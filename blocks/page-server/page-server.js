@@ -1,0 +1,61 @@
+import HtmlSanitizer from '../../deps/html-sanitizer.js';
+import { getMetadata, yieldToMain } from '../../utils/utils.js';
+
+const ignoredMeta = [
+  'serp-content-type',
+  'description',
+  'primaryproductname',
+  'theme',
+  'show-free-plan',
+  'sheet-powered',
+  'viewport',
+];
+
+async function sanitizeMeta(meta) {
+  if (meta.property || meta.name.includes(':') || ignoredMeta.includes(meta.name)) return;
+  await yieldToMain();
+  meta.content = HtmlSanitizer.SanitizeHtml(meta.content);
+}
+
+// metadata -> dom blades
+async function autoUpdatePage(main) {
+  if (!main) {
+    window.lana?.log('page server block cannot find it\'s parent main');
+    return;
+  }
+
+  const regex = /\[\[([a-zA-Z0-9_-]+)]]/g;
+
+  const metaTags = document.head.querySelectorAll('meta');
+
+  await Promise.all(Array.from(metaTags).map((meta) => sanitizeMeta(meta)));
+
+  main.innerHTML = main.innerHTML.replaceAll(regex, (_match, p1) => {
+    // todo: instead of using metadata, try using event metadata fetched from Event Service Layer
+    const { pathname } = window.location;
+
+    if (p1 === 'event-name') {
+      const pathArray = pathname.split('/');
+      return pathArray[pathArray.length - 1];
+    }
+
+    return getMetadata(p1);
+  });
+
+  // handle link replacement
+  main.querySelectorAll('a[href*="#"]').forEach((a) => {
+    try {
+      let url = new URL(a.href);
+      if (getMetadata(url.hash.replace('#', ''))) {
+        a.href = getMetadata(url.hash.replace('#', ''));
+        url = new URL(a.href);
+      }
+    } catch (e) {
+      window.lana?.log(`Error while attempting to replace link ${a.href}: ${e}`);
+    }
+  });
+}
+
+export default function init(el) {
+  autoUpdatePage(document.querySelector('main'));
+}
