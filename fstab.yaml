@@ -5,3 +5,6 @@
 
 mountpoints:
   /: https://adobe.sharepoint.com/:f:/r/sites/adobecom/Shared%20Documents/events-milo
+
+folders:
+  /event: /event/default
