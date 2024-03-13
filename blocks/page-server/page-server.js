@@ -38,17 +38,7 @@ async function autoUpdatePage(main) {
 
   await Promise.all(Array.from(metaTags).map((meta) => sanitizeMeta(meta)));
 
-  main.innerHTML = main.innerHTML.replaceAll(regex, (_match, p1) => {
-    // todo: besides of using metadata, try using event metadata fetched from Event Service Layer
-    const { pathname } = window.location;
-
-    if (p1 === 'event-name') {
-      const pathArray = pathname.split('/');
-      return titleCase(pathArray[pathArray.length - 1]);
-    }
-
-    return getMetadata(p1);
-  });
+  main.innerHTML = main.innerHTML.replaceAll(regex, (_match, p1) => getMetadata(p1));
 
   // handle link replacement
   main.querySelectorAll('a[href*="#"]').forEach((a) => {
