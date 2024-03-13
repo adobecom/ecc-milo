@@ -17,7 +17,6 @@ async function sanitizeMeta(meta) {
   meta.content = HtmlSanitizer.SanitizeHtml(meta.content);
 }
 
-
 export function titleCase(str) {
   const splitStr = str.toLowerCase().split('-');
   for (let i = 0; i < splitStr.length; i += 1) {
@@ -25,7 +24,6 @@ export function titleCase(str) {
   }
   return splitStr.join(' ');
 }
-
 
 // metadata -> dom blades
 async function autoUpdatePage(main) {
@@ -67,5 +65,5 @@ async function autoUpdatePage(main) {
 }
 
 export default function init(el) {
-  autoUpdatePage(document.querySelector('main'));
+  autoUpdatePage(el.closest('main'));
 }
