@@ -24,13 +24,42 @@ async function autoUpdatePage(main) {
     return;
   }
 
-  const regex = /\[\[([a-zA-Z0-9_-]+)]]/g;
-
   const metaTags = document.head.querySelectorAll('meta');
 
   await Promise.all(Array.from(metaTags).map((meta) => sanitizeMeta(meta)));
 
-  main.innerHTML = main.innerHTML.replaceAll(regex, (_match, p1) => getMetadata(p1));
+  // main.innerHTML = main.innerHTML.replaceAll(regex, (_match, p1) => {
+  //   console.log(getMetadata(p1), p1);
+  //   return getMetadata(p1);
+  // });
+
+  // Select all elements in the document
+  const allElements = main.querySelectorAll('*');
+
+  // Define a regular expression to find [[ ]] content
+  const bracketRegex = /\[\[(.*?)\]\]/g;
+
+  // Iterate over all elements
+  allElements.forEach((element) => {
+    // Check if the element has text nodes
+    if (element.childNodes.length) {
+      element.childNodes.forEach((child) => {
+        // Make sure we're dealing with a text node
+        if (child.nodeType === 3) {
+          const originalText = child.nodeValue;
+          // Replace the content inside [[ ]] with the replacementText
+          const replacedText = originalText.replace(bracketRegex, (_match, p1) => {
+            console.log(getMetadata(p1), p1);
+            return getMetadata(p1);
+          });
+          if (replacedText !== originalText) {
+            // Update the text node only if changes were made
+            child.nodeValue = replacedText;
+          }
+        }
+      });
+    }
+  });
 
   // handle link replacement
   main.querySelectorAll('a[href*="#"]').forEach((a) => {
