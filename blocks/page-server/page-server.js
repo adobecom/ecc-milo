@@ -6,8 +6,6 @@ const ignoredMeta = [
   'description',
   'primaryproductname',
   'theme',
-  'show-free-plan',
-  'sheet-powered',
   'viewport',
 ];
 
