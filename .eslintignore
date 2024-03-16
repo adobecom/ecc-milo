@@ -1,0 +1,3 @@
+node_modules/*
+scripts/fallback.js
+web-test-runner.config.js

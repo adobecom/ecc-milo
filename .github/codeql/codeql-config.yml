@@ -1,0 +1,4 @@
+name: "Milo Events CodeQL Config"
+
+paths-ignore:
+  - node_modules
