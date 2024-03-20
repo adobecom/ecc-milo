@@ -9,6 +9,10 @@ const ignoredMeta = [
   'viewport',
 ];
 
+const preserveFormatKeys = [
+  'event-description',
+];
+
 async function sanitizeMeta(meta) {
   if (meta.property || meta.name.includes(':') || ignoredMeta.includes(meta.name)) return;
   await yieldToMain();
@@ -22,20 +26,51 @@ async function autoUpdatePage(main) {
     return;
   }
 
+  const getContent = (_match, p1, n) => {
+    const content = getMetadata(p1) || '';
+    if (preserveFormatKeys.includes(p1)) {
+      n.parentNode?.classList.add('preserve-format');
+    }
+    return content;
+  };
+
   const metaTags = document.head.querySelectorAll('meta');
 
   await Promise.all(Array.from(metaTags).map((meta) => sanitizeMeta(meta)));
   const allElements = main.querySelectorAll('*');
-  const bracketRegex = /\[\[(.*?)\]\]/g;
+  const reg = /\[\[(.*?)\]\]/g;
+
   allElements.forEach((element) => {
     if (element.childNodes.length) {
-      element.childNodes.forEach((child) => {
-        if (child.nodeType === 3) {
-          const originalText = child.nodeValue;
-          const replacedText = originalText.replace(bracketRegex, (_match, p1) => getMetadata(p1));
-          if (replacedText !== originalText) {
-            child.nodeValue = replacedText;
+      element.childNodes.forEach((n) => {
+        if (n.tagName === 'IMG' && n.nodeType === 1) {
+          const parentPic = n.closest('picture');
+          const originalAlt = n.alt;
+          const replacedSrc = originalAlt.replace(reg, (_match, p1) => getContent(_match, p1, n));
+
+          if (replacedSrc && parentPic && replacedSrc !== originalAlt) {
+            parentPic.querySelectorAll('source').forEach((el) => {
+              try {
+                el.srcset = el.srcset.replace(/.*\?/, `${replacedSrc}?`);
+              } catch (e) {
+                window.lana?.log(`failed to convert optimized picture source from ${el} with dynamic data: ${e}`);
+              }
+            });
+
+            parentPic.querySelectorAll('img').forEach((el) => {
+              try {
+                el.src = el.src.replace(/.*\?/, `${replacedSrc}?`);
+              } catch (e) {
+                window.lana?.log(`failed to convert optimized img from ${el} with dynamic data: ${e}`);
+              }
+            });
           }
+        }
+
+        if (n.nodeType === 3) {
+          const originalText = n.nodeValue;
+          const replacedText = originalText.replace(reg, (_match, p1) => getContent(_match, p1, n));
+          if (replacedText !== originalText) n.nodeValue = replacedText;
         }
       });
     }

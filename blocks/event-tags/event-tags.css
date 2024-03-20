@@ -1,0 +1,23 @@
+.event-tags {
+  margin: 20px auto;
+  width: max-content;
+  display: flex;
+  gap: 8px;
+}
+
+.event-tags .tag {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 4px 12px;
+  background: var(--color-gray-200);
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+
+.event-tags .tag img {
+  margin-right: 8px;
+  height: 18px;
+}

@@ -6,3 +6,7 @@
  * 
  *
  */
+
+ .preserve-format {
+  white-space: pre-wrap;
+ }
