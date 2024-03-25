@@ -44,12 +44,12 @@ export function decorateArea(area = document) {
   };
 
   (async function loadLCPImage() {
-    const marquee = document.querySelector('.marquee');
+    const marquee = area.querySelector('.marquee');
     if (!marquee) {
-      eagerLoad(document, 'img');
+      eagerLoad(area, 'img');
       return;
     }
-  
+
     // First image of first row
     eagerLoad(marquee, 'div:first-child img');
     // Last image of last column of last row
@@ -57,6 +57,6 @@ export function decorateArea(area = document) {
   }());
 }
 
-export async function useMiloSample() {
-  const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+export async function importMiloUtils() {
+  return import(`${getLibs()}/utils/utils.js`);
 }
