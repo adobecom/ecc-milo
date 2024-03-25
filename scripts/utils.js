@@ -56,3 +56,7 @@ export function decorateArea(area = document) {
     eagerLoad(marquee, 'div:last-child > div:last-child img');
   }());
 }
+
+export async function importMiloUtils() {
+  return import(`${getLibs()}/utils/utils.js`);
+}

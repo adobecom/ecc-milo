@@ -1,3 +1,4 @@
 node_modules/*
+deps/*
 scripts/fallback.js
 web-test-runner.config.js
