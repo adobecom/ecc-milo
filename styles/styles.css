@@ -12,7 +12,6 @@ body.has-page-server {
 }
 
 body.has-page-server.loading {
-  pointer-events: none;
   opacity: 0!important;
 }
 
