@@ -12,6 +12,7 @@
 
 import { setLibs, decorateArea } from './utils.js';
 import { decorateTemplate } from '../utils/utils.js';
+import { captureProfile } from '../utils/event-apis.js';
 
 // Add project-wide style path here.
 const STYLES = '';
@@ -63,9 +64,10 @@ window.bm8tr = await import('../deps/block-mediator.min.js').then((mod) => mod.d
 decorateTemplate();
 
 (async function loadPage() {
-  const { loadArea, setConfig, loadDelayed } = await import(`${miloLibs}/utils/utils.js`);
+  const { loadArea, setConfig } = await import(`${miloLibs}/utils/utils.js`);
   const config = setConfig({ ...CONFIG, miloLibs });
   console.log(config);
-  await loadArea();
-  loadDelayed();
+  await loadArea().then(() => {
+    captureProfile();
+  });
 }());
