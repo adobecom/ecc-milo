@@ -7,23 +7,6 @@
  *
  */
 
-/* body.has-page-server {
-  transition: opacity 0.2s;
-}
-
-body.has-page-server.loading {
-  opacity: 0!important;
-} */
-
-body.has-page-server picture > img[alt^="[["] {
-  transition: opacity 0.2s;
-  opacity: 0;
-}
-
-body.has-page-server picture > img.loaded {
-  opacity: 1;
-}
-
 main a.con-button.no-event {
   user-select: none;
   pointer-events: none;

@@ -13,6 +13,15 @@
 /**
  * The decision engine for where to get Milo's libs from.
  */
+/*
+ * ------------------------------------------------------------
+ * Edit above at your own risk.
+ *
+ * Note: This file should have no self-invoking functions.
+ * ------------------------------------------------------------
+ */
+import { autoUpdateContent } from '../utils/utils.js';
+
 export const [setLibs, getLibs] = (() => {
   let libs;
   return [
@@ -28,14 +37,6 @@ export const [setLibs, getLibs] = (() => {
     }, () => libs,
   ];
 })();
-
-/*
- * ------------------------------------------------------------
- * Edit above at your own risk.
- *
- * Note: This file should have no self-invoking functions.
- * ------------------------------------------------------------
- */
 
 export function decorateArea(area = document) {
   const eagerLoad = (parent, selector) => {
@@ -55,6 +56,8 @@ export function decorateArea(area = document) {
     // Last image of last column of last row
     eagerLoad(marquee, 'div:last-child > div:last-child img');
   }());
+
+  autoUpdateContent(area);
 }
 
 export async function importMiloUtils() {
