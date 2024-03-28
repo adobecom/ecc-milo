@@ -23,12 +23,11 @@ function handleRegisterButton(a) {
 }
 
 function autoUpdateLinks(scope) {
-  scope.querySelectorAll('a[href*="#"]').forEach(async (a) => {
+  scope.querySelectorAll('a[href*="#"]').forEach((a) => {
     try {
-      let url = new URL(a.href);
+      const url = new URL(a.href);
       if (getMetadata(url.hash.replace('#', ''))) {
         a.href = getMetadata(url.hash.replace('#', ''));
-        url = new URL(a.href);
       }
 
       if (a.href.endsWith('#rsvp-form')) {
@@ -82,7 +81,7 @@ function updateTextNode(child, matchCallback) {
 }
 
 // data -> dom gills
-export async function autoUpdateContent(parent) {
+export function autoUpdateContent(parent) {
   if (!parent) {
     window.lana?.log('page server block cannot find its parent element');
     return;
@@ -117,5 +116,5 @@ export async function autoUpdateContent(parent) {
 }
 
 export default async function init(el) {
-  await autoUpdateContent(el.closest('main'));
+  autoUpdateContent(el.closest('main'));
 }
