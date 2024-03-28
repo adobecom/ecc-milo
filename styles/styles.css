@@ -7,13 +7,13 @@
  *
  */
 
-body.has-page-server {
+/* body.has-page-server {
   transition: opacity 0.2s;
 }
 
 body.has-page-server.loading {
   opacity: 0!important;
-}
+} */
 
 body.has-page-server picture > img[alt^="[["] {
   transition: opacity 0.2s;
