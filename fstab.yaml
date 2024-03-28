@@ -8,6 +8,4 @@ mountpoints:
 
 folders:
   /t3/event: /t3/event/default
-  /event/t3: 
-    resource: /event/t3/event-detail-template
-    metadata: /event/t3/event-detail-metadata.json
+  /event/t3: /event/t3/default
