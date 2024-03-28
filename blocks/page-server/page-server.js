@@ -120,7 +120,7 @@ export function autoUpdateContent(parent) {
   autoUpdateLinks(parent);
 }
 
-export default async function init(el) {
+export default function init(el) {
   autoUpdateContent(el.closest('main'));
   document.body.classList.remove('loading');
 }
