@@ -1,10 +1,8 @@
-import { getMetadata } from '../../utils/utils.js';
+import { getMetadata, REG } from '../../utils/utils.js';
 
 const preserveFormatKeys = [
   'event-description',
 ];
-
-const REG = /\[\[(.*?)\]\]/g;
 
 function handleRegisterButton(a) {
   const signIn = () => {
@@ -63,11 +61,18 @@ function updateImgTag(child, matchCallback, parentElement) {
     });
 
     parentPic.querySelectorAll('img').forEach((el) => {
+      const onImgLoad = () => {
+        el.classList.add('loaded');
+        el.removeEventListener('load', onImgLoad);
+      };
+
       try {
         el.src = el.src.replace(/.*\?/, `${replacedSrc}?`);
       } catch (e) {
         window.lana?.log(`failed to convert optimized img from ${el} with dynamic data: ${e}`);
       }
+
+      el.addEventListener('load', onImgLoad);
     });
   } else if (originalAlt.match(REG)) {
     parentElement.remove();
@@ -117,4 +122,5 @@ export function autoUpdateContent(parent) {
 
 export default async function init(el) {
   autoUpdateContent(el.closest('main'));
+  document.body.classList.remove('loading');
 }

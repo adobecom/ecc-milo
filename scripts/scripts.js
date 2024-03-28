@@ -11,7 +11,7 @@
  */
 
 import { setLibs, decorateArea } from './utils.js';
-import { getMetadata } from '../utils/utils.js';
+import { decorateTemplate } from '../utils/utils.js';
 
 // Add project-wide style path here.
 const STYLES = '';
@@ -60,15 +60,7 @@ window.bm8tr = await import('../deps/block-mediator.min.js').then((mod) => mod.d
   });
 }());
 
-if (getMetadata('event-template')) {
-  document.body.querySelectorAll('a[href*="#event-template"]').forEach((a) => {
-    try {
-      a.href = getMetadata('event-template');
-    } catch (e) {
-      window.lana?.log(`Error while attempting to replace link ${a.href}: ${e}`);
-    }
-  });
-}
+decorateTemplate();
 
 (async function loadPage() {
   const { loadArea, setConfig, loadDelayed } = await import(`${miloLibs}/utils/utils.js`);
