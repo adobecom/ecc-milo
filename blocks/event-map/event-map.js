@@ -35,7 +35,7 @@ export default async function init(el) {
 
   decorateMapContainer(configs);
   loadStyle('https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css');
-  loadScript('https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js').then(() => {
+  loadScript('https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js', 'module').then(() => {
     window.mapboxgl.accessToken = window.atob(MAPBOX_API_TOKEN);
     const map = new mapboxgl.Map({
       container: 'mapbox-container',
