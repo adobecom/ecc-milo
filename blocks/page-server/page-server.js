@@ -1,8 +1,10 @@
 import { getMetadata } from '../../utils/utils.js';
-import fetchPageData, { flattenObject } from '../../utils/event-apis.js';
-import { getLibs } from '../../scripts/utils.js';
 
-const PLACEHOLDER_REG = /\[\[(.*?)\]\]/g;
+const preserveFormatKeys = [
+  'event-description',
+];
+
+const REG = /\[\[(.*?)\]\]/g;
 
 function handleRegisterButton(a) {
   const signIn = () => {
@@ -50,7 +52,7 @@ function autoUpdateLinks(scope) {
 function updateImgTag(child, matchCallback, parentElement) {
   const parentPic = child.closest('picture');
   const originalAlt = child.alt;
-  const replacedSrc = originalAlt.replace(PLACEHOLDER_REG, matchCallback);
+  const replacedSrc = originalAlt.replace(REG, (_match, p1) => matchCallback(_match, p1, child));
 
   if (replacedSrc && parentPic && replacedSrc !== originalAlt) {
     parentPic.querySelectorAll('source').forEach((el) => {
@@ -68,61 +70,43 @@ function updateImgTag(child, matchCallback, parentElement) {
         window.lana?.log(`failed to convert optimized img from ${el} with dynamic data: ${e}`);
       }
     });
-  } else if (originalAlt.match(PLACEHOLDER_REG)) {
+  } else if (originalAlt.match(REG)) {
     parentElement.remove();
   }
 }
 
 function updateTextNode(child, matchCallback) {
   const originalText = child.nodeValue;
-  const replacedText = originalText.replace(PLACEHOLDER_REG, matchCallback);
+  const replacedText = originalText.replace(REG, matchCallback);
   if (replacedText !== originalText) child.nodeValue = replacedText;
 }
 
-function autoUpdateMetadata(res) {
-  if (!res) return;
-
-  if (res['contentArea.title']) document.title = res['contentArea.title'];
-
-  if (!res['contentArea.description']) return;
-
-  const metaDescription = document.querySelector("meta[name='description']");
-  if (metaDescription) {
-    metaDescription.setAttribute('content', res['contentArea.description']);
-  } else {
-    const newMetaDescription = document.createElement('meta');
-    newMetaDescription.setAttribute('name', 'description');
-    newMetaDescription.setAttribute('content', res['contentArea.description']);
-    document.head.appendChild(newMetaDescription);
-  }
-}
-
 // data -> dom gills
-export async function autoUpdateContent(parent, data, isStructured = false) {
+export async function autoUpdateContent(parent) {
   if (!parent) {
     window.lana?.log('page server block cannot find its parent element');
-    return null;
+    return;
   }
 
-  if (!data) {
-    document.body.style.display = 'none';
-    window.location.replace('/404');
-  }
+  const getContent = (_match, p1, n) => {
+    const content = getMetadata(p1) || '';
+    if (preserveFormatKeys.includes(p1)) {
+      n.parentNode?.classList.add('preserve-format');
+    }
+    return content;
+  };
 
-  const res = isStructured ? flattenObject(data) : data;
-  console.log('Replacing content with:', res);
-  const findRegexMatch = (_match, p1) => res[p1] || '';
   const allElements = parent.querySelectorAll('*');
 
   allElements.forEach((element) => {
     if (element.childNodes.length) {
-      element.childNodes.forEach((child) => {
-        if (child.tagName === 'IMG' && child.nodeType === 1) {
-          updateImgTag(child, findRegexMatch, element);
+      element.childNodes.forEach((n) => {
+        if (n.tagName === 'IMG' && n.nodeType === 1) {
+          updateImgTag(n, getContent, element);
         }
 
-        if (child.nodeType === 3) {
-          updateTextNode(child, findRegexMatch);
+        if (n.nodeType === 3) {
+          updateTextNode(n, getContent);
         }
       });
     }
@@ -130,14 +114,8 @@ export async function autoUpdateContent(parent, data, isStructured = false) {
 
   // handle link replacement. To keep when switching to metadata based rendering
   autoUpdateLinks(parent);
-
-  // TODO: handle Metadata
-  autoUpdateMetadata(res);
-  return res;
 }
 
 export default async function init(el) {
-  const { default: getUuid } = await import(`${getLibs()}/utils/getUuid.js`);
-  const hash = await getUuid(window.location.pathname);
-  await autoUpdateContent(el.closest('main'), await fetchPageData(hash, true), true);
+  await autoUpdateContent(el.closest('main'));
 }
