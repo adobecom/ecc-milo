@@ -12,3 +12,7 @@ main a.con-button.no-event {
   pointer-events: none;
   opacity: 0.5;
 }
+
+.preserve-format {
+  white-space: pre-wrap;
+}

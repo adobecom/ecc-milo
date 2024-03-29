@@ -92,7 +92,7 @@ function updateImgTag(child, matchCallback, parentElement) {
 
 function updateTextNode(child, matchCallback) {
   const originalText = child.nodeValue;
-  const replacedText = originalText.replace(REG, matchCallback);
+  const replacedText = originalText.replace(REG, (_match, p1) => matchCallback(_match, p1, child));
   if (replacedText !== originalText) child.nodeValue = replacedText;
 }
 
@@ -106,6 +106,7 @@ export function autoUpdateContent(parent) {
   const getContent = (_match, p1, n) => {
     const content = getMetadata(p1) || '';
     if (preserveFormatKeys.includes(p1)) {
+      console.log('yes! but', n.parentNode);
       n.parentNode?.classList.add('preserve-format');
     }
     return content;
