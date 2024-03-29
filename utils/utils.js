@@ -106,7 +106,6 @@ export function autoUpdateContent(parent) {
   const getContent = (_match, p1, n) => {
     const content = getMetadata(p1) || '';
     if (preserveFormatKeys.includes(p1)) {
-      console.log('yes! but', n.parentNode);
       n.parentNode?.classList.add('preserve-format');
     }
     return content;
