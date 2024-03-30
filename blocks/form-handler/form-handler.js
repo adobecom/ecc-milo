@@ -1,3 +1,3 @@
 export default function init(el) {
-  console.log('handler loaded');
+  console.log(el, 'handler loaded');
 }
