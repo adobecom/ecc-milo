@@ -358,7 +358,7 @@ async function updateDynamicContent(bp) {
   await Promise.all([
     import(`${getLibs()}/utils/getUuid.js`),
     import('../../utils/event-apis.js'),
-    import('../page-server/page-server.js'),
+    import('../../utils/utils.js'),
   ]).then(async ([{ default: getUuid }, caasApiMod, { autoUpdateContent }]) => {
     const hash = await getUuid(window.location.pathname);
     let profile;
@@ -373,7 +373,7 @@ async function updateDynamicContent(bp) {
       await decorateRSVPStatus(bp, profile);
     }
 
-    await autoUpdateContent(block, { ...await caasApiMod.default(hash), ...profile }, true);
+    await autoUpdateContent(block, { ...await caasApiMod.default(hash), ...profile });
     eventHero.classList.remove('loading');
     personalizeForm(block, profile);
   });

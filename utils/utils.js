@@ -16,6 +16,15 @@ export function yieldToMain() {
   });
 }
 
+export function getIcon(tag) {
+  const img = document.createElement('img');
+  img.className = `icon icon-${tag}`;
+  img.src = `/icons/${tag}.svg`;
+  img.alt = tag;
+
+  return img;
+}
+
 function handleRegisterButton(a) {
   const signIn = () => {
     if (typeof window.adobeIMS?.signIn !== 'function') {
@@ -97,14 +106,14 @@ function updateTextNode(child, matchCallback) {
 }
 
 // data -> dom gills
-export function autoUpdateContent(parent) {
+export function autoUpdateContent(parent, extraData) {
   if (!parent) {
     window.lana?.log('page server block cannot find its parent element');
     return;
   }
 
   const getContent = (_match, p1, n) => {
-    const content = getMetadata(p1) || '';
+    const content = getMetadata(p1) || extraData?.[p1] || '';
     if (preserveFormatKeys.includes(p1)) {
       n.parentNode?.classList.add('preserve-format');
     }
