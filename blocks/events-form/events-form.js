@@ -373,7 +373,7 @@ async function updateDynamicContent(bp) {
       await decorateRSVPStatus(bp, profile);
     }
 
-    await autoUpdateContent(block, { ...await caasApiMod.default(hash), ...profile });
+    autoUpdateContent(block, { ...await caasApiMod.default(hash), ...profile });
     eventHero.classList.remove('loading');
     personalizeForm(block, profile);
   });
