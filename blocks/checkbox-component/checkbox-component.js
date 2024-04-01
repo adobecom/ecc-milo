@@ -1,10 +1,7 @@
 import { getLibs } from '../../scripts/utils.js';
+import { handlize } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
-
-function handlize(str) {
-  return str.toLowerCase().trim().replace(' ', '-');
-}
 
 function decorateHeading(el) {
   const h2 = el.querySelector(':scope > div:first-of-type h2');

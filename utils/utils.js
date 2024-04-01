@@ -16,6 +16,10 @@ export function yieldToMain() {
   });
 }
 
+export function handlize(str) {
+  return str.toLowerCase().trim().replace(' ', '-');
+}
+
 export function getIcon(tag) {
   const img = document.createElement('img');
   img.className = `icon icon-${tag}`;

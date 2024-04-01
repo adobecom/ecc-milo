@@ -1,0 +1,12 @@
+.event-information-component input[type="text"] {
+  border: none;
+  border-bottom: 1px solid var(--color-black);
+  margin-bottom: 16px;
+  font-family: var(--body-font-family);
+  font-size: var(--type-body-m-size);;
+  width: 100%;
+}
+
+.event-information-component input[type="text"].lg {
+  font-size: var(--type-heading-l-size);;
+}
