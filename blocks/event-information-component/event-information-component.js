@@ -31,10 +31,14 @@ function decorateTextFields(row) {
     const text = li.textContent.trim();
     const isRequired = text.endsWith('*');
     const handle = handlize(text);
-    const input = createTag('input', { id: `info-field-${handle}`, type: 'text', class: 'text-input', placeholder: text, required: isRequired });
-    const wrapper = createTag('div', { class: 'info-field-wrapper' });
+    let input;
+    if (i === 0) {
+      input = createTag('input', { id: `info-field-${handle}`, type: 'text', class: 'text-input', placeholder: text, required: isRequired });
+    } else {
+      input = createTag('textarea', { id: `info-field-${handle}`, class: 'textarea-input', placeholder: text, required: isRequired });
+    }
 
-    if (i === 0) input.classList.add('lg');
+    const wrapper = createTag('div', { class: 'info-field-wrapper' });
 
     wrapper.append(input);
     row.append(wrapper);
