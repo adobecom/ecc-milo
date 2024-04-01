@@ -16,3 +16,8 @@ main a.con-button.no-event {
 .preserve-format {
   white-space: pre-wrap;
 }
+
+fieldset {
+  border: none;
+  padding: 0;
+}

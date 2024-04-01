@@ -1,3 +1,9 @@
-.checkbox-section {
-  border-bottom: 2px solid var(--color-gray-300);
+.checkbox-component .checkboxes {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.checkbox-component .checkboxes input[type='checkbox'] {
+  margin-right: 4px;
 }
