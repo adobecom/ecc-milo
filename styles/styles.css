@@ -7,6 +7,17 @@
  *
  */
 
- .preserve-format {
+main a.con-button.no-event {
+  user-select: none;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.preserve-format {
   white-space: pre-wrap;
- }
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+}

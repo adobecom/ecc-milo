@@ -1,0 +1,10 @@
+.checkbox-component .checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.checkbox-component .checkboxes input[type='checkbox'] {
+  margin-right: 4px;
+}

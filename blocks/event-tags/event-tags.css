@@ -1,7 +1,14 @@
 .event-tags {
   margin: 20px auto;
+  overflow: auto;
+}
+
+.event-tags .tags-wrapper {
+  margin: auto;
+  padding: 8px 16px;
   width: max-content;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
@@ -20,4 +27,12 @@
 .event-tags .tag img {
   margin-right: 8px;
   height: 18px;
+}
+
+@media (min-width: 900px) {
+  .event-tags .tags-wrapper {
+    display: flex;
+  }
+  
+
 }

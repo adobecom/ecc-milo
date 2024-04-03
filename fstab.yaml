@@ -8,3 +8,4 @@ mountpoints:
 
 folders:
   /t3/event: /t3/event/default
+  /event/t3: /event/t3/default

@@ -11,6 +11,7 @@
  */
 
 import { setLibs, decorateArea } from './utils.js';
+import { captureProfile } from '../utils/event-apis.js';
 
 // Add project-wide style path here.
 const STYLES = '';
@@ -22,7 +23,8 @@ const LIBS = '/libs';
 const CONFIG = {
   // codeRoot: '',
   // contentRoot: '',
-  imsClientId: 'milo',
+  // TODO: we need client ID for Events Milo
+  imsClientId: 'adobedotcomdx',
   // imsScope: 'AdobeID,openid,gnav',
   // geoRouting: 'off',
   // fallbackRouting: 'off',
@@ -45,6 +47,8 @@ decorateArea();
 
 const miloLibs = setLibs(LIBS);
 
+window.bm8tr = await import('../deps/block-mediator.min.js').then((mod) => mod.default);
+
 (function loadStyles() {
   const paths = [`${miloLibs}/styles/styles.css`];
   if (STYLES) { paths.push(STYLES); }
@@ -60,5 +64,7 @@ const miloLibs = setLibs(LIBS);
   const { loadArea, setConfig } = await import(`${miloLibs}/utils/utils.js`);
   const config = setConfig({ ...CONFIG, miloLibs });
   console.log(config);
-  await loadArea();
+  await loadArea().then(() => {
+    captureProfile();
+  });
 }());

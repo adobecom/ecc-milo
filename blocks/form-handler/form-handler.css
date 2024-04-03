@@ -1,0 +1,63 @@
+.form-handler {
+  display: block;
+  max-width: var(--grid-container-width);
+  margin: auto;
+}
+
+.form-handler > div {
+  display: flex;
+}
+
+.form-handler .main-frame {
+  flex-grow: 1;
+}
+
+.form-handler .main-frame .section {
+  padding: 24px;
+  border-radius: 24px;
+  margin: 24px;
+  box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
+}
+
+.form-handler .form-component {
+  border-bottom: 2px solid var(--color-gray-300);
+}
+
+.form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon {
+  height: 22px;
+  width: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-gray-500);
+  color: var(--color-gray-100);
+  border-radius: 24px;
+  cursor: help;
+}
+
+.form-handler .form-component > div > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-handler .event-heading-tooltip-wrapper {
+  position: relative;
+}
+
+.form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon ~ .event-heading-tooltip-box {
+  display: none;
+  position: absolute;
+  width: max-content;
+  margin-left: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 16px;
+  border-radius: 8px;
+  background-color: var(--color-white);
+  box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
+}
+
+.form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon:hover ~ .event-heading-tooltip-box {
+  display: unset;
+}

@@ -13,6 +13,15 @@
 /**
  * The decision engine for where to get Milo's libs from.
  */
+/*
+ * ------------------------------------------------------------
+ * Edit above at your own risk.
+ *
+ * Note: This file should have no self-invoking functions.
+ * ------------------------------------------------------------
+ */
+import { autoUpdateContent } from '../utils/utils.js';
+
 export const [setLibs, getLibs] = (() => {
   let libs;
   return [
@@ -29,14 +38,6 @@ export const [setLibs, getLibs] = (() => {
   ];
 })();
 
-/*
- * ------------------------------------------------------------
- * Edit above at your own risk.
- *
- * Note: This file should have no self-invoking functions.
- * ------------------------------------------------------------
- */
-
 export function decorateArea(area = document) {
   const eagerLoad = (parent, selector) => {
     const img = parent.querySelector(selector);
@@ -44,19 +45,21 @@ export function decorateArea(area = document) {
   };
 
   (async function loadLCPImage() {
-    const marquee = document.querySelector('.marquee');
+    const marquee = area.querySelector('.marquee');
     if (!marquee) {
-      eagerLoad(document, 'img');
+      eagerLoad(area, 'img');
       return;
     }
-  
+
     // First image of first row
     eagerLoad(marquee, 'div:first-child img');
     // Last image of last column of last row
     eagerLoad(marquee, 'div:last-child > div:last-child img');
   }());
+
+  autoUpdateContent(area);
 }
 
-export async function useMiloSample() {
-  const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+export async function importMiloUtils() {
+  return import(`${getLibs()}/utils/utils.js`);
 }

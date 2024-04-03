@@ -1,45 +1,22 @@
+import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
-import { setLibs } from '../../scripts/utils.js';
+import { decorateArea } from '../../scripts/utils.js';
 
-describe('Libs', () => {
-  it('Default Libs', () => {
-    const libs = setLibs('/libs');
-    expect(libs).to.equal('https://main--milo--adobecom.hlx.live/libs');
+document.head.innerHTML = await readFile({ path: './mocks/head.html' });
+const marqueeMain = await readFile({ path: './mocks/body-with-marquee.html' });
+const heroMain = await readFile({ path: './mocks/body-without-marquee.html' });
+
+describe('Decorating LCP', () => {
+  it('with marquee', () => {
+    document.body.innerHTML = marqueeMain;
+    decorateArea(document.querySelector('main'));
+    console.log(document.body.querySelector('img')?.loading);
+    expect(document.body.querySelector('img').getAttribute('loading')).to.equal(null);
   });
 
-  it('Does not support milolibs query param on prod', () => {
-    const location = {
-      hostname: 'business.adobe.com',
-      search: '?milolibs=foo',
-    };
-    const libs = setLibs('/libs', location);
-    expect(libs).to.equal('/libs');
-  });
-
-  it('Supports milolibs query param', () => {
-    const location = {
-      hostname: 'localhost',
-      search: '?milolibs=foo',
-    };
-    const libs = setLibs('/libs', location);
-    expect(libs).to.equal('https://foo--milo--adobecom.hlx.live/libs');
-  });
-
-  it('Supports local milolibs query param', () => {
-    const location = {
-      hostname: 'localhost',
-      search: '?milolibs=local',
-    };
-    const libs = setLibs('/libs', location);
-    expect(libs).to.equal('http://localhost:6456/libs');
-  });
-
-  it('Supports forked milolibs query param', () => {
-    const location = {
-      hostname: 'localhost',
-      search: '?milolibs=awesome--milo--forkedowner',
-    };
-    const libs = setLibs('/libs', location);
-    expect(libs).to.equal('https://awesome--milo--forkedowner.hlx.live/libs');
+  it('without marquee', () => {
+    document.body.innerHTML = heroMain;
+    decorateArea(document.querySelector('main'));
+    expect(document.body.querySelector('img').getAttribute('loading')).to.equal(null);
   });
 });
