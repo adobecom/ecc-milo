@@ -35,7 +35,7 @@
   cursor: help;
 }
 
-.form-handler .form-component > div > div {
+.form-handler .form-component > div:first-of-type > div {
   display: flex;
   align-items: center;
   gap: 8px;

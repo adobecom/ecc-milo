@@ -23,6 +23,7 @@ function decorateHeading(el) {
 }
 
 function decorateTextFields(row) {
+  row.classList.add('text=field-row');
   const lis = row.querySelectorAll('ul > li');
 
   if (!lis.length) return;
@@ -49,8 +50,30 @@ function decorateTextFields(row) {
   if (oldDiv.querySelector('ul')) oldDiv.remove();
 }
 
-function decorateDateTimeFields() {
-  console.log('to be built');
+function buildDatePicker(column) {
+  const dateLabel = createTag('label', { for: 'event-info-date-picker' }, column.textContent.trim());
+  const datePicker = createTag('input', { id: 'event-info-date-picker', name: 'event-date', type: 'date', class: 'date-input' });
+  let today = new Date();
+  const offset = today.getTimezoneOffset();
+  today = new Date(today.getTime() - (offset * 60 * 1000));
+  datePicker.setAttribute('min', today.toISOString().split('T')[0]);
+
+  column.innerHTML = '';
+  column.append(dateLabel, datePicker);
+}
+
+function buildTimePicker(column) {
+  
+}
+
+function decorateDateTimeFields(row) {
+  row.classList.add('date-time-row');
+  const cols = row.querySelectorAll(':scope > div');
+
+  cols.forEach((c, i) => {
+    if (i === 0) buildDatePicker(c);
+    if (i === 1) buildTimePicker(c);
+  });
 }
 
 export default function init(el) {

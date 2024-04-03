@@ -13,7 +13,27 @@
   padding: 16px 0;
 }
 
+.event-information-component input[type="date"]:focus::-webkit-datetime-edit {
+  color: rgb(255 255 255 / 46%); 
+ }
+
 .event-information-component textarea {
   resize: vertical;
   min-height: 40px;
 }
+
+.event-information-component .date-time-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.event-information-component .date-time-row > div:last-of-type {
+  flex-grow: 1;
+}
+
+input[type="date"]:not(.is-dirty) input::-webkit-datetime-edit {
+  color: transparent; 
+}
+
+
