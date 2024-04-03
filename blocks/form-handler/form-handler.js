@@ -27,15 +27,9 @@ const COMPONENT_MAP = {
             boxesChecked -= 1;
           }
 
-          if (boxesChecked >= configs.min) {
-            cbs.forEach((c) => {
-              if (c !== cb) c.required = false;
-            });
-          } else {
-            cbs.forEach((c) => {
-              if (c !== cb) c.required = true;
-            });
-          }
+          cbs.forEach((c) => {
+            c.required = boxesChecked < configs.min;
+          });
 
           if (boxesChecked === configs.max) {
             cbs.forEach((c) => {

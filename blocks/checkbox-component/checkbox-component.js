@@ -31,7 +31,14 @@ function decorateCheckboxes(el) {
   lis.forEach((cb) => {
     const cn = cb.textContent.trim();
     const handle = handlize(cn);
-    const input = createTag('input', { id: `checkbox-${handle}`, name: `checkbox-${handle}`, type: 'checkbox', class: 'checkbox-input', value: handle, required: isRequired });
+    const input = createTag('input', {
+      id: `checkbox-${handle}`,
+      name: `checkbox-${handle}`,
+      type: 'checkbox',
+      class: 'checkbox-input',
+      value: handle,
+      required: isRequired,
+    });
     const label = createTag('label', { class: 'checkbox-label', for: `checkbox-${handle}` }, cn);
     const wrapper = createTag('div', { class: 'checkbox-wrapper' });
 
