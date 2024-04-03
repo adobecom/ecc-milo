@@ -51,6 +51,7 @@ function decorateTextFields(row) {
 }
 
 function buildDatePicker(column) {
+  column.classList.add('date-picker');
   const dateLabel = createTag('label', { for: 'event-info-date-picker' }, column.textContent.trim());
   const datePicker = createTag('input', { id: 'event-info-date-picker', name: 'event-date', type: 'date', class: 'date-input' });
   let today = new Date();
@@ -63,7 +64,38 @@ function buildDatePicker(column) {
 }
 
 function buildTimePicker(column) {
-  
+  column.classList.add('time-pickers');
+  const rows = column.querySelectorAll('table tr');
+  const timePickerWrappers = [];
+
+  rows.forEach((r) => {
+    const timePickerWrapper = createTag('div', { class: 'time-picker-wrapper' });
+    const cols = r.querySelectorAll('td');
+    let pickerName;
+    cols.forEach((c, j) => {
+      if (j === 0) {
+        pickerName = c.textContent.trim();
+        const label = createTag('label', { for: `time-picker-${handlize(pickerName)}` }, pickerName);
+        timePickerWrapper.append(label);
+      }
+
+      if (j === 1) {
+        const timeSlots = c.querySelectorAll('li');
+        const select = createTag('select', { id: `time-picker-${handlize(pickerName)}`, class: 'select-input' });
+        timeSlots.forEach((t) => {
+          const text = t.textContent.trim();
+          const option = createTag('option', { value: handlize(text) }, text);
+          select.append(option);
+        });
+        timePickerWrapper.append(select);
+      }
+    });
+
+    timePickerWrappers.push(timePickerWrapper);
+  });
+
+  column.innerHTML = '';
+  timePickerWrappers.forEach((w) => { column.append(w); });
 }
 
 function decorateDateTimeFields(row) {

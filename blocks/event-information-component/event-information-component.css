@@ -2,7 +2,7 @@
 .event-information-component textarea {
   border: none;
   border-bottom: 1px solid var(--color-black);
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   font-family: var(--body-font-family);
   font-size: var(--type-body-m-size);;
   width: 100%;
@@ -10,7 +10,7 @@
 
 .event-information-component input[type="text"] {
   font-size: var(--type-heading-l-size);
-  padding: 16px 0;
+  padding: 24px 0;
 }
 
 .event-information-component input[type="date"]:focus::-webkit-datetime-edit {
@@ -22,18 +22,41 @@
   min-height: 40px;
 }
 
+.event-information-component label {
+  font-weight: 700;
+}
+
 .event-information-component .date-time-row {
   display: flex;
   align-items: center;
   gap: 24px;
+  margin-bottom: 24px;
+}
+
+.event-information-component .date-time-row > .date-picker {
+  border-bottom: 1px solid var(--color-black);
 }
 
 .event-information-component .date-time-row > div:last-of-type {
   flex-grow: 1;
 }
 
-input[type="date"]:not(.is-dirty) input::-webkit-datetime-edit {
-  color: transparent; 
+.event-information-component .date-time-row input {
+  border: none;
+  margin-left: 24px;
 }
 
+.event-information-component .time-pickers {
+  display: flex;
+  gap: 16px;
+}
 
+.event-information-component .time-pickers .time-picker-wrapper {
+  flex: 1 1 0;
+  display: flex;
+  gap: 8px;
+}
+
+.event-information-component .time-pickers .time-picker-wrapper select {
+  flex-grow: 1;
+}
