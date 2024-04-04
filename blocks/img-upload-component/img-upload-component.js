@@ -18,8 +18,14 @@ function decorateImageDropzones(row) {
     const inputWrapper = createTag('div', { class: 'img-file-input-wrapper' });
     const inputLabel = createTag('label', { class: 'img-file-input-label' });
 
-    inputWrapper.append(inputLabel);
-    inputLabel.append(fileInput, getIcon('image-add'));
+    const previewWrapper = createTag('div', { class: 'preview-wrapper hidden' });
+    const previewImg = createTag('div', { class: 'preview-img-placeholder' });
+    const previewDeleteButton = getIcon('delete--smoke');
+
+    previewWrapper.append(previewImg, previewDeleteButton);
+
+    inputWrapper.append(previewWrapper, inputLabel);
+    inputLabel.append(fileInput, getIcon('image-add--smoke'));
     paragraphs.forEach((p) => {
       inputLabel.append(p);
     });
