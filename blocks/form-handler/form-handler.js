@@ -2,59 +2,56 @@ import { getLibs } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
-const COMPONENT_MAP = {
-  'checkbox-component': {
-    configCallback: (component) => {
-      const minReg = component.className.match(/min-(.*?)( |$)/);
-      const maxReg = component.className.match(/max-(.*?)( |$)/);
-      const required = !!minReg;
-      const min = minReg ? parseInt(minReg[1], 10) : 0;
-      const max = maxReg ? parseInt(maxReg[1], 10) : 0;
+// mapping block names to their init callbacks
+const COMPONENT_CB_MAP = {
+  'checkbox-component': (component) => {
+    const checkboxes = component.querySelectorAll('input[type="checkbox"]');
+    const minReg = component.className.match(/min-(.*?)( |$)/);
+    const maxReg = component.className.match(/max-(.*?)( |$)/);
+    const required = !!minReg;
+    const min = minReg ? parseInt(minReg[1], 10) : 0;
+    const max = maxReg ? parseInt(maxReg[1], 10) : 0;
 
-      return {
-        required,
-        min,
-        max,
-      };
-    },
-    ruleCallback: (cbs, configs) => {
-      let boxesChecked = 0;
-      cbs.forEach((cb) => {
-        cb.addEventListener('change', () => {
-          if (cb.checked) {
-            boxesChecked += 1;
-          } else {
-            boxesChecked -= 1;
-          }
+    const configs = {
+      required,
+      min,
+      max,
+    };
 
-          cbs.forEach((c) => {
-            c.required = boxesChecked < configs.min;
-          });
+    let boxesChecked = 0;
+    checkboxes.forEach((cb) => {
+      cb.addEventListener('change', () => {
+        if (cb.checked) {
+          boxesChecked += 1;
+        } else {
+          boxesChecked -= 1;
+        }
 
-          if (boxesChecked === configs.max) {
-            cbs.forEach((c) => {
-              if (!c.checked) c.disabled = true;
-            });
-          } else {
-            cbs.forEach((c) => {
-              c.disabled = false;
-            });
-          }
+        checkboxes.forEach((c) => {
+          c.required = boxesChecked < configs.min;
         });
+
+        if (boxesChecked === configs.max) {
+          checkboxes.forEach((c) => {
+            if (!c.checked) c.disabled = true;
+          });
+        } else {
+          checkboxes.forEach((c) => {
+            c.disabled = false;
+          });
+        }
       });
-    },
+    });
   },
 };
 
-function applyRules(el) {
-  Object.entries(COMPONENT_MAP).forEach(([k, v]) => {
-    const mappedComponents = el.querySelectorAll(`.${k}`);
+function initComponents(el) {
+  Object.entries(COMPONENT_CB_MAP).forEach(([blockName, cb]) => {
+    const mappedComponents = el.querySelectorAll(`.${blockName}`);
     if (!mappedComponents?.length) return;
 
     mappedComponents.forEach((component) => {
-      const configs = v.configCallback(component);
-      const checkboxes = component.querySelectorAll('input[type="checkbox"]');
-      v.ruleCallback(checkboxes, configs);
+      cb(component);
     });
   });
 }
@@ -80,5 +77,5 @@ export default function init(el) {
   form.innerHTML = formDiv.innerHTML;
 
   decorateForm(el);
-  applyRules(el);
+  initComponents(el);
 }

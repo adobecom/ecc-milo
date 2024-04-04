@@ -1,0 +1,29 @@
+.img-upload-component .image-dropzones {
+  display: flex;
+  gap: 16px;
+}
+
+.img-upload-component .img-file-input-wrapper {
+  border: 2px dashed var(--color-gray-400);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.img-upload-component .img-file-input-wrapper label {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+}
+
+.img-upload-component .img-file-input-wrapper label:hover {
+  filter: brightness(0.7);
+}
+
+.img-upload-component .img-file-input-wrapper label input.img-file-input {
+  display: none;
+}
+
+.img-upload-component .img-file-input-wrapper label img {
+
+}

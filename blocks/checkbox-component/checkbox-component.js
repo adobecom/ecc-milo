@@ -1,26 +1,7 @@
 import { getLibs } from '../../scripts/utils.js';
-import { handlize } from '../../utils/utils.js';
+import { handlize, standardizeFormComponentHeading } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
-
-function decorateHeading(el) {
-  const h2 = el.querySelector(':scope > div:first-of-type h2');
-
-  if (h2) {
-    const em = el.querySelector('p > em');
-
-    if (em) {
-      const tooltipText = em.textContent.trim();
-      const toolTipIcon = createTag('span', { class: 'event-heading-tooltip-icon' }, 'i');
-      const toolTipBox = createTag('div', { class: 'event-heading-tooltip-box' }, tooltipText);
-      const toolTipWrapper = createTag('div', { class: 'event-heading-tooltip-wrapper' });
-
-      toolTipWrapper.append(toolTipIcon, toolTipBox);
-      h2.parentElement?.append(toolTipWrapper);
-      em.parentElement?.remove();
-    }
-  }
-}
 
 function decorateCheckboxes(el) {
   const minReg = el.className.match(/min-(.*?)( |$)/);
@@ -57,6 +38,6 @@ function decorateCheckboxes(el) {
 
 export default function init(el) {
   el.classList.add('form-component');
-  decorateHeading(el);
+  standardizeFormComponentHeading(el);
   decorateCheckboxes(el);
 }
