@@ -51,7 +51,7 @@
 
 .img-upload-component .img-file-input-wrapper label p {
   margin: 0;
-  font-size: var(--type-body-s-size);;
+  font-size: var(--type-body-xs-size);;
 }
 
 .img-upload-component .img-file-input-wrapper .hidden {
