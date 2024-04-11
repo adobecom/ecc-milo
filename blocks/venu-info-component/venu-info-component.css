@@ -1,0 +1,40 @@
+.venu-info-component {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.venu-info-component input[type='text'],
+.venu-info-component textarea {
+  border: none;
+  border-bottom: 1px solid var(--color-black);
+  margin-bottom: 24px;
+  font-family: var(--body-font-family);
+  font-size: var(--type-body-m-size);
+  width: 100%;
+}
+
+.venu-info-component .timezone-picker-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.venu-info-component .timezone-picker-wrapper .timezone-label-wrapper {
+  display: flex;
+  justify-content: space-between;
+
+  font-size: var(--type-heading-m-size);
+}
+
+.venu-info-component .timezone-picker-wrapper .timezone-label-wrapper .attrib {
+  font-size: var(--type-body-s-size);
+}
+
+.venu-info-component .timezone-picker-wrapper .select-input {
+  padding: 9px 11px;
+  border-radius: 5px;
+}
+
+
+.venu-info-component 
