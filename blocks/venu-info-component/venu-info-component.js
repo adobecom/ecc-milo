@@ -1,58 +1,10 @@
 import { getLibs } from '../../scripts/utils.js';
-import {
-  handlize,
-  standardizeFormComponentHeading,
-} from '../../utils/utils.js';
+import { standardizeFormComponentHeading } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
-function decorateTextFields(row) {
-  row.classList.add('text=field-row');
-  const lis = row.querySelectorAll('ul > li');
-
-  if (!lis.length) return;
-
-  lis.forEach((li, i) => {
-    const text = li.textContent.trim();
-    const isRequired = text.endsWith('*');
-    const handle = handlize(text);
-    let input;
-    if (i === 0) {
-      input = createTag('input', {
-        id: `info-field-${handle}`,
-        type: 'text',
-        class: 'text-input',
-        placeholder: text,
-        required: isRequired,
-      });
-    } else {
-      input = createTag('textarea', {
-        id: `info-field-${handle}`,
-        class: 'textarea-input',
-        placeholder: text,
-        required: isRequired,
-      });
-    }
-
-    const wrapper = createTag('div', { class: 'info-field-wrapper' });
-
-    wrapper.append(input);
-    row.append(wrapper);
-  });
-
-  const oldDiv = row.querySelector(':scope > div:first-of-type');
-
-  if (oldDiv.querySelector('ul')) oldDiv.remove();
-}
-
-function decorateDateTimeFields(row) {
-  row.classList.add('date-time-row');
-  const cols = row.querySelectorAll(':scope > div');
-
-  cols.forEach((c, i) => {
-    if (i === 0) buildDatePicker(c);
-    if (i === 1) buildTimePicker(c);
-  });
+function handlize(str) {
+  return str.toLowerCase().trim().replaceAll(' ', '-');
 }
 
 function decorateTimezone(row) {
@@ -87,7 +39,7 @@ function decorateTimezone(row) {
       console.log(pickerName, handlize(pickerName));
       const select = createTag('select', {
         id: `timezone-picker-${handlize(pickerName)}`,
-        class: `select-input`
+        class: `select-input`,
       });
       timeSlots.forEach((t) => {
         const text = t.textContent.trim();
@@ -105,8 +57,8 @@ function decorateTimezone(row) {
 
 function decorateTextInput_1(row) {
   const cols = row.querySelectorAll(':scope > div');
-  const inputWrapper = createTag('div', { id: 'input-wrapper' });
-  const attribWrapper = createTag('div', { id: 'attrib-wrapper' });
+  const inputWrapper = createTag('div', { class: 'input-wrapper' });
+  const attribWrapper = createTag('div', { class: 'attrib-wrapper' });
   let pickerName;
   let params = { type: 'text' };
   cols.forEach((c, j) => {
@@ -145,14 +97,14 @@ function decorateTextInput_1(row) {
   attribWrapper.append(createTag('div', {}, content.join(' ')));
 
   row.innerHTML = '';
-  row.classList.add(`venu-info-${handlize(pickerName)}-wrapper`);
+  row.classList.add(`venu-info-textinput-wrapper`);
   row.append(inputWrapper);
   row.append(attribWrapper);
 }
 
 function decorateTextInput_2(row) {
   const cols = row.querySelectorAll(':scope > div');
-  const inputWrapper = createTag('div', { id: 'input-wrapper' });
+  const inputWrapper = createTag('div', { class: 'input-wrapper' });
   let pickerName;
   let params = {};
   pickerName = row.textContent.trim();
