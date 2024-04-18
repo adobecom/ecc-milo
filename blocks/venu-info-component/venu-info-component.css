@@ -46,3 +46,16 @@
   font-size: var(--type-body-xs-size);
   text-align: right;
 }
+
+.venu-info-component .venu-info-field-zipcode .zipcode-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.venu-info-component .venu-info-field-zipcode .zipcode-input {
+  padding-bottom: 16px;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid #00000040;
+  width: 40%;
+}

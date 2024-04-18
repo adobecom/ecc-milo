@@ -55,7 +55,7 @@ function decorateTimezone(row) {
   row.append(timezonePickerWrapper);
 }
 
-function decorateTextInput_1(row) {
+function decorateTextInput(row) {
   const cols = row.querySelectorAll(':scope > div');
   const inputWrapper = createTag('div', { class: 'input-wrapper' });
   const attribWrapper = createTag('div', { class: 'attrib-wrapper' });
@@ -103,7 +103,6 @@ function decorateTextInput_1(row) {
 }
 
 function decorateTextInput_2(row) {
-  const cols = row.querySelectorAll(':scope > div');
   const inputWrapper = createTag('div', { class: 'input-wrapper' });
   let pickerName;
   let params = {};
@@ -121,51 +120,63 @@ function decorateTextInput_2(row) {
   row.innerHTML = '';
   row.append(inputWrapper);
 }
-function decorateCheckboxes(el) {
-  const minReg = el.className.match(/min-(.*?)( |$)/);
-  const isRequired = !!minReg;
-  const lis = el.querySelectorAll('ul > li');
-  const checkboxes = [];
-  const fieldSet = createTag('fieldset', { class: 'checkboxes' });
-  console.log(lis);
-  lis.forEach((cb) => {
-    const cn = cb.textContent.trim();
-    const handle = handlize(cn);
-    const input = createTag('input', {
-      id: `checkbox-${handle}`,
-      name: `checkbox-${handle}`,
-      type: 'checkbox',
-      class: 'checkbox-input',
-      value: handle,
-      required: isRequired,
+// function decorateCheckboxes(el) {
+//   const minReg = el.className.match(/min-(.*?)( |$)/);
+//   const isRequired = !!minReg;
+//   const lis = el.querySelectorAll('ul > li');
+//   const checkboxes = [];
+//   const fieldSet = createTag('fieldset', { class: 'checkboxes' });
+//   console.log(lis);
+//   lis.forEach((cb) => {
+//     const cn = cb.textContent.trim();
+//     const handle = handlize(cn);
+//     const input = createTag('input', {
+//       id: `checkbox-${handle}`,
+//       name: `checkbox-${handle}`,
+//       type: 'checkbox',
+//       class: 'checkbox-input',
+//       value: handle,
+//       required: isRequired,
+//     });
+//     const label = createTag(
+//       'label',
+//       { class: 'checkbox-label', for: `checkbox-${handle}` },
+//       cn
+//     );
+//     const wrapper = createTag('div', { class: 'checkbox-wrapper' });
+
+//     wrapper.append(input, label);
+//     fieldSet.append(wrapper);
+//     checkboxes.push(input);
+//   });
+
+//   el.append(fieldSet);
+
+//   const oldCheckboxDiv = el.querySelector('ul');
+
+//   if (oldCheckboxDiv) {
+//     oldCheckboxDiv.remove();
+//   }
+// }
+
+function buildLocationSelector(row) {
+  function buildInput(label) {
+    return createTag('input', {
+      type: 'text',
+      id: `zipcode-${handlize(label)}`,
+      class: 'zipcode-input',
+      placeholder: label,
     });
-    const label = createTag(
-      'label',
-      { class: 'checkbox-label', for: `checkbox-${handle}` },
-      cn
-    );
-    const wrapper = createTag('div', { class: 'checkbox-wrapper' });
-
-    wrapper.append(input, label);
-    fieldSet.append(wrapper);
-    checkboxes.push(input);
-  });
-
-  el.append(fieldSet);
-
-  const oldCheckboxDiv = el.querySelector('ul');
-
-  if (oldCheckboxDiv) {
-    oldCheckboxDiv.remove();
   }
-}
+  const list = row.querySelector(':scope ul');
+  const subs = list.querySelectorAll(':scope > li');
+  const zipCodeWrapper = createTag('div', { class: 'zipcode-wrapper' });
 
-function buildZipcodeSelector(row) {
-  const subs = row.querySelectorAll(':scope > div');
-  subs.forEach((sub, i) => {
-    if (i === 0) decorateTextInput_2(sub);
-    else if (i === 1) decorateCheckboxes(sub);
+  subs.forEach((sub) => {
+    zipCodeWrapper.append(buildInput(sub.textContent.trim()));
   });
+  row.innerHTML = '';
+  row.append(zipCodeWrapper);
   row.classList.add('venu-info-field-zipcode');
 }
 
@@ -176,7 +187,7 @@ export default function init(el) {
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach((r, i) => {
     if (i === 1) decorateTimezone(r);
-    else if (i === 2 || i === 3) decorateTextInput_1(r);
-    else if (i === 4) buildZipcodeSelector(r);
+    else if (i === 2 || i === 3) decorateTextInput(r);
+    else if (i === 4) buildLocationSelector(r);
   });
 }
