@@ -1,8 +1,17 @@
+.event-info-component .info-field-wrapper {
+  margin-bottom: 24px;
+}
+
+.event-info-component .attr-text {
+  font-family: var(--body-font-family);
+  font-size: var(--type-body-xs-size);
+  text-align: right;
+}
+
 .event-info-component input[type="text"],
 .event-info-component textarea {
   border: none;
   border-bottom: 1px solid var(--color-black);
-  margin-bottom: 24px;
   font-family: var(--body-font-family);
   font-size: var(--type-body-m-size);;
   width: 100%;

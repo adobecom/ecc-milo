@@ -3,32 +3,31 @@ import { handlize, standardizeFormComponentHeading } from '../../utils/utils.js'
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
-function decorateTextFields(row) {
+function decorateField(row, type = 'text') {
   row.classList.add('text=field-row');
-  const lis = row.querySelectorAll('ul > li');
+  const cols = row.querySelectorAll(':scope > div');
+  if (!cols.length) return;
+  const [placeholderCol, maxLengthCol] = cols;
+  const text = placeholderCol.textContent.trim();
+  const attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
+  const maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
+  const isRequired = attrTextEl.textContent.trim().endsWith('*');
+  const handle = handlize(text);
+  let input;
+  if (type === 'text') {
+    input = createTag('input', { id: `info-field-${handle}`, type: 'text', class: 'text-input', placeholder: text, required: isRequired });
+  }
 
-  if (!lis.length) return;
+  if (type === 'textarea') {
+    input = createTag('textarea', { id: `info-field-${handle}`, class: 'textarea-input', placeholder: text, required: isRequired });
+  }
 
-  lis.forEach((li, i) => {
-    const text = li.textContent.trim();
-    const isRequired = text.endsWith('*');
-    const handle = handlize(text);
-    let input;
-    if (i === 0) {
-      input = createTag('input', { id: `info-field-${handle}`, type: 'text', class: 'text-input', placeholder: text, required: isRequired });
-    } else {
-      input = createTag('textarea', { id: `info-field-${handle}`, class: 'textarea-input', placeholder: text, required: isRequired });
-    }
+  if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
 
-    const wrapper = createTag('div', { class: 'info-field-wrapper' });
-
-    wrapper.append(input);
-    row.append(wrapper);
-  });
-
-  const oldDiv = row.querySelector(':scope > div:first-of-type');
-
-  if (oldDiv.querySelector('ul')) oldDiv.remove();
+  const wrapper = createTag('div', { class: 'info-field-wrapper' });
+  row.innerHTML = '';
+  wrapper.append(input, attrTextEl);
+  row.append(wrapper);
 }
 
 function buildDatePicker(column) {
@@ -95,7 +94,8 @@ export default function init(el) {
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach((r, i) => {
-    if (i === 1) decorateTextFields(r);
-    if (i === 2) decorateDateTimeFields(r);
+    if (i === 1) decorateField(r, 'text');
+    if (i === 2) decorateField(r, 'textarea');
+    if (i === 3) decorateDateTimeFields(r);
   });
 }
