@@ -33,14 +33,17 @@ function decorateForm(el) {
 
 export default function init(el) {
   const form = createTag('form');
-  const formDiv = el.querySelector(':scope > div > div > .fragment');
-  if (!formDiv) {
+  const formDivs = el.querySelectorAll('.fragment');
+
+  if (!formDivs.length) {
     el.remove();
     return;
   }
 
-  formDiv.parentElement.replaceChild(form, formDiv);
-  form.innerHTML = formDiv.innerHTML;
+  formDivs.forEach((formDiv) => {
+    formDiv.parentElement.replaceChild(form, formDiv);
+    form.append(formDiv);
+  });
 
   decorateForm(el);
   initComponents(el);
