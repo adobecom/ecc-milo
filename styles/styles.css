@@ -7,6 +7,10 @@
  *
  */
 
+:root {
+  --stroke-color-divider: #6E6E6E;
+}
+
 main a.con-button.no-event {
   user-select: none;
   pointer-events: none;

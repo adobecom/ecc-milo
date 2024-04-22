@@ -32,8 +32,8 @@
   box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
 }
 
-.form-handler .form-component {
-  border-bottom: 2px solid var(--color-gray-300);
+.form-handler .form-component:not(:last-of-type) {
+  border-bottom: 3px solid var(--stroke-color-divider);
 }
 
 .form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon {
