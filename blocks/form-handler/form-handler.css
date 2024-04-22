@@ -12,8 +12,20 @@
   flex-grow: 1;
 }
 
-/* TODO: make cards based on card-? class to restructure the form */
-.form-handler .main-frame .section {
+.form-handler .main-frame .section:first-of-type .content {
+  margin: 0 24px;
+  max-width: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between
+}
+
+.form-handler .main-frame .section:first-of-type .content p {
+  font-family: var(--body-font-family);
+    font-size: var(--type-body-xs-size);
+}
+
+.form-handler .main-frame .section:not(:first-of-type) {
   padding: 24px;
   border-radius: 24px;
   margin: 24px;
