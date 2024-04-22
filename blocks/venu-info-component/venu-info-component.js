@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { standardizeFormComponentHeading } from '../../utils/utils.js';
+import { getIcon, standardizeFormComponentHeading } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -102,62 +102,82 @@ function decorateTextInput(row) {
   row.append(attribWrapper);
 }
 
-function decorateTextInput_2(row) {
-  const inputWrapper = createTag('div', { class: 'input-wrapper' });
-  let pickerName;
-  let params = {};
-  pickerName = row.textContent.trim();
-  const isRequired = pickerName.endsWith('*');
-  params.required = isRequired;
-  params.id = `venu-info-field-${handlize(pickerName)}`;
+function buildAdditionalInfo(row) {
+  function decorateImageDropzones(col) {
+    col.classList.add('image-dropzone');
+    const uploadName = col
+      .querySelector(':scope > p:first-of-type')
+      ?.textContent.trim();
+    const paragraphs = col.querySelectorAll(':scope > p');
+    const existingFileInput = document.querySelectorAll('.img-file-input');
+    const inputId = uploadName
+      ? `${handlize(uploadName)}`
+      : `img-file-input-${existingFileInput.length + i}`;
+    const fileInput = createTag('input', {
+      id: inputId,
+      type: 'file',
+      class: 'img-file-input',
+    });
+    const inputWrapper = createTag('div', {
+      class: 'img-file-input-wrapper',
+    });
+    const inputLabel = createTag('label', { class: 'img-file-input-label' });
 
-  params.placeholder = pickerName;
+    const previewWrapper = createTag('div', {
+      class: 'preview-wrapper hidden',
+    });
+    const previewImg = createTag('div', { class: 'preview-img-placeholder' });
+    const previewDeleteButton = getIcon('delete--smoke');
 
-  const el = createTag('input', params);
+    previewWrapper.append(previewImg, previewDeleteButton);
 
-  inputWrapper.append(el);
+    inputWrapper.append(previewWrapper, inputLabel);
+    inputLabel.append(fileInput, getIcon('image-add--smoke'));
+    paragraphs.forEach((p) => {
+      inputLabel.append(p);
+    });
 
-  row.innerHTML = '';
-  row.append(inputWrapper);
+    col.innerHTML = '';
+    col.append(inputWrapper);
+  }
+
+  function decorateVenuInfoVisible(col) {
+    const fieldSet = createTag('fieldset', { class: 'checkboxes' });
+    col.classList.add('venu-info-addition');
+    const [inputLabel, comment] = [...col.querySelectorAll(':scope > p')];
+    const cn = inputLabel.textContent.trim();
+
+    const handle = 'venu-info-visible';
+    const input = createTag('input', {
+      id: `checkbox-${handle}`,
+      name: `checkbox-${handle}`,
+      type: 'checkbox',
+      class: 'checkbox-input',
+      value: handle,
+    });
+    const label = createTag(
+      'label',
+      { class: 'checkbox-label', for: `checkbox-${handle}` },
+      cn
+    );
+    const wrapper = createTag('div', { class: 'checkbox-wrapper' });
+
+    wrapper.append(input, label);
+    fieldSet.append(wrapper);
+
+    const additionComment = createTag('div', { class: 'addition-comment' });
+    additionComment.append(comment.textContent.trim());
+    col.innerHTML = '';
+    col.append(fieldSet);
+    col.append(additionComment);
+  }
+
+  row.classList.add('img-upload-component');
+  const [image_uploader, venu_visible] = row.querySelectorAll(':scope > div');
+  decorateImageDropzones(image_uploader);
+  decorateVenuInfoVisible(venu_visible);
+  row.classList.add('venu-info-addition-wrapper');
 }
-// function decorateCheckboxes(el) {
-//   const minReg = el.className.match(/min-(.*?)( |$)/);
-//   const isRequired = !!minReg;
-//   const lis = el.querySelectorAll('ul > li');
-//   const checkboxes = [];
-//   const fieldSet = createTag('fieldset', { class: 'checkboxes' });
-//   console.log(lis);
-//   lis.forEach((cb) => {
-//     const cn = cb.textContent.trim();
-//     const handle = handlize(cn);
-//     const input = createTag('input', {
-//       id: `checkbox-${handle}`,
-//       name: `checkbox-${handle}`,
-//       type: 'checkbox',
-//       class: 'checkbox-input',
-//       value: handle,
-//       required: isRequired,
-//     });
-//     const label = createTag(
-//       'label',
-//       { class: 'checkbox-label', for: `checkbox-${handle}` },
-//       cn
-//     );
-//     const wrapper = createTag('div', { class: 'checkbox-wrapper' });
-
-//     wrapper.append(input, label);
-//     fieldSet.append(wrapper);
-//     checkboxes.push(input);
-//   });
-
-//   el.append(fieldSet);
-
-//   const oldCheckboxDiv = el.querySelector('ul');
-
-//   if (oldCheckboxDiv) {
-//     oldCheckboxDiv.remove();
-//   }
-// }
 
 function buildLocationSelector(row) {
   function buildInput(label) {
@@ -189,5 +209,6 @@ export default function init(el) {
     if (i === 1) decorateTimezone(r);
     else if (i === 2 || i === 3) decorateTextInput(r);
     else if (i === 4) buildLocationSelector(r);
+    else if (i === 5) buildAdditionalInfo(r);
   });
 }

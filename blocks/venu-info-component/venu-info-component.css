@@ -59,3 +59,16 @@
   border-bottom: 1px solid #00000040;
   width: 40%;
 }
+
+.venu-info-component .venu-info-addition-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.venu-info-component .venu-info-addition-wrapper .image-dropzone {
+  max-width: 240px;
+}
+
+.venu-info-component .venu-info-addition-wrapper .addition-comment {
+  padding-left: 20px;
+}
