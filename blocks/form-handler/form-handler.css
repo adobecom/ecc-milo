@@ -22,7 +22,7 @@
 
 .form-handler .main-frame .section:first-of-type .content p {
   font-family: var(--body-font-family);
-    font-size: var(--type-body-xs-size);
+  font-size: var(--type-body-xs-size);
 }
 
 .form-handler .main-frame .section:not(:first-of-type) {
@@ -32,7 +32,7 @@
   box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
 }
 
-.form-handler .form-component:not(:last-of-type) {
+.form-handler .form-component:not(:last-of-type):not(.no-divider) {
   border-bottom: 3px solid var(--stroke-color-divider);
 }
 
