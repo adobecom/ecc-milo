@@ -7,6 +7,12 @@ export function onSubmit(component) {
   return { el: component };
 }
 
+function compareDates(date1, date2) {
+  return date1.getFullYear() === date2.getFullYear()
+         && date1.getMonth() === date2.getMonth()
+         && date1.getDate() === date2.getDate();
+}
+
 // Function to generate a calendar
 function updateCalendar(component, parent, state) {
   parent.querySelectorAll('.calendar-grid, .weekdays').forEach((e) => e.remove());
@@ -16,6 +22,10 @@ function updateCalendar(component, parent, state) {
     updateMonthView(component, parent, state);
   } else if (state.currentView === 'years') {
     updateYearView(component, parent, state);
+  }
+
+  if (state.selectedStartDate && state.selectedEndDate) {
+    updateSelectedDates(state);
   }
 }
 
@@ -37,11 +47,11 @@ function updateDayView(component, parent, state) {
     createTag('div', { class: 'calendar-day empty' }, '', { parent: calendarGrid });
   }
   for (let day = 1; day <= daysInMonth; day += 1) {
-    const date = new Date(Date.UTC(state.currentYear, state.currentMonth, day));
+    const date = new Date(state.currentYear, state.currentMonth, day);
     const dayElement = createTag('div', {
       class: 'calendar-day',
       tabindex: '0',
-      'data-date': date.toISOString().split('T')[0],
+      'data-date': `${state.currentYear}-${state.currentMonth + 1}-${day}`,
     }, day.toString(), { parent: calendarGrid });
 
     if (date < todayDate) {
@@ -57,7 +67,7 @@ function updateDayView(component, parent, state) {
     }
 
     // Mark today's date
-    if (date.toISOString().split('T')[0] === todayDate.toISOString().split('T')[0]) {
+    if (compareDates(date, todayDate)) {
       dayElement.classList.add('today');
     }
   }
@@ -125,34 +135,51 @@ function selectDate(component, parent, state, date) {
       state.selectedEndDate = date;
     }
   }
-  updateSelectedDates(component, parent, state);
+  updateSelectedDates(state);
+  updateInput(component, state);
 }
 
-function updateSelectedDates(component, parent, state) {
+function updateInput(component, state) {
+  const options = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: state.timeZone,
+  };
+
+  const dateInput = component.querySelector('#event-info-date-picker');
+
+  dateInput.dataset.startDate = state.selectedStartDate;
+  dateInput.dataset.endDate = state.selectedEndDate;
+
+  const localStartTime = state.selectedStartDate?.toLocaleString('en-GB', options) || '';
+  const localEndTime = state.selectedEndDate?.toLocaleString('en-GB', options) || '';
+
+  if (dateInput) {
+    dateInput.value = `${localStartTime} - ${localEndTime}`;
+  }
+}
+
+function updateSelectedDates(state) {
+  const { parent } = state;
   parent.querySelectorAll('.calendar-day').forEach((dayElement) => {
     const date = new Date(dayElement.getAttribute('data-date'));
     dayElement.classList.toggle('selected', date >= state.selectedStartDate && date <= (state.selectedEndDate || state.selectedStartDate));
     dayElement.classList.toggle('range', date > state.selectedStartDate && date < (state.selectedEndDate || state.selectedStartDate));
     // Mark the start date and end date
-    if (state.selectedStartDate && date.toISOString().split('T')[0] === state.selectedStartDate.toISOString().split('T')[0]) {
+    if (state.selectedStartDate && compareDates(date, state.selectedStartDate)) {
       dayElement.classList.remove('end-date');
       dayElement.classList.add('start-date');
-      parent.classList.remove('range-selected');
-    } else if (state.selectedEndDate && date.toISOString().split('T')[0] === state.selectedEndDate.toISOString().split('T')[0]) {
+    } else if (state.selectedEndDate && compareDates(date, state.selectedEndDate)) {
       dayElement.classList.remove('start-date');
       dayElement.classList.add('end-date');
-      parent.classList.add('range-selected');
     } else {
       dayElement.classList.remove('start-date', 'end-date');
-      parent.classList.remove('range-selecte');
     }
+
+    parent.classList.toggle('range-selected', state.selectedStartDate && state.selectedEndDate);
   });
-
-  const dateInput = component.querySelector('#event-info-date-picker');
-
-  if (dateInput) {
-    dateInput.value = `${state.selectedStartDate} - ${state.selectedEndDate}`;
-  }
 }
 
 function changeMonth(component, state, delta) {
@@ -169,10 +196,15 @@ function changeMonth(component, state, delta) {
 }
 
 function buildCalendar(component, parent) {
+  const input = component.querySelector('#event-info-date-picker');
+
+  if (!input) return;
+
   const state = {
     currentView: 'days',
-    selectedStartDate: null,
-    selectedEndDate: null,
+    selectedStartDate: input.dataset.startDate ? new Date(input.dataset.startDate) : null,
+    selectedEndDate: input.dataset.endDate ? new Date(input.dataset.endDate) : null,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     currentYear: new Date().getFullYear(),
     currentMonth: new Date().getMonth(),
     headerTitle: createTag('span', { class: 'header-title' }, '', { parent }),
@@ -196,24 +228,26 @@ function buildCalendar(component, parent) {
   updateCalendar(component, parent, state);
 }
 
-export default function init(component) {
+function initCalendar(component) {
+  let calendar;
   const datePickerContainer = component.querySelector('.date-picker');
-  const dateInput = datePickerContainer.querySelector('#event-info-date-picker');
-  const label = datePickerContainer.querySelector('label');
+  const calendarIcon = datePickerContainer.querySelector('.icon-calendar-add--smoke');
 
-  dateInput.addEventListener('click', () => {
-    const calendar = createTag('div', { class: 'calendar-container' });
+  calendarIcon.addEventListener('click', () => {
+    if (calendar) return;
+    calendar = createTag('div', { class: 'calendar-container' });
     datePickerContainer.append(calendar);
-    label.style.display = 'none';
     buildCalendar(component, calendar);
   });
 
   document.addEventListener('click', (e) => {
-    const calendar = datePickerContainer.querySelector('.calendar-container');
-    if (!datePickerContainer.contains(e.target)) {
-      dateInput.value = '';
-      calendar?.remove();
-      label.style.removeProperty('display');
+    if (!datePickerContainer.contains(e.target) && calendar) {
+      calendar.remove();
+      calendar = '';
     }
   });
+}
+
+export default function init(component) {
+  initCalendar(component);
 }

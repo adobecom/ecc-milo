@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { handlize, standardizeFormComponentHeading } from '../../utils/utils.js';
+import { getIcon, handlize, standardizeFormComponentHeading } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -34,13 +34,10 @@ function buildDatePicker(column) {
   column.classList.add('date-picker');
   const dateLabel = createTag('label', { for: 'event-info-date-picker' }, column.textContent.trim());
   const datePicker = createTag('input', { id: 'event-info-date-picker', name: 'event-date', class: 'date-input' });
-  let today = new Date();
-  const offset = today.getTimezoneOffset();
-  today = new Date(today.getTime() - (offset * 60 * 1000));
-  datePicker.setAttribute('min', today.toISOString().split('T')[0]);
+  const calendarIcon = getIcon('calendar-add--smoke');
 
   column.innerHTML = '';
-  column.append(dateLabel, datePicker);
+  column.append(dateLabel, datePicker, calendarIcon);
 }
 
 function buildTimePicker(column) {
