@@ -33,7 +33,7 @@ function decorateField(row, type = 'text') {
 function buildDatePicker(column) {
   column.classList.add('date-picker');
   const dateLabel = createTag('label', { for: 'event-info-date-picker' }, column.textContent.trim());
-  const datePicker = createTag('input', { id: 'event-info-date-picker', name: 'event-date', type: 'date', class: 'date-input' });
+  const datePicker = createTag('input', { id: 'event-info-date-picker', name: 'event-date', class: 'date-input' });
   let today = new Date();
   const offset = today.getTimezoneOffset();
   today = new Date(today.getTime() - (offset * 60 * 1000));

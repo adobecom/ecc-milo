@@ -5,9 +5,9 @@ const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 // list of controllers for the hanler to load
 const SUPPORTED_COMPONENTS = [
   'checkbox',
-  // 'event-info',
+  'event-info',
   // 'img-upload',
-  // 'venu-info',
+  // 'venue-info',
 ];
 
 function initComponents(el) {

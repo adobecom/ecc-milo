@@ -9,27 +9,23 @@ function handlize(str) {
 
 function decorateTimezone(row) {
   const cols = row.querySelectorAll(':scope > div');
-  const timezonePickerWrapper = createTag('div', {
-    class: 'timezone-picker-wrapper',
-  });
+  const timezonePickerWrapper = createTag('div', { class: 'timezone-picker-wrapper' });
   let pickerName;
   let isRequired;
-  let labelWrapper = createTag('div', { class: 'timezone-label-wrapper' });
+  const labelWrapper = createTag('div', { class: 'timezone-label-wrapper' });
   cols.forEach((col, i) => {
     if (i === 0) {
       pickerName = col.textContent.trim();
       isRequired = pickerName.endsWith('*');
       const label = createTag(
         'label',
-        {
-          for: `timezone-picker-${handlize(pickerName)}`,
-        },
-        pickerName
+        { for: `timezone-picker-${handlize(pickerName)}` },
+        pickerName,
       );
       labelWrapper.append(label);
       if (isRequired) {
         labelWrapper.append(
-          createTag('span', { class: 'attrib' }, 'Required *')
+          createTag('span', { class: 'attrib' }, 'Required *'),
         );
       }
 
@@ -39,7 +35,7 @@ function decorateTimezone(row) {
       console.log(pickerName, handlize(pickerName));
       const select = createTag('select', {
         id: `timezone-picker-${handlize(pickerName)}`,
-        class: `select-input`,
+        class: 'select-input',
       });
       timeSlots.forEach((t) => {
         const text = t.textContent.trim();
@@ -60,13 +56,13 @@ function decorateTextInput(row) {
   const inputWrapper = createTag('div', { class: 'input-wrapper' });
   const attribWrapper = createTag('div', { class: 'attrib-wrapper' });
   let pickerName;
-  let params = { type: 'text' };
+  const params = { type: 'text' };
   cols.forEach((c, j) => {
     if (j === 0) {
       pickerName = c.textContent.trim();
       const isRequired = pickerName.endsWith('*');
       params.required = isRequired;
-      params.id = `venu-info-field-${handlize(pickerName)}`;
+      params.id = `venue-info-field-${handlize(pickerName)}`;
     } else if (j === 1) {
       const attribs = c.textContent.split(',').map((s) => s.trim());
       attribs.forEach((attrib) => {
@@ -97,12 +93,12 @@ function decorateTextInput(row) {
   attribWrapper.append(createTag('div', {}, content.join(' ')));
 
   row.innerHTML = '';
-  row.classList.add(`venu-info-textinput-wrapper`);
+  row.classList.add('venue-info-textinput-wrapper');
   row.append(inputWrapper);
   row.append(attribWrapper);
 }
 
-function buildAdditionalInfo(row) {
+function buildAdditionalInfo(row, i) {
   function decorateImageDropzones(col) {
     col.classList.add('image-dropzone');
     const uploadName = col
@@ -118,14 +114,10 @@ function buildAdditionalInfo(row) {
       type: 'file',
       class: 'img-file-input',
     });
-    const inputWrapper = createTag('div', {
-      class: 'img-file-input-wrapper',
-    });
+    const inputWrapper = createTag('div', { class: 'img-file-input-wrapper' });
     const inputLabel = createTag('label', { class: 'img-file-input-label' });
 
-    const previewWrapper = createTag('div', {
-      class: 'preview-wrapper hidden',
-    });
+    const previewWrapper = createTag('div', { class: 'preview-wrapper hidden' });
     const previewImg = createTag('div', { class: 'preview-img-placeholder' });
     const previewDeleteButton = getIcon('delete--smoke');
 
@@ -141,13 +133,13 @@ function buildAdditionalInfo(row) {
     col.append(inputWrapper);
   }
 
-  function decorateVenuInfoVisible(col) {
+  function decorateVenueInfoVisible(col) {
     const fieldSet = createTag('fieldset', { class: 'checkboxes' });
-    col.classList.add('venu-info-addition');
+    col.classList.add('venue-info-addition');
     const [inputLabel, comment] = [...col.querySelectorAll(':scope > p')];
     const cn = inputLabel.textContent.trim();
 
-    const handle = 'venu-info-visible';
+    const handle = 'venue-info-visible';
     const input = createTag('input', {
       id: `checkbox-${handle}`,
       name: `checkbox-${handle}`,
@@ -158,7 +150,7 @@ function buildAdditionalInfo(row) {
     const label = createTag(
       'label',
       { class: 'checkbox-label', for: `checkbox-${handle}` },
-      cn
+      cn,
     );
     const wrapper = createTag('div', { class: 'checkbox-wrapper' });
 
@@ -173,10 +165,10 @@ function buildAdditionalInfo(row) {
   }
 
   row.classList.add('img-upload-component');
-  const [image_uploader, venu_visible] = row.querySelectorAll(':scope > div');
-  decorateImageDropzones(image_uploader);
-  decorateVenuInfoVisible(venu_visible);
-  row.classList.add('venu-info-addition-wrapper');
+  const [imageUploader, venueVisible] = row.querySelectorAll(':scope > div');
+  decorateImageDropzones(imageUploader);
+  decorateVenueInfoVisible(venueVisible);
+  row.classList.add('venue-info-addition-wrapper');
 }
 
 function buildLocationSelector(row) {
@@ -197,7 +189,7 @@ function buildLocationSelector(row) {
   });
   row.innerHTML = '';
   row.append(zipCodeWrapper);
-  row.classList.add('venu-info-field-zipcode');
+  row.classList.add('venue-info-field-zipcode');
 }
 
 export default function init(el) {
@@ -209,6 +201,6 @@ export default function init(el) {
     if (i === 1) decorateTimezone(r);
     else if (i === 2 || i === 3) decorateTextInput(r);
     else if (i === 4) buildLocationSelector(r);
-    else if (i === 5) buildAdditionalInfo(r);
+    else if (i === 5) buildAdditionalInfo(r, i);
   });
 }

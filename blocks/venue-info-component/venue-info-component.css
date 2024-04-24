@@ -1,11 +1,11 @@
-.venu-info-component {
+.venue-info-component {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.venu-info-component input[type='text'],
-.venu-info-component textarea {
+.venue-info-component input[type='text'],
+.venue-info-component textarea {
   box-sizing: border-box;
   border: none;
   border-bottom: 1px solid var(--color-black);
@@ -15,44 +15,44 @@
   width: 100%;
 }
 
-.venu-info-component .timezone-picker-wrapper {
+.venue-info-component .timezone-picker-wrapper {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.venu-info-component .timezone-picker-wrapper .timezone-label-wrapper {
+.venue-info-component .timezone-picker-wrapper .timezone-label-wrapper {
   display: flex;
   justify-content: space-between;
-
   font-size: var(--type-heading-m-size);
 }
 
-.venu-info-component .timezone-picker-wrapper .timezone-label-wrapper .attrib {
+.venue-info-component .timezone-picker-wrapper .timezone-label-wrapper .attrib {
   font-size: var(--type-body-s-size);
 }
 
-.venu-info-component .timezone-picker-wrapper .select-input {
+.venue-info-component .timezone-picker-wrapper .select-input {
   padding: 9px 11px;
   border-radius: 5px;
 }
 
-.venu-info-component .venu-info-textinput-wrapper .input-wrapper {
+.venue-info-component .venue-info-textinput-wrapper .input-wrapper {
   margin-bottom: 15px;
 }
 
-.venu-info-component .venu-info-textinput-wrapper .attrib-wrapper {
+.venue-info-component .venue-info-textinput-wrapper .attrib-wrapper {
   font-family: var(--body-font-family);
   font-size: var(--type-body-xs-size);
   text-align: right;
 }
 
-.venu-info-component .venu-info-field-zipcode .zipcode-wrapper {
+.venue-info-component .venue-info-field-zipcode .zipcode-wrapper {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
 }
-.venu-info-component .venu-info-field-zipcode .zipcode-input {
+
+.venue-info-component .venue-info-field-zipcode .zipcode-input {
   padding-bottom: 16px;
   border: none;
   outline: none;
@@ -60,15 +60,15 @@
   width: 40%;
 }
 
-.venu-info-component .venu-info-addition-wrapper {
+.venue-info-component .venue-info-addition-wrapper {
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
 
-.venu-info-component .venu-info-addition-wrapper .image-dropzone {
+.venue-info-component .venue-info-addition-wrapper .image-dropzone {
   max-width: 240px;
 }
 
-.venu-info-component .venu-info-addition-wrapper .addition-comment {
+.venue-info-component .venue-info-addition-wrapper .addition-comment {
   padding-left: 20px;
 }
