@@ -42,6 +42,7 @@ function buildDatePicker(column) {
 
 function buildTimePicker(column) {
   column.classList.add('time-pickers');
+  const header = column.querySelector(':scope > p');
   const rows = column.querySelectorAll('table tr');
   const timePickerWrappers = [];
 
@@ -72,6 +73,7 @@ function buildTimePicker(column) {
   });
 
   column.innerHTML = '';
+  if (header) column.append(header);
   timePickerWrappers.forEach((w) => { column.append(w); });
 }
 

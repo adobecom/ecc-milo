@@ -47,6 +47,10 @@
   gap: 8px;
 }
 
+.event-info-component .date-time-row > .date-picker label {
+  font-size: var(--type-heading-m-size);
+}
+
 .event-info-component .date-time-row > div:last-of-type {
   flex-grow: 1;
 }
@@ -68,14 +72,26 @@
   gap: 16px;
 }
 
+.event-info-component .time-pickers > p {
+  font-size: var(--type-heading-m-size);
+  font-weight: 700;
+}
+
 .event-info-component .time-pickers .time-picker-wrapper {
   flex: 1 1 0;
-  display: flex;
-  gap: 8px;
+}
+
+.event-info-component .time-pickers .time-picker-wrapper label {
+  display: block;
+  font-size: var(--type-body-xs-size);
 }
 
 .event-info-component .time-pickers .time-picker-wrapper select {
   flex-grow: 1;
+  border-radius: 6px;
+  padding: 4px;
+  height: 40px;
+  width: 100%;
 }
 
 .event-info-component .date-input {
@@ -217,7 +233,7 @@
   z-index: -1;
 }
 
-.event-info-component .calendar-container.range-selected .calendar-day.start-date::before {
+.event-info-component .calendar-container.range-selected .calendar-day.start-date:not(.end-date)::before {
   content: '';
   position: absolute;
   width: calc(100% + 16px);
@@ -229,7 +245,7 @@
   z-index: -1;
 }
 
-.event-info-component .calendar-container.range-selected .calendar-day.end-date::before {
+.event-info-component .calendar-container.range-selected .calendar-day.end-date:not(.start-date)::before {
   content: '';
   position: absolute;
   width: calc(100% + 16px);

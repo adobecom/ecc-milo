@@ -3,14 +3,23 @@ import { getLibs } from '../../../scripts/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
-export function onSubmit(component) {
-  return { el: component };
-}
-
 function compareDates(date1, date2) {
   return date1.getFullYear() === date2.getFullYear()
          && date1.getMonth() === date2.getMonth()
          && date1.getDate() === date2.getDate();
+}
+
+function addTimeToDate(date, timeString) {
+  const timeParts = timeString.match(/(\d+):(\d+)-(\w+)/);
+  const hours = parseInt(timeParts[1], 10);
+  const minutes = parseInt(timeParts[2], 10);
+  const ampm = timeParts[3];
+
+  const hoursIn24 = ampm.toLowerCase() === 'pm' ? (hours % 12) + 12 : hours % 12;
+
+  date.setHours(hoursIn24, minutes, 0, 0);
+
+  return date;
 }
 
 // Function to generate a calendar
@@ -31,7 +40,7 @@ function updateCalendar(component, parent, state) {
 
 function updateDayView(component, parent, state) {
   state.headerTitle.textContent = `${new Date(state.currentYear, state.currentMonth).toLocaleString('default', { month: 'long' })} ${state.currentYear}`;
-  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   const weekdaysRow = createTag('div', { class: 'weekdays' }, null, { parent });
   weekdays.forEach((day) => {
     createTag('div', { class: 'weekday' }, day, { parent: weekdaysRow });
@@ -59,11 +68,11 @@ function updateDayView(component, parent, state) {
     } else {
       dayElement.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
-          selectDate(component, parent, state, date);
+          selectDate(component, state, date);
           event.preventDefault();
         }
       });
-      dayElement.addEventListener('click', () => selectDate(component, parent, state, date));
+      dayElement.addEventListener('click', () => selectDate(component, state, date));
     }
 
     // Mark today's date
@@ -123,11 +132,12 @@ function updateYearView(component, parent, state) {
   }
 }
 
-function selectDate(component, parent, state, date) {
-  if (!state.selectedStartDate || (state.selectedStartDate && state.selectedEndDate)) {
+function selectDate(component, state, date) {
+  if (!state.selectedStartDate || (state.selectedStartDate !== state.selectedEndDate)) {
     state.selectedStartDate = date;
-    state.selectedEndDate = null;
-  } else if (state.selectedStartDate && !state.selectedEndDate) {
+    state.selectedEndDate = date;
+  } else if ((state.selectedStartDate && !state.selectedEndDate)
+  || (state.selectedStartDate === state.selectedEndDate)) {
     if (date < state.selectedStartDate) {
       state.selectedEndDate = state.selectedStartDate;
       state.selectedStartDate = date;
@@ -168,7 +178,10 @@ function updateSelectedDates(state) {
     dayElement.classList.toggle('selected', date >= state.selectedStartDate && date <= (state.selectedEndDate || state.selectedStartDate));
     dayElement.classList.toggle('range', date > state.selectedStartDate && date < (state.selectedEndDate || state.selectedStartDate));
     // Mark the start date and end date
-    if (state.selectedStartDate && compareDates(date, state.selectedStartDate)) {
+    if (compareDates(date, state.selectedStartDate)
+    && (state.selectedStartDate === state.selectedEndDate)) {
+      dayElement.classList.add('start-date', 'end-date');
+    } else if (state.selectedStartDate && compareDates(date, state.selectedStartDate)) {
       dayElement.classList.remove('end-date');
       dayElement.classList.add('start-date');
     } else if (state.selectedEndDate && compareDates(date, state.selectedEndDate)) {
@@ -250,4 +263,30 @@ function initCalendar(component) {
 
 export default function init(component) {
   initCalendar(component);
+}
+
+export function onSubmit(component) {
+  const eventTitle = component.querySelector('#info-field-event-title').value;
+  const eventDescription = component.querySelector('#info-field-event-description').value;
+
+  const startTime = component.querySelector('#time-picker-start-time').value;
+  const endTime = component.querySelector('#time-picker-end-time').value;
+
+  const datePicker = component.querySelector('#event-info-date-picker');
+  const startDate = new Date(datePicker.dataset.startDate);
+  const endDate = new Date(datePicker.dataset.endDate);
+
+  const eventStartDate = addTimeToDate(new Date(startDate), startTime);
+  const eventEndDate = addTimeToDate(new Date(endDate), endTime);
+
+  const eventInfo = {
+    title: eventTitle,
+    'event-title': eventTitle,
+    description: eventDescription,
+    'event-description': eventDescription,
+    'event-start': eventStartDate,
+    'event-end': eventEndDate,
+  };
+
+  return eventInfo;
 }

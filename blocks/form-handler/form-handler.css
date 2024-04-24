@@ -1,15 +1,16 @@
 .form-handler {
   display: block;
-  max-width: var(--grid-container-width);
-  margin: auto;
+  padding: 40px;
 }
 
-.form-handler > div {
+.form-handler > div:first-child {
   display: flex;
+  justify-content: center;
 }
 
 .form-handler .main-frame {
   flex-grow: 1;
+  max-width: var(--grid-container-width);
 }
 
 .form-handler .main-frame .section:first-of-type .content {
@@ -79,4 +80,44 @@
 
 .form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon:hover ~ .event-heading-tooltip-box {
   display: unset;
+}
+
+.form-handler .form-handler-ctas-panel {
+  position: sticky;
+  transform: translateX(-40px);
+  box-sizing: border-box;
+  bottom: 0;
+  padding: 40px 60px;
+  background-color: var(--color-gray-200);
+  width: calc(100% + 80px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.form-handler .form-handler-ctas-panel > div {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.form-handler .form-handler-ctas-panel > div:first-of-type {
+  padding-right: 16px;
+  height: 40px;
+  border-right: 2px solid var(--color-black);
+}
+
+.form-handler .form-handler-ctas-panel a {
+  font-size: var(--type-body-s-size);
+}
+
+.form-handler .form-handler-ctas-panel a.fill {
+  background-color: var(--color-white);
+  color: var(--color-black);
+  font-weight: 700;
+  border-radius: 20px;
+  line-height: 20px;
+  min-height: 21px;
+  padding: 7px 18px 8px;
 }
