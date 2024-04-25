@@ -27,7 +27,7 @@ export function yieldToMain() {
 }
 
 export function handlize(str) {
-  return str.toLowerCase().trim().replace(' ', '-');
+  return str.toLowerCase().trim().replaceAll(' ', '-');
 }
 
 export function standardizeFormComponentHeading(formComponent) {

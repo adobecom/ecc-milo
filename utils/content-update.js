@@ -98,7 +98,16 @@ export default function autoUpdateContent(parent, extraData) {
   }
 
   const getContent = (_match, p1, n) => {
-    const content = getMetadata(p1) || extraData?.[p1] || '';
+    let content;
+    if (document.title === 'Event Preview') {
+      const queryString = window.location.search;
+      const urlParams = new URLSearchParams(queryString);
+      const eventId = urlParams.get('eventId');
+      content = JSON.parse(localStorage.getItem(eventId))[p1] || '';
+    } else {
+      content = getMetadata(p1) || extraData?.[p1] || '';
+    }
+
     if (preserveFormatKeys.includes(p1)) {
       n.parentNode?.classList.add('preserve-format');
     }

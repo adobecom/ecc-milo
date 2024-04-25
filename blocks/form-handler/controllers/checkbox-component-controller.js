@@ -37,3 +37,8 @@ export default function init(component) {
     });
   });
 }
+
+export function onSubmit(component) {
+  console.log(component, 'checkbox onSubmit not built yet');
+  return {};
+}

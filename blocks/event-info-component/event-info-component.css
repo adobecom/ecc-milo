@@ -18,7 +18,7 @@
 }
 
 .event-info-component input[type="text"] {
-  font-size: var(--type-heading-l-size);
+  font-size: var(--type-heading-m-size);
   padding: 24px 0;
 }
 

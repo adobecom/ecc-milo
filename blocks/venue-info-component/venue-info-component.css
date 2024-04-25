@@ -40,7 +40,7 @@
   margin-bottom: 15px;
 }
 
-.venue-info-component .venue-info-textinput-wrapper .attrib-wrapper {
+.venue-info-component .venue-info-textinput-wrapper .attr-text {
   font-family: var(--body-font-family);
   font-size: var(--type-body-xs-size);
   text-align: right;

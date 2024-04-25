@@ -49,6 +49,9 @@ function decorateTimezone(row) {
 
   row.innerHTML = '';
   row.append(timezonePickerWrapper);
+
+  // FIXME: temporarily removing timezone row
+  row.remove();
 }
 
 function decorateTextInput(row) {
@@ -57,40 +60,19 @@ function decorateTextInput(row) {
   const attribWrapper = createTag('div', { class: 'attrib-wrapper' });
   let pickerName;
   const params = { type: 'text' };
-  cols.forEach((c, j) => {
-    if (j === 0) {
-      pickerName = c.textContent.trim();
-      const isRequired = pickerName.endsWith('*');
-      params.required = isRequired;
-      params.id = `venue-info-field-${handlize(pickerName)}`;
-    } else if (j === 1) {
-      const attribs = c.textContent.split(',').map((s) => s.trim());
-      attribs.forEach((attrib) => {
-        const [key, value] = attrib.split('=');
-        params[key.toLowerCase()] = value;
-      });
-    }
-  });
+  const [placeholderCol, maxLengthCol] = cols;
+  const text = placeholderCol.textContent.trim();
+  const attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
+  const maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
+  const isRequired = attrTextEl.textContent.trim().endsWith('*');
+  const handle = handlize(text);
+  const input = createTag('input', { id: `venue-field-${handle}`, type: 'text', class: 'text-input', placeholder: text, required: isRequired });
+
+  if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
 
   params.placeholder = pickerName;
 
-  const inputElem = createTag('input', params);
-  inputWrapper.append(inputElem);
-
-  const content = [];
-  const attribs = ['maxlength', 'required'];
-  attribs.forEach((key) => {
-    const lowerCase = key.toLowerCase();
-    const value = params[key];
-    if (lowerCase === 'maxlength') {
-      content.push(`${value} charaters max`);
-    } else if (lowerCase === 'required') {
-      if (value !== 'false') {
-        content.push('*');
-      }
-    }
-  });
-  attribWrapper.append(createTag('div', {}, content.join(' ')));
+  inputWrapper.append(input, attrTextEl);
 
   row.innerHTML = '';
   row.classList.add('venue-info-textinput-wrapper');
