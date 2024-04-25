@@ -254,7 +254,7 @@ function initCalendar(component) {
   });
 
   document.addEventListener('click', (e) => {
-    if (!datePickerContainer.contains(e.target) && calendar) {
+    if (!(e.target.closest('.date-picker') || e.target.parentElement.classList.contains('calendar-grid')) && calendar) {
       calendar.remove();
       calendar = '';
     }
