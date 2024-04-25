@@ -104,9 +104,9 @@ async function postForm(payload) {
     title: payload['event-title'],
     eventType: 'Networking Event',
     startDate: formatDateTime(new Date(payload['event-start'])),
-    endDate: formatDateTime(new Date(payload['end-start'])),
+    endDate: formatDateTime(new Date(payload['event-end'])),
     timezone: payload['time-zone'] || 'America/Los_Angeles',
-    venue: payload['event-title'],
+    venue: payload['event-venue'],
     venueAddress: payload['event-address'],
     venueCity: payload.city,
     venueState: payload.state,
@@ -174,8 +174,8 @@ function decorateFormCtas(el) {
       }
 
       if (['#save', '#next'].includes(ctaUrl.hash)) {
-        cta.addEventListener('click', () => {
-          const payload = saveEvent(el);
+        cta.addEventListener('click', async () => {
+          const payload = await saveEvent(el);
 
           if (ctaUrl.hash === '#next') {
             cta.classList.add('next-button');
