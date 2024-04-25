@@ -163,7 +163,9 @@ function navigateForm(el, stepIndex = formState.currentStep + 1) {
   });
 
   if (formState.currentStep === frags.length - 1) {
-    nextBtn.textContent = '🎬 Publish event';
+    nextBtn.textContent = nextBtn.dataset.finalStateText;
+  } else {
+    nextBtn.textContent = nextBtn.dataset.nextStateText;
   }
 }
 
@@ -188,11 +190,24 @@ function decorateFormCtas(el) {
       }
 
       if (['#save', '#next'].includes(ctaUrl.hash)) {
+        if (ctaUrl.hash === '#next') {
+          cta.classList.add('next-button');
+          const [nextStateText, finalStateText] = cta.textContent.split('||');
+          cta.textContent = nextStateText;
+          cta.dataset.nextStateText = nextStateText;
+          cta.dataset.finalStateText = finalStateText;
+
+          if (formState.currentStep === frags.length - 1) {
+            cta.textContent = finalStateText;
+          } else {
+            cta.textContent = nextStateText;
+          }
+        }
+
         cta.addEventListener('click', async () => {
           const payload = await saveEvent(el);
 
           if (ctaUrl.hash === '#next') {
-            cta.classList.add('next-button');
             if (formState.currentStep === frags.length - 1) {
               postForm(payload);
             } else {
