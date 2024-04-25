@@ -96,7 +96,8 @@ function updateMonthView(component, parent, state) {
     }, month, { parent: calendarGrid });
 
     // Disable past months in the current year
-    if (state.currentYear === currentYear && index < currentMonth) {
+    if ((state.currentYear === currentYear && index < currentMonth)
+    || state.currentYear < currentYear) {
       monthElement.classList.add('disabled');
     } else {
       monthElement.addEventListener('click', () => {
