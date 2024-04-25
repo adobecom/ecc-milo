@@ -60,7 +60,7 @@ function updateDayView(component, parent, state) {
     const dayElement = createTag('div', {
       class: 'calendar-day',
       tabindex: '0',
-      'data-date': `${state.currentYear}-${state.currentMonth + 1}-${day}`,
+      'data-date': date,
     }, day.toString(), { parent: calendarGrid });
 
     if (date < todayDate) {
@@ -96,7 +96,7 @@ function updateMonthView(component, parent, state) {
     }, month, { parent: calendarGrid });
 
     // Disable past months in the current year
-    if (state.currentYear === currentYear && index <= currentMonth) {
+    if (state.currentYear === currentYear && index < currentMonth) {
       monthElement.classList.add('disabled');
     } else {
       monthElement.addEventListener('click', () => {
@@ -145,6 +145,7 @@ function selectDate(component, state, date) {
       state.selectedEndDate = date;
     }
   }
+
   updateSelectedDates(state);
   updateInput(component, state);
 }
@@ -195,13 +196,18 @@ function updateSelectedDates(state) {
   });
 }
 
-function changeMonth(component, state, delta) {
+function changeCalendarPage(component, state, delta) {
   if (state.currentView === 'days') {
     state.currentMonth += delta;
-    if (state.currentMonth < 0 || state.currentMonth > 11) {
-      state.currentYear += Math.floor(state.currentMonth / 12);
-      state.currentMonth = (state.currentMonth + 12) % 12;
+    if (state.currentMonth < 0) {
+      state.currentMonth = 11;
+      state.currentYear -= 1;
+    } else if (state.currentMonth > 11) {
+      state.currentMonth = 0;
+      state.currentYear += 1;
     }
+  } else if (state.currentView === 'months') {
+    state.currentYear += delta;
   } else if (state.currentView === 'years') {
     state.currentYear += delta * 10;
   }
@@ -229,8 +235,8 @@ function buildCalendar(component, parent) {
   header.append(state.headerTitle);
   const nextButton = createTag('a', { class: 'next-button' }, '>', { parent: header });
 
-  prevButton.onclick = () => changeMonth(component, state, -1);
-  nextButton.onclick = () => changeMonth(component, state, 1);
+  prevButton.onclick = () => changeCalendarPage(component, state, -1);
+  nextButton.onclick = () => changeCalendarPage(component, state, 1);
 
   state.headerTitle.addEventListener('click', () => {
     // eslint-disable-next-line no-nested-ternary
@@ -266,11 +272,11 @@ export default function init(component) {
 }
 
 export function onSubmit(component) {
-  const eventTitle = component.querySelector('#info-field-event-title').value;
-  const eventDescription = component.querySelector('#info-field-event-description').value;
+  const eventTitle = component.querySelector('#info-field-event-title').getAttribute('value');
+  const eventDescription = component.querySelector('#info-field-event-description').getAttribute('value');
 
-  const startTime = component.querySelector('#time-picker-start-time').value;
-  const endTime = component.querySelector('#time-picker-end-time').value;
+  const startTime = component.querySelector('#time-picker-start-time').getAttribute('value');
+  const endTime = component.querySelector('#time-picker-end-time').getAttribute('value');
 
   const datePicker = component.querySelector('#event-info-date-picker');
   const startDate = new Date(datePicker.dataset.startDate);
