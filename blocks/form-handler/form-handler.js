@@ -53,7 +53,19 @@ function decorateForm(el) {
   const cols = el.querySelectorAll(':scope > div:first-of-type > div');
 
   cols.forEach((col, i) => {
-    if (i === 0) col.classList.add('side-menu');
+    if (i === 0) {
+      col.classList.add('side-menu');
+      const navItems = col.querySelectorAll('a[href*="#"]');
+      navItems.forEach((nav, index) => {
+        nav.classList.add('nav-item');
+
+        if (index !== 0) {
+          nav.classList.add('disabled');
+        } else {
+          nav.closest('li')?.classList.add('active');
+        }
+      });
+    }
     if (i === 1) col.classList.add('main-frame');
   });
 }
@@ -145,7 +157,9 @@ function navigateForm(el, stepIndex = formState.currentStep + 1) {
   frags[prevStep].classList.add('hidden');
   frags[formState.currentStep].classList.remove('hidden');
   sideNavs.forEach((n, i) => {
-    if (i < formState.farthestStep) n.classList.remove('disabled');
+    n.closest('li')?.classList.remove('active');
+    if (i <= formState.farthestStep) n.classList.remove('disabled');
+    if (i === formState.currentStep) n.closest('li')?.classList.add('active');
   });
 
   if (formState.currentStep === frags.length - 1) {
@@ -193,8 +207,7 @@ function decorateFormCtas(el) {
 
 function initNavigation(el) {
   const frags = el.querySelectorAll('.fragment');
-  const sideMenu = el.querySelector('.side-menu');
-  const navItems = sideMenu.querySelectorAll('a[href*="#"]');
+  const navItems = el.querySelectorAll('.side-menu .nav-item');
 
   frags.forEach((frag, i) => {
     if (i !== 0) {
@@ -203,12 +216,6 @@ function initNavigation(el) {
   });
 
   navItems.forEach((nav, i) => {
-    if (i !== 0) {
-      nav.classList.add('nav-item', 'disabled');
-    } else {
-      nav.closest('li')?.classList.add('active');
-    }
-
     nav.addEventListener('click', () => {
       if (!nav.closest('li')?.classList.contains('disabled')) {
         navigateForm(el, i);
