@@ -9,7 +9,7 @@ const { default: getUuid } = await import(`${getLibs()}/utils/getUuid.js`);
 const SUPPORTED_COMPONENTS = [
   // 'checkbox',
   'event-info',
-  // 'img-upload',
+  'img-upload',
   'venue-info',
 ];
 
