@@ -14,9 +14,25 @@ function initNewSeriesModal(component) {
   });
 }
 
+function prepopulateTimeZone(component) {
+  const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  if (!currentTimeZone) return;
+
+  const timeZoneInput = component.querySelector('#time-zone-select-input');
+  const options = timeZoneInput.querySelectorAll('option');
+
+  options.forEach((opt) => {
+    if (opt.value === currentTimeZone) {
+      options[0].removeAttribute('selected');
+      opt.selected = true;
+    }
+  });
+}
+
 export default function init(component) {
   initNewSeriesModal(component);
-  return component;
+  prepopulateTimeZone(component);
 }
 
 export function onSubmit(component) {
