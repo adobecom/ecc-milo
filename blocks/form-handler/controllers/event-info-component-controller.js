@@ -251,7 +251,7 @@ function buildCalendar(component, parent) {
 function initCalendar(component) {
   let calendar;
   const datePickerContainer = component.querySelector('.date-picker');
-  const calendarIcon = datePickerContainer.querySelector('.icon-calendar-add--smoke');
+  const calendarIcon = datePickerContainer.querySelector('.icon-calendar-add');
 
   calendarIcon.addEventListener('click', () => {
     if (calendar) return;

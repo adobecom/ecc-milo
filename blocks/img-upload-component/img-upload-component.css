@@ -23,7 +23,7 @@
   z-index: 1;
 }
 
-.img-upload-component .img-file-input-wrapper .preview-wrapper .icon-delete--smoke {
+.img-upload-component .img-file-input-wrapper .preview-wrapper .icon-delete {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -33,6 +33,8 @@
 .img-upload-component .img-file-input-wrapper .preview-img-placeholder {
   height: 100%;
   overflow: hidden;
+  border-radius: 8px;
+
 }
 
 .img-upload-component .img-file-input-wrapper .preview-img-placeholder img {

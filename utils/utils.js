@@ -30,21 +30,25 @@ export function handlize(str) {
   return str.toLowerCase().trim().replaceAll(' ', '-');
 }
 
-export function standardizeFormComponentHeading(formComponent) {
-  const h2 = formComponent.querySelector(':scope > div:first-of-type h2');
+export function addTooltipToHeading(em, heading) {
+  const tooltipText = em.textContent.trim();
+  const toolTipIcon = createTag('span', { class: 'event-heading-tooltip-icon' }, 'i');
+  const toolTipBox = createTag('div', { class: 'event-heading-tooltip-box' }, tooltipText);
+  const toolTipWrapper = createTag('div', { class: 'event-heading-tooltip-wrapper' });
 
-  if (h2) {
+  toolTipWrapper.append(toolTipIcon, toolTipBox);
+  heading.append(toolTipWrapper);
+  em.parentElement?.remove();
+}
+
+export function standardizeFormComponentHeading(formComponent) {
+  const heading = formComponent.querySelector(':scope > div:first-of-type h2, :scope > div:first-of-type h3');
+
+  if (heading) {
     const em = formComponent.querySelector('p > em');
 
     if (em) {
-      const tooltipText = em.textContent.trim();
-      const toolTipIcon = createTag('span', { class: 'event-heading-tooltip-icon' }, 'i');
-      const toolTipBox = createTag('div', { class: 'event-heading-tooltip-box' }, tooltipText);
-      const toolTipWrapper = createTag('div', { class: 'event-heading-tooltip-wrapper' });
-
-      toolTipWrapper.append(toolTipIcon, toolTipBox);
-      h2.append(toolTipWrapper);
-      em.parentElement?.remove();
+      addTooltipToHeading(em, heading);
     }
   }
 }

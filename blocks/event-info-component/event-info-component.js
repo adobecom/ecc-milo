@@ -34,7 +34,7 @@ function buildDatePicker(column) {
   column.classList.add('date-picker');
   const dateLabel = createTag('label', { for: 'event-info-date-picker' }, column.textContent.trim());
   const datePicker = createTag('input', { id: 'event-info-date-picker', name: 'event-date', class: 'date-input' });
-  const calendarIcon = getIcon('calendar-add--smoke');
+  const calendarIcon = getIcon('calendar-add');
 
   column.innerHTML = '';
   column.append(dateLabel, datePicker, calendarIcon);

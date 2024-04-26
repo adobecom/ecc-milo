@@ -1,0 +1,75 @@
+.event-format-component .series-fields-wrapper {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 24px;
+}
+
+.event-format-component select,
+.event-format-component input.text-input {
+  border-radius: 4px;
+  padding: 4px;
+  height: 32px;
+  border: 1px solid var(--color-gray-500);
+  font-size: var(--type-body-xs-size);
+}
+
+.event-format-component input.text-input {
+  width: 100%;
+}
+
+.event-format-component .series-fields-wrapper a.add-series-modal-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-black);
+  font-size: var(--type-body-s-size);
+}
+
+.event-format-component .new-series-modal {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #00000050;
+  z-index: 99;
+}
+
+.event-format-component .new-series-modal .new-series-light-box {
+  background: var(--color-white);
+  width: 480px;
+  padding: 24px;
+  box-shadow: 0 4px 4px 0 rgb(0 0 0 / 25%);
+}
+
+.event-format-component .new-series-modal .new-series-light-box h3,
+.event-format-component .new-series-modal .new-series-light-box h4 {
+  border-bottom: 2px solid var(--color-gray-500);;
+}
+
+.event-format-component .new-series-modal .new-series-light-box label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: var(--type-body-xs-size);
+}
+
+.event-format-component .new-series-modal .new-series-light-box input,
+.event-format-component .new-series-modal .new-series-light-box select {
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+.event-format-component .new-series-ctas-wrapper {
+  text-align: right;
+}
+
+.event-format-component .new-series-ctas-wrapper a {
+  margin-left: 16px;
+}
+
+.event-format-component .new-series-modal.hidden {
+  display: none;
+}

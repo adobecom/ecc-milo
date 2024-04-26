@@ -64,7 +64,6 @@
   border-radius: var(--input-border-radius);
   font-size: var(--type-body-xs-size);
   line-height: var(--type-body-xs-lh);
-  font-family: var(--body-font-family);
 }
 
 .events-form textarea {
@@ -218,7 +217,6 @@
 }
 
 .events-form button {
-  font-family: var(--body-font-family);
   font-size: var(--type-body-s-size);
   background-color: var(--link-color);
   min-width: 114px;

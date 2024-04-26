@@ -7,7 +7,8 @@ const { default: getUuid } = await import(`${getLibs()}/utils/getUuid.js`);
 
 // list of controllers for the hanler to load
 const SUPPORTED_COMPONENTS = [
-  // 'checkbox',
+  'checkbox',
+  'event-format',
   'event-info',
   'img-upload',
   'venue-info',

@@ -2,7 +2,7 @@ async function uploadImage(file) {
   const formData = new FormData();
   formData.append('file', file);
 
-  await fetch('', {
+  await fetch('http://localhost:8000/upload', {
     method: 'POST',
     body: formData,
   })
@@ -20,7 +20,7 @@ function handleFiles(wrapper, files) {
   const imgPlaceholder = wrapper.querySelector('.preview-img-placeholder');
   const fileInput = wrapper.querySelector('.img-file-input');
   const dz = wrapper.querySelector('.dropzone');
-  const deleteBtn = wrapper.querySelector('.icon-delete--smoke');
+  const deleteBtn = wrapper.querySelector('.icon-delete');
 
   if (files.length > 0) {
     const file = files[0];
@@ -57,28 +57,30 @@ export default function init(component) {
     const dropZone = wrapper.querySelector('.dropzone');
     const fileInput = wrapper.querySelector('.img-file-input');
 
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((event) => {
-      dropZone.addEventListener(event, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }, false);
-    });
+    if (dropZone) {
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((event) => {
+        dropZone.addEventListener(event, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }, false);
+      });
 
-    dropZone.addEventListener('dragover', (e) => {
-      e.currentTarget.classList.add('dragover');
-    });
+      dropZone.addEventListener('dragover', (e) => {
+        e.currentTarget.classList.add('dragover');
+      });
 
-    dropZone.addEventListener('dragleave', (e) => {
-      e.currentTarget.classList.remove('dragover');
-    });
+      dropZone.addEventListener('dragleave', (e) => {
+        e.currentTarget.classList.remove('dragover');
+      });
 
-    dropZone.addEventListener('drop', (e) => {
-      const { files } = e.dataTransfer;
-      handleFiles(wrapper, files);
-      e.currentTarget.classList.remove('dragover');
-    });
+      dropZone.addEventListener('drop', (e) => {
+        const { files } = e.dataTransfer;
+        handleFiles(wrapper, files);
+        e.currentTarget.classList.remove('dragover');
+      });
+    }
 
-    fileInput.addEventListener('change', (e) => {
+    fileInput?.addEventListener('change', (e) => {
       const { files } = e.currentTarget;
       handleFiles(wrapper, files);
     });

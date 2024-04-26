@@ -11,7 +11,6 @@
   outline: none;
   border-bottom: 1px solid var(--color-black);
   padding: 16px 5px;
-  font-family: var(--body-font-family);
   font-size: var(--type-heading-m-size);
   width: 100%;
 }
@@ -42,7 +41,6 @@
 }
 
 .venue-info-component .venue-info-textinput-wrapper .attr-text {
-  font-family: var(--body-font-family);
   font-size: var(--type-body-xs-size);
   text-align: right;
 }

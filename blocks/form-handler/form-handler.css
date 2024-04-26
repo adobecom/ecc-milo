@@ -3,6 +3,10 @@
   padding: 40px;
 }
 
+.form-handler * {
+  font-family: var(--body-font-family);
+}
+
 .form-handler > div:first-child {
   display: flex;
   justify-content: center;
@@ -61,7 +65,6 @@
 }
 
 .form-handler .main-frame .section:first-of-type .content p {
-  font-family: var(--body-font-family);
   font-size: var(--type-body-xs-size);
 }
 
@@ -92,33 +95,49 @@
   cursor: help;
 }
 
-.form-handler .form-component > div:first-of-type > div > h2 {
+.form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon:hover {
+  background: var(--color-gray-700);
+}
+
+.form-handler .form-component > div:first-of-type > div > h2,
+.form-handler .form-component > div:first-of-type > div > h3 {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 24px 0 0;
-}
-
-.form-handler .form-component > div:first-of-type > div > h2 * {
-  font-size: var(--type-body-s-size);
-  font-weight: normal;
+  margin: 24px 0;
 }
 
 .form-handler .event-heading-tooltip-wrapper {
   position: relative;
+  font-size: var(--type-body-s-size);
+  font-weight: normal;
 }
 
 .form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon ~ .event-heading-tooltip-box {
   display: none;
   position: absolute;
   width: max-content;
+  color: var(--color-white);
   margin-left: 32px;
   top: 50%;
   transform: translateY(-50%);
-  padding: 4px 16px;
-  border-radius: 8px;
-  background-color: var(--color-white);
+  padding: 8px;
+  border-radius: 4px;
+  background-color: var(--color-accent);
   box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
+  font-size: var(--type-body-xxs-size);
+  line-height: normal;
+}
+
+.form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon ~ .event-heading-tooltip-box::before {
+  content: '';
+  position: absolute;
+  height: 8px;
+  width: 8px;
+  background: var(--color-accent);
+  transform: rotate(45deg) translateY(-50%);
+  left: -6px;
+  top: 50%;
 }
 
 .form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon:hover ~ .event-heading-tooltip-box {

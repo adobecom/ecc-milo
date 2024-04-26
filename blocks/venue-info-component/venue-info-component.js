@@ -101,12 +101,12 @@ function buildAdditionalInfo(row, i) {
 
     const previewWrapper = createTag('div', { class: 'preview-wrapper hidden' });
     const previewImg = createTag('div', { class: 'preview-img-placeholder' });
-    const previewDeleteButton = getIcon('delete--smoke');
+    const previewDeleteButton = getIcon('delete');
 
     previewWrapper.append(previewImg, previewDeleteButton);
 
     inputWrapper.append(previewWrapper, inputLabel);
-    inputLabel.append(fileInput, getIcon('image-add--smoke'));
+    inputLabel.append(fileInput, getIcon('image-add'));
     paragraphs.forEach((p) => {
       inputLabel.append(p);
     });
