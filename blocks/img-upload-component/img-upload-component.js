@@ -16,7 +16,7 @@ function decorateImageDropzones(row) {
     const inputId = uploadName ? `${handlize(uploadName)}` : `img-file-input-${existingFileInput.length + i}`;
     const fileInput = createTag('input', { id: inputId, type: 'file', class: 'img-file-input' });
     const inputWrapper = createTag('div', { class: 'img-file-input-wrapper' });
-    const inputLabel = createTag('label', { class: 'img-file-input-label dropzone' });
+    const inputLabel = createTag('label', { class: 'img-file-input-label' });
 
     const previewWrapper = createTag('div', { class: 'preview-wrapper hidden' });
     const previewImg = createTag('div', { class: 'preview-img-placeholder' });

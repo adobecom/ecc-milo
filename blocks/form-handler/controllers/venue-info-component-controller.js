@@ -1,5 +1,12 @@
+import makeFileInputDropZone from './share-controller.js';
+
+function initVenueImageInput(component) {
+  const wrapper = component.querySelector('.img-file-input-wrapper');
+  makeFileInputDropZone(wrapper);
+}
+
 export default function init(component) {
-  return component;
+  initVenueImageInput(component);
 }
 
 export function onSubmit(component) {

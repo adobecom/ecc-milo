@@ -156,6 +156,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 16px;
+  z-index: 9;
 }
 
 .form-handler .form-handler-ctas-panel > div {
