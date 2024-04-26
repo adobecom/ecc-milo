@@ -25,7 +25,7 @@ export default function init(component) {
         c.required = boxesChecked < configs.min;
       });
 
-      if (boxesChecked === configs.max) {
+      if (!!configs.max && boxesChecked === configs.max) {
         checkboxes.forEach((c) => {
           if (!c.checked) c.disabled = true;
         });
