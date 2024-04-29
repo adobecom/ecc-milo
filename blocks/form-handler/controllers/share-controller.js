@@ -53,7 +53,12 @@ function handleImageFiles(wrapper, files) {
 function getElementOutput(element, accessPoint) {
   if (!element) return null;
 
-  return element[accessPoint] || element.getAttribute(accessPoint) || '';
+  const propertyValue = element[accessPoint];
+  if (propertyValue !== undefined) {
+    return propertyValue;
+  }
+
+  return element.getAttribute(accessPoint) || '';
 }
 
 export function getMappedInputsOutput(component, inputMap) {

@@ -1,0 +1,60 @@
+.ecc-dashboard {
+  font-family: var(--body-font-family);
+}
+
+.ecc-dashboard table {
+  margin: auto;
+}
+
+.ecc-dashboard table .table-header-row {
+  height: 80px;
+  border-bottom: 2px solid var(--color-gray-600);
+}
+
+.ecc-dashboard table .table-header-row th {
+  padding: 0 16px;
+  font-weight: 700;
+  text-align: left;
+  font-size: var(--type-body-xs-size);
+  color: var(--color-gray-500);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 120px;
+  user-select: none;
+}
+
+.ecc-dashboard table .table-header-row th.active {
+  color: var(--color-black);
+}
+
+.ecc-dashboard table .table-header-row th .icon {
+  transform: translateY(4px);
+}
+
+.ecc-dashboard table .table-header-row th .icon-chev-down,
+.ecc-dashboard table .table-header-row th.desc-sort .icon-chev-up {
+  display: none;
+}
+
+.ecc-dashboard table .table-header-row th.desc-sort .icon-chev-down {
+  display: inline-block;
+
+}
+
+.ecc-dashboard table .event-row {
+  height: 120px;
+}
+
+.ecc-dashboard table .event-row .thumbnail-container img {
+  display: block;
+  height: 90px;
+  width: 90px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.ecc-dashboard table .event-row td {
+  padding: 0 16px;
+}
