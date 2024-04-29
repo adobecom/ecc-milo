@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { handlize, standardizeFormComponentHeading } from '../../utils/utils.js';
+import { handlize, generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -38,6 +38,6 @@ function decorateCheckboxes(el) {
 
 export default function init(el) {
   el.classList.add('form-component');
-  standardizeFormComponentHeading(el);
+  generateToolTip(el);
   decorateCheckboxes(el);
 }

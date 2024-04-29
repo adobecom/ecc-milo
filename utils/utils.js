@@ -41,7 +41,7 @@ export function addTooltipToHeading(em, heading) {
   em.parentElement?.remove();
 }
 
-export function standardizeFormComponentHeading(formComponent) {
+export function generateToolTip(formComponent) {
   const heading = formComponent.querySelector(':scope > div:first-of-type h2, :scope > div:first-of-type h3');
 
   if (heading) {

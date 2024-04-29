@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { getLibs } from '../../../scripts/utils.js';
+import { getElementOutput } from './share-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -273,11 +274,12 @@ export default function init(component) {
 }
 
 export function onSubmit(component) {
-  const eventTitle = component.querySelector('#info-field-event-title').getAttribute('value');
-  const eventDescription = component.querySelector('#info-field-event-description').getAttribute('value');
+  // TODO: make these agnostic by adding a mapping sheet for selector -> key -> data access point
+  const eventTitle = getElementOutput(component.querySelector('#info-field-event-title'), 'value');
+  const eventDescription = getElementOutput(component.querySelector('#info-field-event-description'), 'value');
 
-  const startTime = component.querySelector('#time-picker-start-time').getAttribute('value');
-  const endTime = component.querySelector('#time-picker-end-time').getAttribute('value');
+  const startTime = getElementOutput(component.querySelector('#time-picker-start-time'), 'value');
+  const endTime = getElementOutput(component.querySelector('#time-picker-end-time'), 'value');
 
   const datePicker = component.querySelector('#event-info-date-picker');
   const startDate = new Date(datePicker.dataset.startDate);

@@ -1,58 +1,7 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, standardizeFormComponentHeading } from '../../utils/utils.js';
+import { getIcon, generateToolTip, handlize } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
-
-function handlize(str) {
-  return str.toLowerCase().trim().replaceAll(' ', '-');
-}
-
-function decorateTimezone(row) {
-  const cols = row.querySelectorAll(':scope > div');
-  const timezonePickerWrapper = createTag('div', { class: 'timezone-picker-wrapper' });
-  let pickerName;
-  let isRequired;
-  const labelWrapper = createTag('div', { class: 'timezone-label-wrapper' });
-  cols.forEach((col, i) => {
-    if (i === 0) {
-      pickerName = col.textContent.trim();
-      isRequired = pickerName.endsWith('*');
-      const label = createTag(
-        'label',
-        { for: `timezone-picker-${handlize(pickerName)}` },
-        pickerName,
-      );
-      labelWrapper.append(label);
-      if (isRequired) {
-        labelWrapper.append(
-          createTag('span', { class: 'attrib' }, 'Required *'),
-        );
-      }
-
-      timezonePickerWrapper.append(labelWrapper);
-    } else if (i === 1) {
-      const timeSlots = col.querySelectorAll('li');
-      console.log(pickerName, handlize(pickerName));
-      const select = createTag('select', {
-        id: `timezone-picker-${handlize(pickerName)}`,
-        class: 'select-input',
-      });
-      timeSlots.forEach((t) => {
-        const text = t.textContent.trim();
-        const option = createTag('option', { value: handlize(text) }, text);
-        select.append(option);
-      });
-
-      timezonePickerWrapper.append(select);
-    }
-  });
-
-  row.innerHTML = '';
-  row.append(timezonePickerWrapper);
-
-  // FIXME: temporarily removing timezone row
-  row.remove();
-}
 
 function decorateTextInput(row) {
   const cols = row.querySelectorAll(':scope > div');
@@ -176,13 +125,12 @@ function buildLocationSelector(row) {
 
 export default function init(el) {
   el.classList.add('form-component');
-  standardizeFormComponentHeading(el);
+  generateToolTip(el);
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach((r, i) => {
-    if (i === 1) decorateTimezone(r);
-    else if (i === 2 || i === 3) decorateTextInput(r);
-    else if (i === 4) buildLocationSelector(r);
-    else if (i === 5) buildAdditionalInfo(r, i);
+    if (i === 1 || i === 2) decorateTextInput(r);
+    if (i === 3) buildLocationSelector(r);
+    if (i === 4) buildAdditionalInfo(r, i);
   });
 }

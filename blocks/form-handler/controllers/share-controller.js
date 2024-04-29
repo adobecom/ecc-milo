@@ -50,6 +50,12 @@ function handleImageFiles(wrapper, files) {
   });
 }
 
+export function getElementOutput(element, accessPoint) {
+  if (!element) return null;
+
+  return element[accessPoint] || element.getAttribute(accessPoint) || '';
+}
+
 export default function makeFileInputDropZone(inputWrapper) {
   const dropZone = inputWrapper.querySelector('.img-file-input-label');
   const fileInput = inputWrapper.querySelector('input[type="file"].img-file-input');
