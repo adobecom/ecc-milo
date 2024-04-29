@@ -26,19 +26,19 @@ function initComponents(el) {
 
     mappedComponents.forEach(async (component) => {
       const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
-      initComponent(component);
+      await initComponent(component);
     });
   });
 }
 
-async function gatherValues(el) {
+async function gatherValues(el, inputMap) {
   const allComponentPromises = SUPPORTED_COMPONENTS.map(async (comp) => {
     const mappedComponents = el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
       const { onSubmit } = await import(`./controllers/${comp}-component-controller.js`);
-      const componentPayload = await onSubmit(component);
+      const componentPayload = await onSubmit(component, inputMap);
       return componentPayload;
     });
 
@@ -99,8 +99,8 @@ async function generateEventId(payload) {
   payload.url = pathname;
 }
 
-async function saveEvent(el) {
-  const payload = await gatherValues(el);
+async function saveEvent(el, inputMap) {
+  const payload = await gatherValues(el, inputMap);
   await generateEventId(payload);
   localStorage.setItem(payload['event-id'], JSON.stringify(payload));
   return payload;
@@ -170,7 +170,7 @@ function navigateForm(el, stepIndex = formState.currentStep + 1) {
   }
 }
 
-function decorateFormCtas(el) {
+function initFormCtas(el, inputMap) {
   const ctaRow = el.querySelector(':scope > div:last-of-type');
   const frags = el.querySelectorAll('.fragment');
   decorateButtons(ctaRow, 'button-l');
@@ -184,7 +184,7 @@ function decorateFormCtas(el) {
       if (['#pre-event', '#post-event'].includes(ctaUrl.hash)) {
         cta.classList.add('fill');
         cta.addEventListener('click', async () => {
-          const payload = await saveEvent(el);
+          const payload = await saveEvent(el, inputMap);
           const targetRedirect = `${window.location.origin}/event/t3/dme/preview?eventId=${payload['event-id']}`;
           window.open(targetRedirect);
         });
@@ -206,7 +206,7 @@ function decorateFormCtas(el) {
         }
 
         cta.addEventListener('click', async () => {
-          const payload = await saveEvent(el);
+          const payload = await saveEvent(el, inputMap);
 
           if (ctaUrl.hash === '#next') {
             if (formState.currentStep === frags.length - 1) {
@@ -240,7 +240,19 @@ function initNavigation(el) {
   });
 }
 
-export default function init(el) {
+async function getInputMap(el) {
+  const jsonRow = el.querySelector(':scope > div:last-of-type');
+  const jsonUrl = jsonRow.querySelector('a')?.href || jsonRow.textContent.trim();
+  jsonRow.remove();
+
+  const json = await fetch(jsonUrl)
+    .then((resp) => resp.json())
+    .catch((error) => console.log(error));
+
+  return json.data;
+}
+
+export default async function init(el) {
   const form = createTag('form');
   const formDivs = el.querySelectorAll('.fragment');
 
@@ -254,8 +266,9 @@ export default function init(el) {
     form.append(formDiv);
   });
 
+  const inputMap = await getInputMap(el);
   decorateForm(el);
-  decorateFormCtas(el);
+  initFormCtas(el, inputMap);
   initComponents(el);
   initNavigation(el);
 

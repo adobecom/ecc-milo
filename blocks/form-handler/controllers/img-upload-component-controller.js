@@ -8,7 +8,7 @@ export default function init(component) {
   });
 }
 
-export function onSubmit(component) {
-  console.log(component);
+export function onSubmit(component, inputMap) {
+  console.log(inputMap);
   return {};
 }

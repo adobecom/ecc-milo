@@ -1,4 +1,4 @@
-import makeFileInputDropZone from './share-controller.js';
+import makeFileInputDropZone, { getMappedInputsOutput } from './share-controller.js';
 
 function initVenueImageInput(component) {
   const wrapper = component.querySelector('.img-file-input-wrapper');
@@ -9,7 +9,7 @@ export default function init(component) {
   initVenueImageInput(component);
 }
 
-export function onSubmit(component) {
+export function onSubmit(component, inputMap) {
   const venueName = component.querySelector('#venue-field-venue-name').value;
   const venueAddress = component.querySelector('#venue-field-venue-name').value;
   const city = component.querySelector('#zipcode-city').value;
@@ -23,6 +23,7 @@ export function onSubmit(component) {
   const imageData = imageFile ? `File name: ${imageFile.name}, Size: ${imageFile.size} bytes` : 'No file uploaded';
 
   const venueData = {
+    ...getMappedInputsOutput(component, inputMap),
     'event-venue': venueName,
     'event-address': venueAddress,
     city,

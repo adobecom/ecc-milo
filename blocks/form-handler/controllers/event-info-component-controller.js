@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { getLibs } from '../../../scripts/utils.js';
-import { getElementOutput } from './share-controller.js';
+import { getMappedInputsOutput } from './share-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -273,26 +273,18 @@ export default function init(component) {
   initCalendar(component);
 }
 
-export function onSubmit(component) {
-  // TODO: make these agnostic by adding a mapping sheet for selector -> key -> data access point
-  const eventTitle = getElementOutput(component.querySelector('#info-field-event-title'), 'value');
-  const eventDescription = getElementOutput(component.querySelector('#info-field-event-description'), 'value');
-
-  const startTime = getElementOutput(component.querySelector('#time-picker-start-time'), 'value');
-  const endTime = getElementOutput(component.querySelector('#time-picker-end-time'), 'value');
-
+export function onSubmit(component, inputMap) {
   const datePicker = component.querySelector('#event-info-date-picker');
   const startDate = new Date(datePicker.dataset.startDate);
   const endDate = new Date(datePicker.dataset.endDate);
 
+  const startTime = component.querySelector('#time-picker-start-time').value;
+  const endTime = component.querySelector('#time-picker-end-time').value;
   const eventStartDate = addTimeToDate(new Date(startDate), startTime);
   const eventEndDate = addTimeToDate(new Date(endDate), endTime);
 
   const eventInfo = {
-    title: eventTitle,
-    'event-title': eventTitle,
-    description: eventDescription,
-    'event-description': eventDescription,
+    ...getMappedInputsOutput(component, inputMap),
     'event-start': eventStartDate,
     'event-end': eventEndDate,
   };

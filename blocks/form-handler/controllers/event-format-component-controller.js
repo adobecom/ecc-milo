@@ -35,7 +35,7 @@ export default function init(component) {
   prepopulateTimeZone(component);
 }
 
-export function onSubmit(component) {
-  console.log(component);
+export function onSubmit(component, inputMap) {
+  console.log(inputMap);
   return {};
 }

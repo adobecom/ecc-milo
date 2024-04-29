@@ -50,10 +50,25 @@ function handleImageFiles(wrapper, files) {
   });
 }
 
-export function getElementOutput(element, accessPoint) {
+function getElementOutput(element, accessPoint) {
   if (!element) return null;
 
   return element[accessPoint] || element.getAttribute(accessPoint) || '';
+}
+
+export function getMappedInputsOutput(component, inputMap) {
+  const output = {};
+
+  inputMap.forEach((row) => {
+    const inputFound = component.querySelector(row.selector);
+
+    if (inputFound) {
+      const { key, accessPoint } = row;
+      output[key] = getElementOutput(inputFound, accessPoint);
+    }
+  });
+
+  return output;
 }
 
 export default function makeFileInputDropZone(inputWrapper) {
