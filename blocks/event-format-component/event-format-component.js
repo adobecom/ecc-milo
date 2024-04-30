@@ -65,7 +65,7 @@ function decorateTimeZoneSelect(column) {
 }
 
 async function decorateNewSeriesModal(column) {
-  column.classList.add('new-series-modal', 'hidden');
+  const columnTag = createTag('div', { class: 'new-series-modal hidden' });
   const lightbox = createTag('div', { class: 'new-series-light-box' });
   const lightboxTable = column.querySelector('table');
   const lightboxTableRows = lightboxTable.querySelectorAll('table tr');
@@ -113,7 +113,8 @@ async function decorateNewSeriesModal(column) {
     }
   });
 
-  column.append(lightbox);
+  columnTag.append(lightbox);
+  column.append(columnTag);
   lightboxTable.remove();
 }
 
