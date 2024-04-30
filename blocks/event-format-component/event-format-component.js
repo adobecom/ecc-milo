@@ -43,15 +43,6 @@ async function decorateSeriesSelect(column) {
   column.append(seriesSelectWrapper);
 }
 
-function decorateNewSeriesBtn(column) {
-  const plusIcon = getIcon('add-circle');
-  const a = column.querySelector('a[href$="#new-series"]');
-
-  if (a) {
-    a.append(plusIcon);
-    a.classList.add('add-series-modal-btn');
-  }
-}
 
 function decorateTimeZoneSelect(column) {
   const tzWrapper = createTag('div', { class: 'time-zone-picker-wrapper' });
@@ -126,6 +117,18 @@ async function decorateNewSeriesModal(column) {
   lightboxTable.remove();
 }
 
+async function decorateNewSeriesBtnAndModal(column) {
+  const plusIcon = getIcon('add-circle');
+  const a = column.querySelector('a[href$="#new-series"]');
+
+  if (a) {
+    a.append(plusIcon);
+    a.classList.add('add-series-modal-btn');
+  }
+
+  await decorateNewSeriesModal(column);
+}
+
 export default function init(el) {
   el.classList.add('form-component');
   generateToolTip(el);
@@ -140,14 +143,13 @@ export default function init(el) {
       cols.forEach(async (c, ci) => {
         if (ci === 0) await decorateCloudTagSelect(c);
         if (ci === 1) await decorateSeriesSelect(c);
-        if (ci === 2) decorateNewSeriesBtn(c);
+        if (ci === 2) decorateNewSeriesBtnAndModal(c);
       });
     }
 
     if (ri === 2) {
       cols.forEach(async (c, ci) => {
         if (ci === 0) decorateTimeZoneSelect(c);
-        if (ci === 1) await decorateNewSeriesModal(c);
       });
     }
   });
