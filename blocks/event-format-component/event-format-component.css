@@ -73,3 +73,8 @@
 .event-format-component .new-series-modal.hidden {
   display: none;
 }
+
+.event-format-component .add-series-btn-wrapper {
+  margin-block-start: 0px;
+  margin-block-end: 0px;
+}

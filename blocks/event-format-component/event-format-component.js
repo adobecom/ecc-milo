@@ -43,7 +43,6 @@ async function decorateSeriesSelect(column) {
   column.append(seriesSelectWrapper);
 }
 
-
 function decorateTimeZoneSelect(column) {
   const tzWrapper = createTag('div', { class: 'time-zone-picker-wrapper' });
   const phText = column.querySelector('p')?.textContent.trim();
@@ -119,10 +118,12 @@ async function decorateNewSeriesModal(column) {
 }
 
 async function decorateNewSeriesBtnAndModal(column) {
+  const pTag = column.querySelector(':scope > p');
   const plusIcon = getIcon('add-circle');
   const a = column.querySelector('a[href$="#new-series"]');
 
   if (a) {
+    pTag.classList.add('add-series-btn-wrapper');
     a.append(plusIcon);
     a.classList.add('add-series-modal-btn');
   }
