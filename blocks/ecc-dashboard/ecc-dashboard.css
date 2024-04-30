@@ -1,9 +1,46 @@
 .ecc-dashboard {
   font-family: var(--body-font-family);
+  padding: 40px;
+  max-width: var(--grid-container-width);
+  margin: auto;
+}
+
+.ecc-dashboard .dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.ecc-dashboard .dashboard-header-text {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.ecc-dashboard .dashboard-header-text h1 {
+  margin: 0;
+}
+
+.ecc-dashboard .dashboard-header-text p {
+  margin: 6px 0;
+}
+
+.ecc-dashboard .dashboard-actions-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ecc-dashboard .dashboard-actions-container input {
+  border-radius: 4px;
+  border: 1px solid var(--color-gray-500);
+  height: 24px;
+  padding: 0 16px;
 }
 
 .ecc-dashboard table {
   margin: auto;
+  border-collapse: collapse; 
 }
 
 .ecc-dashboard table .table-header-row {
@@ -15,14 +52,17 @@
   padding: 0 16px;
   font-weight: 700;
   text-align: left;
-  font-size: var(--type-body-xs-size);
+  font-size: var(--type-body-xxs-size);
   color: var(--color-gray-500);
-  cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 120px;
+  width: 100px;
   user-select: none;
+}
+
+.ecc-dashboard table .table-header-row th.sortable {
+  cursor: pointer;
 }
 
 .ecc-dashboard table .table-header-row th.active {
@@ -44,7 +84,8 @@
 }
 
 .ecc-dashboard table .event-row {
-  height: 120px;
+  height: 140px;
+  border-bottom: 2px solid var(--color-gray-300);
 }
 
 .ecc-dashboard table .event-row .thumbnail-container img {
@@ -57,4 +98,61 @@
 
 .ecc-dashboard table .event-row td {
   padding: 0 16px;
+  position: relative;
+  font-size: var(--type-body-s-size);
+}
+
+.ecc-dashboard table .event-row .icon-more-small-list {
+  cursor: pointer;
+  height: 24px;
+  width: 24px;
+}
+
+.ecc-dashboard .event-row .dashboard-event-tool-box {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  border-radius: 4px;
+  padding: 16px;
+  right: 100%;
+  z-index: 1;
+  box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
+  width: 182px;
+}
+
+.ecc-dashboard .event-row .dashboard-event-tool-box a.dash-event-tool {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--color-black);
+  font-size: var(--type-body-xxs-size);
+}
+
+.ecc-dashboard .event-row .dashboard-event-tool-box a.dash-event-tool:hover {
+  text-decoration: underline;
+}
+
+.ecc-dashboard .pagination-container {
+  margin: 40px auto 0;
+  display: flex;
+  width: max-content;
+  font-size: var(--type-body-xs-size);
+}
+
+.ecc-dashboard .pagination-container input {
+  width: 4px 16px;
+  padding: 12px;
+  margin-right: 4px;
+}
+
+.ecc-dashboard .pagination-container img.icon {
+  cursor: pointer;
+  width: 24px;
+  padding: 0 16px;
+}
+
+.ecc-dashboard .event-row .dashboard-event-tool-box a.dash-event-tool img.icon {
+  width: 16px;
 }
