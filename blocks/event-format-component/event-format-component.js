@@ -43,16 +43,6 @@ async function decorateSeriesSelect(column) {
   column.append(seriesSelectWrapper);
 }
 
-function decorateNewSeriesBtn(column) {
-  const plusIcon = getIcon('add-circle');
-  const a = column.querySelector('a[href$="#new-series"]');
-
-  if (a) {
-    a.append(plusIcon);
-    a.classList.add('add-series-modal-btn');
-  }
-}
-
 function decorateTimeZoneSelect(column) {
   const tzWrapper = createTag('div', { class: 'time-zone-picker-wrapper' });
   const phText = column.querySelector('p')?.textContent.trim();
@@ -74,7 +64,7 @@ function decorateTimeZoneSelect(column) {
 }
 
 async function decorateNewSeriesModal(column) {
-  column.classList.add('new-series-modal', 'hidden');
+  const columnTag = createTag('div', { class: 'new-series-modal hidden' });
   const lightbox = createTag('div', { class: 'new-series-light-box' });
   const lightboxTable = column.querySelector('table');
   const lightboxTableRows = lightboxTable.querySelectorAll('table tr');
@@ -122,8 +112,23 @@ async function decorateNewSeriesModal(column) {
     }
   });
 
-  column.append(lightbox);
+  columnTag.append(lightbox);
+  column.append(columnTag);
   lightboxTable.remove();
+}
+
+async function decorateNewSeriesBtnAndModal(column) {
+  const pTag = column.querySelector(':scope > p');
+  const plusIcon = getIcon('add-circle');
+  const a = column.querySelector('a[href$="#new-series"]');
+
+  if (a) {
+    pTag.classList.add('add-series-btn-wrapper');
+    a.append(plusIcon);
+    a.classList.add('add-series-modal-btn');
+  }
+
+  await decorateNewSeriesModal(column);
 }
 
 export default function init(el) {
@@ -140,14 +145,13 @@ export default function init(el) {
       cols.forEach(async (c, ci) => {
         if (ci === 0) await decorateCloudTagSelect(c);
         if (ci === 1) await decorateSeriesSelect(c);
-        if (ci === 2) decorateNewSeriesBtn(c);
+        if (ci === 2) decorateNewSeriesBtnAndModal(c);
       });
     }
 
     if (ri === 2) {
       cols.forEach(async (c, ci) => {
         if (ci === 0) decorateTimeZoneSelect(c);
-        if (ci === 1) await decorateNewSeriesModal(c);
       });
     }
   });
