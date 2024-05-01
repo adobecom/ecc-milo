@@ -216,7 +216,8 @@ function buildDashboardHeader(props) {
   createTag('p', { class: 'dashboard-header-events-count' }, `(${props.data.length} events)`, { parent: textContainer });
 
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: actionsContainer });
-  createTag('a', { class: 'con-button blue', href: '#' }, 'Create new event', { parent: actionsContainer });
+  // TODO: find potentially better create page link integration method
+  createTag('a', { class: 'con-button blue', href: '/event/create/dme' }, 'Create new event', { parent: actionsContainer });
   searchInput.addEventListener('input', () => filterData(props, searchInput.value));
 
   dashboardHeader.append(textContainer, actionsContainer);
