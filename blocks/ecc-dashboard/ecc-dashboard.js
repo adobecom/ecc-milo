@@ -44,6 +44,8 @@ function initMoreOptions(eventObj, moreOptionsCell) {
     buildTool(toolBox, 'dash-tool-clone-event', 'Clone', 'duplicate');
     buildTool(toolBox, 'dash-tool-delete-event', 'Delete', 'delete-outline');
 
+    // TODO: enable each tool to perform their functions.
+
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
       moreOptionsCell.append(toolBox);
     }
@@ -69,6 +71,7 @@ function buildStatusTag(event) {
 function populateRow(el, event) {
   const tBody = el.querySelector('table.dashboard-table tbody');
 
+  // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'event-row' }, '', { parent: tBody });
   const thumbnailCell = buildThumbnail(event);
   const titleCell = createTag('td', {}, event.title);
