@@ -45,7 +45,7 @@ function initMoreOptions(eventObj, moreOptionsCell) {
   });
 
   document.addEventListener('click', (e) => {
-    if (!moreOptionsCell.contains(e.target)) {
+    if (!moreOptionsCell.contains(e.target) || moreOptionsCell === e.target) {
       const toolBox = moreOptionsCell.querySelector('.dashboard-event-tool-box');
       toolBox?.remove();
     }
@@ -64,7 +64,7 @@ function populateRow(el, event) {
   const venueCell = createTag('td', {}, event.venueId);
   const timezoneCell = createTag('td', {}, event.timezone);
   const externalEventId = createTag('td', {}, event.externalEventId);
-  const moreOptionsCell = createTag('td', {}, getIcon('more-small-list'));
+  const moreOptionsCell = createTag('td', { class: 'option-col' }, getIcon('more-small-list'));
 
   row.append(
     thumbnailCell,
@@ -85,16 +85,16 @@ function populateTable(props) {
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   tBody.innerHTML = '';
 
-  const endOfPages = Math.min(props.currentPage + 10, props.filteredData.length);
+  const endOfPages = Math.min(props.currentPage + 10, props.mutableData.length);
 
   for (let i = props.currentPage; i < endOfPages; i += 1) {
-    populateRow(props.el, props.filteredData[i]);
+    populateRow(props.el, props.mutableData[i]);
   }
 }
 
 function filterData(props, query) {
   const q = query.toLowerCase();
-  props.filteredData = props.data.filter((e) => e.title.toLowerCase().startsWith(q));
+  props.mutableData = props.data.filter((e) => e.title.toLowerCase().startsWith(q));
 }
 
 function sortData(props, th, field) {
@@ -107,7 +107,7 @@ function sortData(props, th, field) {
     th.classList.remove('desc-sort');
   }
 
-  props.filteredData = props.data.sort((a, b) => {
+  props.mutableData = props.data.sort((a, b) => {
     let valA;
     let valB;
 
@@ -135,7 +135,7 @@ function sortData(props, th, field) {
 }
 
 function paginateData(props, page) {
-  props.filteredData = props.data.slice((page - 1) * props.pageSize, page * props.pageSize);
+  props.mutableData = props.data.slice((page - 1) * props.pageSize, page * props.pageSize);
 }
 
 function updatePaginationControl(pagination, currentPage, totalPages) {
@@ -148,7 +148,7 @@ function updatePaginationControl(pagination, currentPage, totalPages) {
 }
 
 function decoratePagination(props) {
-  const totalPages = Math.ceil(props.filteredData.length / props.pageSize);
+  const totalPages = Math.ceil(props.mutableData.length / props.pageSize);
   const paginationContainer = createTag('div', { class: 'pagination-container' });
   const chevLeft = getIcon('chev-left');
   const chevRight = getIcon('chev-right');
@@ -207,7 +207,8 @@ function buildDashboardHeader(props) {
 }
 
 function buildDashboard(props) {
-  const table = createTag('table', { class: 'dashboard-table' }, '', { parent: props.el });
+  const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
+  const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
   const thead = createTag('thead', {}, '', { parent: table });
   createTag('tbody', {}, '', { parent: table });
 
@@ -225,7 +226,8 @@ function buildDashboard(props) {
   const tr = createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
 
   Object.entries(headers).forEach(([key, val]) => {
-    const th = createTag('th', {}, val, { parent: tr });
+    const thText = createTag('span', {}, val);
+    const th = createTag('th', {}, thText, { parent: tr });
 
     if (['thumbnail', 'manage'].includes(key)) return;
 
@@ -266,7 +268,7 @@ export default async function init(el) {
   const props = {
     el,
     data,
-    filteredData: [...data],
+    mutableData: [...data],
     currentPage: 1,
     pageSize: 10,
   };

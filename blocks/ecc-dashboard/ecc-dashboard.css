@@ -1,7 +1,7 @@
 .ecc-dashboard {
   font-family: var(--body-font-family);
   padding: 40px;
-  max-width: var(--grid-container-width);
+  width: var(--grid-container-width);
   margin: auto;
 }
 
@@ -38,6 +38,11 @@
   padding: 0 16px;
 }
 
+.ecc-dashboard .dashboard-table-container {
+  max-width: 100%;
+  overflow: auto;
+}
+
 .ecc-dashboard table {
   margin: auto;
   border-collapse: collapse; 
@@ -54,11 +59,14 @@
   text-align: left;
   font-size: var(--type-body-xxs-size);
   color: var(--color-gray-500);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100px;
   user-select: none;
+  width: 100px;
+  white-space: nowrap;
+}
+
+.ecc-dashboard table .table-header-row th span {
+  white-space: nowrap;
+  width: 60px;
 }
 
 .ecc-dashboard table .table-header-row th.sortable {
@@ -92,6 +100,7 @@
   display: block;
   height: 90px;
   width: 90px;
+  min-width: 90px;
   object-fit: cover;
   border-radius: 4px;
 }
