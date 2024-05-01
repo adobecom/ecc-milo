@@ -81,12 +81,13 @@
   transform: translateY(4px);
 }
 
+.ecc-dashboard table .table-header-row th:not(.active) .icon,
 .ecc-dashboard table .table-header-row th .icon-chev-down,
 .ecc-dashboard table .table-header-row th.desc-sort .icon-chev-up {
   display: none;
 }
 
-.ecc-dashboard table .table-header-row th.desc-sort .icon-chev-down {
+.ecc-dashboard table .table-header-row th.active.desc-sort .icon-chev-down {
   display: inline-block;
 
 }
@@ -151,8 +152,8 @@
 }
 
 .ecc-dashboard .pagination-container input {
-  width: 4px 16px;
-  padding: 12px;
+  padding: 4px 12px;
+  width: 16px;
   margin-right: 4px;
 }
 
