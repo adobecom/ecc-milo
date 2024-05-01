@@ -216,8 +216,7 @@ function buildDashboardHeader(props) {
   createTag('p', { class: 'dashboard-header-events-count' }, `(${props.data.length} events)`, { parent: textContainer });
 
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: actionsContainer });
-  // TODO: find potentially better create page link integration method
-  createTag('a', { class: 'con-button blue', href: '/event/create/dme' }, 'Create new event', { parent: actionsContainer });
+  createTag('a', { class: 'con-button blue', href: props.createFormUrl }, 'Create new event', { parent: actionsContainer });
   searchInput.addEventListener('input', () => filterData(props, searchInput.value));
 
   dashboardHeader.append(textContainer, actionsContainer);
@@ -272,7 +271,30 @@ async function getEventsData() {
   return json;
 }
 
+async function getConfig(el) {
+  const configLinkATag = el.querySelector('a');
+
+  if (!configLinkATag) return {};
+
+  const configLink = configLinkATag.href;
+  const config = {};
+
+  const resp = await fetch(configLink);
+  if (resp.ok) {
+    const json = await resp.json();
+
+    json.data.forEach((placeholder) => {
+      if (placeholder.key) config[placeholder.key] = placeholder.val;
+    });
+  }
+
+  configLinkATag.remove();
+
+  return config;
+}
+
 export default async function init(el) {
+  const config = await getConfig(el);
   const dataHandler = {
     set(target, prop, value) {
       target[prop] = value;
@@ -288,7 +310,8 @@ export default async function init(el) {
     data,
     mutableData: [...data],
     currentPage: 1,
-    pageSize: 10,
+    pageSize: config['page-size'],
+    createFormUrl: config['create-form-url'],
   };
 
   const proxyProps = new Proxy(props, dataHandler);

@@ -102,25 +102,25 @@ function buildAdditionalInfo(row, i) {
   row.classList.add('venue-info-addition-wrapper');
 }
 
-function buildLocationSelector(row) {
+function buildLocationInputGrid(row) {
   function buildInput(label) {
     return createTag('input', {
       type: 'text',
-      id: `zipcode-${handlize(label)}`,
-      class: 'zipcode-input',
+      id: `location-${handlize(label)}`,
+      class: 'location-input',
       placeholder: label,
     });
   }
-  const list = row.querySelector(':scope ul');
-  const subs = list.querySelectorAll(':scope > li');
-  const zipCodeWrapper = createTag('div', { class: 'zipcode-wrapper' });
+
+  const subs = row.querySelectorAll('li');
+  const zipCodeWrapper = createTag('div', { class: 'location-wrapper' });
 
   subs.forEach((sub) => {
     zipCodeWrapper.append(buildInput(sub.textContent.trim()));
   });
   row.innerHTML = '';
   row.append(zipCodeWrapper);
-  row.classList.add('venue-info-field-zipcode');
+  row.classList.add('venue-info-field-location');
 }
 
 export default function init(el) {
@@ -130,7 +130,7 @@ export default function init(el) {
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach((r, i) => {
     if (i === 1 || i === 2) decorateTextInput(r);
-    if (i === 3) buildLocationSelector(r);
+    if (i === 3) buildLocationInputGrid(r);
     if (i === 4) buildAdditionalInfo(r, i);
   });
 }

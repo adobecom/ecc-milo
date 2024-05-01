@@ -7,6 +7,8 @@
 
 .ecc-dashboard .dashboard-header {
   display: flex;
+  flex-direction: column;
+  gap: 16px;
   justify-content: space-between;
   align-items: flex-start;
 }
@@ -193,4 +195,10 @@
 
 .ecc-dashboard .event-row .dashboard-event-tool-box a.dash-event-tool img.icon {
   width: 16px;
+}
+
+@media screen and (min-width: 900px) {
+  .ecc-dashboard .dashboard-header {
+    flex-direction: row;
+  }
 }
