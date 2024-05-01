@@ -74,14 +74,14 @@ function populateRow(el, event) {
   // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'event-row' }, '', { parent: tBody });
   const thumbnailCell = buildThumbnail(event);
-  const titleCell = createTag('td', {}, event.title);
-  const statusCell = createTag('td', {}, buildStatusTag(event));
-  const startDateCell = createTag('td', {}, formatLocaleDate(event.startDate));
-  const modDateCell = createTag('td', {}, formatLocaleDate(event.modificationTime));
-  const venueCell = createTag('td', {}, event.venueId);
-  const timezoneCell = createTag('td', {}, event.timezone);
-  const externalEventId = createTag('td', {}, event.externalEventId);
-  const moreOptionsCell = createTag('td', { class: 'option-col' }, getIcon('more-small-list'));
+  const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.title));
+  const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
+  const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
+  const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
+  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.venueId));
+  const timezoneCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.timezone));
+  const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.externalEventId));
+  const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
   row.append(
     thumbnailCell,
