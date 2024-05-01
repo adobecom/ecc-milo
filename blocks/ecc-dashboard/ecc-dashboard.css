@@ -182,6 +182,11 @@
   padding: 0 16px;
 }
 
+.ecc-dashboard .pagination-container img.icon.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .ecc-dashboard table .event-row .event-status img.icon {
   margin-right: 8px;
 }

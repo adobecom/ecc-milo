@@ -160,8 +160,8 @@ function updatePaginationControl(pagination, currentPage, totalPages) {
   input.value = currentPage;
   const leftChevron = pagination.querySelector('.icon-chev-left');
   const rightChevron = pagination.querySelector('.icon-chev-right');
-  leftChevron.style.visibility = currentPage === 1 ? 'hidden' : 'visible';
-  rightChevron.style.visibility = currentPage === totalPages ? 'hidden' : 'visible';
+  leftChevron.classList.toggle('disabled', currentPage === 1);
+  rightChevron.classList.toggle('disabled', currentPage === totalPages);
 }
 
 function decoratePagination(props) {
