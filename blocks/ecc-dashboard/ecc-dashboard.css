@@ -97,6 +97,10 @@
   border-bottom: 2px solid var(--color-gray-300);
 }
 
+.ecc-dashboard table .event-row .event-status img.icon {
+  margin-right: 8px;
+}
+
 .ecc-dashboard table .event-row .thumbnail-container img {
   display: block;
   height: 90px;

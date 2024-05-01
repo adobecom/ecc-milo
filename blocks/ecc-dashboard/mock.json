@@ -153,7 +153,7 @@
     ],
     "eventId": "virtual-event-001",
     "externalEventId": "webinar001",
-    "published": true,
+    "published": false,
     "attendees": [
       "virtual-participant-001"
     ],
@@ -470,7 +470,7 @@
     ],
     "eventId": "virtual-event-001",
     "externalEventId": "webinar001",
-    "published": true,
+    "published": false,
     "attendees": [
       "virtual-participant-001"
     ],
@@ -787,7 +787,7 @@
     ],
     "eventId": "virtual-event-001",
     "externalEventId": "webinar001",
-    "published": true,
+    "published": false,
     "attendees": [
       "virtual-participant-001"
     ],
@@ -978,7 +978,7 @@
     ],
     "eventId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "externalEventId": "event001",
-    "published": true,
+    "published": false,
     "attendees": [
       "3fa85f64-5717-4562-b3fc-2c963f66afa6"
     ],
@@ -1104,7 +1104,7 @@
     ],
     "eventId": "virtual-event-001",
     "externalEventId": "webinar001",
-    "published": true,
+    "published": false,
     "attendees": [
       "virtual-participant-001"
     ],

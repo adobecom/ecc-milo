@@ -34,10 +34,15 @@ function initMoreOptions(eventObj, moreOptionsCell) {
     const toolBox = createTag('div', { class: 'dashboard-event-tool-box' });
     buildTool(toolBox, 'dash-tool-edit-event', 'Edit', 'edit');
     buildTool(toolBox, 'dash-tool-review-event', 'Send for review', 'resolve-comment');
-    buildTool(toolBox, 'dash-tool-publish-event', 'Publish', 'publish-check');
+
+    if (eventObj.published) {
+      buildTool(toolBox, 'dash-tool-unpublish-event', 'Unpublish', 'publish-remove');
+    } else {
+      buildTool(toolBox, 'dash-tool-publish-event', 'Publish', 'publish-check');
+    }
+
     buildTool(toolBox, 'dash-tool-clone-event', 'Clone', 'duplicate');
     buildTool(toolBox, 'dash-tool-delete-event', 'Delete', 'delete-outline');
-    buildTool(toolBox, 'dash-tool-unpublish-event', 'Unpublish', 'publish-remove');
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
       moreOptionsCell.append(toolBox);
@@ -52,13 +57,22 @@ function initMoreOptions(eventObj, moreOptionsCell) {
   });
 }
 
+function buildStatusTag(event) {
+  const dot = event.published ? getIcon('dot-purple') : getIcon('dot-green');
+  const text = event.published ? 'Published' : 'Draft';
+
+  const statusTag = createTag('div', { class: 'event-status' });
+  statusTag.append(dot, text);
+  return statusTag;
+}
+
 function populateRow(el, event) {
   const tBody = el.querySelector('table.dashboard-table tbody');
 
   const row = createTag('tr', { class: 'event-row' }, '', { parent: tBody });
   const thumbnailCell = buildThumbnail(event);
   const titleCell = createTag('td', {}, event.title);
-  const statusCell = createTag('td', {}, event.published ? 'Published' : 'Draft');
+  const statusCell = createTag('td', {}, buildStatusTag(event));
   const startDateCell = createTag('td', {}, formatLocaleDate(event.startDate));
   const modDateCell = createTag('td', {}, formatLocaleDate(event.modificationTime));
   const venueCell = createTag('td', {}, event.venueId);
