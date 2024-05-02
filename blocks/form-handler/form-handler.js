@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { handlize } from '../../utils/utils.js';
+import { getIcon, handlize } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -188,6 +188,20 @@ function initFormCtas(el, inputMap) {
   const ctas = ctaRow.querySelectorAll('a');
 
   ctaRow.classList.add('form-handler-ctas-panel');
+
+  const forwardActionsWrappers = ctaRow.querySelectorAll(':scope > div');
+
+  const backwardWrapper = createTag('div', { class: 'form-handler-backward-wrapper' }, '', { parent: ctaRow });
+  const forwardWrapper = createTag('div', { class: 'form-handler-forward-wrapper' }, '', { parent: ctaRow });
+
+  forwardActionsWrappers.forEach((w) => {
+    forwardWrapper.append(w);
+  });
+
+  const backBtn = createTag('a', { class: 'back-btn' }, getIcon('chev-left'));
+
+  backwardWrapper.append(backBtn);
+
   ctas.forEach((cta) => {
     if (cta.href) {
       const ctaUrl = new URL(cta.href);
