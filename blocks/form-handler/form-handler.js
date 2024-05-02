@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { handlize } from '../../utils/utils.js';
+import { getIcon, handlize } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -90,18 +90,29 @@ function formatDateTime(date) {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-async function generateEventId(payload) {
+async function getEventIdAndUrl(payload) {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const eventId = urlParams.get('eventId');
+
+  if (eventId) {
+    const eventUrl = JSON.parse(localStorage.getItem(eventId)).url;
+    return [eventId, eventUrl];
+  }
+
   const date = new Date(payload['event-start']);
   const formattedDate = formatDate(date);
   const pathname = `/event/t3/${formattedDate}/${payload.city}/${payload.state}/${handlize(payload['event-title'])}`;
   const hash = await getUuid(pathname);
-  payload['event-id'] = hash;
-  payload.url = pathname;
+
+  return [hash, pathname];
 }
 
 async function saveEvent(el, inputMap) {
   const payload = await gatherValues(el, inputMap);
-  await generateEventId(payload);
+  const [hash, pathname] = await getEventIdAndUrl(payload);
+  payload['event-id'] = hash;
+  payload.url = pathname;
   localStorage.setItem(payload['event-id'], JSON.stringify(payload));
   return payload;
 }
@@ -177,6 +188,20 @@ function initFormCtas(el, inputMap) {
   const ctas = ctaRow.querySelectorAll('a');
 
   ctaRow.classList.add('form-handler-ctas-panel');
+
+  const forwardActionsWrappers = ctaRow.querySelectorAll(':scope > div');
+
+  const backwardWrapper = createTag('div', { class: 'form-handler-backward-wrapper' }, '', { parent: ctaRow });
+  const forwardWrapper = createTag('div', { class: 'form-handler-forward-wrapper' }, '', { parent: ctaRow });
+
+  forwardActionsWrappers.forEach((w) => {
+    forwardWrapper.append(w);
+  });
+
+  const backBtn = createTag('a', { class: 'back-btn' }, getIcon('chev-left'));
+
+  backwardWrapper.append(backBtn);
+
   ctas.forEach((cta) => {
     if (cta.href) {
       const ctaUrl = new URL(cta.href);
@@ -252,6 +277,27 @@ async function getInputMap(el) {
   return json.data;
 }
 
+function prepopulateForm(el, inputMap) {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const eventId = urlParams.get('eventId');
+
+  if (!eventId) return;
+
+  const eventObj = JSON.parse(localStorage.getItem(eventId));
+
+  inputMap.forEach((input) => {
+    const element = el.querySelector(input.selector);
+    if (!element) return;
+
+    if (element[input.accessPoint] !== undefined) {
+      element[input.accessPoint] = eventObj[input.key];
+    } else {
+      element.setAttirbute(input.accessPoint, eventObj[input.key]);
+    }
+  });
+}
+
 export default async function init(el) {
   const form = createTag('form');
   const formDivs = el.querySelectorAll('.fragment');
@@ -271,6 +317,7 @@ export default async function init(el) {
   initFormCtas(el, inputMap);
   initComponents(el);
   initNavigation(el);
+  prepopulateForm(el, inputMap);
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();

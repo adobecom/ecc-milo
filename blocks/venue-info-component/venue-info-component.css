@@ -45,13 +45,13 @@
   text-align: right;
 }
 
-.venue-info-component .venue-info-field-zipcode .zipcode-wrapper {
+.venue-info-component .venue-info-field-location .location-wrapper {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
 }
 
-.venue-info-component .venue-info-field-zipcode .zipcode-input {
+.venue-info-component .venue-info-field-location .location-input {
   padding-bottom: 16px;
   border: none;
   outline: none;
