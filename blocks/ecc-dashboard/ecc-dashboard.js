@@ -53,6 +53,7 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
       delete payload.eventId;
 
       console.log('POST to ESP with this payload with eventId already removed:', payload);
+      // TODO: rerender the dashboard with the response.
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
@@ -356,10 +357,16 @@ async function buildDashboard(el, config) {
 }
 
 export default async function init(el) {
+  const { search, hostname } = window.location;
+  const urlParams = new URLSearchParams(search);
+  const devMode = urlParams.get('devMode');
+
   const config = await getConfig(el);
   const profile = window.bm8tr.get('imsProfile');
 
-  if (profile?.noProfile) {
+  if (devMode === 'true' && hostname === 'localhost') {
+    buildDashboard(el, config);
+  } else if (profile?.noProfile) {
     buildNoAccessScreen(el, config);
   } else if (!profile) {
     window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
