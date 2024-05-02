@@ -34,9 +34,9 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
     const toolBox = createTag('div', { class: 'dashboard-event-tool-box' });
 
     if (eventObj.published) {
-      buildTool(toolBox, 'dash-tool-unpublish-event', 'Unpublish', 'publish-rocket');
+      buildTool(toolBox, 'dash-tool-unpublish-event', 'Unpublish', 'publish-remove');
     } else {
-      buildTool(toolBox, 'dash-tool-publish-event', 'Publish', 'publish-check');
+      buildTool(toolBox, 'dash-tool-publish-event', 'Publish', 'publish-rocket');
     }
 
     buildTool(toolBox, 'dash-tool-preview-pre-event', 'Preview pre-event', 'preview-eye');
@@ -108,7 +108,7 @@ function populateTable(props) {
 
   const endOfPages = Math.min(props.currentPage + 10, props.mutableData.length);
 
-  for (let i = props.currentPage; i < endOfPages; i += 1) {
+  for (let i = props.currentPage - 1; i < endOfPages; i += 1) {
     populateRow(props, i);
   }
 }
@@ -227,7 +227,7 @@ function buildDashboardHeader(props) {
   props.el.prepend(dashboardHeader);
 }
 
-function buildDashboard(props) {
+function buildDashboardTable(props) {
   const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
   const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
   const thead = createTag('thead', {}, '', { parent: table });
@@ -297,28 +297,73 @@ async function getConfig(el) {
   return config;
 }
 
-export default async function init(el) {
-  const config = await getConfig(el);
-  const dataHandler = {
-    set(target, prop, value) {
-      target[prop] = value;
-      populateTable(target);
-      return true;
-    },
-  };
+function buildNoAccessScreen(el) {
+  el.classList.add('no-access');
 
-  const data = await getEventsData();
+  const h1 = createTag('h1', {}, 'You do not have sufficient access to view.');
+  const area = createTag('div', { class: 'no-access-area' });
+  const noAccessDescription = createTag('p', {}, 'An Adobe corporate account is required to access this feature.');
 
+  el.append(h1, area);
+  area.append(getIcon('browser-access-forbidden-lg'), noAccessDescription);
+}
+
+function buildNoEventScreen(el, props) {
+  el.classList.add('no-events');
+
+  const h1 = createTag('h1', {}, 'All Events');
+  const area = createTag('div', { class: 'no-events-area' });
+  const noEventHeading = createTag('h2', {}, 'You have no events');
+  const noEventDescription = createTag('p', {}, 'Lorem ipsum dolor sit amet consectecteur, adipscing...');
+  const cta = createTag('a', { class: 'con-button blue', href: props.createFormUrl }, 'Create new event');
+
+  el.append(h1, area);
+  area.append(getIcon('empty-dashboard'), noEventHeading, noEventDescription, cta);
+}
+
+async function buildDashboard(el, config) {
   const props = {
     el,
-    data,
-    mutableData: [...data],
     currentPage: 1,
     pageSize: config['page-size'],
     createFormUrl: config['create-form-url'],
   };
 
-  const proxyProps = new Proxy(props, dataHandler);
-  buildDashboardHeader(proxyProps);
-  buildDashboard(proxyProps);
+  const data = (await getEventsData())?.reverse();
+
+  if (!data.length) {
+    buildNoEventScreen(el, props);
+  } else {
+    props.data = data;
+    props.mutableData = [...data];
+    const dataHandler = {
+      set(target, prop, value) {
+        target[prop] = value;
+        populateTable(target);
+        return true;
+      },
+    };
+    const proxyProps = new Proxy(props, dataHandler);
+    buildDashboardHeader(proxyProps);
+    buildDashboardTable(proxyProps);
+  }
+}
+
+export default async function init(el) {
+  const config = await getConfig(el);
+  const profile = window.bm8tr.get('imsProfile');
+
+  if (profile?.noProfile) {
+    buildNoAccessScreen(el, config);
+  } else if (!profile) {
+    window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
+      if (newValue?.noProfile) {
+        buildNoAccessScreen(el, config);
+      } else {
+        buildDashboard(el, config);
+      }
+    });
+  } else {
+    buildDashboard(el, config);
+  }
 }
