@@ -141,7 +141,7 @@
   flex-direction: column;
   background-color: var(--color-white);
   border-radius: 4px;
-  padding: 16px;
+  padding: 4px;
   right: 100%;
   z-index: 1;
   box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
@@ -156,13 +156,16 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 0 8px;
+  margin: 2px;
   text-decoration: none;
   color: var(--color-black);
   font-size: var(--type-body-xxs-size);
+  border-radius: 8px;
 }
 
 .ecc-dashboard .event-row .dashboard-event-tool-box a.dash-event-tool:hover {
-  text-decoration: underline;
+  background-color: var(--color-gray-200);
 }
 
 .ecc-dashboard .pagination-container {

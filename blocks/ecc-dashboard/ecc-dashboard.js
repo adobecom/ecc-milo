@@ -21,7 +21,7 @@ function buildThumbnail(data) {
   return container;
 }
 
-function initMoreOptions(eventObj, moreOptionsCell) {
+function initMoreOptions(props, eventObj, moreOptionsCell) {
   const moreOptionIcon = moreOptionsCell.querySelector('.icon-more-small-list');
 
   const buildTool = (parent, id, text, icon) => {
@@ -32,19 +32,22 @@ function initMoreOptions(eventObj, moreOptionsCell) {
 
   moreOptionIcon.addEventListener('click', () => {
     const toolBox = createTag('div', { class: 'dashboard-event-tool-box' });
-    buildTool(toolBox, 'dash-tool-edit-event', 'Edit', 'edit');
-    buildTool(toolBox, 'dash-tool-review-event', 'Send for review', 'resolve-comment');
 
     if (eventObj.published) {
-      buildTool(toolBox, 'dash-tool-unpublish-event', 'Unpublish', 'publish-remove');
+      buildTool(toolBox, 'dash-tool-unpublish-event', 'Unpublish', 'publish-rocket');
     } else {
       buildTool(toolBox, 'dash-tool-publish-event', 'Publish', 'publish-check');
     }
 
-    buildTool(toolBox, 'dash-tool-clone-event', 'Clone', 'duplicate');
-    buildTool(toolBox, 'dash-tool-delete-event', 'Delete', 'delete-outline');
+    buildTool(toolBox, 'dash-tool-preview-pre-event', 'Preview pre-event', 'preview-eye');
+    buildTool(toolBox, 'dash-tool-preview-post-event', 'Preview post-event', 'preview-eye');
+    const edit = buildTool(toolBox, 'dash-tool-edit-event', 'Edit', 'edit-pencil');
+    buildTool(toolBox, 'dash-tool-clone-event', 'Clone', 'clone');
+    buildTool(toolBox, 'dash-tool-delete-event', 'Delete', 'delete-wire-round');
 
     // TODO: enable each tool to perform their functions.
+
+    edit.href = `${props.createFormUrl}?${eventObj.eventId}`;
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
       moreOptionsCell.append(toolBox);
@@ -68,8 +71,9 @@ function buildStatusTag(event) {
   return statusTag;
 }
 
-function populateRow(el, event) {
-  const tBody = el.querySelector('table.dashboard-table tbody');
+function populateRow(props, index) {
+  const event = props.mutableData[index];
+  const tBody = props.el.querySelector('table.dashboard-table tbody');
 
   // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'event-row' }, '', { parent: tBody });
@@ -95,7 +99,7 @@ function populateRow(el, event) {
     moreOptionsCell,
   );
 
-  initMoreOptions(event, moreOptionsCell);
+  initMoreOptions(props, event, moreOptionsCell);
 }
 
 function populateTable(props) {
@@ -105,7 +109,7 @@ function populateTable(props) {
   const endOfPages = Math.min(props.currentPage + 10, props.mutableData.length);
 
   for (let i = props.currentPage; i < endOfPages; i += 1) {
-    populateRow(props.el, props.mutableData[i]);
+    populateRow(props, i);
   }
 }
 
