@@ -42,12 +42,18 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
     buildTool(toolBox, 'dash-tool-preview-pre-event', 'Preview pre-event', 'preview-eye');
     buildTool(toolBox, 'dash-tool-preview-post-event', 'Preview post-event', 'preview-eye');
     const edit = buildTool(toolBox, 'dash-tool-edit-event', 'Edit', 'edit-pencil');
-    buildTool(toolBox, 'dash-tool-clone-event', 'Clone', 'clone');
+    const clone = buildTool(toolBox, 'dash-tool-clone-event', 'Clone', 'clone');
     buildTool(toolBox, 'dash-tool-delete-event', 'Delete', 'delete-wire-round');
 
     // TODO: enable each tool to perform their functions.
 
     edit.href = `${props.createFormUrl}?${eventObj.eventId}`;
+    clone.addEventListener('click', () => {
+      const payload = { ...eventObj };
+      delete payload.eventId;
+
+      console.log('POST to ESP with this payload with eventId already removed:', payload);
+    });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
       moreOptionsCell.append(toolBox);
