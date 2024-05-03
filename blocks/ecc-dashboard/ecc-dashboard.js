@@ -366,17 +366,28 @@ export default async function init(el) {
 
   if (devMode === 'true' && hostname === 'localhost') {
     buildDashboard(el, config);
-  } else if (profile?.noProfile) {
-    buildNoAccessScreen(el, config);
-  } else if (!profile) {
-    window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
-      if (newValue?.noProfile) {
+    return;
+  }
+
+  if (profile) {
+    if (profile.noProfile || profile['account-type'] !== 'type3') {
+      buildNoAccessScreen(el, config);
+    } else {
+      buildDashboard(el, config);
+    }
+
+    return;
+  }
+
+  if (!profile) {
+    const unsubscribe = window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
+      if (newValue?.noProfile || newValue['account-type'] !== 'type3') {
         buildNoAccessScreen(el, config);
       } else {
         buildDashboard(el, config);
       }
+
+      unsubscribe();
     });
-  } else {
-    buildDashboard(el, config);
   }
 }
