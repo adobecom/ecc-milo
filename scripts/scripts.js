@@ -23,7 +23,7 @@ const LIBS = '/libs';
 const CONFIG = {
   // codeRoot: '',
   // contentRoot: '',
-  imsClientId: 'events-milo',
+  imsClientId: 'ecc-milo',
   // imsScope: 'AdobeID,openid,gnav',
   // geoRouting: 'off',
   // fallbackRouting: 'off',
