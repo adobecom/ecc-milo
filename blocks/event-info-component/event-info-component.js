@@ -7,7 +7,6 @@ async function decorateField(row, type = 'text') {
   const miloLibs = getLibs();
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
   ]);
 
@@ -22,11 +21,15 @@ async function decorateField(row, type = 'text') {
   const handle = handlize(text);
   let input;
   if (type === 'text') {
-    input = createTag('sp-textfield', { id: `info-field-${handle}`, class: 'text-input', placeholder: text, required: isRequired, quiet: true });
+    input = createTag('sp-textfield', {
+      id: `info-field-${handle}`, class: 'text-input', placeholder: text, required: isRequired, quiet: true, size: 'xl',
+    });
   }
 
   if (type === 'textarea') {
-    input = createTag('textarea', { id: `info-field-${handle}`, class: 'textarea-input', placeholder: text, required: isRequired });
+    input = createTag('sp-textfield', {
+      id: `info-field-${handle}`, multiline: true, class: 'textarea-input', quiet: true, placeholder: text, required: isRequired,
+    });
   }
 
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
