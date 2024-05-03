@@ -293,6 +293,8 @@ export function onSubmit(component, inputMap) {
 
   const startTime = component.querySelector('#time-picker-start-time').value;
   const endTime = component.querySelector('#time-picker-end-time').value;
+
+  // FIXME: need to align date-time format to the requirement of API
   const eventStartDate = addTimeToDate(new Date(startDate), startTime);
   const eventEndDate = addTimeToDate(new Date(endDate), endTime);
 
