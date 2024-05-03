@@ -34,9 +34,18 @@ async function decorateField(row, type = 'text') {
 
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
 
-  const wrapper = createTag('div', { class: 'info-field-wrapper' });
+  const component = createTag('div');
   row.innerHTML = '';
-  wrapper.append(input, attrTextEl);
+  component.append(input, attrTextEl);
+
+  // TODO Remove after validation.
+  const deleteButton = createTag('div', { class: 'delete-button' });
+  deleteButton.append(getIcon('delete'));
+  deleteButton.classList.add('hidden');
+
+  const wrapper = createTag('div', { class: 'info-field-wrapper' });
+  wrapper.append(component);
+  wrapper.append(deleteButton);
   row.append(wrapper);
 }
 
@@ -97,14 +106,30 @@ function decorateDateTimeFields(row) {
   });
 }
 
+function addRepeater(element) {
+  element.lastChild.setAttribute('repeatIdx', 0);
+
+  const tag = createTag('div');
+  tag.classList.add('trial-repeater');
+  const plusIcon = getIcon('add-circle');
+  tag.append(plusIcon);
+  element.append(tag);
+}
+
 export default function init(el) {
   el.classList.add('form-component');
   generateToolTip(el);
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach(async (r, i) => {
-    if (i === 1) await decorateField(r, 'text');
-    if (i === 2) await decorateField(r, 'textarea');
+    if (i === 1) {
+      await decorateField(r, 'text');
+      addRepeater(r);
+    }
+    if (i === 2) {
+      await decorateField(r, 'textarea');
+      addRepeater(r);
+    }
     if (i === 3) decorateDateTimeFields(r);
   });
 }
