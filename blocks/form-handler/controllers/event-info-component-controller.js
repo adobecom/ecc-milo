@@ -284,22 +284,23 @@ export default function init(component) {
 }
 
 function initRepeater(component) {
-  const tRepeaters = component.querySelectorAll('.trial-repeater');
-  tRepeaters.forEach((tRepeater) => tRepeater.addEventListener('click', (event) => {
-    const prevNode = event.currentTarget.previousElementSibling;
-    const nodeClone = prevNode.cloneNode(true);
-    // eslint
-    nodeClone.setAttribute('repeatIdx', parseInt(prevNode.getAttribute('repeatIdx'), 10) + 1);
-    const deleteIcon = nodeClone.querySelector('.delete-button');
-    deleteIcon.classList.remove('hidden');
-    setRemoveEventListener(deleteIcon);
-    prevNode.after(nodeClone);
-  }));
+  const repeaters = component.querySelectorAll('.trial-repeater');
+  repeaters.forEach((tRepeater) => {
+    const vanillaNode = tRepeater.previousElementSibling.cloneNode(true);
+    tRepeater.addEventListener('click', (event) => {
+      const clonedNode = vanillaNode.cloneNode(true);
+      const prevNode = event.currentTarget.previousElementSibling;
+      clonedNode.setAttribute('repeatIdx', parseInt(prevNode.getAttribute('repeatIdx'), 10) + 1);
+      const deleteIcon = clonedNode.querySelector('.delete-button');
+      deleteIcon.classList.remove('hidden');
+      setRemoveEventListener(deleteIcon);
+      prevNode.after(clonedNode);
+    });
+  });
 }
 
 function setRemoveEventListener(removeElement) {
   removeElement.addEventListener('click', (event) => {
-    console.log('remove called');
     event.currentTarget.parentElement.remove();
   });
 }
