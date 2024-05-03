@@ -370,7 +370,7 @@ export default async function init(el) {
   }
 
   if (profile) {
-    if (profile.noProfile || profile['account-type'] !== 'type3') {
+    if (profile.noProfile || profile.account_type !== 'type3') {
       buildNoAccessScreen(el, config);
     } else {
       buildDashboard(el, config);
@@ -381,7 +381,7 @@ export default async function init(el) {
 
   if (!profile) {
     const unsubscribe = window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
-      if (newValue?.noProfile || newValue['account-type'] !== 'type3') {
+      if (newValue?.noProfile || newValue.account_type !== 'type3') {
         buildNoAccessScreen(el, config);
       } else {
         buildDashboard(el, config);
