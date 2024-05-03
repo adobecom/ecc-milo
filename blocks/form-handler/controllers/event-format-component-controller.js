@@ -16,10 +16,12 @@ function initNewSeriesModal(component) {
 
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
   if (!currentTimeZone) return;
 
   const timeZoneInput = component.querySelector('#time-zone-select-input');
+
+  if (!timeZoneInput) return;
+
   const options = timeZoneInput.querySelectorAll('option');
 
   options.forEach((opt) => {
@@ -33,6 +35,10 @@ function prepopulateTimeZone(component) {
 export default function init(component) {
   initNewSeriesModal(component);
   prepopulateTimeZone(component);
+}
+
+export function onResume() {
+  // TODO: handle form prepopulation on component level
 }
 
 export function onSubmit(component, inputMap) {

@@ -286,15 +286,14 @@ function prepopulateForm(el, inputMap) {
 
   const eventObj = JSON.parse(localStorage.getItem(eventId));
 
-  inputMap.forEach((input) => {
-    const element = el.querySelector(input.selector);
-    if (!element) return;
+  SUPPORTED_COMPONENTS.forEach((comp) => {
+    const mappedComponents = el.querySelectorAll(`.${comp}-component`);
+    if (!mappedComponents?.length) return;
 
-    if (element[input.accessPoint] !== undefined) {
-      element[input.accessPoint] = eventObj[input.key];
-    } else {
-      element.setAttirbute(input.accessPoint, eventObj[input.key]);
-    }
+    mappedComponents.forEach(async (component) => {
+      const { onResume } = await import(`./controllers/${comp}-component-controller.js`);
+      await onResume(component, eventObj, inputMap);
+    });
   });
 }
 

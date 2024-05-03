@@ -9,6 +9,10 @@ export default function init(component) {
   initVenueImageInput(component);
 }
 
+export function onResume() {
+  // TODO: handle form prepopulation on component level
+}
+
 export function onSubmit(component, inputMap) {
   const venueInfoVisible = component.querySelector('#checkbox-venue-info-visible').checked;
 

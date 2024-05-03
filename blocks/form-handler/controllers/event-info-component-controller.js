@@ -273,6 +273,19 @@ export default function init(component) {
   initCalendar(component);
 }
 
+export function onResume(component, eventObj, inputMap) {
+  inputMap.forEach((input) => {
+    const element = component.querySelector(input.selector);
+    if (!element) return;
+
+    if (element[input.accessPoint] !== undefined) {
+      element[input.accessPoint] = eventObj[input.key];
+    } else {
+      element.setAttirbute(input.accessPoint, eventObj[input.key]);
+    }
+  });
+}
+
 export function onSubmit(component, inputMap) {
   const datePicker = component.querySelector('#event-info-date-picker');
   const startDate = new Date(datePicker.dataset.startDate);

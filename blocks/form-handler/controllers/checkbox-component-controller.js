@@ -38,6 +38,10 @@ export default function init(component) {
   });
 }
 
+export function onResume() {
+  // TODO: handle form prepopulation on component level
+}
+
 export function onSubmit(component, inputMap) {
   console.log(inputMap, 'checkbox onSubmit not built yet');
   return {};

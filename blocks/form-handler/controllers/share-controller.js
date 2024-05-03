@@ -68,8 +68,14 @@ export function getMappedInputsOutput(component, inputMap) {
     const inputFound = component.querySelector(row.selector);
 
     if (inputFound) {
-      const { key, accessPoint } = row;
-      output[key] = getElementOutput(inputFound, accessPoint);
+      const { key, accessPoint, shadowRootSelector } = row;
+      let targetInput = inputFound;
+
+      if (shadowRootSelector) {
+        targetInput = inputFound.shadowRoot.querySelector(shadowRootSelector);
+      }
+
+      output[key] = getElementOutput(targetInput, accessPoint);
     }
   });
 
