@@ -299,7 +299,14 @@ function prepopulateForm(el, inputMap) {
 }
 
 export default async function init(el) {
-  const form = createTag('form');
+  const miloLibs = getLibs();
+  await Promise.all([
+    import(`${miloLibs}/deps/lit-all.min.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
+  ]);
+
+  const app = createTag('sp-theme', { color: 'light', scale: 'medium' });
+  const form = createTag('form', {}, '', { parent: app });
   const formDivs = el.querySelectorAll('.fragment');
 
   if (!formDivs.length) {
@@ -308,7 +315,7 @@ export default async function init(el) {
   }
 
   formDivs.forEach((formDiv) => {
-    formDiv.parentElement.replaceChild(form, formDiv);
+    formDiv.parentElement.replaceChild(app, formDiv);
     form.append(formDiv);
   });
 
