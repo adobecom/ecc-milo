@@ -15,6 +15,31 @@ async function uploadImage(file) {
     });
 }
 
+function uploadBinaryFile(file) {
+  // TODO: replace with real endpoint
+  const url = 'http://localhost:8000/upload';
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', url, true);
+
+  // TODO: set required headers
+  // xhr.setRequestHeader('Content-Type', 'application/json');
+
+  xhr.onload = function () {
+      if (xhr.status === 200) {
+          console.log('Success:', xhr.responseText);
+      } else {
+          console.error('Error Status:', xhr.status);
+      }
+  };
+
+  xhr.onerror = function () {
+      console.error('Network error');
+  };
+
+  xhr.send(file);
+}
+
 function handleImageFiles(wrapper, files) {
   const previewWrapper = wrapper.querySelector('.preview-wrapper');
   const imgPlaceholder = wrapper.querySelector('.preview-img-placeholder');
