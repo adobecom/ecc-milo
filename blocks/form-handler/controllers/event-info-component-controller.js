@@ -4,6 +4,19 @@ import { getMappedInputsOutput } from './share-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
+function formatDate(date) {
+  let month = '' + (date.getMonth() + 1),
+      day = '' + date.getDate(),
+      year = date.getFullYear();
+
+  if (month.length < 2) 
+      month = '0' + month;
+  if (day.length < 2) 
+      day = '0' + day;
+
+  return [month, day, year].join('-');
+}
+
 function compareDates(date1, date2) {
   return date1.getFullYear() === date2.getFullYear()
          && date1.getMonth() === date2.getMonth()
@@ -61,7 +74,7 @@ function updateDayView(component, parent, state) {
     const dayElement = createTag('div', {
       class: 'calendar-day',
       tabindex: '0',
-      'data-date': date,
+      'data-date': formatDate(date),
     }, day.toString(), { parent: calendarGrid });
 
     if (date < todayDate) {
@@ -158,19 +171,15 @@ function updateInput(component, state) {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-    timeZone: state.timeZone,
   };
 
   const dateInput = component.querySelector('#event-info-date-picker');
 
-  dateInput.dataset.startDate = state.selectedStartDate;
-  dateInput.dataset.endDate = state.selectedEndDate;
-
-  const localStartTime = state.selectedStartDate?.toLocaleString('en-GB', options) || '';
-  const localEndTime = state.selectedEndDate?.toLocaleString('en-GB', options) || '';
+  dateInput.dataset.startDate = formatDate(state.selectedStartDate);
+  dateInput.dataset.endDate = formatDate(state.selectedEndDate);
 
   if (dateInput) {
-    dateInput.value = `${localStartTime} - ${localEndTime}`;
+    dateInput.value = `${dateInput.dataset.startDate} - ${dateInput.dataset.endDate}`;
   }
 }
 
@@ -225,7 +234,6 @@ function buildCalendar(component, parent) {
     currentView: 'days',
     selectedStartDate: input.dataset.startDate ? new Date(input.dataset.startDate) : null,
     selectedEndDate: input.dataset.endDate ? new Date(input.dataset.endDate) : null,
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     currentYear: new Date().getFullYear(),
     currentMonth: new Date().getMonth(),
     headerTitle: createTag('span', { class: 'header-title' }, '', { parent }),
