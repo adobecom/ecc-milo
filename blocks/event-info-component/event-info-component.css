@@ -34,7 +34,7 @@
 .event-info-component .date-time-row > .date-picker {
   position: relative;
   border-bottom: 1px solid var(--color-black);
-  min-width: 280;
+  min-width: 280px;
   display: flex;
   align-items: center;
   gap: 8px;

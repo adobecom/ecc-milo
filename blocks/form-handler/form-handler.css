@@ -1,6 +1,6 @@
 .form-handler {
   display: block;
-  padding: 40px;
+  padding: 0 40px;
 }
 
 .form-handler * {
@@ -25,11 +25,21 @@
   padding-right: 12px;
 }
 
+.form-handler .side-menu ul li a {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
 .form-handler .side-menu ul li:not(:has(ul)) {
+  padding-left: 0;
+  padding-right: 0;
   margin: 12px 0;
+  display: flex;
+}
+
+.form-handler .side-menu ul li:not(:has(ul)) a {
   padding-top: 8px;
   padding-bottom: 8px;
-  display: flex;
 }
 
 .form-handler .side-menu ul li a {
