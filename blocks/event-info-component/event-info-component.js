@@ -106,13 +106,18 @@ function decorateDateTimeFields(row) {
   });
 }
 
-function addRepeater(element) {
+function addRepeater(element, title) {
   element.lastChild.setAttribute('repeatIdx', 0);
 
   const tag = createTag('div');
-  tag.classList.add('trial-repeater');
+  tag.classList.add('repeater-element');
+
+  const heading = createTag('h3', { class: 'repeater-element-title' }, title);
+  tag.append(heading);
+
   const plusIcon = getIcon('add-circle');
   tag.append(plusIcon);
+
   element.append(tag);
 }
 
@@ -124,11 +129,11 @@ export default function init(el) {
   rows.forEach(async (r, i) => {
     if (i === 1) {
       await decorateField(r, 'text');
-      addRepeater(r);
+      addRepeater(r, 'Add event title');
     }
     if (i === 2) {
       await decorateField(r, 'textarea');
-      addRepeater(r);
+      addRepeater(r, 'Add event description');
     }
     if (i === 3) decorateDateTimeFields(r);
   });

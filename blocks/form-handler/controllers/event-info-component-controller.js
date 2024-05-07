@@ -284,7 +284,7 @@ export default function init(component) {
 }
 
 function initRepeater(component) {
-  const repeaters = component.querySelectorAll('.trial-repeater');
+  const repeaters = component.querySelectorAll('.repeater-element');
   repeaters.forEach((tRepeater) => {
     const vanillaNode = tRepeater.previousElementSibling.cloneNode(true);
     tRepeater.addEventListener('click', (event) => {
