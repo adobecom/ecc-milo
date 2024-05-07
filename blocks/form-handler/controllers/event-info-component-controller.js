@@ -291,9 +291,12 @@ function initRepeater(component) {
       const clonedNode = vanillaNode.cloneNode(true);
       const prevNode = event.currentTarget.previousElementSibling;
       clonedNode.setAttribute('repeatIdx', parseInt(prevNode.getAttribute('repeatIdx'), 10) + 1);
+      
+      // Reset delete icon state and add listener.
       const deleteIcon = clonedNode.querySelector('.delete-button');
       deleteIcon.classList.remove('hidden');
       setRemoveEventListener(deleteIcon);
+      
       prevNode.after(clonedNode);
     });
   });

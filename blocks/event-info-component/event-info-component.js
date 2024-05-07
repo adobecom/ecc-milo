@@ -129,10 +129,12 @@ export default function init(el) {
   rows.forEach(async (r, i) => {
     if (i === 1) {
       await decorateField(r, 'text');
+      // Remove after view.
       addRepeater(r, 'Add event title');
     }
     if (i === 2) {
       await decorateField(r, 'textarea');
+      // Remove after view.
       addRepeater(r, 'Add event description');
     }
     if (i === 3) decorateDateTimeFields(r);
