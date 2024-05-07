@@ -191,14 +191,15 @@ function initFormCtas(el, inputMap) {
 
   const forwardActionsWrappers = ctaRow.querySelectorAll(':scope > div');
 
-  const backwardWrapper = createTag('div', { class: 'form-handler-backward-wrapper' }, '', { parent: ctaRow });
-  const forwardWrapper = createTag('div', { class: 'form-handler-forward-wrapper' }, '', { parent: ctaRow });
+  const panelWrapper = createTag('div', { class: 'form-handler-panel-wrapper' }, '', { parent: ctaRow });
+  const backwardWrapper = createTag('div', { class: 'form-handler-backward-wrapper' }, '', { parent: panelWrapper });
+  const forwardWrapper = createTag('div', { class: 'form-handler-forward-wrapper' }, '', { parent: panelWrapper });
 
   forwardActionsWrappers.forEach((w) => {
     forwardWrapper.append(w);
   });
 
-  const backBtn = createTag('a', { class: 'back-btn' }, getIcon('chev-left'));
+  const backBtn = createTag('a', { class: 'back-btn' }, getIcon('chev-left-white'));
 
   backwardWrapper.append(backBtn);
 
