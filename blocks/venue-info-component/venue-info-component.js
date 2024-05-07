@@ -91,8 +91,8 @@ function buildAdditionalInfo(row, i) {
     const additionComment = createTag('div', { class: 'addition-comment' });
     additionComment.append(comment.textContent.trim());
     col.innerHTML = '';
+    fieldSet.append(additionComment)
     col.append(fieldSet);
-    col.append(additionComment);
   }
 
   row.classList.add('img-upload-component');

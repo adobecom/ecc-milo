@@ -64,6 +64,13 @@
   grid-template-columns: 1fr 1fr;
 }
 
+.venue-info-component .venue-info-addition-wrapper .venue-info-addition {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  align-items: end;
+}
+
 .venue-info-component .venue-info-addition-wrapper .image-dropzone {
   max-width: 240px;
 }
