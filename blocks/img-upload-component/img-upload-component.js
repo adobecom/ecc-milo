@@ -13,8 +13,8 @@ function decorateImageDropzones(row) {
     const uploadName = c.querySelector(':scope > p:first-of-type')?.textContent.trim();
     const paragraphs = c.querySelectorAll(':scope > p');
     const existingFileInput = document.querySelectorAll('.img-file-input');
-    const inputId = uploadName ? `${handlize(uploadName)}` : `img-file-input-${existingFileInput.length + i}`;
-    const fileInput = createTag('input', { id: inputId, type: 'file', class: 'img-file-input' });
+    const inputId = uploadName ? `${handlize(uploadName)}` : `img-file-input-${existingFileInput.length + i + 1}`;
+    const fileInput = createTag('input', { id: inputId, type: 'file', class: 'img-file-input', accept: 'image/png, image/jpeg' });
     const inputWrapper = createTag('div', { class: 'img-file-input-wrapper' });
     const inputLabel = createTag('label', { class: 'img-file-input-label' });
 
