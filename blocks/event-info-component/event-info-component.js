@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, handlize, generateToolTip } from '../../utils/utils.js';
+import { getIcon, handlize, generateToolTip, addRepeater } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -38,14 +38,8 @@ async function decorateField(row, type = 'text') {
   row.innerHTML = '';
   component.append(input, attrTextEl);
 
-  // TODO Remove after validation.
-  const deleteButton = createTag('div', { class: 'delete-button' });
-  deleteButton.append(getIcon('delete'));
-  deleteButton.classList.add('hidden');
-
   const wrapper = createTag('div', { class: 'info-field-wrapper' });
   wrapper.append(component);
-  wrapper.append(deleteButton);
   row.append(wrapper);
 }
 
@@ -106,21 +100,6 @@ function decorateDateTimeFields(row) {
   });
 }
 
-function addRepeater(element, title) {
-  element.lastChild.setAttribute('repeatIdx', 0);
-
-  const tag = createTag('div');
-  tag.classList.add('repeater-element');
-
-  const heading = createTag('h3', { class: 'repeater-element-title' }, title);
-  tag.append(heading);
-
-  const plusIcon = getIcon('add-circle');
-  tag.append(plusIcon);
-
-  element.append(tag);
-}
-
 export default function init(el) {
   el.classList.add('form-component');
   generateToolTip(el);
@@ -129,13 +108,9 @@ export default function init(el) {
   rows.forEach(async (r, i) => {
     if (i === 1) {
       await decorateField(r, 'text');
-      // Remove after view.
-      addRepeater(r, 'Add event title');
     }
     if (i === 2) {
       await decorateField(r, 'textarea');
-      // Remove after view.
-      addRepeater(r, 'Add event description');
     }
     if (i === 3) decorateDateTimeFields(r);
   });

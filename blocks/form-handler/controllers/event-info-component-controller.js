@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { getLibs } from '../../../scripts/utils.js';
-import { getMappedInputsOutput } from './share-controller.js';
+import { getMappedInputsOutput, initRepeater, initRemove } from './share-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -281,36 +281,6 @@ export default function init(component) {
   initCalendar(component);
   initRepeater(component);
   initRemove(component);
-}
-
-function initRepeater(component) {
-  const repeaters = component.querySelectorAll('.repeater-element');
-  repeaters.forEach((tRepeater) => {
-    const vanillaNode = tRepeater.previousElementSibling.cloneNode(true);
-    tRepeater.addEventListener('click', (event) => {
-      const clonedNode = vanillaNode.cloneNode(true);
-      const prevNode = event.currentTarget.previousElementSibling;
-      clonedNode.setAttribute('repeatIdx', parseInt(prevNode.getAttribute('repeatIdx'), 10) + 1);
-      
-      // Reset delete icon state and add listener.
-      const deleteIcon = clonedNode.querySelector('.delete-button');
-      deleteIcon.classList.remove('hidden');
-      setRemoveEventListener(deleteIcon);
-      
-      prevNode.after(clonedNode);
-    });
-  });
-}
-
-function setRemoveEventListener(removeElement) {
-  removeElement.addEventListener('click', (event) => {
-    event.currentTarget.parentElement.remove();
-  });
-}
-
-function initRemove(component) {
-  const removeIcons = component.querySelectorAll('.delete-button');
-  removeIcons.forEach((removeIcon) => setRemoveEventListener(removeIcon));
 }
 
 export function onResume(component, eventObj, inputMap) {
