@@ -3,7 +3,7 @@ import { getIcon, generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
-async function decorateSWCTextField(row, id, extraOptions) {
+async function decorateSWCTextField(row, extraOptions) {
   const miloLibs = getLibs();
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
@@ -12,7 +12,6 @@ async function decorateSWCTextField(row, id, extraOptions) {
 
   row.classList.add('text-field-row');
 
-  const existingFileInput = document.querySelectorAll('.material-file-input');
   const cols = row.querySelectorAll(':scope > div');
   if (!cols.length) return;
   const [placeholderCol, maxLengthCol] = cols;
@@ -27,7 +26,7 @@ async function decorateSWCTextField(row, id, extraOptions) {
   const isRequired = attrTextEl?.textContent.trim().endsWith('*');
 
   const input = createTag('sp-textfield', {
-    id, class: 'text-input', placeholder: text, ...extraOptions
+    ...extraOptions, class: 'text-input', placeholder: text
   });
 
   if (isRequired) input.required = true;
@@ -82,7 +81,7 @@ export default function init(el) {
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach(async (r, i) => {
     if (i === 0) decorateFileDropzone(r);
-    if (i === 1) await decorateSWCTextField(r, `event-material-url-${blockIndex}`);
-    if (i === 2) await decorateSWCTextField(r, `event-material-name-${blockIndex}`, { quiet: true, size: 'xl' });
+    if (i === 1) await decorateSWCTextField(r, { id: `event-material-url-${blockIndex}` });
+    if (i === 2) await decorateSWCTextField(r, { id: `event-material-name-${blockIndex}`, quiet: true, size: 'xl' });
   });
 }
