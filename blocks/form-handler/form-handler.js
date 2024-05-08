@@ -19,7 +19,7 @@ const formState = {
   farthestStep: 0,
 };
 
-async function initComponents(el) {
+function initComponents(el) {
   SUPPORTED_COMPONENTS.forEach((comp) => {
     const mappedComponents = el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
@@ -327,7 +327,6 @@ function initRequiredFieldsValidation(el) {
   const onValidate = () => {
     allFieldsValid = Array.from(requiredFields).every((f) => f.value)
 
-    Array.from(requiredFields).forEach((f) => console.log(f.value, allFieldsValid))
     allFormCtas.forEach((cta) => {
       cta.classList.toggle('disabled', !allFieldsValid);
     })
@@ -364,7 +363,7 @@ export default async function init(el) {
   const inputMap = await getInputMap(el);
   decorateForm(el);
   initFormCtas(el, inputMap);
-  await initComponents(el);
+  initComponents(el);
   initNavigation(el);
   prepopulateForm(el, inputMap);
   initRequiredFieldsValidation(el);
