@@ -169,8 +169,9 @@ function navigateForm(el, stepIndex = formState.currentStep + 1) {
   const frags = el.querySelectorAll('.fragment');
 
   const nextBtn = el.querySelector('.form-handler-ctas-panel .next-button');
+  const backBtn = el.querySelector('.form-handler-ctas-panel .back-btn');
 
-  if (stepIndex >= frags.length) return;
+  if (stepIndex >= frags.length || stepIndex < 0) return;
 
   const prevStep = formState.currentStep;
   formState.currentStep = stepIndex;
@@ -185,6 +186,8 @@ function navigateForm(el, stepIndex = formState.currentStep + 1) {
   } else {
     nextBtn.textContent = nextBtn.dataset.nextStateText;
   }
+
+  backBtn.classList.toggle('disabled', formState.currentStep === 0);
 }
 
 function initFormCtas(el, inputMap) {
@@ -225,10 +228,11 @@ function initFormCtas(el, inputMap) {
       if (['#save', '#next'].includes(ctaUrl.hash)) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
-          const [nextStateText, finalStateText] = cta.textContent.split('||');
+          const [nextStateText, finalStateText, republishStateText] = cta.textContent.split('||');
           cta.textContent = nextStateText;
           cta.dataset.nextStateText = nextStateText;
           cta.dataset.finalStateText = finalStateText;
+          cta.dataset.republishStateText = republishStateText;
 
           if (formState.currentStep === frags.length - 1) {
             cta.textContent = finalStateText;
@@ -250,6 +254,10 @@ function initFormCtas(el, inputMap) {
         });
       }
     }
+  });
+
+  backBtn.addEventListener('click', async () => {
+    navigateForm(el, formState.currentStep - 1);
   });
 }
 
@@ -354,7 +362,11 @@ function initRequiredFieldsValidation(el) {
       allFieldsValid = validateRequiredFields(requiredFields);
       
       allFormCtas.forEach((cta) => {
-        cta.classList.toggle('disabled', !allFieldsValid);
+        if (cta.classList.contains('back-btn')) {
+          cta.classList.toggle('disabled', !allFieldsValid && formState.currentStep === 0);
+        } else {
+          cta.classList.toggle('disabled', !allFieldsValid);
+        }
       })
     }, { bubbles: true });
   })
