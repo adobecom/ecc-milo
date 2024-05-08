@@ -43,7 +43,7 @@ async function decorateField(row, type = 'text') {
 function buildDatePicker(column) {
   column.classList.add('date-picker');
   const dateLabel = createTag('label', { for: 'event-info-date-picker' }, column.textContent.trim());
-  const datePicker = createTag('input', { id: 'event-info-date-picker', name: 'event-date', class: 'date-input' });
+  const datePicker = createTag('input', { id: 'event-info-date-picker', name: 'event-date', class: 'date-input', required: true });
   const calendarIcon = getIcon('calendar-add');
 
   column.innerHTML = '';
@@ -56,20 +56,26 @@ function buildTimePicker(column) {
   const rows = column.querySelectorAll('table tr');
   const timePickerWrappers = [];
 
-  rows.forEach((r) => {
+  rows.forEach((r, i) => {
     const timePickerWrapper = createTag('div', { class: 'time-picker-wrapper' });
     const cols = r.querySelectorAll('td');
     let pickerName;
+    let pickerHandle;
+    if (i === 0) pickerHandle = 'start-time';
+    if (i === 1) pickerHandle = 'end-time';
     cols.forEach((c, j) => {
       if (j === 0) {
         pickerName = c.textContent.trim();
-        const label = createTag('label', { for: `time-picker-${handlize(pickerName)}` }, pickerName);
+
+        const label = createTag('label', { for: `time-picker-${pickerHandle}` }, pickerName);
         timePickerWrapper.append(label);
       }
 
       if (j === 1) {
         const timeSlots = c.querySelectorAll('li');
-        const select = createTag('select', { id: `time-picker-${handlize(pickerName)}`, class: 'select-input' });
+        const select = createTag('select', { id: `time-picker-${pickerHandle}`, class: 'select-input', required: true });
+        const option = createTag('option', { value: '', selected: true, disabled: true }, '-');
+        select.append(option);
         timeSlots.forEach((t) => {
           const text = t.textContent.trim();
           const option = createTag('option', { value: handlize(text) }, text);

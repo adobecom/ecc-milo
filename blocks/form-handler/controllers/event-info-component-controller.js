@@ -148,6 +148,10 @@ function updateYearView(component, parent, state) {
 }
 
 function selectDate(component, state, date) {
+  const input = component.querySelector('#event-info-date-picker');
+
+  if (!input) return;
+
   if (!state.selectedStartDate || (state.selectedStartDate !== state.selectedEndDate)) {
     state.selectedStartDate = date;
     state.selectedEndDate = date;
@@ -163,6 +167,7 @@ function selectDate(component, state, date) {
 
   updateSelectedDates(state);
   updateInput(component, state);
+  input.dispatchEvent(new Event('change'));
 }
 
 function updateInput(component, state) {

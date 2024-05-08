@@ -109,6 +109,7 @@ function buildLocationInputGrid(row) {
       id: `location-${handlize(label)}`,
       class: 'location-input',
       placeholder: label,
+      required: true,
     });
   }
 

@@ -19,7 +19,7 @@ const formState = {
   farthestStep: 0,
 };
 
-function initComponents(el) {
+async function initComponents(el) {
   SUPPORTED_COMPONENTS.forEach((comp) => {
     const mappedComponents = el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
@@ -298,6 +298,48 @@ function prepopulateForm(el, inputMap) {
   });
 }
 
+function querySelectorDeep(selector, root = document) {
+  const elements = [];
+
+  function recursiveQuery(root) {
+      elements.push(...root.querySelectorAll(selector));
+
+      root.querySelectorAll('*').forEach(el => {
+          if (el.shadowRoot) {
+              recursiveQuery(el.shadowRoot);
+          }
+      });
+  }
+
+  recursiveQuery(root);
+
+  return elements;
+}
+
+function initRequiredFieldsValidation(el) {
+  const frags = el.querySelectorAll('.fragment');
+  const allFormCtas = el.querySelectorAll('.form-handler-panel-wrapper a');
+
+  const requiredFields = querySelectorDeep('input[required], select[required], textarea[required]', frags[formState.currentStep]);
+
+  let allFieldsValid = false;
+
+  const onValidate = () => {
+    allFieldsValid = Array.from(requiredFields).every((f) => f.value)
+
+    Array.from(requiredFields).forEach((f) => console.log(f.value, allFieldsValid))
+    allFormCtas.forEach((cta) => {
+      cta.classList.toggle('disabled', !allFieldsValid);
+    })
+  }
+
+  requiredFields.forEach((field) => {
+    field.addEventListener('change', onValidate, { bubbles: true });
+  })
+
+  onValidate();
+}
+
 export default async function init(el) {
   const miloLibs = getLibs();
   await Promise.all([
@@ -322,9 +364,10 @@ export default async function init(el) {
   const inputMap = await getInputMap(el);
   decorateForm(el);
   initFormCtas(el, inputMap);
-  initComponents(el);
+  await initComponents(el);
   initNavigation(el);
   prepopulateForm(el, inputMap);
+  initRequiredFieldsValidation(el);
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();

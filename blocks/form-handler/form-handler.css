@@ -206,8 +206,13 @@
   border-right: 2px solid var(--color-black);
 }
 
-.form-handler .form-handler-ctas-panel a:any-link {
+.form-handler .form-handler-ctas-panel a {
   font-size: var(--type-body-s-size);
+}
+
+.form-handler .form-handler-ctas-panel a.disabled {
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 .form-handler .form-handler-ctas-panel a.next-button {
