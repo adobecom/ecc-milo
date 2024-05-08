@@ -155,9 +155,19 @@ async function postForm(payload) {
     .catch((error) => console.error(error));
 }
 
+function updateSideNav(el) {
+  const sideNavs = el.querySelectorAll('.side-menu .nav-item');
+
+  sideNavs.forEach((n, i) => {
+    n.closest('li')?.classList.remove('active');
+    if (i <= formState.farthestStep) n.classList.remove('disabled');
+    if (i === formState.currentStep) n.closest('li')?.classList.add('active');
+  });
+}
+
 function navigateForm(el, stepIndex = formState.currentStep + 1) {
   const frags = el.querySelectorAll('.fragment');
-  const sideNavs = el.querySelectorAll('.side-menu .nav-item');
+
   const nextBtn = el.querySelector('.form-handler-ctas-panel .next-button');
 
   if (stepIndex >= frags.length) return;
@@ -168,11 +178,7 @@ function navigateForm(el, stepIndex = formState.currentStep + 1) {
 
   frags[prevStep].classList.add('hidden');
   frags[formState.currentStep].classList.remove('hidden');
-  sideNavs.forEach((n, i) => {
-    n.closest('li')?.classList.remove('active');
-    if (i <= formState.farthestStep) n.classList.remove('disabled');
-    if (i === formState.currentStep) n.closest('li')?.classList.add('active');
-  });
+
 
   if (formState.currentStep === frags.length - 1) {
     nextBtn.textContent = nextBtn.dataset.finalStateText;
@@ -278,26 +284,6 @@ async function getInputMap(el) {
   return json.data;
 }
 
-function prepopulateForm(el, inputMap) {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const eventId = urlParams.get('eventId');
-
-  if (!eventId) return;
-
-  const eventObj = JSON.parse(localStorage.getItem(eventId));
-
-  SUPPORTED_COMPONENTS.forEach((comp) => {
-    const mappedComponents = el.querySelectorAll(`.${comp}-component`);
-    if (!mappedComponents?.length) return;
-
-    mappedComponents.forEach(async (component) => {
-      const { onResume } = await import(`./controllers/${comp}-component-controller.js`);
-      await onResume(component, eventObj, inputMap);
-    });
-  });
-}
-
 function querySelectorDeep(selector, root = document) {
   const elements = [];
 
@@ -316,27 +302,62 @@ function querySelectorDeep(selector, root = document) {
   return elements;
 }
 
+function validateRequiredFields(fields) {
+  return Array.from(fields).every((f) => f.value)
+}
+
+function prepopulateForm(el, inputMap) {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const eventId = urlParams.get('eventId');
+  const frags = el.querySelectorAll('.fragment');
+
+  if (!eventId) return;
+
+  const eventObj = JSON.parse(localStorage.getItem(eventId));
+
+  SUPPORTED_COMPONENTS.forEach((comp) => {
+    const mappedComponents = el.querySelectorAll(`.${comp}-component`);
+    if (!mappedComponents?.length) return;
+
+    mappedComponents.forEach(async (component) => {
+      const { onResume } = await import(`./controllers/${comp}-component-controller.js`);
+      await onResume(component, eventObj, inputMap);
+    });
+  });
+
+  frags.forEach((frag, i) => {
+    const requiredFields = querySelectorDeep('input[required], select[required], textarea[required]', frag);
+
+    if (validateRequiredFields(requiredFields)) {
+      formState.farthestStep = i + 1;
+    }
+  })
+
+  updateSideNav(el);
+}
+
 function initRequiredFieldsValidation(el) {
   const frags = el.querySelectorAll('.fragment');
   const allFormCtas = el.querySelectorAll('.form-handler-panel-wrapper a');
 
   const requiredFields = querySelectorDeep('input[required], select[required], textarea[required]', frags[formState.currentStep]);
 
-  let allFieldsValid = false;
+  let allFieldsValid = validateRequiredFields(requiredFields);
 
-  const onValidate = () => {
-    allFieldsValid = Array.from(requiredFields).every((f) => f.value)
-
-    allFormCtas.forEach((cta) => {
-      cta.classList.toggle('disabled', !allFieldsValid);
-    })
-  }
-
-  requiredFields.forEach((field) => {
-    field.addEventListener('change', onValidate, { bubbles: true });
+  allFormCtas.forEach((cta) => {
+    cta.classList.toggle('disabled', !allFieldsValid);
   })
 
-  onValidate();
+  requiredFields.forEach((field) => {
+    field.addEventListener('change', () => {
+      allFieldsValid = validateRequiredFields(requiredFields);
+      
+      allFormCtas.forEach((cta) => {
+        cta.classList.toggle('disabled', !allFieldsValid);
+      })
+    }, { bubbles: true });
+  })
 }
 
 export default async function init(el) {
