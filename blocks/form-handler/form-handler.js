@@ -1,11 +1,11 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, handlize } from '../../utils/utils.js';
+import { getIcon, handlize, buildNoAccessScreen } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 const { default: getUuid } = await import(`${getLibs()}/utils/getUuid.js`);
 
-// list of controllers for the hanler to load
+// list of controllers for the handler to load
 const SUPPORTED_COMPONENTS = [
   'checkbox',
   'event-format',
@@ -14,14 +14,17 @@ const SUPPORTED_COMPONENTS = [
   'venue-info',
 ];
 
+let formElement;
+
 const formState = {
   currentStep: 0,
   farthestStep: 0,
+  steps: {},
 };
 
-function initComponents(el) {
+function initComponents() {
   SUPPORTED_COMPONENTS.forEach((comp) => {
-    const mappedComponents = el.querySelectorAll(`.${comp}-component`);
+    const mappedComponents = formElement.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
 
     mappedComponents.forEach(async (component) => {
@@ -31,9 +34,9 @@ function initComponents(el) {
   });
 }
 
-async function gatherValues(el, inputMap) {
+async function gatherValues(inputMap) {
   const allComponentPromises = SUPPORTED_COMPONENTS.map(async (comp) => {
-    const mappedComponents = el.querySelectorAll(`.${comp}-component`);
+    const mappedComponents = formElement.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
@@ -50,8 +53,22 @@ async function gatherValues(el, inputMap) {
   return finalPayload;
 }
 
-function decorateForm(el) {
-  const cols = el.querySelectorAll(':scope > div:first-of-type > div');
+function decorateForm() {
+  const app = createTag('sp-theme', { color: 'light', scale: 'medium' });
+  const form = createTag('form', {}, '', { parent: app });
+  const formDivs = formElement.querySelectorAll('.fragment');
+
+  if (!formDivs.length) {
+    formElement.remove();
+    return;
+  }
+
+  formDivs.forEach((formDiv) => {
+    formDiv.parentElement.replaceChild(app, formDiv);
+    form.append(formDiv);
+  });
+
+  const cols = formElement.querySelectorAll(':scope > div:first-of-type > div');
 
   cols.forEach((col, i) => {
     if (i === 0) {
@@ -67,8 +84,21 @@ function decorateForm(el) {
         }
       });
     }
-    if (i === 1) col.classList.add('main-frame');
+
+    if (i === 1) {
+      col.classList.add('main-frame');
+      const frags = formElement.querySelectorAll('.fragment');
+
+      frags.forEach((frag) => {
+        const fragPathSegments = frag.dataset.path.split('/');
+        const fragId = `form-step-${fragPathSegments[fragPathSegments.length - 1]}`;
+        frag.id = fragId;
+        formState.steps[fragId] = {};
+      })
+    }
   });
+
+  return form;
 }
 
 function formatDate(date) {
@@ -108,8 +138,8 @@ async function getEventIdAndUrl(payload) {
   return [hash, pathname];
 }
 
-async function saveEvent(el, inputMap) {
-  const payload = await gatherValues(el, inputMap);
+async function saveEvent(inputMap) {
+  const payload = await gatherValues(inputMap);
   const [hash, pathname] = await getEventIdAndUrl(payload);
   payload['event-id'] = hash;
   payload.url = pathname;
@@ -155,8 +185,8 @@ async function postForm(payload) {
     .catch((error) => console.error(error));
 }
 
-function updateSideNav(el) {
-  const sideNavs = el.querySelectorAll('.side-menu .nav-item');
+function updateSideNav() {
+  const sideNavs = formElement.querySelectorAll('.side-menu .nav-item');
 
   sideNavs.forEach((n, i) => {
     n.closest('li')?.classList.remove('active');
@@ -165,11 +195,42 @@ function updateSideNav(el) {
   });
 }
 
-function navigateForm(el, stepIndex = formState.currentStep + 1) {
-  const frags = el.querySelectorAll('.fragment');
+function validateRequiredFields(fields) {
+  return fields.length === 0 || Array.from(fields).every((f) => f.value)
+}
 
-  const nextBtn = el.querySelector('.form-handler-ctas-panel .next-button');
-  const backBtn = el.querySelector('.form-handler-ctas-panel .back-btn');
+function updateCtaStatus() {
+  const frags = formElement.querySelectorAll('.fragment');
+  const currentFrag = frags[formState.currentStep];
+  const stepValid = validateRequiredFields(formState.steps[currentFrag.id].requiredFields);
+  const ctas = formElement.querySelectorAll('.form-handler-panel-wrapper a');
+  
+  ctas.forEach((cta) => {
+    if (cta.classList.contains('back-btn')) {
+      cta.classList.toggle('disabled', !stepValid || formState.currentStep === 0);
+    } else {
+      cta.classList.toggle('disabled', !stepValid);
+    }
+  })
+}
+
+export function initRequiredFieldsValidation() {
+  const frags = formElement.querySelectorAll('.fragment');
+  const currentFrag = frags[formState.currentStep];
+  formState.steps[currentFrag.id].requiredFields = querySelectorAllDeep('input[required], select[required], textarea[required]', currentFrag);
+  updateCtaStatus()
+
+  formState.steps[currentFrag.id].requiredFields.forEach((field) => {
+    field.removeEventListener('change', updateCtaStatus)
+    field.addEventListener('change', updateCtaStatus, { bubbles: true });
+  })
+}
+
+function navigateForm(stepIndex = formState.currentStep + 1) {
+  const frags = formElement.querySelectorAll('.fragment');
+
+  const nextBtn = formElement.querySelector('.form-handler-ctas-panel .next-button');
+  const backBtn = formElement.querySelector('.form-handler-ctas-panel .back-btn');
 
   if (stepIndex >= frags.length || stepIndex < 0) return;
 
@@ -188,12 +249,13 @@ function navigateForm(el, stepIndex = formState.currentStep + 1) {
   }
 
   backBtn.classList.toggle('disabled', formState.currentStep === 0);
-  updateSideNav(el);
+  updateSideNav();
+  initRequiredFieldsValidation();
 }
 
-function initFormCtas(el, inputMap) {
-  const ctaRow = el.querySelector(':scope > div:last-of-type');
-  const frags = el.querySelectorAll('.fragment');
+function initFormCtas(inputMap) {
+  const ctaRow = formElement.querySelector(':scope > div:last-of-type');
+  const frags = formElement.querySelectorAll('.fragment');
   decorateButtons(ctaRow, 'button-l');
   const ctas = ctaRow.querySelectorAll('a');
 
@@ -220,7 +282,7 @@ function initFormCtas(el, inputMap) {
       if (['#pre-event', '#post-event'].includes(ctaUrl.hash)) {
         cta.classList.add('fill');
         cta.addEventListener('click', async () => {
-          const payload = await saveEvent(el, inputMap);
+          const payload = await saveEvent(inputMap);
           const targetRedirect = `${window.location.origin}/event/t3/dme/preview?eventId=${payload['event-id']}`;
           window.open(targetRedirect);
         });
@@ -237,19 +299,20 @@ function initFormCtas(el, inputMap) {
 
           if (formState.currentStep === frags.length - 1) {
             cta.textContent = finalStateText;
+            cta.prepend(getIcon('golden-rocket'));
           } else {
             cta.textContent = nextStateText;
           }
         }
 
         cta.addEventListener('click', async () => {
-          const payload = await saveEvent(el, inputMap);
+          const payload = await saveEvent(inputMap);
 
           if (ctaUrl.hash === '#next') {
             if (formState.currentStep === frags.length - 1) {
               postForm(payload);
             } else {
-              navigateForm(el);
+              navigateForm();
             }
           }
         });
@@ -258,13 +321,13 @@ function initFormCtas(el, inputMap) {
   });
 
   backBtn.addEventListener('click', async () => {
-    navigateForm(el, formState.currentStep - 1);
+    navigateForm(formState.currentStep - 1);
   });
 }
 
-function initNavigation(el) {
-  const frags = el.querySelectorAll('.fragment');
-  const navItems = el.querySelectorAll('.side-menu .nav-item');
+function initNavigation() {
+  const frags = formElement.querySelectorAll('.fragment');
+  const navItems = formElement.querySelectorAll('.side-menu .nav-item');
 
   frags.forEach((frag, i) => {
     if (i !== 0) {
@@ -275,7 +338,7 @@ function initNavigation(el) {
   navItems.forEach((nav, i) => {
     nav.addEventListener('click', () => {
       if (!nav.closest('li')?.classList.contains('disabled')) {
-        navigateForm(el, i);
+        navigateForm(i);
       }
     });
   });
@@ -293,7 +356,7 @@ async function getInputMap(el) {
   return json.data;
 }
 
-function querySelectorDeep(selector, root = document) {
+function querySelectorAllDeep(selector, root = document) {
   const elements = [];
 
   function recursiveQuery(root) {
@@ -311,22 +374,18 @@ function querySelectorDeep(selector, root = document) {
   return elements;
 }
 
-function validateRequiredFields(fields) {
-  return fields.length === 0 || Array.from(fields).every((f) => f.value)
-}
-
-function prepopulateForm(el, inputMap) {
+function prepopulateForm(inputMap) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
-  const frags = el.querySelectorAll('.fragment');
+  const frags = formElement.querySelectorAll('.fragment');
 
   if (!eventId) return;
 
   const eventObj = JSON.parse(localStorage.getItem(eventId));
 
   SUPPORTED_COMPONENTS.forEach((comp) => {
-    const mappedComponents = el.querySelectorAll(`.${comp}-component`);
+    const mappedComponents = formElement.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
 
     mappedComponents.forEach(async (component) => {
@@ -336,41 +395,29 @@ function prepopulateForm(el, inputMap) {
   });
 
   frags.forEach((frag, i) => {
-    const requiredFields = querySelectorDeep('input[required], select[required], textarea[required]', frag);
+    const requiredFields = querySelectorAllDeep('input[required], select[required], textarea[required]', frag);
 
     if (validateRequiredFields(requiredFields)) {
       formState.farthestStep = i + 1;
     }
   })
 
-  updateSideNav(el);
+  updateSideNav(formElement);
 }
 
-function initRequiredFieldsValidation(el) {
-  const frags = el.querySelectorAll('.fragment');
-  const allFormCtas = el.querySelectorAll('.form-handler-panel-wrapper a');
+async function buildECCForm(el) {
+  formElement = el;
+  const inputMap = await getInputMap(el);
+  const form = decorateForm();
+  initFormCtas(inputMap);
+  initComponents();
+  initNavigation();
+  prepopulateForm(inputMap);
+  initRequiredFieldsValidation();
 
-  const requiredFields = querySelectorDeep('input[required], select[required], textarea[required]', frags[formState.currentStep]);
-
-  let allFieldsValid = validateRequiredFields(requiredFields);
-
-  allFormCtas.forEach((cta) => {
-    cta.classList.toggle('disabled', !allFieldsValid);
-  })
-
-  requiredFields.forEach((field) => {
-    field.addEventListener('change', () => {
-      allFieldsValid = validateRequiredFields(requiredFields);
-      
-      allFormCtas.forEach((cta) => {
-        if (cta.classList.contains('back-btn')) {
-          cta.classList.toggle('disabled', !allFieldsValid && formState.currentStep === 0);
-        } else {
-          cta.classList.toggle('disabled', !allFieldsValid);
-        }
-      })
-    }, { bubbles: true });
-  })
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+  });
 }
 
 export default async function init(el) {
@@ -380,29 +427,35 @@ export default async function init(el) {
     import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
   ]);
 
-  const app = createTag('sp-theme', { color: 'light', scale: 'medium' });
-  const form = createTag('form', {}, '', { parent: app });
-  const formDivs = el.querySelectorAll('.fragment');
+  const profile = window.bm8tr.get('imsProfile');
+  const { search, hostname } = window.location;
+  const urlParams = new URLSearchParams(search);
+  const devMode = urlParams.get('devMode');
 
-  if (!formDivs.length) {
-    el.remove();
+  if (devMode === 'true' && hostname === 'localhost') {
+    buildECCForm(el);
     return;
   }
 
-  formDivs.forEach((formDiv) => {
-    formDiv.parentElement.replaceChild(app, formDiv);
-    form.append(formDiv);
-  });
+  if (profile) {
+    if (profile.noProfile || profile.account_type !== 'type3') {
+      buildNoAccessScreen(el);
+    } else {
+      buildECCForm(el);
+    }
 
-  const inputMap = await getInputMap(el);
-  decorateForm(el);
-  initFormCtas(el, inputMap);
-  initComponents(el);
-  initNavigation(el);
-  prepopulateForm(el, inputMap);
-  initRequiredFieldsValidation(el);
+    return;
+  }
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-  });
+  if (!profile) {
+    const unsubscribe = window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
+      if (newValue?.noProfile || newValue.account_type !== 'type3') {
+        buildNoAccessScreen(el);
+      } else {
+        buildECCForm(el);
+      }
+
+      unsubscribe();
+    });
+  }
 }
