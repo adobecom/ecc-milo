@@ -311,7 +311,7 @@ function querySelectorDeep(selector, root = document) {
 }
 
 function validateRequiredFields(fields) {
-  return Array.from(fields).every((f) => f.value)
+  return fields.length === 0 || Array.from(fields).every((f) => f.value)
 }
 
 function prepopulateForm(el, inputMap) {
