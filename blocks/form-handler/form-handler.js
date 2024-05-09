@@ -60,7 +60,7 @@ function decorateForm() {
 
   if (!formDivs.length) {
     formElement.remove();
-    return;
+    return null;
   }
 
   formDivs.forEach((formDiv) => {
@@ -94,7 +94,7 @@ function decorateForm() {
         const fragId = `form-step-${fragPathSegments[fragPathSegments.length - 1]}`;
         frag.id = fragId;
         formState.steps[fragId] = {};
-      })
+      });
     }
   });
 
@@ -196,7 +196,7 @@ function updateSideNav() {
 }
 
 function validateRequiredFields(fields) {
-  return fields.length === 0 || Array.from(fields).every((f) => f.value)
+  return fields.length === 0 || Array.from(fields).every((f) => f.value);
 }
 
 function updateCtaStatus() {
@@ -204,26 +204,46 @@ function updateCtaStatus() {
   const currentFrag = frags[formState.currentStep];
   const stepValid = validateRequiredFields(formState.steps[currentFrag.id].requiredFields);
   const ctas = formElement.querySelectorAll('.form-handler-panel-wrapper a');
-  
+
   ctas.forEach((cta) => {
     if (cta.classList.contains('back-btn')) {
       cta.classList.toggle('disabled', !stepValid || formState.currentStep === 0);
     } else {
       cta.classList.toggle('disabled', !stepValid);
     }
-  })
+  });
+}
+
+function querySelectorAllDeep(selector, root = document) {
+  const elements = [];
+
+  function recursiveQuery(r) {
+    elements.push(...r.querySelectorAll(selector));
+
+    r.querySelectorAll('*').forEach((el) => {
+      if (el.shadowRoot) {
+        recursiveQuery(el.shadowRoot);
+      }
+    });
+  }
+
+  recursiveQuery(root);
+
+  return elements;
 }
 
 export function initRequiredFieldsValidation() {
-  const frags = formElement.querySelectorAll('.fragment');
-  const currentFrag = frags[formState.currentStep];
-  formState.steps[currentFrag.id].requiredFields = querySelectorAllDeep('input[required], select[required], textarea[required]', currentFrag);
-  updateCtaStatus()
-
-  formState.steps[currentFrag.id].requiredFields.forEach((field) => {
-    field.removeEventListener('change', updateCtaStatus)
-    field.addEventListener('change', updateCtaStatus, { bubbles: true });
-  })
+  setTimeout(() => {
+    const frags = formElement.querySelectorAll('.fragment');
+    const currentFrag = frags[formState.currentStep];
+    formState.steps[currentFrag.id].requiredFields = querySelectorAllDeep('input[required], select[required], textarea[required]', currentFrag);
+    formState.steps[currentFrag.id].requiredFields.forEach((field) => {
+      field.removeEventListener('change', updateCtaStatus);
+      field.addEventListener('change', updateCtaStatus, { bubbles: true });
+    });
+  
+    updateCtaStatus();
+  }, 100);
 }
 
 function navigateForm(stepIndex = formState.currentStep + 1) {
@@ -240,7 +260,6 @@ function navigateForm(stepIndex = formState.currentStep + 1) {
 
   frags[prevStep].classList.add('hidden');
   frags[formState.currentStep].classList.remove('hidden');
-
 
   if (formState.currentStep === frags.length - 1) {
     nextBtn.textContent = nextBtn.dataset.finalStateText;
@@ -356,24 +375,6 @@ async function getInputMap(el) {
   return json.data;
 }
 
-function querySelectorAllDeep(selector, root = document) {
-  const elements = [];
-
-  function recursiveQuery(root) {
-      elements.push(...root.querySelectorAll(selector));
-
-      root.querySelectorAll('*').forEach(el => {
-          if (el.shadowRoot) {
-              recursiveQuery(el.shadowRoot);
-          }
-      });
-  }
-
-  recursiveQuery(root);
-
-  return elements;
-}
-
 function prepopulateForm(inputMap) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
@@ -400,7 +401,7 @@ function prepopulateForm(inputMap) {
     if (validateRequiredFields(requiredFields)) {
       formState.farthestStep = i + 1;
     }
-  })
+  });
 
   updateSideNav(formElement);
 }

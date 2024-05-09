@@ -1,3 +1,6 @@
+import { yieldToMain } from '../../../utils/utils.js';
+import { initRequiredFieldsValidation } from '../form-handler.js';
+
 async function uploadImage(file) {
   const formData = new FormData();
   formData.append('file', file);
@@ -26,15 +29,15 @@ function uploadBinaryFile(file) {
   // xhr.setRequestHeader('Content-Type', 'application/json');
 
   xhr.onload = function () {
-      if (xhr.status === 200) {
-          console.log('Success:', xhr.responseText);
-      } else {
-          console.error('Error Status:', xhr.status);
-      }
+    if (xhr.status === 200) {
+      console.log('Success:', xhr.responseText);
+    } else {
+      console.error('Error Status:', xhr.status);
+    }
   };
 
   xhr.onerror = function () {
-      console.error('Network error');
+    console.error('Network error');
   };
 
   xhr.send(file);
@@ -140,6 +143,12 @@ export default function makeFileInputDropZone(inputWrapper) {
   });
 }
 
+function setRemoveEventListener(removeElement) {
+  removeElement.addEventListener('click', (event) => {
+    event.currentTarget.parentElement.remove();
+  });
+}
+
 export function initRepeater(component) {
   const repeaters = component.querySelectorAll('.repeater-element');
   repeaters.forEach((element) => {
@@ -148,24 +157,24 @@ export function initRepeater(component) {
       const clonedNode = vanillaNode.cloneNode(true);
       const prevNode = event.currentTarget.previousElementSibling;
       clonedNode.setAttribute('repeatIdx', parseInt(prevNode.getAttribute('repeatIdx'), 10) + 1);
-      
+
       // Reset delete icon state and add listener.
-      const deleteIcon = clonedNode.querySelector('.delete-button');
-      deleteIcon.classList.remove('hidden');
-      setRemoveEventListener(deleteIcon);
-      
+      const deleteIcon = clonedNode.querySelector('.repeater-delete-button');
+
+      if (deleteIcon) {
+        deleteIcon.classList.remove('hidden');
+        setRemoveEventListener(deleteIcon);
+      }
+
       prevNode.after(clonedNode);
+      yieldToMain().then(() => {
+        initRequiredFieldsValidation();
+      });
     });
   });
 }
 
-function setRemoveEventListener(removeElement) {
-  removeElement.addEventListener('click', (event) => {
-    event.currentTarget.parentElement.remove();
-  });
-}
-
 export function initRemove(component) {
-  const removeIcons = component.querySelectorAll('.delete-button');
+  const removeIcons = component.querySelectorAll('.repeater-delete-button');
   removeIcons.forEach((removeIcon) => setRemoveEventListener(removeIcon));
 }

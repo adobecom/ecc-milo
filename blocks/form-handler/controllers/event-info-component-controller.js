@@ -5,14 +5,12 @@ import { getMappedInputsOutput, initRepeater, initRemove } from './share-control
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 function formatDate(date) {
-  let month = '' + (date.getMonth() + 1),
-      day = '' + date.getDate(),
-      year = date.getFullYear();
+  let month = `${date.getMonth() + 1}`;
+  let day = `${date.getDate()}`;
+  const year = date.getFullYear();
 
-  if (month.length < 2) 
-      month = '0' + month;
-  if (day.length < 2) 
-      day = '0' + day;
+  if (month.length < 2) month = `0${month}`;
+  if (day.length < 2) day = `0${day}`;
 
   return [month, day, year].join('-');
 }
@@ -171,13 +169,6 @@ function selectDate(component, state, date) {
 }
 
 function updateInput(component, state) {
-  const options = {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  };
-
   const dateInput = component.querySelector('#event-info-date-picker');
 
   dateInput.dataset.startDate = formatDate(state.selectedStartDate);
