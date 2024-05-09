@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { getLibs } from '../../../scripts/utils.js';
-import { getMappedInputsOutput } from './share-controller.js';
+import { getMappedInputsOutput, initRepeater, initRemove } from './share-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -284,6 +284,8 @@ function initCalendar(component) {
 
 export default function init(component) {
   initCalendar(component);
+  initRepeater(component);
+  initRemove(component);
 }
 
 export function onResume(component, eventObj, inputMap) {
