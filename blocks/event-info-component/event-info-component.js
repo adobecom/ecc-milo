@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, handlize, generateToolTip, addRepeater } from '../../utils/utils.js';
+import { getIcon, handlize, generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -38,7 +38,6 @@ async function decorateField(row, type = 'text') {
   row.innerHTML = '';
   wrapper.append(input, attrTextEl);
   row.append(wrapper);
-  addRepeater(row, 'add extra title');
 }
 
 function buildDatePicker(column) {
