@@ -43,13 +43,10 @@ export function addTooltipToHeading(em, heading) {
 
 export function generateToolTip(formComponent) {
   const heading = formComponent.querySelector(':scope > div:first-of-type h2, :scope > div:first-of-type h3');
+  const em = formComponent.querySelector('p > em');
 
-  if (heading) {
-    const em = formComponent.querySelector('p > em');
-
-    if (em) {
-      addTooltipToHeading(em, heading);
-    }
+  if (heading && em) {
+    addTooltipToHeading(em, heading);
   }
 }
 
