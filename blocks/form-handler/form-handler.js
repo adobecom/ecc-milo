@@ -155,12 +155,23 @@ async function postForm(payload) {
     .catch((error) => console.error(error));
 }
 
+function updateSideNav(el) {
+  const sideNavs = el.querySelectorAll('.side-menu .nav-item');
+
+  sideNavs.forEach((n, i) => {
+    n.closest('li')?.classList.remove('active');
+    if (i <= formState.farthestStep) n.classList.remove('disabled');
+    if (i === formState.currentStep) n.closest('li')?.classList.add('active');
+  });
+}
+
 function navigateForm(el, stepIndex = formState.currentStep + 1) {
   const frags = el.querySelectorAll('.fragment');
-  const sideNavs = el.querySelectorAll('.side-menu .nav-item');
-  const nextBtn = el.querySelector('.form-handler-ctas-panel .next-button');
 
-  if (stepIndex >= frags.length) return;
+  const nextBtn = el.querySelector('.form-handler-ctas-panel .next-button');
+  const backBtn = el.querySelector('.form-handler-ctas-panel .back-btn');
+
+  if (stepIndex >= frags.length || stepIndex < 0) return;
 
   const prevStep = formState.currentStep;
   formState.currentStep = stepIndex;
@@ -168,17 +179,15 @@ function navigateForm(el, stepIndex = formState.currentStep + 1) {
 
   frags[prevStep].classList.add('hidden');
   frags[formState.currentStep].classList.remove('hidden');
-  sideNavs.forEach((n, i) => {
-    n.closest('li')?.classList.remove('active');
-    if (i <= formState.farthestStep) n.classList.remove('disabled');
-    if (i === formState.currentStep) n.closest('li')?.classList.add('active');
-  });
+
 
   if (formState.currentStep === frags.length - 1) {
     nextBtn.textContent = nextBtn.dataset.finalStateText;
   } else {
     nextBtn.textContent = nextBtn.dataset.nextStateText;
   }
+
+  backBtn.classList.toggle('disabled', formState.currentStep === 0);
 }
 
 function initFormCtas(el, inputMap) {
@@ -191,14 +200,15 @@ function initFormCtas(el, inputMap) {
 
   const forwardActionsWrappers = ctaRow.querySelectorAll(':scope > div');
 
-  const backwardWrapper = createTag('div', { class: 'form-handler-backward-wrapper' }, '', { parent: ctaRow });
-  const forwardWrapper = createTag('div', { class: 'form-handler-forward-wrapper' }, '', { parent: ctaRow });
+  const panelWrapper = createTag('div', { class: 'form-handler-panel-wrapper' }, '', { parent: ctaRow });
+  const backwardWrapper = createTag('div', { class: 'form-handler-backward-wrapper' }, '', { parent: panelWrapper });
+  const forwardWrapper = createTag('div', { class: 'form-handler-forward-wrapper' }, '', { parent: panelWrapper });
 
   forwardActionsWrappers.forEach((w) => {
     forwardWrapper.append(w);
   });
 
-  const backBtn = createTag('a', { class: 'back-btn' }, getIcon('chev-left'));
+  const backBtn = createTag('a', { class: 'back-btn' }, getIcon('chev-left-white'));
 
   backwardWrapper.append(backBtn);
 
@@ -218,10 +228,11 @@ function initFormCtas(el, inputMap) {
       if (['#save', '#next'].includes(ctaUrl.hash)) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
-          const [nextStateText, finalStateText] = cta.textContent.split('||');
+          const [nextStateText, finalStateText, republishStateText] = cta.textContent.split('||');
           cta.textContent = nextStateText;
           cta.dataset.nextStateText = nextStateText;
           cta.dataset.finalStateText = finalStateText;
+          cta.dataset.republishStateText = republishStateText;
 
           if (formState.currentStep === frags.length - 1) {
             cta.textContent = finalStateText;
@@ -243,6 +254,10 @@ function initFormCtas(el, inputMap) {
         });
       }
     }
+  });
+
+  backBtn.addEventListener('click', async () => {
+    navigateForm(el, formState.currentStep - 1);
   });
 }
 
@@ -277,10 +292,33 @@ async function getInputMap(el) {
   return json.data;
 }
 
+function querySelectorDeep(selector, root = document) {
+  const elements = [];
+
+  function recursiveQuery(root) {
+      elements.push(...root.querySelectorAll(selector));
+
+      root.querySelectorAll('*').forEach(el => {
+          if (el.shadowRoot) {
+              recursiveQuery(el.shadowRoot);
+          }
+      });
+  }
+
+  recursiveQuery(root);
+
+  return elements;
+}
+
+function validateRequiredFields(fields) {
+  return fields.length === 0 || Array.from(fields).every((f) => f.value)
+}
+
 function prepopulateForm(el, inputMap) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
+  const frags = el.querySelectorAll('.fragment');
 
   if (!eventId) return;
 
@@ -295,6 +333,43 @@ function prepopulateForm(el, inputMap) {
       await onResume(component, eventObj, inputMap);
     });
   });
+
+  frags.forEach((frag, i) => {
+    const requiredFields = querySelectorDeep('input[required], select[required], textarea[required]', frag);
+
+    if (validateRequiredFields(requiredFields)) {
+      formState.farthestStep = i + 1;
+    }
+  })
+
+  updateSideNav(el);
+}
+
+function initRequiredFieldsValidation(el) {
+  const frags = el.querySelectorAll('.fragment');
+  const allFormCtas = el.querySelectorAll('.form-handler-panel-wrapper a');
+
+  const requiredFields = querySelectorDeep('input[required], select[required], textarea[required]', frags[formState.currentStep]);
+
+  let allFieldsValid = validateRequiredFields(requiredFields);
+
+  allFormCtas.forEach((cta) => {
+    cta.classList.toggle('disabled', !allFieldsValid);
+  })
+
+  requiredFields.forEach((field) => {
+    field.addEventListener('change', () => {
+      allFieldsValid = validateRequiredFields(requiredFields);
+      
+      allFormCtas.forEach((cta) => {
+        if (cta.classList.contains('back-btn')) {
+          cta.classList.toggle('disabled', !allFieldsValid && formState.currentStep === 0);
+        } else {
+          cta.classList.toggle('disabled', !allFieldsValid);
+        }
+      })
+    }, { bubbles: true });
+  })
 }
 
 export default async function init(el) {
@@ -324,6 +399,7 @@ export default async function init(el) {
   initComponents(el);
   initNavigation(el);
   prepopulateForm(el, inputMap);
+  initRequiredFieldsValidation(el);
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();

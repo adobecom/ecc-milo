@@ -1,6 +1,6 @@
 .form-handler {
   display: block;
-  padding: 40px;
+  padding: 0 40px;
 }
 
 .form-handler * {
@@ -25,11 +25,21 @@
   padding-right: 12px;
 }
 
+.form-handler .side-menu ul li a {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
 .form-handler .side-menu ul li:not(:has(ul)) {
+  padding-left: 0;
+  padding-right: 0;
   margin: 12px 0;
+  display: flex;
+}
+
+.form-handler .side-menu ul li:not(:has(ul)) a {
   padding-top: 8px;
   padding-bottom: 8px;
-  display: flex;
 }
 
 .form-handler .side-menu ul li a {
@@ -37,9 +47,17 @@
   width: 100%;
 }
 
-.form-handler .side-menu ul li:not(:has(ul)):hover,
-.form-handler .side-menu ul li:not(:has(ul)).active {
-  background-color: var(--color-gray-200);
+.form-handler .side-menu ul li:not(:has(ul)):has(a):hover,
+.form-handler .side-menu ul li:not(:has(ul)):has(a).active {
+  background-color: var(--color-red);
+  color: var(--color-white);
+  font-weight: 700;
+}
+
+.form-handler .side-menu ul li:not(:has(ul)):has(a):hover a,
+.form-handler .side-menu ul li:not(:has(ul)):has(a).active a {
+  color: var(--color-white);
+  font-weight: 700;
 }
 
 .form-handler .side-menu .nav-item {
@@ -152,14 +170,19 @@
   padding: 16px 60px;
   background-color: var(--color-red);
   width: calc(100% + 80px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
   z-index: 9;
+  display: flex;
+  justify-content: center;
 }
 
-.form-handler .form-handler-ctas-panel > div {
+.form-handler .form-handler-ctas-panel .form-handler-panel-wrapper {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1440px;
+}
+
+.form-handler .form-handler-ctas-panel .form-handler-panel-wrapper > div {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -167,7 +190,7 @@
 
 .form-handler .form-handler-ctas-panel .form-handler-backward-wrapper .back-btn {
   padding: 8px;
-  border: 2px solid var(--color-gray-700);
+  border: 2px solid var(--color-white);
   border-radius: 24px;
   cursor: pointer;
 }
@@ -183,16 +206,47 @@
   border-right: 2px solid var(--color-black);
 }
 
-.form-handler .form-handler-ctas-panel a:any-link {
+.form-handler .form-handler-ctas-panel a {
   font-size: var(--type-body-s-size);
 }
 
+.form-handler .form-handler-ctas-panel a.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.form-handler .form-handler-ctas-panel a.next-button {
+  background-color: var(--color-gray-800);
+  border-color: var(--color-gray-800);
+}
+
+.form-handler .form-handler-ctas-panel a.next-button:hover {
+  filter: invert();
+}
+
 .form-handler .form-handler-ctas-panel a.fill {
-  background-color: var(--color-white);
+  background-color: var(--color-gray-200);
   color: var(--color-black);
   font-weight: 700;
   border-radius: 20px;
   line-height: 20px;
   min-height: 21px;
   padding: 7px 18px 8px;
+  border: 2px solid var(--color-white);
+  display: inline-block;
+}
+
+.form-handler .form-handler-ctas-panel a.fill:hover {
+  text-decoration: none;
+  filter: invert();
+}
+
+.form-handler .form-handler-ctas-panel .con-button.outline {
+  color: var(--color-white);
+  border-color: var(--color-white);
+}
+
+.form-handler .form-handler-ctas-panel .con-button.outline:hover {
+  background-color: var(--color-white);
+  color: var(--color-red);
 }

@@ -26,6 +26,7 @@
 .event-info-component .date-time-row {
   display: flex;
   align-items: center;
+  flex-direction: column;
   gap: 24px;
   margin-bottom: 24px;
 }
@@ -33,7 +34,7 @@
 .event-info-component .date-time-row > .date-picker {
   position: relative;
   border-bottom: 1px solid var(--color-black);
-  min-width: 400px;
+  min-width: 280px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -97,7 +98,6 @@
   right: calc(-50% + 40px);
   padding: 16px;
   width: 317px;
-  height: 286px;
   position: absolute;
   margin: auto;
   background: white;
@@ -249,4 +249,10 @@
   right: 0 ;
   background-color: var(--color-info-accent-light);
   z-index: -1;
+}
+
+@media screen and (min-width: 900px) {
+  .event-info-component .date-time-row {
+    flex-direction: row;
+  }
 }
