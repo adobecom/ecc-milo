@@ -71,3 +71,18 @@ export function buildNoAccessScreen(el) {
   el.append(h1, area);
   area.append(getIcon('browser-access-forbidden-lg'), noAccessDescription);
 }
+
+export function addRepeater(element, title) {
+  element.lastChild.setAttribute('repeatIdx', 0);
+
+  const tag = createTag('div');
+  tag.classList.add('repeater-element');
+
+  const heading = createTag('h3', { class: 'repeater-element-title' }, title);
+  tag.append(heading);
+
+  const plusIcon = getIcon('add-circle');
+  tag.append(plusIcon);
+
+  element.append(tag);
+}

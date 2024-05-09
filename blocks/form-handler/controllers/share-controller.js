@@ -139,3 +139,33 @@ export default function makeFileInputDropZone(inputWrapper) {
     handleImageFiles(inputWrapper, files);
   });
 }
+
+export function initRepeater(component) {
+  const repeaters = component.querySelectorAll('.repeater-element');
+  repeaters.forEach((element) => {
+    const vanillaNode = element.previousElementSibling.cloneNode(true);
+    element.addEventListener('click', (event) => {
+      const clonedNode = vanillaNode.cloneNode(true);
+      const prevNode = event.currentTarget.previousElementSibling;
+      clonedNode.setAttribute('repeatIdx', parseInt(prevNode.getAttribute('repeatIdx'), 10) + 1);
+      
+      // Reset delete icon state and add listener.
+      const deleteIcon = clonedNode.querySelector('.delete-button');
+      deleteIcon.classList.remove('hidden');
+      setRemoveEventListener(deleteIcon);
+      
+      prevNode.after(clonedNode);
+    });
+  });
+}
+
+function setRemoveEventListener(removeElement) {
+  removeElement.addEventListener('click', (event) => {
+    event.currentTarget.parentElement.remove();
+  });
+}
+
+export function initRemove(component) {
+  const removeIcons = component.querySelectorAll('.delete-button');
+  removeIcons.forEach((removeIcon) => setRemoveEventListener(removeIcon));
+}
