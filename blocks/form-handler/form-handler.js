@@ -188,6 +188,7 @@ function navigateForm(el, stepIndex = formState.currentStep + 1) {
   }
 
   backBtn.classList.toggle('disabled', formState.currentStep === 0);
+  updateSideNav(el);
 }
 
 function initFormCtas(el, inputMap) {
