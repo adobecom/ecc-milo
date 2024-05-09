@@ -1,0 +1,96 @@
+.event-materials-component > div {
+  margin-bottom: 32px;
+}
+
+.event-materials-component .image-dropzones {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.event-materials-component sp-textfield {
+  width: 100%;
+}
+
+.event-materials-component .material-file-input-wrapper {
+  border: 2px dashed var(--color-gray-400);
+  border-radius: 8px;
+  height: 124px;
+  width: 124px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+}
+
+.event-materials-component .material-file-input-wrapper .preview-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.event-materials-component .material-file-input-wrapper .preview-wrapper .icon-delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  cursor: pointer;
+}
+
+.event-materials-component .material-file-input-wrapper .preview-material-placeholder {
+  height: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+
+}
+
+.event-materials-component .material-file-input-wrapper .preview-material-placeholder img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.event-materials-component .material-file-input-wrapper label {
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  align-items: center;
+  padding: 16px;
+  height: 100%;
+  width: 100%;
+  line-height: var(--type-body-xxs-lh);
+}
+
+.event-materials-component .material-file-input-wrapper label:hover {
+  background-color: var(--color-gray-100);
+}
+
+.event-materials-component .material-file-input-wrapper label input.material-file-input {
+  display: none;
+}
+
+.event-materials-component .material-file-input-wrapper label .icon {
+  width: 40px;
+  opacity: 0.5;
+}
+
+.event-materials-component .material-file-input-wrapper label p {
+  margin: 0;
+  font-size: var(--type-body-xs-size);;
+}
+
+.event-materials-component .material-file-input-wrapper .hidden {
+  display: none;
+}
+
+.event-materials-component .attr-text {
+  text-align: right;
+}
+
+@media (min-width: 900px) {
+  .event-materials-component .file-dropzones {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
