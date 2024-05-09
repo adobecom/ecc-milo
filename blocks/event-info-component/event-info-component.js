@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, handlize, generateToolTip, addRepeater } from '../../utils/utils.js';
+import { getIcon, handlize, generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -34,12 +34,9 @@ async function decorateField(row, type = 'text') {
 
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
 
-  const component = createTag('div');
-  row.innerHTML = '';
-  component.append(input, attrTextEl);
-
   const wrapper = createTag('div', { class: 'info-field-wrapper' });
-  wrapper.append(component);
+  row.innerHTML = '';
+  wrapper.append(input, attrTextEl);
   row.append(wrapper);
 }
 
@@ -106,12 +103,8 @@ export default function init(el) {
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach(async (r, i) => {
-    if (i === 1) {
-      await decorateField(r, 'text');
-    }
-    if (i === 2) {
-      await decorateField(r, 'textarea');
-    }
+    if (i === 1) await decorateField(r, 'text');
+    if (i === 2) await decorateField(r, 'textarea');
     if (i === 3) decorateDateTimeFields(r);
   });
 }
