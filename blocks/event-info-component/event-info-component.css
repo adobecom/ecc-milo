@@ -250,36 +250,3 @@
   background-color: var(--color-info-accent-light);
   z-index: -1;
 }
-
-.hidden {
-  display: none;
-}
-
-.repeater-element {
-  max-width: 100%;
-  height: var(--spectrum-spacing-700, 48px);
-  flex-shrink: 0;
-  border-radius: 10px;
-  border: 1px dashed var(--Divider, #6E6E6E);
-  display: flex;
-  align-items: center;
-  padding: 0px 32px;
-  margin-bottom: 24px;
-}
-
-.icon-add-circle {
-  height: 24px;
-  width: 24px;
-}
-
-.repeater-element-title {
-  width: 100%;
-  color: var(--web-gray-scale-color-gray-500909090, var(--web-grey-scale-color-gray-500909090, #909090));
-  /* Heading/Heading S */
-  font-family: "Adobe Clean";
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 24px; /* 125% */
-  margin: 0px;
-}
