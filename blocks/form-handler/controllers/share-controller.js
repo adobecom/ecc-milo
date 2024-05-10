@@ -1,6 +1,3 @@
-import { yieldToMain } from '../../../utils/utils.js';
-import { initRequiredFieldsValidation } from '../form-handler.js';
-
 async function uploadImage(file) {
   const formData = new FormData();
   formData.append('file', file);
@@ -141,40 +138,4 @@ export default function makeFileInputDropZone(inputWrapper) {
     const { files } = e.currentTarget;
     handleImageFiles(inputWrapper, files);
   });
-}
-
-function setRemoveEventListener(removeElement) {
-  removeElement.addEventListener('click', (event) => {
-    event.currentTarget.parentElement.remove();
-  });
-}
-
-export function initRepeater(component) {
-  const repeaters = component.querySelectorAll('.repeater-element');
-  repeaters.forEach((element) => {
-    const vanillaNode = element.previousElementSibling.cloneNode(true);
-    element.addEventListener('click', (event) => {
-      const clonedNode = vanillaNode.cloneNode(true);
-      const prevNode = event.currentTarget.previousElementSibling;
-      clonedNode.setAttribute('repeatIdx', parseInt(prevNode.getAttribute('repeatIdx'), 10) + 1);
-
-      // Reset delete icon state and add listener.
-      const deleteIcon = clonedNode.querySelector('.repeater-delete-button');
-
-      if (deleteIcon) {
-        deleteIcon.classList.remove('hidden');
-        setRemoveEventListener(deleteIcon);
-      }
-
-      prevNode.after(clonedNode);
-      yieldToMain().then(() => {
-        initRequiredFieldsValidation();
-      });
-    });
-  });
-}
-
-export function initRemove(component) {
-  const removeIcons = component.querySelectorAll('.repeater-delete-button');
-  removeIcons.forEach((removeIcon) => setRemoveEventListener(removeIcon));
 }
