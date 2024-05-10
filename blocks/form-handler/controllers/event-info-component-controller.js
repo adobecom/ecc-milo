@@ -284,7 +284,7 @@ function initCalendar(component) {
 
 export default function init(component) {
   initCalendar(component);
-  initRepeater(component);
+
   initRemove(component);
 }
 

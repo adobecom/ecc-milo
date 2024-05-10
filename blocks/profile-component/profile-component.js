@@ -77,8 +77,4 @@ export default function init(element){
     element.classList.add('form-component');
 
     decorateProfile(element);
-
-    // element.parentNode.append(tag);
-
-    // decorateProfile(tag);
 }

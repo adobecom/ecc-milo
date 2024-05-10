@@ -66,11 +66,6 @@ function decorateDateTimeFields(row) {
   });
 }
 
-// function profileComponentInit(element){
-//   const tag = createTag('div', { class:'form-component'});
-//   element.parentNode.append(tag);
-// }
-
 export default function init(el) {
   el.classList.add('form-component');
   generateToolTip(el);
@@ -81,5 +76,4 @@ export default function init(el) {
     if (i === 2) await decorateTextfield(r, 'textarea');
     if (i === 3) decorateDateTimeFields(r);
   });
-  // profileComponentInit(el);
 }
