@@ -16,8 +16,9 @@ async function decorateSWCTextField(row, extraOptions) {
   if (!cols.length) return;
   const [placeholderCol, maxLengthCol] = cols;
   const text = placeholderCol.textContent.trim();
-  
-  let maxCharNum, attrTextEl;
+
+  let maxCharNum; let
+    attrTextEl;
   if (maxLengthCol) {
     attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
     maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
@@ -25,9 +26,7 @@ async function decorateSWCTextField(row, extraOptions) {
 
   const isRequired = attrTextEl?.textContent.trim().endsWith('*');
 
-  const input = createTag('sp-textfield', {
-    ...extraOptions, class: 'text-input', placeholder: text
-  });
+  const input = createTag('sp-textfield', { ...extraOptions, class: 'text-input', placeholder: text });
 
   if (isRequired) input.required = true;
 
@@ -44,7 +43,7 @@ function decorateFileDropzone(row) {
   row.classList.add('file-dropzones');
   const cols = row.querySelectorAll(':scope > div');
   const dropzones = [];
-  
+
   cols.forEach((c, i) => {
     c.classList.add('file-dropzone');
     const text = c.textContent.trim();
@@ -53,17 +52,17 @@ function decorateFileDropzone(row) {
     const fileInput = createTag('input', { id: inputId, type: 'file', class: 'material-file-input' });
     const inputWrapper = createTag('div', { class: 'material-file-input-wrapper' });
     const inputLabel = createTag('label', { class: 'material-file-input-label' });
-  
+
     const previewWrapper = createTag('div', { class: 'preview-wrapper hidden' });
     const previewImg = createTag('div', { class: 'preview-img-placeholder' });
     const previewDeleteButton = getIcon('delete');
-  
+
     previewWrapper.append(previewImg, previewDeleteButton);
-  
+
     inputWrapper.append(previewWrapper, inputLabel);
     inputLabel.append(fileInput, getIcon('upload-cloud'), text);
     dropzones.push(inputWrapper);
-  })
+  });
 
   row.innerHTML = '';
   dropzones.forEach((dz) => {

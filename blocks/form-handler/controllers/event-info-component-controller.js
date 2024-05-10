@@ -1,18 +1,16 @@
 /* eslint-disable no-use-before-define */
 import { getLibs } from '../../../scripts/utils.js';
-import { getMappedInputsOutput, initRepeater, initRemove } from './share-controller.js';
+import { getMappedInputsOutput } from './share-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 function formatDate(date) {
-  let month = '' + (date.getMonth() + 1),
-      day = '' + date.getDate(),
-      year = date.getFullYear();
+  let month = `${date.getMonth() + 1}`;
+  let day = `${date.getDate()}`;
+  const year = date.getFullYear();
 
-  if (month.length < 2) 
-      month = '0' + month;
-  if (day.length < 2) 
-      day = '0' + day;
+  if (month.length < 2) month = `0${month}`;
+  if (day.length < 2) day = `0${day}`;
 
   return [month, day, year].join('-');
 }
@@ -171,13 +169,6 @@ function selectDate(component, state, date) {
 }
 
 function updateInput(component, state) {
-  const options = {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  };
-
   const dateInput = component.querySelector('#event-info-date-picker');
 
   dateInput.dataset.startDate = formatDate(state.selectedStartDate);
@@ -284,8 +275,6 @@ function initCalendar(component) {
 
 export default function init(component) {
   initCalendar(component);
-
-  initRemove(component);
 }
 
 export function onResume(component, eventObj, inputMap) {

@@ -28,6 +28,8 @@
 .form-handler .side-menu ul li a {
   padding-left: 12px;
   padding-right: 12px;
+  color: var(--color-black);
+  width: 100%;
 }
 
 .form-handler .side-menu ul li:not(:has(ul)) {
@@ -40,11 +42,6 @@
 .form-handler .side-menu ul li:not(:has(ul)) a {
   padding-top: 8px;
   padding-bottom: 8px;
-}
-
-.form-handler .side-menu ul li a {
-  color: var(--color-black);
-  width: 100%;
 }
 
 .form-handler .side-menu ul li:not(:has(ul)):has(a):hover,
@@ -74,6 +71,10 @@
   max-width: var(--grid-container-width);
 }
 
+.form-handler .main-frame .section .content {
+  max-width: none;
+}
+
 .form-handler .main-frame .section:first-of-type .content {
   margin: 0 24px;
   max-width: none;
@@ -91,10 +92,6 @@
   border-radius: 10px;
   margin: 24px;
   box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
-}
-
-.form-handler .main-frame .section .content {
-  max-width: none;
 }
 
 .form-handler .fragment.hidden {
@@ -264,10 +261,10 @@
   height: var(--spectrum-spacing-700, 48px);
   flex-shrink: 0;
   border-radius: 10px;
-  border: 1px dashed var(--Divider, #6E6E6E);
+  border: 1px dashed var(--color-gray-500);
   display: flex;
   align-items: center;
-  padding: 0px 32px;
+  padding: 0 32px;
   margin-bottom: 24px;
 }
 
@@ -278,14 +275,12 @@
 
 .form-handler .repeater-element-title {
   width: 100%;
-  color: var(--web-gray-scale-color-gray-500909090, var(--web-grey-scale-color-gray-500909090, #909090));
-  /* Heading/Heading S */
-  font-family: "Adobe Clean";
+  color: var(--color-gray-500);
+  font-family: var(--body-font-family);
   font-size: 20px;
   font-style: normal;
   font-weight: 700;
-  line-height: 24px; /* 125% */
-  margin: 0px;
+  margin: 0;
 }
 
 .form-handler .img-upload-text p {

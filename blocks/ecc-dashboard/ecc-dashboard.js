@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon } from '../../utils/utils.js';
+import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -304,17 +304,6 @@ async function getConfig(el) {
   return config;
 }
 
-function buildNoAccessScreen(el) {
-  el.classList.add('no-access');
-
-  const h1 = createTag('h1', {}, 'You do not have sufficient access to view.');
-  const area = createTag('div', { class: 'no-access-area' });
-  const noAccessDescription = createTag('p', {}, 'An Adobe corporate account is required to access this feature.');
-
-  el.append(h1, area);
-  area.append(getIcon('browser-access-forbidden-lg'), noAccessDescription);
-}
-
 function buildNoEventScreen(el, props) {
   el.classList.add('no-events');
 
@@ -371,7 +360,7 @@ export default async function init(el) {
 
   if (profile) {
     if (profile.noProfile || profile.account_type !== 'type3') {
-      buildNoAccessScreen(el, config);
+      buildNoAccessScreen(el);
     } else {
       buildDashboard(el, config);
     }
@@ -382,7 +371,7 @@ export default async function init(el) {
   if (!profile) {
     const unsubscribe = window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
       if (newValue?.noProfile || newValue.account_type !== 'type3') {
-        buildNoAccessScreen(el, config);
+        buildNoAccessScreen(el);
       } else {
         buildDashboard(el, config);
       }
