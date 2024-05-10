@@ -1,5 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, handlize } from '../../utils/utils.js';
+import { initRepeater } from './controllers/share-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -405,4 +406,6 @@ export default async function init(el) {
   form.addEventListener('submit', (e) => {
     e.preventDefault();
   });
+
+  initRepeater(el);
 }

@@ -151,7 +151,7 @@ export function initRepeater(component) {
       
       // Reset delete icon state and add listener.
       const deleteIcon = clonedNode.querySelector('.delete-button');
-      deleteIcon.classList.remove('hidden');
+      deleteIcon?.classList.remove('hidden');
       setRemoveEventListener(deleteIcon);
       
       prevNode.after(clonedNode);
@@ -160,6 +160,9 @@ export function initRepeater(component) {
 }
 
 function setRemoveEventListener(removeElement) {
+  if(!removeElement){
+    return;
+  }
   removeElement.addEventListener('click', (event) => {
     event.currentTarget.parentElement.remove();
   });

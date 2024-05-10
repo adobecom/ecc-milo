@@ -16,13 +16,14 @@ export function onResume() {
 export function onSubmit(component, inputMap) {
   const venueInfoVisible = component.querySelector('#checkbox-venue-info-visible').checked;
 
-  const imageFile = component.querySelector('#venue-image').files[0];
-  const imageData = imageFile ? `File name: ${imageFile.name}, Size: ${imageFile.size} bytes` : 'No file uploaded';
+  // const imageFile = component.querySelector('#venue-image').files[0];
+  // const imageData = imageFile ? `File name: ${imageFile.name}, 
+  // Size: ${imageFile.size} bytes` : 'No file uploaded';
 
   const venueData = {
     ...getMappedInputsOutput(component, inputMap),
     venueInfoVisible,
-    imageData,
+    // imageData,
   };
 
   return venueData;

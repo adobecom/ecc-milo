@@ -287,3 +287,9 @@
   line-height: 24px; /* 125% */
   margin: 0px;
 }
+
+.form-handler .img-upload-text p {
+  margin: 0;
+  font-size: var(--type-body-xs-size);
+  line-height: normal;
+}

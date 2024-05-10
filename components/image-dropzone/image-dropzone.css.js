@@ -1,11 +1,12 @@
 /* stylelint-disable selector-class-pattern */
-.img-upload-component .image-dropzones {
+export const styles = `
+.image-dropzones {
   display: grid;
   gap: 16px;
   margin-bottom: 24px;
 }
 
-.img-upload-component .img-file-input-wrapper {
+.img-file-input-wrapper {
   border: 2px dashed var(--color-gray-400);
   border-radius: 8px;
   height: 200px;
@@ -16,34 +17,33 @@
   align-items: center;
 }
 
-.img-upload-component .img-file-input-wrapper .preview-wrapper {
+.img-file-input-wrapper .preview-wrapper {
   width: 100%;
   height: 100%;
   position: relative;
   z-index: 1;
 }
 
-.img-upload-component .img-file-input-wrapper .preview-wrapper .icon-delete {
+.img-file-input-wrapper .preview-wrapper .icon-delete {
   position: absolute;
   top: 8px;
   right: 8px;
   cursor: pointer;
 }
 
-.img-upload-component .img-file-input-wrapper .preview-img-placeholder {
+.img-file-input-wrapper .preview-img-placeholder {
   height: 100%;
   overflow: hidden;
   border-radius: 8px;
-
 }
 
-.img-upload-component .img-file-input-wrapper .preview-img-placeholder img {
+.img-file-input-wrapper .preview-img-placeholder img {
   height: 100%;
   width: 100%;
   object-fit: cover;
 }
 
-.img-upload-component .img-file-input-wrapper label {
+.img-file-input-wrapper div {
   border-radius: 8px;
   display: block;
   box-sizing: border-box;
@@ -52,26 +52,31 @@
   width: 100%;
 }
 
-.img-upload-component .img-file-input-wrapper label:hover {
+.img-file-input-wrapper div:hover {
   background-color: var(--color-gray-100);
 }
 
-.img-upload-component .img-file-input-wrapper label input.img-file-input {
+.img-file-input-wrapper div input.img-file-input {
   display: none;
 }
 
-.img-upload-component .img-file-input-wrapper label img.icon {
+.img-file-input-wrapper div img.icon {
   width: 40px;
   opacity: 0.5;
   margin-bottom: 24px;
 }
 
-.img-upload-component .img-file-input-wrapper .hidden {
+.img-file-input-wrapper div p {
+  margin: 0;
+  font-size: var(--type-body-xs-size);;
+}
+
+.img-file-input-wrapper .hidden {
   display: none;
 }
 
 @media (min-width: 900px) {
-  .img-upload-component .image-dropzones {
+  .image-dropzones {
     grid-template-columns: 1fr 1fr 1fr;
   }
 
@@ -79,3 +84,4 @@
     grid-template-columns: 2fr 1fr;
   }
 }
+`
