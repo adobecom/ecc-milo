@@ -13,9 +13,9 @@ function decorateAttendeeFields(row) {
       const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number' });
       const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, c.textContent.trim());
       c.innerHTML = '';
-      c.append(input, label)
+      c.append(input, label);
     }
-  })
+  });
 }
 
 function decorateSWCTextField(row, options) {
@@ -25,8 +25,9 @@ function decorateSWCTextField(row, options) {
   if (!cols.length) return;
   const [placeholderCol, maxLengthCol] = cols;
   const text = placeholderCol.textContent.trim();
-  
-  let maxCharNum, attrTextEl;
+
+  let maxCharNum; let
+    attrTextEl;
   if (maxLengthCol) {
     attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
     maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
@@ -34,14 +35,11 @@ function decorateSWCTextField(row, options) {
 
   const isRequired = attrTextEl?.textContent.trim().endsWith('*');
 
-  const inputOptions = {
-    ...options, class: 'text-input', placeholder: text, 
-  }
+  const inputOptions = { ...options, class: 'text-input', placeholder: text };
   if (isRequired) inputOptions.required = true;
   if (maxCharNum) inputOptions.maxlength = maxCharNum;
 
   const input = createTag('sp-textfield', inputOptions);
-
 
   const wrapper = createTag('div', { class: 'rsvp-field-wrapper' });
   row.innerHTML = '';
@@ -61,8 +59,8 @@ function decorateAllCheckboxes(el) {
     lis.forEach((li) => {
       const checkbox = createTag('sp-checkbox', { id: `registration-${handlize(li.textContent)}` }, li.textContent.trim());
       fieldset.append(checkbox);
-    })
-  })
+    });
+  });
 }
 
 function decorateRSVPFields(row) {
