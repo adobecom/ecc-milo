@@ -5,26 +5,11 @@
   margin: auto;
 }
 
-.ecc-dashboard.no-access {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: var(--color-gray-100);
-  max-width: none;
-  box-sizing: border-box;
-  width: 100%;
-}
-
-.ecc-dashboard.no-access .no-access-area,
 .ecc-dashboard.no-events .no-events-area {
   margin: 64px;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.ecc-dashboard.no-access .no-access-area .icon.icon-browser-access-forbidden-lg {
-  margin: 40px;
 }
 
 .ecc-dashboard .dashboard-header {

@@ -1,11 +1,11 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, handlize } from '../../utils/utils.js';
+import { getIcon, handlize, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 const { default: getUuid } = await import(`${getLibs()}/utils/getUuid.js`);
 
-// list of controllers for the hanler to load
+// list of controllers for the handler to load
 const SUPPORTED_COMPONENTS = [
   'checkbox',
   'event-format',
@@ -14,14 +14,9 @@ const SUPPORTED_COMPONENTS = [
   'venue-info',
 ];
 
-const formState = {
-  currentStep: 0,
-  farthestStep: 0,
-};
-
-function initComponents(el) {
+function initComponents(props) {
   SUPPORTED_COMPONENTS.forEach((comp) => {
-    const mappedComponents = el.querySelectorAll(`.${comp}-component`);
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
 
     mappedComponents.forEach(async (component) => {
@@ -31,9 +26,9 @@ function initComponents(el) {
   });
 }
 
-async function gatherValues(el, inputMap) {
+async function gatherValues(props, inputMap) {
   const allComponentPromises = SUPPORTED_COMPONENTS.map(async (comp) => {
-    const mappedComponents = el.querySelectorAll(`.${comp}-component`);
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
@@ -51,6 +46,20 @@ async function gatherValues(el, inputMap) {
 }
 
 function decorateForm(el) {
+  const app = createTag('sp-theme', { color: 'light', scale: 'medium' });
+  const form = createTag('form', {}, '', { parent: app });
+  const formDivs = el.querySelectorAll('.fragment');
+
+  if (!formDivs.length) {
+    el.remove();
+    return;
+  }
+
+  formDivs.forEach((formDiv) => {
+    formDiv.parentElement.replaceChild(app, formDiv);
+    form.append(formDiv);
+  });
+
   const cols = el.querySelectorAll(':scope > div:first-of-type > div');
 
   cols.forEach((col, i) => {
@@ -67,7 +76,21 @@ function decorateForm(el) {
         }
       });
     }
-    if (i === 1) col.classList.add('main-frame');
+
+    if (i === 1) {
+      col.classList.add('main-frame');
+      const frags = el.querySelectorAll('.fragment');
+
+      frags.forEach((frag) => {
+        const fragPathSegments = frag.dataset.path.split('/');
+        const fragId = `form-step-${fragPathSegments[fragPathSegments.length - 1]}`;
+        frag.id = fragId;
+      });
+    }
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
   });
 }
 
@@ -108,8 +131,8 @@ async function getEventIdAndUrl(payload) {
   return [hash, pathname];
 }
 
-async function saveEvent(el, inputMap) {
-  const payload = await gatherValues(el, inputMap);
+async function saveEvent(props, inputMap) {
+  const payload = await gatherValues(props, inputMap);
   const [hash, pathname] = await getEventIdAndUrl(payload);
   payload['event-id'] = hash;
   payload.url = pathname;
@@ -155,45 +178,137 @@ async function postForm(payload) {
     .catch((error) => console.error(error));
 }
 
-function updateSideNav(el) {
-  const sideNavs = el.querySelectorAll('.side-menu .nav-item');
+function updateSideNav(props) {
+  const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
 
   sideNavs.forEach((n, i) => {
     n.closest('li')?.classList.remove('active');
-    if (i <= formState.farthestStep) n.classList.remove('disabled');
-    if (i === formState.currentStep) n.closest('li')?.classList.add('active');
+    if (i <= props.farthestStep) n.classList.remove('disabled');
+    if (i === props.currentStep) n.closest('li')?.classList.add('active');
   });
 }
 
-function navigateForm(el, stepIndex = formState.currentStep + 1) {
-  const frags = el.querySelectorAll('.fragment');
+function validateRequiredFields(fields) {
+  return fields.length === 0 || Array.from(fields).every((f) => f.value);
+}
 
-  const nextBtn = el.querySelector('.form-handler-ctas-panel .next-button');
-  const backBtn = el.querySelector('.form-handler-ctas-panel .back-btn');
+function onStepValidate(props) {
+  return function updateCtaStatus() {
+    const frags = props.el.querySelectorAll('.fragment');
+    const currentFrag = frags[props.currentStep];
+    const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
+    const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
 
-  if (stepIndex >= frags.length || stepIndex < 0) return;
+    ctas.forEach((cta) => {
+      if (cta.classList.contains('back-btn')) {
+        cta.classList.toggle('disabled', props.currentStep === 0);
+      } else {
+        cta.classList.toggle('disabled', !stepValid);
+      }
+    });
+  };
+}
 
-  const prevStep = formState.currentStep;
-  formState.currentStep = stepIndex;
-  formState.farthestStep = Math.max(formState.farthestStep, stepIndex);
+function querySelectorAllDeep(selector, root = document) {
+  const elements = [];
+
+  function recursiveQuery(r) {
+    elements.push(...r.querySelectorAll(selector));
+
+    r.querySelectorAll('*').forEach((el) => {
+      if (el.shadowRoot) {
+        recursiveQuery(el.shadowRoot);
+      }
+    });
+  }
+
+  recursiveQuery(root);
+
+  return elements;
+}
+
+function updateRequiredFields(props, stepIndex) {
+  const frags = props.el.querySelectorAll('.fragment');
+  const currentFrag = stepIndex || frags[props.currentStep];
+  props[`required-fields-in-${currentFrag.id}`] = querySelectorAllDeep('input[required], select[required], textarea[required]', currentFrag);
+}
+
+function initRequiredFieldsValidation(props) {
+  const frags = props.el.querySelectorAll('.fragment');
+  const currentFrag = frags[props.currentStep];
+
+  const inputValidationCB = onStepValidate(props);
+  props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
+    field.removeEventListener('change', inputValidationCB);
+    field.addEventListener('change', inputValidationCB, { bubbles: true });
+  });
+
+  inputValidationCB();
+}
+
+function setRemoveEventListener(removeElement) {
+  removeElement.addEventListener('click', (event) => {
+    event.currentTarget.parentElement.remove();
+  });
+}
+
+function initRepeaters(props) {
+  const repeaters = props.el.querySelectorAll('.repeater-element');
+  repeaters.forEach((element) => {
+    const vanillaNode = element.previousElementSibling.cloneNode(true);
+    element.addEventListener('click', (event) => {
+      const clonedNode = vanillaNode.cloneNode(true);
+      const prevNode = event.currentTarget.previousElementSibling;
+      clonedNode.setAttribute('repeatIdx', parseInt(prevNode.getAttribute('repeatIdx'), 10) + 1);
+
+      // Reset delete icon state and add listener.
+      const deleteIcon = clonedNode.querySelector('.repeater-delete-button');
+
+      if (deleteIcon) {
+        deleteIcon.classList.remove('hidden');
+        setRemoveEventListener(deleteIcon);
+      }
+
+      prevNode.after(clonedNode);
+      yieldToMain().then(() => {
+        updateRequiredFields(props);
+      });
+    });
+  });
+}
+
+function renderFormNavigation(props, prevStep, currentStep) {
+  const nextBtn = props.el.querySelector('.form-handler-ctas-panel .next-button');
+  const backBtn = props.el.querySelector('.form-handler-ctas-panel .back-btn');
+  const frags = props.el.querySelectorAll('.fragment');
 
   frags[prevStep].classList.add('hidden');
-  frags[formState.currentStep].classList.remove('hidden');
+  frags[currentStep].classList.remove('hidden');
 
-
-  if (formState.currentStep === frags.length - 1) {
+  if (currentStep === frags.length - 1) {
     nextBtn.textContent = nextBtn.dataset.finalStateText;
   } else {
     nextBtn.textContent = nextBtn.dataset.nextStateText;
   }
 
-  backBtn.classList.toggle('disabled', formState.currentStep === 0);
-  updateSideNav(el);
+  backBtn.classList.toggle('disabled', currentStep === 0);
 }
 
-function initFormCtas(el, inputMap) {
-  const ctaRow = el.querySelector(':scope > div:last-of-type');
-  const frags = el.querySelectorAll('.fragment');
+function navigateForm(props, stepIndex) {
+  const index = stepIndex || props.currentStep + 1;
+  const frags = props.el.querySelectorAll('.fragment');
+
+  if (index >= frags.length || index < 0) return;
+
+  props.currentStep = index;
+  props.farthestStep = Math.max(props.farthestStep, index);
+
+  updateRequiredFields(props);
+}
+
+function initFormCtas(props, inputMap) {
+  const ctaRow = props.el.querySelector(':scope > div:last-of-type');
+  const frags = props.el.querySelectorAll('.fragment');
   decorateButtons(ctaRow, 'button-l');
   const ctas = ctaRow.querySelectorAll('a');
 
@@ -220,7 +335,7 @@ function initFormCtas(el, inputMap) {
       if (['#pre-event', '#post-event'].includes(ctaUrl.hash)) {
         cta.classList.add('fill');
         cta.addEventListener('click', async () => {
-          const payload = await saveEvent(el, inputMap);
+          const payload = await saveEvent(props, inputMap);
           const targetRedirect = `${window.location.origin}/event/t3/dme/preview?eventId=${payload['event-id']}`;
           window.open(targetRedirect);
         });
@@ -235,21 +350,22 @@ function initFormCtas(el, inputMap) {
           cta.dataset.finalStateText = finalStateText;
           cta.dataset.republishStateText = republishStateText;
 
-          if (formState.currentStep === frags.length - 1) {
+          if (props.currentStep === frags.length - 1) {
             cta.textContent = finalStateText;
+            cta.prepend(getIcon('golden-rocket'));
           } else {
             cta.textContent = nextStateText;
           }
         }
 
         cta.addEventListener('click', async () => {
-          const payload = await saveEvent(el, inputMap);
+          const payload = await saveEvent(props, inputMap);
 
           if (ctaUrl.hash === '#next') {
-            if (formState.currentStep === frags.length - 1) {
+            if (props.currentStep === frags.length - 1) {
               postForm(payload);
             } else {
-              navigateForm(el);
+              navigateForm(props);
             }
           }
         });
@@ -258,13 +374,13 @@ function initFormCtas(el, inputMap) {
   });
 
   backBtn.addEventListener('click', async () => {
-    navigateForm(el, formState.currentStep - 1);
+    props.currentStep -= 1;
   });
 }
 
-function initNavigation(el) {
-  const frags = el.querySelectorAll('.fragment');
-  const navItems = el.querySelectorAll('.side-menu .nav-item');
+function initNavigation(props) {
+  const frags = props.el.querySelectorAll('.fragment');
+  const navItems = props.el.querySelectorAll('.side-menu .nav-item');
 
   frags.forEach((frag, i) => {
     if (i !== 0) {
@@ -275,7 +391,7 @@ function initNavigation(el) {
   navItems.forEach((nav, i) => {
     nav.addEventListener('click', () => {
       if (!nav.closest('li')?.classList.contains('disabled')) {
-        navigateForm(el, i);
+        navigateForm(props, i);
       }
     });
   });
@@ -293,40 +409,18 @@ async function getInputMap(el) {
   return json.data;
 }
 
-function querySelectorDeep(selector, root = document) {
-  const elements = [];
-
-  function recursiveQuery(root) {
-      elements.push(...root.querySelectorAll(selector));
-
-      root.querySelectorAll('*').forEach(el => {
-          if (el.shadowRoot) {
-              recursiveQuery(el.shadowRoot);
-          }
-      });
-  }
-
-  recursiveQuery(root);
-
-  return elements;
-}
-
-function validateRequiredFields(fields) {
-  return fields.length === 0 || Array.from(fields).every((f) => f.value)
-}
-
-function prepopulateForm(el, inputMap) {
+function prepopulateForm(props, inputMap) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
-  const frags = el.querySelectorAll('.fragment');
+  const frags = props.el.querySelectorAll('.fragment');
 
   if (!eventId) return;
 
   const eventObj = JSON.parse(localStorage.getItem(eventId));
 
   SUPPORTED_COMPONENTS.forEach((comp) => {
-    const mappedComponents = el.querySelectorAll(`.${comp}-component`);
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
 
     mappedComponents.forEach(async (component) => {
@@ -336,41 +430,61 @@ function prepopulateForm(el, inputMap) {
   });
 
   frags.forEach((frag, i) => {
-    const requiredFields = querySelectorDeep('input[required], select[required], textarea[required]', frag);
+    updateRequiredFields(props, i);
 
-    if (validateRequiredFields(requiredFields)) {
-      formState.farthestStep = i + 1;
+    if (validateRequiredFields(props[`required-fields-in-${frag.id}`])) {
+      props.farthestStep = i + 1;
     }
-  })
-
-  updateSideNav(el);
+  });
 }
 
-function initRequiredFieldsValidation(el) {
+async function buildECCForm(el) {
+  decorateForm(el);
+  const inputMap = await getInputMap(el);
+
+  const props = {
+    el,
+    currentStep: 0,
+    farthestStep: 0,
+  };
+
   const frags = el.querySelectorAll('.fragment');
-  const allFormCtas = el.querySelectorAll('.form-handler-panel-wrapper a');
 
-  const requiredFields = querySelectorDeep('input[required], select[required], textarea[required]', frags[formState.currentStep]);
+  frags.forEach((frag) => {
+    props[`required-fields-in-${frag.id}`] = [];
+  });
 
-  let allFieldsValid = validateRequiredFields(requiredFields);
+  const dataHandler = {
+    set(target, prop, value) {
+      const oldValue = target[prop];
+      target[prop] = value;
 
-  allFormCtas.forEach((cta) => {
-    cta.classList.toggle('disabled', !allFieldsValid);
-  })
+      if (prop.startsWith('required-fields-in-')) {
+        initRequiredFieldsValidation(target);
+      }
 
-  requiredFields.forEach((field) => {
-    field.addEventListener('change', () => {
-      allFieldsValid = validateRequiredFields(requiredFields);
-      
-      allFormCtas.forEach((cta) => {
-        if (cta.classList.contains('back-btn')) {
-          cta.classList.toggle('disabled', !allFieldsValid && formState.currentStep === 0);
-        } else {
-          cta.classList.toggle('disabled', !allFieldsValid);
-        }
-      })
-    }, { bubbles: true });
-  })
+      if (prop === 'currentStep') {
+        renderFormNavigation(target, oldValue, value);
+        updateSideNav(target);
+        initRequiredFieldsValidation(target);
+      }
+
+      if (prop === 'farthestStep') {
+        updateSideNav(target);
+      }
+
+      return true;
+    },
+  };
+
+  const proxyProps = new Proxy(props, dataHandler);
+
+  initFormCtas(proxyProps, inputMap);
+  initComponents(proxyProps);
+  initRepeaters(proxyProps);
+  initNavigation(proxyProps);
+  prepopulateForm(proxyProps, inputMap);
+  updateRequiredFields(proxyProps);
 }
 
 export default async function init(el) {
@@ -380,29 +494,35 @@ export default async function init(el) {
     import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
   ]);
 
-  const app = createTag('sp-theme', { color: 'light', scale: 'medium' });
-  const form = createTag('form', {}, '', { parent: app });
-  const formDivs = el.querySelectorAll('.fragment');
+  const profile = window.bm8tr.get('imsProfile');
+  const { search, hostname } = window.location;
+  const urlParams = new URLSearchParams(search);
+  const devMode = urlParams.get('devMode');
 
-  if (!formDivs.length) {
-    el.remove();
+  if (devMode === 'true' && hostname === 'localhost') {
+    buildECCForm(el);
     return;
   }
 
-  formDivs.forEach((formDiv) => {
-    formDiv.parentElement.replaceChild(app, formDiv);
-    form.append(formDiv);
-  });
+  if (profile) {
+    if (profile.noProfile || profile.account_type !== 'type3') {
+      buildNoAccessScreen(el);
+    } else {
+      buildECCForm(el);
+    }
 
-  const inputMap = await getInputMap(el);
-  decorateForm(el);
-  initFormCtas(el, inputMap);
-  initComponents(el);
-  initNavigation(el);
-  prepopulateForm(el, inputMap);
-  initRequiredFieldsValidation(el);
+    return;
+  }
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-  });
+  if (!profile) {
+    const unsubscribe = window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
+      if (newValue?.noProfile || newValue.account_type !== 'type3') {
+        buildNoAccessScreen(el);
+      } else {
+        buildECCForm(el);
+      }
+
+      unsubscribe();
+    });
+  }
 }

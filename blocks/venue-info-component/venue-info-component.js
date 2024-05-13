@@ -91,7 +91,7 @@ function buildAdditionalInfo(row, i) {
     const additionComment = createTag('div', { class: 'addition-comment' });
     additionComment.append(comment.textContent.trim());
     col.innerHTML = '';
-    fieldSet.append(additionComment)
+    fieldSet.append(additionComment);
     col.append(fieldSet);
   }
 

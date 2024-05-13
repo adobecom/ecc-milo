@@ -78,8 +78,8 @@ function buildTimePicker(column) {
         select.append(option);
         timeSlots.forEach((t) => {
           const text = t.textContent.trim();
-          const option = createTag('option', { value: handlize(text) }, text);
-          select.append(option);
+          const opt = createTag('option', { value: handlize(text) }, text);
+          select.append(opt);
         });
         timePickerWrapper.append(select);
       }

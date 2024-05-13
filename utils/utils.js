@@ -59,6 +59,19 @@ export function getIcon(tag) {
   return img;
 }
 
+export function buildNoAccessScreen(el) {
+  el.removeAttribute('style');
+  el.classList.add('no-access');
+  el.innerHTML = '';
+
+  const h1 = createTag('h1', {}, 'You do not have sufficient access to view.');
+  const area = createTag('div', { class: 'no-access-area' });
+  const noAccessDescription = createTag('p', {}, 'An Adobe corporate account is required to access this feature.');
+
+  el.append(h1, area);
+  area.append(getIcon('browser-access-forbidden-lg'), noAccessDescription);
+}
+
 export function addRepeater(element, title) {
   element.lastChild.setAttribute('repeatIdx', 0);
 
