@@ -114,6 +114,7 @@ function buildLocationInputGrid(row) {
           required: true,
           type: 'text',
           quiet: true,
+          size: 'l',
         }));
         break;
       case 1:
@@ -124,6 +125,7 @@ function buildLocationInputGrid(row) {
           required: true,
           type: 'text',
           quiet: true,
+          size: 'l',
         }));
         break;
       case 2:
@@ -134,6 +136,7 @@ function buildLocationInputGrid(row) {
           required: true,
           type: 'text',
           quiet: true,
+          size: 'l',
         }));
         break;
       case 3:
@@ -144,6 +147,7 @@ function buildLocationInputGrid(row) {
           required: true,
           type: 'text',
           quiet: true,
+          size: 'l',
         }));
         break;
       default:
@@ -158,11 +162,11 @@ function buildLocationInputGrid(row) {
   row.classList.add('venue-info-field-location');
 }
 
-export default async function init(el) {
+export default function init(el) {
   el.classList.add('form-component');
   generateToolTip(el);
   const miloLibs = getLibs();
-  await Promise.all([
+  Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
   ]);

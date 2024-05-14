@@ -18,19 +18,18 @@ function loadGoogleMapsAPI(callback) {
 }
 
 function initAutocomplete(el) {
-  const venueName = el.querySelector('#venue-info-venue-name input');
+  const venueName = el.querySelector('#venue-info-venue-name');
   // eslint-disable-next-line no-undef
   if (!google) return;
   // eslint-disable-next-line no-undef
-  const autocomplete = new google.maps.places.Autocomplete(venueName);
+  const autocomplete = new google.maps.places.Autocomplete(venueName.shadowRoot.querySelector('input'));
 
-  console.log(el.cloneNode(true));
-  const address = el.querySelector('#venue-info-venue-address input');
-  const city = el.querySelector('#location-city input');
-  const state = el.querySelector('#location-state input');
-  const zip = el.querySelector('#location-zip-code input');
-  const country = el.querySelector('#location-country input');
-  const placeId = el.querySelector('#google-place-id input');
+  const address = el.querySelector('#venue-info-venue-address');
+  const city = el.querySelector('#location-city');
+  const state = el.querySelector('#location-state');
+  const zip = el.querySelector('#location-zip-code');
+  const country = el.querySelector('#location-country');
+  const placeId = el.querySelector('#google-place-id');
 
   autocomplete.setFields(['name', 'address_components', 'geometry', 'place_id']);
 
