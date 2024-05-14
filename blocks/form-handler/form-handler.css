@@ -7,6 +7,16 @@
   font-family: var(--body-font-family);
 }
 
+.form-handler sp-textfield {
+  display: unset;
+  outline: none;
+}
+
+.form-handler sp-textfield:focus {
+  outline: 1px var(--color-gray-500) solid;
+  border-radius: 4px;
+}
+
 .form-handler > div:first-child {
   display: flex;
   justify-content: center;
