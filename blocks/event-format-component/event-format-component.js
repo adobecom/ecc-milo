@@ -4,14 +4,11 @@ import { getIcon, generateToolTip } from '../../utils/utils.js';
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 
-function buildSelectFromTags(wrapper, phText, options) {
-  const option = createTag('option', { value: '', disabled: true, selected: true }, phText);
-  const select = createTag('select', { id: 'bu-select-input', class: 'select-input' });
-
-  select.append(option);
+function buildPickerFromTags(wrapper, phText, options) {
+  const select = createTag('sp-picker', { id: 'bu-select-input', class: 'select-input', size: 'm', label: phText });
 
   options.forEach(([, val]) => {
-    const opt = createTag('option', { value: val.name }, val.title);
+    const opt = createTag('sp-menu-item', val.title);
     select.append(opt);
   });
 
@@ -25,7 +22,7 @@ async function decorateCloudTagSelect(column) {
 
   if (!resp.error) {
     const clouds = resp.namespaces.caas.tags['business-unit'].tags;
-    buildSelectFromTags(buSelectWrapper, phText, Object.entries(clouds));
+    buildPickerFromTags(buSelectWrapper, phText, Object.entries(clouds));
   }
 
   column.innerHTML = '';
@@ -37,7 +34,7 @@ async function decorateSeriesSelect(column) {
   const phText = column.textContent.trim();
 
   // TODO: Connect API.
-  buildSelectFromTags(seriesSelectWrapper, phText, Object.entries({}));
+  buildPickerFromTags(seriesSelectWrapper, phText, Object.entries({}));
 
   column.innerHTML = '';
   column.append(seriesSelectWrapper);
@@ -87,7 +84,7 @@ async function decorateNewSeriesModal(column) {
 
       if (!resp.error) {
         const clouds = resp.namespaces.caas.tags['business-unit'].tags;
-        buildSelectFromTags(buSelectWrapper, phText, Object.entries(clouds));
+        buildPickerFromTags(buSelectWrapper, phText, Object.entries(clouds));
       }
     }
 

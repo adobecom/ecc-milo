@@ -3,12 +3,14 @@ function initNewSeriesModal(component) {
   const newSeriesModal = component.querySelector('.new-series-modal');
   const modalCtas = newSeriesModal.querySelectorAll('a.con-button');
 
-  addSeriesModalBtn.addEventListener('click', () => {
+  addSeriesModalBtn.addEventListener('click', (e) => {
+    e.preventDefault();
     newSeriesModal.classList.remove('hidden');
   });
 
   modalCtas.forEach((cta) => {
-    cta.addEventListener('click', () => {
+    cta.addEventListener('click', (e) => {
+      e.preventDefault();
       newSeriesModal.classList.add('hidden');
     });
   });
