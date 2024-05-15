@@ -100,8 +100,9 @@ function buildTimePicker(column) {
 async function decorateCheckBox(row) {
   const fieldSet = createTag('fieldset', { class: 'checkboxes' });
   row.classList.add('agenda-info-addition');
-  const checkBoxRow = [...row.querySelectorAll(':scope > div')];
-  const cn = checkBoxRow[2].textContent.trim();
+  const cols = row.querySelectorAll(':scope > div');
+  const[checkboxText] =  cols
+  const cn = checkboxText.textContent.trim();
   row.innerHTML = '';
 
   const checkbox = document.createElement('sp-checkbox');
@@ -122,5 +123,5 @@ export default async function init(el) {
   generateToolTip(el);
   const rows = [...el.querySelectorAll(':scope > div')];
   decorateField(rows[1], 'text');
-  decorateCheckBox(rows[3]);
+  decorateCheckBox(rows[2]);
 }
