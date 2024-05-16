@@ -26,14 +26,14 @@ function initComponents(props) {
   });
 }
 
-async function gatherValues(props, inputMap) {
+async function gatherValues(props) {
   const allComponentPromises = SUPPORTED_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
       const { onSubmit } = await import(`./controllers/${comp}-component-controller.js`);
-      const componentPayload = await onSubmit(component, inputMap);
+      const componentPayload = await onSubmit(component);
       return componentPayload;
     });
 
@@ -131,8 +131,8 @@ async function getEventIdAndUrl(payload) {
   return [hash, pathname];
 }
 
-async function saveEvent(props, inputMap) {
-  const payload = await gatherValues(props, inputMap);
+async function saveEvent(props) {
+  const payload = await gatherValues(props);
   const [hash, pathname] = await getEventIdAndUrl(payload);
   payload['event-id'] = hash;
   payload.url = pathname;
@@ -306,7 +306,7 @@ function navigateForm(props, stepIndex) {
   updateRequiredFields(props);
 }
 
-function initFormCtas(props, inputMap) {
+function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
   const frags = props.el.querySelectorAll('.fragment');
   decorateButtons(ctaRow, 'button-l');
@@ -335,7 +335,7 @@ function initFormCtas(props, inputMap) {
       if (['#pre-event', '#post-event'].includes(ctaUrl.hash)) {
         cta.classList.add('fill');
         cta.addEventListener('click', async () => {
-          const payload = await saveEvent(props, inputMap);
+          const payload = await saveEvent(props);
           const targetRedirect = `${window.location.origin}/event/t3/dme/preview?eventId=${payload['event-id']}`;
           window.open(targetRedirect);
         });
@@ -359,7 +359,7 @@ function initFormCtas(props, inputMap) {
         }
 
         cta.addEventListener('click', async () => {
-          const payload = await saveEvent(props, inputMap);
+          const payload = await saveEvent(props);
 
           if (ctaUrl.hash === '#next') {
             if (props.currentStep === frags.length - 1) {
@@ -409,7 +409,7 @@ async function getInputMap(el) {
   return json.data;
 }
 
-function prepopulateForm(props, inputMap) {
+function prepopulateForm(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
@@ -425,7 +425,7 @@ function prepopulateForm(props, inputMap) {
 
     mappedComponents.forEach(async (component) => {
       const { onResume } = await import(`./controllers/${comp}-component-controller.js`);
-      await onResume(component, eventObj, inputMap);
+      await onResume(component, eventObj);
     });
   });
 
@@ -479,11 +479,11 @@ async function buildECCForm(el) {
 
   const proxyProps = new Proxy(props, dataHandler);
 
-  initFormCtas(proxyProps, inputMap);
+  initFormCtas(proxyProps);
   initComponents(proxyProps);
   initRepeaters(proxyProps);
   initNavigation(proxyProps);
-  prepopulateForm(proxyProps, inputMap);
+  prepopulateForm(proxyProps);
   updateRequiredFields(proxyProps);
 }
 

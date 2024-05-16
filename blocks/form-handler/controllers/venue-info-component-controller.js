@@ -1,4 +1,4 @@
-import makeFileInputDropZone, { getMappedInputsOutput } from './share-controller.js';
+import makeFileInputDropZone from './share-controller.js';
 
 function initVenueImageInput(component) {
   const wrapper = component.querySelector('.img-file-input-wrapper');
@@ -91,20 +91,54 @@ export default function init(component) {
   loadGoogleMapsAPI(() => initAutocomplete(component));
 }
 
-export function onResume() {
-  // TODO: handle form prepopulation on component level
+export function onResume(component) {
+  const visibleInPostState = component.querySelector('#checkbox-venue-info-visible').checked;
+  const venueName = component.querySelector('#venue-info-venue-name').value;
+  const address = component.querySelector('#venue-info-venue-address').value;
+  const city = component.querySelector('#location-city').value;
+  const state = component.querySelector('#location-state').value;
+  const postalCode = component.querySelector('#location-zip-code').value;
+  const country = component.querySelector('#location-country').value;
+  // const placeId = component.querySelector('#google-place-id').value;
+  const lat = component.querySelector('#google-place-lat').value;
+  const lon = component.querySelector('#google-place-lng').value;
 }
 
-export function onSubmit(component, inputMap) {
-  const venueInfoVisible = component.querySelector('#checkbox-venue-info-visible').checked;
-
-  const imageFile = component.querySelector('#venue-image').files[0];
-  const imageData = imageFile ? `File name: ${imageFile.name}, Size: ${imageFile.size} bytes` : 'No file uploaded';
+export function onSubmit(component) {
+  const visibleInPostState = component.querySelector('#checkbox-venue-info-visible').checked;
+  const venueName = component.querySelector('#venue-info-venue-name').value;
+  const address = component.querySelector('#venue-info-venue-address').value;
+  const city = component.querySelector('#location-city').value;
+  const state = component.querySelector('#location-state').value;
+  const postalCode = component.querySelector('#location-zip-code').value;
+  const country = component.querySelector('#location-country').value;
+  // const placeId = component.querySelector('#google-place-id').value;
+  const lat = component.querySelector('#google-place-lat').value;
+  const lon = component.querySelector('#google-place-lng').value;
 
   const venueData = {
-    ...getMappedInputsOutput(component, inputMap),
-    venueInfoVisible,
-    imageData,
+    visibleInPostState,
+    venueName,
+    address,
+    city,
+    state,
+    postalCode,
+    country,
+    coordinates: {
+      lat,
+      lon,
+    },
+    mapUrl: 'string',
+    photo: {
+      imageId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+      imageUrl: 'string',
+      imageSharepointUrl: 'string',
+      s3Key: 'string',
+      mimeType: 'image/jpeg',
+      imageType: 'event-hero-image',
+      creationTime: '2024-05-16T20:25:14.929Z',
+      modificationTime: '2024-05-16T20:25:14.929Z',
+    },
   };
 
   return venueData;

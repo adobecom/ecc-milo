@@ -37,11 +37,10 @@ export default function init(component) {
   prepopulateTimeZone(component);
 }
 
-export function onResume() {
+export function onResume(component, eventObj) {
   // TODO: handle form prepopulation on component level
 }
 
-export function onSubmit(component, inputMap) {
-  console.log(inputMap);
+export function onSubmit(component) {
   return {};
 }

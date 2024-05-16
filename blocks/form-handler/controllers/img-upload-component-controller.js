@@ -8,11 +8,11 @@ export default function init(component) {
   });
 }
 
-export function onResume() {
+export function onResume(component, eventObj) {
   // TODO: handle form prepopulation on component level
 }
 
-export function onSubmit(component, inputMap) {
+export function onSubmit(component) {
   console.log(inputMap);
   return {};
 }
