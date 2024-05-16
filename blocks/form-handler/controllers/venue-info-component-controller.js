@@ -12,7 +12,7 @@ function loadGoogleMapsAPI(callback) {
   script.defer = true;
   window.onGoogleMapsApiLoaded = callback;
   script.onerror = () => {
-    console.error('Failed to load the Google Maps script!');
+    window.lana?.error('Failed to load the Google Maps script!');
   };
   document.head.appendChild(script);
 }
@@ -30,6 +30,8 @@ function initAutocomplete(el) {
   const zip = el.querySelector('#location-zip-code');
   const country = el.querySelector('#location-country');
   const placeId = el.querySelector('#google-place-id');
+  const placeLAT = el.querySelector('#google-place-lat');
+  const placeLNG = el.querySelector('#google-place-lng');
 
   autocomplete.setFields(['name', 'address_components', 'geometry', 'place_id']);
 
@@ -75,6 +77,11 @@ function initAutocomplete(el) {
       zip.value = addressInfo.zip;
       country.value = addressInfo.country;
       placeId.value = place.place_id;
+    }
+
+    if (place.geometry) {
+      placeLAT.value = place.geometry.location.lat();
+      placeLNG.value = place.geometry.location.lng();
     }
   });
 }

@@ -155,7 +155,9 @@ function buildLocationInputGrid(row) {
     }
   });
   const placeIdInput = createTag('input', { id: 'google-place-id', type: 'hidden' });
-  locationDetailsWrapper.append(placeIdInput);
+  const placeLATInput = createTag('input', { id: 'google-place-lat', type: 'hidden' });
+  const placeLNGInput = createTag('input', { id: 'google-place-lng', type: 'hidden' });
+  locationDetailsWrapper.append(placeIdInput, placeLATInput, placeLNGInput);
 
   row.innerHTML = '';
   row.append(locationDetailsWrapper);
