@@ -32,9 +32,16 @@ function prepopulateTimeZone(component) {
   });
 }
 
+function initStepLock(component) {
+  const step = component.closest('.fragment');
+  const inputs = component.querySelectorAll('#bu-select-input, #seires-select-input');
+  const allComponents = step.querySelectorAll('.form-component');
+}
+
 export default function init(component) {
   initNewSeriesModal(component);
   prepopulateTimeZone(component);
+  initStepLock(component);
 }
 
 export function onResume() {

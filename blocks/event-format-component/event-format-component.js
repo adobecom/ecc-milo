@@ -4,9 +4,9 @@ import { getIcon, generateToolTip } from '../../utils/utils.js';
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 
-function buildSelectFromTags(wrapper, phText, options) {
+function buildSelectFromTags(id, wrapper, phText, options) {
   const option = createTag('option', { value: '', disabled: true, selected: true }, phText);
-  const select = createTag('select', { id: 'bu-select-input', class: 'select-input' });
+  const select = createTag('select', { id, class: 'select-input' });
 
   select.append(option);
 
@@ -25,7 +25,7 @@ async function decorateCloudTagSelect(column) {
 
   if (!resp.error) {
     const clouds = resp.namespaces.caas.tags['business-unit'].tags;
-    buildSelectFromTags(buSelectWrapper, phText, Object.entries(clouds));
+    buildSelectFromTags('bu-select-input', buSelectWrapper, phText, Object.entries(clouds));
   }
 
   column.innerHTML = '';
@@ -35,9 +35,13 @@ async function decorateCloudTagSelect(column) {
 async function decorateSeriesSelect(column) {
   const seriesSelectWrapper = createTag('div', { class: 'series-picker-wrapper' });
   const phText = column.textContent.trim();
+  const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
 
   // TODO: Connect API.
-  buildSelectFromTags(seriesSelectWrapper, phText, Object.entries({}));
+  if (!resp.error) {
+    const clouds = resp.namespaces.caas.tags['business-unit'].tags;
+    buildSelectFromTags('series-select-input', seriesSelectWrapper, phText, Object.entries(clouds));
+  }
 
   column.innerHTML = '';
   column.append(seriesSelectWrapper);
