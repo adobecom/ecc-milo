@@ -1,3 +1,5 @@
+import { querySelectorAllDeep } from '../../../utils/utils.js';
+
 function initNewSeriesModal(component) {
   const addSeriesModalBtn = component.querySelector('.add-series-modal-btn');
   const newSeriesModal = component.querySelector('.new-series-modal');
@@ -32,16 +34,52 @@ function prepopulateTimeZone(component) {
   });
 }
 
+function initStepLock(component) {
+  const step = component.closest('.fragment');
+  const inputs = component.querySelectorAll('#bu-select-input, #series-select-input');
+
+  const onFormatChange = () => {
+    const allComponents = step.querySelectorAll('.form-component');
+
+    if (Array.from(inputs).every((input) => !!input.value)) {
+      allComponents.forEach((c) => {
+        if (c !== component) {
+          const compInputs = querySelectorAllDeep('input, select, textarea', c);
+          compInputs.forEach((input) => {
+            input.disabled = false;
+          });
+        }
+      });
+    } else {
+      allComponents.forEach((c) => {
+        if (c !== component) {
+          const compInputs = querySelectorAllDeep('input, select, textarea', c);
+          compInputs.forEach((input) => {
+            input.disabled = true;
+          });
+        }
+      });
+    }
+  };
+
+  inputs.forEach((input) => {
+    input.addEventListener('change', onFormatChange);
+  });
+
+  onFormatChange();
+}
+
 export default function init(component) {
   initNewSeriesModal(component);
   prepopulateTimeZone(component);
+  initStepLock(component);
 }
 
 export function onResume() {
   // TODO: handle form prepopulation on component level
 }
 
-export function onSubmit(component, inputMap) {
-  console.log(inputMap);
+export function onSubmit(component) {
+  console.log(component);
   return {};
 }
