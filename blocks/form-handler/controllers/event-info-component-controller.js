@@ -1,6 +1,5 @@
 /* eslint-disable no-use-before-define */
 import { getLibs } from '../../../scripts/utils.js';
-import { getMappedInputsOutput } from './share-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -310,7 +309,7 @@ export function onResume(component, eventObj, inputMap) {
   });
 }
 
-export function onSubmit(component, inputMap) {
+export function onSubmit(component) {
   const datePicker = component.querySelector('#event-info-date-picker');
   const startDate = new Date(datePicker.dataset.startDate);
   const endDate = new Date(datePicker.dataset.endDate);
@@ -323,7 +322,6 @@ export function onSubmit(component, inputMap) {
   const eventEndDate = addTimeToDate(new Date(endDate), endTime);
 
   const eventInfo = {
-    ...getMappedInputsOutput(component, inputMap),
     'event-start': eventStartDate,
     'event-end': eventEndDate,
   };
