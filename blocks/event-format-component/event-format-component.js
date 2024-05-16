@@ -91,7 +91,7 @@ async function decorateNewSeriesModal(column) {
 
       if (!resp.error) {
         const clouds = resp.namespaces.caas.tags['business-unit'].tags;
-        buildSelectFromTags(buSelectWrapper, phText, Object.entries(clouds));
+        buildSelectFromTags('series-select-modal-input', buSelectWrapper, phText, Object.entries(clouds));
       }
     }
 

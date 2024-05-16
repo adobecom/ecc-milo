@@ -72,6 +72,24 @@ export function buildNoAccessScreen(el) {
   area.append(getIcon('browser-access-forbidden-lg'), noAccessDescription);
 }
 
+export function querySelectorAllDeep(selector, root = document) {
+  const elements = [];
+
+  function recursiveQuery(r) {
+    elements.push(...r.querySelectorAll(selector));
+
+    r.querySelectorAll('*').forEach((el) => {
+      if (el.shadowRoot) {
+        recursiveQuery(el.shadowRoot);
+      }
+    });
+  }
+
+  recursiveQuery(root);
+
+  return elements;
+}
+
 export function addRepeater(element, title) {
   element.lastChild.setAttribute('repeatIdx', 0);
 
