@@ -1,6 +1,5 @@
 /* eslint-disable no-use-before-define */
 import { getLibs } from '../../../scripts/utils.js';
-import { getMappedInputsOutput } from './share-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 

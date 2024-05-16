@@ -91,17 +91,17 @@ export default function init(component) {
   loadGoogleMapsAPI(() => initAutocomplete(component));
 }
 
-export function onResume(component) {
-  const visibleInPostState = component.querySelector('#checkbox-venue-info-visible').checked;
-  const venueName = component.querySelector('#venue-info-venue-name').value;
-  const address = component.querySelector('#venue-info-venue-address').value;
-  const city = component.querySelector('#location-city').value;
-  const state = component.querySelector('#location-state').value;
-  const postalCode = component.querySelector('#location-zip-code').value;
-  const country = component.querySelector('#location-country').value;
-  // const placeId = component.querySelector('#google-place-id').value;
-  const lat = component.querySelector('#google-place-lat').value;
-  const lon = component.querySelector('#google-place-lng').value;
+export function onResume(component, eventObj) {
+  component.querySelector('#checkbox-venue-info-visible').checked = eventObj;
+  component.querySelector('#venue-info-venue-name');
+  component.querySelector('#venue-info-venue-address');
+  component.querySelector('#location-city');
+  component.querySelector('#location-state');
+  component.querySelector('#location-zip-code');
+  component.querySelector('#location-country');
+  // const placeId = component.querySelector('#google-place-id');
+  component.querySelector('#google-place-lat');
+  component.querySelector('#google-place-lng');
 }
 
 export function onSubmit(component) {
