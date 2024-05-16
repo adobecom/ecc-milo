@@ -220,6 +220,20 @@ function changeCalendarPage(component, state, delta) {
   updateCalendar(component, state.parent, state);
 }
 
+function initInputWatcher(input, onChange) {
+  const config = { attributes: true, childList: false, subtree: false };
+
+  const callback = (mutationList) => {
+    const [mutation] = mutationList;
+    if (mutation.target.disabled) {
+      onChange();
+    }
+  };
+
+  const observer = new MutationObserver(callback);
+  observer.observe(input, config);
+}
+
 function buildCalendar(component, parent) {
   const input = component.querySelector('#event-info-date-picker');
 
@@ -256,9 +270,10 @@ function initCalendar(component) {
   let calendar;
   const datePickerContainer = component.querySelector('.date-picker');
   const calendarIcon = datePickerContainer.querySelector('.icon-calendar-add');
+  const input = component.querySelector('#event-info-date-picker');
 
   calendarIcon.addEventListener('click', () => {
-    if (calendar) return;
+    if (calendar || input.disabled) return;
     calendar = createTag('div', { class: 'calendar-container' });
     datePickerContainer.append(calendar);
     buildCalendar(component, calendar);
@@ -269,6 +284,11 @@ function initCalendar(component) {
       calendar.remove();
       calendar = '';
     }
+  });
+
+  initInputWatcher(input, () => {
+    calendar.remove();
+    calendar = '';
   });
 }
 

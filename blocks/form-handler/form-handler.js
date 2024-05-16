@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, handlize, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
+import { getIcon, handlize, buildNoAccessScreen, yieldToMain, querySelectorAllDeep } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -207,24 +207,6 @@ function onStepValidate(props) {
       }
     });
   };
-}
-
-function querySelectorAllDeep(selector, root = document) {
-  const elements = [];
-
-  function recursiveQuery(r) {
-    elements.push(...r.querySelectorAll(selector));
-
-    r.querySelectorAll('*').forEach((el) => {
-      if (el.shadowRoot) {
-        recursiveQuery(el.shadowRoot);
-      }
-    });
-  }
-
-  recursiveQuery(root);
-
-  return elements;
 }
 
 function updateRequiredFields(props, stepIndex) {
@@ -488,6 +470,7 @@ async function buildECCForm(el) {
 }
 
 export default async function init(el) {
+  el.style.display = 'none';
   const miloLibs = getLibs();
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
@@ -501,6 +484,7 @@ export default async function init(el) {
 
   if (devMode === 'true' && hostname === 'localhost') {
     buildECCForm(el);
+    el.removeAttribute('style');
     return;
   }
 
@@ -511,6 +495,7 @@ export default async function init(el) {
       buildECCForm(el);
     }
 
+    el.removeAttribute('style');
     return;
   }
 
@@ -521,7 +506,7 @@ export default async function init(el) {
       } else {
         buildECCForm(el);
       }
-
+      el.removeAttribute('style');
       unsubscribe();
     });
   }
