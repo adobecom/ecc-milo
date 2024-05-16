@@ -99,12 +99,18 @@ export async function decorateTextfield(row, type = 'text') {
   row.classList.add('text-field-row');
   const cols = row.querySelectorAll(':scope > div');
   if (!cols.length) return;
-  const [placeholderCol, maxLengthCol] = cols;
+  let placeholderCol;
+  let maxLengthCol;
+  if (cols.length === 1) {
+    [placeholderCol] = cols;
+  } else if (cols.length === 2) {
+    [placeholderCol, maxLengthCol] = cols;
+  }
   const text = placeholderCol.textContent.trim();
   const handle = handlize(text);
 
   const attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
-  const maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
+  const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
   const isRequired = attrTextEl.textContent.trim().endsWith('*');
 
   let input;

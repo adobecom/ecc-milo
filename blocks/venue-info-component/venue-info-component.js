@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, generateToolTip, handlize } from '../../utils/utils.js';
+import { generateToolTip, handlize } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -38,17 +38,17 @@ function buildAdditionalInfo(row, i) {
     const paragraphs = col.querySelectorAll(':scope > p');
     const existingFileInput = document.querySelectorAll('.img-file-input');
     const inputId = uploadName
-      ? `${handlize(uploadName)}`
-      : `img-file-input-${existingFileInput.length + i}`;
+    ? `${handlize(uploadName)}`
+    : `img-file-input-${existingFileInput.length + i}`;
 
-    const dropzoneUI = createTag('image-dropzone', {'inputid' : inputId });
-    const inputLabel = createTag('div', { slot: 'img-label', class: 'img-upload-text'});
+    const dropzoneUI = createTag('image-dropzone', { id: inputId });
+    const inputLabel = createTag('div', { slot: 'img-label', class: 'img-upload-text' });
     paragraphs.forEach((p) => {
       inputLabel.append(p);
     });
 
     dropzoneUI.append(inputLabel);
-    
+
     col.innerHTML = '';
     col.append(dropzoneUI);
   }

@@ -13,7 +13,17 @@ export function onResume() {
   // TODO: handle form prepopulation on component level
 }
 
+const mapProfileToJson = (component) => {
+  const name = component.querySelector('#info-field-name').value;
+  const title = component.querySelector('#info-field-add-title').value;
+  const bio = component.querySelector('#info-field-add-bio').value;
+  return {
+    name,
+    title,
+    bio,
+  };
+};
+
 export function onSubmit(component, inputMap) {
-  console.log(inputMap);
-  return {};
+  return mapProfileToJson(component);
 }

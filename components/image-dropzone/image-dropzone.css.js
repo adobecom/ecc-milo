@@ -1,11 +1,5 @@
 /* stylelint-disable selector-class-pattern */
 export const styles = `
-.image-dropzones {
-  display: grid;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
 .img-file-input-wrapper {
   border: 2px dashed var(--color-gray-400);
   border-radius: 8px;
@@ -43,7 +37,7 @@ export const styles = `
   object-fit: cover;
 }
 
-.img-file-input-wrapper div {
+.img-file-input-wrapper label {
   border-radius: 8px;
   display: block;
   box-sizing: border-box;
@@ -56,19 +50,19 @@ export const styles = `
   background-color: var(--color-gray-100);
 }
 
-.img-file-input-wrapper div input.img-file-input {
+.img-file-input-wrapper input.img-file-input {
   display: none;
 }
 
-.img-file-input-wrapper div img.icon {
+.img-file-input-wrapper label img.icon {
   width: 40px;
   opacity: 0.5;
   margin-bottom: 24px;
 }
 
-.img-file-input-wrapper div p {
+.img-file-input-wrapper label p {
   margin: 0;
-  font-size: var(--type-body-xs-size);;
+  font-size: var(--type-body-xs-size);
 }
 
 .img-file-input-wrapper .hidden {

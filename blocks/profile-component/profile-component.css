@@ -34,6 +34,11 @@
 }
 
 .profile-component .profile-header-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
+  display: flex;
+  flex-direction: row;
+  column-gap: 40px;
+}
+
+.profile-component .profile-delete-button {
+  margin-left: auto;
+}

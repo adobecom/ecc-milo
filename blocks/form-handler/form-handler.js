@@ -12,6 +12,7 @@ const SUPPORTED_COMPONENTS = [
   'event-info',
   'img-upload',
   'venue-info',
+  'profile',
 ];
 
 function initComponents(props) {
@@ -209,7 +210,7 @@ function onStepValidate(props) {
   };
 }
 
-function querySelectorAllDeep(selector, root = document) {
+export function querySelectorAllDeep(selector, root = document) {
   const elements = [];
 
   function recursiveQuery(r) {
@@ -230,7 +231,8 @@ function querySelectorAllDeep(selector, root = document) {
 function updateRequiredFields(props, stepIndex) {
   const frags = props.el.querySelectorAll('.fragment');
   const currentFrag = stepIndex || frags[props.currentStep];
-  props[`required-fields-in-${currentFrag.id}`] = querySelectorAllDeep('input[required], select[required], textarea[required]', currentFrag);
+  // props[`required-fields-in-${currentFrag.id}`] = querySelectorAllDeep('input[required], select[required], textarea[required]', currentFrag);
+  props[`required-fields-in-${currentFrag.id}`] = [];
 }
 
 function initRequiredFieldsValidation(props) {
@@ -248,7 +250,9 @@ function initRequiredFieldsValidation(props) {
 
 function setRemoveEventListener(removeElement) {
   removeElement.addEventListener('click', (event) => {
-    event.currentTarget.parentElement.remove();
+    // FIXME : Use a generic approach to call remove of the handler.
+    // event.currentTarget.getAttribute('deleteHandler')();
+    event.currentTarget.parentNode.parentNode.parentNode.remove();
   });
 }
 
@@ -270,8 +274,10 @@ function initRepeaters(props) {
       }
 
       prevNode.after(clonedNode);
+      const tempProps = { el: clonedNode };
       yieldToMain().then(() => {
         updateRequiredFields(props);
+        initRepeaters(tempProps);
       });
     });
   });

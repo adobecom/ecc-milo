@@ -15,7 +15,7 @@ function decorateImageDropzones(row) {
     const inputId = uploadName ? `${handlize(uploadName)}` : `img-file-input-${existingFileInput.length + i}`;
     const paragraphs = c.querySelectorAll(':scope > p');
 
-    const dropzoneUI = createTag('image-dropzone', {'inputid' : inputId });
+    const dropzoneUI = createTag('image-dropzone', { id: inputId });
     const inputLabel = createTag('div', { slot: 'img-label', class: 'img-upload-text'});
     paragraphs.forEach((p) => {
       inputLabel.append(p);
