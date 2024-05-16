@@ -494,6 +494,7 @@ async function buildECCForm(el) {
 }
 
 export default async function init(el) {
+  el.style.display = 'none';
   const miloLibs = getLibs();
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
@@ -507,6 +508,7 @@ export default async function init(el) {
 
   if (devMode === 'true' && hostname === 'localhost') {
     buildECCForm(el);
+    el.removeAttribute('style');
     return;
   }
 
@@ -517,6 +519,7 @@ export default async function init(el) {
       buildECCForm(el);
     }
 
+    el.removeAttribute('style');
     return;
   }
 
@@ -527,7 +530,7 @@ export default async function init(el) {
       } else {
         buildECCForm(el);
       }
-
+      el.removeAttribute('style');
       unsubscribe();
     });
   }
