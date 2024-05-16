@@ -50,6 +50,29 @@ function buildDatePicker(column) {
   column.append(dateLabel, datePicker, calendarIcon);
 }
 
+function convertTo24HourFormat(timeStr) {
+  const timeFormat = /^(0?[1-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/;
+
+  if (!timeStr.match(timeFormat)) {
+    throw new Error("Invalid time format. Expected format: 'h:mm AM/PM'");
+  }
+
+  const [time, period] = timeStr.split(' ');
+  const [, minutes] = time.split(':').map(Number);
+  let [hours] = time.split(':').map(Number);
+
+  if (period === 'PM' && hours !== 12) {
+    hours += 12;
+  } else if (period === 'AM' && hours === 12) {
+    hours = 0;
+  }
+
+  const formattedHours = hours.toString().padStart(2, '0');
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+
+  return `${formattedHours}:${formattedMinutes}:00`;
+}
+
 function buildTimePicker(column) {
   column.classList.add('time-pickers');
   const header = column.querySelector(':scope > p');
@@ -78,7 +101,7 @@ function buildTimePicker(column) {
         select.append(option);
         timeSlots.forEach((t) => {
           const text = t.textContent.trim();
-          const opt = createTag('option', { value: handlize(text) }, text);
+          const opt = createTag('option', { value: convertTo24HourFormat(text) }, text);
           select.append(opt);
         });
         timePickerWrapper.append(select);
