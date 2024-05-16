@@ -2,13 +2,6 @@ import { getLibs } from '../../scripts/utils.js';
 import { getIcon, handlize, generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
-const miloLibs = getLibs();
-
-await Promise.all([
-  import(`${miloLibs}/deps/lit-all.min.js`),
-  import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
-  import(`${miloLibs}/features/spectrum-web-components/dist/checkbox.js`),
-]);
 
 async function decorateField(row, type = 'text') {
   row.classList.add('text-field-row');
@@ -119,6 +112,14 @@ async function decorateCheckBox(row) {
 }
 
 export default async function init(el) {
+  const miloLibs = getLibs();
+
+await Promise.all([
+  import(`${miloLibs}/deps/lit-all.min.js`),
+  import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
+  import(`${miloLibs}/features/spectrum-web-components/dist/checkbox.js`),
+]);
+
   el.classList.add('form-component');
   generateToolTip(el);
   const rows = [...el.querySelectorAll(':scope > div')];
