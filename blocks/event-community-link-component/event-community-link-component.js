@@ -14,7 +14,7 @@ async function decorateField(row, type = 'text') {
 
   if (type === 'text') {
     input = createTag('sp-textfield', {
-      id: 'community-URL-details',
+      id: 'community-url-details',
       class: 'text-input',
       placeholder: text,
       size: 'xl',
