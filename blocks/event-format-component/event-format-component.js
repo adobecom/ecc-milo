@@ -4,7 +4,12 @@ import { getIcon, generateToolTip } from '../../utils/utils.js';
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 
-function buildPickerFromTags(wrapper, phText, options) {
+async function buildPickerFromTags(wrapper, phText, options) {
+  const miloLibs = getLibs();
+  await Promise.all([
+    import(`${miloLibs}/deps/lit-all.min.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/picker.js`),
+  ]);
   const select = createTag('sp-picker', { id: 'bu-select-input', class: 'select-input', size: 'm', label: phText });
 
   options.forEach(([, val]) => {
