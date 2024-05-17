@@ -13,6 +13,29 @@
 import { setLibs, decorateArea } from './utils.js';
 import { captureProfile } from '../utils/event-apis.js';
 
+const locales = {
+  '': { ietf: 'en-US', tk: 'jdq5hay.css' },
+  br: { ietf: 'pt-BR', tk: 'inq1xob.css' },
+  cn: { ietf: 'zh-Hans-CN', tk: 'puu3xkp' },
+  de: { ietf: 'de-DE', tk: 'vin7zsi.css' },
+  dk: { ietf: 'da-DK', tk: 'aaz7dvd.css' },
+  es: { ietf: 'es-ES', tk: 'oln4yqj.css' },
+  fi: { ietf: 'fi-FI', tk: 'aaz7dvd.css' },
+  fr: { ietf: 'fr-FR', tk: 'vrk5vyv.css' },
+  gb: { ietf: 'en-GB', tk: 'pps7abe.css' },
+  in: { ietf: 'en-IN', tk: 'pps7abe.css' },
+  it: { ietf: 'it-IT', tk: 'bbf5pok.css' },
+  jp: { ietf: 'ja-JP', tk: 'dvg6awq' },
+  kr: { ietf: 'ko-KR', tk: 'qjs5sfm' },
+  nl: { ietf: 'nl-NL', tk: 'cya6bri.css' },
+  no: { ietf: 'no-NO', tk: 'aaz7dvd.css' },
+  se: { ietf: 'sv-SE', tk: 'fpk1pcd.css' },
+  tw: { ietf: 'zh-Hant-TW', tk: 'jay0ecd' },
+  uk: { ietf: 'en-GB', tk: 'pps7abe.css' },
+  tr: { ietf: 'tr-TR', tk: 'ley8vds.css' },
+  eg: { ietf: 'en-EG', tk: 'pps7abe.css' },
+};
+
 // Add project-wide style path here.
 const STYLES = '';
 
@@ -28,11 +51,7 @@ const CONFIG = {
   // geoRouting: 'off',
   // fallbackRouting: 'off',
   decorateArea,
-  locales: {
-    '': { ietf: 'en-US', tk: 'hah7vzn.css' },
-    de: { ietf: 'de-DE', tk: 'hah7vzn.css' },
-    kr: { ietf: 'ko-KR', tk: 'zfo3ouc' },
-  },
+  locales,
 };
 
 // Decorate the page with site specific needs.

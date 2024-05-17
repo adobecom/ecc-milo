@@ -7,9 +7,23 @@
   font-family: var(--body-font-family);
 }
 
+.form-handler sp-textfield {
+  display: unset;
+  outline: none;
+}
+
+.form-handler sp-textfield:focus {
+  outline: 1px var(--color-gray-500) solid;
+  border-radius: 4px;
+}
+
 .form-handler > div:first-child {
   display: flex;
   justify-content: center;
+}
+
+.form-handler .form-handler-ctas-panel a {
+  font-size: var(--type-body-s-size);
 }
 
 .form-handler .side-menu ul {
@@ -205,10 +219,6 @@
 .form-handler .form-handler-ctas-panel .form-handler-forward-wrapper > div:first-of-type {
   padding-right: 16px;
   border-right: 2px solid var(--color-black);
-}
-
-.form-handler .form-handler-ctas-panel a {
-  font-size: var(--type-body-s-size);
 }
 
 .form-handler .form-handler-ctas-panel a.disabled {

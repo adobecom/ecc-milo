@@ -1,6 +1,5 @@
 /* eslint-disable no-use-before-define */
 import { getLibs } from '../../../scripts/utils.js';
-import { getMappedInputsOutput } from './share-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -221,6 +220,20 @@ function changeCalendarPage(component, state, delta) {
   updateCalendar(component, state.parent, state);
 }
 
+function initInputWatcher(input, onChange) {
+  const config = { attributes: true, childList: false, subtree: false };
+
+  const callback = (mutationList) => {
+    const [mutation] = mutationList;
+    if (mutation.target.disabled) {
+      onChange();
+    }
+  };
+
+  const observer = new MutationObserver(callback);
+  observer.observe(input, config);
+}
+
 function buildCalendar(component, parent) {
   const input = component.querySelector('#event-info-date-picker');
 
@@ -257,9 +270,10 @@ function initCalendar(component) {
   let calendar;
   const datePickerContainer = component.querySelector('.date-picker');
   const calendarIcon = datePickerContainer.querySelector('.icon-calendar-add');
+  const input = component.querySelector('#event-info-date-picker');
 
   calendarIcon.addEventListener('click', () => {
-    if (calendar) return;
+    if (calendar || input.disabled) return;
     calendar = createTag('div', { class: 'calendar-container' });
     datePickerContainer.append(calendar);
     buildCalendar(component, calendar);
@@ -270,6 +284,11 @@ function initCalendar(component) {
       calendar.remove();
       calendar = '';
     }
+  });
+
+  initInputWatcher(input, () => {
+    calendar.remove();
+    calendar = '';
   });
 }
 
@@ -290,7 +309,7 @@ export function onResume(component, eventObj, inputMap) {
   });
 }
 
-export function onSubmit(component, inputMap) {
+export function onSubmit(component) {
   const datePicker = component.querySelector('#event-info-date-picker');
   const startDate = new Date(datePicker.dataset.startDate);
   const endDate = new Date(datePicker.dataset.endDate);
@@ -303,7 +322,6 @@ export function onSubmit(component, inputMap) {
   const eventEndDate = addTimeToDate(new Date(endDate), endTime);
 
   const eventInfo = {
-    ...getMappedInputsOutput(component, inputMap),
     'event-start': eventStartDate,
     'event-end': eventEndDate,
   };
