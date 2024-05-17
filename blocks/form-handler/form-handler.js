@@ -12,6 +12,8 @@ const SUPPORTED_COMPONENTS = [
   'event-info',
   'img-upload',
   'venue-info',
+  'event-agenda',
+  'community-link'
 ];
 
 function initComponents(props) {
