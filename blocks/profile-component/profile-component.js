@@ -1,6 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 import '../../components/image-dropzone/image-dropzone.js';
-import { addRepeater, decorateTextfield, getIcon } from '../../utils/utils.js';
+import { addRepeater, decorateTextfield, decorateTextarea, getIcon } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -22,7 +22,7 @@ function decorateTitle(element) {
   // eslint-disable-next-line no-undef
   deleteButton.append(getIcon('remove-circle'));
   deleteButton.classList.add('hidden');
-//   deleteButton.setAttribute('deleteHandler', () => {  });
+  deleteButton.setAttribute('deleteHandler', () => {  });
 
   element.parentNode.append(deleteButton);
 }
@@ -68,7 +68,7 @@ async function decorateProfile(element) {
         decorateTextfield(row);
         break;
       case 3:
-        decorateTextfield(row, 'textarea');
+        decorateTextarea(row);
         break;
       case 4:
         decorateBio(row);

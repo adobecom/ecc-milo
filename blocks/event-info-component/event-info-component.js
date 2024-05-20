@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, handlize, generateToolTip, decorateTextfield } from '../../utils/utils.js';
+import { getIcon, generateToolTip, decorateTextfield, decorateTextarea } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -95,8 +95,8 @@ export default function init(el) {
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach(async (r, i) => {
-    if (i === 1) await decorateTextfield(r, 'text');
-    if (i === 2) await decorateTextfield(r, 'textarea');
+    if (i === 1) await decorateTextfield(r);
+    if (i === 2) await decorateTextarea(r);
     if (i === 3) decorateDateTimeFields(r);
   });
 }

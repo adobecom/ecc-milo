@@ -1,5 +1,5 @@
 import makeFileInputDropZone from './share-controller.js';
-import { querySelectorAllDeep } from '../form-handler.js';
+import { querySelectorAllDeep } from '../../../utils/utils.js';
 
 export default function init(component) {
   const imgFileInputWrapper = querySelectorAllDeep('.img-file-input-wrapper', component);
