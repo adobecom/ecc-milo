@@ -73,7 +73,7 @@ function convertTo24HourFormat(timeStr) {
   return `${formattedHours}:${formattedMinutes}:00`;
 }
 
-function buildTimePicker(column) {
+function buildTimePicker(column, wrapper) {
   column.classList.add('time-pickers');
   const header = column.querySelector(':scope > p');
   const rows = column.querySelectorAll('table tr');
@@ -112,17 +112,52 @@ function buildTimePicker(column) {
   });
 
   column.innerHTML = '';
-  if (header) column.append(header);
+  if (header) wrapper.before(header);
   timePickerWrappers.forEach((w) => { column.append(w); });
+
+  wrapper.append(column);
+}
+
+function getGMTOffset(timeZone) {
+  const match = timeZone.match(/UTC([+-])(\d{2}):(\d{2})/);
+  if (match) {
+    const sign = match[1] === '+' ? 1 : -1;
+    const hours = parseInt(match[2], 10);
+
+    return sign * hours;
+  }
+
+  return 0;
+}
+
+function decorateTimeZoneSelect(cell, wrapper) {
+  const phText = cell.querySelector('p')?.textContent.trim();
+  const option = createTag('option', { value: '', disabled: true, selected: true }, phText);
+  const select = createTag('select', { id: 'time-zone-select-input', class: 'select-input' });
+  select.append(option);
+  const timeZones = cell.querySelectorAll('li');
+  timeZones.forEach((t) => {
+    const text = t.textContent.trim();
+    const opt = createTag('option', { value: getGMTOffset(text.split(' - ')[0]) }, text);
+    select.append(opt);
+  });
+  cell.innerHTML = '';
+  cell.className = 'time-zone-picker';
+  cell.append(select);
+
+  wrapper.append(cell);
 }
 
 function decorateDateTimeFields(row) {
   row.classList.add('date-time-row');
+  const timeInputsWrapper = createTag('div', { class: 'time-inputs-wrapper' });
   const cols = row.querySelectorAll(':scope > div');
+  row.append(timeInputsWrapper);
 
   cols.forEach((c, i) => {
     if (i === 0) buildDatePicker(c);
-    if (i === 1) buildTimePicker(c);
+    if (i === 1) buildTimePicker(c, timeInputsWrapper);
+    if (i === 2) decorateTimeZoneSelect(c, timeInputsWrapper);
   });
 }
 
@@ -132,8 +167,18 @@ export default function init(el) {
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach(async (r, i) => {
-    if (i === 1) await decorateField(r, 'text');
-    if (i === 2) await decorateField(r, 'textarea');
-    if (i === 3) decorateDateTimeFields(r);
+    switch (i) {
+      case 1:
+        await decorateField(r, 'text');
+        break;
+      case 2:
+        await decorateField(r, 'textarea');
+        break;
+      case 3:
+        decorateDateTimeFields(r);
+        break;
+      default:
+        break;
+    }
   });
 }

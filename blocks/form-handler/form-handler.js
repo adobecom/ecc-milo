@@ -279,7 +279,7 @@ function renderFormNavigation(props, prevStep, currentStep) {
 }
 
 function navigateForm(props, stepIndex) {
-  const index = stepIndex || props.currentStep + 1;
+  const index = stepIndex || stepIndex === 0 ? stepIndex : props.currentStep + 1;
   const frags = props.el.querySelectorAll('.fragment');
 
   if (index >= frags.length || index < 0) return;

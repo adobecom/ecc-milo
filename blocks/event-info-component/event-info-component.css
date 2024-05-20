@@ -25,7 +25,7 @@
 
 .event-info-component .date-time-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   flex-direction: column;
   gap: 24px;
   margin-bottom: 24px;
@@ -38,6 +38,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  margin: 16px 0;
 }
 
 .event-info-component .date-time-row > .date-picker label {
@@ -60,14 +61,20 @@
   cursor: pointer;
 }
 
+.event-info-component .date-time-row > p {
+  font-size: var(--type-heading-m-size);
+  font-weight: 700;
+}
+
+.event-info-component .time-inputs-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 .event-info-component .time-pickers {
   display: flex;
   gap: 16px;
-}
-
-.event-info-component .time-pickers > p {
-  font-size: var(--type-heading-m-size);
-  font-weight: 700;
 }
 
 .event-info-component .time-pickers .time-picker-wrapper {
@@ -79,6 +86,12 @@
   font-size: var(--type-body-xs-size);
 }
 
+.event-info-component .time-zone-picker {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.event-info-component .time-zone-picker select,
 .event-info-component .time-pickers .time-picker-wrapper select {
   flex-grow: 1;
   border-radius: 4px;

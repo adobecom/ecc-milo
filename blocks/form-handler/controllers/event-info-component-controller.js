@@ -311,19 +311,21 @@ export function onResume(component, eventObj, inputMap) {
 
 export function onSubmit(component) {
   const datePicker = component.querySelector('#event-info-date-picker');
-  const startDate = new Date(datePicker.dataset.startDate);
-  const endDate = new Date(datePicker.dataset.endDate);
+  const localStartDate = datePicker.dataset.startDate;
+  const localEndDate = datePicker.dataset.endDate;
 
-  const startTime = component.querySelector('#time-picker-start-time').value;
-  const endTime = component.querySelector('#time-picker-end-time').value;
+  const localStartTime = component.querySelector('#time-picker-start-time').value;
+  const localEndTime = component.querySelector('#time-picker-end-time').value;
 
-  // FIXME: need to align date-time format to the requirement of API
-  const eventStartDate = addTimeToDate(new Date(startDate), startTime);
-  const eventEndDate = addTimeToDate(new Date(endDate), endTime);
+  const gmtOffset = component.querySelector('#time-zone-select-input').value;
 
   const eventInfo = {
-    'event-start': eventStartDate,
-    'event-end': eventEndDate,
+    // TODO: add the other text field values
+    localStartDate,
+    localEndDate,
+    localStartTime,
+    localEndTime,
+    gmtOffset,
   };
 
   return eventInfo;

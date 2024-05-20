@@ -1,5 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 import { generateToolTip } from '../../utils/utils.js';
+import { getClouds, getSeries } from '../form-handler/controllers/shared-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -21,12 +22,12 @@ function buildSelectFromTags(id, wrapper, phText, options) {
 async function decorateCloudTagSelect(column) {
   const buSelectWrapper = createTag('div', { class: 'bu-picker-wrapper' });
   const phText = column.textContent.trim();
-  const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
 
-  if (!resp.error) {
-    const clouds = resp.namespaces.caas.tags['business-unit'].tags;
-    buildSelectFromTags('bu-select-input', buSelectWrapper, phText, Object.entries(clouds));
-  }
+  const clouds = await getClouds();
+
+  if (!clouds) return;
+
+  buildSelectFromTags('bu-select-input', buSelectWrapper, phText, Object.entries(clouds));
 
   column.innerHTML = '';
   column.append(buSelectWrapper);
@@ -35,32 +36,22 @@ async function decorateCloudTagSelect(column) {
 async function decorateSeriesSelect(column) {
   const seriesSelectWrapper = createTag('div', { class: 'series-picker-wrapper' });
   const phText = column.textContent.trim();
-  const resp = await fetch(
-    'http://localhost:8500/v1/series',
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer',
-      },
-    },
-  ).then((res) => res.json()).catch((error) => error);
 
   // TODO: Connect API.
-  if (!resp.error) {
-    const { series } = resp;
-    const option = createTag('option', { value: '', disabled: true, selected: true }, phText);
-    const select = createTag('select', { id: 'series-select-input', class: 'select-input' });
+  const series = await getSeries();
+  if (!series) return;
 
-    select.append(option);
+  const option = createTag('option', { value: '', disabled: true, selected: true }, phText);
+  const select = createTag('select', { id: 'series-select-input', class: 'select-input' });
 
-    series.forEach((s) => {
-      const opt = createTag('option', { value: s.seriesId }, s.seriesName);
-      select.append(opt);
-    });
+  select.append(option);
 
-    seriesSelectWrapper.append(select);
-  }
+  series.forEach((s) => {
+    const opt = createTag('option', { value: s.seriesId }, s.seriesName);
+    select.append(opt);
+  });
+
+  seriesSelectWrapper.append(select);
 
   column.innerHTML = '';
   column.append(seriesSelectWrapper);

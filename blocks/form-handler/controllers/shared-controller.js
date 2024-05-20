@@ -23,7 +23,11 @@ function uploadBinaryFile(file) {
   xhr.open('POST', url, true);
 
   // TODO: set required headers
-  // xhr.setRequestHeader('Content-Type', 'application/json');
+
+  // xhr.setRequestHeader('imageType', 'event-hero-image');
+  // xhr.setRequestHeader('imageType', 'event-card-image');
+  // xhr.setRequestHeader('imageType', 'venue-image');
+  // xhr.setRequestHeader('imageType', 'speaker-photo');
 
   xhr.onload = function () {
     if (xhr.status === 200) {
@@ -75,36 +79,35 @@ function handleImageFiles(wrapper, files) {
   });
 }
 
-function getElementOutput(element, accessPoint) {
-  if (!element) return null;
+export async function getClouds() {
+  const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
 
-  const propertyValue = element[accessPoint];
-  if (propertyValue !== undefined) {
-    return propertyValue;
+  if (!resp.error) {
+    const clouds = resp.namespaces.caas.tags['business-unit'].tags;
+    return clouds;
   }
 
-  return element.getAttribute(accessPoint) || '';
+  return null;
 }
 
-export function getMappedInputsOutput(component, inputMap) {
-  const output = {};
+export async function getSeries() {
+  const resp = await fetch(
+    'http://localhost:8500/v1/series',
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer',
+      },
+    },
+  ).then((res) => res.json()).catch((error) => error);
 
-  inputMap.forEach((row) => {
-    const inputFound = component.querySelector(row.selector);
+  if (!resp.error) {
+    const { series } = resp;
+    return series;
+  }
 
-    if (inputFound) {
-      const { key, accessPoint, shadowRootSelector } = row;
-      let targetInput = inputFound;
-
-      if (shadowRootSelector) {
-        targetInput = inputFound.shadowRoot.querySelector(shadowRootSelector);
-      }
-
-      output[key] = getElementOutput(targetInput, accessPoint);
-    }
-  });
-
-  return output;
+  return null;
 }
 
 export default function makeFileInputDropZone(inputWrapper) {

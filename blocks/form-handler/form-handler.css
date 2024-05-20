@@ -20,6 +20,7 @@
 .form-handler > div:first-child {
   display: flex;
   justify-content: center;
+  min-height: 50vh;
 }
 
 .form-handler .form-handler-ctas-panel a {
