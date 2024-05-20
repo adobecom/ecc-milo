@@ -215,8 +215,7 @@ function onStepValidate(props) {
 function updateRequiredFields(props, stepIndex) {
   const frags = props.el.querySelectorAll('.fragment');
   const currentFrag = stepIndex || frags[props.currentStep];
-  // props[`required-fields-in-${currentFrag.id}`] = querySelectorAllDeep('input[required], select[required], textarea[required]', currentFrag);
-  props[`required-fields-in-${currentFrag.id}`] = [];
+  props[`required-fields-in-${currentFrag.id}`] = querySelectorAllDeep('input[required], select[required], textarea[required]', currentFrag);
 }
 
 function initRequiredFieldsValidation(props) {
