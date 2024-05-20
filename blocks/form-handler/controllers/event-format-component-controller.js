@@ -55,5 +55,16 @@ export function onResume(component, eventObj) {
 }
 
 export function onSubmit(component) {
-  return {};
+  const eventType = 'inPerson';
+  const cloudType = component.querySelector('#bu-select-input').value;
+  const seriesId = component.querySelector('#series-select-input').value;
+
+  const eventFormat = {
+    // TODO: add the other text field values
+    eventType,
+    cloudType,
+    seriesId,
+  };
+
+  return eventFormat;
 }

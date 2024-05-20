@@ -38,7 +38,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 16px 0;
+  margin: 13px 0;
 }
 
 .event-info-component .date-time-row > .date-picker label {

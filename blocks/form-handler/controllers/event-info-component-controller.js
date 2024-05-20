@@ -20,19 +20,6 @@ function compareDates(date1, date2) {
          && date1.getDate() === date2.getDate();
 }
 
-function addTimeToDate(date, timeString) {
-  const timeParts = timeString.match(/(\d+):(\d+)-(\w+)/);
-  const hours = parseInt(timeParts[1], 10);
-  const minutes = parseInt(timeParts[2], 10);
-  const ampm = timeParts[3];
-
-  const hoursIn24 = ampm.toLowerCase() === 'pm' ? (hours % 12) + 12 : hours % 12;
-
-  date.setHours(hoursIn24, minutes, 0, 0);
-
-  return date;
-}
-
 // Function to generate a calendar
 function updateCalendar(component, parent, state) {
   parent.querySelectorAll('.calendar-grid, .weekdays').forEach((e) => e.remove());
@@ -310,6 +297,9 @@ export function onResume(component, eventObj, inputMap) {
 }
 
 export function onSubmit(component) {
+  const title = component.querySelector('#info-field-event-title').value;
+  const description = component.querySelector('#info-field-event-description').value;
+  const title = component.querySelector('#info-field-event-title').value;
   const datePicker = component.querySelector('#event-info-date-picker');
   const localStartDate = datePicker.dataset.startDate;
   const localEndDate = datePicker.dataset.endDate;
@@ -321,6 +311,8 @@ export function onSubmit(component) {
 
   const eventInfo = {
     // TODO: add the other text field values
+    title,
+    description,
     localStartDate,
     localEndDate,
     localStartTime,
