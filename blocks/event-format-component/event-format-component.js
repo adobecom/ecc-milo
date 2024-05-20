@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, generateToolTip } from '../../utils/utils.js';
+import { generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -35,12 +35,31 @@ async function decorateCloudTagSelect(column) {
 async function decorateSeriesSelect(column) {
   const seriesSelectWrapper = createTag('div', { class: 'series-picker-wrapper' });
   const phText = column.textContent.trim();
-  const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
+  const resp = await fetch(
+    'http://localhost:8500/v1/series',
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer',
+      },
+    },
+  ).then((res) => res.json()).catch((error) => error);
 
   // TODO: Connect API.
   if (!resp.error) {
-    const clouds = resp.namespaces.caas.tags['business-unit'].tags;
-    buildSelectFromTags('series-select-input', seriesSelectWrapper, phText, Object.entries(clouds));
+    const { series } = resp;
+    const option = createTag('option', { value: '', disabled: true, selected: true }, phText);
+    const select = createTag('select', { id: 'series-select-input', class: 'select-input' });
+
+    select.append(option);
+
+    series.forEach((s) => {
+      const opt = createTag('option', { value: s.seriesId }, s.seriesName);
+      select.append(opt);
+    });
+
+    seriesSelectWrapper.append(select);
   }
 
   column.innerHTML = '';
@@ -121,19 +140,25 @@ async function decorateNewSeriesModal(column) {
   lightboxTable.remove();
 }
 
-async function decorateNewSeriesBtnAndModal(column) {
-  const pTag = column.querySelector(':scope > p');
-  const plusIcon = getIcon('add-circle');
-  const a = column.querySelector('a[href$="#new-series"]');
-
-  if (a) {
-    pTag.classList.add('add-series-btn-wrapper');
-    a.append(plusIcon);
-    a.classList.add('add-series-modal-btn');
-  }
-
-  await decorateNewSeriesModal(column);
+function decorateCheckbox(column) {
+  const checkbox = createTag('sp-checkbox', { id: 'rsvp-required-check' }, column.textContent.trim());
+  column.innerHTML = '';
+  column.append(checkbox);
 }
+
+// async function decorateNewSeriesBtnAndModal(column) {
+//   const pTag = column.querySelector(':scope > p');
+//   const plusIcon = getIcon('add-circle');
+//   const a = column.querySelector('a[href$="#new-series"]');
+
+//   if (a) {
+//     pTag.classList.add('add-series-btn-wrapper');
+//     a.append(plusIcon);
+//     a.classList.add('add-series-modal-btn');
+//   }
+
+//   await decorateNewSeriesModal(column);
+// }
 
 export default function init(el) {
   el.classList.add('form-component');
@@ -149,7 +174,8 @@ export default function init(el) {
       cols.forEach(async (c, ci) => {
         if (ci === 0) await decorateCloudTagSelect(c);
         if (ci === 1) await decorateSeriesSelect(c);
-        if (ci === 2) decorateNewSeriesBtnAndModal(c);
+        // if (ci === 2) decorateNewSeriesBtnAndModal(c);
+        if (ci === 2) decorateCheckbox(c);
       });
     }
 

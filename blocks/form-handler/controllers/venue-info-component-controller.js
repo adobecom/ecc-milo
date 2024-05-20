@@ -1,13 +1,3 @@
-import { querySelectorAllDeep } from '../../../utils/utils.js';
-import makeFileInputDropZone from './share-controller.js';
-
-function initVenueImageInput(component) {
-  const wrappers = querySelectorAllDeep('.img-file-input-wrapper', component);
-  wrappers.forEach((wrapper) => {
-    makeFileInputDropZone(wrapper);
-  });
-}
-
 function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');
   script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBStUMRpmG-vchdbtciHmqdQhzvLXmgQyI&libraries=places&callback=onGoogleMapsApiLoaded';
@@ -90,7 +80,6 @@ function initAutocomplete(el) {
 }
 
 export default function init(component) {
-  initVenueImageInput(component);
   loadGoogleMapsAPI(() => initAutocomplete(component));
 }
 

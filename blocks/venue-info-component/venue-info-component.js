@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { generateToolTip, handlize } from '../../utils/utils.js';
+import { generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -34,65 +34,21 @@ function decorateSWCTextField(row, extraOptions) {
 }
 
 function buildAdditionalInfo(row) {
-  function decorateImageDropzones(col) {
-    col.classList.add('image-dropzone');
-    const paragraphs = col.querySelectorAll(':scope > p');
-    const existingFileInput = document.querySelectorAll('.img-file-input');
+  row.classList.add('venue-info-addition');
+  const fieldSet = createTag('fieldset', { class: 'checkboxes' });
+  const [inputLabel, comment] = [...row.querySelectorAll(':scope  p')];
+  const labelText = inputLabel.textContent.trim();
+  const checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-info-visible' }, labelText);
+  const wrapper = createTag('div', { class: 'checkbox-wrapper' });
 
-    const uploadName = col
-      .querySelector(':scope > p:first-of-type')
-      ?.textContent.trim();
-    const inputId = uploadName
-      ? `${handlize(uploadName)}`
-      : `img-file-input-${existingFileInput.length + i}`;
+  wrapper.append(checkbox);
+  fieldSet.append(wrapper);
 
-    const dropzoneUI = createTag('image-dropzone', { id: inputId });
-    const inputLabel = createTag('div', { slot: 'img-label', class: 'img-upload-text' });
-    paragraphs.forEach((p) => {
-      inputLabel.append(p);
-    });
-
-    dropzoneUI.append(inputLabel);
-
-    col.innerHTML = '';
-    col.append(dropzoneUI);
-  }
-
-  function decorateVenueInfoVisible(col) {
-    const fieldSet = createTag('fieldset', { class: 'checkboxes' });
-    col.classList.add('venue-info-addition');
-    const [inputLabel, comment] = [...col.querySelectorAll(':scope > p')];
-    const cn = inputLabel.textContent.trim();
-
-    const handle = 'venue-info-visible';
-    const input = createTag('input', {
-      id: `checkbox-${handle}`,
-      name: `checkbox-${handle}`,
-      type: 'checkbox',
-      class: 'checkbox-input',
-      value: handle,
-    });
-    const label = createTag(
-      'label',
-      { class: 'checkbox-label', for: `checkbox-${handle}` },
-      cn,
-    );
-    const wrapper = createTag('div', { class: 'checkbox-wrapper' });
-
-    wrapper.append(input, label);
-    fieldSet.append(wrapper);
-
-    const additionComment = createTag('div', { class: 'addition-comment' });
-    additionComment.append(comment.textContent.trim());
-    col.innerHTML = '';
-    fieldSet.append(additionComment);
-    col.append(fieldSet);
-  }
-
-  row.classList.add('img-upload-component');
-  const [imageUploader, venueVisible] = row.querySelectorAll(':scope > div');
-  decorateImageDropzones(imageUploader);
-  decorateVenueInfoVisible(venueVisible);
+  const additionComment = createTag('div', { class: 'addition-comment' });
+  additionComment.append(comment.textContent.trim());
+  row.innerHTML = '';
+  fieldSet.append(additionComment);
+  row.append(fieldSet);
   row.classList.add('venue-info-addition-wrapper');
 }
 
@@ -168,6 +124,7 @@ export default function init(el) {
   Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/checkbox.js`),
   ]);
 
   const rows = el.querySelectorAll(':scope > div');

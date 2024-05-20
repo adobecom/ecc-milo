@@ -14,7 +14,7 @@ const SUPPORTED_COMPONENTS = [
   'venue-info',
   'profile',
   'event-agenda',
-  'community-link'
+  'community-link',
 ];
 
 function initComponents(props) {
@@ -386,18 +386,6 @@ function initNavigation(props) {
   });
 }
 
-async function getInputMap(el) {
-  const jsonRow = el.querySelector(':scope > div:last-of-type');
-  const jsonUrl = jsonRow.querySelector('a')?.href || jsonRow.textContent.trim();
-  jsonRow.remove();
-
-  const json = await fetch(jsonUrl)
-    .then((resp) => resp.json())
-    .catch((error) => console.log(error));
-
-  return json.data;
-}
-
 function prepopulateForm(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
@@ -429,7 +417,6 @@ function prepopulateForm(props) {
 
 async function buildECCForm(el) {
   decorateForm(el);
-  const inputMap = await getInputMap(el);
 
   const props = {
     el,

@@ -56,8 +56,8 @@
 }
 
 .venue-info-component .venue-info-addition-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .venue-info-component .venue-info-addition-wrapper .venue-info-addition {
