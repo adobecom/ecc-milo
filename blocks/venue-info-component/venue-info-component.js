@@ -38,9 +38,13 @@ function buildAdditionalInfo(row) {
     col.classList.add('image-dropzone');
     const paragraphs = col.querySelectorAll(':scope > p');
     const existingFileInput = document.querySelectorAll('.img-file-input');
+
+    const uploadName = col
+      .querySelector(':scope > p:first-of-type')
+      ?.textContent.trim();
     const inputId = uploadName
-    ? `${handlize(uploadName)}`
-    : `img-file-input-${existingFileInput.length + i}`;
+      ? `${handlize(uploadName)}`
+      : `img-file-input-${existingFileInput.length + i}`;
 
     const dropzoneUI = createTag('image-dropzone', { id: inputId });
     const inputLabel = createTag('div', { slot: 'img-label', class: 'img-upload-text' });
