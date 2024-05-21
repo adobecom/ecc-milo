@@ -17,7 +17,7 @@ const SUPPORTED_COMPONENTS = [
   'community-link',
 ];
 
-function initComponents(props) {
+async function initComponents(props) {
   SUPPORTED_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
@@ -27,6 +27,12 @@ function initComponents(props) {
       await initComponent(component);
     });
   });
+
+  const miloLibs = getLibs();
+  await Promise.all([
+    import(`${miloLibs}/deps/lit-all.min.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
+  ]);
 }
 
 async function gatherValues(props) {
@@ -456,7 +462,7 @@ async function buildECCForm(el) {
   const proxyProps = new Proxy(props, dataHandler);
 
   initFormCtas(proxyProps);
-  initComponents(proxyProps);
+  await initComponents(proxyProps);
   initRepeaters(proxyProps);
   initNavigation(proxyProps);
   prepopulateForm(proxyProps);

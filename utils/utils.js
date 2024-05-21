@@ -108,12 +108,6 @@ export function addRepeater(element, title) {
 }
 
 export async function decorateTextfield(row, extraOptions) {
-  const miloLibs = getLibs();
-  await Promise.all([
-    import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
-  ]);
-
   row.classList.add('text-field-row');
   const cols = row.querySelectorAll(':scope > div');
   if (!cols.length) return;
@@ -148,12 +142,6 @@ export async function decorateTextfield(row, extraOptions) {
 }
 
 export async function decorateTextarea(row, extraOptions) {
-  const miloLibs = getLibs();
-  await Promise.all([
-    import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
-  ]);
-
   row.classList.add('text-field-row');
   const cols = row.querySelectorAll(':scope > div');
   if (!cols.length) return;
