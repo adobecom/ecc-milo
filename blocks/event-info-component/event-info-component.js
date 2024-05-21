@@ -95,8 +95,8 @@ export default function init(el) {
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach(async (r, i) => {
-    if (i === 1) await decorateTextfield(r);
-    if (i === 2) await decorateTextarea(r);
+    if (i === 1) await decorateTextfield(r, { id: 'info-field-title' });
+    if (i === 2) await decorateTextarea(r, { id: 'info-field-description' });
     if (i === 3) decorateDateTimeFields(r);
   });
 }
