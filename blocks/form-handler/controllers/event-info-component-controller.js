@@ -292,17 +292,8 @@ export default function init(component) {
   initCalendar(component);
 }
 
-export function onResume(component, eventObj, inputMap) {
-  inputMap.forEach((input) => {
-    const element = component.querySelector(input.selector);
-    if (!element) return;
-
-    if (element[input.accessPoint] !== undefined) {
-      element[input.accessPoint] = eventObj[input.key];
-    } else {
-      element.setAttirbute(input.accessPoint, eventObj[input.key]);
-    }
-  });
+export function onResume(component, eventObj) {
+  // TODO: handle form prepopulation on component level
 }
 
 function dateTimeStringToTimestamp(dateString, timeString) {
@@ -323,13 +314,12 @@ export function onSubmit(component, props) {
   const localStartTime = component.querySelector('#time-picker-start-time').value;
   const localEndTime = component.querySelector('#time-picker-end-time').value;
 
-  const gmtOffset = component.querySelector('#time-zone-select-input').value;
+  const gmtOffset = +component.querySelector('#time-zone-select-input').value;
 
   const localStartTimeMillis = dateTimeStringToTimestamp(localStartDate, localStartTime);
   const localEndTimeMillis = dateTimeStringToTimestamp(localEndDate, localEndTime);
 
   const eventInfo = {
-    // TODO: add the other text field values
     title,
     description,
     localStartDate,
@@ -342,5 +332,4 @@ export function onSubmit(component, props) {
   };
 
   props.payload = { ...props.payload, ...eventInfo };
-  return eventInfo;
 }

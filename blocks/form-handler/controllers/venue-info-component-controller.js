@@ -67,7 +67,7 @@ function initAutocomplete(el) {
           addressInfo.zip = component.long_name;
         }
         if (component.types.includes('country')) {
-          addressInfo.country = component.long_name;
+          addressInfo.country = component.short_name;
         }
       });
 

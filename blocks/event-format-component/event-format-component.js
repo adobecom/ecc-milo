@@ -23,12 +23,24 @@ async function decorateCloudTagSelect(column) {
   const buSelectWrapper = createTag('div', { class: 'bu-picker-wrapper' });
   const phText = column.textContent.trim();
 
-  const clouds = await getClouds();
+  // const clouds = await getClouds();
 
-  if (!clouds) return;
+  // if (!clouds) return;
 
-  buildSelectFromTags('bu-select-input', buSelectWrapper, phText, Object.entries(clouds));
+  // buildSelectFromTags('bu-select-input', buSelectWrapper, phText, Object.entries(clouds));
 
+  const option = createTag('option', { value: '', disabled: true, selected: true }, phText);
+  const select = createTag('select', { id: 'bu-select-input', class: 'select-input' });
+
+  select.append(option);
+
+  // FIXME: use correct data source rather than hardcoded values.
+  ['Creative Cloud', 'DX'].forEach((bu) => {
+    const opt = createTag('option', { value: bu }, bu);
+    select.append(opt);
+  });
+
+  buSelectWrapper.append(select);
   column.innerHTML = '';
   column.append(buSelectWrapper);
 }

@@ -1,6 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
-import { createEvent } from './controllers/shared-controller.js';
+import { createEvent, updateEvent, publishEvent } from './controllers/shared-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -47,12 +47,10 @@ async function gatherValues(props) {
       return componentPayload;
     });
 
-    return Promise.all(promises).then((r) => r.reduce((acc, curr) => ({ ...acc, ...curr }), {}));
+    return Promise.all(promises);
   });
 
-  const results = await Promise.all(allComponentPromises);
-  const finalPayload = results.reduce((acc, p) => (p ? { ...acc, ...p } : acc), {});
-  return finalPayload;
+  await Promise.all(allComponentPromises);
 }
 
 function decorateForm(el) {
@@ -105,9 +103,17 @@ function decorateForm(el) {
 }
 
 async function saveEvent(props) {
-  const payload = await gatherValues(props);
-  await createEvent(props.payload);
-  return payload;
+  await gatherValues(props);
+  if (props.currentStep === 0) {
+    const resp = await createEvent(props.payload);
+    props.payload = resp;
+  } else if (props.currentStep < props.maxStep) {
+    const resp = await publishEvent(props.payload.eventId, props.payload);
+    props.payload = resp;
+  } else {
+    const resp = await updateEvent(props.payload.eventId, props.payload);
+    props.payload = resp;
+  }
 }
 
 function updateSideNav(props) {
@@ -207,7 +213,7 @@ function renderFormNavigation(props, prevStep, currentStep) {
   frags[prevStep].classList.add('hidden');
   frags[currentStep].classList.remove('hidden');
 
-  if (currentStep === frags.length - 1) {
+  if (currentStep === props.maxStep) {
     nextBtn.textContent = nextBtn.dataset.finalStateText;
   } else {
     nextBtn.textContent = nextBtn.dataset.nextStateText;
@@ -257,9 +263,9 @@ function initFormCtas(props) {
       if (['#pre-event', '#post-event'].includes(ctaUrl.hash)) {
         cta.classList.add('fill');
         cta.addEventListener('click', async () => {
-          const payload = await saveEvent(props);
+          await saveEvent(props);
           // TODO: use real .page links
-          const targetRedirect = `${window.location.origin}/event/t3/dme/preview?eventId=${payload['event-id']}`;
+          const targetRedirect = `${window.location.origin}/event/t3/dme/preview?eventId=${props.payload['event-id']}`;
           window.open(targetRedirect);
         });
       }
@@ -282,12 +288,10 @@ function initFormCtas(props) {
         }
 
         cta.addEventListener('click', async () => {
-          const payload = await saveEvent(props);
+          await saveEvent(props);
 
           if (ctaUrl.hash === '#next') {
-            if (props.currentStep === frags.length - 1) {
-              updateEvent(payload);
-            } else {
+            if (props.currentStep < props.maxStep) {
               navigateForm(props);
             }
           }
@@ -356,6 +360,7 @@ async function buildECCForm(el) {
     el,
     currentStep: 0,
     farthestStep: 0,
+    maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
   };
 

@@ -133,6 +133,23 @@ export async function updateEvent(eventId, payload) {
   return resp;
 }
 
+export async function publishEvent(eventId, payload) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', 'Bearer');
+  myHeaders.append('content-type', 'application/json');
+
+  const raw = JSON.stringify({ ...payload, published: true });
+
+  const requestOptions = {
+    method: 'PUT',
+    headers: myHeaders,
+    body: raw,
+  };
+
+  const resp = fetch(`http://localhost:8500/v1/events${eventId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
+
 export async function getClouds() {
   const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
 
