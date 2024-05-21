@@ -131,12 +131,12 @@ export async function decorateTextfield(row, extraOptions) {
   const isRequired = attrTextEl.textContent.trim().endsWith('*');
 
   const input = createTag('sp-textfield', {
-    ...extraOptions,
     class: 'text-input',
     placeholder: text,
     required: isRequired,
     quiet: true,
     size: 'xl',
+    ...extraOptions,
   });
 
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
@@ -171,12 +171,12 @@ export async function decorateTextarea(row, extraOptions) {
   const isRequired = attrTextEl.textContent.trim().endsWith('*');
 
   const input = createTag('sp-textfield', {
-    ...extraOptions,
     multiline: true,
     class: 'textarea-input',
     quiet: true,
     placeholder: text,
     required: isRequired,
+    ...extraOptions,
   });
 
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
