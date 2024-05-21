@@ -132,10 +132,10 @@ export default function init(el) {
   rows.forEach(async (r, i) => {
     switch (i) {
       case 1:
-        await decorateTextfield(r, { id: 'info-field-title' });
+        await decorateTextfield(r, { id: 'info-field-event-title' });
         break;
       case 2:
-        await decorateTextarea(r, { id: 'info-field-description' });
+        await decorateTextarea(r, { id: 'info-field-event-description' });
         break;
       case 3:
         decorateDateTimeFields(r);

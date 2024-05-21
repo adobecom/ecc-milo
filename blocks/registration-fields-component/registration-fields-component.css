@@ -1,11 +1,15 @@
 .registration-details-component .attendee-fields-wrapper {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
   padding-bottom: 24px;
   margin-bottom: 40px;
   border-bottom: 3px solid var(--stroke-color-divider);
 }
 
 .registration-details-component .attendee-count-wrapper {
-  margin-bottom: 24px;
+  display: flex;
+  gap: 16px;
 }
 
 .registration-details-component .attendee-count-wrapper input {
@@ -20,14 +24,14 @@
   text-align: right;
 }
 
-.registration-details-component fieldset.checkboxes-wrapper,
-.host-contact-wrapper {
+.registration-details-component fieldset.checkboxes-wrapper {
   display: flex;
   gap: 32px;
 }
 
 .registration-details-component .attendee-fields-wrapper fieldset.checkboxes-wrapper {
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 0; 
 }
 
 .registration-details-component .rsvp-checkboxes {

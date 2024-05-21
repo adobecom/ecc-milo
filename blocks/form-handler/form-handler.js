@@ -35,12 +35,6 @@ async function initComponents(props) {
       await initComponent(component);
     });
   });
-
-  const miloLibs = getLibs();
-  await Promise.all([
-    import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
-  ]);
 }
 
 async function gatherValues(props) {
@@ -420,6 +414,7 @@ export default async function init(el) {
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
   ]);
 
   const profile = window.bm8tr.get('imsProfile');
