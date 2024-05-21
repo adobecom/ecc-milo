@@ -46,7 +46,7 @@ function decorateHeader(element) {
   });
 }
 
-async function decorateBio(element) {
+async function decorateSocialMedia(element) {
   const socialTag = createTag('div');
   element.replaceWith(socialTag);
 
@@ -64,14 +64,16 @@ async function decorateProfile(element) {
         decorateHeader(row);
         break;
       case 1:
+        decorateTextfield(row, { id: 'profile-field-name' });
+        break;
       case 2:
-        decorateTextfield(row);
+        decorateTextfield(row, { id: 'profile-field-title' });
         break;
       case 3:
-        decorateTextarea(row);
+        decorateTextarea(row, { id: 'profile-field-bio' });
         break;
       case 4:
-        decorateBio(row);
+        decorateSocialMedia(row);
         break;
       default:
         break;

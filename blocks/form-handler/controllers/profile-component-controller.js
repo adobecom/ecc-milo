@@ -14,9 +14,9 @@ export function onResume() {
 }
 
 const mapProfileToJson = (component) => {
-  const name = component.querySelector('#info-field-name').value;
-  const title = component.querySelector('#info-field-add-title').value;
-  const bio = component.querySelector('#info-field-add-bio').value;
+  const name = component.querySelector('#profile-field-name').value;
+  const title = component.querySelector('#profile-field-title').value;
+  const bio = component.querySelector('#profile-field-bio').value;
   return {
     name,
     title,

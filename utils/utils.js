@@ -125,7 +125,6 @@ export async function decorateTextfield(row, extraOptions) {
     [placeholderCol, maxLengthCol] = cols;
   }
   const text = placeholderCol.textContent.trim();
-  const handle = handlize(text);
 
   const attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
   const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
@@ -133,7 +132,6 @@ export async function decorateTextfield(row, extraOptions) {
 
   const input = createTag('sp-textfield', {
     ...extraOptions,
-    id: `info-field-${handle}`,
     class: 'text-input',
     placeholder: text,
     required: isRequired,
@@ -167,15 +165,13 @@ export async function decorateTextarea(row, extraOptions) {
     [placeholderCol, maxLengthCol] = cols;
   }
   const text = placeholderCol.textContent.trim();
-  const handle = handlize(text);
 
   const attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
   const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
   const isRequired = attrTextEl.textContent.trim().endsWith('*');
 
-  const input = createTag('sp-textfield', { 
+  const input = createTag('sp-textfield', {
     ...extraOptions,
-    id: `info-field-${handle}`,
     multiline: true,
     class: 'textarea-input',
     quiet: true,
