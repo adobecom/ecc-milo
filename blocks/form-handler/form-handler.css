@@ -293,3 +293,9 @@
   font-weight: 700;
   margin: 0;
 }
+
+.form-handler .img-upload-text p {
+  margin: 0;
+  font-size: var(--type-body-xs-size);
+  line-height: normal;
+}

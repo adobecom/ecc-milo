@@ -1,0 +1,44 @@
+.profile-component{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-component .info-field-wrapper {
+  margin-bottom: 24px;
+}
+
+.profile-component .attr-text {
+  font-size: var(--type-body-xs-size);
+  text-align: right;
+}
+
+.profile-component sp-textfield {
+  width: 100%;
+}
+
+.profile-component sp-textfield.textarea-input {
+  font-size: var(--type-body-m-size);;
+  width: 100%;
+  outline: none;
+  resize: vertical;
+  min-height: 40px;
+}
+
+.profile-component label {
+  font-weight: 700;
+}
+
+.profile-component .profile-image {
+  max-width: 200px;
+}
+
+.profile-component .profile-header-wrapper {
+  display: flex;
+  flex-direction: row;
+  column-gap: 40px;
+}
+
+.profile-component .profile-delete-button {
+  margin-left: auto;
+}

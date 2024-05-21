@@ -12,6 +12,7 @@ const SUPPORTED_COMPONENTS = [
   'event-info',
   'img-upload',
   'venue-info',
+  'profile',
   'event-agenda',
   'community-link',
 ];
@@ -24,7 +25,7 @@ const INPUT_TYPES = [
   'sp-checkbox[required]',
 ];
 
-function initComponents(props) {
+async function initComponents(props) {
   SUPPORTED_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
@@ -34,6 +35,12 @@ function initComponents(props) {
       await initComponent(component);
     });
   });
+
+  const miloLibs = getLibs();
+  await Promise.all([
+    import(`${miloLibs}/deps/lit-all.min.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
+  ]);
 }
 
 async function gatherValues(props) {
@@ -176,7 +183,9 @@ function initRequiredFieldsValidation(props) {
 
 function setRemoveEventListener(removeElement) {
   removeElement.addEventListener('click', (event) => {
-    event.currentTarget.parentElement.remove();
+    // FIXME : Use a generic approach to call remove of the handler.
+    // event.currentTarget.getAttribute('deleteHandler')();
+    event.currentTarget.parentNode.parentNode.parentNode.remove();
   });
 }
 
@@ -198,8 +207,10 @@ function initRepeaters(props) {
       }
 
       prevNode.after(clonedNode);
+      const tempProps = { el: clonedNode };
       yieldToMain().then(() => {
         updateRequiredFields(props);
+        initRepeaters(tempProps);
       });
     });
   });
@@ -396,7 +407,7 @@ async function buildECCForm(el) {
   const proxyProps = new Proxy(props, dataHandler);
 
   initFormCtas(proxyProps);
-  initComponents(proxyProps);
+  await initComponents(proxyProps);
   initRepeaters(proxyProps);
   initNavigation(proxyProps);
   prepopulateForm(proxyProps);
