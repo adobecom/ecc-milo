@@ -38,7 +38,6 @@ function buildAdditionalInfo(row) {
   const fieldSet = createTag('fieldset', { class: 'checkboxes' });
   const [inputLabel, comment] = [...row.querySelectorAll(':scope  p')];
   const labelText = inputLabel.textContent.trim();
-
   const checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-info-visible' }, labelText);
   const wrapper = createTag('div', { class: 'checkbox-wrapper' });
 

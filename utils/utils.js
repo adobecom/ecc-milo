@@ -1,3 +1,5 @@
+import { getLibs } from '../scripts/utils.js';
+
 function createTag(tag, attributes, html, options = {}) {
   const el = document.createElement(tag);
   if (html) {
@@ -27,7 +29,7 @@ export function yieldToMain() {
 }
 
 export function handlize(str) {
-  return str.toLowerCase().trim().replaceAll(' ', '-');
+  return str?.toLowerCase().trim().replaceAll(' ', '-');
 }
 
 export function addTooltipToHeading(em, heading) {
@@ -103,4 +105,72 @@ export function addRepeater(element, title) {
   tag.append(plusIcon);
 
   element.append(tag);
+}
+
+export async function decorateTextfield(row, extraOptions) {
+  row.classList.add('text-field-row');
+  const cols = row.querySelectorAll(':scope > div');
+  if (!cols.length) return;
+  let placeholderCol;
+  let maxLengthCol;
+  if (cols.length === 1) {
+    [placeholderCol] = cols;
+  } else if (cols.length === 2) {
+    [placeholderCol, maxLengthCol] = cols;
+  }
+  const text = placeholderCol.textContent.trim();
+
+  const attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
+  const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
+  const isRequired = attrTextEl.textContent.trim().endsWith('*');
+
+  const input = createTag('sp-textfield', {
+    class: 'text-input',
+    placeholder: text,
+    required: isRequired,
+    quiet: true,
+    size: 'xl',
+    ...extraOptions,
+  });
+
+  if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
+
+  const wrapper = createTag('div', { class: 'info-field-wrapper' });
+  row.innerHTML = '';
+  wrapper.append(input, attrTextEl);
+  row.append(wrapper);
+}
+
+export async function decorateTextarea(row, extraOptions) {
+  row.classList.add('text-field-row');
+  const cols = row.querySelectorAll(':scope > div');
+  if (!cols.length) return;
+  let placeholderCol;
+  let maxLengthCol;
+  if (cols.length === 1) {
+    [placeholderCol] = cols;
+  } else if (cols.length === 2) {
+    [placeholderCol, maxLengthCol] = cols;
+  }
+  const text = placeholderCol.textContent.trim();
+
+  const attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
+  const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
+  const isRequired = attrTextEl.textContent.trim().endsWith('*');
+
+  const input = createTag('sp-textfield', {
+    multiline: true,
+    class: 'textarea-input',
+    quiet: true,
+    placeholder: text,
+    required: isRequired,
+    ...extraOptions,
+  });
+
+  if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
+
+  const wrapper = createTag('div', { class: 'info-field-wrapper' });
+  row.innerHTML = '';
+  wrapper.append(input, attrTextEl);
+  row.append(wrapper);
 }

@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, handlize, generateToolTip } from '../../utils/utils.js';
+import { handlize, generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -11,25 +11,18 @@ function decorateImageDropzones(row) {
   cols.forEach((c, i) => {
     c.classList.add('image-dropzone');
     const uploadName = c.querySelector(':scope > p:first-of-type')?.textContent.trim();
-    const paragraphs = c.querySelectorAll(':scope > p');
     const existingFileInput = document.querySelectorAll('.img-file-input');
-    const inputId = uploadName ? `${handlize(uploadName)}` : `img-file-input-${existingFileInput.length + i + 1}`;
-    const fileInput = createTag('input', { id: inputId, type: 'file', class: 'img-file-input', accept: 'image/png, image/jpeg' });
-    const inputWrapper = createTag('div', { class: 'img-file-input-wrapper' });
-    const inputLabel = createTag('label', { class: 'img-file-input-label' });
+    const inputId = uploadName ? `${handlize(uploadName)}` : `img-file-input-${existingFileInput.length + i}`;
+    const paragraphs = c.querySelectorAll(':scope > p');
 
-    const previewWrapper = createTag('div', { class: 'preview-wrapper hidden' });
-    const previewImg = createTag('div', { class: 'preview-img-placeholder' });
-    const previewDeleteButton = getIcon('delete');
-
-    previewWrapper.append(previewImg, previewDeleteButton);
-
-    inputWrapper.append(previewWrapper, inputLabel);
-    inputLabel.append(fileInput, getIcon('image-add'));
+    const dropzoneUI = createTag('image-dropzone', { id: inputId });
+    const inputLabel = createTag('div', { slot: 'img-label', class: 'img-upload-text'});
     paragraphs.forEach((p) => {
       inputLabel.append(p);
     });
-    dropzones.push(inputWrapper);
+    
+    dropzoneUI.append(inputLabel);
+    dropzones.push(dropzoneUI);
   });
 
   row.innerHTML = '';
