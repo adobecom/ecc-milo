@@ -17,6 +17,14 @@ function prepopulateTimeZone(component) {
 }
 
 function initStepLock(component) {
+  const { search, hostname } = window.location;
+  const urlParams = new URLSearchParams(search);
+  const skipValidation = urlParams.get('skipValidation');
+
+  if (skipValidation === 'true' && hostname === 'localhost') {
+    return;
+  }
+
   const step = component.closest('.fragment');
   const inputs = component.querySelectorAll('#bu-select-input, #series-select-input');
 
@@ -54,17 +62,20 @@ export function onResume(component, eventObj) {
   // TODO: handle form prepopulation on component level
 }
 
-export function onSubmit(component) {
-  const eventType = 'inPerson';
-  const cloudType = component.querySelector('#bu-select-input').value;
+export function onSubmit(component, props) {
+  const eventType = 'InPerson';
+  const cloudType = 'CreativeCloud' || component.querySelector('#bu-select-input').value;
   const seriesId = component.querySelector('#series-select-input').value;
+  const rsvpRequired = component.querySelector('#rsvp-required-check').checked;
 
   const eventFormat = {
     // TODO: add the other text field values
     eventType,
     cloudType,
     seriesId,
+    rsvpRequired,
   };
 
+  props.payload = { ...props.payload, ...eventFormat };
   return eventFormat;
 }

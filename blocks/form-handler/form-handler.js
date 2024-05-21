@@ -1,9 +1,9 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, handlize, buildNoAccessScreen, yieldToMain, querySelectorAllDeep } from '../../utils/utils.js';
+import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
+import { createEvent } from './controllers/shared-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
-const { default: getUuid } = await import(`${getLibs()}/utils/getUuid.js`);
 
 // list of controllers for the handler to load
 const SUPPORTED_COMPONENTS = [
@@ -14,6 +14,14 @@ const SUPPORTED_COMPONENTS = [
   'venue-info',
   'event-agenda',
   'community-link',
+];
+
+const INPUT_TYPES = [
+  'input[required]',
+  'select[required]',
+  'textarea[required]',
+  'sp-textfield[required]',
+  'sp-checkbox[required]',
 ];
 
 function initComponents(props) {
@@ -35,7 +43,7 @@ async function gatherValues(props) {
 
     const promises = Array.from(mappedComponents).map(async (component) => {
       const { onSubmit } = await import(`./controllers/${comp}-component-controller.js`);
-      const componentPayload = await onSubmit(component);
+      const componentPayload = await onSubmit(component, props);
       return componentPayload;
     });
 
@@ -96,88 +104,10 @@ function decorateForm(el) {
   });
 }
 
-function formatDate(date) {
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
-
-  return `${month}-${day}-${year}`;
-}
-
-function formatDateTime(date) {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const seconds = date.getSeconds().toString().padStart(2, '0');
-
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
-
-async function getEventIdAndUrl(payload) {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const eventId = urlParams.get('eventId');
-
-  if (eventId) {
-    const eventUrl = JSON.parse(localStorage.getItem(eventId)).url;
-    return [eventId, eventUrl];
-  }
-
-  const date = new Date(payload['event-start']);
-  const formattedDate = formatDate(date);
-  const pathname = `/event/t3/${formattedDate}/${payload.city}/${payload.state}/${handlize(payload['event-title'])}`;
-  const hash = await getUuid(pathname);
-
-  return [hash, pathname];
-}
-
 async function saveEvent(props) {
   const payload = await gatherValues(props);
-  const [hash, pathname] = await getEventIdAndUrl(payload);
-  payload['event-id'] = hash;
-  payload.url = pathname;
-  localStorage.setItem(payload['event-id'], JSON.stringify(payload));
+  await createEvent(props.payload);
   return payload;
-}
-
-async function postForm(payload) {
-  const myHeaders = new Headers();
-  myHeaders.append('Host', 'cchome-stage.adobe.io');
-  myHeaders.append('x-api-key', 'SplashThatWebhook');
-  myHeaders.append('content-type', 'application/json');
-
-  const raw = JSON.stringify({
-    eventId: payload['event-id'],
-    title: payload['event-title'],
-    eventType: 'Networking Event',
-    startDate: formatDateTime(new Date(payload['event-start'])),
-    endDate: formatDateTime(new Date(payload['event-end'])),
-    timezone: payload['time-zone'] || 'America/Los_Angeles',
-    venue: payload['event-venue'],
-    venueAddress: payload['event-address'],
-    venueCity: payload.city,
-    venueState: payload.state,
-    venueZipcode: payload.zipCode,
-    venueCountry: payload.country,
-    creationTime: formatDateTime(new Date()),
-    modificationTime: formatDateTime(new Date()),
-    description: payload['event-description'],
-    thumbnail: 'https://images.unsplash.com/photo-1429667947446-3c93a979b7e0?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjk1MTh9',
-  });
-
-  const requestOptions = {
-    method: 'POST',
-    headers: myHeaders,
-    body: raw,
-    redirect: 'follow',
-  };
-
-  fetch('https://cchome-stage.adobe.io/lod/v1/webhooks/platforms/splash-that/resources/event?=', requestOptions)
-    .then((response) => response.text())
-    .then((result) => console.log(result))
-    .catch((error) => console.error(error));
 }
 
 function updateSideNav(props) {
@@ -191,6 +121,14 @@ function updateSideNav(props) {
 }
 
 function validateRequiredFields(fields) {
+  const { search, hostname } = window.location;
+  const urlParams = new URLSearchParams(search);
+  const skipValidation = urlParams.get('skipValidation');
+
+  if (skipValidation === 'true' && hostname === 'localhost') {
+    return true;
+  }
+
   return fields.length === 0 || Array.from(fields).every((f) => f.value);
 }
 
@@ -214,7 +152,7 @@ function onStepValidate(props) {
 function updateRequiredFields(props, stepIndex) {
   const frags = props.el.querySelectorAll('.fragment');
   const currentFrag = stepIndex || frags[props.currentStep];
-  props[`required-fields-in-${currentFrag.id}`] = querySelectorAllDeep('input[required], select[required], textarea[required]', currentFrag);
+  props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(INPUT_TYPES.join());
 }
 
 function initRequiredFieldsValidation(props) {
@@ -320,6 +258,7 @@ function initFormCtas(props) {
         cta.classList.add('fill');
         cta.addEventListener('click', async () => {
           const payload = await saveEvent(props);
+          // TODO: use real .page links
           const targetRedirect = `${window.location.origin}/event/t3/dme/preview?eventId=${payload['event-id']}`;
           window.open(targetRedirect);
         });
@@ -347,7 +286,7 @@ function initFormCtas(props) {
 
           if (ctaUrl.hash === '#next') {
             if (props.currentStep === frags.length - 1) {
-              postForm(payload);
+              updateEvent(payload);
             } else {
               navigateForm(props);
             }
@@ -417,6 +356,7 @@ async function buildECCForm(el) {
     el,
     currentStep: 0,
     farthestStep: 0,
+    payload: {},
   };
 
   const frags = el.querySelectorAll('.fragment');

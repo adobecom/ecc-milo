@@ -3,63 +3,74 @@
   align-items: center;
   justify-content: space-between;
   gap: 35px;
- }
+}
  
- .event-agenda-component .text-field-row .time-pickers {
+.event-agenda-component .agenda-input-fields-row .time-picker {
   display: flex;
   align-items: center;
   gap: 16px;
   padding-bottom: 13px;
- }
+}
  
- .event-agenda-component .text-field-row .time-pickers > p {
+.event-agenda-component .agenda-input-fields-row .time-picker > p {
   font-size: var(--type-heading-m-size);
   font-weight: 700;
- }
+  min-width: max-content;
+}
+
+.event-agenda-component .agenda-input-fields-row .time-picker > p::before {
+  content: '';
+  display: inline-block;
+  background-image: url('../../icons/clock.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 32px;
+  height: 16px;
+}
  
- .event-agenda-component .text-field-row .time-pickers .time-picker-wrapper {
+.event-agenda-component .agenda-input-fields-row .time-picker .time-picker-wrapper {
   flex: 1;
   min-width: 150px;
- }
+}
  
- .event-agenda-component .text-field-row .time-pickers .time-picker-wrapper select {
+.event-agenda-component .agenda-input-fields-row .time-picker .time-picker-wrapper select {
   border-radius: 4px;
   padding: 4px;
   height: 40px;
   width: 100%;
   border: 1px solid var(--color-gray-500);
   font-size: var(--type-body-xs-size);
- }
- 
- .event-agenda-component .text-field-wrapper {
+}
+
+.event-agenda-component .text-field-wrapper {
   display: flex;
   flex-direction: column;
   width: 100%;
- }
+}
  
- .event-agenda-component .text-field-wrapper sp-textfield {
+.event-agenda-component .text-field-wrapper sp-textfield {
   width: 100%;
-  margin-bottom: 0px;
- }
+  margin-bottom: 0;
+}
  
- .event-agenda-component .text-field-wrapper .attr-text {
+.event-agenda-component .text-field-wrapper .attr-text {
   font-size: var(--type-body-xs-size);
   color: var(--color-secondary);
   text-align: right;
- }
+}
  
- .event-agenda-component .checkbox-wrapper {
+.event-agenda-component .checkbox-wrapper {
   display: flex;
   justify-content: flex-end;
   margin-top: 12px;
- }
+}
  
- .event-agenda-component .checkbox-input {
+.event-agenda-component .checkbox-input {
   margin-right: 8px;
- }
+}
  
- .event-agenda-component .checkbox-label {
+.event-agenda-component .checkbox-label {
   font-size: var(--type-body-xs-size);
   font-weight: normal;
- }
+}
  

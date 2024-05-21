@@ -111,7 +111,8 @@ function buildLocationInputGrid(row) {
   const placeIdInput = createTag('input', { id: 'google-place-id', type: 'hidden' });
   const placeLATInput = createTag('input', { id: 'google-place-lat', type: 'hidden' });
   const placeLNGInput = createTag('input', { id: 'google-place-lng', type: 'hidden' });
-  locationDetailsWrapper.append(placeIdInput, placeLATInput, placeLNGInput);
+  const gmtOffsetInput = createTag('input', { id: 'google-place-gmt-offset', type: 'hidden' });
+  locationDetailsWrapper.append(placeIdInput, placeLATInput, placeLNGInput, gmtOffsetInput);
 
   row.innerHTML = '';
   row.append(locationDetailsWrapper);

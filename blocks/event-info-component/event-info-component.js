@@ -133,7 +133,7 @@ function getGMTOffset(timeZone) {
 function decorateTimeZoneSelect(cell, wrapper) {
   const phText = cell.querySelector('p')?.textContent.trim();
   const option = createTag('option', { value: '', disabled: true, selected: true }, phText);
-  const select = createTag('select', { id: 'time-zone-select-input', class: 'select-input' });
+  const select = createTag('select', { id: 'time-zone-select-input', class: 'select-input', required: true });
   select.append(option);
   const timeZones = cell.querySelectorAll('li');
   timeZones.forEach((t) => {

@@ -15,7 +15,7 @@ async function uploadImage(file) {
     });
 }
 
-function uploadBinaryFile(file) {
+export function uploadBinaryFile(file) {
   // TODO: replace with real endpoint
   const url = 'http://localhost:8000/upload';
 
@@ -77,6 +77,60 @@ function handleImageFiles(wrapper, files) {
     imgPlaceholder.innerHTML = '';
     dz.classList.remove('hidden');
   });
+}
+
+export async function createVenue(payload) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', 'Bearer');
+  myHeaders.append('content-type', 'application/json');
+
+  const raw = JSON.stringify(payload);
+
+  const requestOptions = {
+    method: 'POST',
+    headers: myHeaders,
+    body: raw,
+  };
+
+  const resp = await fetch('http://localhost:8500/v1/venues', requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  console.log(payload, resp);
+  return resp;
+}
+
+export async function createEvent(payload) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', 'Bearer');
+  myHeaders.append('content-type', 'application/json');
+
+  const raw = JSON.stringify(payload);
+
+  const requestOptions = {
+    method: 'POST',
+    headers: myHeaders,
+    body: raw,
+  };
+
+  const resp = await fetch('http://localhost:8500/v1/events', requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  console.log(payload, resp);
+  return resp;
+}
+
+export async function updateEvent(eventId, payload) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', 'Bearer');
+  myHeaders.append('content-type', 'application/json');
+
+  const raw = JSON.stringify(payload);
+
+  const requestOptions = {
+    method: 'PUT',
+    headers: myHeaders,
+    body: raw,
+  };
+
+  const resp = fetch(`http://localhost:8500/v1/events${eventId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  console.log(payload, resp);
+  return resp;
 }
 
 export async function getClouds() {

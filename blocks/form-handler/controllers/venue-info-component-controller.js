@@ -1,3 +1,5 @@
+import { createVenue } from './shared-controller.js';
+
 function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');
   script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBStUMRpmG-vchdbtciHmqdQhzvLXmgQyI&libraries=places&callback=onGoogleMapsApiLoaded';
@@ -8,6 +10,11 @@ function loadGoogleMapsAPI(callback) {
     window.lana?.error('Failed to load the Google Maps script!');
   };
   document.head.appendChild(script);
+}
+
+function changeInputValue(input, value) {
+  input.value = value;
+  input.dispatchEvent(new Event('change'));
 }
 
 function initAutocomplete(el) {
@@ -25,8 +32,9 @@ function initAutocomplete(el) {
   const placeId = el.querySelector('#google-place-id');
   const placeLAT = el.querySelector('#google-place-lat');
   const placeLNG = el.querySelector('#google-place-lng');
+  const placeGmtOffset = el.querySelector('#google-place-gmt-offset');
 
-  autocomplete.setFields(['name', 'address_components', 'geometry', 'place_id']);
+  autocomplete.setFields(['name', 'address_components', 'geometry', 'place_id', 'utc_offset_minutes']);
 
   autocomplete.addListener('place_changed', () => {
     const place = autocomplete.getPlace();
@@ -63,16 +71,17 @@ function initAutocomplete(el) {
         }
       });
 
-      if (place.name) venueName.value = place.name;
-      address.value = addressInfo.address;
-      city.value = addressInfo.city;
-      state.value = addressInfo.state;
-      zip.value = addressInfo.zip;
-      country.value = addressInfo.country;
-      placeId.value = place.place_id;
+      if (place.name) changeInputValue(venueName, place.name);
+      changeInputValue(address, addressInfo.address);
+      changeInputValue(city, addressInfo.city);
+      changeInputValue(state, addressInfo.state);
+      changeInputValue(zip, addressInfo.zip);
+      changeInputValue(country, addressInfo.country);
+      changeInputValue(placeId, place.place_id);
     }
 
     if (place.geometry) {
+      placeGmtOffset.value = place.utc_offset_minutes / 60;
       placeLAT.value = place.geometry.location.lat();
       placeLNG.value = place.geometry.location.lng();
     }
@@ -94,9 +103,10 @@ export function onResume(component, eventObj) {
   // const placeId = component.querySelector('#google-place-id');
   component.querySelector('#google-place-lat');
   component.querySelector('#google-place-lng');
+  component.querySelector('#google-place-gmt-offset');
 }
 
-export function onSubmit(component) {
+export async function onSubmit(component, props) {
   const visibleInPostState = component.querySelector('#checkbox-venue-info-visible').checked;
   const venueName = component.querySelector('#venue-info-venue-name').value;
   const address = component.querySelector('#venue-info-venue-address').value;
@@ -105,8 +115,9 @@ export function onSubmit(component) {
   const postalCode = component.querySelector('#location-zip-code').value;
   const country = component.querySelector('#location-country').value;
   // const placeId = component.querySelector('#google-place-id').value;
-  const lat = component.querySelector('#google-place-lat').value;
-  const lon = component.querySelector('#google-place-lng').value;
+  const lat = +component.querySelector('#google-place-lat').value;
+  const lon = +component.querySelector('#google-place-lng').value;
+  const gmtOffset = +component.querySelector('#google-place-gmt-offset').value;
 
   const venueData = {
     visibleInPostState,
@@ -120,18 +131,16 @@ export function onSubmit(component) {
       lat,
       lon,
     },
-    mapUrl: 'string',
-    photo: {
-      imageId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-      imageUrl: 'string',
-      imageSharepointUrl: 'string',
-      s3Key: 'string',
-      mimeType: 'image/jpeg',
-      imageType: 'event-hero-image',
-      creationTime: '2024-05-16T20:25:14.929Z',
-      modificationTime: '2024-05-16T20:25:14.929Z',
-    },
+    gmtOffset,
   };
 
+  if (!props.payload.venueId) {
+    const venueCreatedResp = await createVenue(venueData);
+
+    props.payload = { ...props.payload, ...venueCreatedResp };
+    return venueCreatedResp;
+  }
+
+  props.payload = { ...props.payload, ...venueData };
   return venueData;
 }

@@ -11,13 +11,14 @@ function formatDate(date) {
   if (month.length < 2) month = `0${month}`;
   if (day.length < 2) day = `0${day}`;
 
-  return [month, day, year].join('-');
+  return [year, month, day].join('-');
 }
 
-function compareDates(date1, date2) {
-  return date1.getFullYear() === date2.getFullYear()
-         && date1.getMonth() === date2.getMonth()
-         && date1.getDate() === date2.getDate();
+function parseFormatedDate(string) {
+  const [year, month, day] = string.split('-');
+  const date = new Date(year, +month - 1, day);
+
+  return date;
 }
 
 // Function to generate a calendar
@@ -48,7 +49,6 @@ function updateDayView(component, parent, state) {
   const firstDayOfMonth = new Date(state.currentYear, state.currentMonth, 1).getDay();
   const calendarGrid = createTag('div', { class: 'calendar-grid' }, null, { parent });
   const todayDate = new Date();
-  todayDate.setHours(0, 0, 0, 0); // Normalize today's date
 
   for (let i = 0; i < firstDayOfMonth; i += 1) {
     createTag('div', { class: 'calendar-day empty' }, '', { parent: calendarGrid });
@@ -74,7 +74,7 @@ function updateDayView(component, parent, state) {
     }
 
     // Mark today's date
-    if (compareDates(date, todayDate)) {
+    if (date === todayDate) {
       dayElement.classList.add('today');
     }
   }
@@ -105,6 +105,12 @@ function updateMonthView(component, parent, state) {
       });
     }
   });
+}
+
+function isSameDay(date1, date2) {
+  return date1.getFullYear() === date2.getFullYear()
+         && date1.getMonth() === date2.getMonth()
+         && date1.getDate() === date2.getDate();
 }
 
 function updateYearView(component, parent, state) {
@@ -168,17 +174,20 @@ function updateInput(component, state) {
 function updateSelectedDates(state) {
   const { parent } = state;
   parent.querySelectorAll('.calendar-day').forEach((dayElement) => {
-    const date = new Date(dayElement.getAttribute('data-date'));
-    dayElement.classList.toggle('selected', date >= state.selectedStartDate && date <= (state.selectedEndDate || state.selectedStartDate));
-    dayElement.classList.toggle('range', date > state.selectedStartDate && date < (state.selectedEndDate || state.selectedStartDate));
+    if (!dayElement.getAttribute('data-date')) return;
+
+    const clickedDate = parseFormatedDate(dayElement.getAttribute('data-date'));
+    dayElement.classList.toggle('selected', clickedDate >= state.selectedStartDate && clickedDate <= (state.selectedEndDate || state.selectedStartDate));
+    dayElement.classList.toggle('range', clickedDate > state.selectedStartDate && clickedDate < (state.selectedEndDate || state.selectedStartDate));
     // Mark the start date and end date
-    if (compareDates(date, state.selectedStartDate)
-    && (state.selectedStartDate === state.selectedEndDate)) {
+
+    if (isSameDay(clickedDate, state.selectedStartDate)
+    && isSameDay(state.selectedStartDate, state.selectedEndDate)) {
       dayElement.classList.add('start-date', 'end-date');
-    } else if (state.selectedStartDate && compareDates(date, state.selectedStartDate)) {
+    } else if (state.selectedStartDate && isSameDay(clickedDate, state.selectedStartDate)) {
       dayElement.classList.remove('end-date');
       dayElement.classList.add('start-date');
-    } else if (state.selectedEndDate && compareDates(date, state.selectedEndDate)) {
+    } else if (state.selectedEndDate && isSameDay(clickedDate, state.selectedEndDate)) {
       dayElement.classList.remove('start-date');
       dayElement.classList.add('end-date');
     } else {
@@ -228,8 +237,8 @@ function buildCalendar(component, parent) {
 
   const state = {
     currentView: 'days',
-    selectedStartDate: input.dataset.startDate ? new Date(input.dataset.startDate) : null,
-    selectedEndDate: input.dataset.endDate ? new Date(input.dataset.endDate) : null,
+    selectedStartDate: input.dataset.startDate ? parseFormatedDate(input.dataset.startDate) : null,
+    selectedEndDate: input.dataset.endDate ? parseFormatedDate(input.dataset.endDate) : null,
     currentYear: new Date().getFullYear(),
     currentMonth: new Date().getMonth(),
     headerTitle: createTag('span', { class: 'header-title' }, '', { parent }),
@@ -296,10 +305,17 @@ export function onResume(component, eventObj, inputMap) {
   });
 }
 
-export function onSubmit(component) {
+function dateTimeStringToTimestamp(dateString, timeString) {
+  const dateTimeString = `${dateString}T${timeString}`;
+
+  const date = new Date(dateTimeString);
+
+  return date.getTime();
+}
+
+export function onSubmit(component, props) {
   const title = component.querySelector('#info-field-event-title').value;
   const description = component.querySelector('#info-field-event-description').value;
-  const title = component.querySelector('#info-field-event-title').value;
   const datePicker = component.querySelector('#event-info-date-picker');
   const localStartDate = datePicker.dataset.startDate;
   const localEndDate = datePicker.dataset.endDate;
@@ -309,6 +325,9 @@ export function onSubmit(component) {
 
   const gmtOffset = component.querySelector('#time-zone-select-input').value;
 
+  const localStartTimeMillis = dateTimeStringToTimestamp(localStartDate, localStartTime);
+  const localEndTimeMillis = dateTimeStringToTimestamp(localEndDate, localEndTime);
+
   const eventInfo = {
     // TODO: add the other text field values
     title,
@@ -317,8 +336,11 @@ export function onSubmit(component) {
     localEndDate,
     localStartTime,
     localEndTime,
+    localStartTimeMillis,
+    localEndTimeMillis,
     gmtOffset,
   };
 
+  props.payload = { ...props.payload, ...eventInfo };
   return eventInfo;
 }

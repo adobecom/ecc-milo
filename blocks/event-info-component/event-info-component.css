@@ -66,6 +66,16 @@
   font-weight: 700;
 }
 
+.event-info-component .date-time-row > p::before {
+  content: '';
+  display: inline-block;
+  background-image: url('../../icons/clock.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 32px;
+  height: 16px;
+}
+
 .event-info-component .time-inputs-wrapper {
   display: flex;
   flex-direction: column;
