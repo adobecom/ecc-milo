@@ -1,11 +1,11 @@
 export function onSubmit(component) {
   // TODO: agenda details
-  const time = component.querySelector('#time-picker-time').value;
-  const agendaInfoVisible = component.querySelector('#checkbox-agenda-info-will-appear-post-event').checked;
+  const time = component.querySelector('#time-picker').value;
+  const agendaInfoVisible = component.querySelector('#checkbox-agenda-info').checked;
 
   const eventInfo = {
     agendaInfoVisible,
-    Time: time,
+    time,
   };
 
   return eventInfo;
@@ -16,6 +16,6 @@ export function onResume(component, eventObj) {
 
 }
 
-export default function init(component) {
+export default function init(component, props) {
   // TODO: agenda init function
 }

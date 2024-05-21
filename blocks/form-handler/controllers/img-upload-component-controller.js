@@ -13,7 +13,6 @@ export function onResume(component, eventObj) {
   // TODO: handle form prepopulation on component level
 }
 
-export function onSubmit(component) {
-  // console.log(inputMap);
+export function onSubmit(component, props) {
   return {};
 }

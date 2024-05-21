@@ -1,6 +1,6 @@
 export function onSubmit(component) {
   // TODO: community URL
-  const time = component.querySelector('#community-URL-details').value;
+  const time = component.querySelector('#community-url-details').value;
   const discussionLinkCheckbox = component.querySelector('#checkbox-community').checked;
 
   const eventInfo = {
@@ -16,6 +16,6 @@ export function onResume(component, eventObj) {
 
 }
 
-export default function init(component) {
+export default function init(component, props) {
   // TODO: community link init function
 }

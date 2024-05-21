@@ -49,29 +49,22 @@ function decorateSWCTextField(row, options) {
 }
 
 function decorateAllCheckboxes(el) {
-  const ul = el.querySelector(':scope > div > div > ul');
-  const fieldset = createTag('fieldset', { class: 'checkboxes-wrapper' });
-  ul.parentElement.replaceChild(fieldset, ul);
-  const lis = ul.querySelectorAll(':scope > li');
+  const uls = el.querySelectorAll('ul');
 
-  lis.forEach((li, i) => {
-    if (i === 0) {
-      const checkbox = createTag('sp-checkbox', { id: 'registration-allow-waitlist' }, li.textContent.trim());
+  uls.forEach((ul) => {
+    const fieldset = createTag('fieldset', { class: 'checkboxes-wrapper' });
+    ul.parentElement.replaceChild(fieldset, ul);
+    const lis = ul.querySelectorAll('li');
+
+    lis.forEach((li) => {
+      const checkbox = createTag('sp-checkbox', { id: `registration-${handlize(li.textContent)}` }, li.textContent.trim());
       fieldset.append(checkbox);
-    } else if (i === 1) {
-      const [checkboxText, inputText] = li.textContent.trim().split('|');
-      const checkbox = createTag('sp-checkbox', { id: 'registration-contact-host' }, checkboxText);
-      const input = createTag('sp-textfield', {
-        class: 'text-input',
-        placeholder: inputText,
-        size: 's',
-      });
-
-      const wrapperDiv = createTag('div', { class: 'host-contact-wrapper' });
-      wrapperDiv.append(checkbox, input);
-      fieldset.append(wrapperDiv);
-    }
+    });
   });
+}
+
+function decorateRSVPFields(row) {
+  row.classList.add('rsvp-checkboxes');
 }
 
 export default async function init(el) {
@@ -90,5 +83,6 @@ export default async function init(el) {
   rows.forEach((r, i) => {
     if (i === 1) decorateAttendeeFields(r);
     if (i === 2 || i === 3 || i === 4) decorateSWCTextField(r, { quiet: true, size: 'xl' });
+    if (i === 5) decorateRSVPFields(r);
   });
 }
