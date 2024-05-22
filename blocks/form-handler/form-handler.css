@@ -7,9 +7,24 @@
   font-family: var(--body-font-family);
 }
 
+.form-handler sp-textfield {
+  display: unset;
+  outline: none;
+}
+
+.form-handler sp-textfield:focus {
+  outline: 1px var(--color-gray-500) solid;
+  border-radius: 4px;
+}
+
 .form-handler > div:first-child {
   display: flex;
   justify-content: center;
+  min-height: 50vh;
+}
+
+.form-handler .form-handler-ctas-panel a {
+  font-size: var(--type-body-s-size);
 }
 
 .form-handler .side-menu ul {
@@ -207,10 +222,6 @@
   border-right: 2px solid var(--color-black);
 }
 
-.form-handler .form-handler-ctas-panel a {
-  font-size: var(--type-body-s-size);
-}
-
 .form-handler .form-handler-ctas-panel a.disabled {
   pointer-events: none;
   opacity: 0.5;
@@ -281,4 +292,10 @@
   font-style: normal;
   font-weight: 700;
   margin: 0;
+}
+
+.form-handler .img-upload-text p {
+  margin: 0;
+  font-size: var(--type-body-xs-size);
+  line-height: normal;
 }

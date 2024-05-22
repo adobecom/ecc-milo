@@ -1,9 +1,9 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, handlize, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
+import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
+import { createEvent, updateEvent, publishEvent } from '../../utils/esp-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
-const { default: getUuid } = await import(`${getLibs()}/utils/getUuid.js`);
 
 // list of controllers for the handler to load
 const SUPPORTED_COMPONENTS = [
@@ -12,9 +12,20 @@ const SUPPORTED_COMPONENTS = [
   'event-info',
   'img-upload',
   'venue-info',
+  'profile',
+  'event-agenda',
+  'community-link',
 ];
 
-function initComponents(props) {
+const INPUT_TYPES = [
+  'input[required]',
+  'select[required]',
+  'textarea[required]',
+  'sp-textfield[required]',
+  'sp-checkbox[required]',
+];
+
+async function initComponents(props) {
   SUPPORTED_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
@@ -26,23 +37,21 @@ function initComponents(props) {
   });
 }
 
-async function gatherValues(props, inputMap) {
+async function gatherValues(props) {
   const allComponentPromises = SUPPORTED_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
       const { onSubmit } = await import(`./controllers/${comp}-component-controller.js`);
-      const componentPayload = await onSubmit(component, inputMap);
+      const componentPayload = await onSubmit(component, props);
       return componentPayload;
     });
 
-    return Promise.all(promises).then((r) => r.reduce((acc, curr) => ({ ...acc, ...curr }), {}));
+    return Promise.all(promises);
   });
 
-  const results = await Promise.all(allComponentPromises);
-  const finalPayload = results.reduce((acc, p) => (p ? { ...acc, ...p } : acc), {});
-  return finalPayload;
+  await Promise.all(allComponentPromises);
 }
 
 function decorateForm(el) {
@@ -94,88 +103,18 @@ function decorateForm(el) {
   });
 }
 
-function formatDate(date) {
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
-
-  return `${month}-${day}-${year}`;
-}
-
-function formatDateTime(date) {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const seconds = date.getSeconds().toString().padStart(2, '0');
-
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
-
-async function getEventIdAndUrl(payload) {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const eventId = urlParams.get('eventId');
-
-  if (eventId) {
-    const eventUrl = JSON.parse(localStorage.getItem(eventId)).url;
-    return [eventId, eventUrl];
+async function saveEvent(props) {
+  await gatherValues(props);
+  if (props.currentStep === 0) {
+    const resp = await createEvent(props.payload);
+    props.payload = resp;
+  } else if (props.currentStep < props.maxStep) {
+    const resp = await publishEvent(props.payload.eventId, props.payload);
+    props.payload = resp;
+  } else {
+    const resp = await updateEvent(props.payload.eventId, props.payload);
+    props.payload = resp;
   }
-
-  const date = new Date(payload['event-start']);
-  const formattedDate = formatDate(date);
-  const pathname = `/event/t3/${formattedDate}/${payload.city}/${payload.state}/${handlize(payload['event-title'])}`;
-  const hash = await getUuid(pathname);
-
-  return [hash, pathname];
-}
-
-async function saveEvent(props, inputMap) {
-  const payload = await gatherValues(props, inputMap);
-  const [hash, pathname] = await getEventIdAndUrl(payload);
-  payload['event-id'] = hash;
-  payload.url = pathname;
-  localStorage.setItem(payload['event-id'], JSON.stringify(payload));
-  return payload;
-}
-
-async function postForm(payload) {
-  const myHeaders = new Headers();
-  myHeaders.append('Host', 'cchome-stage.adobe.io');
-  myHeaders.append('x-api-key', 'SplashThatWebhook');
-  myHeaders.append('content-type', 'application/json');
-
-  const raw = JSON.stringify({
-    eventId: payload['event-id'],
-    title: payload['event-title'],
-    eventType: 'Networking Event',
-    startDate: formatDateTime(new Date(payload['event-start'])),
-    endDate: formatDateTime(new Date(payload['event-end'])),
-    timezone: payload['time-zone'] || 'America/Los_Angeles',
-    venue: payload['event-venue'],
-    venueAddress: payload['event-address'],
-    venueCity: payload.city,
-    venueState: payload.state,
-    venueZipcode: payload.zipCode,
-    venueCountry: payload.country,
-    creationTime: formatDateTime(new Date()),
-    modificationTime: formatDateTime(new Date()),
-    description: payload['event-description'],
-    thumbnail: 'https://images.unsplash.com/photo-1429667947446-3c93a979b7e0?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjk1MTh9',
-  });
-
-  const requestOptions = {
-    method: 'POST',
-    headers: myHeaders,
-    body: raw,
-    redirect: 'follow',
-  };
-
-  fetch('https://cchome-stage.adobe.io/lod/v1/webhooks/platforms/splash-that/resources/event?=', requestOptions)
-    .then((response) => response.text())
-    .then((result) => console.log(result))
-    .catch((error) => console.error(error));
 }
 
 function updateSideNav(props) {
@@ -189,6 +128,14 @@ function updateSideNav(props) {
 }
 
 function validateRequiredFields(fields) {
+  const { search, hostname } = window.location;
+  const urlParams = new URLSearchParams(search);
+  const skipValidation = urlParams.get('skipValidation');
+
+  if (skipValidation === 'true' && hostname === 'localhost') {
+    return true;
+  }
+
   return fields.length === 0 || Array.from(fields).every((f) => f.value);
 }
 
@@ -209,28 +156,10 @@ function onStepValidate(props) {
   };
 }
 
-function querySelectorAllDeep(selector, root = document) {
-  const elements = [];
-
-  function recursiveQuery(r) {
-    elements.push(...r.querySelectorAll(selector));
-
-    r.querySelectorAll('*').forEach((el) => {
-      if (el.shadowRoot) {
-        recursiveQuery(el.shadowRoot);
-      }
-    });
-  }
-
-  recursiveQuery(root);
-
-  return elements;
-}
-
 function updateRequiredFields(props, stepIndex) {
   const frags = props.el.querySelectorAll('.fragment');
   const currentFrag = stepIndex || frags[props.currentStep];
-  props[`required-fields-in-${currentFrag.id}`] = querySelectorAllDeep('input[required], select[required], textarea[required]', currentFrag);
+  props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(INPUT_TYPES.join());
 }
 
 function initRequiredFieldsValidation(props) {
@@ -248,7 +177,9 @@ function initRequiredFieldsValidation(props) {
 
 function setRemoveEventListener(removeElement) {
   removeElement.addEventListener('click', (event) => {
-    event.currentTarget.parentElement.remove();
+    // FIXME : Use a generic approach to call remove of the handler.
+    // event.currentTarget.getAttribute('deleteHandler')();
+    event.currentTarget.parentNode.parentNode.parentNode.remove();
   });
 }
 
@@ -270,8 +201,10 @@ function initRepeaters(props) {
       }
 
       prevNode.after(clonedNode);
+      const tempProps = { el: clonedNode };
       yieldToMain().then(() => {
         updateRequiredFields(props);
+        initRepeaters(tempProps);
       });
     });
   });
@@ -285,7 +218,7 @@ function renderFormNavigation(props, prevStep, currentStep) {
   frags[prevStep].classList.add('hidden');
   frags[currentStep].classList.remove('hidden');
 
-  if (currentStep === frags.length - 1) {
+  if (currentStep === props.maxStep) {
     nextBtn.textContent = nextBtn.dataset.finalStateText;
   } else {
     nextBtn.textContent = nextBtn.dataset.nextStateText;
@@ -295,7 +228,7 @@ function renderFormNavigation(props, prevStep, currentStep) {
 }
 
 function navigateForm(props, stepIndex) {
-  const index = stepIndex || props.currentStep + 1;
+  const index = stepIndex || stepIndex === 0 ? stepIndex : props.currentStep + 1;
   const frags = props.el.querySelectorAll('.fragment');
 
   if (index >= frags.length || index < 0) return;
@@ -306,7 +239,7 @@ function navigateForm(props, stepIndex) {
   updateRequiredFields(props);
 }
 
-function initFormCtas(props, inputMap) {
+function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
   const frags = props.el.querySelectorAll('.fragment');
   decorateButtons(ctaRow, 'button-l');
@@ -335,8 +268,9 @@ function initFormCtas(props, inputMap) {
       if (['#pre-event', '#post-event'].includes(ctaUrl.hash)) {
         cta.classList.add('fill');
         cta.addEventListener('click', async () => {
-          const payload = await saveEvent(props, inputMap);
-          const targetRedirect = `${window.location.origin}/event/t3/dme/preview?eventId=${payload['event-id']}`;
+          await saveEvent(props);
+          // TODO: use real .page links
+          const targetRedirect = `${window.location.origin}/event/t3/dme/preview?eventId=${props.payload['event-id']}`;
           window.open(targetRedirect);
         });
       }
@@ -359,12 +293,10 @@ function initFormCtas(props, inputMap) {
         }
 
         cta.addEventListener('click', async () => {
-          const payload = await saveEvent(props, inputMap);
+          await saveEvent(props);
 
           if (ctaUrl.hash === '#next') {
-            if (props.currentStep === frags.length - 1) {
-              postForm(payload);
-            } else {
+            if (props.currentStep < props.maxStep) {
               navigateForm(props);
             }
           }
@@ -397,19 +329,7 @@ function initNavigation(props) {
   });
 }
 
-async function getInputMap(el) {
-  const jsonRow = el.querySelector(':scope > div:last-of-type');
-  const jsonUrl = jsonRow.querySelector('a')?.href || jsonRow.textContent.trim();
-  jsonRow.remove();
-
-  const json = await fetch(jsonUrl)
-    .then((resp) => resp.json())
-    .catch((error) => console.log(error));
-
-  return json.data;
-}
-
-function prepopulateForm(props, inputMap) {
+function prepopulateForm(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
@@ -425,7 +345,7 @@ function prepopulateForm(props, inputMap) {
 
     mappedComponents.forEach(async (component) => {
       const { onResume } = await import(`./controllers/${comp}-component-controller.js`);
-      await onResume(component, eventObj, inputMap);
+      await onResume(component, eventObj);
     });
   });
 
@@ -440,12 +360,13 @@ function prepopulateForm(props, inputMap) {
 
 async function buildECCForm(el) {
   decorateForm(el);
-  const inputMap = await getInputMap(el);
 
   const props = {
     el,
     currentStep: 0,
     farthestStep: 0,
+    maxStep: el.querySelectorAll('.fragment').length - 1,
+    payload: {},
   };
 
   const frags = el.querySelectorAll('.fragment');
@@ -479,11 +400,11 @@ async function buildECCForm(el) {
 
   const proxyProps = new Proxy(props, dataHandler);
 
-  initFormCtas(proxyProps, inputMap);
-  initComponents(proxyProps);
+  initFormCtas(proxyProps);
+  await initComponents(proxyProps);
   initRepeaters(proxyProps);
   initNavigation(proxyProps);
-  prepopulateForm(proxyProps, inputMap);
+  prepopulateForm(proxyProps);
   updateRequiredFields(proxyProps);
 }
 
@@ -493,6 +414,7 @@ export default async function init(el) {
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
   ]);
 
   const profile = window.bm8tr.get('imsProfile');

@@ -1,17 +1,18 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, generateToolTip } from '../../utils/utils.js';
+import { generateToolTip } from '../../utils/utils.js';
+import { getClouds, getSeries } from '../../utils/esp-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 
-async function buildPickerFromTags(wrapper, phText, options) {
+async function buildPickerFromTags(id, wrapper, phText, options) {
   const miloLibs = getLibs();
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/picker.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/menu.js`),
   ]);
-  const select = createTag('sp-picker', { id: 'bu-select-input', class: 'select-input', size: 'm', label: phText });
+  const select = createTag('sp-picker', { id, class: 'select-input', size: 'm', label: phText });
 
   options.forEach(([, val]) => {
     const opt = createTag('sp-menu-item', {}, val.title);
@@ -24,6 +25,25 @@ async function buildPickerFromTags(wrapper, phText, options) {
 async function decorateCloudTagSelect(column) {
   const buSelectWrapper = createTag('div', { class: 'bu-picker-wrapper' });
   const phText = column.textContent.trim();
+
+  // const clouds = await getClouds();
+
+  // if (!clouds) return;
+
+  // buildSelectFromTags('bu-select-input', buSelectWrapper, phText, Object.entries(clouds));
+
+  const option = createTag('option', { value: '', disabled: true, selected: true }, phText);
+  const select = createTag('select', { id: 'bu-select-input', class: 'select-input' });
+
+  select.append(option);
+
+  // FIXME: use correct data source rather than hardcoded values.
+  ['Creative Cloud', 'DX'].forEach((bu) => {
+    const opt = createTag('option', { value: bu }, bu);
+    select.append(opt);
+  });
+
+  buSelectWrapper.append(select);
   const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
 
   if (!resp.error) {
@@ -120,27 +140,33 @@ async function decorateNewSeriesModal(column) {
   lightboxTable.remove();
 }
 
-async function decorateNewSeriesBtnAndModal(column) {
-  const pTag = column.querySelector(':scope > p');
-  const plusIcon = getIcon('add-circle');
-  const a = column.querySelector('a[href$="#new-series"]');
-
-  if (a) {
-    pTag.classList.add('add-series-btn-wrapper');
-    a.append(plusIcon);
-    a.classList.add('add-series-modal-btn');
-  }
-
-  await decorateNewSeriesModal(column);
+function decorateCheckbox(column) {
+  const checkbox = createTag('sp-checkbox', { id: 'rsvp-required-check' }, column.textContent.trim());
+  column.innerHTML = '';
+  column.append(checkbox);
 }
+
+// async function decorateNewSeriesBtnAndModal(column) {
+//   const pTag = column.querySelector(':scope > p');
+//   const plusIcon = getIcon('add-circle');
+//   const a = column.querySelector('a[href$="#new-series"]');
+
+//   if (a) {
+//     pTag.classList.add('add-series-btn-wrapper');
+//     a.append(plusIcon);
+//     a.classList.add('add-series-modal-btn');
+//   }
+
+//   await decorateNewSeriesModal(column);
+// }
 
 export default function init(el) {
   el.classList.add('form-component');
-  generateToolTip(el);
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach((r, ri) => {
     const cols = r.querySelectorAll(':scope > div');
+    if (ri === 0) generateToolTip(el);
 
     if (ri === 1) {
       r.classList.add('series-fields-wrapper');
@@ -148,7 +174,8 @@ export default function init(el) {
       cols.forEach(async (c, ci) => {
         if (ci === 0) await decorateCloudTagSelect(c);
         if (ci === 1) await decorateSeriesSelect(c);
-        if (ci === 2) decorateNewSeriesBtnAndModal(c);
+        // if (ci === 2) decorateNewSeriesBtnAndModal(c);
+        if (ci === 2) decorateCheckbox(c);
       });
     }
 

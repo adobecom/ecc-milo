@@ -1,3 +1,6 @@
+import { getLibs } from '../scripts/utils.js';
+import { handleImageFiles } from './esp-controller.js';
+
 function createTag(tag, attributes, html, options = {}) {
   const el = document.createElement(tag);
   if (html) {
@@ -27,7 +30,7 @@ export function yieldToMain() {
 }
 
 export function handlize(str) {
-  return str.toLowerCase().trim().replaceAll(' ', '-');
+  return str?.toLowerCase().trim().replaceAll(' ', '-');
 }
 
 export function addTooltipToHeading(em, heading) {
@@ -41,9 +44,9 @@ export function addTooltipToHeading(em, heading) {
   em.parentElement?.remove();
 }
 
-export function generateToolTip(formComponent) {
-  const heading = formComponent.querySelector(':scope > div:first-of-type h2, :scope > div:first-of-type h3');
-  const em = formComponent.querySelector('p > em');
+export function generateToolTip(el) {
+  const heading = el.querySelector('h2, h3');
+  const em = el.querySelector('p > em');
 
   if (heading && em) {
     addTooltipToHeading(em, heading);
@@ -72,6 +75,24 @@ export function buildNoAccessScreen(el) {
   area.append(getIcon('browser-access-forbidden-lg'), noAccessDescription);
 }
 
+export function querySelectorAllDeep(selector, root = document) {
+  const elements = [];
+
+  function recursiveQuery(r) {
+    elements.push(...r.querySelectorAll(selector));
+
+    r.querySelectorAll('*').forEach((el) => {
+      if (el.shadowRoot) {
+        recursiveQuery(el.shadowRoot);
+      }
+    });
+  }
+
+  recursiveQuery(root);
+
+  return elements;
+}
+
 export function addRepeater(element, title) {
   element.lastChild.setAttribute('repeatIdx', 0);
 
@@ -85,4 +106,105 @@ export function addRepeater(element, title) {
   tag.append(plusIcon);
 
   element.append(tag);
+}
+
+export async function decorateTextfield(row, extraOptions) {
+  row.classList.add('text-field-row');
+  const cols = row.querySelectorAll(':scope > div');
+  if (!cols.length) return;
+  let placeholderCol;
+  let maxLengthCol;
+  if (cols.length === 1) {
+    [placeholderCol] = cols;
+  } else if (cols.length === 2) {
+    [placeholderCol, maxLengthCol] = cols;
+  }
+  const text = placeholderCol.textContent.trim();
+
+  const attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
+  const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
+  const isRequired = attrTextEl.textContent.trim().endsWith('*');
+
+  const input = createTag('sp-textfield', {
+    class: 'text-input',
+    placeholder: text,
+    required: isRequired,
+    quiet: true,
+    size: 'xl',
+    ...extraOptions,
+  });
+
+  if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
+
+  const wrapper = createTag('div', { class: 'info-field-wrapper' });
+  row.innerHTML = '';
+  wrapper.append(input, attrTextEl);
+  row.append(wrapper);
+}
+
+export async function decorateTextarea(row, extraOptions) {
+  row.classList.add('text-field-row');
+  const cols = row.querySelectorAll(':scope > div');
+  if (!cols.length) return;
+  let placeholderCol;
+  let maxLengthCol;
+  if (cols.length === 1) {
+    [placeholderCol] = cols;
+  } else if (cols.length === 2) {
+    [placeholderCol, maxLengthCol] = cols;
+  }
+  const text = placeholderCol.textContent.trim();
+
+  const attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
+  const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
+  const isRequired = attrTextEl.textContent.trim().endsWith('*');
+
+  const input = createTag('sp-textfield', {
+    multiline: true,
+    class: 'textarea-input',
+    quiet: true,
+    placeholder: text,
+    required: isRequired,
+    ...extraOptions,
+  });
+
+  if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
+
+  const wrapper = createTag('div', { class: 'info-field-wrapper' });
+  row.innerHTML = '';
+  wrapper.append(input, attrTextEl);
+  row.append(wrapper);
+}
+
+export function makeFileInputDropZone(inputWrapper) {
+  const dropZone = inputWrapper.querySelector('.img-file-input-label');
+  const fileInput = inputWrapper.querySelector('input[type="file"].img-file-input');
+
+  if (dropZone) {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((event) => {
+      dropZone.addEventListener(event, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, false);
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.currentTarget.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', (e) => {
+      e.currentTarget.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const { files } = e.dataTransfer;
+      handleImageFiles(inputWrapper, files);
+      e.currentTarget.classList.remove('dragover');
+    });
+  }
+
+  fileInput?.addEventListener('change', (e) => {
+    const { files } = e.currentTarget;
+    handleImageFiles(inputWrapper, files);
+  });
 }

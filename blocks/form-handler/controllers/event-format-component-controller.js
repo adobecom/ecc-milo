@@ -1,21 +1,3 @@
-function initNewSeriesModal(component) {
-  const addSeriesModalBtn = component.querySelector('.add-series-modal-btn');
-  const newSeriesModal = component.querySelector('.new-series-modal');
-  const modalCtas = newSeriesModal.querySelectorAll('a.con-button');
-
-  addSeriesModalBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    newSeriesModal.classList.remove('hidden');
-  });
-
-  modalCtas.forEach((cta) => {
-    cta.addEventListener('click', (e) => {
-      e.preventDefault();
-      newSeriesModal.classList.add('hidden');
-    });
-  });
-}
-
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   if (!currentTimeZone) return;
@@ -34,16 +16,66 @@ function prepopulateTimeZone(component) {
   });
 }
 
-export default function init(component) {
-  initNewSeriesModal(component);
-  prepopulateTimeZone(component);
+function initStepLock(component) {
+  const { search, hostname } = window.location;
+  const urlParams = new URLSearchParams(search);
+  const skipValidation = urlParams.get('skipValidation');
+
+  if (skipValidation === 'true' && hostname === 'localhost') {
+    return;
+  }
+
+  const step = component.closest('.fragment');
+  const inputs = component.querySelectorAll('#bu-select-input, #series-select-input');
+
+  const onFormatChange = () => {
+    const componentSections = step.querySelectorAll('.section:not(:first-of-type)');
+
+    if (Array.from(inputs).every((input) => !!input.value)) {
+      componentSections.forEach((s) => {
+        if (s !== component.closest('.section')) {
+          s.classList.remove('hidden');
+        }
+      });
+    } else {
+      componentSections.forEach((s) => {
+        if (s !== component.closest('.section')) {
+          s.classList.add('hidden');
+        }
+      });
+    }
+  };
+
+  inputs.forEach((input) => {
+    input.addEventListener('change', onFormatChange);
+  });
+
+  onFormatChange();
 }
 
-export function onResume() {
+export default function init(component) {
+  prepopulateTimeZone(component);
+  initStepLock(component);
+}
+
+export function onResume(component, eventObj) {
   // TODO: handle form prepopulation on component level
 }
 
-export function onSubmit(component, inputMap) {
-  console.log(inputMap);
-  return {};
+export function onSubmit(component, props) {
+  const eventType = 'InPerson';
+  const cloudType = 'CreativeCloud' || component.querySelector('#bu-select-input').value;
+  const seriesId = component.querySelector('#series-select-input').value;
+  const rsvpRequired = component.querySelector('#rsvp-required-check').checked;
+
+  const eventFormat = {
+    // TODO: add the other text field values
+    eventType,
+    cloudType,
+    seriesId,
+    rsvpRequired,
+  };
+
+  props.payload = { ...props.payload, ...eventFormat };
+  return eventFormat;
 }

@@ -12,6 +12,31 @@
   --color-red: #EB1000;
 }
 
+body header {
+  background: url('/img/header-background.jpg');
+  color: var(--color-white);
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+body header .feds-signIn {
+  color: var(--color-white);
+}
+
+body header.dashboard-page {
+  position: fixed;
+  background: transparent;
+  width: 100%;
+}
+
+body header .feds-topnav-wrapper {
+  background: transparent;
+  border-bottom: none;
+}
+
+body header.dashboard-page .feds-topnav-wrapper .feds-topnav {
+  border-bottom: 1px var(--color-white) solid;
+}
+
 main a.con-button.no-event {
   user-select: none;
   pointer-events: none;

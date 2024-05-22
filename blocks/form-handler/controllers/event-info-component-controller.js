@@ -1,6 +1,5 @@
 /* eslint-disable no-use-before-define */
 import { getLibs } from '../../../scripts/utils.js';
-import { getMappedInputsOutput } from './share-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -12,24 +11,12 @@ function formatDate(date) {
   if (month.length < 2) month = `0${month}`;
   if (day.length < 2) day = `0${day}`;
 
-  return [month, day, year].join('-');
+  return [year, month, day].join('-');
 }
 
-function compareDates(date1, date2) {
-  return date1.getFullYear() === date2.getFullYear()
-         && date1.getMonth() === date2.getMonth()
-         && date1.getDate() === date2.getDate();
-}
-
-function addTimeToDate(date, timeString) {
-  const timeParts = timeString.match(/(\d+):(\d+)-(\w+)/);
-  const hours = parseInt(timeParts[1], 10);
-  const minutes = parseInt(timeParts[2], 10);
-  const ampm = timeParts[3];
-
-  const hoursIn24 = ampm.toLowerCase() === 'pm' ? (hours % 12) + 12 : hours % 12;
-
-  date.setHours(hoursIn24, minutes, 0, 0);
+function parseFormatedDate(string) {
+  const [year, month, day] = string.split('-');
+  const date = new Date(year, +month - 1, day);
 
   return date;
 }
@@ -62,7 +49,6 @@ function updateDayView(component, parent, state) {
   const firstDayOfMonth = new Date(state.currentYear, state.currentMonth, 1).getDay();
   const calendarGrid = createTag('div', { class: 'calendar-grid' }, null, { parent });
   const todayDate = new Date();
-  todayDate.setHours(0, 0, 0, 0); // Normalize today's date
 
   for (let i = 0; i < firstDayOfMonth; i += 1) {
     createTag('div', { class: 'calendar-day empty' }, '', { parent: calendarGrid });
@@ -88,7 +74,7 @@ function updateDayView(component, parent, state) {
     }
 
     // Mark today's date
-    if (compareDates(date, todayDate)) {
+    if (date === todayDate) {
       dayElement.classList.add('today');
     }
   }
@@ -119,6 +105,12 @@ function updateMonthView(component, parent, state) {
       });
     }
   });
+}
+
+function isSameDay(date1, date2) {
+  return date1.getFullYear() === date2.getFullYear()
+         && date1.getMonth() === date2.getMonth()
+         && date1.getDate() === date2.getDate();
 }
 
 function updateYearView(component, parent, state) {
@@ -182,17 +174,20 @@ function updateInput(component, state) {
 function updateSelectedDates(state) {
   const { parent } = state;
   parent.querySelectorAll('.calendar-day').forEach((dayElement) => {
-    const date = new Date(dayElement.getAttribute('data-date'));
-    dayElement.classList.toggle('selected', date >= state.selectedStartDate && date <= (state.selectedEndDate || state.selectedStartDate));
-    dayElement.classList.toggle('range', date > state.selectedStartDate && date < (state.selectedEndDate || state.selectedStartDate));
+    if (!dayElement.getAttribute('data-date')) return;
+
+    const clickedDate = parseFormatedDate(dayElement.getAttribute('data-date'));
+    dayElement.classList.toggle('selected', clickedDate >= state.selectedStartDate && clickedDate <= (state.selectedEndDate || state.selectedStartDate));
+    dayElement.classList.toggle('range', clickedDate > state.selectedStartDate && clickedDate < (state.selectedEndDate || state.selectedStartDate));
     // Mark the start date and end date
-    if (compareDates(date, state.selectedStartDate)
-    && (state.selectedStartDate === state.selectedEndDate)) {
+
+    if (isSameDay(clickedDate, state.selectedStartDate)
+    && isSameDay(state.selectedStartDate, state.selectedEndDate)) {
       dayElement.classList.add('start-date', 'end-date');
-    } else if (state.selectedStartDate && compareDates(date, state.selectedStartDate)) {
+    } else if (state.selectedStartDate && isSameDay(clickedDate, state.selectedStartDate)) {
       dayElement.classList.remove('end-date');
       dayElement.classList.add('start-date');
-    } else if (state.selectedEndDate && compareDates(date, state.selectedEndDate)) {
+    } else if (state.selectedEndDate && isSameDay(clickedDate, state.selectedEndDate)) {
       dayElement.classList.remove('start-date');
       dayElement.classList.add('end-date');
     } else {
@@ -221,6 +216,20 @@ function changeCalendarPage(component, state, delta) {
   updateCalendar(component, state.parent, state);
 }
 
+function initInputWatcher(input, onChange) {
+  const config = { attributes: true, childList: false, subtree: false };
+
+  const callback = (mutationList) => {
+    const [mutation] = mutationList;
+    if (mutation.target.disabled) {
+      onChange();
+    }
+  };
+
+  const observer = new MutationObserver(callback);
+  observer.observe(input, config);
+}
+
 function buildCalendar(component, parent) {
   const input = component.querySelector('#event-info-date-picker');
 
@@ -228,8 +237,8 @@ function buildCalendar(component, parent) {
 
   const state = {
     currentView: 'days',
-    selectedStartDate: input.dataset.startDate ? new Date(input.dataset.startDate) : null,
-    selectedEndDate: input.dataset.endDate ? new Date(input.dataset.endDate) : null,
+    selectedStartDate: input.dataset.startDate ? parseFormatedDate(input.dataset.startDate) : null,
+    selectedEndDate: input.dataset.endDate ? parseFormatedDate(input.dataset.endDate) : null,
     currentYear: new Date().getFullYear(),
     currentMonth: new Date().getMonth(),
     headerTitle: createTag('span', { class: 'header-title' }, '', { parent }),
@@ -257,9 +266,10 @@ function initCalendar(component) {
   let calendar;
   const datePickerContainer = component.querySelector('.date-picker');
   const calendarIcon = datePickerContainer.querySelector('.icon-calendar-add');
+  const input = component.querySelector('#event-info-date-picker');
 
   calendarIcon.addEventListener('click', () => {
-    if (calendar) return;
+    if (calendar || input.disabled) return;
     calendar = createTag('div', { class: 'calendar-container' });
     datePickerContainer.append(calendar);
     buildCalendar(component, calendar);
@@ -271,42 +281,55 @@ function initCalendar(component) {
       calendar = '';
     }
   });
+
+  initInputWatcher(input, () => {
+    calendar.remove();
+    calendar = '';
+  });
 }
 
 export default function init(component) {
   initCalendar(component);
 }
 
-export function onResume(component, eventObj, inputMap) {
-  inputMap.forEach((input) => {
-    const element = component.querySelector(input.selector);
-    if (!element) return;
-
-    if (element[input.accessPoint] !== undefined) {
-      element[input.accessPoint] = eventObj[input.key];
-    } else {
-      element.setAttirbute(input.accessPoint, eventObj[input.key]);
-    }
-  });
+export function onResume(component, eventObj) {
+  // TODO: handle form prepopulation on component level
 }
 
-export function onSubmit(component, inputMap) {
+function dateTimeStringToTimestamp(dateString, timeString) {
+  const dateTimeString = `${dateString}T${timeString}`;
+
+  const date = new Date(dateTimeString);
+
+  return date.getTime();
+}
+
+export function onSubmit(component, props) {
+  const title = component.querySelector('#info-field-event-title').value;
+  const description = component.querySelector('#info-field-event-description').value;
   const datePicker = component.querySelector('#event-info-date-picker');
-  const startDate = new Date(datePicker.dataset.startDate);
-  const endDate = new Date(datePicker.dataset.endDate);
+  const localStartDate = datePicker.dataset.startDate;
+  const localEndDate = datePicker.dataset.endDate;
 
-  const startTime = component.querySelector('#time-picker-start-time').value;
-  const endTime = component.querySelector('#time-picker-end-time').value;
+  const localStartTime = component.querySelector('#time-picker-start-time').value;
+  const localEndTime = component.querySelector('#time-picker-end-time').value;
 
-  // FIXME: need to align date-time format to the requirement of API
-  const eventStartDate = addTimeToDate(new Date(startDate), startTime);
-  const eventEndDate = addTimeToDate(new Date(endDate), endTime);
+  const gmtOffset = +component.querySelector('#time-zone-select-input').value;
+
+  const localStartTimeMillis = dateTimeStringToTimestamp(localStartDate, localStartTime);
+  const localEndTimeMillis = dateTimeStringToTimestamp(localEndDate, localEndTime);
 
   const eventInfo = {
-    ...getMappedInputsOutput(component, inputMap),
-    'event-start': eventStartDate,
-    'event-end': eventEndDate,
+    title,
+    description,
+    localStartDate,
+    localEndDate,
+    localStartTime,
+    localEndTime,
+    localStartTimeMillis,
+    localEndTimeMillis,
+    gmtOffset,
   };
 
-  return eventInfo;
+  props.payload = { ...props.payload, ...eventInfo };
 }

@@ -1,137 +1,160 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, generateToolTip, handlize } from '../../utils/utils.js';
+import { generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
-function decorateTextInput(row) {
+function decorateSWCTextField(row, extraOptions) {
+  row.classList.add('text-field-row');
+
   const cols = row.querySelectorAll(':scope > div');
-  const inputWrapper = createTag('div', { class: 'input-wrapper' });
-  const attribWrapper = createTag('div', { class: 'attrib-wrapper' });
-  let pickerName;
-  const params = { type: 'text' };
+  if (!cols.length) return;
   const [placeholderCol, maxLengthCol] = cols;
   const text = placeholderCol.textContent.trim();
-  const attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
-  const maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
-  const isRequired = attrTextEl.textContent.trim().endsWith('*');
-  const handle = handlize(text);
-  const input = createTag('input', { id: `venue-field-${handle}`, type: 'text', class: 'text-input', placeholder: text, required: isRequired });
+
+  let maxCharNum; let
+    attrTextEl;
+  if (maxLengthCol) {
+    attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
+    maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
+  }
+
+  const isRequired = attrTextEl?.textContent.trim().endsWith('*');
+
+  const input = createTag('sp-textfield', { ...extraOptions, class: 'venue-info-text text-input', placeholder: text });
+
+  if (isRequired) input.required = true;
 
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
 
-  params.placeholder = pickerName;
-
-  inputWrapper.append(input, attrTextEl);
-
+  const wrapper = createTag('div', { class: 'info-field-wrapper' });
   row.innerHTML = '';
-  row.classList.add('venue-info-textinput-wrapper');
-  row.append(inputWrapper);
-  row.append(attribWrapper);
+  wrapper.append(input);
+  if (attrTextEl) wrapper.append(attrTextEl);
+  row.append(wrapper);
 }
 
-function buildAdditionalInfo(row, i) {
-  function decorateImageDropzones(col) {
-    col.classList.add('image-dropzone');
-    const uploadName = col
-      .querySelector(':scope > p:first-of-type')
-      ?.textContent.trim();
-    const paragraphs = col.querySelectorAll(':scope > p');
-    const existingFileInput = document.querySelectorAll('.img-file-input');
-    const inputId = uploadName
-      ? `${handlize(uploadName)}`
-      : `img-file-input-${existingFileInput.length + i}`;
-    const fileInput = createTag('input', {
-      id: inputId,
-      type: 'file',
-      class: 'img-file-input',
-    });
-    const inputWrapper = createTag('div', { class: 'img-file-input-wrapper' });
-    const inputLabel = createTag('label', { class: 'img-file-input-label' });
+function buildAdditionalInfo(row) {
+  row.classList.add('venue-info-addition');
+  const fieldSet = createTag('fieldset', { class: 'checkboxes' });
+  const [inputLabel, comment] = [...row.querySelectorAll(':scope  p')];
+  const labelText = inputLabel.textContent.trim();
+  const checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-info-visible' }, labelText);
+  const wrapper = createTag('div', { class: 'checkbox-wrapper' });
 
-    const previewWrapper = createTag('div', { class: 'preview-wrapper hidden' });
-    const previewImg = createTag('div', { class: 'preview-img-placeholder' });
-    const previewDeleteButton = getIcon('delete');
+  wrapper.append(checkbox);
+  fieldSet.append(wrapper);
 
-    previewWrapper.append(previewImg, previewDeleteButton);
-
-    inputWrapper.append(previewWrapper, inputLabel);
-    inputLabel.append(fileInput, getIcon('image-add'));
-    paragraphs.forEach((p) => {
-      inputLabel.append(p);
-    });
-
-    col.innerHTML = '';
-    col.append(inputWrapper);
-  }
-
-  function decorateVenueInfoVisible(col) {
-    const fieldSet = createTag('fieldset', { class: 'checkboxes' });
-    col.classList.add('venue-info-addition');
-    const [inputLabel, comment] = [...col.querySelectorAll(':scope > p')];
-    const cn = inputLabel.textContent.trim();
-
-    const handle = 'venue-info-visible';
-    const input = createTag('input', {
-      id: `checkbox-${handle}`,
-      name: `checkbox-${handle}`,
-      type: 'checkbox',
-      class: 'checkbox-input',
-      value: handle,
-    });
-    const label = createTag(
-      'label',
-      { class: 'checkbox-label', for: `checkbox-${handle}` },
-      cn,
-    );
-    const wrapper = createTag('div', { class: 'checkbox-wrapper' });
-
-    wrapper.append(input, label);
-    fieldSet.append(wrapper);
-
-    const additionComment = createTag('div', { class: 'addition-comment' });
-    additionComment.append(comment.textContent.trim());
-    col.innerHTML = '';
-    fieldSet.append(additionComment);
-    col.append(fieldSet);
-  }
-
-  row.classList.add('img-upload-component');
-  const [imageUploader, venueVisible] = row.querySelectorAll(':scope > div');
-  decorateImageDropzones(imageUploader);
-  decorateVenueInfoVisible(venueVisible);
+  const additionComment = createTag('div', { class: 'addition-comment' });
+  additionComment.append(comment.textContent.trim());
+  row.innerHTML = '';
+  fieldSet.append(additionComment);
+  row.append(fieldSet);
   row.classList.add('venue-info-addition-wrapper');
 }
 
 function buildLocationInputGrid(row) {
-  function buildInput(label) {
-    return createTag('input', {
-      type: 'text',
-      id: `location-${handlize(label)}`,
-      class: 'location-input',
-      placeholder: label,
-      required: true,
-    });
-  }
-
   const subs = row.querySelectorAll('li');
-  const zipCodeWrapper = createTag('div', { class: 'location-wrapper' });
+  const locationDetailsWrapper = createTag('div', { class: 'location-wrapper' });
 
-  subs.forEach((sub) => {
-    zipCodeWrapper.append(buildInput(sub.textContent.trim()));
+  subs.forEach((sub, i) => {
+    const placeholder = sub.textContent.trim();
+    switch (i) {
+      case 0:
+        locationDetailsWrapper.append(createTag('sp-textfield', {
+          id: 'location-city',
+          class: 'location-input venue-info-text text-input',
+          placeholder,
+          required: true,
+          type: 'text',
+          quiet: true,
+          size: 'l',
+        }));
+        break;
+      case 1:
+        locationDetailsWrapper.append(createTag('sp-textfield', {
+          id: 'location-state',
+          class: 'location-input venue-info-text text-input',
+          placeholder,
+          required: true,
+          type: 'text',
+          quiet: true,
+          size: 'l',
+        }));
+        break;
+      case 2:
+        locationDetailsWrapper.append(createTag('sp-textfield', {
+          id: 'location-zip-code',
+          class: 'location-input venue-info-text text-input',
+          placeholder,
+          required: true,
+          type: 'text',
+          quiet: true,
+          size: 'l',
+        }));
+        break;
+      case 3:
+        locationDetailsWrapper.append(createTag('sp-textfield', {
+          id: 'location-country',
+          class: 'location-input venue-info-text text-input',
+          placeholder,
+          required: true,
+          type: 'text',
+          quiet: true,
+          size: 'l',
+        }));
+        break;
+      default:
+        break;
+    }
   });
+  const placeIdInput = createTag('input', { id: 'google-place-id', type: 'hidden' });
+  const placeLATInput = createTag('input', { id: 'google-place-lat', type: 'hidden' });
+  const placeLNGInput = createTag('input', { id: 'google-place-lng', type: 'hidden' });
+  const gmtOffsetInput = createTag('input', { id: 'google-place-gmt-offset', type: 'hidden' });
+  locationDetailsWrapper.append(placeIdInput, placeLATInput, placeLNGInput, gmtOffsetInput);
+
   row.innerHTML = '';
-  row.append(zipCodeWrapper);
+  row.append(locationDetailsWrapper);
   row.classList.add('venue-info-field-location');
 }
 
 export default function init(el) {
   el.classList.add('form-component');
-  generateToolTip(el);
+  const miloLibs = getLibs();
+  Promise.all([
+    import(`${miloLibs}/deps/lit-all.min.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/checkbox.js`),
+  ]);
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach((r, i) => {
-    if (i === 1 || i === 2) decorateTextInput(r);
-    if (i === 3) buildLocationInputGrid(r);
-    if (i === 4) buildAdditionalInfo(r, i);
+    switch (i) {
+      case 0:
+        generateToolTip(r);
+        break;
+      case 1:
+        decorateSWCTextField(r, {
+          id: 'venue-info-venue-name',
+          quiet: true,
+          size: 'xl',
+        });
+        break;
+      case 2:
+        decorateSWCTextField(r, {
+          id: 'venue-info-venue-address',
+          quiet: true,
+          size: 'xl',
+        });
+        break;
+      case 3:
+        buildLocationInputGrid(r);
+        break;
+      case 4:
+        buildAdditionalInfo(r);
+        break;
+      default:
+        break;
+    }
   });
 }
