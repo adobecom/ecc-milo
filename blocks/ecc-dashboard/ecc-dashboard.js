@@ -1,3 +1,4 @@
+import { getEvents, getVenue } from '../../utils/esp-controller.js';
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon } from '../../utils/utils.js';
 
@@ -16,7 +17,7 @@ function formatLocaleDate(string) {
 }
 
 function buildThumbnail(data) {
-  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos[0].imageUrl });
+  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0].imageUrl });
   const container = createTag('td', { class: 'thumbnail-container' }, img);
   return container;
 }
@@ -69,6 +70,23 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
   });
 }
 
+function getTimezoneName(offsetHours) {
+  const offsetMinutes = offsetHours * 60;
+
+  const d = new Date();
+  const utcDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000 + offsetMinutes * 60000);
+
+  const options = {
+    timeZone: 'UTC',
+    timeZoneName: 'long',
+  };
+  const formatter = new Intl.DateTimeFormat('en-US', options);
+  const parts = formatter.formatToParts(utcDate);
+  const timeZoneName = parts.find((part) => part.type === 'timeZoneName').value;
+
+  return timeZoneName;
+}
+
 function buildStatusTag(event) {
   const dot = event.published ? getIcon('dot-purple') : getIcon('dot-green');
   const text = event.published ? 'Published' : 'Draft';
@@ -78,19 +96,33 @@ function buildStatusTag(event) {
   return statusTag;
 }
 
-function populateRow(props, index) {
+function buildEventTitleTag(event) {
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `https://stage--events-milo--adobecom.hlx.page/event/t3/${event.detailPagePath}` }, event.title);
+  return eventTitleTag;
+}
+
+async function buildVenueTag(venueId) {
+  const venue = await getVenue(venueId);
+
+  if (!venue) return null;
+
+  const venueTag = createTag('div', { class: 'vanue-name' }, venue.venueName);
+  return venueTag;
+}
+
+async function populateRow(props, index) {
   const event = props.mutableData[index];
   const tBody = props.el.querySelector('table.dashboard-table tbody');
 
   // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'event-row' }, '', { parent: tBody });
   const thumbnailCell = buildThumbnail(event);
-  const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.title));
+  const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(event)));
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.venueId));
-  const timezoneCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.timezone));
+  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, await buildVenueTag(event.venueId)));
+  const timezoneCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getTimezoneName(event.gmtOffset)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.externalEventId));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
@@ -278,10 +310,12 @@ function buildDashboardTable(props) {
   populateTable(props);
 }
 
-async function getEventsData() {
-  const json = await fetch('/blocks/ecc-dashboard/mock.json').then((resp) => resp.json()).catch((error) => console.log(error));
+async function getEventsArray() {
+  const json = await getEvents();
 
-  return json;
+  if (!json) return [];
+
+  return json.events;
 }
 
 async function getConfig(el) {
@@ -340,7 +374,7 @@ async function buildDashboard(el, config) {
     createFormUrl: config['create-form-url'],
   };
 
-  const data = (await getEventsData())?.reverse();
+  const data = await getEventsArray();
 
   if (!data.length) {
     buildNoEventScreen(el, props);
