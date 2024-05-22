@@ -17,7 +17,7 @@ function formatLocaleDate(string) {
 }
 
 function buildThumbnail(data) {
-  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0].imageUrl });
+  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl });
   const container = createTag('td', { class: 'thumbnail-container' }, img);
   return container;
 }
