@@ -71,18 +71,10 @@ export default async function init(el) {
   const miloLibs = getLibs();
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/checkbox.js`),
   ]);
 
   el.classList.add('form-component');
-  generateToolTip(el);
-  decorateAllCheckboxes(el);
-
-  const rows = el.querySelectorAll(':scope > div');
-  rows.forEach((r, i) => {
-    if (i === 1) decorateAttendeeFields(r);
-    if (i === 2 || i === 3 || i === 4) decorateSWCTextField(r, { quiet: true, size: 'xl' });
-    if (i === 5) decorateRSVPFields(r);
-  });
+  generateToolTip(el.querySelector(':scope > div:first-of-type'));
+  decorateRSVPFields(el.querySelector(':scope > div:last-of-type'));
 }

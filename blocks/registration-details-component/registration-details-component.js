@@ -83,11 +83,11 @@ export default async function init(el) {
   ]);
 
   el.classList.add('form-component');
-  generateToolTip(el);
   decorateAllCheckboxes(el);
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach((r, i) => {
+    if (i === 0) generateToolTip(r);
     if (i === 1) decorateAttendeeFields(r);
     if (i === 2 || i === 3 || i === 4) decorateSWCTextField(r, { quiet: true, size: 'xl' });
   });

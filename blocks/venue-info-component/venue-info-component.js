@@ -120,7 +120,6 @@ function buildLocationInputGrid(row) {
 
 export default function init(el) {
   el.classList.add('form-component');
-  generateToolTip(el);
   const miloLibs = getLibs();
   Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
@@ -131,6 +130,9 @@ export default function init(el) {
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach((r, i) => {
     switch (i) {
+      case 0:
+        generateToolTip(r);
+        break;
       case 1:
         decorateSWCTextField(r, {
           id: 'venue-info-venue-name',

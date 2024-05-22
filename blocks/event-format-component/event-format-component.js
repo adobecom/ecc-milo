@@ -165,11 +165,11 @@ function decorateCheckbox(column) {
 
 export default function init(el) {
   el.classList.add('form-component');
-  generateToolTip(el);
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach((r, ri) => {
     const cols = r.querySelectorAll(':scope > div');
+    if (ri === 0) generateToolTip(el);
 
     if (ri === 1) {
       r.classList.add('series-fields-wrapper');
