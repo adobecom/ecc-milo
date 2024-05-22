@@ -64,7 +64,7 @@ export function onResume(component, eventObj) {
 
 export function onSubmit(component, props) {
   const eventType = 'InPerson';
-  const cloudType = 'CreativeCloud' || component.querySelector('#bu-select-input').value;
+  const cloudType = component.querySelector('#bu-select-input').value;
   const seriesId = component.querySelector('#series-select-input').value;
   const rsvpRequired = component.querySelector('#rsvp-required-check').checked;
 

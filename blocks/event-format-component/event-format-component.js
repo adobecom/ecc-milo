@@ -35,7 +35,7 @@ async function decorateCloudTagSelect(column) {
   select.append(option);
 
   // FIXME: use correct data source rather than hardcoded values.
-  ['Creative Cloud', 'DX'].forEach((bu) => {
+  ['CreativeCloud', 'DX'].forEach((bu) => {
     const opt = createTag('option', { value: bu }, bu);
     select.append(opt);
   });
