@@ -1,4 +1,5 @@
 import { getLibs } from '../scripts/utils.js';
+import { handleImageFiles } from '../scripts/esp-controller.js';
 
 function createTag(tag, attributes, html, options = {}) {
   const el = document.createElement(tag);
@@ -173,4 +174,37 @@ export async function decorateTextarea(row, extraOptions) {
   row.innerHTML = '';
   wrapper.append(input, attrTextEl);
   row.append(wrapper);
+}
+
+export function makeFileInputDropZone(inputWrapper) {
+  const dropZone = inputWrapper.querySelector('.img-file-input-label');
+  const fileInput = inputWrapper.querySelector('input[type="file"].img-file-input');
+
+  if (dropZone) {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((event) => {
+      dropZone.addEventListener(event, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, false);
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.currentTarget.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', (e) => {
+      e.currentTarget.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const { files } = e.dataTransfer;
+      handleImageFiles(inputWrapper, files);
+      e.currentTarget.classList.remove('dragover');
+    });
+  }
+
+  fileInput?.addEventListener('change', (e) => {
+    const { files } = e.currentTarget;
+    handleImageFiles(inputWrapper, files);
+  });
 }

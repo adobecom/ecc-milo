@@ -1,6 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 import { generateToolTip } from '../../utils/utils.js';
-import { getClouds, getSeries } from '../form-handler/controllers/shared-controller.js';
+import { getClouds, getSeries } from '../../scripts/esp-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);

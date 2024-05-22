@@ -1,4 +1,4 @@
-import { createVenue } from './shared-controller.js';
+import { createVenue } from '../../../scripts/esp-controller.js';
 
 function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');

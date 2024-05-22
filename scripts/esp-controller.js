@@ -44,7 +44,7 @@ export function uploadBinaryFile(file) {
   xhr.send(file);
 }
 
-function handleImageFiles(wrapper, files) {
+export function handleImageFiles(wrapper, files) {
   const previewWrapper = wrapper.querySelector('.preview-wrapper');
   const imgPlaceholder = wrapper.querySelector('.preview-img-placeholder');
   const fileInput = wrapper.querySelector('.img-file-input');
@@ -150,6 +150,20 @@ export async function publishEvent(eventId, payload) {
   return resp;
 }
 
+export async function getEvents() {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', 'Bearer');
+  myHeaders.append('content-type', 'application/json');
+
+  const requestOptions = {
+    method: 'GET',
+    headers: myHeaders,
+  };
+
+  const resp = fetch('http://localhost:8500/v1/events', requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
+
 export async function getClouds() {
   const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
 
@@ -179,37 +193,4 @@ export async function getSeries() {
   }
 
   return null;
-}
-
-export default function makeFileInputDropZone(inputWrapper) {
-  const dropZone = inputWrapper.querySelector('.img-file-input-label');
-  const fileInput = inputWrapper.querySelector('input[type="file"].img-file-input');
-
-  if (dropZone) {
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((event) => {
-      dropZone.addEventListener(event, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }, false);
-    });
-
-    dropZone.addEventListener('dragover', (e) => {
-      e.currentTarget.classList.add('dragover');
-    });
-
-    dropZone.addEventListener('dragleave', (e) => {
-      e.currentTarget.classList.remove('dragover');
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-      const { files } = e.dataTransfer;
-      handleImageFiles(inputWrapper, files);
-      e.currentTarget.classList.remove('dragover');
-    });
-  }
-
-  fileInput?.addEventListener('change', (e) => {
-    const { files } = e.currentTarget;
-    handleImageFiles(inputWrapper, files);
-  });
 }
