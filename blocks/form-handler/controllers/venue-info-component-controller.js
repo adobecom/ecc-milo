@@ -1,4 +1,4 @@
-import { createVenue } from '../../../scripts/esp-controller.js';
+import { createVenue } from '../../../utils/esp-controller.js';
 
 function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');

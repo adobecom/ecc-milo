@@ -128,7 +128,7 @@ export async function updateEvent(eventId, payload) {
     body: raw,
   };
 
-  const resp = fetch(`http://localhost:8500/v1/events${eventId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
   console.log(payload, resp);
   return resp;
 }
@@ -146,7 +146,7 @@ export async function publishEvent(eventId, payload) {
     body: raw,
   };
 
-  const resp = fetch(`http://localhost:8500/v1/events${eventId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
@@ -161,6 +161,20 @@ export async function getEvents() {
   };
 
   const resp = fetch('http://localhost:8500/v1/events', requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
+
+export async function getVenue(venueId) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', 'Bearer');
+  myHeaders.append('content-type', 'application/json');
+
+  const requestOptions = {
+    method: 'GET',
+    headers: myHeaders,
+  };
+
+  const resp = fetch(`http://localhost:8500/v1/venues/${venueId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 

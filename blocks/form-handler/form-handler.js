@@ -1,6 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
-import { createEvent, updateEvent, publishEvent } from '../../scripts/esp-controller.js';
+import { createEvent, updateEvent, publishEvent } from '../../utils/esp-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);

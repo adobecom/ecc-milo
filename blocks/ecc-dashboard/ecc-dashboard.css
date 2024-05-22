@@ -123,6 +123,11 @@
   border-bottom: 2px solid var(--color-gray-300);
 }
 
+.ecc-dashboard table .event-row .event-title-link {
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .ecc-dashboard table .event-row .thumbnail-container img {
   display: block;
   height: 90px;

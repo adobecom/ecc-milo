@@ -1,5 +1,5 @@
 import { getLibs } from '../scripts/utils.js';
-import { handleImageFiles } from '../scripts/esp-controller.js';
+import { handleImageFiles } from './esp-controller.js';
 
 function createTag(tag, attributes, html, options = {}) {
   const el = document.createElement(tag);
