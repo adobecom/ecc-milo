@@ -15,7 +15,7 @@ async function buildPickerFromTags(id, wrapper, phText, options) {
   const select = createTag('sp-picker', { id, class: 'select-input', size: 'm', label: phText });
 
   options.forEach(([, val]) => {
-    const opt = createTag('sp-menu-item', {}, val.title);
+    const opt = createTag('sp-menu-item', {}, val);
     select.append(opt);
   });
 
@@ -29,27 +29,18 @@ async function decorateCloudTagSelect(column) {
   // const clouds = await getClouds();
 
   // if (!clouds) return;
-
-  // buildSelectFromTags('bu-select-input', buSelectWrapper, phText, Object.entries(clouds));
-
-  const option = createTag('option', { value: '', disabled: true, selected: true }, phText);
-  const select = createTag('select', { id: 'bu-select-input', class: 'select-input' });
-
-  select.append(option);
-
   // FIXME: use correct data source rather than hardcoded values.
-  ['Creative Cloud', 'DX'].forEach((bu) => {
-    const opt = createTag('option', { value: bu }, bu);
-    select.append(opt);
-  });
+  const clouds = ['Creative Cloud', 'DX'];
 
-  buSelectWrapper.append(select);
-  const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
+  buildPickerFromTags('bu-select-input', buSelectWrapper, phText, Object.entries(clouds));
 
-  if (!resp.error) {
-    const clouds = resp.namespaces.caas.tags['business-unit'].tags;
-    buildPickerFromTags(buSelectWrapper, phText, Object.entries(clouds));
-  }
+  // FIXME: Use common api for rendering select field
+  // const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
+
+  // if (!resp.error) {
+  //   const tags = resp.namespaces.caas.tags['business-unit'].tags;
+  //   buildPickerFromTags(buSelectWrapper, phText, Object.entries(tags));
+  // }
 
   column.innerHTML = '';
   column.append(buSelectWrapper);

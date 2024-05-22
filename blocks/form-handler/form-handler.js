@@ -415,6 +415,8 @@ export default async function init(el) {
     import(`${miloLibs}/deps/lit-all.min.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/picker.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/menu.js`),
   ]);
 
   const profile = window.bm8tr.get('imsProfile');
