@@ -9,11 +9,12 @@ async function buildPickerFromTags(wrapper, phText, options) {
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/picker.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/menu.js`),
   ]);
   const select = createTag('sp-picker', { id: 'bu-select-input', class: 'select-input', size: 'm', label: phText });
 
   options.forEach(([, val]) => {
-    const opt = createTag('sp-menu-item', val.title);
+    const opt = createTag('sp-menu-item', {}, val.title);
     select.append(opt);
   });
 
