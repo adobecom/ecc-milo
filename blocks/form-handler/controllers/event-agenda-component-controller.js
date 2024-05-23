@@ -1,4 +1,4 @@
-export function onSubmit(component) {
+export function onSubmit(component, props) {
   // TODO: agenda details
   const time = component.querySelector('#time-picker').value;
   const agendaInfoVisible = component.querySelector('#checkbox-agenda-info').checked;

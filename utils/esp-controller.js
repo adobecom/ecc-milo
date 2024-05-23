@@ -164,6 +164,20 @@ export async function getEvents() {
   return resp;
 }
 
+export async function getEvent(eventId) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', 'Bearer');
+  myHeaders.append('content-type', 'application/json');
+
+  const requestOptions = {
+    method: 'GET',
+    headers: myHeaders,
+  };
+
+  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
+
 export async function getVenue(venueId) {
   const myHeaders = new Headers();
   myHeaders.append('Authorization', 'Bearer');

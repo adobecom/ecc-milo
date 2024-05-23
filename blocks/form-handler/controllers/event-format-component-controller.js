@@ -53,7 +53,7 @@ function initStepLock(component) {
   onFormatChange();
 }
 
-export default function init(component) {
+export default function init(component, props) {
   prepopulateTimeZone(component);
   initStepLock(component);
 }
