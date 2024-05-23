@@ -88,7 +88,7 @@ function initAutocomplete(el) {
   });
 }
 
-export default function init(component) {
+export default function init(component, props) {
   // TODO: init function and repopulate data from props if exists
   loadGoogleMapsAPI(() => initAutocomplete(component));
 }
