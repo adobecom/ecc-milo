@@ -89,21 +89,8 @@ function initAutocomplete(el) {
 }
 
 export default function init(component) {
+  // TODO: init function and repopulate data from props if exists
   loadGoogleMapsAPI(() => initAutocomplete(component));
-}
-
-export function onResume(component, eventObj) {
-  component.querySelector('#checkbox-venue-info-visible').checked = eventObj;
-  component.querySelector('#venue-info-venue-name');
-  component.querySelector('#venue-info-venue-address');
-  component.querySelector('#location-city');
-  component.querySelector('#location-state');
-  component.querySelector('#location-zip-code');
-  component.querySelector('#location-country');
-  // const placeId = component.querySelector('#google-place-id');
-  component.querySelector('#google-place-lat');
-  component.querySelector('#google-place-lng');
-  component.querySelector('#google-place-gmt-offset');
 }
 
 export async function onSubmit(component, props) {

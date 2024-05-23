@@ -11,11 +11,6 @@ export function onSubmit(component) {
   return eventInfo;
 }
 
-export function onResume(component, eventObj) {
-  // TODO: agenda resume function
-
-}
-
 export default function init(component, props) {
-  // TODO: agenda init function
+  // TODO: init function and repopulate data from props if exists
 }

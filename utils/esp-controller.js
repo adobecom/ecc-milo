@@ -179,6 +179,7 @@ export async function getVenue(venueId) {
 }
 
 export async function getClouds() {
+  // TODO: use ESP to fetch clouds rather than Chimera
   const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
 
   if (!resp.error) {
