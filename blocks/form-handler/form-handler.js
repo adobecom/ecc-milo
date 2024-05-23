@@ -14,7 +14,7 @@ const SUPPORTED_COMPONENTS = [
   'venue-info',
   'profile',
   'event-agenda',
-  'community-link',
+  'event-community-link',
 ];
 
 const INPUT_TYPES = [

@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { addRepeater, handlize, generateToolTip } from '../../utils/utils.js';
+import { addRepeater, generateToolTip, convertTo24HourFormat } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -9,14 +9,11 @@ function buildTimePicker(column) {
 
   const timePickerWrapper = createTag('div', { class: 'time-picker-wrapper' });
   const timeSlots = column.querySelectorAll('li');
-  const select = createTag('select', {
-    id: 'time-picker',
-    class: 'select-input',
-  });
+  const select = createTag('select', { class: 'time-picker-input select-input' });
 
   timeSlots.forEach((t) => {
     const text = t.textContent.trim();
-    const option = createTag('option', { value: handlize(text) }, text);
+    const option = createTag('option', { value: convertTo24HourFormat(text) }, text);
     select.append(option);
   });
 
@@ -42,7 +39,6 @@ function decorateFields(row) {
   const maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
   const isRequired = attrTextEl.textContent.trim().endsWith('*');
   const input = createTag('sp-textfield', {
-    id: 'agenda-field-details',
     class: 'text-input',
     placeholder: text,
     required: isRequired,

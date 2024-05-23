@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, generateToolTip, decorateTextfield, decorateTextarea } from '../../utils/utils.js';
+import { getIcon, generateToolTip, decorateTextfield, decorateTextarea, convertTo24HourFormat } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -11,29 +11,6 @@ function buildDatePicker(column) {
 
   column.innerHTML = '';
   column.append(dateLabel, datePicker, calendarIcon);
-}
-
-function convertTo24HourFormat(timeStr) {
-  const timeFormat = /^(0?[1-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/;
-
-  if (!timeStr.match(timeFormat)) {
-    throw new Error("Invalid time format. Expected format: 'h:mm AM/PM'");
-  }
-
-  const [time, period] = timeStr.split(' ');
-  const [, minutes] = time.split(':').map(Number);
-  let [hours] = time.split(':').map(Number);
-
-  if (period === 'PM' && hours !== 12) {
-    hours += 12;
-  } else if (period === 'AM' && hours === 12) {
-    hours = 0;
-  }
-
-  const formattedHours = hours.toString().padStart(2, '0');
-  const formattedMinutes = minutes.toString().padStart(2, '0');
-
-  return `${formattedHours}:${formattedMinutes}:00`;
 }
 
 function buildTimePicker(column, wrapper) {

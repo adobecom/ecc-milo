@@ -277,11 +277,21 @@
   align-items: center;
   padding: 0 32px;
   margin-bottom: 24px;
+  cursor: pointer;
 }
 
-.form-handler .icon-add-circle {
+.form-handler .repeater-element:hover .icon-add-circle,
+.form-handler .icon-remove-circle:hover {
+  opacity: 1;
+}
+
+.form-handler .icon-add-circle,
+.form-handler .icon-remove-circle {
   height: 24px;
   width: 24px;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+  cursor: pointer;
 }
 
 .form-handler .repeater-element-title {

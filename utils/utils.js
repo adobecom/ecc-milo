@@ -1,4 +1,3 @@
-import { getLibs } from '../scripts/utils.js';
 import { handleImageFiles } from './esp-controller.js';
 
 function createTag(tag, attributes, html, options = {}) {
@@ -31,6 +30,29 @@ export function yieldToMain() {
 
 export function handlize(str) {
   return str?.toLowerCase().trim().replaceAll(' ', '-');
+}
+
+export function convertTo24HourFormat(timeStr) {
+  const timeFormat = /^(0?[1-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/;
+
+  if (!timeStr.match(timeFormat)) {
+    throw new Error("Invalid time format. Expected format: 'h:mm AM/PM'");
+  }
+
+  const [time, period] = timeStr.split(' ');
+  const [, minutes] = time.split(':').map(Number);
+  let [hours] = time.split(':').map(Number);
+
+  if (period === 'PM' && hours !== 12) {
+    hours += 12;
+  } else if (period === 'AM' && hours === 12) {
+    hours = 0;
+  }
+
+  const formattedHours = hours.toString().padStart(2, '0');
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+
+  return `${formattedHours}:${formattedMinutes}:00`;
 }
 
 export function addTooltipToHeading(em, heading) {
@@ -109,51 +131,21 @@ export function addRepeater(element, title) {
   element.after(tag);
 }
 
-export async function decorateTextfield(row, extraOptions) {
-  row.classList.add('text-field-row');
-  const cols = row.querySelectorAll(':scope > div');
-  if (!cols.length) return;
-  let placeholderCol;
-  let maxLengthCol;
-  if (cols.length === 1) {
-    [placeholderCol] = cols;
-  } else if (cols.length === 2) {
-    [placeholderCol, maxLengthCol] = cols;
-  }
-  const text = placeholderCol.textContent.trim();
+function mergeOptions(defaultOptions, overrideOptions) {
+  const combinedOptions = { ...defaultOptions, ...overrideOptions };
 
-  const attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
-  const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
-  const isRequired = attrTextEl.textContent.trim().endsWith('*');
-
-  console.log({
-    class: 'text-input',
-    placeholder: text,
-    required: isRequired,
-    quiet: true,
-    size: 'xl',
-    ...extraOptions,
-  });
-  const input = createTag('sp-textfield', {
-    class: 'text-input',
-    placeholder: text,
-    required: isRequired,
-    quiet: true,
-    size: 'xl',
-    ...extraOptions,
+  Object.keys(overrideOptions).forEach((key) => {
+    if (overrideOptions[key] === false) {
+      delete combinedOptions[key];
+    }
   });
 
-  if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
-
-  const wrapper = createTag('div', { class: 'info-field-wrapper' });
-  row.innerHTML = '';
-  wrapper.append(input, attrTextEl);
-  row.append(wrapper);
+  return combinedOptions;
 }
 
-export async function decorateTextarea(row, extraOptions) {
-  row.classList.add('text-field-row');
-  const cols = row.querySelectorAll(':scope > div');
+export async function decorateTextfield(cell, extraOptions) {
+  cell.classList.add('text-field-row');
+  const cols = cell.querySelectorAll(':scope > div');
   if (!cols.length) return;
   let placeholderCol;
   let maxLengthCol;
@@ -168,21 +160,60 @@ export async function decorateTextarea(row, extraOptions) {
   const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
   const isRequired = attrTextEl.textContent.trim().endsWith('*');
 
-  const input = createTag('sp-textfield', {
-    multiline: true,
-    class: 'textarea-input',
-    quiet: true,
-    placeholder: text,
-    required: isRequired,
-    ...extraOptions,
-  });
+  const input = createTag('sp-textfield', mergeOptions(
+    {
+      class: 'text-input',
+      placeholder: text,
+      required: isRequired,
+      quiet: true,
+      size: 'xl',
+    },
+    extraOptions,
+  ));
 
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
 
   const wrapper = createTag('div', { class: 'info-field-wrapper' });
-  row.innerHTML = '';
+  cell.innerHTML = '';
   wrapper.append(input, attrTextEl);
-  row.append(wrapper);
+  cell.append(wrapper);
+}
+
+export async function decorateTextarea(cell, extraOptions) {
+  cell.classList.add('text-field-row');
+  const cols = cell.querySelectorAll(':scope > div');
+  if (!cols.length) return;
+  let placeholderCol;
+  let maxLengthCol;
+  if (cols.length === 1) {
+    [placeholderCol] = cols;
+  } else if (cols.length === 2) {
+    [placeholderCol, maxLengthCol] = cols;
+  }
+  const text = placeholderCol.textContent.trim();
+
+  const attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
+  const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
+  const isRequired = attrTextEl.textContent.trim().endsWith('*');
+
+  const input = createTag('sp-textfield', mergeOptions(
+    {
+      multiline: true,
+      class: 'textarea-input',
+      // quiet: true,
+      placeholder: text,
+      required: isRequired,
+      ...extraOptions,
+    },
+    extraOptions,
+  ));
+
+  if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
+
+  const wrapper = createTag('div', { class: 'info-field-wrapper' });
+  cell.innerHTML = '';
+  wrapper.append(input, attrTextEl);
+  cell.append(wrapper);
 }
 
 export function makeFileInputDropZone(inputWrapper) {
