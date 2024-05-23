@@ -94,7 +94,8 @@ export function querySelectorAllDeep(selector, root = document) {
 }
 
 export function addRepeater(element, title) {
-  element.lastChild.setAttribute('repeatIdx', 0);
+  if (!element) return;
+  element.setAttribute('repeatIdx', 0);
 
   const tag = createTag('div');
   tag.classList.add('repeater-element');
@@ -105,7 +106,7 @@ export function addRepeater(element, title) {
   const plusIcon = getIcon('add-circle');
   tag.append(plusIcon);
 
-  element.append(tag);
+  element.after(tag);
 }
 
 export async function decorateTextfield(row, extraOptions) {
@@ -125,6 +126,14 @@ export async function decorateTextfield(row, extraOptions) {
   const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
   const isRequired = attrTextEl.textContent.trim().endsWith('*');
 
+  console.log({
+    class: 'text-input',
+    placeholder: text,
+    required: isRequired,
+    quiet: true,
+    size: 'xl',
+    ...extraOptions,
+  });
   const input = createTag('sp-textfield', {
     class: 'text-input',
     placeholder: text,

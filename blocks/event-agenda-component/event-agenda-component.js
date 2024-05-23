@@ -27,7 +27,7 @@ function buildTimePicker(column) {
   column.append(timePickerWrapper);
 }
 
-async function decorateFields(row) {
+function decorateFields(row) {
   row.classList.add('agenda-input-fields-row');
   const cols = row.querySelectorAll(':scope > div');
   if (!cols.length) return null;
@@ -69,7 +69,7 @@ async function decorateFields(row) {
   return row;
 }
 
-async function decorateCheckBox(row) {
+function decorateCheckBox(row) {
   const fieldSet = createTag('fieldset', { class: 'checkboxes' });
   row.classList.add('agenda-info-addition');
   const cols = row.querySelectorAll(':scope > div');
@@ -102,6 +102,7 @@ export default async function init(el) {
   el.classList.add('form-component');
   generateToolTip(el);
   const rows = [...el.querySelectorAll(':scope > div')];
-  decorateFields(rows[1]);
+  const fieldsContainer = decorateFields(rows[1]);
   decorateCheckBox(rows[2]);
+  addRepeater(fieldsContainer, 'Add agenda time and details');
 }

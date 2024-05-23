@@ -47,13 +47,13 @@ function decorateHeader(element) {
 }
 
 async function decorateSocialMedia(element) {
-  const socialTag = createTag('div');
-  element.replaceWith(socialTag);
+  // const socialTag = createTag('div');
+  // element.replaceWith(socialTag);
 
-  socialTag.append(element);
+  // socialTag.append(element);
 
-  await decorateTextfield(element);
-  addRepeater(socialTag, 'Add social media');
+  await decorateTextfield(element, { quiet: false });
+  addRepeater(element, 'Add social media');
 }
 
 async function decorateProfile(element) {
@@ -86,5 +86,5 @@ export default async function init(element) {
 
   await decorateProfile(element);
 
-  addRepeater(element.parentNode.parentNode, 'Add Profile');
+  addRepeater(element.parentNode, 'Add Profile');
 }
