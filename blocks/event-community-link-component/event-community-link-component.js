@@ -51,14 +51,6 @@ async function decorateField(row, type = 'text') {
 }
 
 export default async function init(el) {
-  const miloLibs = getLibs();
-
-  await Promise.all([
-    import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/checkbox.js`),
-  ]);
-
   el.classList.add('form-component');
   generateToolTip(el);
   const rows = [...el.querySelectorAll(':scope > div')];

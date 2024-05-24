@@ -120,12 +120,6 @@ function buildLocationInputGrid(row) {
 
 export default function init(el) {
   el.classList.add('form-component');
-  const miloLibs = getLibs();
-  Promise.all([
-    import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/checkbox.js`),
-  ]);
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach((r, i) => {

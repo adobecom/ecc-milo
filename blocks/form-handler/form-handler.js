@@ -30,6 +30,7 @@ const SPECTRUM_COMPONENTS = [
   'textfield',
   'picker',
   'menu',
+  'checkbox',
 ];
 
 async function initComponents(props) {
