@@ -125,9 +125,7 @@ export async function onSubmit(component, props) {
     const venueCreatedResp = await createVenue(venueData);
 
     props.payload = { ...props.payload, ...venueCreatedResp };
-    return venueCreatedResp;
   }
 
   props.payload = { ...props.payload, ...venueData };
-  return venueData;
 }
