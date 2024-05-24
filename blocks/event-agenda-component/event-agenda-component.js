@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { addRepeater, handlize, generateToolTip } from '../../utils/utils.js';
+import { addRepeater, generateToolTip, convertTo24HourFormat } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -9,14 +9,11 @@ function buildTimePicker(column) {
 
   const timePickerWrapper = createTag('div', { class: 'time-picker-wrapper' });
   const timeSlots = column.querySelectorAll('li');
-  const select = createTag('select', {
-    id: 'time-picker',
-    class: 'select-input',
-  });
+  const select = createTag('select', { class: 'time-picker-input select-input' });
 
   timeSlots.forEach((t) => {
     const text = t.textContent.trim();
-    const option = createTag('option', { value: handlize(text) }, text);
+    const option = createTag('option', { value: convertTo24HourFormat(text) }, text);
     select.append(option);
   });
 
@@ -27,7 +24,7 @@ function buildTimePicker(column) {
   column.append(timePickerWrapper);
 }
 
-async function decorateFields(row) {
+function decorateFields(row) {
   row.classList.add('agenda-input-fields-row');
   const cols = row.querySelectorAll(':scope > div');
   if (!cols.length) return null;
@@ -42,7 +39,6 @@ async function decorateFields(row) {
   const maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
   const isRequired = attrTextEl.textContent.trim().endsWith('*');
   const input = createTag('sp-textfield', {
-    id: 'agenda-field-details',
     class: 'text-input',
     placeholder: text,
     required: isRequired,
@@ -69,7 +65,7 @@ async function decorateFields(row) {
   return row;
 }
 
-async function decorateCheckBox(row) {
+function decorateCheckBox(row) {
   const fieldSet = createTag('fieldset', { class: 'checkboxes' });
   row.classList.add('agenda-info-addition');
   const cols = row.querySelectorAll(':scope > div');
@@ -94,6 +90,7 @@ export default async function init(el) {
   el.classList.add('form-component');
   generateToolTip(el);
   const rows = [...el.querySelectorAll(':scope > div')];
-  decorateFields(rows[1]);
+  const fieldsContainer = decorateFields(rows[1]);
   decorateCheckBox(rows[2]);
+  addRepeater(fieldsContainer, 'Add agenda time and details');
 }

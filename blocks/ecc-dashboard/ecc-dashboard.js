@@ -17,7 +17,7 @@ function formatLocaleDate(string) {
 }
 
 function buildThumbnail(data) {
-  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0].imageUrl });
+  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl });
   const container = createTag('td', { class: 'thumbnail-container' }, img);
   return container;
 }
@@ -97,7 +97,7 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(event) {
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `https://stage--events-milo--adobecom.hlx.page/event/t3/${event.detailPagePath}` }, event.title);
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `https://stage--events-milo--adobecom.hlx.page/t3/event/${event.detailPagePath}` }, event.title);
   return eventTitleTag;
 }
 

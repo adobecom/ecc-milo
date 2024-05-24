@@ -1,4 +1,4 @@
-async function uploadImage(file) {
+export async function uploadImage(file) {
   const formData = new FormData();
   formData.append('file', file);
 
@@ -42,41 +42,6 @@ export function uploadBinaryFile(file) {
   };
 
   xhr.send(file);
-}
-
-export function handleImageFiles(wrapper, files) {
-  const previewWrapper = wrapper.querySelector('.preview-wrapper');
-  const imgPlaceholder = wrapper.querySelector('.preview-img-placeholder');
-  const fileInput = wrapper.querySelector('.img-file-input');
-  const dz = wrapper.querySelector('.img-file-input-label');
-  const deleteBtn = wrapper.querySelector('.icon-delete');
-
-  if (files.length > 0) {
-    const file = files[0];
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-
-      reader.onload = async (e) => {
-        const img = new Image();
-        img.src = e.target.result;
-        previewWrapper.classList.remove('hidden');
-        dz.classList.add('hidden');
-        imgPlaceholder.innerHTML = '';
-        imgPlaceholder.append(img);
-
-        await uploadImage(file);
-      };
-
-      reader.readAsDataURL(file);
-    }
-  }
-
-  deleteBtn.addEventListener('click', () => {
-    fileInput.value = '';
-    previewWrapper.classList.add('hidden');
-    imgPlaceholder.innerHTML = '';
-    dz.classList.remove('hidden');
-  });
 }
 
 export async function createVenue(payload) {
@@ -164,6 +129,20 @@ export async function getEvents() {
   return resp;
 }
 
+export async function getEvent(eventId) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', 'Bearer');
+  myHeaders.append('content-type', 'application/json');
+
+  const requestOptions = {
+    method: 'GET',
+    headers: myHeaders,
+  };
+
+  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
+
 export async function getVenue(venueId) {
   const myHeaders = new Headers();
   myHeaders.append('Authorization', 'Bearer');
@@ -179,6 +158,7 @@ export async function getVenue(venueId) {
 }
 
 export async function getClouds() {
+  // TODO: use ESP to fetch clouds rather than Chimera
   const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
 
   if (!resp.error) {

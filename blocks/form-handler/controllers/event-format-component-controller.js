@@ -53,20 +53,28 @@ function initStepLock(component) {
   onFormatChange();
 }
 
-export default function init(component) {
+export default function init(component, props) {
   prepopulateTimeZone(component);
   initStepLock(component);
 }
 
-export function onResume(component, eventObj) {
-  // TODO: handle form prepopulation on component level
+function getTemplateId(bu) {
+  switch (bu) {
+    case 'DX':
+      return '/fragments/event-templates/dx/simple';
+    case 'CreativeCloud':
+    default:
+      return '/fragments/event-templates/dme/simple';
+  }
 }
 
 export function onSubmit(component, props) {
+  // TODO: init function and repopulate data from props if exists
   const eventType = 'InPerson';
   const cloudType = component.querySelector('#bu-select-input').value;
   const seriesId = component.querySelector('#series-select-input').value;
   const rsvpRequired = component.querySelector('#rsvp-required-check').checked;
+  const templateId = getTemplateId(cloudType);
 
   const eventFormat = {
     // TODO: add the other text field values
@@ -74,8 +82,8 @@ export function onSubmit(component, props) {
     cloudType,
     seriesId,
     rsvpRequired,
+    templateId,
   };
 
   props.payload = { ...props.payload, ...eventFormat };
-  return eventFormat;
 }
