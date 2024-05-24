@@ -1,17 +1,10 @@
 import { getLibs } from '../../scripts/utils.js';
 import { generateToolTip } from '../../utils/utils.js';
-import { getClouds, getSeries } from '../../utils/esp-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 
 async function buildPickerFromTags(id, wrapper, phText, options) {
-  const miloLibs = getLibs();
-  await Promise.all([
-    import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/picker.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/menu.js`),
-  ]);
   const select = createTag('sp-picker', { id, class: 'select-input', size: 'm', label: phText });
 
   options.forEach(([, val]) => {
@@ -26,21 +19,10 @@ async function decorateCloudTagSelect(column) {
   const buSelectWrapper = createTag('div', { class: 'bu-picker-wrapper' });
   const phText = column.textContent.trim();
 
-  // const clouds = await getClouds();
-
-  // if (!clouds) return;
   // FIXME: use correct data source rather than hardcoded values.
   const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
 
   buildPickerFromTags('bu-select-input', buSelectWrapper, phText, Object.entries(clouds));
-
-  // FIXME: Use common api for rendering select field
-  // const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
-
-  // if (!resp.error) {
-  //   const tags = resp.namespaces.caas.tags['business-unit'].tags;
-  //   buildPickerFromTags(buSelectWrapper, phText, Object.entries(tags));
-  // }
 
   column.innerHTML = '';
   column.append(buSelectWrapper);
@@ -50,8 +32,9 @@ async function decorateSeriesSelect(column) {
   const seriesSelectWrapper = createTag('div', { class: 'series-picker-wrapper' });
   const phText = column.textContent.trim();
 
+  // FIXME: use correct data source rather than hardcoded values.
   const series = [{ id: 'createNow', name: 'Create Now' }, { id: 'series2', name: 'Series 2' }];
-  // TODO: Connect API.
+
   buildPickerFromTags('series-select-input', seriesSelectWrapper, phText, Object.entries(series));
 
   column.innerHTML = '';

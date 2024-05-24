@@ -29,10 +29,9 @@ export const [setLibs, getLibs] = (() => {
       libs = (() => {
         const { hostname, search } = location || window.location;
         if (!(hostname.includes('.hlx.') || hostname.includes('local'))) return prodLibs;
-        //FIXME: Revert once my branch is merged to ecc branch in milo repo.
-        const branch = new URLSearchParams(search).get('milolibs') || 'gbajaj-swc-update';
+        const branch = new URLSearchParams(search).get('milolibs') || 'ecc';
         if (branch === 'local') return 'http://localhost:6456/libs';
-        return branch.includes('--') ? `https://${branch}.hlx.live/libs` : `https://${branch}--milo--gbajaj91.hlx.live/libs`;
+        return branch.includes('--') ? `https://${branch}.hlx.live/libs` : `https://${branch}--milo--adobecom.hlx.live/libs`;
       })();
       return libs;
     }, () => libs,
