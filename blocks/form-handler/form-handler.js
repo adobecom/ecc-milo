@@ -26,6 +26,14 @@ const INPUT_TYPES = [
   'sp-checkbox[required]',
 ];
 
+const SPECTRUM_COMPONENTS = [
+  'theme',
+  'textfield',
+  'picker',
+  'menu',
+  'checkbox',
+];
+
 async function initComponents(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
@@ -420,10 +428,12 @@ async function buildECCForm(el) {
 export default async function init(el) {
   el.style.display = 'none';
   const miloLibs = getLibs();
+  const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
+    await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
+  });
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
+    ...promises,
   ]);
 
   const profile = window.bm8tr.get('imsProfile');
