@@ -1,5 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 import { generateToolTip } from '../../utils/utils.js';
+import { getClouds, getSeries } from '../../utils/esp-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -30,12 +31,18 @@ async function decorateCloudTagSelect(column) {
 
 async function decorateSeriesSelect(column) {
   const seriesSelectWrapper = createTag('div', { class: 'series-picker-wrapper' });
-  const phText = column.textContent.trim();
 
-  // FIXME: use correct data source rather than hardcoded values.
-  const series = [{ id: 'createNow', name: 'Create Now' }, { id: 'series2', name: 'Series 2' }];
+  const series = await getSeries();
+  if (!series) return;
 
-  buildPickerFromTags('series-select-input', seriesSelectWrapper, phText, Object.entries(series));
+  const select = createTag('sp-picker', { id: 'series-select-input', class: 'select-input', size: 'm', label: column.textContent.trim() });
+
+  Object.values(series).forEach((val) => {
+    const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
+    select.append(opt);
+  });
+
+  seriesSelectWrapper.append(select);
 
   column.innerHTML = '';
   column.append(seriesSelectWrapper);

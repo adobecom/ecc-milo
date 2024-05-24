@@ -16,10 +16,16 @@
   margin-bottom: 24px;
 }
 
-.event-partners-component select {
+.event-partners-component .rsvp-field-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.event-partners-component .rsvp-field-wrapper img.partner-img {
+  display: block;
+  width: 40px;
+  height: 40px;
   border-radius: 4px;
-  padding: 4px;
-  height: 32px;
-  border: 1px solid var(--color-gray-500);
-  font-size: var(--type-body-xs-size);
+  object-fit: contain;
 }

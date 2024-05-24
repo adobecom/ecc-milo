@@ -9,11 +9,11 @@ function buildTimePicker(column) {
 
   const timePickerWrapper = createTag('div', { class: 'time-picker-wrapper' });
   const timeSlots = column.querySelectorAll('li');
-  const select = createTag('select', { class: 'time-picker-input select-input' });
+  const select = createTag('sp-picker', { class: 'time-picker-input select-input', label: 'Select agenda time' });
 
   timeSlots.forEach((t) => {
     const text = t.textContent.trim();
-    const option = createTag('option', { value: convertTo24HourFormat(text) }, text);
+    const option = createTag('sp-menu-item', { value: convertTo24HourFormat(text) }, text);
     select.append(option);
   });
 
