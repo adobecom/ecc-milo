@@ -1,4 +1,3 @@
-import { getLibs } from '../scripts/utils.js';
 import { handleImageFiles } from './esp-controller.js';
 
 function createTag(tag, attributes, html, options = {}) {
