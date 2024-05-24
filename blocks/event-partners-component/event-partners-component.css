@@ -1,0 +1,25 @@
+.event-partners-component > div:first-of-type {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.event-partners-component .partners-visible-toggle .additional-comment  {
+  padding-left: 24px;
+}
+
+.event-partners-component .partners-visible-toggle {
+  margin-top: 24px;
+}
+
+.event-partners-component fieldset {
+  margin-bottom: 24px;
+}
+
+.event-partners-component select {
+  border-radius: 4px;
+  padding: 4px;
+  height: 32px;
+  border: 1px solid var(--color-gray-500);
+  font-size: var(--type-body-xs-size);
+}

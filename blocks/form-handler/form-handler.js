@@ -236,6 +236,7 @@ function navigateForm(props, stepIndex) {
   props.currentStep = index;
   props.farthestStep = Math.max(props.farthestStep, index);
 
+  window.scrollTo(0, 0);
   updateRequiredFields(props);
 }
 
