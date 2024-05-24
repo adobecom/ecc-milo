@@ -68,12 +68,6 @@ function decorateRSVPFields(row) {
 }
 
 export default async function init(el) {
-  const miloLibs = getLibs();
-  await Promise.all([
-    import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/checkbox.js`),
-  ]);
-
   el.classList.add('form-component');
   generateToolTip(el.querySelector(':scope > div:first-of-type'));
   decorateRSVPFields(el.querySelector(':scope > div:last-of-type'));

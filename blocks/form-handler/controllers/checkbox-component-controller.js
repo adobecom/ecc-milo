@@ -1,4 +1,5 @@
-export default function init(component) {
+export default function init(component, props) {
+  // TODO: init function and repopulate data from props if exists
   const checkboxes = component.querySelectorAll('input[type="checkbox"]');
   const minReg = component.className.match(/min-(.*?)( |$)/);
   const maxReg = component.className.match(/max-(.*?)( |$)/);
@@ -38,10 +39,6 @@ export default function init(component) {
   });
 }
 
-export function onResume(component, eventObj) {
-  // TODO: handle form prepopulation on component level
-}
-
 export function onSubmit(component, props) {
-  return {};
+
 }

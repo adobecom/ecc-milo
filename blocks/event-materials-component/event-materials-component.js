@@ -4,12 +4,6 @@ import { getIcon, generateToolTip } from '../../utils/utils.js';
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 async function decorateSWCTextField(row, extraOptions) {
-  const miloLibs = getLibs();
-  await Promise.all([
-    import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
-  ]);
-
   row.classList.add('text-field-row');
 
   const cols = row.querySelectorAll(':scope > div');

@@ -1,21 +1,29 @@
-export function onSubmit(component) {
+export function onSubmit(component, props) {
   // TODO: community URL
-  const time = component.querySelector('#community-url-details').value;
-  const discussionLinkCheckbox = component.querySelector('#checkbox-community').checked;
+  const checkbox = component.querySelector('#checkbox-community');
 
-  const eventInfo = {
-    discussionLinkCheckbox,
-    Time: time,
-  };
+  if (checkbox.checked) {
+    const communityTopicUrl = component.querySelector('#community-url-details').value;
+    props.payload = { ...props.payload, communityTopicUrl };
+    return communityTopicUrl;
+  }
 
-  return eventInfo;
-}
-
-export function onResume(component, eventObj) {
-  // TODO: community link resume function
-
+  return {};
 }
 
 export default function init(component, props) {
-  // TODO: community link init function
+  // TODO: init function and repopulate data from props if exists
+  const checkbox = component.querySelector('#checkbox-community');
+  const input = component.querySelector('#community-url-details');
+
+  const updateInputState = () => {
+    input.disabled = !checkbox.checked;
+    input.required = checkbox.checked;
+  };
+
+  if (checkbox && input) {
+    checkbox.addEventListener('change', updateInputState);
+  }
+
+  updateInputState();
 }

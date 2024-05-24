@@ -292,10 +292,6 @@ export default function init(component) {
   initCalendar(component);
 }
 
-export function onResume(component, eventObj) {
-  // TODO: handle form prepopulation on component level
-}
-
 function dateTimeStringToTimestamp(dateString, timeString) {
   const dateTimeString = `${dateString}T${timeString}`;
 

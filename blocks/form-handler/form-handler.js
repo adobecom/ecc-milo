@@ -1,6 +1,7 @@
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
-import { createEvent, updateEvent, publishEvent } from '../../utils/esp-controller.js';
+import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
+import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -14,7 +15,7 @@ const SUPPORTED_COMPONENTS = [
   'venue-info',
   'profile',
   'event-agenda',
-  'community-link',
+  'event-community-link',
 ];
 
 const INPUT_TYPES = [
@@ -25,16 +26,32 @@ const INPUT_TYPES = [
   'sp-checkbox[required]',
 ];
 
+const SPECTRUM_COMPONENTS = [
+  'theme',
+  'textfield',
+  'picker',
+  'menu',
+  'checkbox',
+];
+
 async function initComponents(props) {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const eventId = urlParams.get('eventId');
+
+  if (eventId) props.payload = JSON.parse(getEvent(eventId));
+
   SUPPORTED_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
 
     mappedComponents.forEach(async (component) => {
       const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
-      await initComponent(component);
+      await initComponent(component, props);
     });
   });
+  
+  customElements.define('image-dropzone', ImageDropzone);
 }
 
 async function gatherValues(props) {
@@ -338,7 +355,7 @@ function prepopulateForm(props) {
 
   if (!eventId) return;
 
-  const eventObj = JSON.parse(localStorage.getItem(eventId));
+  const eventObj = JSON.parse(getEvent(eventId));
 
   SUPPORTED_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
@@ -412,10 +429,12 @@ async function buildECCForm(el) {
 export default async function init(el) {
   el.style.display = 'none';
   const miloLibs = getLibs();
+  const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
+    await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
+  });
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
+    ...promises,
   ]);
 
   const profile = window.bm8tr.get('imsProfile');

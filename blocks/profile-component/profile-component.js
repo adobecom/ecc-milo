@@ -6,7 +6,7 @@ const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 function decorateProfileImageDropzone(element) {
   element.classList.add('profile-image');
-  const dropzone = createTag('image-dropzone', { inputid: 'alpha-beta' });
+  const dropzone = createTag('image-dropzone', { class: 'profile-image' });
 
   const inputLabel = createTag('div', { slot: 'img-label', class: 'img-upload-text' });
   const paragraphs = element.querySelectorAll(':scope > p');
@@ -22,7 +22,7 @@ function decorateTitle(element) {
   // eslint-disable-next-line no-undef
   deleteButton.append(getIcon('remove-circle'));
   deleteButton.classList.add('hidden');
-  deleteButton.setAttribute('deleteHandler', () => {  });
+  deleteButton.setAttribute('deleteHandler', () => { });
 
   element.parentNode.append(deleteButton);
 }
@@ -47,13 +47,13 @@ function decorateHeader(element) {
 }
 
 async function decorateSocialMedia(element) {
-  const socialTag = createTag('div');
-  element.replaceWith(socialTag);
+  // const socialTag = createTag('div');
+  // element.replaceWith(socialTag);
 
-  socialTag.append(element);
+  // socialTag.append(element);
 
-  await decorateTextfield(element);
-  addRepeater(socialTag, 'Add social media');
+  await decorateTextfield(element, { quiet: false });
+  addRepeater(element, 'Add social media');
 }
 
 async function decorateProfile(element) {
@@ -86,5 +86,5 @@ export default async function init(element) {
 
   await decorateProfile(element);
 
-  addRepeater(element.parentNode.parentNode, 'Add Profile');
+  addRepeater(element.parentNode, 'Add Profile');
 }
