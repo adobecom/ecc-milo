@@ -7,7 +7,7 @@ const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 
 // list of controllers for the handler to load
-const SUPPORTED_COMPONENTS = [
+const VANILLA_COMPONENTS = [
   'checkbox',
   'event-format',
   'event-info',
@@ -16,6 +16,7 @@ const SUPPORTED_COMPONENTS = [
   'profile',
   'event-agenda',
   'event-community-link',
+  'event-partners',
 ];
 
 const INPUT_TYPES = [
@@ -41,7 +42,7 @@ async function initComponents(props) {
 
   if (eventId) props.payload = JSON.parse(getEvent(eventId));
 
-  SUPPORTED_COMPONENTS.forEach((comp) => {
+  VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
 
@@ -55,7 +56,7 @@ async function initComponents(props) {
 }
 
 async function gatherValues(props) {
-  const allComponentPromises = SUPPORTED_COMPONENTS.map(async (comp) => {
+  const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
 
@@ -357,7 +358,7 @@ function prepopulateForm(props) {
 
   const eventObj = JSON.parse(getEvent(eventId));
 
-  SUPPORTED_COMPONENTS.forEach((comp) => {
+  VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
 
