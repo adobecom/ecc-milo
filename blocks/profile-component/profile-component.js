@@ -6,7 +6,7 @@ const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 function decorateProfileImageDropzone(element) {
   element.classList.add('profile-image');
-  const dropzone = createTag('image-dropzone', { inputid: 'alpha-beta' });
+  const dropzone = createTag('image-dropzone', { class: 'profile-image' });
 
   const inputLabel = createTag('div', { slot: 'img-label', class: 'img-upload-text' });
   const paragraphs = element.querySelectorAll(':scope > p');
@@ -22,7 +22,7 @@ function decorateTitle(element) {
   // eslint-disable-next-line no-undef
   deleteButton.append(getIcon('remove-circle'));
   deleteButton.classList.add('hidden');
-  deleteButton.setAttribute('deleteHandler', () => {  });
+  deleteButton.setAttribute('deleteHandler', () => { });
 
   element.parentNode.append(deleteButton);
 }
