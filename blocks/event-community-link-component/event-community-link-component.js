@@ -3,23 +3,20 @@ import { generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
-async function decorateField(row, type = 'text') {
+async function decorateFields(row) {
   row.classList.add('text-field-row');
   const cols = row.querySelectorAll(':scope > div');
   if (!cols.length) return null;
   const [checkboxText, placeholderCol] = cols;
   const text = placeholderCol.textContent.trim();
 
-  let input;
-
-  if (type === 'text') {
-    input = createTag('sp-textfield', {
-      id: 'community-url-details',
-      class: 'text-input',
-      placeholder: text,
-      size: 'xl',
-    });
-  }
+  const input = createTag('sp-textfield', {
+    id: 'community-url-details',
+    class: 'text-input',
+    placeholder: text,
+    pattern: 'https:\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?',
+    size: 'xl',
+  });
 
   const cn = checkboxText.textContent.trim();
   const checkbox = createTag('sp-checkbox', {
@@ -32,7 +29,7 @@ async function decorateField(row, type = 'text') {
 
   const parenthesisMatch = cn.match(/(.*?)(\s*\(.*?\))/);
   if (parenthesisMatch) {
-    const [_, mainText, parenthesisText] = parenthesisMatch;
+    const [, mainText, parenthesisText] = parenthesisMatch;
 
     checkbox.appendChild(document.createTextNode(mainText.trim()));
     checkbox.appendChild(document.createElement('br'));
@@ -62,5 +59,5 @@ export default async function init(el) {
   el.classList.add('form-component');
   generateToolTip(el);
   const rows = [...el.querySelectorAll(':scope > div')];
-  await decorateField(rows[1], 'text');
+  decorateFields(rows[1]);
 }

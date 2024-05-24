@@ -1,8 +1,5 @@
-export default function init(component) {
-}
+export default function init(component, props) {
 
-export function onResume() {
-  // TODO: handle form prepopulation on component level
 }
 
 const mapProfileToJson = (component) => {
@@ -16,6 +13,6 @@ const mapProfileToJson = (component) => {
   };
 };
 
-export function onSubmit(component, inputMap) {
+export function onSubmit(component, props) {
   return mapProfileToJson(component);
 }

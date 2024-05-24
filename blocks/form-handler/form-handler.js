@@ -1,6 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
-import { createEvent, updateEvent, publishEvent } from '../../utils/esp-controller.js';
+import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
@@ -15,7 +15,7 @@ const SUPPORTED_COMPONENTS = [
   'venue-info',
   'profile',
   'event-agenda',
-  'community-link',
+  'event-community-link',
 ];
 
 const INPUT_TYPES = [
@@ -27,13 +27,19 @@ const INPUT_TYPES = [
 ];
 
 async function initComponents(props) {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const eventId = urlParams.get('eventId');
+
+  if (eventId) props.payload = JSON.parse(getEvent(eventId));
+
   SUPPORTED_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
 
     mappedComponents.forEach(async (component) => {
       const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
-      await initComponent(component);
+      await initComponent(component, props);
     });
   });
   
@@ -340,7 +346,7 @@ function prepopulateForm(props) {
 
   if (!eventId) return;
 
-  const eventObj = JSON.parse(localStorage.getItem(eventId));
+  const eventObj = JSON.parse(getEvent(eventId));
 
   SUPPORTED_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);

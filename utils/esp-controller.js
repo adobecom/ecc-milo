@@ -129,6 +129,20 @@ export async function getEvents() {
   return resp;
 }
 
+export async function getEvent(eventId) {
+  const myHeaders = new Headers();
+  myHeaders.append('Authorization', 'Bearer');
+  myHeaders.append('content-type', 'application/json');
+
+  const requestOptions = {
+    method: 'GET',
+    headers: myHeaders,
+  };
+
+  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
+
 export async function getVenue(venueId) {
   const myHeaders = new Headers();
   myHeaders.append('Authorization', 'Bearer');
@@ -144,6 +158,7 @@ export async function getVenue(venueId) {
 }
 
 export async function getClouds() {
+  // TODO: use ESP to fetch clouds rather than Chimera
   const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
 
   if (!resp.error) {
