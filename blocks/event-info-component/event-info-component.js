@@ -137,7 +137,7 @@ export default function init(el) {
         await decorateTextfield(r, { id: 'info-field-event-title' });
         break;
       case 2:
-        await decorateTextarea(r, { id: 'info-field-event-description' });
+        await decorateTextarea(r, { id: 'info-field-event-description', grows: true });
         break;
       case 3:
         decorateDateTimeFields(r);

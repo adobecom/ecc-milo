@@ -22,8 +22,6 @@ function decorateSWCTextField(row, extraOptions) {
 
   const input = createTag('sp-textfield', { ...extraOptions, class: 'venue-info-text text-input', placeholder: text });
 
-  if (isRequired) input.required = true;
-
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
 
   const wrapper = createTag('div', { class: 'info-field-wrapper' });
@@ -64,7 +62,6 @@ function buildLocationInputGrid(row) {
           id: 'location-city',
           class: 'location-input venue-info-text text-input',
           placeholder,
-          required: true,
           type: 'text',
           quiet: true,
           size: 'l',
@@ -75,7 +72,6 @@ function buildLocationInputGrid(row) {
           id: 'location-state',
           class: 'location-input venue-info-text text-input',
           placeholder,
-          required: true,
           type: 'text',
           quiet: true,
           size: 'l',
@@ -86,7 +82,6 @@ function buildLocationInputGrid(row) {
           id: 'location-zip-code',
           class: 'location-input venue-info-text text-input',
           placeholder,
-          required: true,
           type: 'text',
           quiet: true,
           size: 'l',
@@ -97,7 +92,6 @@ function buildLocationInputGrid(row) {
           id: 'location-country',
           class: 'location-input venue-info-text text-input',
           placeholder,
-          required: true,
           type: 'text',
           quiet: true,
           size: 'l',

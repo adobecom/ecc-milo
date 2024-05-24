@@ -128,7 +128,6 @@ export async function decorateTextfield(row, extraOptions) {
   const input = createTag('sp-textfield', {
     class: 'text-input',
     placeholder: text,
-    required: isRequired,
     quiet: true,
     size: 'xl',
     ...extraOptions,
@@ -164,7 +163,6 @@ export async function decorateTextarea(row, extraOptions) {
     class: 'textarea-input',
     quiet: true,
     placeholder: text,
-    required: isRequired,
     ...extraOptions,
   });
 
