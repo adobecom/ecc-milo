@@ -2,6 +2,7 @@ import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
 import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
+import { getEventListeners, removeTrackedEventListeners  } from '../../utils/event-tracker.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -35,6 +36,27 @@ const SPECTRUM_COMPONENTS = [
   'checkbox',
 ];
 
+function cloneNodeWithEvents(node, deep = false) {
+  console.log(node);
+  const clone = node.cloneNode(deep);
+  const listeners = getEventListeners(node);
+  removeTrackedEventListeners(clone);
+
+  listeners.forEach(({ event, listener, options }) => {
+    clone.addEventListener(event, listener, options);
+  });
+
+  if (deep) {
+    const { children } = node;
+    const clonedChildren = clone.children;
+    for (let i = 0; i < children.length; i++) {
+      clone.replaceChild(cloneNodeWithEvents(children[i], true), clonedChildren[i]);
+    }
+  }
+
+  return clone;
+}
+
 async function initComponents(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
@@ -51,7 +73,7 @@ async function initComponents(props) {
       await initComponent(component, props);
     });
   });
-  
+
   customElements.define('image-dropzone', ImageDropzone);
 }
 
@@ -204,9 +226,9 @@ function setRemoveEventListener(removeElement) {
 function initRepeaters(props) {
   const repeaters = props.el.querySelectorAll('.repeater-element');
   repeaters.forEach((element) => {
-    const vanillaNode = element.previousElementSibling.cloneNode(true);
+    const vanillaNode = cloneNodeWithEvents(element.previousElementSibling, true);
     element.addEventListener('click', (event) => {
-      const clonedNode = vanillaNode.cloneNode(true);
+      const clonedNode = cloneNodeWithEvents(vanillaNode, true);
       const prevNode = event.currentTarget.previousElementSibling;
       clonedNode.setAttribute('repeatIdx', parseInt(prevNode.getAttribute('repeatIdx'), 10) + 1);
 

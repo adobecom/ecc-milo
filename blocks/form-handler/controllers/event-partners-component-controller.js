@@ -1,3 +1,5 @@
+import { addTrackedEventListener } from '../../../utils/event-tracker.js';
+
 export function onSubmit(component, props) {
 
 }
@@ -15,7 +17,7 @@ export default async function init(component, props) {
     const checkbox = fieldset.querySelector('.checkbox-partner-link');
     const originalCheckboxText = checkbox.textContent;
 
-    picker.addEventListener('change', () => {
+    addTrackedEventListener(picker, 'change', () => {
       const partnerPicked = partners.data.find((partner) => partner.name === picker.value);
       img.src = partnerPicked.imageUrl;
       checkbox.textContent = originalCheckboxText;
