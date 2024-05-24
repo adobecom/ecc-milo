@@ -1,5 +1,10 @@
 /* stylelint-disable selector-class-pattern */
-export const styles = `
+import { getLibs } from '../../scripts/utils.js';
+
+const { css } = await import(`${getLibs()}/deps/lit-all.min.js`);
+
+// eslint-disable-next-line import/prefer-default-export
+export const style = css`
 .img-file-input-wrapper {
   border: 2px dashed var(--color-gray-400);
   border-radius: 8px;
@@ -78,4 +83,4 @@ export const styles = `
     grid-template-columns: 2fr 1fr;
   }
 }
-`
+`;

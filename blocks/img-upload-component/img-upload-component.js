@@ -16,11 +16,11 @@ function decorateImageDropzones(row) {
     const paragraphs = c.querySelectorAll(':scope > p');
 
     const dropzoneUI = createTag('image-dropzone', { id: inputId });
-    const inputLabel = createTag('div', { slot: 'img-label', class: 'img-upload-text'});
+    const inputLabel = createTag('div', { slot: 'img-label', class: 'img-upload-text' });
     paragraphs.forEach((p) => {
       inputLabel.append(p);
     });
-    
+
     dropzoneUI.append(inputLabel);
     dropzones.push(dropzoneUI);
   });

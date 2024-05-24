@@ -1,6 +1,7 @@
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
 import { createEvent, updateEvent, publishEvent } from '../../utils/esp-controller.js';
+import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -35,6 +36,8 @@ async function initComponents(props) {
       await initComponent(component);
     });
   });
+  
+  customElements.define('image-dropzone', ImageDropzone);
 }
 
 async function gatherValues(props) {
