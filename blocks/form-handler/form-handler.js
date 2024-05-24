@@ -37,7 +37,6 @@ const SPECTRUM_COMPONENTS = [
 ];
 
 function cloneNodeWithEvents(node, deep = false) {
-  console.log(node);
   const clone = node.cloneNode(deep);
   const listeners = getEventListeners(node);
   removeTrackedEventListeners(clone);
@@ -49,7 +48,7 @@ function cloneNodeWithEvents(node, deep = false) {
   if (deep) {
     const { children } = node;
     const clonedChildren = clone.children;
-    for (let i = 0; i < children.length; i++) {
+    for (let i = 0; i < children.length; i += 1) {
       clone.replaceChild(cloneNodeWithEvents(children[i], true), clonedChildren[i]);
     }
   }
