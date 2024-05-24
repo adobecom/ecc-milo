@@ -1,49 +1,73 @@
+/* eslint-disable import/prefer-default-export */
+/* eslint-disable class-methods-use-this */
 import { getLibs } from '../../scripts/utils.js';
-import { styles } from './image-dropzone.css.js';
-import { getIcon } from '../../utils/utils.js';
+import { style } from './image-dropzone.css.js';
+import { uploadImage } from '../../utils/esp-controller.js';
 
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
-class ImageDropzone extends HTMLElement {
+export class ImageDropzone extends LitElement {
+  properties = { file: { type: Object, reflect: true } };
+
+  static styles = style;
+
   constructor() {
     super();
 
-    // Create a shadow root
-    const shadowRoot = this.attachShadow({ mode: 'open' });
-
-    const div = this.decorateImageDropzone();
-    shadowRoot.append(div);
-
-    // init Shadow DOM specific CSS
-    this.initStyles();
+    this.file = null;
   }
 
-  decorateImageDropzone() {
-    // const inputId = this.getAttribute('input-id');
+  async handleImageFiles(files) {
+    if (files.length > 0) {
+      [this.file] = files;
+      if (this.file.type.startsWith('image/')) {
+        this.file.url = URL.createObjectURL(this.file);
+        this.requestUpdate();
 
-    const previewImg = createTag('div', { class: 'preview-img-placeholder' });
-    const previewDeleteButton = getIcon('delete');
-
-    const previewWrapper = createTag('div', { class: 'preview-wrapper hidden' });
-    previewWrapper.append(previewImg, previewDeleteButton);
-
-    const inputDiv = createTag('label', { class: 'img-file-input-label' });
-    const inputLabel = createTag('slot', { name: 'img-label' });
-    const fileInput = createTag('input', { type: 'file', class: 'img-file-input' });
-    inputDiv.append(fileInput, getIcon('image-add'));
-    inputDiv.append(inputLabel);
-
-    const inputWrapper = createTag('div', { class: 'img-file-input-wrapper' });
-    inputWrapper.append(previewWrapper, inputDiv);
-    return inputWrapper;
+        await uploadImage(this.file);
+      }
+    }
   }
 
-  initStyles() {
-    const styleElement = createTag('style');
-    styleElement.textContent = styles;
+  handleImageDrop(e) {
+    const { files } = e.dataTransfer;
+    this.handleImageFiles(files);
+  }
 
-    this.shadowRoot.appendChild(styleElement);
+  handleImageUpload(event) {
+    const { files } = event.currentTarget;
+    this.handleImageFiles(files);
+  }
+
+  handleDragover(e) {
+    e.currentTarget.classList.add('dragover');
+  }
+
+  handleDragleave(e) {
+    e.currentTarget.classList.remove('dragover');
+  }
+
+  deleteImage() {
+    this.file = null;
+    this.requestUpdate();
+  }
+
+  render() {
+    return html`
+    <div class="img-file-input-wrapper">
+    ${this.file?.url ? html`
+    <div class="preview-wrapper">
+      <div class="preview-img-placeholder">
+      <img src="${this.file.url}" alt="preview image">
+      </div>
+      <img src="/icons/delete.svg" alt="delete icon" class="icon icon-delete" @click=${this.deleteImage}>
+    </div>`
+    : html`<label class="img-file-input-label">
+      <input type="file" class="img-file-input" @change=${this.handleImageUpload} @dragover=${this.handleDragover} @dragleave=${this.handleDragleave} @drop=${this.handleImageDrop}>
+      <img src="/icons/image-add.svg" alt="add image icon" class="icon icon-image-add"}>
+      <slot name="img-label"></slot>
+    </label>`}
+    </div>
+    `;
   }
 }
-
-customElements.define('image-dropzone', ImageDropzone);

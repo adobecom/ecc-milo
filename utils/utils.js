@@ -1,5 +1,3 @@
-import { handleImageFiles } from './esp-controller.js';
-
 function createTag(tag, attributes, html, options = {}) {
   const el = document.createElement(tag);
   if (html) {
@@ -214,37 +212,4 @@ export async function decorateTextarea(cell, extraOptions) {
   cell.innerHTML = '';
   wrapper.append(input, attrTextEl);
   cell.append(wrapper);
-}
-
-export function makeFileInputDropZone(inputWrapper) {
-  const dropZone = inputWrapper.querySelector('.img-file-input-label');
-  const fileInput = inputWrapper.querySelector('input[type="file"].img-file-input');
-
-  if (dropZone) {
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((event) => {
-      dropZone.addEventListener(event, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }, false);
-    });
-
-    dropZone.addEventListener('dragover', (e) => {
-      e.currentTarget.classList.add('dragover');
-    });
-
-    dropZone.addEventListener('dragleave', (e) => {
-      e.currentTarget.classList.remove('dragover');
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-      const { files } = e.dataTransfer;
-      handleImageFiles(inputWrapper, files);
-      e.currentTarget.classList.remove('dragover');
-    });
-  }
-
-  fileInput?.addEventListener('change', (e) => {
-    const { files } = e.currentTarget;
-    handleImageFiles(inputWrapper, files);
-  });
 }
