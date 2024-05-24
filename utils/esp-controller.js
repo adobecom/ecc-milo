@@ -44,41 +44,6 @@ export function uploadBinaryFile(file) {
   xhr.send(file);
 }
 
-export function handleImageFiles(wrapper, files) {
-  const previewWrapper = wrapper.querySelector('.preview-wrapper');
-  const imgPlaceholder = wrapper.querySelector('.preview-img-placeholder');
-  const fileInput = wrapper.querySelector('.img-file-input');
-  const dz = wrapper.querySelector('.img-file-input-label');
-  const deleteBtn = wrapper.querySelector('.icon-delete');
-
-  if (files.length > 0) {
-    const file = files[0];
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-
-      reader.onload = async (e) => {
-        const img = new Image();
-        img.src = e.target.result;
-        previewWrapper.classList.remove('hidden');
-        dz.classList.add('hidden');
-        imgPlaceholder.innerHTML = '';
-        imgPlaceholder.append(img);
-
-        await uploadImage(file);
-      };
-
-      reader.readAsDataURL(file);
-    }
-  }
-
-  deleteBtn.addEventListener('click', () => {
-    fileInput.value = '';
-    previewWrapper.classList.add('hidden');
-    imgPlaceholder.innerHTML = '';
-    dz.classList.remove('hidden');
-  });
-}
-
 export async function createVenue(payload) {
   const myHeaders = new Headers();
   myHeaders.append('Authorization', 'Bearer');
