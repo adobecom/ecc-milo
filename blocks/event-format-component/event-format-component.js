@@ -15,7 +15,7 @@ async function buildPickerFromTags(id, wrapper, phText, options) {
   const select = createTag('sp-picker', { id, class: 'select-input', size: 'm', label: phText });
 
   options.forEach(([, val]) => {
-    const opt = createTag('sp-menu-item', {}, val);
+    const opt = createTag('sp-menu-item', { value: val.id }, val.name);
     select.append(opt);
   });
 
@@ -30,7 +30,7 @@ async function decorateCloudTagSelect(column) {
 
   // if (!clouds) return;
   // FIXME: use correct data source rather than hardcoded values.
-  const clouds = ['Creative Cloud', 'DX'];
+  const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
 
   buildPickerFromTags('bu-select-input', buSelectWrapper, phText, Object.entries(clouds));
 
@@ -50,8 +50,9 @@ async function decorateSeriesSelect(column) {
   const seriesSelectWrapper = createTag('div', { class: 'series-picker-wrapper' });
   const phText = column.textContent.trim();
 
+  const series = [{ id: 'createNow', name: 'Create Now' }, { id: 'series2', name: 'Series 2' }];
   // TODO: Connect API.
-  buildPickerFromTags(seriesSelectWrapper, phText, Object.entries({}));
+  buildPickerFromTags('series-select-input', seriesSelectWrapper, phText, Object.entries(series));
 
   column.innerHTML = '';
   column.append(seriesSelectWrapper);
