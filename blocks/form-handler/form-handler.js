@@ -2,13 +2,12 @@ import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
 import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
-import eventListenersMap from '../../utils/event-tracker.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 
 // list of controllers for the handler to load
-const VANILLA_COMPONENTS = [
+const SUPPORTED_COMPONENTS = [
   'checkbox',
   'event-format',
   'event-info',
@@ -17,7 +16,6 @@ const VANILLA_COMPONENTS = [
   'profile',
   'event-agenda',
   'event-community-link',
-  'event-partners',
 ];
 
 const INPUT_TYPES = [
@@ -43,7 +41,7 @@ async function initComponents(props) {
 
   if (eventId) props.payload = JSON.parse(getEvent(eventId));
 
-  VANILLA_COMPONENTS.forEach((comp) => {
+  SUPPORTED_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
 
@@ -52,12 +50,12 @@ async function initComponents(props) {
       await initComponent(component, props);
     });
   });
-
+  
   customElements.define('image-dropzone', ImageDropzone);
 }
 
 async function gatherValues(props) {
-  const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
+  const allComponentPromises = SUPPORTED_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
 
@@ -202,32 +200,12 @@ function setRemoveEventListener(removeElement) {
   });
 }
 
-function cloneNodeWithEvents(node, deep = false) {
-  const clone = node.cloneNode(deep);
-  const listeners = eventListenersMap.get(node);
-
-  if (listeners) {
-    listeners.forEach(({ event, listener, options }) => {
-      clone.addEventListener(event, listener, options);
-    });
-  }
-
-  if (deep) {
-    const { children } = node;
-    const clonedChildren = clone.children;
-    for (let i = 0; i < children.length; i += 1) {
-      clone.replaceChild(cloneNodeWithEvents(children[i], true), clonedChildren[i]);
-    }
-  }
-
-  return clone;
-}
 function initRepeaters(props) {
   const repeaters = props.el.querySelectorAll('.repeater-element');
   repeaters.forEach((element) => {
-    const vanillaNode = cloneNodeWithEvents(element.previousElementSibling, true);
+    const vanillaNode = element.previousElementSibling.cloneNode(true);
     element.addEventListener('click', (event) => {
-      const clonedNode = cloneNodeWithEvents(vanillaNode, true);
+      const clonedNode = vanillaNode.cloneNode(true);
       const prevNode = event.currentTarget.previousElementSibling;
       clonedNode.setAttribute('repeatIdx', parseInt(prevNode.getAttribute('repeatIdx'), 10) + 1);
 
@@ -379,7 +357,7 @@ function prepopulateForm(props) {
 
   const eventObj = JSON.parse(getEvent(eventId));
 
-  VANILLA_COMPONENTS.forEach((comp) => {
+  SUPPORTED_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
 
