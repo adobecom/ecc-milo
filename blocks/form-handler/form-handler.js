@@ -52,9 +52,7 @@ async function initComponents(props) {
       await initComponent(component, props);
     });
   });
-}
 
-function initLitComponents(props) {
   customElements.define('image-dropzone', ImageDropzone);
   customElements.define('partner-selector', PartnerSelector);
 }
@@ -425,7 +423,6 @@ async function buildECCForm(el) {
 
   initFormCtas(proxyProps);
   await initComponents(proxyProps);
-  initLitComponents(proxyProps);
   initRepeaters(proxyProps);
   initNavigation(proxyProps);
   prepopulateForm(proxyProps);
