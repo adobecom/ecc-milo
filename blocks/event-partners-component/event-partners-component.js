@@ -22,23 +22,6 @@ function buildCheckbox(el) {
   checkboxCell.append(fieldSet);
 }
 
-function buildFieldSelector(row, partners) {
-  const fieldset = createTag('fieldset', { class: 'rsvp-field-wrapper' });
-
-  const select = createTag('sp-picker', { class: 'partner-select-input', label: 'Select a partner' });
-  const imgHolder = createTag('img', { class: 'partner-img' });
-  const partnerCheckbox = createTag('sp-checkbox', { class: 'checkbox-partner-link' }, 'Link to [Partner name]');
-
-  partners.forEach((p) => {
-    const opt = createTag('sp-menu-item', { value: p.name }, p.name);
-    select.append(opt);
-  });
-
-  fieldset.append(select, imgHolder, partnerCheckbox);
-  row.append(fieldset);
-  addRepeater(fieldset, 'Add Partners');
-}
-
 async function buildFields(el) {
   const configRow = el.querySelector(':scope > div:last-of-type');
   const configSheetLocation = configRow.querySelector('a')?.textContent.trim();
@@ -49,7 +32,11 @@ async function buildFields(el) {
   if (!partners) return;
 
   configRow.innerHTML = '';
-  buildFieldSelector(configRow, partners.data);
+  const partnerFieldset = createTag('partner-selector');
+  partnerFieldset.dataset.partners = JSON.stringify(partners.data);
+  configRow.appendChild(partnerFieldset);
+
+  addRepeater(partnerFieldset, 'Add Partners');
 }
 
 export default async function init(el) {

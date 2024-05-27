@@ -2,6 +2,7 @@ import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
 import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
+import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -51,8 +52,11 @@ async function initComponents(props) {
       await initComponent(component, props);
     });
   });
-  
+}
+
+function initLitComponents(props) {
   customElements.define('image-dropzone', ImageDropzone);
+  customElements.define('partner-selector', PartnerSelector);
 }
 
 async function gatherValues(props) {
@@ -421,6 +425,7 @@ async function buildECCForm(el) {
 
   initFormCtas(proxyProps);
   await initComponents(proxyProps);
+  initLitComponents(proxyProps);
   initRepeaters(proxyProps);
   initNavigation(proxyProps);
   prepopulateForm(proxyProps);

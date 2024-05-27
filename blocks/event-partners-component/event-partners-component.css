@@ -11,21 +11,3 @@
 .event-partners-component .partners-visible-toggle {
   margin-top: 24px;
 }
-
-.event-partners-component fieldset {
-  margin-bottom: 24px;
-}
-
-.event-partners-component .rsvp-field-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.event-partners-component .rsvp-field-wrapper img.partner-img {
-  display: block;
-  width: 40px;
-  height: 40px;
-  border-radius: 4px;
-  object-fit: contain;
-}
