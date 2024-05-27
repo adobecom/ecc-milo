@@ -11,7 +11,7 @@
  */
 
 import { setLibs, decorateArea } from './utils.js';
-import { captureProfile } from '../utils/event-apis.js';
+import { lazyCaptureProfile } from '../utils/event-apis.js';
 
 const locales = {
   '': { ietf: 'en-US', tk: 'jdq5hay.css' },
