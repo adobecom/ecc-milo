@@ -36,12 +36,10 @@ function buildTimePicker(column, wrapper) {
 
       if (j === 1) {
         const timeSlots = c.querySelectorAll('li');
-        const select = createTag('select', { id: `time-picker-${pickerHandle}`, class: 'select-input', required: true });
-        const option = createTag('option', { value: '', selected: true, disabled: true }, '-');
-        select.append(option);
+        const select = createTag('sp-picker', { id: `time-picker-${pickerHandle}`, class: 'select-input', required: true, label: '-' });
         timeSlots.forEach((t) => {
           const text = t.textContent.trim();
-          const opt = createTag('option', { value: convertTo24HourFormat(text) }, text);
+          const opt = createTag('sp-menu-item', { value: convertTo24HourFormat(text) }, text);
           select.append(opt);
         });
         timePickerWrapper.append(select);
@@ -72,13 +70,11 @@ function getGMTOffset(timeZone) {
 
 function decorateTimeZoneSelect(cell, wrapper) {
   const phText = cell.querySelector('p')?.textContent.trim();
-  const option = createTag('option', { value: '', disabled: true, selected: true }, phText);
-  const select = createTag('select', { id: 'time-zone-select-input', class: 'select-input', required: true });
-  select.append(option);
+  const select = createTag('sp-picker', { id: 'time-zone-select-input', class: 'select-input', required: true, label: phText });
   const timeZones = cell.querySelectorAll('li');
   timeZones.forEach((t) => {
     const text = t.textContent.trim();
-    const opt = createTag('option', { value: getGMTOffset(text.split(' - ')[0]) }, text);
+    const opt = createTag('sp-menu-item', { value: getGMTOffset(text.split(' - ')[0]) }, text);
     select.append(opt);
   });
   cell.innerHTML = '';

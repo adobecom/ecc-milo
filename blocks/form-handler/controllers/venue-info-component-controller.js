@@ -1,4 +1,5 @@
 import { createVenue } from '../../../utils/esp-controller.js';
+import { changeInputValue } from '../../../utils/utils.js';
 
 function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');
@@ -10,11 +11,6 @@ function loadGoogleMapsAPI(callback) {
     window.lana?.error('Failed to load the Google Maps script!');
   };
   document.head.appendChild(script);
-}
-
-function changeInputValue(input, value) {
-  input.value = value;
-  input.dispatchEvent(new Event('change'));
 }
 
 function initAutocomplete(el) {
@@ -71,13 +67,13 @@ function initAutocomplete(el) {
         }
       });
 
-      if (place.name) changeInputValue(venueName, place.name);
-      changeInputValue(address, addressInfo.address);
-      changeInputValue(city, addressInfo.city);
-      changeInputValue(state, addressInfo.state);
-      changeInputValue(zip, addressInfo.zip);
-      changeInputValue(country, addressInfo.country);
-      changeInputValue(placeId, place.place_id);
+      if (place.name) changeInputValue(venueName, 'value', place.name);
+      changeInputValue(address, 'value', addressInfo.address);
+      changeInputValue(city, 'value', addressInfo.city);
+      changeInputValue(state, 'value', addressInfo.state);
+      changeInputValue(zip, 'value', addressInfo.zip);
+      changeInputValue(country, 'value', addressInfo.country);
+      changeInputValue(placeId, 'value', place.place_id);
     }
 
     if (place.geometry) {
