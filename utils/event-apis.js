@@ -145,7 +145,7 @@ export async function captureProfile() {
   }
 }
 
-function lazyCaptureProfile() {
+export function lazyCaptureProfile() {
   let attempCounter = 0;
   const profileRetryer = setInterval(async () => {
     if (!window.adobeIMS) {
