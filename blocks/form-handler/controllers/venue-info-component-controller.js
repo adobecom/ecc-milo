@@ -87,6 +87,28 @@ function initAutocomplete(el) {
 export default function init(component, props) {
   // TODO: init function and repopulate data from props if exists
   loadGoogleMapsAPI(() => initAutocomplete(component));
+
+  const {
+    venueName,
+    address,
+    city,
+    state,
+    postalCode,
+    country,
+    coordinates: {
+      lat,
+      lon,
+    },
+  } = props.payload;
+
+  changeInputValue(component.querySelector('#venue-info-venue-name'), 'value', venueName);
+  changeInputValue(component.querySelector('#venue-info-venue-address'), 'value', address);
+  changeInputValue(component.querySelector('#location-city'), 'value', city);
+  changeInputValue(component.querySelector('#location-state'), 'value', state);
+  changeInputValue(component.querySelector('#location-zip-code'), 'value', postalCode);
+  changeInputValue(component.querySelector('#location-country'), 'value', country);
+  changeInputValue(component.querySelector('#google-place-lat'), 'value', lat);
+  changeInputValue(component.querySelector('#google-place-lng'), 'value', lon);
 }
 
 export async function onSubmit(component, props) {

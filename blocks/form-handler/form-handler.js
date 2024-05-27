@@ -2,6 +2,7 @@ import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
 import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
+import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -52,6 +53,7 @@ async function initComponents(props) {
   });
   
   customElements.define('image-dropzone', ImageDropzone);
+  customElements.define('agenda-fieldset', AgendaFieldset);
 }
 
 async function gatherValues(props) {
