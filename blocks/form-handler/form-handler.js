@@ -2,13 +2,14 @@ import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
 import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
+import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 
 // list of controllers for the handler to load
-const SUPPORTED_COMPONENTS = [
+const VANILLA_COMPONENTS = [
   'checkbox',
   'event-format',
   'event-info',
@@ -17,6 +18,7 @@ const SUPPORTED_COMPONENTS = [
   'profile',
   'event-agenda',
   'event-community-link',
+  'event-partners',
 ];
 
 const INPUT_TYPES = [
@@ -42,7 +44,7 @@ async function initComponents(props) {
 
   if (eventId) props.payload = await getEvent(eventId);
 
-  SUPPORTED_COMPONENTS.forEach((comp) => {
+  VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
 
@@ -51,13 +53,14 @@ async function initComponents(props) {
       await initComponent(component, props);
     });
   });
-  
+
   customElements.define('image-dropzone', ImageDropzone);
+  customElements.define('partner-selector', PartnerSelector);
   customElements.define('agenda-fieldset', AgendaFieldset);
 }
 
 async function gatherValues(props) {
-  const allComponentPromises = SUPPORTED_COMPONENTS.map(async (comp) => {
+  const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
 
@@ -255,6 +258,7 @@ function navigateForm(props, stepIndex) {
   props.currentStep = index;
   props.farthestStep = Math.max(props.farthestStep, index);
 
+  window.scrollTo(0, 0);
   updateRequiredFields(props);
 }
 
