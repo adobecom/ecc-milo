@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { getLibs } from '../../../scripts/utils.js';
+import { changeInputValue } from '../../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -288,16 +289,39 @@ function initCalendar(component) {
   });
 }
 
-export default function init(component) {
-  initCalendar(component);
-}
-
 function dateTimeStringToTimestamp(dateString, timeString) {
   const dateTimeString = `${dateString}T${timeString}`;
 
   const date = new Date(dateTimeString);
 
   return date.getTime();
+}
+
+export default function init(component, props) {
+  initCalendar(component);
+
+  const {
+    title,
+    description,
+    localStartDate,
+    localEndDate,
+    localStartTime,
+    localEndTime,
+    gmtOffset,
+  } = props.payload;
+  component.querySelector('#info-field-event-title').value = title || '';
+  component.querySelector('#info-field-event-description').value = description || '';
+  changeInputValue(component.querySelector('#time-picker-start-time'), 'value', localStartTime || '');
+  changeInputValue(component.querySelector('#time-picker-end-time'), 'value', localEndTime || '');
+  changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${gmtOffset}` || '0');
+
+  const datePicker = component.querySelector('#event-info-date-picker');
+  datePicker.dataset.startDate = localStartDate || '';
+  datePicker.dataset.endDate = localEndDate || '';
+  updateInput(component, {
+    selectedStartDate: parseFormatedDate(localStartDate),
+    selectedEndDate: parseFormatedDate(localEndDate),
+  });
 }
 
 export function onSubmit(component, props) {
