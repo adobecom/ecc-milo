@@ -42,3 +42,7 @@
 .profile-component .profile-delete-button {
   margin-left: auto;
 }
+
+.repeater-element{
+  margin: 24px;
+}

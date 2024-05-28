@@ -1,90 +1,61 @@
 import { getLibs } from '../../scripts/utils.js';
 import '../../components/image-dropzone/image-dropzone.js';
-import { addRepeater, decorateTextfield, decorateTextarea, getIcon } from '../../utils/utils.js';
+import { addRepeater } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
-function decorateProfileImageDropzone(element) {
-  element.classList.add('profile-image');
-  const dropzone = createTag('image-dropzone', { class: 'profile-image' });
+function extractFieldLabels(element) {
+  const rows = Array.from(element.children);
+  const headingDiv = rows.shift();
 
-  const inputLabel = createTag('div', { slot: 'img-label', class: 'img-upload-text' });
-  const paragraphs = element.querySelectorAll(':scope > p');
-  paragraphs.forEach((p) => {
-    inputLabel.append(p);
-  });
-  dropzone.append(inputLabel);
-  element.append(dropzone);
-}
+  const payload = {
+    heading: headingDiv.querySelector('h2, h3, h4, h5, h6')?.textContent?.trim(),
+    chooseType: rows[0].querySelector('div')?.textContent?.trim(),
+    name: rows[1].querySelector('div')?.textContent?.trim(),
+    nameSubText: rows[1].querySelector('div > div:nth-of-type(1)')?.textContent?.trim(),
+    image: rows[2].querySelector('div'),
+    title: rows[3].querySelector('div')?.textContent?.trim(),
+    titleSubText: rows[3].querySelector('div > div:nth-of-type(1)')?.textContent?.trim(),
+    bio: rows[4].querySelector('div')?.textContent?.trim(),
+    bioSubText: rows[4].querySelector('div > div')?.textContent?.trim(),
+    socialMedia: rows[5].querySelector('div')?.textContent?.trim(),
+    addSocialMedia: rows[6].querySelector('div')?.textContent?.trim(),
+    addSocialMediaRepeater: rows[7].querySelector('div')?.textContent?.trim(),
+    addProfileRepeater: rows[8].querySelector('div')?.textContent?.trim(),
+  };
 
-function decorateTitle(element) {
-  const deleteButton = createTag('div', { class: 'repeater-delete-button profile-delete-button' });
-  // eslint-disable-next-line no-undef
-  deleteButton.append(getIcon('remove-circle'));
-  deleteButton.classList.add('hidden');
-  deleteButton.setAttribute('deleteHandler', () => { });
-
-  element.parentNode.append(deleteButton);
-}
-
-function decorateHeader(element) {
-  element.classList.add('profile-header-wrapper');
-
-  const cols = element.querySelectorAll(':scope > div');
-
-  cols.forEach((col, i) => {
-    switch (i) {
-      case 0:
-        decorateProfileImageDropzone(col);
-        break;
-      case 1:
-        decorateTitle(col);
-        break;
-      default:
-        break;
-    }
-  });
-}
-
-async function decorateSocialMedia(element) {
-  // const socialTag = createTag('div');
-  // element.replaceWith(socialTag);
-
-  // socialTag.append(element);
-
-  await decorateTextfield(element, { quiet: false });
-  addRepeater(element, 'Add social media');
+  payload.image.setAttribute('slot', 'img-label');
+  return payload;
 }
 
 async function decorateProfile(element) {
-  const rows = element.querySelectorAll(':scope > div');
-  rows.forEach((row, i) => {
-    switch (i) {
-      case 0:
-        decorateHeader(row);
-        break;
-      case 1:
-        decorateTextfield(row, { id: 'profile-field-name' });
-        break;
-      case 2:
-        decorateTextfield(row, { id: 'profile-field-title' });
-        break;
-      case 3:
-        decorateTextarea(row, { id: 'profile-field-bio' });
-        break;
-      case 4:
-        decorateSocialMedia(row);
-        break;
-      default:
-        break;
-    }
-  });
+  const fieldlabels = extractFieldLabels(element);
+  element.innerHTML = '';
+
+  const profiles = [{
+    type: 'Presenter',
+    name: 'Alpha',
+    title: 'Beta',
+    bio: 'adddas',
+    socialMedia: [{ url: 'asdsad' }],
+  }];
+
+  fieldlabels.image.setAttribute('slot', 'img-label');
+  fieldlabels.image.classList.add('img-upload-text');
+  const profileTag = createTag('profile-ui', { class: 'profile-component' }, fieldlabels.image);
+  profileTag.fieldlabels = fieldlabels;
+  // eslint-disable-next-line prefer-destructuring
+  profileTag.profile = profiles[0];
+  // profileTag.setAttribute('data', JSON.stringify(payload));
+  // addRepeater(profileTag.shadowRoot.lastchild, payload.addSocialMediaRepeater);
+
+  element.append(profileTag);
+  // Replace with repeater tag.
+  addRepeater(element.parentNode, fieldlabels.addProfileRepeater);
 }
 
-export default async function init(element) {
+export default async function init(element, proxyProps) {
   element.classList.add('form-component');
 
   await decorateProfile(element);
-
-  addRepeater(element.parentNode, 'Add Profile');
 }

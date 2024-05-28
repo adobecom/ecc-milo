@@ -2,6 +2,8 @@ import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
 import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
+import { Profile } from '../../components/profile/profile.js';
+import { Repeater } from '../../components/repeater/repeater.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -32,6 +34,7 @@ const SPECTRUM_COMPONENTS = [
   'picker',
   'menu',
   'checkbox',
+  'field-label',
 ];
 
 async function initComponents(props) {
@@ -50,8 +53,10 @@ async function initComponents(props) {
       await initComponent(component, props);
     });
   });
-  
+
   customElements.define('image-dropzone', ImageDropzone);
+  customElements.define('profile-ui', Profile);
+  customElements.define('repeater-element', Repeater);
 }
 
 async function gatherValues(props) {
