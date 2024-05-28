@@ -3,66 +3,39 @@ import { addRepeater, generateToolTip, convertTo24HourFormat } from '../../utils
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
-function buildTimePicker(column) {
-  column.classList.add('time-picker');
-  const header = column.querySelector(':scope > p');
-
-  const timePickerWrapper = createTag('div', { class: 'time-picker-wrapper' });
-  const timeSlots = column.querySelectorAll('li');
-  const select = createTag('sp-picker', { class: 'time-picker-input select-input', label: 'Select agenda time' });
-
-  timeSlots.forEach((t) => {
-    const text = t.textContent.trim();
-    const option = createTag('sp-menu-item', { value: convertTo24HourFormat(text) }, text);
-    select.append(option);
-  });
-
-  timePickerWrapper.append(select);
-
-  column.innerHTML = '';
-  if (header) column.append(header);
-  column.append(timePickerWrapper);
+function getTimeSlots(column) {
+  const timeSlots = Array.from(column.querySelectorAll('li')).map((li) => li.textContent.trim());
+  return timeSlots;
 }
 
 function decorateFields(row) {
   row.classList.add('agenda-input-fields-row');
   const cols = row.querySelectorAll(':scope > div');
-  if (!cols.length) return null;
+  if (!cols.length) return;
+
   const [placeholderCol, maxLengthCol] = cols;
-  const text = placeholderCol.textContent.trim();
-  const attrTextEl = createTag(
-    'div',
-    { class: 'attr-text' },
-    maxLengthCol.textContent.trim(),
-  );
-
+  const maxLengthText = maxLengthCol.textContent.trim();
+  const placeholder = placeholderCol.textContent.trim();
   const maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
-  const isRequired = attrTextEl.textContent.trim().endsWith('*');
-  const input = createTag('sp-textfield', {
-    class: 'text-input',
-    placeholder: text,
-    required: isRequired,
-    quiet: true,
-    size: 'xl',
-  });
+  const isRequired = maxLengthText.endsWith('*');
 
-  if (maxCharNum) {
-    input.setAttribute('maxlength', maxCharNum);
-  }
+  const options = {
+    maxLengthText,
+    maxCharNum,
+    placeholder,
+    isRequired,
+  };
 
-  const wrapper = createTag('div', { class: 'field-container' });
-  const textWrapper = createTag('div', { class: 'text-field-wrapper' });
-  textWrapper.append(input, attrTextEl);
   row.innerHTML = '';
-  wrapper.append(cols[2], textWrapper);
-  row.append(wrapper);
 
-  const timePickerContainer = createTag('div');
-  timePickerContainer.classList.add('custom-time-picker');
+  const timeSlots = getTimeSlots(cols[2]);
+  const agendaFieldset = createTag('agenda-fieldset');
+  agendaFieldset.dataset.timeSlots = timeSlots.join(',');
+  agendaFieldset.dataset.options = JSON.stringify(options);
 
-  buildTimePicker(cols[2]);
+  row.append(agendaFieldset);
 
-  return row;
+  addRepeater(agendaFieldset, 'Add agenda time and details');
 }
 
 function decorateCheckBox(row) {
@@ -90,7 +63,6 @@ export default async function init(el) {
   el.classList.add('form-component');
   generateToolTip(el);
   const rows = [...el.querySelectorAll(':scope > div')];
-  const fieldsContainer = decorateFields(rows[1]);
+  decorateFields(rows[1]);
   decorateCheckBox(rows[2]);
-  addRepeater(fieldsContainer, 'Add agenda time and details');
 }

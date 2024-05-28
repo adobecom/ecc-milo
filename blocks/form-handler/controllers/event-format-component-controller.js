@@ -1,3 +1,5 @@
+import { changeInputValue } from '../../../utils/utils.js';
+
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   if (!currentTimeZone) return;
@@ -56,6 +58,16 @@ function initStepLock(component) {
 export default function init(component, props) {
   prepopulateTimeZone(component);
   initStepLock(component);
+
+  const {
+    cloudType,
+    seriesId,
+    rsvpRequired,
+  } = props.payload;
+
+  changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType || '');
+  changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId || '');
+  changeInputValue(component.querySelector('#rsvp-required-check'), 'checked', rsvpRequired || 0);
 }
 
 function getTemplateId(bu) {

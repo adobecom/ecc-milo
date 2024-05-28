@@ -101,14 +101,13 @@
   justify-content: flex-end;
 }
 
-.event-info-component .time-zone-picker select,
-.event-info-component .time-pickers .time-picker-wrapper select {
+.event-info-component .time-zone-picker sp-picker,
+.event-info-component .time-pickers .time-picker-wrapper sp-picker {
   flex-grow: 1;
   border-radius: 4px;
   padding: 4px 8px;
   height: 32px;
   width: 100%;
-  border: 1px solid var(--color-gray-500);
 }
 
 .event-info-component .date-input {

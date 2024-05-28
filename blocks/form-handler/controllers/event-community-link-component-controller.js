@@ -1,3 +1,5 @@
+import { changeInputValue } from '../../../utils/utils.js';
+
 export function onSubmit(component, props) {
   // TODO: community URL
   const checkbox = component.querySelector('#checkbox-community');
@@ -15,6 +17,9 @@ export default function init(component, props) {
   // TODO: init function and repopulate data from props if exists
   const checkbox = component.querySelector('#checkbox-community');
   const input = component.querySelector('#community-url-details');
+
+  changeInputValue(checkbox, 'checked', !!props.payload.communityTopicUrl);
+  changeInputValue(input, 'value', props.payload.communityTopicUrl || '');
 
   const updateInputState = () => {
     input.disabled = !checkbox.checked;

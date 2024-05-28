@@ -11,7 +11,7 @@
  */
 
 import { setLibs, decorateArea } from './utils.js';
-import { captureProfile } from '../utils/event-apis.js';
+import { lazyCaptureProfile } from '../utils/event-apis.js';
 
 const locales = {
   '': { ietf: 'en-US', tk: 'jdq5hay.css' },
@@ -83,6 +83,6 @@ window.bm8tr = await import('../deps/block-mediator.min.js').then((mod) => mod.d
   const config = setConfig({ ...CONFIG, miloLibs });
   console.log(config);
   await loadArea().then(() => {
-    captureProfile();
+    lazyCaptureProfile();
   });
 }());

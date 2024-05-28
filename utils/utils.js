@@ -177,6 +177,11 @@ export async function decorateTextfield(cell, extraOptions) {
   cell.append(wrapper);
 }
 
+export function changeInputValue(input, attr, value) {
+  input[attr] = value;
+  input.dispatchEvent(new Event('change'));
+}
+
 export async function decorateTextarea(cell, extraOptions) {
   cell.classList.add('text-field-row');
   const cols = cell.querySelectorAll(':scope > div');
