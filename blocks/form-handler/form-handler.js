@@ -4,12 +4,14 @@ import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/es
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
 import { Repeater } from '../../components/repeater/repeater.js';
+import PartnerSelector from '../../components/partner-selector/partner-selector.js';
+import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 
 // list of controllers for the handler to load
-const SUPPORTED_COMPONENTS = [
+const VANILLA_COMPONENTS = [
   'checkbox',
   'event-format',
   'event-info',
@@ -18,6 +20,7 @@ const SUPPORTED_COMPONENTS = [
   'profile',
   'event-agenda',
   'event-community-link',
+  'event-partners',
 ];
 
 const INPUT_TYPES = [
@@ -42,9 +45,9 @@ async function initComponents(props) {
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
 
-  if (eventId) props.payload = JSON.parse(getEvent(eventId));
+  if (eventId) props.payload = await getEvent(eventId);
 
-  SUPPORTED_COMPONENTS.forEach((comp) => {
+  VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
 
@@ -57,10 +60,12 @@ async function initComponents(props) {
   customElements.define('image-dropzone', ImageDropzone);
   customElements.define('profile-ui', Profile);
   customElements.define('repeater-element', Repeater);
+  customElements.define('partner-selector', PartnerSelector);
+  customElements.define('agenda-fieldset', AgendaFieldset);
 }
 
 async function gatherValues(props) {
-  const allComponentPromises = SUPPORTED_COMPONENTS.map(async (comp) => {
+  const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
 
@@ -258,6 +263,7 @@ function navigateForm(props, stepIndex) {
   props.currentStep = index;
   props.farthestStep = Math.max(props.farthestStep, index);
 
+  window.scrollTo(0, 0);
   updateRequiredFields(props);
 }
 
@@ -351,35 +357,6 @@ function initNavigation(props) {
   });
 }
 
-function prepopulateForm(props) {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const eventId = urlParams.get('eventId');
-  const frags = props.el.querySelectorAll('.fragment');
-
-  if (!eventId) return;
-
-  const eventObj = JSON.parse(getEvent(eventId));
-
-  SUPPORTED_COMPONENTS.forEach((comp) => {
-    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
-    if (!mappedComponents?.length) return;
-
-    mappedComponents.forEach(async (component) => {
-      const { onResume } = await import(`./controllers/${comp}-component-controller.js`);
-      await onResume(component, eventObj);
-    });
-  });
-
-  frags.forEach((frag, i) => {
-    updateRequiredFields(props, i);
-
-    if (validateRequiredFields(props[`required-fields-in-${frag.id}`])) {
-      props.farthestStep = i + 1;
-    }
-  });
-}
-
 async function buildECCForm(el) {
   decorateForm(el);
 
@@ -426,7 +403,6 @@ async function buildECCForm(el) {
   await initComponents(proxyProps);
   initRepeaters(proxyProps);
   initNavigation(proxyProps);
-  prepopulateForm(proxyProps);
   updateRequiredFields(proxyProps);
 }
 

@@ -1,0 +1,13 @@
+.event-partners-component > div:first-of-type {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.event-partners-component .partners-visible-toggle .additional-comment  {
+  padding-left: 24px;
+}
+
+.event-partners-component .partners-visible-toggle {
+  margin-top: 24px;
+}
