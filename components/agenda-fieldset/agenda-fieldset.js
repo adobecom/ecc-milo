@@ -2,7 +2,7 @@ import { getLibs } from '../../scripts/utils.js';
 import { style } from './agenda-fieldset.css.js';
 import { convertTo24HourFormat } from '../../utils/utils.js';
 
-const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html, repeat } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 export default class AgendaFieldset extends LitElement {
   static properties = { timeSlots: { type: Array }, options: { type: Object } };
@@ -22,7 +22,7 @@ export default class AgendaFieldset extends LitElement {
           <p>Time</p>
           <div class="time-picker-wrapper">
             <sp-picker class="time-picker-input select-input" label="Pick agenda time">
-            ${this.timeSlots.map((timeSlot) => html`<sp-menu-item value=${convertTo24HourFormat(timeSlot)}">${timeSlot}</sp-menu-item>`)}
+            ${repeat(this.timeSlots, (timeSlot) => html`<sp-menu-item value=${convertTo24HourFormat(timeSlot)}">${timeSlot}</sp-menu-item>`)}
             </sp-picker>
           </div>
         </div>
