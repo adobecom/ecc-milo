@@ -33,7 +33,7 @@ async function buildFields(el) {
 
   configRow.innerHTML = '';
   const partnerFieldset = createTag('partner-selector');
-  partnerFieldset.dataset.partners = JSON.stringify(partners.data);
+  partnerFieldset.dataset.partners = partners.data;
   configRow.appendChild(partnerFieldset);
 
   addRepeater(partnerFieldset, 'Add Partners');
