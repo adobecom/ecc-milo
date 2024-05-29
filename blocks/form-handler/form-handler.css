@@ -12,7 +12,7 @@
   outline: none;
 }
 
-.form-handler sp-textfield:focus {
+.form-handler sp-textfield[quiet]:focus {
   outline: 1px var(--color-gray-500) solid;
   border-radius: 4px;
 }

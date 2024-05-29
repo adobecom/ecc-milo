@@ -312,10 +312,11 @@ function buildDashboardTable(props) {
 
 async function getEventsArray() {
   const json = await getEvents();
+  const mock = await fetch('/blocks/ecc-dashboard/mock.json').then((resp) => resp.json()).catch((error) => console.log(error));
 
-  if (!json) return [];
+  if (!json) return null;
 
-  return json.events;
+  return json?.events || mock;
 }
 
 async function getConfig(el) {
@@ -376,7 +377,7 @@ async function buildDashboard(el, config) {
 
   const data = await getEventsArray();
 
-  if (!data.length) {
+  if (!data?.length) {
     buildNoEventScreen(el, props);
   } else {
     props.data = data;

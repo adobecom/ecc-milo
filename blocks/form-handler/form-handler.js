@@ -19,6 +19,7 @@ const VANILLA_COMPONENTS = [
   'event-agenda',
   'event-community-link',
   'event-partners',
+  'terms-conditions',
 ];
 
 const INPUT_TYPES = [
