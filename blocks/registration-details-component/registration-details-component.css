@@ -1,3 +1,7 @@
+.registration-details-component {
+  padding-bottom: 40px;
+}
+
 .registration-details-component .attendee-fields-wrapper {
   padding-bottom: 24px;
   margin-bottom: 40px;
@@ -10,6 +14,7 @@
 
 .registration-details-component .attendee-count-wrapper input {
   max-width: 64px;
+  margin-right: 16px;
 }
 
 .registration-details-component .rsvp-field-wrapper sp-textfield {
