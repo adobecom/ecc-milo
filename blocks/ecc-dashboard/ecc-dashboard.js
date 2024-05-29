@@ -314,9 +314,9 @@ async function getEventsArray() {
   const json = await getEvents();
   const mock = await fetch('/blocks/ecc-dashboard/mock.json').then((resp) => resp.json()).catch((error) => console.log(error));
 
-  if (!json) return null;
+  if (!json) return mock;
 
-  return json?.events || mock;
+  return json.events;
 }
 
 async function getConfig(el) {
