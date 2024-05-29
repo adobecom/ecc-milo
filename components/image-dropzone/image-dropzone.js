@@ -7,12 +7,13 @@ import { uploadImage } from '../../utils/esp-controller.js';
 const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 export class ImageDropzone extends LitElement {
-  properties = { file: { type: Object, reflect: true } };
+  static properties = { file: { type: Object, reflect: true } };
 
   static styles = style;
 
   constructor() {
     super();
+    this.attachShadow({ mode: 'open' });
 
     this.file = null;
   }
@@ -22,7 +23,6 @@ export class ImageDropzone extends LitElement {
       [this.file] = files;
       if (this.file.type.startsWith('image/')) {
         this.file.url = URL.createObjectURL(this.file);
-        this.requestUpdate();
 
         await uploadImage(this.file);
       }
@@ -49,7 +49,6 @@ export class ImageDropzone extends LitElement {
 
   deleteImage() {
     this.file = null;
-    this.requestUpdate();
   }
 
   render() {

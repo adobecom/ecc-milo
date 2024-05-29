@@ -2,8 +2,11 @@ import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
 import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
+import { Profile } from '../../components/profile/profile.js';
+import { Repeater } from '../../components/repeater/repeater.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
+import { ProfileContainer } from '../../components/profile-container/profile-container.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -35,6 +38,7 @@ const SPECTRUM_COMPONENTS = [
   'picker',
   'menu',
   'checkbox',
+  'field-label',
 ];
 
 async function initComponents(props) {
@@ -55,8 +59,11 @@ async function initComponents(props) {
   });
 
   customElements.define('image-dropzone', ImageDropzone);
+  customElements.define('profile-ui', Profile);
+  customElements.define('repeater-element', Repeater);
   customElements.define('partner-selector', PartnerSelector);
   customElements.define('agenda-fieldset', AgendaFieldset);
+  customElements.define('profile-container', ProfileContainer);
 }
 
 async function gatherValues(props) {
@@ -353,8 +360,6 @@ function initNavigation(props) {
 }
 
 async function buildECCForm(el) {
-  decorateForm(el);
-
   const props = {
     el,
     currentStep: 0,
@@ -362,12 +367,6 @@ async function buildECCForm(el) {
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
   };
-
-  const frags = el.querySelectorAll('.fragment');
-
-  frags.forEach((frag) => {
-    props[`required-fields-in-${frag.id}`] = [];
-  });
 
   const dataHandler = {
     set(target, prop, value) {
@@ -393,6 +392,14 @@ async function buildECCForm(el) {
   };
 
   const proxyProps = new Proxy(props, dataHandler);
+
+  decorateForm(el);
+
+  const frags = el.querySelectorAll('.fragment');
+
+  frags.forEach((frag) => {
+    props[`required-fields-in-${frag.id}`] = [];
+  });
 
   initFormCtas(proxyProps);
   await initComponents(proxyProps);
