@@ -71,7 +71,7 @@ export async function createEvent(payload) {
   };
 
   const resp = await fetch('http://localhost:8500/v1/events', requestOptions).then((res) => res.json()).catch((error) => console.log(error));
-  console.log(payload, resp);
+  console.log('attempted to create event', payload, resp);
   return resp;
 }
 

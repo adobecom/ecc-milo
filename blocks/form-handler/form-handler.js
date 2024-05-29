@@ -137,14 +137,15 @@ async function saveEvent(props) {
   await gatherValues(props);
   if (props.currentStep === 0) {
     const resp = await createEvent(props.payload);
-    props.payload = resp;
+    props.payload = { ...props.payload, ...resp };
   } else if (props.currentStep < props.maxStep) {
     const resp = await publishEvent(props.payload.eventId, props.payload);
-    props.payload = resp;
+    props.payload = { ...props.payload, ...resp };
   } else {
     const resp = await updateEvent(props.payload.eventId, props.payload);
-    props.payload = resp;
+    props.payload = { ...props.payload, ...resp };
   }
+  console.log('payload update', props.payload)
 }
 
 function updateSideNav(props) {
@@ -186,10 +187,31 @@ function onStepValidate(props) {
   };
 }
 
+function updateImgDropzoneConfigs(frag, props) {
+  const dropzones = frag.querySelectorAll('image-dropzone');
+
+  dropzones.forEach((dz) => {
+    const wrappingBlock = dz.closest('.form-component');
+
+    if (wrappingBlock.classList.contains('img-upload-component')) {
+      const type = `event-${wrappingBlock.classList[1]}-image`;
+
+      const configs = {
+        type,
+        altText: `event-${wrappingBlock.classList[1]}-image`,
+        targetUrl: `http://localhost:8500/v1/events/${props.payload.eventId}/images`,
+      };
+      dz.setAttribute('configs', JSON.stringify(configs));
+    }
+  });
+}
+
 function updateRequiredFields(props, stepIndex) {
   const frags = props.el.querySelectorAll('.fragment');
   const currentFrag = stepIndex || frags[props.currentStep];
   props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(INPUT_TYPES.join());
+
+  updateImgDropzoneConfigs(currentFrag, props);
 }
 
 function initRequiredFieldsValidation(props) {
