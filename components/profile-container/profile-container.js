@@ -28,6 +28,10 @@ export class ProfileContainer extends LitElement {
     this.requestUpdate();
   }
 
+  getProfiles() {
+    return [...this.querySelectorAll('profile-ui')].map((profileUI) => profileUI.profile);
+  }
+
   render() {
     const imageTag = this.fieldlabels.image;
     imageTag.setAttribute('slot', 'img-label');

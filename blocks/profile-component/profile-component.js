@@ -1,6 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
 import '../../components/image-dropzone/image-dropzone.js';
-import { addRepeater } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -39,8 +38,6 @@ async function decorateProfile(element) {
 }
 
 export default async function init(element, proxyProps) {
-  // element.classList.add('form-component');
-
   await decorateProfile(element);
   element.parentNode.classList.remove('section');
 }

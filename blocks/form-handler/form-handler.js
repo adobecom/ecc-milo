@@ -365,26 +365,7 @@ async function buildECCForm(el) {
     currentStep: 0,
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
-    payload: {
-      profiles: [
-        {
-          name: 'Profile 1',
-          type: 'Speaker',
-          id: 1,
-          socialMedia: [{
-            name: 'Facebook',
-            url: 'https://www.facebook.com',
-          }, {
-            name: 'Twitter',
-            url: 'https://www.twitter.com',
-          }],
-        },
-        {
-          name: 'Profile 2',
-          id: 2,
-        },
-      ],
-    },
+    payload: {},
   };
 
   const dataHandler = {
