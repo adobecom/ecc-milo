@@ -32,30 +32,15 @@ async function decorateProfile(element) {
   const fieldlabels = extractFieldLabels(element);
   element.innerHTML = '';
 
-  const profiles = [{
-    type: 'Presenter',
-    name: 'Alpha',
-    title: 'Beta',
-    bio: 'adddas',
-    socialMedia: [{ url: 'asdsad' }],
-  }];
-
-  fieldlabels.image.setAttribute('slot', 'img-label');
-  fieldlabels.image.classList.add('img-upload-text');
-  const profileTag = createTag('profile-ui', { class: 'profile-component' }, fieldlabels.image);
-  profileTag.fieldlabels = fieldlabels;
-  // eslint-disable-next-line prefer-destructuring
-  profileTag.profile = profiles[0];
-  // profileTag.setAttribute('data', JSON.stringify(payload));
-  // addRepeater(profileTag.shadowRoot.lastchild, payload.addSocialMediaRepeater);
-
-  element.append(profileTag);
-  // Replace with repeater tag.
-  addRepeater(element.parentNode, fieldlabels.addProfileRepeater);
+  const profileContainer = createTag('profile-container', { class: 'profile-component' });
+  profileContainer.fieldlabels = fieldlabels;
+  profileContainer.profiles = [{ socialMedia: [{ url: '' }] }];
+  element.append(profileContainer);
 }
 
 export default async function init(element, proxyProps) {
-  element.classList.add('form-component');
+  // element.classList.add('form-component');
 
   await decorateProfile(element);
+  element.parentNode.classList.remove('section');
 }

@@ -6,6 +6,7 @@ import { Profile } from '../../components/profile/profile.js';
 import { Repeater } from '../../components/repeater/repeater.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
+import { ProfileContainer } from '../../components/profile-container/profile-container.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -62,6 +63,7 @@ async function initComponents(props) {
   customElements.define('repeater-element', Repeater);
   customElements.define('partner-selector', PartnerSelector);
   customElements.define('agenda-fieldset', AgendaFieldset);
+  customElements.define('profile-container', ProfileContainer);
 }
 
 async function gatherValues(props) {
@@ -363,7 +365,25 @@ async function buildECCForm(el) {
     currentStep: 0,
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
-    payload: {},
+    payload: {
+      profiles: [
+        {
+          name: 'Profile 1',
+          id: 1,
+          socialMedia: [{
+            name: 'Facebook',
+            url: 'https://www.facebook.com',
+          }, {
+            name: 'Twitter',
+            url: 'https://www.twitter.com',
+          }],
+        },
+        {
+          name: 'Profile 2',
+          id: 2,
+        },
+      ],
+    },
   };
 
   const dataHandler = {
