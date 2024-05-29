@@ -15,21 +15,16 @@ export async function uploadImage(file) {
     });
 }
 
-export function uploadBinaryFile(file) {
-  // TODO: replace with real endpoint
-  const url = 'http://localhost:8000/upload';
-
+export function uploadBinaryFile(file, configs) {
   const xhr = new XMLHttpRequest();
-  xhr.open('POST', url, true);
+  xhr.open('POST', configs.targetUrl, true);
 
   // TODO: set required headers
 
-  // xhr.setRequestHeader('imageType', 'event-hero-image');
-  // xhr.setRequestHeader('imageType', 'event-card-image');
-  // xhr.setRequestHeader('imageType', 'venue-image');
-  // xhr.setRequestHeader('imageType', 'speaker-photo');
+  xhr.setRequestHeader('x-image-kind', configs.type);
+  xhr.setRequestHeader('x-image-alt-text', configs.altText);
 
-  xhr.onload = function () {
+  xhr.onload = () => {
     if (xhr.status === 200) {
       console.log('Success:', xhr.responseText);
     } else {
@@ -37,7 +32,7 @@ export function uploadBinaryFile(file) {
     }
   };
 
-  xhr.onerror = function () {
+  xhr.onerror = () => {
     console.error('Network error');
   };
 
