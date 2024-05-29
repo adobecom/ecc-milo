@@ -16,13 +16,7 @@ const defaultFieldLabels = {
   addSocialMediaRepeater: 'Add Social Media',
 };
 
-const defaultProfile = {
-  type: '',
-  name: '',
-  title: '',
-  bio: '',
-  socialMedia: [{ url: '' }],
-};
+const speakerType = ['Presenter', 'Host', 'Speaker'];
 
 export class Profile extends LitElement {
   static properties = {
@@ -37,7 +31,7 @@ export class Profile extends LitElement {
     this.attachShadow({ mode: 'open' });
     this.fieldlabels = this.fieldlabels ?? defaultFieldLabels;
 
-    this.profile = this.profile ?? defaultProfile;
+    this.profile = this.profile ?? { socialMedia: [{ url: '' }] };
   }
 
   addSocialMedia() {
@@ -50,19 +44,21 @@ export class Profile extends LitElement {
     this.profile = { ...this.profile, [key]: value };
   }
 
-  render() {
-    const speakerType = ['Presenter', 'Host', 'Speaker'];
+  updateSocialMedia(index, value) {
+    this.profile.socialMedia[index] = { url: value };
+  }
 
+  render() {
     const fieldLabelsJSON = {
       ...defaultFieldLabels,
       ...(this.fieldlabels ?? {}),
     };
 
     return html`
-    <h2>${fieldLabelsJSON?.heading}</h2>
+    <h2>${fieldLabelsJSON.heading}</h2>
     <div>
         <div><sp-field-label size="l" required>${fieldLabelsJSON.chooseType}</sp-field-label></div>
-        <sp-picker label=${fieldLabelsJSON.chooseType} selected=${this.profile.type} size="l" @change=${(event) => this.updateValue('type', event.target.value)}>
+        <sp-picker label=${fieldLabelsJSON.chooseType} selected=${this.profile.type} size="l" @change=${(event) => this.updateValue('type', event.target.value)} disabled>
             ${repeat(speakerType, (type) => html`
                 <sp-menu-item value="${type}">${type}</sp-menu-item>
             `)}
@@ -77,8 +73,8 @@ export class Profile extends LitElement {
     <h4>${fieldLabelsJSON?.socialMedia}</h4>
     ${repeat(
     this.profile.socialMedia,
-    (socialMedia) => html`
-            <sp-textfield placeholder=${fieldLabelsJSON?.addSocialMedia} value=${socialMedia.url} quiet size='l' class='text-input'></sp-textfield>
+    (socialMedia, index) => html`
+            <sp-textfield placeholder=${fieldLabelsJSON?.addSocialMedia} value=${socialMedia.url} quiet size='l' class='text-input' @change=${(event) => this.updateSocialMedia(index, event.target.value)}></sp-textfield>
         `,
   )}
     <repeater-element text=${fieldLabelsJSON?.addSocialMediaRepeater} @repeat=${this.addSocialMedia}></repeater-element>

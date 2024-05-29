@@ -358,8 +358,6 @@ function initNavigation(props) {
 }
 
 async function buildECCForm(el) {
-  decorateForm(el);
-
   const props = {
     el,
     currentStep: 0,
@@ -367,12 +365,6 @@ async function buildECCForm(el) {
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
   };
-
-  const frags = el.querySelectorAll('.fragment');
-
-  frags.forEach((frag) => {
-    props[`required-fields-in-${frag.id}`] = [];
-  });
 
   const dataHandler = {
     set(target, prop, value) {
@@ -398,6 +390,14 @@ async function buildECCForm(el) {
   };
 
   const proxyProps = new Proxy(props, dataHandler);
+
+  decorateForm(el);
+
+  const frags = el.querySelectorAll('.fragment');
+
+  frags.forEach((frag) => {
+    props[`required-fields-in-${frag.id}`] = [];
+  });
 
   initFormCtas(proxyProps);
   await initComponents(proxyProps);
