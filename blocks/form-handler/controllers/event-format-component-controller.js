@@ -84,7 +84,7 @@ export function onSubmit(component, props) {
   // TODO: init function and repopulate data from props if exists
   const eventType = 'InPerson';
   const cloudType = component.querySelector('#bu-select-input').value;
-  const seriesId = component.querySelector('#series-select-input').value;
+  const seriesId = component.querySelector('#series-select-input')?.value;
   const rsvpRequired = component.querySelector('#rsvp-required-check').checked;
   const templateId = getTemplateId(cloudType);
 
