@@ -8,5 +8,7 @@ export default function init(component, props) {
 
 export function onSubmit(component, props) {
   const profileContainer = component.querySelector('profile-container');
-  return profileContainer.getProfiles();
+  if (profileContainer) {
+    props.payload = { ...props.payload, ...profileContainer.getProfiles() };
+  }
 }

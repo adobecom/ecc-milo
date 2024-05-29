@@ -29,7 +29,7 @@ export class ProfileContainer extends LitElement {
   }
 
   getProfiles() {
-    return [...this.querySelectorAll('profile-ui')].map((profileUI) => profileUI.profile);
+    return [...this.shadowRoot.querySelectorAll('profile-ui')].map((profileUI) => profileUI.profile);
   }
 
   render() {
