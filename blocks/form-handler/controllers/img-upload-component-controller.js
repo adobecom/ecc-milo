@@ -9,7 +9,7 @@ export default function init(component, props) {
   };
 
   dropzones.forEach((dz) => {
-    dz.configs = configs;
+    dz.setAttribute('configs', JSON.stringify(configs));
   });
 }
 
