@@ -16,7 +16,7 @@ const defaultFieldLabels = {
   addSocialMediaRepeater: 'Add Social Media',
 };
 
-const speakerType = ['Presenter', 'Host', 'Speaker'];
+const speakerType = ['Presenter', 'Host', 'Speaker', 'Keynote'];
 
 export class Profile extends LitElement {
   static properties = {
