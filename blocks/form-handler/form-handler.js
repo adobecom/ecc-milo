@@ -369,6 +369,7 @@ async function buildECCForm(el) {
       profiles: [
         {
           name: 'Profile 1',
+          type: 'Speaker',
           id: 1,
           socialMedia: [{
             name: 'Facebook',

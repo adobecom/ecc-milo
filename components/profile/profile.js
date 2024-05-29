@@ -62,7 +62,7 @@ export class Profile extends LitElement {
     <h2>${fieldLabelsJSON.heading}</h2>
     <div>
         <div><sp-field-label size="l" required>${fieldLabelsJSON.chooseType}</sp-field-label></div>
-        <sp-picker label=${fieldLabelsJSON.chooseType} selected=${this.profile?.type} size="l" @change=${(event) => this.updateValue('type', event.target.value)}>
+        <sp-picker label=${fieldLabelsJSON.chooseType} value=${this.profile?.type} size="l" @change=${(event) => this.updateValue('type', event.target.value)}>
             ${repeat(speakerType, (type) => html`
                 <sp-menu-item value="${type}">${type}</sp-menu-item>
             `)}

@@ -36,7 +36,7 @@ export class ProfileContainer extends LitElement {
       repeat(this.profiles, (profile) => profile.id, (profile, index) => {
         const fieldlabels = { ...this.fieldlabels };
         const imgTag = imageTag.cloneNode(true);
-        return html`<profile-ui profile=${profile} fieldlabels=${fieldlabels} class="form-component">${imgTag}</profile-ui>`})}
+        return html`<profile-ui profile=${JSON.stringify(profile)} fieldlabels=${JSON.stringify(fieldlabels)} class="form-component">${imgTag}</profile-ui>`})}
       <repeater-element text=${this.fieldlabels?.addProfileRepeater} @repeat=${this.addProfile}></repeater-element>`;
   }
 }
