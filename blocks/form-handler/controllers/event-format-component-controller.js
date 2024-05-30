@@ -19,11 +19,11 @@ function prepopulateTimeZone(component) {
 }
 
 function initStepLock(component) {
-  const { search, hostname } = window.location;
+  const { search } = window.location;
   const urlParams = new URLSearchParams(search);
   const skipValidation = urlParams.get('skipValidation');
 
-  if (skipValidation === 'true' && hostname === 'localhost') {
+  if (skipValidation === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
     return;
   }
 
