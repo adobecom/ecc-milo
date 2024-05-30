@@ -198,7 +198,7 @@ function updateImgDropzoneConfigs(frag, props) {
 
       const configs = {
         type,
-        altText: `event-${wrappingBlock.classList[1]}-image`,
+        altText: `Event ${wrappingBlock.classList[1]} image`,
         targetUrl: `http://localhost:8500/v1/events/${props.payload.eventId}/images`,
       };
       dz.setAttribute('configs', JSON.stringify(configs));
