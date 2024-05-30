@@ -70,6 +70,17 @@
   display: none;
 }
 
+.img-upload-component fieldset.checkboxes {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-left: 24px;
+}
+
+.img-upload-component fieldset.checkboxes .additional-comment {
+  padding-left: 24px;
+}
+
 @media (min-width: 900px) {
   .img-upload-component .image-dropzones {
     grid-template-columns: 1fr 1fr 1fr;

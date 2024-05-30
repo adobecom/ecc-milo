@@ -2,19 +2,21 @@
 /* eslint-disable class-methods-use-this */
 import { getLibs } from '../../scripts/utils.js';
 import { style } from './image-dropzone.css.js';
-import { uploadImage } from '../../utils/esp-controller.js';
+import { uploadBinaryFile } from '../../utils/esp-controller.js';
 
 const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 export class ImageDropzone extends LitElement {
-  static properties = { file: { type: Object, reflect: true } };
+  static properties = {
+    file: { type: Object, reflect: true },
+    configs: { type: Object },
+  };
 
   static styles = style;
 
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-
     this.file = null;
   }
 
@@ -24,7 +26,7 @@ export class ImageDropzone extends LitElement {
       if (this.file.type.startsWith('image/')) {
         this.file.url = URL.createObjectURL(this.file);
 
-        await uploadImage(this.file);
+        await uploadBinaryFile(this.file, this.configs);
       }
     }
   }

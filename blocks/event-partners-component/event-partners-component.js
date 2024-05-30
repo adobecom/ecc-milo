@@ -9,7 +9,7 @@ function buildCheckbox(el) {
   const fieldSet = createTag('fieldset', { class: 'checkboxes' });
   const [inputLabel, comment] = [checkboxCell.querySelector('li'), checkboxCell.querySelector('p')];
   const labelText = inputLabel.textContent.trim();
-  const checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-info-visible' }, labelText);
+  const checkbox = createTag('sp-checkbox', { id: 'partners-visible' }, labelText);
   const wrapper = createTag('div', { class: 'checkbox-wrapper' });
 
   wrapper.append(checkbox);

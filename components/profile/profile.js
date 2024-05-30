@@ -69,7 +69,12 @@ export class Profile extends LitElement {
         </sp-picker>
     </div>
     <sp-textfield placeholder=${fieldLabelsJSON.name} quiet size='l' class='text-input' value=${this.profile?.name} @change=${(event) => this.updateValue('name', event.target.value)}></sp-textfield>
-    <image-dropzone>
+    <image-dropzone configs=${JSON.stringify({
+    type: 'speaker-photo',
+    // TODO: get metadata from file
+    altText: 'speaker image',
+    targetUrl: `http://localhost:8500/v1/speakers/${this.profile.id}/images`,
+  })}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
     <sp-textfield placeholder=${fieldLabelsJSON.title} quiet size='l' class='text-input' value=${this.profile?.title} @change=${(event) => this.updateValue('title', event.target.value)}></sp-textfield>
