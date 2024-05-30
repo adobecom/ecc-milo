@@ -1,5 +1,5 @@
 import { getEvents, getVenue } from '../../utils/esp-controller.js';
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs, getConfig } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
@@ -317,7 +317,7 @@ async function getEventsArray() {
   return json.events;
 }
 
-async function getConfig(el) {
+async function getDashboardConfig(el) {
   const configLinkATag = el.querySelector('a');
 
   if (!configLinkATag) return {};
@@ -381,14 +381,15 @@ async function buildDashboard(el, config) {
 }
 
 export default async function init(el) {
-  const { search, hostname } = window.location;
+  const { search } = window.location;
   const urlParams = new URLSearchParams(search);
   const devMode = urlParams.get('devMode');
 
-  const config = await getConfig(el);
+  const config = await getDashboardConfig(el);
+  const miloConfig = getConfig();
   const profile = window.bm8tr.get('imsProfile');
 
-  if (devMode === 'true' && hostname === 'localhost') {
+  if (devMode === 'true' && ['stage', 'local'].includes(miloConfig.env.name)) {
     buildDashboard(el, config);
     return;
   }

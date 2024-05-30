@@ -1,4 +1,4 @@
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs, getConfig } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
 import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
@@ -443,11 +443,12 @@ export default async function init(el) {
   ]);
 
   const profile = window.bm8tr.get('imsProfile');
-  const { search, hostname } = window.location;
+  const { search } = window.location;
+  const miloConfig = getConfig();
   const urlParams = new URLSearchParams(search);
   const devMode = urlParams.get('devMode');
 
-  if (devMode === 'true' && hostname === 'localhost') {
+  if (devMode === 'true' && ['stage', 'local'].includes(miloConfig.env.name)) {
     buildECCForm(el);
     el.removeAttribute('style');
     return;
