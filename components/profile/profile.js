@@ -52,7 +52,78 @@ export class Profile extends LitElement {
     this.profile.socialMedia[index] = { url: value };
   }
 
-  render() {
+  renderProfileForm() {
+    const fieldLabelsJSON = {
+      ...defaultFieldLabels,
+      ...(this.fieldlabels ?? {}),
+    };
+
+    const firstNameData = {
+      value: this.profile?.firstName,
+      placeholder: fieldLabelsJSON.firstName,
+      helperText: fieldLabelsJSON.firstNameSubText,
+    };
+
+    const lastNameData = {
+      value: this.profile?.lastName,
+      placeholder: fieldLabelsJSON.lastName,
+      helperText: fieldLabelsJSON.lastNameSubText,
+    };
+
+    const bioData = {
+      value: this.profile?.bio,
+      placeholder: fieldLabelsJSON.bio,
+      helperText: fieldLabelsJSON.bioSubText,
+    };
+
+    const titleData = {
+      value: this.profile?.title,
+      placeholder: fieldLabelsJSON.title,
+      helperText: fieldLabelsJSON.titleSubText,
+    };
+
+    const textareaConfig = {
+      grows: true,
+      multiline: true,
+      size: 'l',
+    };
+
+    const textfieldConfig = { size: 'l' };
+
+    return html`
+    <h2>${fieldLabelsJSON.heading}</h2>
+    <div>
+        <div><sp-field-label size="l" required>${fieldLabelsJSON.chooseType}</sp-field-label></div>
+        <sp-picker label=${fieldLabelsJSON.chooseType} value=${this.profile?.type} size="l" @change=${(event) => this.updateValue('type', event.target.value)}>
+            ${repeat(speakerType, (type) => html`
+                <sp-menu-item value="${type}">${type}</sp-menu-item>
+            `)}
+        </sp-picker>
+    </div>
+    <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateValue('firstName', event.detail.value)}></custom-textfield>
+    <custom-textfield data=${JSON.stringify(lastNameData)} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateValue('lastName', event.detail.value)}></custom-textfield>
+    <image-dropzone configs=${JSON.stringify({
+    type: 'speaker-photo',
+    // TODO: get metadata from file
+    altText: 'speaker image',
+    targetUrl: `http://localhost:8500/v1/speakers/${this.profile.id}/images`,
+  })}>
+        <slot name="img-label" slot="img-label"></slot>
+    </image-dropzone>
+    <custom-textfield data=${JSON.stringify(titleData)} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateValue('title', event.detail.value)}></custom-textfield>
+    <custom-textfield data=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @input-change=${(event) => this.updateValue('bio', event.detail.value)}></custom-textfield>
+    <h4>${fieldLabelsJSON.socialMedia}</h4>
+    ${this.profile?.socialMedia ? repeat(
+    this.profile?.socialMedia,
+    (socialMedia, index) => html`
+    <custom-textfield data=${JSON.stringify(bioData)} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateSocialMedia(index, event.detail.value)}></sp-textfield>
+        `,
+  ) : nothing}
+    <repeater-element text=${fieldLabelsJSON.addSocialMediaRepeater} @repeat=${() => { this.addSocialMedia(); }}></repeater-element>
+    `;
+  }
+
+  renderProfileView() {
     const fieldLabelsJSON = {
       ...defaultFieldLabels,
       ...(this.fieldlabels ?? {}),
@@ -68,25 +139,30 @@ export class Profile extends LitElement {
             `)}
         </sp-picker>
     </div>
-    <sp-textfield placeholder=${fieldLabelsJSON.name} quiet size='l' class='text-input' value=${this.profile?.name} @change=${(event) => this.updateValue('name', event.target.value)}></sp-textfield>
-    <image-dropzone configs=${JSON.stringify({
-    type: 'speaker-photo',
-    // TODO: get metadata from file
-    altText: 'speaker image',
-    targetUrl: `http://localhost:8500/v1/speakers/${this.profile.id}/images`,
-  })}>
-        <slot name="img-label" slot="img-label"></slot>
-    </image-dropzone>
-    <sp-textfield placeholder=${fieldLabelsJSON.title} quiet size='l' class='text-input' value=${this.profile?.title} @change=${(event) => this.updateValue('title', event.target.value)}></sp-textfield>
-    <sp-textfield placeholder=${fieldLabelsJSON.bio} multiline grows quiet size='l' class='text-input' value=${this.profile?.bio}></sp-textfield>
-    <h4>${fieldLabelsJSON.socialMedia}</h4>
-    ${this.profile?.socialMedia ? repeat(
-    this.profile?.socialMedia,
-    (socialMedia, index) => html`
-            <sp-textfield placeholder=${fieldLabelsJSON.addSocialMedia} value=${socialMedia.url} quiet size='l' class='text-input' @change=${(event) => this.updateSocialMedia(index, event.target.value)}></sp-textfield>
-        `,
-  ) : nothing}
-    <repeater-element text=${fieldLabelsJSON.addSocialMediaRepeater} @repeat=${() => { this.addSocialMedia(); }}></repeater-element>
-    `;
+    <h3>${this.profile.firstName} ${this.profile.lastName}</h3>
+    <div class="img-file-input-wrapper">
+    ${this.profile.image?.url ? html`
+    <div class="preview-wrapper">
+      <div class="preview-img-placeholder">
+      <img src="${this.profile.image?.url}" alt="preview image">
+      </div>
+    </div>`
+    : nothing}
+    </div>
+    <div>
+        <h5>${this.profile.title}</h5>
+        <p>${this.profile.bio}</p>
+    </div>
+    <div>
+        <h4>${fieldLabelsJSON.socialMedia}</h4>
+        ${this.profile?.socialMedia ? repeat(this.profile?.socialMedia, (socialMedia) => html`<p>${socialMedia.url}</p>`) : nothing}
+    </div>`;
+  }
+
+  render() {
+    if (!this.profile.id) {
+      return this.renderProfileForm();
+    }
+    return this.renderProfileView();
   }
 }

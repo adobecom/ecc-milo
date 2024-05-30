@@ -7,6 +7,7 @@ import { Repeater } from '../../components/repeater/repeater.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
 import { ProfileContainer } from '../../components/profile-container/profile-container.js';
+import { CustomTextfield } from '../../components/custom-textfield/custom-textfield.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -65,6 +66,7 @@ async function initComponents(props) {
   customElements.define('partner-selector', PartnerSelector);
   customElements.define('agenda-fieldset', AgendaFieldset);
   customElements.define('profile-container', ProfileContainer);
+  customElements.define('custom-textfield', CustomTextfield);
 }
 
 async function gatherValues(props) {

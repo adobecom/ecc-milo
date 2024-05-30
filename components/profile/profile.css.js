@@ -23,4 +23,12 @@ image-dropzone {
 sp-textfield {
     width: 100%;
 }
+
+p {
+    margin: 0px;
+}
+
+h5 {
+    margin-bottom: 0px;
+}
 `;
