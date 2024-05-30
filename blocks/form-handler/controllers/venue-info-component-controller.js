@@ -95,10 +95,6 @@ export default function init(component, props) {
     state,
     postalCode,
     country,
-    coordinates: {
-      lat,
-      lon,
-    },
   } = props.payload;
 
   changeInputValue(component.querySelector('#venue-info-venue-name'), 'value', venueName);
@@ -107,8 +103,8 @@ export default function init(component, props) {
   changeInputValue(component.querySelector('#location-state'), 'value', state);
   changeInputValue(component.querySelector('#location-zip-code'), 'value', postalCode);
   changeInputValue(component.querySelector('#location-country'), 'value', country);
-  changeInputValue(component.querySelector('#google-place-lat'), 'value', lat);
-  changeInputValue(component.querySelector('#google-place-lng'), 'value', lon);
+  changeInputValue(component.querySelector('#google-place-lat'), 'value', props.payload.coordinates?.lat);
+  changeInputValue(component.querySelector('#google-place-lng'), 'value', props.payload.coordinates?.lon);
 }
 
 export async function onSubmit(component, props) {
