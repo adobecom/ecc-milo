@@ -23,6 +23,7 @@ export function uploadBinaryFile(file, configs) {
 
   xhr.setRequestHeader('x-image-kind', configs.type);
   xhr.setRequestHeader('x-image-alt-text', configs.altText);
+  xhr.setRequestHeader('Content-Type', file.type);
 
   xhr.onload = () => {
     if (xhr.status === 200) {

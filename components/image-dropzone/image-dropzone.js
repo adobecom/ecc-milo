@@ -25,7 +25,6 @@ export class ImageDropzone extends LitElement {
       [this.file] = files;
       if (this.file.type.startsWith('image/')) {
         this.file.url = URL.createObjectURL(this.file);
-
         await uploadBinaryFile(this.file, this.configs);
       }
     }
