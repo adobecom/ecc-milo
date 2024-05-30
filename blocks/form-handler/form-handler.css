@@ -23,10 +23,6 @@
   min-height: 50vh;
 }
 
-.form-handler .form-handler-ctas-panel a {
-  font-size: var(--type-body-s-size);
-}
-
 .form-handler .side-menu ul {
   padding: 0;
 }
@@ -220,6 +216,10 @@
 .form-handler .form-handler-ctas-panel .form-handler-forward-wrapper > div:first-of-type {
   padding-right: 16px;
   border-right: 2px solid var(--color-black);
+}
+
+.form-handler .form-handler-ctas-panel a {
+  font-size: var(--type-body-s-size);
 }
 
 .form-handler .form-handler-ctas-panel a.disabled {
