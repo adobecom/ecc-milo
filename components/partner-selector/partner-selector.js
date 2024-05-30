@@ -23,6 +23,10 @@ export default class PartnerSelector extends LitElement {
     this.requestUpdate();
   }
 
+  getSelectedPartner() {
+    return this.selectedPartner;
+  }
+
   render() {
     return html`
       <fieldset class="rsvp-field-wrapper">
