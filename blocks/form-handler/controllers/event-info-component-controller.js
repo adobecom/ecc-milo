@@ -16,6 +16,8 @@ function formatDate(date) {
 }
 
 function parseFormatedDate(string) {
+  if (!string) return null;
+
   const [year, month, day] = string.split('-');
   const date = new Date(year, +month - 1, day);
 
