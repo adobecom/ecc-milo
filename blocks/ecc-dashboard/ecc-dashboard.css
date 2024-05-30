@@ -1,9 +1,8 @@
 .ecc-dashboard {
-  box-sizing: border-box;
   font-family: var(--body-font-family);
-  width: 100%;
+  padding: 40px;
+  width: var(--grid-container-width);
   margin: auto;
-  padding-bottom: 40px;
 }
 
 .ecc-dashboard.no-events .no-events-area {
@@ -13,25 +12,12 @@
   align-items: center;
 }
 
-.ecc-dashboard .dashboard-header-container {
-  background-image: url('/img/header-background.jpg');
-  position: fixed;
-  width: 100%;
-  z-index: 1;
-  
-}
-
 .ecc-dashboard .dashboard-header {
-  margin: auto;
-  padding: 88px 20px 40px 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   justify-content: space-between;
-  align-items: center;
-  width: var(--grid-container-width);
-  box-sizing: border-box;
-  color: var(--color-white);
+  align-items: flex-start;
 }
 
 .ecc-dashboard .dashboard-header-text {
@@ -64,9 +50,6 @@
 .ecc-dashboard .dashboard-table-container {
   max-width: 100%;
   overflow: auto;
-  margin: auto;
-  width: var(--grid-container-width);
-  padding-top: 172px;
 }
 
 .ecc-dashboard table {

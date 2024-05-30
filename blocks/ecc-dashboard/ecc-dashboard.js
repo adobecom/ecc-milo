@@ -1,6 +1,6 @@
 import { getEvents, getVenue } from '../../utils/esp-controller.js';
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon } from '../../utils/utils.js';
+import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -251,7 +251,6 @@ function decoratePagination(props) {
 }
 
 function buildDashboardHeader(props) {
-  const dashboardHeaderContainer = createTag('div', { class: 'dashboard-header-container' });
   const dashboardHeader = createTag('div', { class: 'dashboard-header' });
   const textContainer = createTag('div', { class: 'dashboard-header-text' });
   const actionsContainer = createTag('div', { class: 'dashboard-actions-container' });
@@ -263,9 +262,8 @@ function buildDashboardHeader(props) {
   createTag('a', { class: 'con-button blue', href: props.createFormUrl }, 'Create new event', { parent: actionsContainer });
   searchInput.addEventListener('input', () => filterData(props, searchInput.value));
 
-  dashboardHeaderContainer.append(dashboardHeader);
   dashboardHeader.append(textContainer, actionsContainer);
-  props.el.prepend(dashboardHeaderContainer);
+  props.el.prepend(dashboardHeader);
 }
 
 function buildDashboardTable(props) {
@@ -341,17 +339,6 @@ async function getConfig(el) {
   return config;
 }
 
-function buildNoAccessScreen(el) {
-  el.classList.add('no-access');
-
-  const h1 = createTag('h1', {}, 'You do not have sufficient access to view.');
-  const area = createTag('div', { class: 'no-access-area' });
-  const noAccessDescription = createTag('p', {}, 'An Adobe corporate account is required to access this feature.');
-
-  el.append(h1, area);
-  area.append(getIcon('browser-access-forbidden-lg'), noAccessDescription);
-}
-
 function buildNoEventScreen(el, props) {
   el.classList.add('no-events');
 
@@ -366,8 +353,6 @@ function buildNoEventScreen(el, props) {
 }
 
 async function buildDashboard(el, config) {
-  document.body.querySelector('header').classList.add('dashboard-page');
-
   const props = {
     el,
     currentPage: 1,
@@ -410,7 +395,7 @@ export default async function init(el) {
 
   if (profile) {
     if (profile.noProfile || profile.account_type !== 'type3') {
-      buildNoAccessScreen(el, config);
+      buildNoAccessScreen(el);
     } else {
       buildDashboard(el, config);
     }
@@ -421,7 +406,7 @@ export default async function init(el) {
   if (!profile) {
     const unsubscribe = window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
       if (newValue?.noProfile || newValue.account_type !== 'type3') {
-        buildNoAccessScreen(el, config);
+        buildNoAccessScreen(el);
       } else {
         buildDashboard(el, config);
       }
