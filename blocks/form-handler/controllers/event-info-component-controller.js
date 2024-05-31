@@ -271,7 +271,7 @@ function initCalendar(component) {
   const calendarIcon = datePickerContainer.querySelector('.icon-calendar-add');
   const input = component.querySelector('#event-info-date-picker');
 
-  calendarIcon.addEventListener('click', () => {
+  datePickerContainer.addEventListener('click', () => {
     if (calendar || input.disabled) return;
     calendar = createTag('div', { class: 'calendar-container' });
     datePickerContainer.append(calendar);

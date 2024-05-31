@@ -21,6 +21,7 @@ export const style = css`
   font-size: var(--type-heading-m-size);
   font-weight: 700;
   min-width: max-content;
+  margin: 0;
 }
 
 .time-picker > p::before {
