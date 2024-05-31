@@ -6,6 +6,7 @@ import { Profile } from '../../components/profile/profile.js';
 import { Repeater } from '../../components/repeater/repeater.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
+import AgendaFieldsetGroup from '../../components/agenda-fieldset-group/agenda-fieldset-group.js';
 import { ProfileContainer } from '../../components/profile-container/profile-container.js';
 import { CustomTextfield } from '../../components/custom-textfield/custom-textfield.js';
 
@@ -73,6 +74,7 @@ async function initComponents(props) {
   customElements.define('repeater-element', Repeater);
   customElements.define('partner-selector', PartnerSelector);
   customElements.define('agenda-fieldset', AgendaFieldset);
+  customElements.define('agenda-fieldset-group', AgendaFieldsetGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
 }

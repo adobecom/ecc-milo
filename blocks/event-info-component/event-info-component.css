@@ -109,6 +109,7 @@
   padding: 4px 8px;
   height: 32px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .event-info-component .date-input {

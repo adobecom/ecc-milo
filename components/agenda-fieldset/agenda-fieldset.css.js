@@ -8,6 +8,7 @@ export const style = css`
   display: flex;
   align-items: center;
   gap: 24px;
+  width: 100%;
 }
 
 .time-picker {

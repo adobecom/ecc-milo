@@ -268,7 +268,6 @@ function buildCalendar(component, parent) {
 function initCalendar(component) {
   let calendar;
   const datePickerContainer = component.querySelector('.date-picker');
-  const calendarIcon = datePickerContainer.querySelector('.icon-calendar-add');
   const input = component.querySelector('#event-info-date-picker');
 
   datePickerContainer.addEventListener('click', () => {
