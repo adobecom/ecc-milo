@@ -11,11 +11,16 @@ export const style = css`
     line-height: normal;
 }
 
-profile-ui {
+.profile-container {
     padding: 24px;
     border-radius: 10px;
     margin: 24px;
     box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
+    display: flex;
+}
+
+profile-ui {
+    width: 100%;
 }
 
 repeater-element {
@@ -34,5 +39,9 @@ repeater-element {
   align-items: center;
   gap: 8px;
   margin: 24px 0;
+}
+
+.icon-delete {
+    position: relative;
 }
 `;
