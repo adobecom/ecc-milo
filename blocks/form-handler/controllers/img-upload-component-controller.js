@@ -7,7 +7,7 @@ export function onSubmit(component, props) {
     const venueImgVisibleCheck = component.querySelector('#checkbox-venue-image-visible');
 
     if (venueImgVisibleCheck) {
-      props.payload = { ...props.payload, ...{ showVenueImage: venueImgVisibleCheck.checked }};
+      props.payload = { ...props.payload, ...{ showVenueImage: venueImgVisibleCheck.checked } };
     }
   }
 }
