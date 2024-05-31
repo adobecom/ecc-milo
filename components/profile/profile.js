@@ -58,7 +58,7 @@ export class Profile extends LitElement {
     this.profile.socialMedia[index] = { url: value };
   }
 
-  renderProfileForm() {
+  renderProfileForm(title) {
     const fieldLabelsJSON = {
       ...defaultFieldLabels,
       ...(this.fieldlabels ?? {}),
@@ -101,7 +101,8 @@ export class Profile extends LitElement {
     const quietTextfieldConfig = { size: 'xl', quiet: true };
 
     return html`
-    <h2>${fieldLabelsJSON.heading}</h2>
+    <div class="profile-edit-view">
+    <h2>${title}</h2>
     <div>
         <div><sp-field-label size="l" required>${fieldLabelsJSON.chooseType}</sp-field-label></div>
         <sp-picker label=${fieldLabelsJSON.chooseType} value=${this.profile?.type} size="l" @change=${(event) => this.updateValue('type', event.target.value)}>
@@ -189,13 +190,23 @@ export class Profile extends LitElement {
         ${this.profile?.socialMedia ? repeat(this.profile?.socialMedia, (socialMedia) => html`<p>${socialMedia.url}</p>`) : nothing}
     </div>
     <sp-divider></sp-divider>
-    <sp-button variant="primary">Save Profile</sp-button>
+    <overlay-trigger type="modal" class="edit-profile">
+    <sp-dialog-wrapper 
+        slot="click-content"
+        dismiss-label="Close"
+        underlay
+    >
+        ${this.renderProfileForm('Edit Profile')}
+    </sp-dialog-wrapper>
+    <sp-button slot="trigger" variant="primary" class="save-profile-button">Edit Profile</sp-button>
+    </overlay-trigger>
+    
     `;
   }
 
   render() {
     if (!this.profile.id) {
-      return this.renderProfileForm();
+      return this.renderProfileForm(this.fieldlabels.heading);
     }
     return this.renderProfileView();
   }

@@ -53,6 +53,8 @@ const SPECTRUM_COMPONENTS = [
   'divider',
   'button',
   'progress-circle',
+  'overlay',
+  'dialog',
 ];
 
 function replaceAnchorWithButton(anchor) {
@@ -499,7 +501,19 @@ async function buildECCForm(el) {
     currentStep: 0,
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
-    payload: {},
+    payload: {
+      profiles:[{
+        id:'122',
+        firstName:'John',
+        lastName:'Doe',
+        title:'CEO',
+        bio:'I am a CEO',
+        socialMedia:[{
+          url:'www.linkedin.com'
+        }],
+        type:'Speaker',
+      }]
+    },
     response: {},
   };
 

@@ -67,4 +67,16 @@ h5 {
 .icon-remove-circle:hover {
   opacity: 1;
 }
+
+.edit-profile {
+    align-self: end;
+}
+
+modal{
+    width: 1000px;
+}
+
+.profile-edit-view {
+    width: 1000px;
+}
 `;
