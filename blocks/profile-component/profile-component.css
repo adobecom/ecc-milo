@@ -1,7 +1,6 @@
 .profile-component{
   display: flex;
   flex-direction: column;
-  gap: 20px;
 }
 
 .profile-component .info-field-wrapper {

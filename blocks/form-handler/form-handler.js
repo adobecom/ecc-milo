@@ -41,6 +41,8 @@ const SPECTRUM_COMPONENTS = [
   'menu',
   'checkbox',
   'field-label',
+  'divider',
+  'button',
 ];
 
 async function initComponents(props) {

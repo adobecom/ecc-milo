@@ -31,4 +31,19 @@ p {
 h5 {
     margin-bottom: 0px;
 }
+
+.social-media-row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.social-media-input {
+    width: 100%;
+}
+
+.save-profile-button {
+    width: fit-content;
+    align-self: end;
+}
 `;

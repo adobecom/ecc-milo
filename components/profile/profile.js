@@ -82,6 +82,8 @@ export class Profile extends LitElement {
       helperText: fieldLabelsJSON.titleSubText,
     };
 
+    const socialMediaData = { placeholder: fieldLabelsJSON.addSocialMedia };
+
     const textareaConfig = {
       grows: true,
       multiline: true,
@@ -112,14 +114,23 @@ export class Profile extends LitElement {
     </image-dropzone>
     <custom-textfield data=${JSON.stringify(titleData)} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateValue('title', event.detail.value)}></custom-textfield>
     <custom-textfield data=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @input-change=${(event) => this.updateValue('bio', event.detail.value)}></custom-textfield>
+    <div>
     <h4>${fieldLabelsJSON.socialMedia}</h4>
     ${this.profile?.socialMedia ? repeat(
     this.profile?.socialMedia,
     (socialMedia, index) => html`
-    <custom-textfield data=${JSON.stringify(bioData)} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateSocialMedia(index, event.detail.value)}></sp-textfield>
-        `,
+    <div class="social-media-row">
+    <custom-textfield class="social-media-input" data=${JSON.stringify({ ...socialMediaData, value: socialMedia.url ?? undefined })} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateSocialMedia(index, event.detail.value)}></custom-textfield>
+        ${this.profile?.socialMedia?.length > 1 ? html`<img class="icon icon-delete" src="/icons/delete.svg" alt="delete" @click=${() => {
+    this.profile.socialMedia.splice(index, 1);
+    this.requestUpdate();
+  }}></img>` : nothing}
+        </div>`,
   ) : nothing}
+    </div>
     <repeater-element text=${fieldLabelsJSON.addSocialMediaRepeater} @repeat=${() => { this.addSocialMedia(); }}></repeater-element>
+    <sp-divider size='s'></sp-divider>
+    <sp-button variant="primary" class="save-profile-button">Save Profile</sp-button>
     `;
   }
 
@@ -156,7 +167,10 @@ export class Profile extends LitElement {
     <div>
         <h4>${fieldLabelsJSON.socialMedia}</h4>
         ${this.profile?.socialMedia ? repeat(this.profile?.socialMedia, (socialMedia) => html`<p>${socialMedia.url}</p>`) : nothing}
-    </div>`;
+    </div>
+    <sp-divider></sp-divider>
+    <sp-button variant="primary">Save Profile</sp-button>
+    `;
   }
 
   render() {

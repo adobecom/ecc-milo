@@ -3,7 +3,7 @@
 import { getLibs } from '../../scripts/utils.js';
 import { style } from './profile-container.css.js';
 
-const { LitElement, html, repeat } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 const defaultProfile = { socialMedia: [{ url: '' }] };
 
@@ -37,10 +37,18 @@ export class ProfileContainer extends LitElement {
     imageTag.setAttribute('slot', 'img-label');
     imageTag.classList.add('img-upload-text');
     return html`${
-      repeat(this.profiles, (profile) => profile.id, (profile) => {
+      repeat(this.profiles, (profile) => profile.id, (profile, index) => {
         const fieldlabels = { ...this.fieldlabels };
         const imgTag = imageTag.cloneNode(true);
-        return html`<profile-ui profile=${JSON.stringify(profile)} fieldlabels=${JSON.stringify(fieldlabels)} class="form-component">${imgTag}</profile-ui>`})}
+        return html`
+        <div class="profile-container">
+        <profile-ui profile=${JSON.stringify(profile)} fieldlabels=${JSON.stringify(fieldlabels)} class="form-component">${imgTag}</profile-ui>
+        ${this.profiles?.length > 1 ? html`<img class="icon-delete" src="/icons/delete.svg" alt="delete" @click=${() => {
+    this.profiles.splice(index, 1);
+    this.requestUpdate();
+  }}></img>` : nothing}
+          </div>`;
+      })}
       <repeater-element text=${this.fieldlabels?.addProfileRepeater} @repeat=${this.addProfile}></repeater-element>`;
   }
 }
