@@ -89,13 +89,19 @@
 .form-handler .main-frame .section:first-of-type .content {
   margin: 0 24px;
   max-width: none;
-  display: flex;
+  display: grid;
   align-items: center;
-  justify-content: space-between
+  justify-content: space-between;
+  grid-template-columns: 1fr 1fr;
 }
 
 .form-handler .main-frame .section:first-of-type .content p {
   font-size: var(--type-body-xs-size);
+}
+
+.form-handler .main-frame .section:first-of-type .content p:first-of-type {
+  display: flex;
+  flex-direction: row-reverse;
 }
 
 .form-handler .main-frame .section:not(:first-of-type) {
