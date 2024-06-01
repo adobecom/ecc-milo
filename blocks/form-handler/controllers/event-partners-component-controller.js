@@ -1,8 +1,8 @@
 export function onSubmit(component, props) {
-  const partnerSelectors = component.querySelectorAll('partner-selector');
+  const partnersGroup = component.querySelector('partner-selector-group');
   const partnerVisible = component.querySelector('#partners-visible')?.checked;
 
-  const partners = Array.from(partnerSelectors).map((p) => p.getSelectedPartner());
+  const partners = partnersGroup.getSelectedPartners();
 
   props.payload = { ...props.payload, partners, partnerVisible };
 }

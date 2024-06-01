@@ -44,7 +44,7 @@ export default class AgendaFieldsetGroup extends LitElement {
           @update-agenda=${(event) => this.handleAgendaUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.agendas.length > 1 ? html`
-              <img class="icon icon-delete" src="/icons/delete.svg" alt="delete" @click=${() => this.deleteAgenda(index)}></img>
+              <img class="icon icon-remove-circle" src="/icons/remove-circle.svg" alt="remove-repeater" @click=${() => this.deleteAgenda(index)}></img>
             ` : nothing}
           </div>
         </agenda-fieldset>

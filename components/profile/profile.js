@@ -121,7 +121,7 @@ export class Profile extends LitElement {
     (socialMedia, index) => html`
     <div class="social-media-row">
     <custom-textfield class="social-media-input" data=${JSON.stringify({ ...socialMediaData, value: socialMedia.url ?? undefined })} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateSocialMedia(index, event.detail.value)}></custom-textfield>
-        ${this.profile?.socialMedia?.length > 1 ? html`<img class="icon icon-delete" src="/icons/delete.svg" alt="delete" @click=${() => {
+        ${this.profile?.socialMedia?.length > 1 ? html`<img class="icon icon-remove-circle" src="/icons/remove-circle.svg" alt="remove-repeater" @click=${() => {
     this.profile.socialMedia.splice(index, 1);
     this.requestUpdate();
   }}></img>` : nothing}

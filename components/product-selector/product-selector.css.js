@@ -17,10 +17,10 @@ fieldset {
   gap: 16px;
 }
 
-.rsvp-field-wrapper img.partner-img {
+.rsvp-field-wrapper img.product-img {
   display: block;
-  width: 80px;
-  height: 80px;
+  width: 40px;
+  height: 40px;
   border-radius: 4px;
   object-fit: contain;
 }

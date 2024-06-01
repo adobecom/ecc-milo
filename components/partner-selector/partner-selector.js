@@ -9,16 +9,6 @@ export default class PartnerSelector extends LitElement {
     selectedPartner: { type: Object },
   };
 
-  constructor() {
-    super();
-    this.partners = JSON.parse(this.dataset.partners);
-    this.selectedPartner = {
-      showPartnerLink: false,
-      name: '[Partner name]',
-      imageUrl: '/icons/partner-icon-placeholder.svg',
-    };
-  }
-
   static styles = style;
 
   handleSelectChange(event) {
@@ -27,6 +17,13 @@ export default class PartnerSelector extends LitElement {
       ...this.selectedPartner,
       ...this.partners.find((partner) => partner.name === partnerName),
     };
+
+    this.dispatchEvent(new CustomEvent('update-partner', {
+      detail: { partner: this.selectedPartner },
+      bubbles: true,
+      composed: true,
+    }));
+
     this.requestUpdate();
   }
 
@@ -39,18 +36,15 @@ export default class PartnerSelector extends LitElement {
     this.requestUpdate();
   }
 
-  getSelectedPartner() {
-    return this.selectedPartner;
-  }
-
   render() {
     return html`
       <fieldset class="rsvp-field-wrapper">
-        ${html`<img class="partner-img" src="${this.selectedPartner.imageUrl}" alt="${this.selectedPartner.name}">`}  
-        <sp-picker class="partner-select-input" label="Select a partner" @change="${this.handleSelectChange}">
+        ${html`<img class="partner-img" src="${this.selectedPartner.imageUrl || '/icons/icon-placeholder.svg'}" alt="${this.selectedPartner.name}">`}  
+        <sp-picker value=${this.selectedPartner.name} class="partner-select-input" label="Select a partner" @change="${this.handleSelectChange}">
           ${this.partners.map((partner) => html`<sp-menu-item value="${partner.name}">${partner.name}</sp-menu-item>`)}
         </sp-picker>
-        ${html`<sp-checkbox class="checkbox-partner-link" @change="${this.handleCheckChange}">Link to ${this.selectedPartner.name}</sp-checkbox>`}
+        ${html`<sp-checkbox class="checkbox-partner-link" @change="${this.handleCheckChange}">Link to ${this.selectedPartner.name || '[Partner name]'}</sp-checkbox>`}
+        <slot name="delete-btn"></slot>
       </fieldset>
     `;
   }

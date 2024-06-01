@@ -4,11 +4,14 @@ import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/es
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
 import { Repeater } from '../../components/repeater/repeater.js';
-import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
 import AgendaFieldsetGroup from '../../components/agenda-fieldset-group/agenda-fieldset-group.js';
 import { ProfileContainer } from '../../components/profile-container/profile-container.js';
 import { CustomTextfield } from '../../components/custom-textfield/custom-textfield.js';
+import ProductSelector from '../../components/product-selector/product-selector.js';
+import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
+import PartnerSelector from '../../components/partner-selector/partner-selector.js';
+import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -25,6 +28,7 @@ const VANILLA_COMPONENTS = [
   'event-community-link',
   'event-partners',
   'terms-conditions',
+  'product-promotion',
 ];
 
 const INPUT_TYPES = [
@@ -73,8 +77,11 @@ async function initComponents(props) {
   customElements.define('profile-ui', Profile);
   customElements.define('repeater-element', Repeater);
   customElements.define('partner-selector', PartnerSelector);
+  customElements.define('partner-selector-group', PartnerSelectorGroup);
   customElements.define('agenda-fieldset', AgendaFieldset);
   customElements.define('agenda-fieldset-group', AgendaFieldsetGroup);
+  customElements.define('product-selector', ProductSelector);
+  customElements.define('product-selector-group', ProductSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
 }
