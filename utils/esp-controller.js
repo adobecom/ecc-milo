@@ -24,9 +24,9 @@ export function uploadBinaryFile(file, configs) {
   xhr.setRequestHeader('x-image-kind', configs.type);
   xhr.setRequestHeader('x-image-alt-text', configs.altText);
   xhr.setRequestHeader('Content-Type', file.type);
-
+  xhr.setRequestHeader('Authorization', 'Bearer');
   xhr.onload = () => {
-    if (xhr.status === 200) {
+    if (xhr.status === 201) {
       console.log('Success:', xhr.responseText);
     } else {
       console.error('Error Status:', xhr.status);
