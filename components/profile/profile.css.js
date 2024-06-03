@@ -35,7 +35,8 @@ h5 {
 .social-media-row {
     display: flex;
     flex-direction: row;
-    gap: 10px;
+    align-items: center;
+    gap: 16px;
 }
 
 .social-media-input {
@@ -45,5 +46,17 @@ h5 {
 .save-profile-button {
     width: fit-content;
     align-self: end;
+}
+
+.icon-remove-circle {
+  height: 24px;
+  width: 24px;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.icon-remove-circle:hover {
+  opacity: 1;
 }
 `;

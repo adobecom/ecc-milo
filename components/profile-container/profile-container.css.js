@@ -41,7 +41,15 @@ repeater-element {
   margin: 24px 0;
 }
 
-.icon-delete {
-    position: relative;
+.icon-remove-circle {
+  height: 24px;
+  width: 24px;
+  opacity: 0.3;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.icon-remove-circle:hover {
+  opacity: 1;
 }
 `;

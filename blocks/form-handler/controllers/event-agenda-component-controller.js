@@ -1,33 +1,20 @@
 export function onSubmit(component, props) {
   // TODO: agenda details
-  const agendaItems = component.querySelectorAll('.agenda-input-fields-row');
+  const agendaGroup = component.querySelector('agenda-fieldset-group');
+  const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info')?.checked;
 
-  const agenda = [];
+  let agenda = [];
 
-  agendaItems.forEach((item) => {
-    const timeInput = item.querySelector('.time-picker-input');
-    const detailsInput = item.querySelector('sp-textfield.text-input');
+  if (agendaGroup) agenda = agendaGroup.getAgendas();
 
-    if (timeInput && detailsInput) {
-      agenda.push({
-        startTime: timeInput.value,
-        description: detailsInput.value,
-      });
-    }
-  });
-
-  const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info').checked;
-
-  const eventInfo = {
+  const agendaInfo = {
     showAgendaPostEvent,
     agenda,
   };
 
-  props.payload = { ...props.payload, ...eventInfo };
-  return eventInfo;
+  props.payload = { ...props.payload, ...agendaInfo };
 }
 
 export default function init(component, props) {
   // TODO: init function and repopulate data from props if exists
-  const agendaItems = component.querySelectorAll('.agenda-input-fields-row');
 }

@@ -42,17 +42,10 @@
 .venue-info-component .venue-info-field-location .location-input {
   font-size: var(--type-body-m-size);
   box-sizing: border-box;
-  padding: 8px 0;
   border: 1px solid transparent;
   outline: none;
   width: 40%;
   color: var(--color-gray-900);
-}
-
-.venue-info-component .venue-info-field-location .location-input:active,
-.venue-info-component .venue-info-field-location .location-input:focus {
-  outline: initial;
-  border-radius: 4px;
 }
 
 .venue-info-component .venue-info-addition-wrapper {

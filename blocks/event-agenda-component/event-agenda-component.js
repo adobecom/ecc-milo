@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { addRepeater, generateToolTip, convertTo24HourFormat } from '../../utils/utils.js';
+import { generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -28,14 +28,12 @@ function decorateFields(row) {
 
   row.innerHTML = '';
 
-  const timeSlots = getTimeSlots(cols[2]);
-  const agendaFieldset = createTag('agenda-fieldset');
-  agendaFieldset.dataset.timeSlots = timeSlots.join(',');
-  agendaFieldset.dataset.options = JSON.stringify(options);
+  const timeslots = getTimeSlots(cols[2]);
+  const fieldSetWrapper = createTag('agenda-fieldset-group');
+  fieldSetWrapper.dataset.timeslots = timeslots.join(',');
+  fieldSetWrapper.dataset.options = JSON.stringify(options);
 
-  row.append(agendaFieldset);
-
-  addRepeater(agendaFieldset, 'Add agenda time and details');
+  row.append(fieldSetWrapper);
 }
 
 function decorateCheckBox(row) {

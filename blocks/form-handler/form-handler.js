@@ -4,10 +4,14 @@ import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/es
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
 import { Repeater } from '../../components/repeater/repeater.js';
-import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
+import AgendaFieldsetGroup from '../../components/agenda-fieldset-group/agenda-fieldset-group.js';
 import { ProfileContainer } from '../../components/profile-container/profile-container.js';
 import { CustomTextfield } from '../../components/custom-textfield/custom-textfield.js';
+import ProductSelector from '../../components/product-selector/product-selector.js';
+import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
+import PartnerSelector from '../../components/partner-selector/partner-selector.js';
+import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -24,6 +28,7 @@ const VANILLA_COMPONENTS = [
   'event-community-link',
   'event-partners',
   'terms-conditions',
+  'product-promotion',
   'event-topics',
   'registration-details',
   'registration-fields',
@@ -48,6 +53,12 @@ const SPECTRUM_COMPONENTS = [
   'button',
 ];
 
+function getCurrentFragment(props) {
+  const frags = props.el.querySelectorAll('.fragment');
+  const currentFrag = frags[props.currentStep];
+  return currentFrag;
+}
+
 async function initComponents(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
@@ -69,7 +80,11 @@ async function initComponents(props) {
   customElements.define('profile-ui', Profile);
   customElements.define('repeater-element', Repeater);
   customElements.define('partner-selector', PartnerSelector);
+  customElements.define('partner-selector-group', PartnerSelectorGroup);
   customElements.define('agenda-fieldset', AgendaFieldset);
+  customElements.define('agenda-fieldset-group', AgendaFieldsetGroup);
+  customElements.define('product-selector', ProductSelector);
+  customElements.define('product-selector-group', ProductSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
 }
@@ -152,7 +167,6 @@ async function saveEvent(props) {
     const resp = await updateEvent(props.payload.eventId, props.payload);
     props.payload = { ...props.payload, ...resp };
   }
-  console.log('payload update', props.payload)
 }
 
 function updateSideNav(props) {
@@ -179,8 +193,7 @@ function validateRequiredFields(fields) {
 
 function onStepValidate(props) {
   return function updateCtaStatus() {
-    const frags = props.el.querySelectorAll('.fragment');
-    const currentFrag = frags[props.currentStep];
+    const currentFrag = getCurrentFragment(props);
     const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
     const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
 
@@ -213,17 +226,13 @@ function updateImgDropzoneConfigs(frag, props) {
   });
 }
 
-function updateRequiredFields(props, stepIndex) {
-  const frags = props.el.querySelectorAll('.fragment');
-  const currentFrag = stepIndex || frags[props.currentStep];
+function updateRequiredFields(props) {
+  const currentFrag = getCurrentFragment(props);
   props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(INPUT_TYPES.join());
-
-  updateImgDropzoneConfigs(currentFrag, props);
 }
 
 function initRequiredFieldsValidation(props) {
-  const frags = props.el.querySelectorAll('.fragment');
-  const currentFrag = frags[props.currentStep];
+  const currentFrag = getCurrentFragment(props);
 
   const inputValidationCB = onStepValidate(props);
   props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
@@ -415,6 +424,11 @@ async function buildECCForm(el) {
 
       if (prop === 'farthestStep') {
         updateSideNav(target);
+      }
+
+      if (prop === 'payload') {
+        console.log('payload updated:', props.payload);
+        updateImgDropzoneConfigs(getCurrentFragment(props), props);
       }
 
       return true;

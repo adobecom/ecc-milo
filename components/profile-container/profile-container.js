@@ -43,7 +43,7 @@ export class ProfileContainer extends LitElement {
         return html`
         <div class="profile-container">
         <profile-ui profile=${JSON.stringify(profile)} fieldlabels=${JSON.stringify(fieldlabels)} class="form-component">${imgTag}</profile-ui>
-        ${this.profiles?.length > 1 ? html`<img class="icon-delete" src="/icons/delete.svg" alt="delete" @click=${() => {
+        ${this.profiles?.length > 1 ? html`<img class="icon-remove-circle" src="/icons/remove-circle.svg" alt="remove-repeater" @click=${() => {
     this.profiles.splice(index, 1);
     this.requestUpdate();
   }}></img>` : nothing}

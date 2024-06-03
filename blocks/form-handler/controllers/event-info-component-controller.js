@@ -16,6 +16,8 @@ function formatDate(date) {
 }
 
 function parseFormatedDate(string) {
+  if (!string) return null;
+
   const [year, month, day] = string.split('-');
   const date = new Date(year, +month - 1, day);
 
@@ -266,10 +268,9 @@ function buildCalendar(component, parent) {
 function initCalendar(component) {
   let calendar;
   const datePickerContainer = component.querySelector('.date-picker');
-  const calendarIcon = datePickerContainer.querySelector('.icon-calendar-add');
   const input = component.querySelector('#event-info-date-picker');
 
-  calendarIcon.addEventListener('click', () => {
+  datePickerContainer.addEventListener('click', () => {
     if (calendar || input.disabled) return;
     calendar = createTag('div', { class: 'calendar-container' });
     datePickerContainer.append(calendar);

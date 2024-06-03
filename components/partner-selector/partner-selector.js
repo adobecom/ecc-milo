@@ -9,28 +9,42 @@ export default class PartnerSelector extends LitElement {
     selectedPartner: { type: Object },
   };
 
-  constructor() {
-    super();
-    this.partners = JSON.parse(this.dataset.partners);
-    this.selectedPartner = null;
-  }
-
   static styles = style;
 
   handleSelectChange(event) {
     const partnerName = event.target.value;
-    this.selectedPartner = this.partners.find((partner) => partner.name === partnerName);
+    this.selectedPartner = {
+      ...this.selectedPartner,
+      ...this.partners.find((partner) => partner.name === partnerName),
+    };
+
+    this.dispatchEvent(new CustomEvent('update-partner', {
+      detail: { partner: this.selectedPartner },
+      bubbles: true,
+      composed: true,
+    }));
+
+    this.requestUpdate();
+  }
+
+  handleCheckChange(event) {
+    const showPartnerLink = event.target.checked;
+    this.selectedPartner = {
+      ...this.selectedPartner,
+      showPartnerLink,
+    };
     this.requestUpdate();
   }
 
   render() {
     return html`
       <fieldset class="rsvp-field-wrapper">
-        ${this.selectedPartner ? html`<img class="partner-img" src="${this.selectedPartner.imageUrl}" alt="${this.selectedPartner.name}">` : html`<img class="partner-img">`}  
-        <sp-picker class="partner-select-input" label="Select a partner" @change="${this.handleSelectChange}">
+        ${html`<img class="partner-img" src="${this.selectedPartner.imageUrl || '/icons/icon-placeholder.svg'}" alt="${this.selectedPartner.name}">`}  
+        <sp-picker value=${this.selectedPartner.name} class="partner-select-input" label="Select a partner" @change="${this.handleSelectChange}">
           ${this.partners.map((partner) => html`<sp-menu-item value="${partner.name}">${partner.name}</sp-menu-item>`)}
         </sp-picker>
-        ${this.selectedPartner ? html`<sp-checkbox class="checkbox-partner-link">Link to ${this.selectedPartner.name}</sp-checkbox>` : html`<sp-checkbox class="checkbox-partner-link">Link to [Partner name]</sp-checkbox>`}
+        ${html`<sp-checkbox class="checkbox-partner-link" @change="${this.handleCheckChange}">Link to ${this.selectedPartner.name || '[Partner name]'}</sp-checkbox>`}
+        <slot name="delete-btn"></slot>
       </fieldset>
     `;
   }
