@@ -6,7 +6,7 @@
 
 .event-topics-component .checkbox-wrapper sp-checkbox {
   padding: 4px 16px;
-  border: var(--color-black) 2px solid;
+  border: var(--color-black) 1px solid;
   border-radius: 100px;
   transition: background-color 0.2s, color 0.2s;
   font-weight: 700;
