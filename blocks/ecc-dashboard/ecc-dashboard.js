@@ -55,19 +55,19 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
     previewPre.href = (() => {
-      const url = new URL(eventObj.url);
+      const url = new URL(`https://stage--events-milo--adobecom.hlx.page/events/${eventObj.url}`);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
       return url.toString();
     })();
 
     previewPost.href = (() => {
-      const url = new URL(eventObj.url);
+      const url = new URL(`https://stage--events-milo--adobecom.hlx.page/events/${eventObj.url}`);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
       return url.toString();
     })();
 
     // edit
-    const url = new URL(eventObj.url);
+    const url = new URL(`https://stage--events-milo--adobecom.hlx.page/events/${eventObj.url}`);
     url.searchParams.set('eventId', eventObj.eventId);
     edit.href = url.toString();
 
@@ -77,10 +77,9 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
       delete payload.eventId;
 
       const newEventJSON = await createEvent(payload);
-
-      if (newEventJSON.errors?.length > 0) return;
-
-      props.mutableData = { ...props.mutableData, ...newEventJSON };
+      const reloadUrl = new URL(window.location.href);
+      reloadUrl.searchParams.set('newEventId', newEventJSON.eventId);
+      window.location.assign(reloadUrl.href);
     });
 
     deleteBtn.addEventListener('click', async () => {
@@ -129,10 +128,11 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(event) {
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `https://stage--events-milo--adobecom.hlx.page/t3/event/${event.url}` }, event.title);
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `https://stage--events-milo--adobecom.hlx.page/events/${event.url}` }, event.title);
   return eventTitleTag;
 }
 
+// TODO: to retire
 async function buildVenueTag(venueId) {
   const venue = await getVenue(venueId);
 
