@@ -98,6 +98,21 @@ export async function publishEvent(eventId, payload) {
   return resp;
 }
 
+export async function unpublishEvent(eventId, payload) {
+  const raw = JSON.stringify({ ...payload, published: false });
+  const options = constructRequestOptions('PUT', raw);
+
+  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
+
+export async function deleteEvent(eventId) {
+  const options = constructRequestOptions('DELETE');
+
+  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
+
 export async function getEvents() {
   const options = constructRequestOptions('GET');
 

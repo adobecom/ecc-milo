@@ -54,6 +54,24 @@ const SPECTRUM_COMPONENTS = [
   'progress-circle',
 ];
 
+function replaceAnchorWithButton(anchor) {
+  if (!anchor || anchor.tagName !== 'A') {
+    console.error('The provided element is not an anchor tag.');
+    return null;
+  }
+
+  const attributes = {};
+  for (let i = 0; i < anchor.attributes.length; i += 1) {
+    const attr = anchor.attributes[i];
+    attributes[attr.name] = attr.value;
+  }
+
+  const button = createTag('button', attributes, anchor.innerHTML);
+
+  anchor.parentNode.replaceChild(button, anchor);
+  return button;
+}
+
 function getCurrentFragment(props) {
   const frags = props.el.querySelectorAll('.fragment');
   const currentFrag = frags[props.currentStep];
@@ -129,12 +147,13 @@ function decorateForm(el) {
       col.classList.add('side-menu');
       const navItems = col.querySelectorAll('a[href*="#"]');
       navItems.forEach((nav, index) => {
-        nav.classList.add('nav-item');
+        const btn = replaceAnchorWithButton(nav);
+        btn.classList.add('nav-item');
 
         if (index !== 0) {
-          nav.classList.add('disabled');
+          btn.disabled = true;
         } else {
-          nav.closest('li')?.classList.add('active');
+          btn.closest('li')?.classList.add('active');
         }
       });
     }
@@ -162,11 +181,13 @@ async function saveEvent(props) {
     const resp = await createEvent(props.payload);
     props.payload = { ...props.payload, ...resp };
   } else if (props.currentStep < props.maxStep) {
-    const resp = await publishEvent(props.payload.eventId, props.payload);
-    props.payload = { ...props.payload, ...resp };
-  } else {
     const resp = await updateEvent(props.payload.eventId, props.payload);
     props.payload = { ...props.payload, ...resp };
+  } else {
+    const resp = await publishEvent(props.payload.eventId, props.payload);
+    props.payload = { ...props.payload, ...resp };
+    const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+    if (dashboardLink) window.location.assign(dashboardLink.href);
   }
 }
 
@@ -175,7 +196,7 @@ function updateSideNav(props) {
 
   sideNavs.forEach((n, i) => {
     n.closest('li')?.classList.remove('active');
-    if (i <= props.farthestStep) n.classList.remove('disabled');
+    if (i <= props.farthestStep) n.disabled = false;
     if (i === props.currentStep) n.closest('li')?.classList.add('active');
   });
 }
@@ -403,8 +424,9 @@ function updatePreviewCtas(props) {
   const previewBtns = props.el.querySelectorAll('.preview-btns');
 
   previewBtns.forEach((a) => {
+    const testTime = new URL(a.href).hash === '#pre-event' ? +props.payload.localEndTimeMillis - 10 : +props.payload.localEndTimeMillis + 10;
     if (props.payload.url) {
-      a.href = `https://www.stage.adobe.com/events/${props.payload.url}?previewMode=true`;
+      a.href = `https://www.stage.adobe.com/events/${props.payload.url}?previewMode=true&timing=${testTime}`;
       a.classList.remove('preview-not-ready');
     }
   });
@@ -422,11 +444,23 @@ function initNavigation(props) {
 
   navItems.forEach((nav, i) => {
     nav.addEventListener('click', () => {
-      if (!nav.closest('li')?.classList.contains('disabled')) {
+      if (!nav.disabled) {
         navigateForm(props, i);
       }
     });
   });
+}
+
+function updateDashboardLink(props) {
+  // FIXME: presuming first link is dashboard link is not good.
+  if (!props.payload.eventId) return;
+  const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+
+  if (!dashboardLink) return;
+
+  const url = new URL(dashboardLink.href);
+  url.searchParams.set('newEventId', props.payload.eventId);
+  dashboardLink.href = url.toString();
 }
 
 async function buildECCForm(el) {
@@ -436,6 +470,8 @@ async function buildECCForm(el) {
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
+    // TODO: split payload and response data handler callbacks.
+    response: {},
   };
 
   const dataHandler = {
@@ -462,6 +498,7 @@ async function buildECCForm(el) {
         updateImgDropzoneConfigs(props);
         updateProfileContainer(props);
         updatePreviewCtas(props);
+        updateDashboardLink(props);
       }
 
       return true;

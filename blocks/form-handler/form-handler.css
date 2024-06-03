@@ -37,9 +37,16 @@
 }
 
 .form-handler .side-menu ul li a {
+  color: var(--color-black);
+}
+
+.form-handler .side-menu ul li a,
+.form-handler .side-menu ul li button {
+  text-align: left;
+  border: none;
+  background-color: transparent;
   padding-left: 12px;
   padding-right: 12px;
-  color: var(--color-black);
   width: 100%;
 }
 
@@ -50,20 +57,34 @@
   display: flex;
 }
 
-.form-handler .side-menu ul li:not(:has(ul)) a {
+.form-handler .side-menu ul li ul {
+  margin-top: 12px;
+}
+
+.form-handler .side-menu ul li ul li:not(:has(ul)) {
+  margin: 4px 0;
+}
+
+.form-handler .side-menu ul li:not(:has(ul)) a,
+.form-handler .side-menu ul li:not(:has(ul)) button {
   padding-top: 8px;
   padding-bottom: 8px;
+  cursor: pointer;
 }
 
 .form-handler .side-menu ul li:not(:has(ul)):has(a):hover,
-.form-handler .side-menu ul li:not(:has(ul)):has(a).active {
+.form-handler .side-menu ul li:not(:has(ul)):has(a).active,
+.form-handler .side-menu ul li:not(:has(ul)):has(button):hover,
+.form-handler .side-menu ul li:not(:has(ul)):has(button).active {
   background-color: var(--color-red);
   color: var(--color-white);
   font-weight: 700;
 }
 
 .form-handler .side-menu ul li:not(:has(ul)):has(a):hover a,
-.form-handler .side-menu ul li:not(:has(ul)):has(a).active a {
+.form-handler .side-menu ul li:not(:has(ul)):has(a).active a,
+.form-handler .side-menu ul li:not(:has(ul)):has(button).active button,
+.form-handler .side-menu ul li:not(:has(ul)):has(button):hover button {
   color: var(--color-white);
   font-weight: 700;
 }
@@ -72,7 +93,7 @@
   cursor: pointer;
 }
 
-.form-handler .side-menu .nav-item.disabled, {
+.form-handler .side-menu .nav-item.disabled {
   pointer-events: none;
   opacity: 0.5;
 }

@@ -39,7 +39,7 @@
     "localStartTimeMillis": 1621782000000,
     "localEndTimeMillis": 1621810800000,
     "duration": 8,
-    "detailPagePath": "https://example.com/create-now-chicago",
+    "url": "https://example.com/create-now-chicago",
     "communityTopicUrl": "https://community.example.com/create-now-chicago-discussion",
     "photos": [
       {
@@ -102,7 +102,7 @@
     "localStartTimeMillis": 1621868400000,
     "localEndTimeMillis": 1621893600000,
     "duration": 7,
-    "detailPagePath": "https://example.com/create-later-chicago",
+    "url": "https://example.com/create-later-chicago",
     "communityTopicUrl": "https://community.example.com/create-later-chicago-discussion",
     "photos": [
       {
@@ -165,7 +165,7 @@
     "localStartTimeMillis": 1622565600000,
     "localEndTimeMillis": 1622576400000,
     "duration": 3,
-    "detailPagePath": "https://example.com/video-editing-webinar",
+    "url": "https://example.com/video-editing-webinar",
     "communityTopicUrl": "https://community.example.com/video-editing-webinar-discussion",
     "photos": [
       {
@@ -228,7 +228,7 @@
     "localStartTimeMillis": 1626332400000,
     "localEndTimeMillis": 1626361200000,
     "duration": 8,
-    "detailPagePath": "https://example.com/creative-coding-with-xd",
+    "url": "https://example.com/creative-coding-with-xd",
     "communityTopicUrl": "https://community.example.com/creative-coding-with-xd-discussion",
     "photos": [
       {
@@ -293,7 +293,7 @@
     "localStartTimeMillis": 1629452400000,
     "localEndTimeMillis": 1629651600000,
     "duration": 33,
-    "detailPagePath": "https://example.com/ux-design-conference-2024",
+    "url": "https://example.com/ux-design-conference-2024",
     "communityTopicUrl": "https://community.example.com/ux-design-conference-2024-discussion",
     "photos": [
       {
@@ -356,7 +356,7 @@
     "localStartTimeMillis": 1621782000000,
     "localEndTimeMillis": 1621810800000,
     "duration": 8,
-    "detailPagePath": "https://example.com/create-now-chicago",
+    "url": "https://example.com/create-now-chicago",
     "communityTopicUrl": "https://community.example.com/create-now-chicago-discussion",
     "photos": [
       {
@@ -419,7 +419,7 @@
     "localStartTimeMillis": 1621868400000,
     "localEndTimeMillis": 1621893600000,
     "duration": 7,
-    "detailPagePath": "https://example.com/create-later-chicago",
+    "url": "https://example.com/create-later-chicago",
     "communityTopicUrl": "https://community.example.com/create-later-chicago-discussion",
     "photos": [
       {
@@ -482,7 +482,7 @@
     "localStartTimeMillis": 1622565600000,
     "localEndTimeMillis": 1622576400000,
     "duration": 3,
-    "detailPagePath": "https://example.com/video-editing-webinar",
+    "url": "https://example.com/video-editing-webinar",
     "communityTopicUrl": "https://community.example.com/video-editing-webinar-discussion",
     "photos": [
       {
@@ -545,7 +545,7 @@
     "localStartTimeMillis": 1626332400000,
     "localEndTimeMillis": 1626361200000,
     "duration": 8,
-    "detailPagePath": "https://example.com/creative-coding-with-xd",
+    "url": "https://example.com/creative-coding-with-xd",
     "communityTopicUrl": "https://community.example.com/creative-coding-with-xd-discussion",
     "photos": [
       {
@@ -610,7 +610,7 @@
     "localStartTimeMillis": 1629452400000,
     "localEndTimeMillis": 1629651600000,
     "duration": 33,
-    "detailPagePath": "https://example.com/ux-design-conference-2024",
+    "url": "https://example.com/ux-design-conference-2024",
     "communityTopicUrl": "https://community.example.com/ux-design-conference-2024-discussion",
     "photos": [
       {
@@ -673,7 +673,7 @@
     "localStartTimeMillis": 1621782000000,
     "localEndTimeMillis": 1621810800000,
     "duration": 8,
-    "detailPagePath": "https://example.com/create-now-chicago",
+    "url": "https://example.com/create-now-chicago",
     "communityTopicUrl": "https://community.example.com/create-now-chicago-discussion",
     "photos": [
       {
@@ -736,7 +736,7 @@
     "localStartTimeMillis": 1621868400000,
     "localEndTimeMillis": 1621893600000,
     "duration": 7,
-    "detailPagePath": "https://example.com/create-later-chicago",
+    "url": "https://example.com/create-later-chicago",
     "communityTopicUrl": "https://community.example.com/create-later-chicago-discussion",
     "photos": [
       {
@@ -799,7 +799,7 @@
     "localStartTimeMillis": 1622565600000,
     "localEndTimeMillis": 1622576400000,
     "duration": 3,
-    "detailPagePath": "https://example.com/video-editing-webinar",
+    "url": "https://example.com/video-editing-webinar",
     "communityTopicUrl": "https://community.example.com/video-editing-webinar-discussion",
     "photos": [
       {
@@ -862,7 +862,7 @@
     "localStartTimeMillis": 1626332400000,
     "localEndTimeMillis": 1626361200000,
     "duration": 8,
-    "detailPagePath": "https://example.com/creative-coding-with-xd",
+    "url": "https://example.com/creative-coding-with-xd",
     "communityTopicUrl": "https://community.example.com/creative-coding-with-xd-discussion",
     "photos": [
       {
@@ -927,7 +927,7 @@
     "localStartTimeMillis": 1629452400000,
     "localEndTimeMillis": 1629651600000,
     "duration": 33,
-    "detailPagePath": "https://example.com/ux-design-conference-2024",
+    "url": "https://example.com/ux-design-conference-2024",
     "communityTopicUrl": "https://community.example.com/ux-design-conference-2024-discussion",
     "photos": [
       {
@@ -990,7 +990,7 @@
     "localStartTimeMillis": 1621782000000,
     "localEndTimeMillis": 1621810800000,
     "duration": 8,
-    "detailPagePath": "https://example.com/create-now-chicago",
+    "url": "https://example.com/create-now-chicago",
     "communityTopicUrl": "https://community.example.com/create-now-chicago-discussion",
     "photos": [
       {
@@ -1053,7 +1053,7 @@
     "localStartTimeMillis": 1621868400000,
     "localEndTimeMillis": 1621893600000,
     "duration": 7,
-    "detailPagePath": "https://example.com/create-later-chicago",
+    "url": "https://example.com/create-later-chicago",
     "communityTopicUrl": "https://community.example.com/create-later-chicago-discussion",
     "photos": [
       {
@@ -1116,7 +1116,7 @@
     "localStartTimeMillis": 1622565600000,
     "localEndTimeMillis": 1622576400000,
     "duration": 3,
-    "detailPagePath": "https://example.com/video-editing-webinar",
+    "url": "https://example.com/video-editing-webinar",
     "communityTopicUrl": "https://community.example.com/video-editing-webinar-discussion",
     "photos": [
       {
@@ -1179,7 +1179,7 @@
     "localStartTimeMillis": 1626332400000,
     "localEndTimeMillis": 1626361200000,
     "duration": 8,
-    "detailPagePath": "https://example.com/creative-coding-with-xd",
+    "url": "https://example.com/creative-coding-with-xd",
     "communityTopicUrl": "https://community.example.com/creative-coding-with-xd-discussion",
     "photos": [
       {

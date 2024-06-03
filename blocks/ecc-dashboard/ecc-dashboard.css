@@ -104,6 +104,11 @@
 .ecc-dashboard table .event-row {
   height: 140px;
   border-bottom: 2px solid var(--color-gray-300);
+  transition: background-color 1s;
+}
+
+.ecc-dashboard table .event-row.highlight {
+  background-color: #EAEAEA;
 }
 
 .ecc-dashboard table .event-row .event-title-link {
