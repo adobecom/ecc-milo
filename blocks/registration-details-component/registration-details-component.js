@@ -62,6 +62,7 @@ function decorateAllCheckboxes(el) {
       const [checkboxText, inputText] = li.textContent.trim().split('|');
       const checkbox = createTag('sp-checkbox', { id: 'registration-contact-host' }, checkboxText);
       const input = createTag('sp-textfield', {
+        id: 'event-host-email-input',
         class: 'text-input',
         placeholder: inputText,
         size: 's',
@@ -82,6 +83,8 @@ export default async function init(el) {
   rows.forEach((r, i) => {
     if (i === 0) generateToolTip(r);
     if (i === 1) decorateAttendeeFields(r);
-    if (i === 2 || i === 3 || i === 4) decorateSWCTextField(r, { quiet: true, size: 'xl' });
+    if (i === 2) decorateSWCTextField(r, { quiet: true, size: 'xl', id: 'rsvp-form-detail-title' });
+    if (i === 3) decorateSWCTextField(r, { quiet: true, size: 'xl', id: 'rsvp-form-detail-subtitle' });
+    if (i === 4) decorateSWCTextField(r, { quiet: true, size: 'xl', id: 'rsvp-form-detail-description' });
   });
 }

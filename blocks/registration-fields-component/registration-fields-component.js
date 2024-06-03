@@ -38,8 +38,8 @@ async function decorateRSVPFields(row) {
     }
     const catText = convertString(field.Field);
     createTag('div', { class: 'cat-text' }, catText, { parent: tds[0] });
-    createTag('sp-checkbox', { class: 'check-appear' }, 'Appears on form', { parent: tds[1] });
-    createTag('sp-checkbox', { class: 'check-require' }, 'Required field', { parent: tds[2] });
+    createTag('sp-checkbox', { class: 'check-appear', name: field.Field }, 'Appears on form', { parent: tds[1] });
+    createTag('sp-checkbox', { class: 'check-require', name: field.Field }, 'Required field', { parent: tds[2] });
   });
 }
 
