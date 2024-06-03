@@ -25,6 +25,8 @@ const VANILLA_COMPONENTS = [
   'event-partners',
   'terms-conditions',
   'event-topics',
+  'registration-details',
+  'registration-fields',
 ];
 
 const INPUT_TYPES = [

@@ -10,7 +10,7 @@ function decorateAttendeeFields(row) {
   cols.forEach((c, i) => {
     if (i === 0) {
       c.classList.add('attendee-count-wrapper');
-      const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number' });
+      const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number', min: 0 });
       const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, c.textContent.trim());
       c.innerHTML = '';
       c.append(input, label);
