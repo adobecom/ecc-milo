@@ -24,6 +24,9 @@ const VANILLA_COMPONENTS = [
   'event-community-link',
   'event-partners',
   'terms-conditions',
+  'event-topics',
+  'registration-details',
+  'registration-fields',
 ];
 
 const INPUT_TYPES = [
