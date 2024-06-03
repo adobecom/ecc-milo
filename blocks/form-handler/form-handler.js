@@ -51,6 +51,7 @@ const SPECTRUM_COMPONENTS = [
   'field-label',
   'divider',
   'button',
+  'progress-circle',
 ];
 
 function getCurrentFragment(props) {
@@ -207,8 +208,8 @@ function onStepValidate(props) {
   };
 }
 
-function updateImgDropzoneConfigs(frag, props) {
-  const dropzones = frag.querySelectorAll('image-dropzone');
+function updateImgDropzoneConfigs(props) {
+  const dropzones = document.querySelectorAll('image-dropzone');
 
   dropzones.forEach((dz) => {
     const wrappingBlock = dz.closest('.form-component');
@@ -222,7 +223,16 @@ function updateImgDropzoneConfigs(frag, props) {
         targetUrl: `http://localhost:8500/v1/events/${props.payload.eventId}/images`,
       };
       dz.setAttribute('configs', JSON.stringify(configs));
+      dz.requestUpdate();
     }
+  });
+}
+
+function updateProfileContainer(props) {
+  const containers = document.querySelectorAll('profile-container');
+  containers.forEach((c) => {
+    c.setAttribute('seriesId', props.payload.seriesId);
+    c.requestUpdate();
   });
 }
 
@@ -330,17 +340,25 @@ function initFormCtas(props) {
 
   backwardWrapper.append(backBtn);
 
+  const toggleBtnsSubmittingState = (submitting) => {
+    ctas.forEach((c) => {
+      c.classList.toggle('submitting', submitting);
+    });
+  };
+
   ctas.forEach((cta) => {
     if (cta.href) {
       const ctaUrl = new URL(cta.href);
 
       if (['#pre-event', '#post-event'].includes(ctaUrl.hash)) {
-        cta.classList.add('fill');
-        cta.addEventListener('click', async () => {
+        cta.classList.add('fill', 'preview-btns', 'preview-not-ready');
+        cta.addEventListener('click', async (e) => {
+          e.preventDefault();
+          toggleBtnsSubmittingState(true);
+          if (cta.classList.contains('preview-not-ready')) return;
           await saveEvent(props);
-          // TODO: use real .page links
-          const targetRedirect = `${window.location.origin}/event/t3/dme/preview?eventId=${props.payload['event-id']}`;
-          window.open(targetRedirect);
+          window.open(cta.href);
+          toggleBtnsSubmittingState(false);
         });
       }
 
@@ -362,6 +380,7 @@ function initFormCtas(props) {
         }
 
         cta.addEventListener('click', async () => {
+          toggleBtnsSubmittingState(true);
           await saveEvent(props);
 
           if (ctaUrl.hash === '#next') {
@@ -369,6 +388,7 @@ function initFormCtas(props) {
               navigateForm(props);
             }
           }
+          toggleBtnsSubmittingState(false);
         });
       }
     }
@@ -376,6 +396,17 @@ function initFormCtas(props) {
 
   backBtn.addEventListener('click', async () => {
     props.currentStep -= 1;
+  });
+}
+
+function updatePreviewCtas(props) {
+  const previewBtns = props.el.querySelectorAll('.preview-btns');
+
+  previewBtns.forEach((a) => {
+    if (props.payload.url) {
+      a.href = `https://www.stage.adobe.com/events/${props.payload.url}?previewMode=true`;
+      a.classList.remove('preview-not-ready');
+    }
   });
 }
 
@@ -428,7 +459,9 @@ async function buildECCForm(el) {
 
       if (prop === 'payload') {
         console.log('payload updated:', props.payload);
-        updateImgDropzoneConfigs(getCurrentFragment(props), props);
+        updateImgDropzoneConfigs(props);
+        updateProfileContainer(props);
+        updatePreviewCtas(props);
       }
 
       return true;

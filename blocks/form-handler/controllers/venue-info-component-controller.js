@@ -26,11 +26,12 @@ function initAutocomplete(el) {
   const zip = el.querySelector('#location-zip-code');
   const country = el.querySelector('#location-country');
   const placeId = el.querySelector('#google-place-id');
+  const mapUrl = el.querySelector('#google-map-url');
   const placeLAT = el.querySelector('#google-place-lat');
   const placeLNG = el.querySelector('#google-place-lng');
   const placeGmtOffset = el.querySelector('#google-place-gmt-offset');
 
-  autocomplete.setFields(['name', 'address_components', 'geometry', 'place_id', 'utc_offset_minutes']);
+  autocomplete.setFields(['name', 'address_components', 'geometry', 'place_id', 'utc_offset_minutes', 'url']);
 
   autocomplete.addListener('place_changed', () => {
     const place = autocomplete.getPlace();
@@ -74,6 +75,7 @@ function initAutocomplete(el) {
       changeInputValue(zip, 'value', addressInfo.zip);
       changeInputValue(country, 'value', addressInfo.country);
       changeInputValue(placeId, 'value', place.place_id);
+      changeInputValue(mapUrl, 'value', place.url);
     }
 
     if (place.geometry) {
@@ -95,6 +97,8 @@ export default function init(component, props) {
     state,
     postalCode,
     country,
+    placeId,
+    mapUrl,
   } = props.payload;
 
   changeInputValue(component.querySelector('#venue-info-venue-name'), 'value', venueName);
@@ -105,6 +109,8 @@ export default function init(component, props) {
   changeInputValue(component.querySelector('#location-country'), 'value', country);
   changeInputValue(component.querySelector('#google-place-lat'), 'value', props.payload.coordinates?.lat);
   changeInputValue(component.querySelector('#google-place-lng'), 'value', props.payload.coordinates?.lon);
+  changeInputValue(component.querySelector('#google-place-id'), 'value', placeId);
+  changeInputValue(component.querySelector('#google-map-url'), 'value', mapUrl);
 }
 
 export async function onSubmit(component, props) {
@@ -115,7 +121,8 @@ export async function onSubmit(component, props) {
   const state = component.querySelector('#location-state').value;
   const postalCode = component.querySelector('#location-zip-code').value;
   const country = component.querySelector('#location-country').value;
-  // const placeId = component.querySelector('#google-place-id').value;
+  const placeId = component.querySelector('#google-place-id').value;
+  const mapUrl = component.querySelector('#google-map-url').value;
   const lat = +component.querySelector('#google-place-lat').value;
   const lon = +component.querySelector('#google-place-lng').value;
   const gmtOffset = +component.querySelector('#google-place-gmt-offset').value;
@@ -128,6 +135,8 @@ export async function onSubmit(component, props) {
     state,
     postalCode,
     country,
+    placeId,
+    mapUrl,
     coordinates: {
       lat,
       lon,

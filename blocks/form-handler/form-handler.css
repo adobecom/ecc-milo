@@ -72,7 +72,7 @@
   cursor: pointer;
 }
 
-.form-handler .side-menu .nav-item.disabled {
+.form-handler .side-menu .nav-item.disabled, {
   pointer-events: none;
   opacity: 0.5;
 }
@@ -228,7 +228,9 @@
   font-size: var(--type-body-s-size);
 }
 
-.form-handler .form-handler-ctas-panel a.disabled {
+.form-handler .form-handler-ctas-panel a.disabled,
+.form-handler .form-handler-ctas-panel a.preview-not-ready,
+.form-handler .form-handler-ctas-panel a.submitting {
   pointer-events: none;
   opacity: 0.5;
 }

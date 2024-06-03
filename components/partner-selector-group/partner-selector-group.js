@@ -37,7 +37,6 @@ export default class PartnerSelectorGroup extends LitElement {
   }
 
   getSelectedPartners() {
-    console.log(this.selectedPartners);
     return this.selectedPartners;
   }
 

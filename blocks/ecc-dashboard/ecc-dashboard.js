@@ -267,6 +267,10 @@ function buildDashboardHeader(props) {
 }
 
 function buildDashboardTable(props) {
+  const { search } = window.location;
+  const urlParams = new URLSearchParams(search);
+  const newEventId = urlParams.get('newEvent');
+
   const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
   const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
   const thead = createTag('thead', {}, '', { parent: table });
@@ -353,6 +357,12 @@ function buildNoEventScreen(el, props) {
 }
 
 async function buildDashboard(el, config) {
+  const miloLibs = getLibs();
+  await Promise.all([
+    import(`${miloLibs}/deps/lit-all.min.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/sp-toast.js`),
+  ]);
+
   const props = {
     el,
     currentPage: 1,
@@ -365,6 +375,10 @@ async function buildDashboard(el, config) {
   if (!data?.length) {
     buildNoEventScreen(el, props);
   } else {
+    const { search } = window.location;
+    const urlParams = new URLSearchParams(search);
+    const newEventId = urlParams.get('newEvent');
+
     props.data = data;
     props.mutableData = [...data];
     const dataHandler = {

@@ -2,8 +2,9 @@
 /* eslint-disable class-methods-use-this */
 import { getLibs } from '../../scripts/utils.js';
 import { style } from './profile.css.js';
+import { createSpeaker } from '../../utils/esp-controller.js';
 
-const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, nothing, query } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 const defaultFieldLabels = {
   heading: 'Profile',
@@ -20,6 +21,7 @@ const speakerType = ['Presenter', 'Host', 'Speaker', 'Keynote'];
 
 export class Profile extends LitElement {
   static properties = {
+    seriesId: { type: String },
     fieldlabels: { type: Object, reflect: true },
     profile: { type: Object, reflect: true },
   };
@@ -32,6 +34,10 @@ export class Profile extends LitElement {
     this.fieldlabels = this.fieldlabels ?? defaultFieldLabels;
 
     this.profile = this.profile ?? { socialMedia: [{ url: '' }] };
+  }
+
+  firstUpdated() {
+    this.imageDropzone = this.shadowRoot.querySelector('image-dropzone');
   }
 
   addSocialMedia() {
@@ -105,9 +111,8 @@ export class Profile extends LitElement {
     <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateValue('firstName', event.detail.value)}></custom-textfield>
     <custom-textfield data=${JSON.stringify(lastNameData)} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateValue('lastName', event.detail.value)}></custom-textfield>
     <image-dropzone configs=${JSON.stringify({
+    uploadOnEvent: true,
     type: 'speaker-photo',
-    // TODO: get metadata from file
-    altText: 'speaker image',
     targetUrl: `http://localhost:8500/v1/speakers/${this.profile.id}/images`,
   })}>
         <slot name="img-label" slot="img-label"></slot>
@@ -130,7 +135,17 @@ export class Profile extends LitElement {
     </div>
     <repeater-element text=${fieldLabelsJSON.addSocialMediaRepeater} @repeat=${() => { this.addSocialMedia(); }}></repeater-element>
     <sp-divider size='s'></sp-divider>
-    <sp-button variant="primary" class="save-profile-button">Save Profile</sp-button>
+    <sp-button variant="primary" class="save-profile-button" @click=${async () => {
+    const respJson = await createSpeaker(this.profile, this.seriesId);
+    if (respJson.speakerId) {
+      this.profile.id = respJson.speakerId;
+      this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload', {
+        detail: { targetUrl: `http://localhost:8500/v1/speakers/${this.profile.id}/images` },
+        bubbles: true,
+        composed: true,
+      }));
+    }
+  }}>Save Profile</sp-button>
     `;
   }
 
