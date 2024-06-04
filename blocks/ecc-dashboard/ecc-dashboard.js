@@ -1,4 +1,6 @@
-import { createEvent, deleteEvent, getEvents, getVenue, publishEvent, unpublishEvent } from '../../utils/esp-controller.js';
+import {
+  createEvent, deleteEvent, getEvents, getVenue, publishEvent, unpublishEvent,
+} from '../../utils/esp-controller.js';
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
 
