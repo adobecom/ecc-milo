@@ -44,7 +44,7 @@ function buildAdditionalInfo(row) {
   wrapper.append(checkbox);
   fieldSet.append(wrapper);
 
-  const additionComment = createTag('div', { class: 'addition-comment' });
+  const additionComment = createTag('div', { class: 'additional-comment' });
   additionComment.append(comment.textContent.trim());
   row.innerHTML = '';
   fieldSet.append(additionComment);
