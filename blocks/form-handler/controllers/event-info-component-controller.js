@@ -166,11 +166,11 @@ function selectDate(component, state, date) {
 function updateInput(component, state) {
   const dateInput = component.querySelector('#event-info-date-picker');
 
-  dateInput.dataset.startDate = formatDate(state.selectedStartDate);
-  dateInput.dataset.endDate = formatDate(state.selectedEndDate);
-
   if (dateInput) {
-    dateInput.value = `${dateInput.dataset.startDate} - ${dateInput.dataset.endDate}`;
+    if (state.selectedStartDate) dateInput.dataset.startDate = formatDate(state.selectedStartDate);
+    if (state.selectedEndDate) dateInput.dataset.endDate = formatDate(state.selectedEndDate);
+
+    if (dateInput.dataset.startDate && dateInput.dataset.endDate) dateInput.value = `${dateInput.dataset.startDate} - ${dateInput.dataset.endDate}`;
   }
 }
 

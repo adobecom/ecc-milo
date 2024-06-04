@@ -1,4 +1,6 @@
-import { getEvents, getVenue } from '../../utils/esp-controller.js';
+import {
+  createEvent, deleteEvent, getEvents, getVenue, publishEvent, unpublishEvent,
+} from '../../utils/esp-controller.js';
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
 
@@ -25,8 +27,8 @@ function buildThumbnail(data) {
 function initMoreOptions(props, eventObj, moreOptionsCell) {
   const moreOptionIcon = moreOptionsCell.querySelector('.icon-more-small-list');
 
-  const buildTool = (parent, id, text, icon) => {
-    const tool = createTag('a', { id, class: 'dash-event-tool', href: '#' }, text, { parent });
+  const buildTool = (parent, text, icon) => {
+    const tool = createTag('a', { class: 'dash-event-tool', href: '#' }, text, { parent });
     tool.prepend(getIcon(icon));
     return tool;
   };
@@ -35,26 +37,57 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
     const toolBox = createTag('div', { class: 'dashboard-event-tool-box' });
 
     if (eventObj.published) {
-      buildTool(toolBox, 'dash-tool-unpublish-event', 'Unpublish', 'publish-remove');
+      const unpub = buildTool(toolBox, 'Unpublish', 'publish-remove');
+      unpub.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await unpublishEvent(eventObj.eventId, eventObj);
+      });
     } else {
-      buildTool(toolBox, 'dash-tool-publish-event', 'Publish', 'publish-rocket');
+      const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
+      pub.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await publishEvent(eventObj.eventId, eventObj);
+      });
     }
 
-    buildTool(toolBox, 'dash-tool-preview-pre-event', 'Preview pre-event', 'preview-eye');
-    buildTool(toolBox, 'dash-tool-preview-post-event', 'Preview post-event', 'preview-eye');
-    const edit = buildTool(toolBox, 'dash-tool-edit-event', 'Edit', 'edit-pencil');
-    const clone = buildTool(toolBox, 'dash-tool-clone-event', 'Clone', 'clone');
-    buildTool(toolBox, 'dash-tool-delete-event', 'Delete', 'delete-wire-round');
+    const previewPre = buildTool(toolBox, 'Preview pre-event', 'preview-eye');
+    const previewPost = buildTool(toolBox, 'Preview post-event', 'preview-eye');
+    const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
+    const clone = buildTool(toolBox, 'Clone', 'clone');
+    const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
-    // TODO: enable each tool to perform their functions.
+    previewPre.href = (() => {
+      const url = new URL(`https://stage--events-milo--adobecom.hlx.page/events/${eventObj.url}`);
+      url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
+      return url.toString();
+    })();
 
-    edit.href = `${props.createFormUrl}?${eventObj.eventId}`;
-    clone.addEventListener('click', () => {
+    previewPost.href = (() => {
+      const url = new URL(`https://stage--events-milo--adobecom.hlx.page/events/${eventObj.url}`);
+      url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
+      return url.toString();
+    })();
+
+    // edit
+    const url = new URL(`https://stage--events-milo--adobecom.hlx.page/events/${eventObj.url}`);
+    url.searchParams.set('eventId', eventObj.eventId);
+    edit.href = url.toString();
+
+    // clone
+    clone.addEventListener('click', async () => {
       const payload = { ...eventObj };
       delete payload.eventId;
 
-      console.log('POST to ESP with this payload with eventId already removed:', payload);
-      // TODO: rerender the dashboard with the response.
+      const newEventJSON = await createEvent(payload);
+      const reloadUrl = new URL(window.location.href);
+      reloadUrl.searchParams.set('newEventId', newEventJSON.eventId);
+      window.location.assign(reloadUrl.href);
+    });
+
+    deleteBtn.addEventListener('click', async () => {
+      await deleteEvent(eventObj.eventId);
+      const newJson = await getEvents();
+      props.mutableData = newJson.events;
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
@@ -97,10 +130,11 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(event) {
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `https://stage--events-milo--adobecom.hlx.page/t3/event/${event.detailPagePath}` }, event.title);
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `https://stage--events-milo--adobecom.hlx.page/events/${event.url}` }, event.title);
   return eventTitleTag;
 }
 
+// TODO: to retire
 async function buildVenueTag(venueId) {
   const venue = await getVenue(venueId);
 
@@ -113,6 +147,7 @@ async function buildVenueTag(venueId) {
 async function populateRow(props, index) {
   const event = props.mutableData[index];
   const tBody = props.el.querySelector('table.dashboard-table tbody');
+  const toastArea = props.el.querySelector('.toast-area');
 
   // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'event-row' }, '', { parent: tBody });
@@ -139,10 +174,21 @@ async function populateRow(props, index) {
   );
 
   initMoreOptions(props, event, moreOptionsCell);
+
+  if (event.eventId === new URLSearchParams(window.location.search).get('newEventId')) {
+    createTag('sp-toast', { open: true, variant: 'positive' }, `New event <strong>${event.title}</strong> created`, { parent: toastArea });
+    row.classList.add('highlight');
+
+    setTimeout(() => {
+      row.classList.remove('highlight');
+    }, 1000);
+  }
 }
 
 function populateTable(props) {
+  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' });
   const tBody = props.el.querySelector('table.dashboard-table tbody');
+  props.el.append(spTheme);
   tBody.innerHTML = '';
 
   const endOfPages = Math.min(props.currentPage + 10, props.mutableData.length);
@@ -283,6 +329,7 @@ function buildDashboardTable(props) {
     externalEventId: 'RSVP DATA',
     manage: 'MANAGE',
   };
+
   const tr = createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
 
   Object.entries(headers).forEach(([key, val]) => {
@@ -312,7 +359,7 @@ async function getEventsArray() {
   const json = await getEvents();
   const mock = await fetch('/blocks/ecc-dashboard/mock.json').then((resp) => resp.json()).catch((error) => console.log(error));
 
-  if (!json) return mock;
+  if (!json || json.errors?.length > 0) return mock;
 
   return json.events;
 }
@@ -353,6 +400,13 @@ function buildNoEventScreen(el, props) {
 }
 
 async function buildDashboard(el, config) {
+  const miloLibs = getLibs();
+  await Promise.all([
+    import(`${miloLibs}/deps/lit-all.min.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/toast.js`),
+  ]);
+
   const props = {
     el,
     currentPage: 1,

@@ -18,6 +18,11 @@ export class ImageDropzone extends LitElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.file = null;
+    this.configs = {
+      targetUrl: null,
+      type: null,
+      uploadOnEvent: false,
+    };
   }
 
   async handleImageFiles(files) {
@@ -25,7 +30,18 @@ export class ImageDropzone extends LitElement {
       [this.file] = files;
       if (this.file.type.startsWith('image/')) {
         this.file.url = URL.createObjectURL(this.file);
-        await uploadBinaryFile(this.file, this.configs);
+
+        if (this.configs.uploadOnEvent) {
+          this.addEventListener('shouldupload', (e) => {
+            this.configs = { ...this.configs, ...e.detail };
+            uploadBinaryFile(this.file, this.configs).then(() => {
+              this.requestUpdate();
+            });
+          });
+        } else {
+          await uploadBinaryFile(this.file, this.configs);
+          this.requestUpdate();
+        }
       }
     }
   }

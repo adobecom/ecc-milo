@@ -44,7 +44,7 @@ function buildAdditionalInfo(row) {
   wrapper.append(checkbox);
   fieldSet.append(wrapper);
 
-  const additionComment = createTag('div', { class: 'addition-comment' });
+  const additionComment = createTag('div', { class: 'additional-comment' });
   additionComment.append(comment.textContent.trim());
   row.innerHTML = '';
   fieldSet.append(additionComment);
@@ -108,10 +108,17 @@ function buildLocationInputGrid(row) {
     }
   });
   const placeIdInput = createTag('input', { id: 'google-place-id', type: 'hidden' });
+  const mapUrlInput = createTag('input', { id: 'google-map-url', type: 'hidden' });
   const placeLATInput = createTag('input', { id: 'google-place-lat', type: 'hidden' });
   const placeLNGInput = createTag('input', { id: 'google-place-lng', type: 'hidden' });
   const gmtOffsetInput = createTag('input', { id: 'google-place-gmt-offset', type: 'hidden' });
-  locationDetailsWrapper.append(placeIdInput, placeLATInput, placeLNGInput, gmtOffsetInput);
+  locationDetailsWrapper.append(
+    placeIdInput,
+    mapUrlInput,
+    placeLATInput,
+    placeLNGInput,
+    gmtOffsetInput,
+  );
 
   row.innerHTML = '';
   row.append(locationDetailsWrapper);

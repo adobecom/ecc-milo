@@ -1,3 +1,18 @@
+function constructRequestOptions(method, body = null) {
+  const headers = new Headers();
+  headers.append('Authorization', 'Bearer');
+  headers.append('content-type', 'application/json');
+
+  const options = {
+    method,
+    headers,
+  };
+
+  if (body) options.body = body;
+
+  return options;
+}
+
 export async function uploadImage(file) {
   const formData = new FormData();
   formData.append('file', file);
@@ -15,141 +30,107 @@ export async function uploadImage(file) {
     });
 }
 
-export function uploadBinaryFile(file, configs) {
-  const xhr = new XMLHttpRequest();
-  xhr.open('POST', configs.targetUrl, true);
+export async function uploadBinaryFile(file, configs) {
+  const headers = new Headers();
+  headers.append('x-image-kind', configs.type);
+  headers.append('x-image-alt-text', configs.altText);
+  headers.append('Authorization', 'Bearer');
 
-  // TODO: set required headers
+  try {
+    const response = await fetch(configs.targetUrl, {
+      method: 'POST',
+      headers,
+      body: file,
+    });
 
-  xhr.setRequestHeader('x-image-kind', configs.type);
-  xhr.setRequestHeader('x-image-alt-text', configs.altText);
-  xhr.setRequestHeader('Content-Type', file.type);
-  xhr.setRequestHeader('Authorization', 'Bearer');
-  xhr.onload = () => {
-    if (xhr.status === 201) {
-      console.log('Success:', xhr.responseText);
+    if (response.ok) {
+      const responseData = await response.text();
+      console.log('Success:', responseData);
     } else {
-      console.error('Error Status:', xhr.status);
+      console.error('Error Status:', response.status);
     }
-  };
-
-  xhr.onerror = () => {
-    console.error('Network error');
-  };
-
-  xhr.send(file);
+  } catch (error) {
+    console.error('Network error', error);
+  }
 }
 
 export async function createVenue(payload) {
-  const myHeaders = new Headers();
-  myHeaders.append('Authorization', 'Bearer');
-  myHeaders.append('content-type', 'application/json');
-
   const raw = JSON.stringify(payload);
+  const options = constructRequestOptions('POST', raw);
 
-  const requestOptions = {
-    method: 'POST',
-    headers: myHeaders,
-    body: raw,
-  };
-
-  const resp = await fetch('http://localhost:8500/v1/venues', requestOptions).then((res) => res.json()).catch((error) => console.log(error));
-  console.log(payload, resp);
+  const resp = await fetch('http://localhost:8500/v1/venues', options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
 export async function createEvent(payload) {
-  const myHeaders = new Headers();
-  myHeaders.append('Authorization', 'Bearer');
-  myHeaders.append('content-type', 'application/json');
-
   const raw = JSON.stringify(payload);
+  const options = constructRequestOptions('POST', raw);
 
-  const requestOptions = {
-    method: 'POST',
-    headers: myHeaders,
-    body: raw,
-  };
-
-  const resp = await fetch('http://localhost:8500/v1/events', requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch('http://localhost:8500/v1/events', options).then((res) => res.json()).catch((error) => console.log(error));
   console.log('attempted to create event', payload, resp);
   return resp;
 }
 
+export async function createSpeaker(profile, seriesId) {
+  const raw = JSON.stringify({ ...profile, seriesId });
+  console.log(raw);
+  const options = constructRequestOptions('POST', raw);
+
+  const resp = await fetch('http://localhost:8500/v1/speakers', options).then((res) => res.json()).catch((error) => console.log(error));
+  console.log('attempted to create speaker', raw, resp);
+  return resp;
+}
+
 export async function updateEvent(eventId, payload) {
-  const myHeaders = new Headers();
-  myHeaders.append('Authorization', 'Bearer');
-  myHeaders.append('content-type', 'application/json');
-
   const raw = JSON.stringify(payload);
+  const options = constructRequestOptions('PUT', raw);
 
-  const requestOptions = {
-    method: 'PUT',
-    headers: myHeaders,
-    body: raw,
-  };
-
-  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   console.log(payload, resp);
   return resp;
 }
 
 export async function publishEvent(eventId, payload) {
-  const myHeaders = new Headers();
-  myHeaders.append('Authorization', 'Bearer');
-  myHeaders.append('content-type', 'application/json');
-
   const raw = JSON.stringify({ ...payload, published: true });
+  const options = constructRequestOptions('PUT', raw);
 
-  const requestOptions = {
-    method: 'PUT',
-    headers: myHeaders,
-    body: raw,
-  };
+  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
 
-  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+export async function unpublishEvent(eventId, payload) {
+  const raw = JSON.stringify({ ...payload, published: false });
+  const options = constructRequestOptions('PUT', raw);
+
+  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
+
+export async function deleteEvent(eventId) {
+  const options = constructRequestOptions('DELETE');
+
+  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
 export async function getEvents() {
-  const myHeaders = new Headers();
-  myHeaders.append('Authorization', 'Bearer');
-  myHeaders.append('content-type', 'application/json');
+  const options = constructRequestOptions('GET');
 
-  const requestOptions = {
-    method: 'GET',
-    headers: myHeaders,
-  };
-
-  const resp = fetch('http://localhost:8500/v1/events', requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = fetch('http://localhost:8500/v1/events', options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
 export async function getEvent(eventId) {
-  const myHeaders = new Headers();
-  myHeaders.append('Authorization', 'Bearer');
-  myHeaders.append('content-type', 'application/json');
+  const options = constructRequestOptions('GET');
 
-  const requestOptions = {
-    method: 'GET',
-    headers: myHeaders,
-  };
-
-  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
 export async function getVenue(venueId) {
-  const myHeaders = new Headers();
-  myHeaders.append('Authorization', 'Bearer');
-  myHeaders.append('content-type', 'application/json');
+  const options = constructRequestOptions('GET');
 
-  const requestOptions = {
-    method: 'GET',
-    headers: myHeaders,
-  };
-
-  const resp = fetch(`http://localhost:8500/v1/venues/${venueId}`, requestOptions).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = fetch(`http://localhost:8500/v1/venues/${venueId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 

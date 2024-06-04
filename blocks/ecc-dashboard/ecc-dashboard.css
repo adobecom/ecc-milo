@@ -104,6 +104,11 @@
 .ecc-dashboard table .event-row {
   height: 140px;
   border-bottom: 2px solid var(--color-gray-300);
+  transition: background-color 1s;
+}
+
+.ecc-dashboard table .event-row.highlight {
+  background-color: #EAEAEA;
 }
 
 .ecc-dashboard table .event-row .event-title-link {
@@ -210,6 +215,15 @@
 
 .ecc-dashboard .event-row .dashboard-event-tool-box a.dash-event-tool img.icon {
   width: 16px;
+}
+
+.ecc-dashboard .toast-area {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 @media screen and (min-width: 900px) {

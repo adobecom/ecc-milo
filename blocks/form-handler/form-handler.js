@@ -51,7 +51,26 @@ const SPECTRUM_COMPONENTS = [
   'field-label',
   'divider',
   'button',
+  'progress-circle',
 ];
+
+function replaceAnchorWithButton(anchor) {
+  if (!anchor || anchor.tagName !== 'A') {
+    console.error('The provided element is not an anchor tag.');
+    return null;
+  }
+
+  const attributes = {};
+  for (let i = 0; i < anchor.attributes.length; i += 1) {
+    const attr = anchor.attributes[i];
+    attributes[attr.name] = attr.value;
+  }
+
+  const button = createTag('button', attributes, anchor.innerHTML);
+
+  anchor.parentNode.replaceChild(button, anchor);
+  return button;
+}
 
 function getCurrentFragment(props) {
   const frags = props.el.querySelectorAll('.fragment');
@@ -128,12 +147,13 @@ function decorateForm(el) {
       col.classList.add('side-menu');
       const navItems = col.querySelectorAll('a[href*="#"]');
       navItems.forEach((nav, index) => {
-        nav.classList.add('nav-item');
+        const btn = replaceAnchorWithButton(nav);
+        btn.classList.add('nav-item');
 
         if (index !== 0) {
-          nav.classList.add('disabled');
+          btn.disabled = true;
         } else {
-          nav.closest('li')?.classList.add('active');
+          btn.closest('li')?.classList.add('active');
         }
       });
     }
@@ -161,11 +181,13 @@ async function saveEvent(props) {
     const resp = await createEvent(props.payload);
     props.payload = { ...props.payload, ...resp };
   } else if (props.currentStep < props.maxStep) {
-    const resp = await publishEvent(props.payload.eventId, props.payload);
-    props.payload = { ...props.payload, ...resp };
-  } else {
     const resp = await updateEvent(props.payload.eventId, props.payload);
     props.payload = { ...props.payload, ...resp };
+  } else {
+    const resp = await publishEvent(props.payload.eventId, props.payload);
+    props.payload = { ...props.payload, ...resp };
+    const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+    if (dashboardLink) window.location.assign(dashboardLink.href);
   }
 }
 
@@ -174,7 +196,7 @@ function updateSideNav(props) {
 
   sideNavs.forEach((n, i) => {
     n.closest('li')?.classList.remove('active');
-    if (i <= props.farthestStep) n.classList.remove('disabled');
+    if (i <= props.farthestStep) n.disabled = false;
     if (i === props.currentStep) n.closest('li')?.classList.add('active');
   });
 }
@@ -207,8 +229,8 @@ function onStepValidate(props) {
   };
 }
 
-function updateImgDropzoneConfigs(frag, props) {
-  const dropzones = frag.querySelectorAll('image-dropzone');
+function updateImgDropzoneConfigs(props) {
+  const dropzones = document.querySelectorAll('image-dropzone');
 
   dropzones.forEach((dz) => {
     const wrappingBlock = dz.closest('.form-component');
@@ -222,7 +244,16 @@ function updateImgDropzoneConfigs(frag, props) {
         targetUrl: `http://localhost:8500/v1/events/${props.payload.eventId}/images`,
       };
       dz.setAttribute('configs', JSON.stringify(configs));
+      dz.requestUpdate();
     }
+  });
+}
+
+function updateProfileContainer(props) {
+  const containers = document.querySelectorAll('profile-container');
+  containers.forEach((c) => {
+    c.setAttribute('seriesId', props.payload.seriesId);
+    c.requestUpdate();
   });
 }
 
@@ -330,17 +361,25 @@ function initFormCtas(props) {
 
   backwardWrapper.append(backBtn);
 
+  const toggleBtnsSubmittingState = (submitting) => {
+    ctas.forEach((c) => {
+      c.classList.toggle('submitting', submitting);
+    });
+  };
+
   ctas.forEach((cta) => {
     if (cta.href) {
       const ctaUrl = new URL(cta.href);
 
       if (['#pre-event', '#post-event'].includes(ctaUrl.hash)) {
-        cta.classList.add('fill');
-        cta.addEventListener('click', async () => {
+        cta.classList.add('fill', 'preview-btns', 'preview-not-ready');
+        cta.addEventListener('click', async (e) => {
+          e.preventDefault();
+          toggleBtnsSubmittingState(true);
+          if (cta.classList.contains('preview-not-ready')) return;
           await saveEvent(props);
-          // TODO: use real .page links
-          const targetRedirect = `${window.location.origin}/event/t3/dme/preview?eventId=${props.payload['event-id']}`;
-          window.open(targetRedirect);
+          window.open(cta.href);
+          toggleBtnsSubmittingState(false);
         });
       }
 
@@ -362,6 +401,7 @@ function initFormCtas(props) {
         }
 
         cta.addEventListener('click', async () => {
+          toggleBtnsSubmittingState(true);
           await saveEvent(props);
 
           if (ctaUrl.hash === '#next') {
@@ -369,6 +409,7 @@ function initFormCtas(props) {
               navigateForm(props);
             }
           }
+          toggleBtnsSubmittingState(false);
         });
       }
     }
@@ -376,6 +417,18 @@ function initFormCtas(props) {
 
   backBtn.addEventListener('click', async () => {
     props.currentStep -= 1;
+  });
+}
+
+function updatePreviewCtas(props) {
+  const previewBtns = props.el.querySelectorAll('.preview-btns');
+
+  previewBtns.forEach((a) => {
+    const testTime = new URL(a.href).hash === '#pre-event' ? +props.payload.localEndTimeMillis - 10 : +props.payload.localEndTimeMillis + 10;
+    if (props.payload.url) {
+      a.href = `https://www.stage.adobe.com/events/${props.payload.url}?previewMode=true&timing=${testTime}`;
+      a.classList.remove('preview-not-ready');
+    }
   });
 }
 
@@ -391,11 +444,23 @@ function initNavigation(props) {
 
   navItems.forEach((nav, i) => {
     nav.addEventListener('click', () => {
-      if (!nav.closest('li')?.classList.contains('disabled')) {
+      if (!nav.disabled) {
         navigateForm(props, i);
       }
     });
   });
+}
+
+function updateDashboardLink(props) {
+  // FIXME: presuming first link is dashboard link is not good.
+  if (!props.payload.eventId) return;
+  const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+
+  if (!dashboardLink) return;
+
+  const url = new URL(dashboardLink.href);
+  url.searchParams.set('newEventId', props.payload.eventId);
+  dashboardLink.href = url.toString();
 }
 
 async function buildECCForm(el) {
@@ -405,6 +470,8 @@ async function buildECCForm(el) {
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
+    // TODO: split payload and response data handler callbacks.
+    response: {},
   };
 
   const dataHandler = {
@@ -428,7 +495,10 @@ async function buildECCForm(el) {
 
       if (prop === 'payload') {
         console.log('payload updated:', props.payload);
-        updateImgDropzoneConfigs(getCurrentFragment(props), props);
+        updateImgDropzoneConfigs(props);
+        updateProfileContainer(props);
+        updatePreviewCtas(props);
+        updateDashboardLink(props);
       }
 
       return true;
