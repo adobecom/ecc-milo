@@ -1,22 +1,9 @@
+.event-topics-component h3 {
+  font-size: var(--type-heading-s-size);
+}
+
 .event-topics-component .checkbox-wrapper {
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
-}
-
-.event-topics-component .checkbox-wrapper sp-checkbox {
-  padding: 4px 16px;
-  border: var(--color-black) 1px solid;
-  border-radius: 100px;
-  transition: background-color 0.2s, color 0.2s;
-  font-weight: 700;
-}
-
-.event-topics-component .checkbox-wrapper sp-checkbox:hover {
-  background-color: var(--color-gray-100);
-}
-
-.event-topics-component .checkbox-wrapper sp-checkbox[checked] {
-  background-color: var(--color-gray-200);
-
 }
