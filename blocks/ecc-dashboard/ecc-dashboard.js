@@ -69,7 +69,7 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
     })();
 
     // edit
-    const url = new URL(`https://stage--events-milo--adobecom.hlx.page/events/${eventObj.url}`);
+    const url = new URL('https://stage--ecc-milo--adobecom.hlx.page/event/create');
     url.searchParams.set('eventId', eventObj.eventId);
     edit.href = url.toString();
 
