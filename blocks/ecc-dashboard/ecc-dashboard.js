@@ -145,6 +145,7 @@ async function buildVenueTag(venueId) {
 async function populateRow(props, index) {
   const event = props.mutableData[index];
   const tBody = props.el.querySelector('table.dashboard-table tbody');
+  const toastArea = props.el.querySelector('.toast-area');
 
   // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'event-row' }, '', { parent: tBody });
@@ -173,7 +174,7 @@ async function populateRow(props, index) {
   initMoreOptions(props, event, moreOptionsCell);
 
   if (event.eventId === new URLSearchParams(window.location.search).get('newEventId')) {
-    // props.el.append(createTag('sp-toast', { open: true, variant: 'positive' }, `New event <strong>${event.title}</strong> created`));
+    createTag('sp-toast', { open: true, variant: 'positive' }, `New event <strong>${event.title}</strong> created`, { parent: toastArea });
     row.classList.add('highlight');
 
     setTimeout(() => {
@@ -183,7 +184,9 @@ async function populateRow(props, index) {
 }
 
 function populateTable(props) {
+  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' });
   const tBody = props.el.querySelector('table.dashboard-table tbody');
+  props.el.append(spTheme);
   tBody.innerHTML = '';
 
   const endOfPages = Math.min(props.currentPage + 10, props.mutableData.length);
@@ -398,6 +401,7 @@ async function buildDashboard(el, config) {
   const miloLibs = getLibs();
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/toast.js`),
   ]);
 

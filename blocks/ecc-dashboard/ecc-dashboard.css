@@ -217,6 +217,15 @@
   width: 16px;
 }
 
+.ecc-dashboard .toast-area {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 @media screen and (min-width: 900px) {
   .ecc-dashboard .dashboard-header {
     flex-direction: row;

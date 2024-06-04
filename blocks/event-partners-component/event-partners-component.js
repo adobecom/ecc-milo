@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { addRepeater, generateToolTip } from '../../utils/utils.js';
+import { generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
