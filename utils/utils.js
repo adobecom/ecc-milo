@@ -20,6 +20,15 @@ function createTag(tag, attributes, html, options = {}) {
   return el;
 }
 
+export function getIcon(tag) {
+  const img = document.createElement('img');
+  img.className = `icon icon-${tag}`;
+  img.src = `/icons/${tag}.svg`;
+  img.alt = tag;
+
+  return img;
+}
+
 export function yieldToMain() {
   return new Promise((r) => {
     setTimeout(r, 0);
@@ -59,7 +68,7 @@ export function convertTo24HourFormat(timeStr) {
 
 export function addTooltipToHeading(em, heading) {
   const tooltipText = em.textContent.trim();
-  const toolTipIcon = createTag('span', { class: 'event-heading-tooltip-icon' }, 'i');
+  const toolTipIcon = createTag('span', { class: 'event-heading-tooltip-icon' }, getIcon('info'));
   const toolTipBox = createTag('div', { class: 'event-heading-tooltip-box' }, tooltipText);
   const toolTipWrapper = createTag('div', { class: 'event-heading-tooltip-wrapper' });
 
@@ -75,15 +84,6 @@ export function generateToolTip(el) {
   if (heading && em) {
     addTooltipToHeading(em, heading);
   }
-}
-
-export function getIcon(tag) {
-  const img = document.createElement('img');
-  img.className = `icon icon-${tag}`;
-  img.src = `/icons/${tag}.svg`;
-  img.alt = tag;
-
-  return img;
 }
 
 export function buildNoAccessScreen(el) {
