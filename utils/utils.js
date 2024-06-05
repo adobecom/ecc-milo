@@ -30,6 +30,10 @@ export function handlize(str) {
   return str?.toLowerCase().trim().replaceAll(' ', '-');
 }
 
+export function isEmptyObject(o) {
+  return Object.keys(o).length === 0 && o.constructor === Object;
+}
+
 export function convertTo24HourFormat(timeStr) {
   const timeFormat = /^(0?[1-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/;
 

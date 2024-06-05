@@ -34,7 +34,7 @@ export default class AgendaFieldsetGroup extends LitElement {
   }
 
   getAgendas() {
-    return this.agendas;
+    return this.agendas.filter((o) => !(Object.keys(o).length === 0 && o.constructor === Object));
   }
 
   render() {
