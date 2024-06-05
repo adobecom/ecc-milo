@@ -33,6 +33,7 @@ async function decorateSeriesSelect(column) {
   const seriesSelectWrapper = createTag('div', { class: 'series-picker-wrapper' });
 
   const series = await getSeries();
+  console.log(series)
   if (!series) return;
 
   const select = createTag('sp-picker', { id: 'series-select-input', class: 'select-input', size: 'm', label: column.textContent.trim() });
