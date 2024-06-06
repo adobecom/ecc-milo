@@ -499,6 +499,10 @@ async function buildECCForm(el) {
         updateProfileContainer(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
+
+        if (props.payload.eventId) {
+          props.el.dispatchEvent(new CustomEvent('eventcreated'));
+        }
       }
 
       return true;

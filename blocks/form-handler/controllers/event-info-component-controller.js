@@ -335,7 +335,7 @@ export function onSubmit(component, props) {
   const localStartTime = component.querySelector('#time-picker-start-time').value;
   const localEndTime = component.querySelector('#time-picker-end-time').value;
 
-  const gmtOffset = +component.querySelector('#time-zone-select-input').value;
+  const timezone = component.querySelector('#time-zone-select-input').value;
 
   const localStartTimeMillis = dateTimeStringToTimestamp(localStartDate, localStartTime);
   const localEndTimeMillis = dateTimeStringToTimestamp(localEndDate, localEndTime);
@@ -349,7 +349,7 @@ export function onSubmit(component, props) {
     localEndTime,
     localStartTimeMillis,
     localEndTimeMillis,
-    gmtOffset,
+    timezone,
   };
 
   props.payload = { ...props.payload, ...eventInfo };

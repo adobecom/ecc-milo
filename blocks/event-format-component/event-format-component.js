@@ -32,9 +32,16 @@ async function decorateCloudTagSelect(column) {
 async function decorateSeriesSelect(column) {
   const seriesSelectWrapper = createTag('div', { class: 'series-picker-wrapper' });
 
-  const series = await getSeries();
-  if (!series) return;
-
+  let series = await getSeries();
+  // if (!series) return;
+  if (!series) {
+    series = [
+      {
+        seriesId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+        seriesName: 'test series',
+      },
+    ];
+  }
   const select = createTag('sp-picker', { id: 'series-select-input', class: 'select-input', size: 'm', label: column.textContent.trim() });
 
   Object.values(series).forEach((val) => {

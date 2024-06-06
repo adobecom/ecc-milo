@@ -54,11 +54,11 @@ export async function uploadBinaryFile(file, configs) {
   }
 }
 
-export async function createVenue(payload) {
-  const raw = JSON.stringify(payload);
+export async function createVenue(eventId, venueData) {
+  const raw = JSON.stringify(venueData);
   const options = constructRequestOptions('POST', raw);
 
-  const resp = await fetch('http://localhost:8500/v1/venues', options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8500/v1/events/${eventId}/venues`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
