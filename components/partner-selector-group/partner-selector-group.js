@@ -1,4 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
+import { isEmptyObject } from '../../utils/utils.js';
 import { style } from './partner-selector-group.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
@@ -15,6 +16,7 @@ export default class PartnerSelectorGroup extends LitElement {
       showPartnerLink: false,
       name: '[Partner name]',
       imageUrl: '/icons/icon-placeholder.svg',
+      isPlaceholder: true,
     }];
     this.partners = JSON.parse(this.dataset.partners);
   }
@@ -37,7 +39,7 @@ export default class PartnerSelectorGroup extends LitElement {
   }
 
   getSelectedPartners() {
-    return this.selectedPartners;
+    return this.selectedPartners.filter((p) => !p.isPlaceholder || !isEmptyObject(p));
   }
 
   render() {

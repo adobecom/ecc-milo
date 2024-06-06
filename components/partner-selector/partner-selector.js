@@ -1,4 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
+import { isEmptyObject } from '../../utils/utils.js';
 import { style } from './partner-selector.css.js';
 
 const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);
@@ -16,6 +17,7 @@ export default class PartnerSelector extends LitElement {
     this.selectedPartner = {
       ...this.selectedPartner,
       ...this.partners.find((partner) => partner.name === partnerName),
+      isPlaceholder: false,
     };
 
     this.dispatchEvent(new CustomEvent('update-partner', {
@@ -33,7 +35,18 @@ export default class PartnerSelector extends LitElement {
       ...this.selectedPartner,
       showPartnerLink,
     };
+
+    this.dispatchEvent(new CustomEvent('update-partner', {
+      detail: { partner: this.selectedPartner },
+      bubbles: true,
+      composed: true,
+    }));
+
     this.requestUpdate();
+  }
+
+  isValidSelection() {
+    return !this.selectedPartner.isPlaceholder && !isEmptyObject(this.selectedPartner);
   }
 
   render() {
@@ -43,7 +56,7 @@ export default class PartnerSelector extends LitElement {
         <sp-picker value=${this.selectedPartner.name} class="partner-select-input" label="Select a partner" @change="${this.handleSelectChange}">
           ${this.partners.map((partner) => html`<sp-menu-item value="${partner.name}">${partner.name}</sp-menu-item>`)}
         </sp-picker>
-        ${html`<sp-checkbox class="checkbox-partner-link" @change="${this.handleCheckChange}">Link to ${this.selectedPartner.name || '[Partner name]'}</sp-checkbox>`}
+        ${html`<sp-checkbox class="checkbox-partner-link" .disabled=${!this.isValidSelection()} .checked=${this.selectedPartner.showPartnerLink} @change="${this.handleCheckChange}">Link to ${this.selectedPartner.name || '[Partner name]'}</sp-checkbox>`}
         <slot name="delete-btn"></slot>
       </fieldset>
     `;

@@ -157,14 +157,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-gray-500);
-  color: var(--color-gray-100);
-  border-radius: 24px;
   cursor: help;
-}
-
-.form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon:hover {
-  background: var(--color-gray-700);
 }
 
 .form-handler .form-component > div:first-of-type > div > h2,
