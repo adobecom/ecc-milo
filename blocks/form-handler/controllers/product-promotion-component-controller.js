@@ -1,7 +1,7 @@
 export function onSubmit(component, props) {
   const productGroup = component.querySelector('product-selector-group');
 
-  const selectedProducts = productGroup.getSelectedProducts();
+  const selectedProducts = productGroup?.getSelectedProducts();
 
   const relatedProducts = selectedProducts.map((p) => ({
     name: p.title,
