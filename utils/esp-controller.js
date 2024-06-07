@@ -85,7 +85,7 @@ export async function updateEvent(eventId, payload) {
   const raw = JSON.stringify(payload);
   const options = constructRequestOptions('PUT', raw);
 
-  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   console.log(payload, resp);
   return resp;
 }
@@ -94,7 +94,7 @@ export async function publishEvent(eventId, payload) {
   const raw = JSON.stringify({ ...payload, published: true });
   const options = constructRequestOptions('PUT', raw);
 
-  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
@@ -102,35 +102,35 @@ export async function unpublishEvent(eventId, payload) {
   const raw = JSON.stringify({ ...payload, published: false });
   const options = constructRequestOptions('PUT', raw);
 
-  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
 export async function deleteEvent(eventId) {
   const options = constructRequestOptions('DELETE');
 
-  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
 export async function getEvents() {
   const options = constructRequestOptions('GET');
 
-  const resp = fetch('http://localhost:8500/v1/events', options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch('http://localhost:8500/v1/events', options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
 export async function getEvent(eventId) {
   const options = constructRequestOptions('GET');
 
-  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
 export async function getVenue(venueId) {
   const options = constructRequestOptions('GET');
 
-  const resp = fetch(`http://localhost:8500/v1/venues/${venueId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8500/v1/venues/${venueId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
