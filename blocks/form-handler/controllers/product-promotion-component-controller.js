@@ -3,12 +3,14 @@ export function onSubmit(component, props) {
 
   const selectedProducts = productGroup?.getSelectedProducts();
 
-  const relatedProducts = selectedProducts.map((p) => ({
-    name: p.title,
-    url: p.url,
-  }));
+  if (selectedProducts) {
+    const relatedProducts = selectedProducts.map((p) => ({
+      name: p.title,
+      url: p.url,
+    }));
 
-  props.payload = { ...props.payload, relatedProducts };
+    props.payload = { ...props.payload, relatedProducts };
+  }
 }
 
 export default async function init(component, props) {
