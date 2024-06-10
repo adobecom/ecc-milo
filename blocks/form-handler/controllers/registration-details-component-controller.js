@@ -32,12 +32,12 @@ export default function init(component, props) {
   } = props.payload.rsvpData;
 
   const attendeeLimitEl = component.querySelector('#attendee-count-input');
-  const allowWaitlistEl = component.querySelector('#registration-allow-waitlist')?.checked;
-  const contactHostEl = component.querySelector('#registration-contact-host')?.checked;
-  const hostEmailEl = component.querySelector('#event-host-email-input')?.value;
-  const titleEl = component.querySelector('#rsvp-form-detail-title')?.value;
-  const subtitleEl = component.querySelector('#rsvp-form-detail-subtitle')?.value;
-  const descriptionEl = component.querySelector('#rsvp-form-detail-description')?.value;
+  const allowWaitlistEl = component.querySelector('#registration-allow-waitlist');
+  const contactHostEl = component.querySelector('#registration-contact-host');
+  const hostEmailEl = component.querySelector('#event-host-email-input');
+  const titleEl = component.querySelector('#rsvp-form-detail-title');
+  const subtitleEl = component.querySelector('#rsvp-form-detail-subtitle');
+  const descriptionEl = component.querySelector('#rsvp-form-detail-description');
 
   if (attendeeLimitEl) attendeeLimitEl.value = attendeeLimit;
   if (allowWaitlistEl) allowWaitlistEl.checked = allowWaitlist;
