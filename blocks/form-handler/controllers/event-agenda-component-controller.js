@@ -17,8 +17,11 @@ export function onSubmit(component, props) {
 export default function init(component, props) {
   // TODO: init function and repopulate data from props if exists
   const agendaGroup = component.querySelector('agenda-fieldset-group');
+  const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info');
 
   if (props.payload?.agenda) {
     agendaGroup.dataset.agendaItems = JSON.stringify(props.payload.agenda);
   }
+
+  showAgendaPostEvent.checked = props.payload?.showAgendaPostEvent;
 }

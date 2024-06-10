@@ -4,6 +4,13 @@ import { style } from './partner-selector-group.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
+const defaultSelectedPartners = [{
+  showPartnerLink: false,
+  name: '[Partner name]',
+  imageUrl: '/icons/icon-placeholder.svg',
+  isPlaceholder: true,
+}];
+
 export default class PartnerSelectorGroup extends LitElement {
   static properties = {
     selectedPartners: { type: Array },
@@ -12,12 +19,8 @@ export default class PartnerSelectorGroup extends LitElement {
 
   constructor() {
     super();
-    this.selectedPartners = this.selectedPartners || [{
-      showPartnerLink: false,
-      name: '[Partner name]',
-      imageUrl: '/icons/icon-placeholder.svg',
-      isPlaceholder: true,
-    }];
+    // eslint-disable-next-line max-len
+    this.selectedPartners = this.dataset.selectedPartners ? JSON.parse(this.dataset.selectedPartners) : defaultSelectedPartners;
     this.partners = JSON.parse(this.dataset.partners);
   }
 

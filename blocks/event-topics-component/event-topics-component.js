@@ -14,7 +14,7 @@ async function buildTopicsCheckboxes(el) {
   const productTags = caasResp.namespaces.caas.tags['product-categories'].tags;
 
   Object.values(productTags).forEach((p) => {
-    createTag('sp-checkbox', {}, p.title, { parent: cw });
+    createTag('sp-checkbox', { name: p.title }, p.title, { parent: cw });
   });
 
   el.append(cw);
