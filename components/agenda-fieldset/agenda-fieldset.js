@@ -6,6 +6,7 @@ const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/li
 
 export default class AgendaFieldset extends LitElement {
   static properties = {
+    agendas: { type: Array },
     agenda: { type: Object, reflect: true },
     timeslots: { type: Array, reflect: true },
     options: { type: Object, reflect: true },
@@ -36,7 +37,7 @@ export default class AgendaFieldset extends LitElement {
           </div>
         </div>
         <div class="text-field-wrapper">
-          <sp-textfield class="text-input" placeholder=${this.options.placeholder} value=${this.agenda.description || nothing} ?required=${this.options.isRequired} quiet size="xl" maxlength=${this.options.maxCharNum} @change=${(event) => {
+          <sp-textfield class="text-input" placeholder=${this.options.placeholder} value=${this.agenda.description || nothing} ?required=${this.options.isRequired && this.agendas.length > 1} quiet size="xl" maxlength=${this.options.maxCharNum} @change=${(event) => {
   this.updateValue('description', event.target.value);
 }}></sp-textfield>
           <div class="attr-text">${this.options.maxLengthText}</div>

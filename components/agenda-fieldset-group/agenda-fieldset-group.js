@@ -40,7 +40,7 @@ export default class AgendaFieldsetGroup extends LitElement {
   render() {
     return html`
       ${repeat(this.agendas, (agenda, index) => html`
-        <agenda-fieldset .agenda=${agenda} .timeslots=${this.timeslots} .options=${this.options}
+        <agenda-fieldset .agendas=${this.agendas} .agenda=${agenda} .timeslots=${this.timeslots} .options=${this.options}
           @update-agenda=${(event) => this.handleAgendaUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.agendas.length > 1 ? html`

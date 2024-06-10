@@ -3,7 +3,7 @@
   padding: 0 40px;
 }
 
-.form-handler * {
+.form-handler .side-menu button {
   font-family: var(--body-font-family);
 }
 
@@ -137,7 +137,7 @@
 }
 
 .form-handler .main-frame .section:not(:first-of-type) {
-  padding: 24px;
+  padding: 0 70px 16px;
   border-radius: 10px;
   margin: 24px;
   box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
@@ -145,6 +145,10 @@
 
 .form-handler .fragment.hidden {
   display: none;
+}
+
+.form-handler .form-component {
+  padding: 32px 0px;
 }
 
 .form-handler .form-component:not(:last-of-type):not(.no-divider) {
@@ -165,7 +169,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 24px 0;
+  margin: 0 0 24px 0;
 }
 
 .form-handler .event-heading-tooltip-wrapper {
@@ -300,7 +304,7 @@
   display: none;
 }
 
-.form-handler .repeater-element {
+.form-handler repeater-element {
   max-width: 100%;
   height: var(--spectrum-spacing-700, 48px);
   flex-shrink: 0;
