@@ -148,7 +148,7 @@
 }
 
 .form-handler .form-component {
-  padding: 32px 0px;
+  padding: 32px 12px 24px;
 }
 
 .form-handler .form-component:not(:last-of-type):not(.no-divider) {
@@ -162,6 +162,11 @@
   align-items: center;
   justify-content: center;
   cursor: help;
+}
+
+.form-handler .form-component > div:first-of-type > div > h2 {
+  font-size: var(--type-heading-xl-size);
+  line-height: var(--type-heading-xl-lh);
 }
 
 .form-handler .form-component > div:first-of-type > div > h2,
@@ -302,44 +307,6 @@
 
 .form-handler .hidden {
   display: none;
-}
-
-.form-handler repeater-element {
-  max-width: 100%;
-  height: var(--spectrum-spacing-700, 48px);
-  flex-shrink: 0;
-  border-radius: 10px;
-  border: 1px dashed var(--color-gray-500);
-  display: flex;
-  align-items: center;
-  padding: 0 32px;
-  margin-top: 16px;
-  margin-bottom: 24px;
-  cursor: pointer;
-}
-
-.form-handler .repeater-element:hover .icon-add-circle,
-.form-handler .icon-remove-circle:hover {
-  opacity: 1;
-}
-
-.form-handler .icon-add-circle,
-.form-handler .icon-remove-circle {
-  height: 24px;
-  width: 24px;
-  opacity: 0.3;
-  transition: opacity 0.2s;
-  cursor: pointer;
-}
-
-.form-handler .repeater-element-title {
-  width: 100%;
-  color: var(--color-gray-500);
-  font-family: var(--body-font-family);
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 700;
-  margin: 0;
 }
 
 .form-handler .img-upload-text p {

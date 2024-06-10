@@ -12,9 +12,9 @@ export default class AgendaFieldsetGroup extends LitElement {
 
   constructor() {
     super();
-    this.agendas = this.agendas || [{}];
+    this.agendas = this.dataset.agendaItems ? JSON.parse(this.dataset.agendaItems) : [{}];
     this.timeslots = this.dataset.timeslots.split(',');
-    this.options = JSON.parse(this.dataset.options);
+    this.options = this.dataset.options ? JSON.parse(this.dataset.options) : {};
   }
 
   static styles = style;
