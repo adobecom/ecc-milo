@@ -119,7 +119,7 @@
 }
 
 .form-handler .main-frame .section:first-of-type .content {
-  margin: 24px 24px 16px;
+  margin: 16px 24px;
   max-width: none;
   display: grid;
   align-items: center;

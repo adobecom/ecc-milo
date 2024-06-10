@@ -463,6 +463,20 @@ function updateDashboardLink(props) {
   dashboardLink.href = url.toString();
 }
 
+function initDeepLink(props) {
+  const { hash } = window.location;
+
+  if (hash) {
+    const frags = props.el.querySelectorAll('.fragment');
+
+    const targetFragindex = Array.from(frags).findIndex((frag) => `#${frag.id}` === hash);
+
+    if (targetFragindex && targetFragindex <= props.farthestStep) {
+      navigateForm(props, targetFragindex);
+    }
+  }
+}
+
 async function buildECCForm(el) {
   const props = {
     el,
@@ -524,6 +538,7 @@ async function buildECCForm(el) {
   initRepeaters(proxyProps);
   initNavigation(proxyProps);
   updateRequiredFields(proxyProps);
+  initDeepLink(proxyProps);
 }
 
 export default async function init(el) {
