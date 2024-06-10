@@ -18,6 +18,6 @@ export default async function init(component, props) {
   const productGroup = component.querySelector('product-selector-group');
 
   if (props.payload?.relatedProducts) {
-    productGroup.dataset.selectedProducts = JSON.stringify(props.payload.relatedProducts);
+    productGroup.setAttribute('.selectedProducts', JSON.stringify(props.payload.relatedProducts));
   }
 }

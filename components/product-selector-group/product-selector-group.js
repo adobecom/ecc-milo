@@ -11,6 +11,7 @@ const defaultProductValue = {
   title: '[Product name]',
   isPlaceholder: true,
 };
+
 export default class ProductSelectorGroup extends LitElement {
   static properties = {
     selectedProducts: { type: Array },

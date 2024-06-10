@@ -4,12 +4,12 @@ import { style } from './partner-selector-group.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
-const defaultSelectedPartners = [{
+const defaultSelectedPartner = {
   showPartnerLink: false,
   name: '[Partner name]',
   imageUrl: '/icons/icon-placeholder.svg',
   isPlaceholder: true,
-}];
+};
 
 export default class PartnerSelectorGroup extends LitElement {
   static properties = {
@@ -20,7 +20,7 @@ export default class PartnerSelectorGroup extends LitElement {
   constructor() {
     super();
     // eslint-disable-next-line max-len
-    this.selectedPartners = this.dataset.selectedPartners ? JSON.parse(this.dataset.selectedPartners) : defaultSelectedPartners;
+    this.selectedPartners = this.selectedPartners || [defaultSelectedPartner];
     this.partners = JSON.parse(this.dataset.partners);
   }
 
