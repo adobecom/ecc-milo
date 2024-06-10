@@ -28,6 +28,13 @@ p {
     margin: 0px;
 }
 
+h2 {
+  font-size: var(--type-heading-xl-size);
+  line-height: var(--type-heading-xl-lh);
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
 h5 {
     margin-bottom: 0px;
 }

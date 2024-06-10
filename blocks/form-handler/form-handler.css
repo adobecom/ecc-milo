@@ -119,7 +119,7 @@
 }
 
 .form-handler .main-frame .section:first-of-type .content {
-  margin: 0 24px;
+  margin: 24px 24px 16px;
   max-width: none;
   display: grid;
   align-items: center;
@@ -136,8 +136,14 @@
   flex-direction: row-reverse;
 }
 
+.form-handler .main-frame .section:first-of-type h2 {
+  margin: 0;
+  font-weight: 900;
+  color: var(--color-red);
+}
+
 .form-handler .main-frame .section:not(:first-of-type) {
-  padding: 0 70px 16px;
+  padding: 36px 70px;
   border-radius: 10px;
   margin: 24px;
   box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
@@ -169,6 +175,8 @@
   line-height: var(--type-heading-xl-lh);
 }
 
+.form-handler .section:not(:first-of-type) > div.content > h2,
+.form-handler .section:not(:first-of-type) > div.content > h3,
 .form-handler .form-component > div:first-of-type > div > h2,
 .form-handler .form-component > div:first-of-type > div > h3 {
   display: flex;

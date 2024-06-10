@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
+import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
 import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
@@ -513,6 +513,10 @@ async function buildECCForm(el) {
 
   frags.forEach((frag) => {
     props[`required-fields-in-${frag.id}`] = [];
+
+    frag.querySelectorAll(':scope > .section > .content').forEach((c) => {
+      generateToolTip(c);
+    });
   });
 
   initFormCtas(proxyProps);
