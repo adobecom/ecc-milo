@@ -19,7 +19,6 @@ export default class PartnerSelectorGroup extends LitElement {
 
   constructor() {
     super();
-    // eslint-disable-next-line max-len
     this.selectedPartners = this.selectedPartners || [defaultSelectedPartner];
     this.partners = JSON.parse(this.dataset.partners);
   }
