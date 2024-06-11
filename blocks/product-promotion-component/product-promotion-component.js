@@ -13,7 +13,9 @@ export default async function init(el) {
   if (!caasTags) return;
 
   const group = createTag('product-selector-group');
-  group.dataset.products = JSON.stringify(caasTags.namespaces.caas.tags.mnemonics.tags);
+  const products = Object.values(caasTags.namespaces.caas.tags['product-categories'].tags).map((x) => [...Object.values(x.tags).map((y) => y)]).flat();
+
+  group.dataset.products = JSON.stringify(products);
 
   el.append(group);
 }

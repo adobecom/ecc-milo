@@ -40,7 +40,7 @@ export default class ProductSelectorGroup extends LitElement {
   }
 
   getSelectedProducts() {
-    return this.selectedProducts.filter((p) => !p.isPlaceholder || !isEmptyObject(p));
+    return this.selectedProducts.filter((p) => !p.isPlaceholder && !isEmptyObject(p));
   }
 
   countBlades() {
