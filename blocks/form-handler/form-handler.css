@@ -84,8 +84,8 @@
 
 .form-handler .side-menu ul li:not(:has(ul)):has(a):hover,
 .form-handler .side-menu ul li:not(:has(ul)):has(a).active,
-.form-handler .side-menu ul li:not(:has(ul)):has(button):hover,
-.form-handler .side-menu ul li:not(:has(ul)):has(button).active {
+.form-handler .side-menu ul li:not(:has(ul)):has(button:not(:disabled)):hover,
+.form-handler .side-menu ul li:not(:has(ul)):has(button:not(:disabled)).active {
   background-color: var(--color-red);
   color: var(--color-white);
   font-weight: 700;
@@ -94,8 +94,8 @@
 
 .form-handler .side-menu ul li:not(:has(ul)):has(a):hover a,
 .form-handler .side-menu ul li:not(:has(ul)):has(a).active a,
-.form-handler .side-menu ul li:not(:has(ul)):has(button).active button,
-.form-handler .side-menu ul li:not(:has(ul)):has(button):hover button {
+.form-handler .side-menu ul li:not(:has(ul)):has(button:not(:disabled)).active button,
+.form-handler .side-menu ul li:not(:has(ul)):has(button:not(:disabled)):hover button {
   color: var(--color-white);
   font-weight: 700;
   letter-spacing: -0.02em
