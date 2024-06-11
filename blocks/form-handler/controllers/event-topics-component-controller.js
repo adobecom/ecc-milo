@@ -8,6 +8,6 @@ export function onSubmit(component, props) {
 export default function init(component, props) {
   const checkedBoxes = component.querySelectorAll('sp-checkbox');
   checkedBoxes.forEach((cb) => {
-    if (props.payload.topics.includes(cb.name)) cb.checked = true;
+    if (props.payload.topics?.includes(cb.name)) cb.checked = true;
   });
 }
