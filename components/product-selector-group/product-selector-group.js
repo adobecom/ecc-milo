@@ -5,9 +5,7 @@ import { style } from './product-selector-group.css.js';
 const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 const defaultProductValue = {
-  showProductBlade: false,
   name: '',
-  url: '',
   title: '[Product name]',
   isPlaceholder: true,
 };
@@ -16,14 +14,12 @@ export default class ProductSelectorGroup extends LitElement {
   static properties = {
     selectedProducts: { type: Array },
     products: { type: Array },
-    caasTags: { type: Array },
   };
 
   constructor() {
     super();
     this.selectedProducts = this.selectedProducts || [defaultProductValue];
     this.products = JSON.parse(this.dataset.products);
-    this.caasTags = JSON.parse(this.dataset.caasTags);
   }
 
   static styles = style;
@@ -54,7 +50,7 @@ export default class ProductSelectorGroup extends LitElement {
   render() {
     return html`
       ${repeat(this.selectedProducts, (product, index) => html`
-        <product-selector .showBladeCheck=${this.countBlades() < 2 || product.showProductBlade} .selectedProduct=${product} .products=${this.products} .caasTags=${this.caasTags}
+        <product-selector .selectedProduct=${product} .products=${this.products}
           @update-product=${(event) => this.handleProductUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.selectedProducts.length > 1 ? html`
