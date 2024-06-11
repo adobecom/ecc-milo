@@ -168,16 +168,8 @@ export async function getClouds() {
 
 export async function getSeries() {
   const { host } = getESLConfig()[window.miloConfig.env.name];
-  const resp = await fetch(
-    `${host}/v1/series`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer',
-      },
-    },
-  ).then((res) => res.json()).catch((error) => error);
+  const options = constructRequestOptions('GET');
+  const resp = await fetch(`${host}/v1/series`, options).then((res) => res.json()).catch((error) => error);
 
   if (!resp.error) {
     const { series } = resp;
@@ -185,4 +177,56 @@ export async function getSeries() {
   }
 
   return null;
+}
+
+export async function createAttendee(eventId, attendeeData) {
+  if (!eventId || !attendeeData) return false;
+
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const raw = JSON.stringify(attendeeData);
+  const options = constructRequestOptions('POST', raw);
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/attendees`, options).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
+
+export async function updateAttendee(eventId, attendeeId, attendeeData) {
+  if (!eventId || !attendeeData) return false;
+
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const raw = JSON.stringify(attendeeData);
+  const options = constructRequestOptions('PUT', raw);
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
+
+export async function deleteAttendee(eventId, attendeeId) {
+  if (!eventId || !attendeeId) return false;
+
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const options = constructRequestOptions('DELETE');
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
+
+export async function getAttendees(eventId) {
+  if (!eventId) return false;
+
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const options = constructRequestOptions('GET');
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/attendees`, options).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
+}
+
+export async function getAttendee(eventId, attendeeId) {
+  if (!eventId || !attendeeId) return false;
+
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const options = constructRequestOptions('GET');
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  return resp;
 }
