@@ -8,7 +8,7 @@ function getESLConfig() {
 
 function constructRequestOptions(method, body = null) {
   const headers = new Headers();
-  const authToken = window.adobeIMS.getAccessToken();
+  const authToken = window.adobeIMS.getAccessToken().token;
   headers.append('Authorization', `Bearer ${authToken}`);
   headers.append('content-type', 'application/json');
 
