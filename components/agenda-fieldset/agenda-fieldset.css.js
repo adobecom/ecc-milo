@@ -8,7 +8,7 @@ export const style = css`
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .time-picker {
