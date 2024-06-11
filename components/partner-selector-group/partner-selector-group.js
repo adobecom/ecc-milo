@@ -4,6 +4,13 @@ import { style } from './partner-selector-group.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
+const defaultSelectedPartner = {
+  showPartnerLink: false,
+  name: '[Partner name]',
+  imageUrl: '/icons/icon-placeholder.svg',
+  isPlaceholder: true,
+};
+
 export default class PartnerSelectorGroup extends LitElement {
   static properties = {
     selectedPartners: { type: Array },
@@ -12,12 +19,7 @@ export default class PartnerSelectorGroup extends LitElement {
 
   constructor() {
     super();
-    this.selectedPartners = this.selectedPartners || [{
-      showPartnerLink: false,
-      name: '[Partner name]',
-      imageUrl: '/icons/icon-placeholder.svg',
-      isPlaceholder: true,
-    }];
+    this.selectedPartners = this.selectedPartners || [defaultSelectedPartner];
     this.partners = JSON.parse(this.dataset.partners);
   }
 
@@ -39,7 +41,7 @@ export default class PartnerSelectorGroup extends LitElement {
   }
 
   getSelectedPartners() {
-    return this.selectedPartners.filter((p) => !p.isPlaceholder || !isEmptyObject(p));
+    return this.selectedPartners.filter((p) => !p.isPlaceholder && !isEmptyObject(p));
   }
 
   render() {

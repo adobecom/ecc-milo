@@ -6,7 +6,7 @@ const { css } = await import(`${getLibs()}/deps/lit-all.min.js`);
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
 fieldset {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
   border: none;
   padding: 0;
 }

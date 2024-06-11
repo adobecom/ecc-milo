@@ -12,7 +12,7 @@ export const style = css`
 }
 
 .profile-container {
-    padding: 24px;
+    padding: 40px 72px;
     border-radius: 10px;
     margin: 24px;
     box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);

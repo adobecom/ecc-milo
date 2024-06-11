@@ -54,5 +54,5 @@ export default async function init(component, props) {
 }
 
 export function onSubmit(component, props) {
-  
+  // Do nothing
 }

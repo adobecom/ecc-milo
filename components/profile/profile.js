@@ -93,10 +93,12 @@ export class Profile extends LitElement {
     const textareaConfig = {
       grows: true,
       multiline: true,
-      size: 'l',
+      size: 'xl',
+      quiet: true,
     };
 
-    const textfieldConfig = { size: 'l' };
+    const textfieldConfig = { size: 'xl' };
+    const quietTextfieldConfig = { size: 'xl', quiet: true };
 
     return html`
     <h2>${fieldLabelsJSON.heading}</h2>
@@ -108,8 +110,8 @@ export class Profile extends LitElement {
             `)}
         </sp-picker>
     </div>
-    <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateValue('firstName', event.detail.value)}></custom-textfield>
-    <custom-textfield data=${JSON.stringify(lastNameData)} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateValue('lastName', event.detail.value)}></custom-textfield>
+    <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('firstName', event.detail.value)}></custom-textfield>
+    <custom-textfield data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('lastName', event.detail.value)}></custom-textfield>
     <image-dropzone configs=${JSON.stringify({
     uploadOnEvent: true,
     type: 'speaker-photo',
@@ -117,10 +119,10 @@ export class Profile extends LitElement {
   })}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
-    <custom-textfield data=${JSON.stringify(titleData)} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateValue('title', event.detail.value)}></custom-textfield>
+    <custom-textfield data=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('title', event.detail.value)}></custom-textfield>
     <custom-textfield data=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @input-change=${(event) => this.updateValue('bio', event.detail.value)}></custom-textfield>
     <div>
-    <h4>${fieldLabelsJSON.socialMedia}</h4>
+    <h3>${fieldLabelsJSON.socialMedia}</h3>
     ${this.profile?.socialMedia ? repeat(
     this.profile?.socialMedia,
     (socialMedia, index) => html`

@@ -1,7 +1,6 @@
 .event-format-component .series-fields-wrapper {
   display: flex;
   gap: 32px;
-  margin-bottom: 24px;
 }
 
 .event-format-component select,

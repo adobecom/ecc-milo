@@ -12,9 +12,9 @@ export default class AgendaFieldsetGroup extends LitElement {
 
   constructor() {
     super();
-    this.agendas = this.agendas || [{}];
+    this.agendas = this.dataset.agendaItems ? JSON.parse(this.dataset.agendaItems) : [{}];
     this.timeslots = this.dataset.timeslots.split(',');
-    this.options = JSON.parse(this.dataset.options);
+    this.options = this.dataset.options ? JSON.parse(this.dataset.options) : {};
   }
 
   static styles = style;
@@ -40,7 +40,7 @@ export default class AgendaFieldsetGroup extends LitElement {
   render() {
     return html`
       ${repeat(this.agendas, (agenda, index) => html`
-        <agenda-fieldset .agenda=${agenda} .timeslots=${this.timeslots} .options=${this.options}
+        <agenda-fieldset .agendas=${this.agendas} .agenda=${agenda} .timeslots=${this.timeslots} .options=${this.options}
           @update-agenda=${(event) => this.handleAgendaUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.agendas.length > 1 ? html`

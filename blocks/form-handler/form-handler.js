@@ -1,5 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
-import { getIcon, buildNoAccessScreen, yieldToMain } from '../../utils/utils.js';
+import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
 import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
@@ -463,6 +463,20 @@ function updateDashboardLink(props) {
   dashboardLink.href = url.toString();
 }
 
+function initDeepLink(props) {
+  const { hash } = window.location;
+
+  if (hash) {
+    const frags = props.el.querySelectorAll('.fragment');
+
+    const targetFragindex = Array.from(frags).findIndex((frag) => `#${frag.id}` === hash);
+
+    if (targetFragindex && targetFragindex <= props.farthestStep) {
+      navigateForm(props, targetFragindex);
+    }
+  }
+}
+
 async function buildECCForm(el) {
   const props = {
     el,
@@ -513,6 +527,10 @@ async function buildECCForm(el) {
 
   frags.forEach((frag) => {
     props[`required-fields-in-${frag.id}`] = [];
+
+    frag.querySelectorAll(':scope > .section > .content').forEach((c) => {
+      generateToolTip(c);
+    });
   });
 
   initFormCtas(proxyProps);
@@ -520,6 +538,7 @@ async function buildECCForm(el) {
   initRepeaters(proxyProps);
   initNavigation(proxyProps);
   updateRequiredFields(proxyProps);
+  initDeepLink(proxyProps);
 }
 
 export default async function init(el) {

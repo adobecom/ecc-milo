@@ -6,9 +6,8 @@ const { LitElement, html, nothing } = await import(`${getLibs()}/deps/lit-all.mi
 
 export default class ProductSelector extends LitElement {
   static properties = {
-    products: { type: Array },
+    products: { type: Object },
     selectedProduct: { type: Object },
-    caasTags: { type: Object },
     showBladeCheck: { type: Boolean },
   };
 
@@ -18,8 +17,7 @@ export default class ProductSelector extends LitElement {
     const productName = event.target.value;
     this.selectedProduct = {
       ...this.selectedProduct,
-      ...this.products.find((product) => product.name === productName),
-      ...this.caasTags[productName],
+      ...Object.values(this.products).find((product) => product.name === productName),
       isPlaceholder: false,
     };
 
@@ -57,10 +55,10 @@ export default class ProductSelector extends LitElement {
       <fieldset class="rsvp-field-wrapper">
       ${html`<img class="product-img" src="${this.selectedProduct.tagImage || '/icons/icon-placeholder.svg'}" alt="${this.selectedProduct.title || nothing}">`}  
         <sp-picker class="product-select-input" label="Select a product" value=${this.selectedProduct.name || nothing} @change="${this.handleSelectChange}">
-          ${this.products.map((product) => html`<sp-menu-item value="${product.name}">${this.caasTags[product.name].title}
+          ${Object.values(this.products).map((product) => html`<sp-menu-item value="${product.name}">${product.title}
           </sp-menu-item>`)}
         </sp-picker>
-        ${html`<sp-checkbox class="checkbox-product-link" .checked=${this.selectedProduct.showProductBlade} .disabled=${!this.isValidSelection() || !(this.showBladeCheck || this.selectedProduct.showProductBlade)} @change="${this.handleCheckChange}">Show ${this.selectedProduct.title || '[Product name]'} product blade on event details page</sp-checkbox>`}
+        ${html`<sp-checkbox class="checkbox-product-link" .checked=${this.selectedProduct.showProductBlade} .disabled=${!this.isValidSelection()} @change="${this.handleCheckChange}">Show ${this.selectedProduct.title || '[Product name]'} product blade on event details page</sp-checkbox>`}
         <slot name="delete-btn"></slot>
       </fieldset>
     `;

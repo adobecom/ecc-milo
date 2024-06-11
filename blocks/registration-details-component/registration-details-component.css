@@ -2,6 +2,10 @@
   padding-bottom: 40px;
 }
 
+.registration-details-component .text-field-row {
+  margin-bottom: 36px;
+}
+
 .registration-details-component .attendee-fields-wrapper {
   padding-bottom: 24px;
   margin-bottom: 40px;

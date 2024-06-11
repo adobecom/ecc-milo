@@ -6,9 +6,9 @@ const { css } = await import(`${getLibs()}/deps/lit-all.min.js`);
 export const style = css`
 .field-container {
   display: flex;
-  align-items: center;
-  gap: 24px;
+  flex-direction: column;
   width: 100%;
+  margin-bottom: 24px;
 }
 
 .time-picker {
@@ -55,5 +55,13 @@ export const style = css`
   font-size: var(--type-body-xs-size);
   color: var(--color-secondary);
   text-align: right;
+}
+
+@media screen and (min-width: 900px) {
+  .field-container {
+    flex-direction: row;
+    align-items: center;
+    gap: 32px;
+  }
 }
 `;

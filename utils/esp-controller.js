@@ -1,6 +1,7 @@
 function constructRequestOptions(method, body = null) {
   const headers = new Headers();
-  headers.append('Authorization', 'Bearer');
+  const authToken = window.adobeIMS.getAccessToken();
+  headers.append('Authorization', `Bearer ${authToken}`);
   headers.append('content-type', 'application/json');
 
   const options = {

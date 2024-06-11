@@ -81,11 +81,12 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  width: 100%;
 }
 
 .event-info-component .time-pickers {
   display: flex;
-  gap: 16px;
+  gap: 32px;
 }
 
 .event-info-component .time-pickers .time-picker-wrapper {
@@ -106,7 +107,7 @@
 .event-info-component .time-pickers .time-picker-wrapper sp-picker {
   flex-grow: 1;
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 4px 0;
   height: 32px;
   width: 100%;
   box-sizing: border-box;
@@ -278,5 +279,9 @@
 @media screen and (min-width: 900px) {
   .event-info-component .date-time-row {
     flex-direction: row;
+  }
+
+  .event-info-component .time-inputs-wrapper {
+    width: auto;
   }
 }
