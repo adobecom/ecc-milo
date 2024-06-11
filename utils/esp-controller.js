@@ -55,11 +55,11 @@ export async function uploadBinaryFile(file, configs) {
   }
 }
 
-export async function createVenue(payload) {
-  const raw = JSON.stringify(payload);
+export async function createVenue(eventId, venueData) {
+  const raw = JSON.stringify(venueData);
   const options = constructRequestOptions('POST', raw);
 
-  const resp = await fetch('http://localhost:8500/v1/venues', options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8499/v1/events/${eventId}/venues`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
@@ -67,7 +67,7 @@ export async function createEvent(payload) {
   const raw = JSON.stringify(payload);
   const options = constructRequestOptions('POST', raw);
 
-  const resp = await fetch('http://localhost:8500/v1/events', options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch('http://localhost:8499/v1/events', options).then((res) => res.json()).catch((error) => console.log(error));
   console.log('attempted to create event', payload, resp);
   return resp;
 }
@@ -77,7 +77,7 @@ export async function createSpeaker(profile, seriesId) {
   console.log(raw);
   const options = constructRequestOptions('POST', raw);
 
-  const resp = await fetch('http://localhost:8500/v1/speakers', options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch('http://localhost:8499/v1/speakers', options).then((res) => res.json()).catch((error) => console.log(error));
   console.log('attempted to create speaker', raw, resp);
   return resp;
 }
@@ -86,7 +86,7 @@ export async function updateEvent(eventId, payload) {
   const raw = JSON.stringify(payload);
   const options = constructRequestOptions('PUT', raw);
 
-  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8499/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   console.log(payload, resp);
   return resp;
 }
@@ -95,7 +95,7 @@ export async function publishEvent(eventId, payload) {
   const raw = JSON.stringify({ ...payload, published: true });
   const options = constructRequestOptions('PUT', raw);
 
-  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8499/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
@@ -103,35 +103,35 @@ export async function unpublishEvent(eventId, payload) {
   const raw = JSON.stringify({ ...payload, published: false });
   const options = constructRequestOptions('PUT', raw);
 
-  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8499/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
 export async function deleteEvent(eventId) {
   const options = constructRequestOptions('DELETE');
 
-  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8499/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
 export async function getEvents() {
   const options = constructRequestOptions('GET');
 
-  const resp = fetch('http://localhost:8500/v1/events', options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch('http://localhost:8499/v1/events', options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
 export async function getEvent(eventId) {
   const options = constructRequestOptions('GET');
 
-  const resp = fetch(`http://localhost:8500/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8499/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
 export async function getVenue(venueId) {
   const options = constructRequestOptions('GET');
 
-  const resp = fetch(`http://localhost:8500/v1/venues/${venueId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`http://localhost:8499/v1/venues/${venueId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
@@ -149,7 +149,7 @@ export async function getClouds() {
 
 export async function getSeries() {
   const resp = await fetch(
-    'http://localhost:8500/v1/series',
+    'http://localhost:8499/v1/series',
     {
       method: 'GET',
       headers: {
