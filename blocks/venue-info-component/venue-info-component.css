@@ -36,7 +36,7 @@
 .venue-info-component .venue-info-field-location .location-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 32px;
 }
 
 .venue-info-component .venue-info-field-location .location-input {

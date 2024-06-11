@@ -19,6 +19,7 @@
 
 .form-handler > div:first-child {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   min-height: 50vh;
 }
@@ -111,7 +112,6 @@
 
 .form-handler .main-frame {
   flex-grow: 1;
-  max-width: var(--grid-container-width);
 }
 
 .form-handler .main-frame .section .content {
@@ -143,7 +143,7 @@
 }
 
 .form-handler .main-frame .section:not(:first-of-type) {
-  padding: 36px 70px;
+  padding: 24px 56px;
   border-radius: 10px;
   margin: 24px;
   box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
@@ -154,7 +154,7 @@
 }
 
 .form-handler .form-component {
-  padding: 32px 12px 24px;
+  padding: 32px 12px;
 }
 
 .form-handler .form-component:not(:last-of-type):not(.no-divider) {
@@ -182,7 +182,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 0 24px 0;
+  margin: 0 0 32px 0;
 }
 
 .form-handler .event-heading-tooltip-wrapper {
@@ -321,4 +321,14 @@
   margin: 0;
   font-size: var(--type-body-xs-size);
   line-height: normal;
+}
+
+@media screen and (min-width: 900px) {
+  .form-handler > div:first-child {
+    flex-direction: row;
+  }
+
+  .form-handler .main-frame {
+    max-width: var(--grid-container-width);
+  }
 }

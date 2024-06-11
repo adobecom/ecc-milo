@@ -5,5 +5,5 @@
 .event-topics-component .checkbox-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
+  gap: 32px;
 }
