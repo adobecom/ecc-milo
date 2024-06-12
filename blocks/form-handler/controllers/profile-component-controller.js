@@ -1,7 +1,7 @@
 export function onSubmit(component, props) {
   const profileContainer = component.querySelector('profile-container');
   if (profileContainer) {
-    props.payload = { ...props.payload, ...profileContainer.getProfiles() };
+    props.payload = { ...props.payload, speakers: profileContainer.getProfiles() };
   }
 }
 
