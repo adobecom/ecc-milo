@@ -357,9 +357,11 @@ function buildDashboardTable(props) {
 
 async function getEventsArray() {
   const json = await getEvents();
-  const mock = await fetch('/blocks/ecc-dashboard/mock.json').then((resp) => resp.json()).catch((error) => console.log(error));
 
-  if (!json || json.errors?.length > 0) return mock;
+  if (!json || json.errors?.length > 0) {
+    const mock = await fetch('/blocks/ecc-dashboard/mock.json').then((resp) => resp.json()).catch((error) => console.log(error));
+    return mock;
+  }
 
   return json.events;
 }

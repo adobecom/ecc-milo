@@ -1,3 +1,5 @@
+let secretCache = [];
+
 function createTag(tag, attributes, html, options = {}) {
   const el = document.createElement(tag);
   if (html) {
@@ -225,13 +227,17 @@ export async function decorateTextarea(cell, extraOptions) {
 }
 
 export async function getSecret(key) {
-  const resp = await fetch('https://main--ecc-milo--adobecom.hlx.page/system/secrets.json')
-    .then((r) => r)
-    .catch((e) => window.lana?.log(`Failed to fetch Google Places API key: ${e}`));
+  if (secretCache.length === 0) {
+    const resp = await fetch('https://main--ecc-milo--adobecom.hlx.page/system/secrets.json')
+      .then((r) => r)
+      .catch((e) => window.lana?.log(`Failed to fetch Google Places API key: ${e}`));
 
-  if (!resp.ok) return null;
+    if (!resp.ok) return null;
 
-  const json = await resp.json();
-  const secret = json.data.find((s) => s.key === key);
+    const json = await resp.json();
+    secretCache = json.data;
+  }
+
+  const secret = secretCache.find((s) => s.key === key);
   return secret.value;
 }
