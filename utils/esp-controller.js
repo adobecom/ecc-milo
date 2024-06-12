@@ -6,11 +6,17 @@ function getESLConfig() {
   };
 }
 
-async function waitForAdobeIMS() {
-  while (!window.adobeIMS || !window.adobeIMS.getAccessToken) {
-    // eslint-disable-next-line no-await-in-loop
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
+function waitForAdobeIMS() {
+  return new Promise((resolve) => {
+    const checkIMS = () => {
+      if (window.adobeIMS && window.adobeIMS.getAccessToken) {
+        resolve();
+      } else {
+        setTimeout(checkIMS, 100);
+      }
+    };
+    checkIMS();
+  });
 }
 
 async function constructRequestOptions(method, body = null) {
