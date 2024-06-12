@@ -21,6 +21,8 @@ export function onSubmit(component, props) {
 }
 
 export default function init(component, props) {
+  if (!props.payload.rsvpData) return;
+
   const {
     attendeeLimit,
     allowWaitlist,

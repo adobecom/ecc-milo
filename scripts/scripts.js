@@ -81,7 +81,6 @@ window.bm8tr = await import('../deps/block-mediator.min.js').then((mod) => mod.d
 (async function loadPage() {
   const { loadArea, setConfig } = await import(`${miloLibs}/utils/utils.js`);
   const config = setConfig({ ...CONFIG, miloLibs });
-  console.log(config);
   window.miloConfig = config;
   await loadArea().then(() => {
     lazyCaptureProfile();
