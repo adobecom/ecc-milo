@@ -6,7 +6,16 @@ function getESLConfig() {
   };
 }
 
-function constructRequestOptions(method, body = null) {
+async function waitForAdobeIMS() {
+  while (!window.adobeIMS || !window.adobeIMS.getAccessToken) {
+    // eslint-disable-next-line no-await-in-loop
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+}
+
+async function constructRequestOptions(method, body = null) {
+  await waitForAdobeIMS();
+
   const headers = new Headers();
   const authToken = window.adobeIMS.getAccessToken().token;
   headers.append('Authorization', `Bearer ${authToken}`);
@@ -67,7 +76,7 @@ export async function uploadBinaryFile(file, configs) {
 export async function createVenue(eventId, venueData) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify(venueData);
-  const options = constructRequestOptions('POST', raw);
+  const options = await constructRequestOptions('POST', raw);
 
   const resp = await fetch(`${host}/v1/events/${eventId}/venues`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
@@ -76,7 +85,7 @@ export async function createVenue(eventId, venueData) {
 export async function createEvent(payload) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify(payload);
-  const options = constructRequestOptions('POST', raw);
+  const options = await constructRequestOptions('POST', raw);
 
   const resp = await fetch(`${host}/v1/events`, options).then((res) => res.json()).catch((error) => console.log(error));
   console.log('attempted to create event', payload, resp);
@@ -87,7 +96,7 @@ export async function createSpeaker(profile, seriesId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify({ ...profile, seriesId });
   console.log(raw);
-  const options = constructRequestOptions('POST', raw);
+  const options = await constructRequestOptions('POST', raw);
 
   const resp = await fetch(`${host}/v1/speakers`, options).then((res) => res.json()).catch((error) => console.log(error));
   console.log('attempted to create speaker', raw, resp);
@@ -97,7 +106,7 @@ export async function createSpeaker(profile, seriesId) {
 export async function updateEvent(eventId, payload) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify(payload);
-  const options = constructRequestOptions('PUT', raw);
+  const options = await constructRequestOptions('PUT', raw);
 
   const resp = await fetch(`${host}/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   console.log(payload, resp);
@@ -107,7 +116,7 @@ export async function updateEvent(eventId, payload) {
 export async function publishEvent(eventId, payload) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify({ ...payload, published: true });
-  const options = constructRequestOptions('PUT', raw);
+  const options = await constructRequestOptions('PUT', raw);
 
   const resp = await fetch(`${host}/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
@@ -116,7 +125,7 @@ export async function publishEvent(eventId, payload) {
 export async function unpublishEvent(eventId, payload) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify({ ...payload, published: false });
-  const options = constructRequestOptions('PUT', raw);
+  const options = await constructRequestOptions('PUT', raw);
 
   const resp = await fetch(`${host}/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
@@ -124,7 +133,7 @@ export async function unpublishEvent(eventId, payload) {
 
 export async function deleteEvent(eventId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
-  const options = constructRequestOptions('DELETE');
+  const options = await constructRequestOptions('DELETE');
 
   const resp = await fetch(`${host}/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
@@ -132,7 +141,7 @@ export async function deleteEvent(eventId) {
 
 export async function getEvents() {
   const { host } = getESLConfig()[window.miloConfig.env.name];
-  const options = constructRequestOptions('GET');
+  const options = await constructRequestOptions('GET');
 
   const resp = await fetch(`${host}/v1/events`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
@@ -140,7 +149,7 @@ export async function getEvents() {
 
 export async function getEvent(eventId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
-  const options = constructRequestOptions('GET');
+  const options = await constructRequestOptions('GET');
 
   const resp = await fetch(`${host}/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
@@ -148,7 +157,7 @@ export async function getEvent(eventId) {
 
 export async function getVenue(venueId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
-  const options = constructRequestOptions('GET');
+  const options = await constructRequestOptions('GET');
 
   const resp = await fetch(`${host}/v1/venues/${venueId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
@@ -168,7 +177,7 @@ export async function getClouds() {
 
 export async function getSeries() {
   const { host } = getESLConfig()[window.miloConfig.env.name];
-  const options = constructRequestOptions('GET');
+  const options = await constructRequestOptions('GET');
   const resp = await fetch(`${host}/v1/series`, options).then((res) => res.json()).catch((error) => error);
 
   if (!resp.error) {
@@ -184,7 +193,7 @@ export async function createAttendee(eventId, attendeeData) {
 
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify(attendeeData);
-  const options = constructRequestOptions('POST', raw);
+  const options = await constructRequestOptions('POST', raw);
 
   const resp = await fetch(`${host}/v1/events/${eventId}/attendees`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
@@ -195,7 +204,7 @@ export async function updateAttendee(eventId, attendeeId, attendeeData) {
 
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify(attendeeData);
-  const options = constructRequestOptions('PUT', raw);
+  const options = await constructRequestOptions('PUT', raw);
 
   const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
@@ -205,7 +214,7 @@ export async function deleteAttendee(eventId, attendeeId) {
   if (!eventId || !attendeeId) return false;
 
   const { host } = getESLConfig()[window.miloConfig.env.name];
-  const options = constructRequestOptions('DELETE');
+  const options = await constructRequestOptions('DELETE');
 
   const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
@@ -215,7 +224,7 @@ export async function getAttendees(eventId) {
   if (!eventId) return false;
 
   const { host } = getESLConfig()[window.miloConfig.env.name];
-  const options = constructRequestOptions('GET');
+  const options = await constructRequestOptions('GET');
 
   const resp = await fetch(`${host}/v1/events/${eventId}/attendees`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
@@ -225,7 +234,7 @@ export async function getAttendee(eventId, attendeeId) {
   if (!eventId || !attendeeId) return false;
 
   const { host } = getESLConfig()[window.miloConfig.env.name];
-  const options = constructRequestOptions('GET');
+  const options = await constructRequestOptions('GET');
 
   const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
