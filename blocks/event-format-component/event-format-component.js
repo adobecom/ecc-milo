@@ -37,8 +37,8 @@ async function decorateSeriesSelect(column) {
   if (!series) {
     series = [
       {
-        seriesId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-        seriesName: 'test series',
+        seriesId: 'b75765b5-ceba-484c-9afc-c96955afabfb',
+        seriesName: 'Create Now Series (test)',
       },
     ];
   }
