@@ -1,9 +1,10 @@
 import { createVenue } from '../../../utils/esp-controller.js';
-import { changeInputValue } from '../../../utils/utils.js';
+import { changeInputValue, getSecret } from '../../../utils/utils.js';
 
-function loadGoogleMapsAPI(callback) {
+async function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');
-  script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBStUMRpmG-vchdbtciHmqdQhzvLXmgQyI&libraries=places&callback=onGoogleMapsApiLoaded';
+  const apiKey = await getSecret('google-places-api');
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=onGoogleMapsApiLoaded`;
   script.async = true;
   script.defer = true;
   window.onGoogleMapsApiLoaded = callback;
@@ -86,9 +87,9 @@ function initAutocomplete(el) {
   });
 }
 
-export default function init(component, props) {
+export default async function init(component, props) {
   // TODO: init function and repopulate data from props if exists
-  loadGoogleMapsAPI(() => initAutocomplete(component));
+  await loadGoogleMapsAPI(() => initAutocomplete(component));
 
   const {
     venueName,
