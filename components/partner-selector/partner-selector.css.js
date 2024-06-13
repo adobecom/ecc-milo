@@ -11,17 +11,18 @@ fieldset {
   padding: 0;
 }
 
-.rsvp-field-wrapper {
+.partner-field-wrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 16px;
 }
 
-.rsvp-field-wrapper img.partner-img {
-  display: block;
-  width: 80px;
-  height: 80px;
-  border-radius: 4px;
-  object-fit: contain;
+.partner-input-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.partner-input-wrapper label {
+  font-weight: 700;
 }
 `;

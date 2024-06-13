@@ -1,6 +1,5 @@
 function getESLConfig() {
   return {
-    // FIXME: stage and local are swapped for demo
     local: { host: 'http://localhost:8499' },
     stage: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
     prod: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
@@ -21,10 +20,11 @@ function waitForAdobeIMS() {
 }
 
 async function constructRequestOptions(method, body = null) {
-  await waitForAdobeIMS();
+  // await waitForAdobeIMS();
 
   const headers = new Headers();
-  const authToken = window.adobeIMS.getAccessToken().token;
+  // const authToken = window.adobeIMS.getAccessToken().token;
+  const authToken = 'eyJhbGciOiJSUzI1NiIsIng1dSI6Imltc19uYTEtc3RnMS1rZXktYXQtMS5jZXIiLCJraWQiOiJpbXNfbmExLXN0ZzEta2V5LWF0LTEiLCJpdHQiOiJhdCJ9.eyJpZCI6IjE3MTgzMDY1NDkzMjhfMmFmMWFmOTYtOTgwMS00N2FmLTg5NTItM2E3M2ZjMTkxNTBiX3VlMSIsInR5cGUiOiJhY2Nlc3NfdG9rZW4iLCJjbGllbnRfaWQiOiJhY29tX2V2ZW50X21nbXRfY29uc29sZSIsInVzZXJfaWQiOiJCOTA3MTlBNzY1QjI4ODY4MEE0OTQyMTlAYzYyZjI0Y2M1YjViN2UwZTBhNDk0MDA0IiwiYXMiOiJpbXMtbmExLXN0ZzEiLCJhYV9pZCI6IkI5MDcxOUE3NjVCMjg4NjgwQTQ5NDIxOUBjNjJmMjRjYzViNWI3ZTBlMGE0OTQwMDQiLCJjdHAiOjAsImZnIjoiWVE1NFZRNFc3WjY3QTZEWjNHWk1DMklBMkk9PT09PT0iLCJzaWQiOiIxNzE3Nzk2MDMxMzI0XzgxMDZiMDY4LWFiNTYtNDdmZi04MTYwLWNjYjU2MzUyMWQ0MF91ZTEiLCJtb2kiOiI3ZDhhN2NlNCIsInBiYSI6Ik1lZFNlY05vRVYsTG93U2VjIiwiZXhwaXJlc19pbiI6Ijg2NDAwMDAwIiwiY3JlYXRlZF9hdCI6IjE3MTgzMDY1NDkzMjgiLCJzY29wZSI6IkFkb2JlSUQsb3BlbmlkLGduYXYifQ.AJxHiqtg38cYeRTq9QNGXJuhnQQ7jrY_zfDeVz16WYB0KpUfIfVJwCaermgjSW18hVa3icJlnN0JHg0JNQR43Vgentt0WBU6c5p6nD-Ljhbmh4yTyGyf28Ah4njW0eMYge1ejHs0xgfszHlM4Fkpn9717BmuVFLD73wULzFx00DM9TV4HYu4ANtzFNnXGWgiMBchCy2LPzN4SqGDetL8v1yOaoC336K6hHKzy9xTfv97iLETHOfT1T2JEEKBEQsMFSllUYSR955yrW-CflEzNy_DV5eL6RA3DiQTvV-HxpHu78cN3PJW25YvzVpNUV3XV9a88tOaREfxiqASMktI-A';
   headers.append('Authorization', `Bearer ${authToken}`);
   headers.append('content-type', 'application/json');
 
@@ -57,13 +57,15 @@ export async function uploadImage(file) {
 }
 
 export async function uploadBinaryFile(file, configs) {
+  await waitForAdobeIMS();
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const authToken = window.adobeIMS.getAccessToken().token;
   const headers = new Headers();
   headers.append('x-image-kind', configs.type);
-  headers.append('x-image-alt-text', configs.altText);
-  headers.append('Authorization', 'Bearer');
+  headers.append('Authorization', `Bearer ${authToken}`);
 
   try {
-    const response = await fetch(configs.targetUrl, {
+    const response = await fetch(`${host}${configs.targetUrl}`, {
       method: 'POST',
       headers,
       body: file,
@@ -102,11 +104,20 @@ export async function createEvent(payload) {
 export async function createSpeaker(profile, seriesId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify({ ...profile, seriesId });
-  console.log(raw);
   const options = await constructRequestOptions('POST', raw);
-
+  console.log('attempted to create speaker with:', raw);
   const resp = await fetch(`${host}/v1/speakers`, options).then((res) => res.json()).catch((error) => console.log(error));
-  console.log('attempted to create speaker', raw, resp);
+  console.log('create speaker response:', resp);
+  return resp;
+}
+
+export async function createPartner(partner, eventId) {
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const raw = JSON.stringify(partner);
+  const options = await constructRequestOptions('POST', raw);
+  console.log('attempted to create partner with:', raw);
+  const resp = await fetch(`${host}/v1/partners/${eventId}/partners`, options).then((res) => res.json()).catch((error) => console.log(error));
+  console.log('create speaker partner:', resp);
   return resp;
 }
 
