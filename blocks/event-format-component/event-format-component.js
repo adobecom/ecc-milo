@@ -6,31 +6,36 @@ const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 
 async function buildPickerFromTags(id, wrapper, phText, options) {
-  const select = createTag('sp-picker', { id, class: 'select-input', size: 'm', label: phText });
 
-  options.forEach(([, val]) => {
+}
+
+async function decorateCloudTagSelect(column) {
+  const phText = column.textContent.trim();
+  const buSelectWrapper = createTag('div', { class: 'bu-picker-wrapper' });
+  const select = createTag('sp-picker', { id: 'bu-select-input', pending: true, class: 'select-input', size: 'm', label: phText });
+
+  column.innerHTML = '';
+  buSelectWrapper.append(select);
+  column.append(buSelectWrapper);
+
+  // const clouds = await getClouds();
+  const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
+
+  Object.entries(clouds).forEach(([, val]) => {
     const opt = createTag('sp-menu-item', { value: val.id }, val.name);
     select.append(opt);
   });
 
-  wrapper.append(select);
-}
-
-async function decorateCloudTagSelect(column) {
-  const buSelectWrapper = createTag('div', { class: 'bu-picker-wrapper' });
-  const phText = column.textContent.trim();
-
-  // FIXME: use correct data source rather than hardcoded values.
-  const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
-
-  buildPickerFromTags('bu-select-input', buSelectWrapper, phText, Object.entries(clouds));
-
-  column.innerHTML = '';
-  column.append(buSelectWrapper);
+  select.pending = false;
 }
 
 async function decorateSeriesSelect(column) {
   const seriesSelectWrapper = createTag('div', { class: 'series-picker-wrapper' });
+  const select = createTag('sp-picker', { id: 'series-select-input', class: 'select-input', pending: true, size: 'm', label: column.textContent.trim() });
+  seriesSelectWrapper.append(select);
+
+  column.innerHTML = '';
+  column.append(seriesSelectWrapper);
 
   let series = await getSeries();
   // if (!series) return;
@@ -42,17 +47,13 @@ async function decorateSeriesSelect(column) {
       },
     ];
   }
-  const select = createTag('sp-picker', { id: 'series-select-input', class: 'select-input', size: 'm', label: column.textContent.trim() });
 
   Object.values(series).forEach((val) => {
     const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
     select.append(opt);
   });
 
-  seriesSelectWrapper.append(select);
-
-  column.innerHTML = '';
-  column.append(seriesSelectWrapper);
+  select.pending = false;
 }
 
 function decorateTimeZoneSelect(column) {
@@ -161,8 +162,8 @@ export default function init(el) {
       r.classList.add('series-fields-wrapper');
 
       cols.forEach(async (c, ci) => {
-        if (ci === 0) await decorateCloudTagSelect(c);
-        if (ci === 1) await decorateSeriesSelect(c);
+        if (ci === 0) decorateCloudTagSelect(c);
+        if (ci === 1) decorateSeriesSelect(c);
         // if (ci === 2) decorateNewSeriesBtnAndModal(c);
         if (ci === 2) decorateCheckbox(c);
       });
