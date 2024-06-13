@@ -1,8 +1,8 @@
 function getESLConfig() {
   return {
     // FIXME: stage and local are swapped for demo
-    stage: { host: 'http://localhost:8500' },
-    local: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
+    local: { host: 'http://localhost:8499' },
+    stage: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
     prod: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
   };
 }
