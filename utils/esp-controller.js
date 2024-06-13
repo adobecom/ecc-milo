@@ -57,10 +57,11 @@ export async function uploadImage(file) {
 }
 
 export async function uploadBinaryFile(file, configs) {
+  await waitForAdobeIMS();
+  const authToken = window.adobeIMS.getAccessToken().token;
   const headers = new Headers();
   headers.append('x-image-kind', configs.type);
-  headers.append('x-image-alt-text', configs.altText);
-  headers.append('Authorization', 'Bearer');
+  headers.append('Authorization', `Bearer ${authToken}`);
 
   try {
     const response = await fetch(configs.targetUrl, {

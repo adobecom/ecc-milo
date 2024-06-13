@@ -18,8 +18,9 @@ export default class ProductSelector extends LitElement {
     this.selectedProduct = {
       ...this.selectedProduct,
       ...Object.values(this.products).find((product) => product.name === productName),
-      isPlaceholder: false,
     };
+
+    delete this.selectedProduct.isPlaceholder;
 
     this.dispatchEvent(new CustomEvent('update-product', {
       detail: { product: this.selectedProduct },
