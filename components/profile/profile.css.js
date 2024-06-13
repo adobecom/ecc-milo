@@ -39,6 +39,12 @@ h5 {
   margin-bottom: 0px;
 }
 
+.social-media {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 .social-media-row {
   display: flex;
   flex-direction: row;
@@ -76,7 +82,19 @@ modal{
     width: 1000px;
 }
 
-.profile-edit-view {
-    width: 1000px;
+.profile-view {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.social-media h3 {
+    margin: 0;
+}
+
+.speaker-image {
+    width: 300px;
+    height: 200px;
 }
 `;

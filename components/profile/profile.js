@@ -4,7 +4,7 @@ import { getLibs } from '../../scripts/utils.js';
 import { style } from './profile.css.js';
 import { createSpeaker } from '../../utils/esp-controller.js';
 
-const { LitElement, html, repeat, nothing, query } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 const defaultFieldLabels = {
   heading: 'Profile',
@@ -56,7 +56,34 @@ export class Profile extends LitElement {
 
   updateSocialMedia(index, value) {
     this.profile.socialMedia[index] = { url: value };
+    this.requestUpdate();
   }
+
+  renderProfileTypePicker(fieldLabel) {
+    return html`
+    <div>
+    <div><sp-field-label size="l" required>${fieldLabel}</sp-field-label></div>
+    <sp-picker label=${fieldLabel} value=${this.profile?.type} size="l" @change=${(event) => this.updateValue('type', event.target.value)}>
+        ${repeat(speakerType, (type) => html`
+            <sp-menu-item value="${type}">${type}</sp-menu-item>
+        `)}
+    </sp-picker>
+    </div>`;
+  }
+
+  async saveProfile() {
+    const respJson = await createSpeaker(this.profile, this.seriesId);
+    if (respJson.speakerId) {
+      this.profile.id = respJson.speakerId;
+      this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.url !== '');
+      this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload', {
+        detail: { targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images` },
+        bubbles: true,
+        composed: true,
+      }));
+    }
+  }
+
 
   renderProfileForm(title) {
     const fieldLabelsJSON = {
@@ -101,16 +128,9 @@ export class Profile extends LitElement {
     const quietTextfieldConfig = { size: 'xl', quiet: true };
 
     return html`
-    <div class="profile-edit-view">
+    <div class="profile-view">
     <h2>${title}</h2>
-    <div>
-        <div><sp-field-label size="l" required>${fieldLabelsJSON.chooseType}</sp-field-label></div>
-        <sp-picker label=${fieldLabelsJSON.chooseType} value=${this.profile?.type} size="l" @change=${(event) => this.updateValue('type', event.target.value)}>
-            ${repeat(speakerType, (type) => html`
-                <sp-menu-item value="${type}">${type}</sp-menu-item>
-            `)}
-        </sp-picker>
-    </div>
+    ${this.renderProfileTypePicker(fieldLabelsJSON.chooseType)}
     <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('firstName', event.detail.value)}></custom-textfield>
     <custom-textfield data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('lastName', event.detail.value)}></custom-textfield>
     <image-dropzone configs=${JSON.stringify({
@@ -122,7 +142,7 @@ export class Profile extends LitElement {
     </image-dropzone>
     <custom-textfield data=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('title', event.detail.value)}></custom-textfield>
     <custom-textfield data=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @input-change=${(event) => this.updateValue('bio', event.detail.value)}></custom-textfield>
-    <div>
+    <div class="social-media">
     <h3>${fieldLabelsJSON.socialMedia}</h3>
     ${this.profile?.socialMedia ? repeat(
     this.profile?.socialMedia,
@@ -138,21 +158,15 @@ export class Profile extends LitElement {
     </div>
     <repeater-element text=${fieldLabelsJSON.addSocialMediaRepeater} @repeat=${() => { this.addSocialMedia(); }}></repeater-element>
     <sp-divider size='s'></sp-divider>
-    <sp-button variant="primary" class="save-profile-button" @click=${async () => {
-    const respJson = await createSpeaker(this.profile, this.seriesId);
-    if (respJson.speakerId) {
-      this.profile.id = respJson.speakerId;
-      this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.url !== '');
-      this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload', {
-        detail: { targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images` },
-        bubbles: true,
-        composed: true,
-      }));
-
-      delete this.profile.isPlaceholder;
-    }
+    <sp-button variant="primary" class="save-profile-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async () => {
+    this.saveProfile();
   }}>Save Profile</sp-button>
+  </div>
     `;
+  }
+
+  renderSocialMediaLink(socialMedia) {
+    return html`<p>${socialMedia.url}</p>`;
   }
 
   renderProfileView() {
@@ -162,21 +176,15 @@ export class Profile extends LitElement {
     };
 
     return html`
+    <div class="profile-view">
     <h2>${fieldLabelsJSON.heading}</h2>
-    <div>
-        <div><sp-field-label size="l" required>${fieldLabelsJSON.chooseType}</sp-field-label></div>
-        <sp-picker label=${fieldLabelsJSON.chooseType} value=${this.profile?.type} size="l" @change=${(event) => this.updateValue('type', event.target.value)}>
-            ${repeat(speakerType, (type) => html`
-                <sp-menu-item value="${type}">${type}</sp-menu-item>
-            `)}
-        </sp-picker>
-    </div>
+    ${this.renderProfileTypePicker(fieldLabelsJSON.chooseType)}
     <h3>${this.profile.firstName} ${this.profile.lastName}</h3>
     <div class="img-file-input-wrapper">
     ${this.profile.image?.url ? html`
     <div class="preview-wrapper">
       <div class="preview-img-placeholder">
-      <img src="${this.profile.image?.url}" alt="preview image">
+      <img class="speaker-image" src="${this.profile.image?.url}" alt="preview image">
       </div>
     </div>`
     : nothing}
@@ -185,13 +193,14 @@ export class Profile extends LitElement {
         <h5>${this.profile.title}</h5>
         <p>${this.profile.bio}</p>
     </div>
-    <div>
-        <h4>${fieldLabelsJSON.socialMedia}</h4>
-        ${this.profile?.socialMedia ? repeat(this.profile?.socialMedia, (socialMedia) => html`<p>${socialMedia.url}</p>`) : nothing}
+    <div class="social-media">
+        <h3>${fieldLabelsJSON.socialMedia}</h3>
+        ${this.profile?.socialMedia ? repeat(this.profile?.socialMedia, (socialMedia) => this.renderSocialMediaLink(socialMedia)) : nothing}
     </div>
     <sp-divider></sp-divider>
     <overlay-trigger type="modal" class="edit-profile">
-    <sp-dialog-wrapper 
+    <sp-dialog-wrapper class="edit-profile-dialog"
+        size="l"
         slot="click-content"
         dismiss-label="Close"
         underlay
@@ -200,6 +209,7 @@ export class Profile extends LitElement {
     </sp-dialog-wrapper>
     <sp-button slot="trigger" variant="primary" class="save-profile-button">Edit Profile</sp-button>
     </overlay-trigger>
+    </div>
     
     `;
   }
