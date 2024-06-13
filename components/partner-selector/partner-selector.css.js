@@ -5,24 +5,41 @@ const { css } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
-fieldset {
-  margin-bottom: 32px;
-  border: none;
-  padding: 0;
-}
+  fieldset {
+    position: relative;
+    border: none;
+    padding: 32px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
 
-.partner-field-wrapper {
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-}
+  fieldset image-dropzone {
+    display: block;
+    width: 280px;
+    height: 164px;
+  }
 
-.partner-input-wrapper {
-  display: flex;
-  flex-direction: column;
-}
+  .partner-input-wrapper {
+    display: flex;
+    align-items: flex-end;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
 
-.partner-input-wrapper label {
-  font-weight: 700;
-}
+  .partner-input {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .partner-input-wrapper label {
+    font-weight: 700;
+  }
+
+  .action-area {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
 `;

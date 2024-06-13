@@ -16,4 +16,10 @@ export const style = css`
   .icon-remove-circle:hover {
     opacity: 1;
   }
+
+  .img-upload-text p {
+    font-size: var(--type-body-xxs-size);
+    line-height: var(--type-body-xxs-lh);
+    margin: 0;
+  }
 `;

@@ -4,23 +4,15 @@ import { style } from './partner-selector-group.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
-const defaultSelectedPartner = {
-  showPartnerLink: false,
-  name: '[Partner name]',
-  imageUrl: '/icons/icon-placeholder.svg',
-  isPlaceholder: true,
-};
-
 export default class PartnerSelectorGroup extends LitElement {
   static properties = {
     selectedPartners: { type: Array },
-    partners: { type: Array },
+    fieldlabels: { type: Object },
   };
 
   constructor() {
     super();
-    this.selectedPartners = this.selectedPartners || [defaultSelectedPartner];
-    this.partners = JSON.parse(this.dataset.partners);
+    this.selectedPartners = this.selectedPartners || [[]];
   }
 
   static styles = style;
@@ -45,17 +37,25 @@ export default class PartnerSelectorGroup extends LitElement {
   }
 
   render() {
+    const imageTag = this.fieldlabels.image;
+    imageTag.setAttribute('slot', 'img-label');
+    imageTag.classList.add('img-upload-text');
+
     return html`
-      ${repeat(this.selectedPartners, (partner, index) => html`
-        <partner-selector .selectedPartner=${partner} .partners=${this.partners}
+      ${repeat(this.selectedPartners, (partner, index) => {
+    const imgTag = imageTag.cloneNode(true);
+    return html`
+        <partner-selector .selectedPartner=${partner}
           @update-partner=${(event) => this.handlePartnerUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.selectedPartners.length > 1 ? html`
               <img class="icon icon-remove-circle" src="/icons/remove-circle.svg" alt="remove-repeater" @click=${() => this.deletePartner(index)}></img>
             ` : nothing}
           </div>
+          ${imgTag}
         </partner-selector>
-      `)}
+      `;
+  })}
       <repeater-element text="Add partner" @repeat=${this.addPartner}></repeater-element>
     `;
   }

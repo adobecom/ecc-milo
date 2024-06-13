@@ -23,18 +23,12 @@ function buildCheckbox(el) {
 }
 
 async function buildFields(el) {
-  const configRow = el.querySelector(':scope > div:last-of-type');
-  const configSheetLocation = configRow.querySelector('a')?.textContent.trim();
-  if (!configSheetLocation) return;
+  const imgLabelRow = el.querySelector(':scope > div:last-of-type');
 
-  el.dataset.configUrl = configSheetLocation;
-  const partners = await fetch(configSheetLocation).then((resp) => resp.json()).catch((err) => window.lana?.log(`Failed to load RSVP fields config: ${err}`));
-  if (!partners) return;
-
-  configRow.innerHTML = '';
   const partnerFieldset = createTag('partner-selector-group');
-  partnerFieldset.dataset.partners = JSON.stringify(partners.data);
-  configRow.appendChild(partnerFieldset);
+  partnerFieldset.fieldlabels = { image: imgLabelRow.querySelector('div')?.cloneNode(true) };
+  el.appendChild(partnerFieldset);
+  imgLabelRow.remove();
 }
 
 export default async function init(el) {
