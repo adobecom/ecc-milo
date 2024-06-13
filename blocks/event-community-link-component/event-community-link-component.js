@@ -14,7 +14,7 @@ async function decorateFields(row) {
     id: 'community-url-details',
     class: 'text-input',
     placeholder: text,
-    pattern: 'https:\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?',
+    pattern: '^https:\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$',
     size: 'xl',
   });
 

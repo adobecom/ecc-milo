@@ -31,6 +31,11 @@ async function decorateCloudTagSelect(column) {
 
 async function decorateSeriesSelect(column) {
   const seriesSelectWrapper = createTag('div', { class: 'series-picker-wrapper' });
+  const select = createTag('sp-picker', { id: 'series-select-input', class: 'select-input', pending: true, size: 'm', label: column.textContent.trim() });
+  seriesSelectWrapper.append(select);
+
+  column.innerHTML = '';
+  column.append(seriesSelectWrapper);
 
   let series = await getSeries();
   // if (!series) return;
@@ -42,17 +47,13 @@ async function decorateSeriesSelect(column) {
       },
     ];
   }
-  const select = createTag('sp-picker', { id: 'series-select-input', class: 'select-input', size: 'm', label: column.textContent.trim() });
 
   Object.values(series).forEach((val) => {
     const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
     select.append(opt);
   });
 
-  seriesSelectWrapper.append(select);
-
-  column.innerHTML = '';
-  column.append(seriesSelectWrapper);
+  select.pending = false;
 }
 
 function decorateTimeZoneSelect(column) {
