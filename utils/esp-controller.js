@@ -217,7 +217,17 @@ export async function getClouds() {
 export async function getSeries() {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
-  const resp = await fetch(`${host}/v1/series`, options).then((res) => res.json()).catch((error) => error);
+  let resp = await fetch(`${host}/v1/series`, options).catch((error) => error);
+
+  // Handle manual redirection
+  if (resp.status === 302) {
+    const redirectedUrl = resp.headers.get('Location');
+    if (redirectedUrl) {
+      resp = await fetch(redirectedUrl, options).catch((error) => error);
+    }
+  }
+
+  resp = await resp.json();
 
   if (!resp.error) {
     const { series } = resp;
