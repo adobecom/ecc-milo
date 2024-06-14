@@ -29,17 +29,6 @@ export const getCaasTags = (() => {
   };
 })();
 
-async function handleRedirect(response, options) {
-  if (response.status === 302) {
-    const redirectedUrl = response.headers.get('Location');
-    if (redirectedUrl) {
-      const newOptions = { ...options, redirect: 'follow' };
-      return fetch(redirectedUrl, newOptions);
-    }
-  }
-  return response;
-}
-
 function getESLConfig() {
   return {
     // FIXME: stage and local are swapped for demo
@@ -232,18 +221,16 @@ export async function getSeries() {
 
   // Handle manual redirection
   if (resp.status === 302) {
-    resp = await handleRedirect(resp, options);
+    const redirectedUrl = resp.headers.get('Location');
+    if (redirectedUrl) {
+      resp = await fetch(redirectedUrl, options).catch((error) => error);
+    }
   }
 
-  if (!resp.ok) {
-    // Handle non-200 status codes
-    return null;
-  }
+  resp = await resp.json();
 
-  const jsonResponse = await resp.json().catch((error) => error);
-
-  if (!jsonResponse.error) {
-    const { series } = jsonResponse;
+  if (!resp.error) {
+    const { series } = resp;
     return series;
   }
 
