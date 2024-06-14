@@ -23,24 +23,28 @@ export default class PartnerSelector extends LitElement {
   }
 
   render() {
+    const configString = JSON.stringify({
+      uploadOnEvent: true,
+      type: 'partner-image',
+      targetUrl: `/v1/partners/${this.selectedPartner.id}/images`,
+    });
+
     return html`
       <fieldset class="partner-field-wrapper">
       <div>
         <div class="partner-input-wrapper">
-          <image-dropzone configs=${JSON.stringify({
-    uploadOnEvent: true,
-    type: 'partner-image',
-    targetUrl: `/v1/partners/${this.selectedPartner.id}/images`,
-  })}>
+          <image-dropzone configs=${configString}>
         <slot name="img-label" slot="img-label"></slot>
-    </image-dropzone>
-          <div class="partner-input">
-            <label>Partner name</label>
-            <sp-textfield @change=${(event) => this.updateValue('name', event.detail.value)}></sp-textfield>
-          </div>
-          <div class="partner-input">
-            <label>Partner external url</label>
-            <sp-textfield @change=${(event) => this.updateValue('externalUrl', event.detail.value)}></sp-textfield>
+          </image-dropzone>
+          <div>
+            <div class="partner-input">
+              <label>Partner name</label>
+              <sp-textfield @change=${(event) => this.updateValue('name', event.detail.value)}></sp-textfield>
+            </div>
+            <div class="partner-input">
+              <label>Partner external url</label>
+              <sp-textfield @change=${(event) => this.updateValue('externalUrl', event.detail.value)}></sp-textfield>
+            </div>
           </div>
         </div>
       </div>
@@ -55,7 +59,6 @@ export default class PartnerSelector extends LitElement {
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
-      <sp-divider size='s'></sp-divider>
     `;
   }
 }

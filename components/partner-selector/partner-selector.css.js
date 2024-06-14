@@ -23,12 +23,13 @@ export const style = css`
 
   .partner-input-wrapper {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     gap: 32px;
     flex-wrap: wrap;
   }
 
   .partner-input {
+    margin-bottom: 16px;
     display: flex;
     flex-direction: column;
   }

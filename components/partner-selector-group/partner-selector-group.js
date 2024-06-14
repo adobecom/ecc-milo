@@ -54,6 +54,8 @@ export default class PartnerSelectorGroup extends LitElement {
           </div>
           ${imgTag}
         </partner-selector>
+
+      ${index < this.selectedPartners.length - 1 ? html`<sp-divider size='s'></sp-divider>` : nothing}
       `;
   })}
       <repeater-element text="Add partner" @repeat=${this.addPartner}></repeater-element>

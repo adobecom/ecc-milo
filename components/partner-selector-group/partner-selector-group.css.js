@@ -22,4 +22,8 @@ export const style = css`
     line-height: var(--type-body-xxs-lh);
     margin: 0;
   }
+
+  .delete-btn {
+    height: 24px;
+  }
 `;

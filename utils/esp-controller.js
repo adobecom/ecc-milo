@@ -115,7 +115,7 @@ export async function createPartner(partner, eventId) {
   const raw = JSON.stringify(partner);
   const options = await constructRequestOptions('POST', raw);
   console.log('attempted to create partner with:', raw);
-  const resp = await fetch(`${host}/v1/partners/${eventId}/partners`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events/${eventId}/partners`, options).then((res) => res.json()).catch((error) => console.log(error));
   console.log('create speaker partner:', resp);
   return resp;
 }
