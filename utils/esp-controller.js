@@ -1,13 +1,33 @@
-let CAAS_TAGS_CACHE;
+export const getCaasTags = (() => {
+  let cache;
+  let promise;
 
-export async function getCaasTags() {
-  if (!CAAS_TAGS_CACHE) {
-    CAAS_TAGS_CACHE = await fetch('https://www.adobe.com/chimera-api/tags')
-      .then((resp) => (resp.ok ? resp.json() : null)).catch((err) => window.lana?.log(`Failed to load products map JSON: ${err}`));
-  }
+  return () => {
+    if (cache) {
+      return cache;
+    }
 
-  return CAAS_TAGS_CACHE;
-}
+    if (!promise) {
+      promise = fetch('https://www.adobe.com/chimera-api/tags')
+        .then((resp) => {
+          if (resp.ok) {
+            return resp.json();
+          }
+          throw new Error('Failed to load tags');
+        })
+        .then((data) => {
+          cache = data;
+          return data;
+        })
+        .catch((err) => {
+          window.lana?.log(`Failed to load products map JSON: ${err}`);
+          throw err;
+        });
+    }
+
+    return promise;
+  };
+})();
 
 function getESLConfig() {
   return {
