@@ -13,7 +13,14 @@ export default async function init(el) {
   if (!caasTags) return;
 
   const group = createTag('product-selector-group');
-  const products = Object.values(caasTags.namespaces.caas.tags['product-categories'].tags).map((x) => [...Object.values(x.tags).map((y) => y)]).flat();
+  const uniqueItems = {};
+  const products = [];
+  Object.values(caasTags.namespaces.caas.tags['product-categories'].tags).map((x) => [...Object.values(x.tags).map((y) => y)]).flat().forEach((item) => {
+    if (!uniqueItems[item.name]) {
+      uniqueItems[item.name] = true;
+      products.push(item);
+    }
+  });
 
   group.dataset.products = JSON.stringify(products);
 
