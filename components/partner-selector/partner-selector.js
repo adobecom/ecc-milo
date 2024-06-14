@@ -20,6 +20,12 @@ export default class PartnerSelector extends LitElement {
 
   updateValue(key, value) {
     this.selectedPartner = { ...this.selectedPartner, [key]: value };
+
+    this.dispatchEvent(new CustomEvent('update-partner', {
+      detail: { partner: this.selectedPartner },
+      bubbles: true,
+      composed: true,
+    }));
   }
 
   render() {
@@ -33,17 +39,17 @@ export default class PartnerSelector extends LitElement {
       <fieldset class="partner-field-wrapper">
       <div>
         <div class="partner-input-wrapper">
-          <image-dropzone configs=${configString}>
+          <image-dropzone .file=${this.selectedPartner.file} .configs=${configString}>
         <slot name="img-label" slot="img-label"></slot>
           </image-dropzone>
           <div>
             <div class="partner-input">
               <label>Partner name</label>
-              <sp-textfield @change=${(event) => this.updateValue('name', event.detail.value)}></sp-textfield>
+              <sp-textfield value=${this.selectedPartner.name} @change=${(event) => this.updateValue('name', event.target.value)}></sp-textfield>
             </div>
             <div class="partner-input">
               <label>Partner external url</label>
-              <sp-textfield @change=${(event) => this.updateValue('externalUrl', event.detail.value)}></sp-textfield>
+              <sp-textfield value=${this.selectedPartner.externalUrl} @change=${(event) => this.updateValue('externalUrl', event.target.value)}></sp-textfield>
             </div>
           </div>
         </div>
