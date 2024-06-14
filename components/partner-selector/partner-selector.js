@@ -2,10 +2,13 @@ import { getLibs } from '../../scripts/utils.js';
 import { style } from './partner-selector.css.js';
 import { createPartner } from '../../utils/esp-controller.js';
 
-const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 export default class PartnerSelector extends LitElement {
-  static properties = { selectedPartner: { type: Object } };
+  static properties = {
+    selectedPartner: { type: Object },
+    fieldLabels: { type: Object },
+  };
 
   constructor() {
     super();
@@ -44,24 +47,24 @@ export default class PartnerSelector extends LitElement {
           </image-dropzone>
           <div>
             <div class="partner-input">
-              <label>Partner name</label>
+              <label>${this.fieldLabels.nameLabelText}</label>
               <sp-textfield value=${this.selectedPartner.name} @change=${(event) => this.updateValue('name', event.target.value)}></sp-textfield>
             </div>
             <div class="partner-input">
-              <label>Partner external url</label>
+              <label>${this.fieldLabels.urlLabelText}</label>
               <sp-textfield value=${this.selectedPartner.externalUrl} @change=${(event) => this.updateValue('externalUrl', event.target.value)}></sp-textfield>
             </div>
           </div>
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" class="save-profile-button" @click=${async () => {
-    const respJson = await createPartner(this.selectedPartner, this.eventId);
-    if (respJson.partnerId) {
-      this.selectedPartner.id = respJson.partnerId;
-      this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload'));
-    }
-  }}>Save Partner</sp-button>
+        <sp-button variant="primary" .disabled=${!this.selectedPartner.name} class="save-partner-button" @click=${async () => {
+  const respJson = await createPartner(this.selectedPartner, this.eventId);
+  if (respJson.partnerId) {
+    this.selectedPartner.id = respJson.partnerId;
+    this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload'));
+  }
+}}>Save Partner</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>

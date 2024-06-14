@@ -26,7 +26,13 @@ async function buildFields(el) {
   const imgLabelRow = el.querySelector(':scope > div:last-of-type');
 
   const partnerFieldset = createTag('partner-selector-group');
-  partnerFieldset.fieldlabels = { image: imgLabelRow.querySelector('div')?.cloneNode(true) };
+
+  partnerFieldset.fieldlabels = {
+    image: imgLabelRow.querySelector(':scope > div:first-of-type'),
+    nameLabelText: imgLabelRow.querySelector('div:last-of-type li:first-of-type')?.textContent.trim() || 'Partner name',
+    urlLabelText: imgLabelRow.querySelector('div:last-of-type li:last-of-type')?.textContent.trim() || 'Partner external URL',
+  };
+
   el.appendChild(partnerFieldset);
   imgLabelRow.remove();
 }
