@@ -1,17 +1,16 @@
 import { getLibs } from '../../scripts/utils.js';
+import { getCaasTags } from '../../utils/esp-controller.js';
 import { generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 async function buildTopicsCheckboxes(el) {
   const cw = createTag('div', { class: 'checkbox-wrapper' });
-  const caasResp = await fetch('https://www.adobe.com/chimera-api/tags')
-    .then((resp) => (resp.ok ? resp.json() : null))
-    .catch((err) => window.lana?.log(`Failed to fetch Chimera tags: ${err}`));
+  const caasTags = await getCaasTags();
 
-  if (!caasResp) return;
+  if (!caasTags) return;
 
-  const productTags = caasResp.namespaces.caas.tags['product-categories'].tags;
+  const productTags = caasTags.namespaces.caas.tags['product-categories'].tags;
 
   Object.values(productTags).forEach((p) => {
     createTag('sp-checkbox', { name: p.title }, p.title, { parent: cw });

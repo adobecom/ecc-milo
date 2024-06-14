@@ -1,3 +1,14 @@
+let CAAS_TAGS_CACHE;
+
+export async function getCaasTags() {
+  if (!CAAS_TAGS_CACHE) {
+    CAAS_TAGS_CACHE = await fetch('https://www.adobe.com/chimera-api/tags')
+      .then((resp) => (resp.ok ? resp.json() : null)).catch((err) => window.lana?.log(`Failed to load products map JSON: ${err}`));
+  }
+
+  return CAAS_TAGS_CACHE;
+}
+
 function getESLConfig() {
   return {
     // FIXME: stage and local are swapped for demo
@@ -173,10 +184,10 @@ export async function getVenue(venueId) {
 
 export async function getClouds() {
   // TODO: use ESP to fetch clouds rather than Chimera
-  const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
+  const tags = await getCaasTags();
 
-  if (!resp.error) {
-    const clouds = resp.namespaces.caas.tags['business-unit'].tags;
+  if (tags) {
+    const clouds = tags.namespaces.caas.tags['business-unit'].tags;
     return clouds;
   }
 
