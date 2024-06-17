@@ -20,7 +20,7 @@ function formatLocaleDate(string) {
 
 function buildThumbnail(data) {
   // TODO: use thumbnail instead of just first image or mock image
-  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl || 'https://images.unsplash.com/photo-1613067532651-7075a620c900?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NTE4fDB8MXxzZWFyY2h8Nnx8dmVudWV8ZW58MHx8fHwxNzA5MTQ3NjI4fDA&ixlib=rb-4.0.3&q=80&w=1080' });
+  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl || '/icons/icon-placeholder.svg' });
   const container = createTag('td', { class: 'thumbnail-container' }, img);
   return container;
 }
