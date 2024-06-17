@@ -58,13 +58,13 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
     previewPre.href = (() => {
-      const url = new URL(`${window.location.origin}/events/${eventObj.url}`);
+      const url = new URL(`${window.location.origin}/events/${eventObj.detailPagePath}`);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
       return url.toString();
     })();
 
     previewPost.href = (() => {
-      const url = new URL(`${window.location.origin}/events/${eventObj.url}`);
+      const url = new URL(`${window.location.origin}/events/${eventObj.detailPagePath}`);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
       return url.toString();
     })();
@@ -136,9 +136,9 @@ function buildEventTitleTag(event) {
 }
 
 // TODO: to retire
-async function buildVenueTag(eventId) {
-  const venue = await getVenue(eventId);
-
+async function buildVenueTag(eventObj) {
+  let { venue } = eventObj;
+  if (!venue) venue = await getVenue(eventObj.eventId);
   if (!venue) return null;
 
   const venueTag = createTag('div', { class: 'vanue-name' }, venue.venueName);
@@ -157,7 +157,7 @@ async function populateRow(props, index) {
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, await buildVenueTag(event.eventId)));
+  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, await buildVenueTag(event)));
   const timezoneCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getTimezoneName(event.gmtOffset)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.externalEventId));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
