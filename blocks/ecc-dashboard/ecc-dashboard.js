@@ -58,19 +58,19 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
     previewPre.href = (() => {
-      const url = new URL(`https://stage--events-milo--adobecom.hlx.page/events/${eventObj.url}`);
+      const url = new URL(`${window.location.host}/events/${eventObj.url}`);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
       return url.toString();
     })();
 
     previewPost.href = (() => {
-      const url = new URL(`https://stage--events-milo--adobecom.hlx.page/events/${eventObj.url}`);
+      const url = new URL(`${window.location.host}/events/${eventObj.url}`);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
       return url.toString();
     })();
 
     // edit
-    const url = new URL('https://stage--ecc-milo--adobecom.hlx.page/event/create');
+    const url = new URL(`${window.location.host}${props.createFormUrl}`);
     url.searchParams.set('eventId', eventObj.eventId);
     edit.href = url.toString();
 
