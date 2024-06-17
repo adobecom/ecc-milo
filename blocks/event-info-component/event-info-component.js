@@ -74,7 +74,7 @@ function decorateTimeZoneSelect(cell, wrapper) {
   const timeZones = cell.querySelectorAll('li');
   timeZones.forEach((t) => {
     const text = t.textContent.trim();
-    const opt = createTag('sp-menu-item', { value: text.split(' - ') }, text);
+    const opt = createTag('sp-menu-item', { value: text.split(' - ')[1] }, text);
     select.append(opt);
   });
   cell.innerHTML = '';
