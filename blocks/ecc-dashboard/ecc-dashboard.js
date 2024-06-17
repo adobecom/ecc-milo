@@ -131,7 +131,7 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(event) {
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `https://stage--events-milo--adobecom.hlx.page/events/${event.url}` }, event.title);
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${window.location.origin}/events/${event.detailPagePath}` }, event.title);
   return eventTitleTag;
 }
 
