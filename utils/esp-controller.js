@@ -13,6 +13,7 @@ export const getCaasTags = (() => {
           if (resp.ok) {
             return resp.json();
           }
+
           throw new Error('Failed to load tags');
         })
         .then((data) => {
@@ -20,7 +21,7 @@ export const getCaasTags = (() => {
           return data;
         })
         .catch((err) => {
-          window.lana?.log(`Failed to load products map JSON: ${err}`);
+          window.lana?.log(`Failed to load products map JSON. Error: ${err}`);
           throw err;
         });
     }
@@ -31,7 +32,6 @@ export const getCaasTags = (() => {
 
 function getESLConfig() {
   return {
-    // FIXME: stage and local are swapped for demo
     local: { host: 'http://localhost:8499' },
     stage: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
     prod: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
@@ -83,7 +83,7 @@ export async function uploadImage(file) {
       console.log('Success:', data);
     })
     .catch((error) => {
-      console.error('Error:', error);
+      window.lana?.log('Failed to upload image. Error:', error);
     });
 }
 
@@ -102,13 +102,12 @@ export async function uploadBinaryFile(file, configs) {
     });
 
     if (response.ok) {
-      const responseData = await response.text();
-      console.log('Success:', responseData);
+      await response.text();
     } else {
-      console.error('Error Status:', response.status);
+      window.lana?.log('Unexpected image upload server response. Reponse:', response.status);
     }
   } catch (error) {
-    console.error('Network error', error);
+    window.lana?.log('Failed to upload image. Error:', error);
   }
 }
 
@@ -117,7 +116,10 @@ export async function createVenue(eventId, venueData) {
   const raw = JSON.stringify(venueData);
   const options = await constructRequestOptions('POST', raw);
 
-  const resp = await fetch(`${host}/v1/events/${eventId}/venues`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events/${eventId}/venues`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to create venue. Error:', error));
+
   return resp;
 }
 
@@ -126,19 +128,22 @@ export async function createEvent(payload) {
   const raw = JSON.stringify(payload);
   const options = await constructRequestOptions('POST', raw);
 
-  const resp = await fetch(`${host}/v1/events`, options).then((res) => res.json()).catch((error) => console.log(error));
-  console.log('attempted to create event', payload, resp);
+  const resp = await fetch(`${host}/v1/events`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to create event. Error:', error));
+
   return resp;
 }
 
 export async function createSpeaker(profile, seriesId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify({ ...profile, seriesId });
-  console.log(raw);
   const options = await constructRequestOptions('POST', raw);
 
-  const resp = await fetch(`${host}/v1/speakers`, options).then((res) => res.json()).catch((error) => console.log(error));
-  console.log('attempted to create speaker', raw, resp);
+  const resp = await fetch(`${host}/v1/speakers`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to create speaker. Error:', error));
+
   return resp;
 }
 
@@ -147,8 +152,10 @@ export async function updateEvent(eventId, payload) {
   const raw = JSON.stringify(payload);
   const options = await constructRequestOptions('PUT', raw);
 
-  const resp = await fetch(`${host}/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
-  console.log(payload, resp);
+  const resp = await fetch(`${host}/v1/events/${eventId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to update event ${eventId}. Error: ${error}`));
+
   return resp;
 }
 
@@ -157,7 +164,9 @@ export async function publishEvent(eventId, payload) {
   const raw = JSON.stringify({ ...payload, published: true });
   const options = await constructRequestOptions('PUT', raw);
 
-  const resp = await fetch(`${host}/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events/${eventId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to publish event ${eventId}. Error: ${error}`));
   return resp;
 }
 
@@ -166,7 +175,9 @@ export async function unpublishEvent(eventId, payload) {
   const raw = JSON.stringify({ ...payload, published: false });
   const options = await constructRequestOptions('PUT', raw);
 
-  const resp = await fetch(`${host}/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events/${eventId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to unpublish event ${eventId}. Error: ${error}`));
   return resp;
 }
 
@@ -174,7 +185,9 @@ export async function deleteEvent(eventId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const options = await constructRequestOptions('DELETE');
 
-  const resp = await fetch(`${host}/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events/${eventId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to delete event ${eventId}. Error: ${error}`));
   return resp;
 }
 
@@ -182,7 +195,9 @@ export async function getEvents() {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
 
-  const resp = await fetch(`${host}/v1/events`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to get list of events. Error: ${error}`));
   return resp;
 }
 
@@ -190,7 +205,9 @@ export async function getEvent(eventId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
 
-  const resp = await fetch(`${host}/v1/events/${eventId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events/${eventId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to get details for event ${eventId}. Error: ${error}`));
   return resp;
 }
 
@@ -198,7 +215,9 @@ export async function getVenue(venueId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
 
-  const resp = await fetch(`${host}/v1/venues/${venueId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/venues/${venueId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to get details for venue ${venueId}. Error: ${error}`));
   return resp;
 }
 
@@ -217,7 +236,9 @@ export async function getClouds() {
 export async function getSeries() {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
-  const resp = await fetch(`${host}/v1/series`, options).then((res) => res.json()).catch((error) => error);
+  const resp = await fetch(`${host}/v1/series`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to fetch series. Error: ${error}`));
 
   if (!resp.error) {
     const { series } = resp;
@@ -234,7 +255,9 @@ export async function createAttendee(eventId, attendeeData) {
   const raw = JSON.stringify(attendeeData);
   const options = await constructRequestOptions('POST', raw);
 
-  const resp = await fetch(`${host}/v1/events/${eventId}/attendees`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events/${eventId}/attendees`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to create attendee for event ${eventId}. Error: ${error}`));
   return resp;
 }
 
@@ -245,7 +268,9 @@ export async function updateAttendee(eventId, attendeeId, attendeeData) {
   const raw = JSON.stringify(attendeeData);
   const options = await constructRequestOptions('PUT', raw);
 
-  const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to update attendee ${attendeeId} for event ${eventId}. Error: ${error}`));
   return resp;
 }
 
@@ -255,7 +280,9 @@ export async function deleteAttendee(eventId, attendeeId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const options = await constructRequestOptions('DELETE');
 
-  const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to delete attendee ${attendeeId} for event ${eventId}. Error: ${error}`));
   return resp;
 }
 
@@ -265,7 +292,9 @@ export async function getAttendees(eventId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
 
-  const resp = await fetch(`${host}/v1/events/${eventId}/attendees`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events/${eventId}/attendees`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to fetch attendees for event ${eventId}. Error: ${error}`));
   return resp;
 }
 
@@ -275,6 +304,8 @@ export async function getAttendee(eventId, attendeeId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
 
-  const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to get details of attendee ${attendeeId} for event ${eventId}. Error: ${error}`));
   return resp;
 }
