@@ -194,11 +194,11 @@ export async function getEvent(eventId) {
   return resp;
 }
 
-export async function getVenue(venueId) {
+export async function getVenue(eventId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
 
-  const resp = await fetch(`${host}/v1/events/${venueId}/venues`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events/${eventId}/venues`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
