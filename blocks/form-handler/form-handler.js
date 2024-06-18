@@ -432,11 +432,12 @@ function initFormCtas(props) {
 
 function updatePreviewCtas(props) {
   const previewBtns = props.el.querySelectorAll('.preview-btns');
+  const filteredResponse = getFilteredResponse(props.response);
 
   previewBtns.forEach((a) => {
     const testTime = new URL(a.href).hash === '#pre-event' ? +props.payload.localEndTimeMillis - 10 : +props.payload.localEndTimeMillis + 10;
-    if (props.response.url) {
-      a.href = `https://www.stage.adobe.com/events/${props.response.url}?previewMode=true&timing=${testTime}`;
+    if (filteredResponse.detailPagePath) {
+      a.href = `https://www.stage.adobe.com/events/${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
       a.classList.remove('preview-not-ready');
     }
   });
