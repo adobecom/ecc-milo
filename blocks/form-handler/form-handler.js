@@ -398,7 +398,8 @@ function initFormCtas(props) {
           }
         }
 
-        cta.addEventListener('click', async () => {
+        cta.addEventListener('click', async (e) => {
+          e.preventDefault();
           toggleBtnsSubmittingState(true);
           await saveEvent(props);
 
