@@ -10,8 +10,6 @@ const attributeWhitelist = [
   'startDate',
   'endDate',
   'duration',
-  'creationTime',
-  'modificationTime',
   'agenda',
   'topics',
   'eventType',
@@ -51,7 +49,7 @@ export function getFilteredPayload(payload) {
   });
 
   payloadCache = { ...payloadCache, ...output };
-  return output;
+  return payloadCache;
 }
 
 export function getFilteredResponse(response) {
@@ -66,12 +64,16 @@ export function getFilteredResponse(response) {
   });
 
   responseCache = { ...responseCache, ...output };
-  return output;
+  return responseCache;
 }
 
 export default function getJoinedOutput(payload, response) {
   const filteredPayload = getFilteredPayload(payload);
   const filteredResponse = getFilteredResponse(response);
 
-  return { ...filteredPayload, ...filteredResponse };
+  return {
+    ...filteredResponse,
+    ...filteredPayload,
+    modificationTime: response.modificationTime,
+  };
 }
