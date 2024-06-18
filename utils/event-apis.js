@@ -21,16 +21,17 @@ export async function getProfile() {
     return profile;
   }
 
+  window.lana?.log('Failed to get user profile data.');
   return {};
 }
 
 export async function captureProfile() {
   try {
     const profile = await getProfile();
-    window.bm8tr.set('imsProfile', profile);
+    window.bm8r.set('imsProfile', profile);
   } catch {
     if (window.adobeIMS) {
-      window.bm8tr.set('imsProfile', { noProfile: true });
+      window.bm8r.set('imsProfile', { noProfile: true });
     }
   }
 }
@@ -49,12 +50,12 @@ export function lazyCaptureProfile() {
 
     try {
       const profile = await getProfile();
-      window.bm8tr.set('imsProfile', profile);
+      window.bm8r.set('imsProfile', profile);
       clearInterval(profileRetryer);
     } catch {
       if (window.adobeIMS) {
         clearInterval(profileRetryer);
-        window.bm8tr.set('imsProfile', { noProfile: true });
+        window.bm8r.set('imsProfile', { noProfile: true });
       }
 
       attempCounter += 1;

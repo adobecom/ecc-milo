@@ -115,7 +115,9 @@ export default async function init(component, props) {
 }
 
 export async function onSubmit(component, props) {
-  const visibleInPostState = component.querySelector('#checkbox-venue-info-visible').checked;
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+
+  // const visibleInPostState = component.querySelector('#checkbox-venue-info-visible').checked;
   const venueName = component.querySelector('#venue-info-venue-name').value;
   const address = component.querySelector('#venue-info-venue-address').value;
   const city = component.querySelector('#location-city').value;
@@ -129,7 +131,8 @@ export async function onSubmit(component, props) {
   const gmtOffset = +component.querySelector('#google-place-gmt-offset').value;
 
   const venueData = {
-    visibleInPostState,
+    // FIXME: need to add this to backend schema
+    // visibleInPostState,
     venueName,
     address,
     city,
@@ -145,13 +148,16 @@ export async function onSubmit(component, props) {
     gmtOffset,
   };
 
+  const onEventCreate = async (e) => {
+    const venue = await createVenue(e.detail.eventId, venueData);
+    props.payload = { ...props.payload, ...venue };
+    document.removeEventListener('eventcreated', onEventCreate);
+  };
+
   if (props.payload.eventId) {
     const venue = await createVenue(props.payload.eventId, venueData);
     props.payload = { ...props.payload, ...venue };
   } else {
-    props.el.addEventListener('eventcreated', async () => {
-      const venue = await createVenue(props.payload.eventId, venueData);
-      props.payload = { ...props.payload, ...venue };
-    });
+    document.addEventListener('eventcreated', onEventCreate);
   }
 }

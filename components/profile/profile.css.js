@@ -6,7 +6,7 @@ const { css } = await import(`${getLibs()}/deps/lit-all.min.js`);
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
 image-dropzone {
-    width: 40%;
+  width: 40%;
 }
 
 .img-file-input-wrapper {
@@ -36,23 +36,24 @@ h2 {
 }
 
 h5 {
-    margin-bottom: 0px;
+  margin-bottom: 0px;
 }
 
 .social-media-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
 .social-media-input {
-    width: 100%;
+  width: 100%;
 }
 
 .save-profile-button {
-    width: fit-content;
-    align-self: end;
+  width: fit-content;
+  align-self: end;
 }
 
 .icon-remove-circle {

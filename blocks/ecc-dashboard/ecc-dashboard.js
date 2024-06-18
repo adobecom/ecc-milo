@@ -20,7 +20,7 @@ function formatLocaleDate(string) {
 
 function buildThumbnail(data) {
   // TODO: use thumbnail instead of just first image or mock image
-  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl || 'https://images.unsplash.com/photo-1613067532651-7075a620c900?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NTE4fDB8MXxzZWFyY2h8Nnx8dmVudWV8ZW58MHx8fHwxNzA5MTQ3NjI4fDA&ixlib=rb-4.0.3&q=80&w=1080' });
+  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl || '/icons/icon-placeholder.svg' });
   const container = createTag('td', { class: 'thumbnail-container' }, img);
   return container;
 }
@@ -58,19 +58,19 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
     previewPre.href = (() => {
-      const url = new URL(`https://stage--events-milo--adobecom.hlx.page/events/${eventObj.url}`);
+      const url = new URL(`${window.location.origin}/events/${eventObj.detailPagePath}`);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
       return url.toString();
     })();
 
     previewPost.href = (() => {
-      const url = new URL(`https://stage--events-milo--adobecom.hlx.page/events/${eventObj.url}`);
+      const url = new URL(`${window.location.origin}/events/${eventObj.detailPagePath}`);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
       return url.toString();
     })();
 
     // edit
-    const url = new URL('https://stage--ecc-milo--adobecom.hlx.page/event/create');
+    const url = new URL(`${window.location.origin}${props.createFormUrl}`);
     url.searchParams.set('eventId', eventObj.eventId);
     edit.href = url.toString();
 
@@ -131,14 +131,14 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(event) {
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `https://stage--events-milo--adobecom.hlx.page/events/${event.url}` }, event.title);
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${window.location.origin}/events/${event.detailPagePath}` }, event.title);
   return eventTitleTag;
 }
 
 // TODO: to retire
-async function buildVenueTag(venueId) {
-  const venue = await getVenue(venueId);
-
+async function buildVenueTag(eventObj) {
+  let { venue } = eventObj;
+  if (!venue) venue = await getVenue(eventObj.eventId);
   if (!venue) return null;
 
   const venueTag = createTag('div', { class: 'vanue-name' }, venue.venueName);
@@ -157,7 +157,7 @@ async function populateRow(props, index) {
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, await buildVenueTag(event.venueId)));
+  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, await buildVenueTag(event)));
   const timezoneCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getTimezoneName(event.gmtOffset)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.externalEventId));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
@@ -445,7 +445,7 @@ export default async function init(el) {
   const devMode = urlParams.get('devMode');
 
   const config = await getDashboardConfig(el);
-  const profile = window.bm8tr.get('imsProfile');
+  const profile = window.bm8r.get('imsProfile');
 
   if (devMode === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
     buildDashboard(el, config);
@@ -463,7 +463,7 @@ export default async function init(el) {
   }
 
   if (!profile) {
-    const unsubscribe = window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
+    const unsubscribe = window.bm8r.subscribe('imsProfile', ({ newValue }) => {
       if (newValue?.noProfile || newValue.account_type !== 'type3') {
         buildNoAccessScreen(el);
       } else {

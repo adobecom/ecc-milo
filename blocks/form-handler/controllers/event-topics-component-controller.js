@@ -1,4 +1,6 @@
 export function onSubmit(component, props) {
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+
   const checkedBoxes = component.querySelectorAll('sp-checkbox[checked]');
   const topics = Array.from(checkedBoxes).map((cb) => cb.name);
 

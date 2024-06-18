@@ -131,6 +131,7 @@ export async function createEvent(payload) {
   const resp = await fetch(`${host}/v1/events`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log('Failed to create event. Error:', error));
+  document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: resp.eventId } }));
 
   return resp;
 }
@@ -140,9 +141,21 @@ export async function createSpeaker(profile, seriesId) {
   const raw = JSON.stringify({ ...profile, seriesId });
   const options = await constructRequestOptions('POST', raw);
 
-  const resp = await fetch(`${host}/v1/speakers`, options)
+  const resp = await fetch(`${host}/v1/series/${seriesId}/speakers`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log('Failed to create speaker. Error:', error));
+
+  return resp;
+}
+
+export async function updateSpeaker(profile, seriesId, speakerId) {
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const raw = JSON.stringify({ ...profile, seriesId });
+  const options = await constructRequestOptions('PUT', raw);
+
+  const resp = await fetch(`${host}/v1/series/${seriesId}/speakers/${speakerId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to update speaker. Error: ${error}`));
 
   return resp;
 }
@@ -211,13 +224,14 @@ export async function getEvent(eventId) {
   return resp;
 }
 
-export async function getVenue(venueId) {
+export async function getVenue(eventId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
 
-  const resp = await fetch(`${host}/v1/venues/${venueId}`, options)
+  const resp = await fetch(`${host}/v1/events/${eventId}/venues`, options)
     .then((res) => res.json())
-    .catch((error) => window.lana?.log(`Failed to get details for venue ${venueId}. Error: ${error}`));
+    .catch((error) => window.lana?.log(`Failed to get venue details. Error: ${error}`));
+
   return resp;
 }
 
