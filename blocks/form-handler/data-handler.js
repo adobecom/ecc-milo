@@ -37,6 +37,7 @@ const wl = [
   'duration',
   'creationTime',
   'modificationTime',
+  'detailPagePath',
 ];
 
 function deepSpread(target, ...sources) {
