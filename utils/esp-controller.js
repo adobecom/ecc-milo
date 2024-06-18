@@ -93,6 +93,7 @@ export async function uploadBinaryFile(file, configs) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const authToken = window.adobeIMS.getAccessToken().token;
   const headers = new Headers();
+  headers.append('x-image-alt-text', configs.altText || '');
   headers.append('x-image-kind', configs.type);
   headers.append('Authorization', `Bearer ${authToken}`);
 

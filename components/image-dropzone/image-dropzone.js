@@ -19,6 +19,7 @@ export class ImageDropzone extends LitElement {
     this.attachShadow({ mode: 'open' });
     this.file = null;
     this.configs = {
+      altText: null,
       targetUrl: null,
       type: null,
       uploadOnEvent: false,
