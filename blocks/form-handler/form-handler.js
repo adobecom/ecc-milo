@@ -412,8 +412,8 @@ function initFormCtas(props) {
 
           if (ctaUrl.hash === '#next') {
             if (props.currentStep < props.maxStep) {
-              navigateForm(props);
               await saveEvent(props);
+              navigateForm(props);
             } else {
               await saveEvent(props, { toPublish: true });
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
