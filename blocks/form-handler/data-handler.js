@@ -42,7 +42,7 @@ const attrsFromResponse = [
   ...attrsFromPayload,
 ];
 
-function getFilteredPayload(payload) {
+export function getFilteredPayload(payload) {
   const output = {};
 
   attrsFromPayload.forEach((attr) => {
@@ -55,7 +55,7 @@ function getFilteredPayload(payload) {
   return output;
 }
 
-function getFilteredResponse(response) {
+export function getFilteredResponse(response) {
   if (response.errors) return responseCache;
 
   const output = {};

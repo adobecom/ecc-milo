@@ -1,3 +1,5 @@
+import { getFilteredResponse } from '../blocks/form-handler/data-handler.js';
+
 export const getCaasTags = (() => {
   let cache;
   let promise;
@@ -130,7 +132,7 @@ export async function createEvent(payload) {
   const options = await constructRequestOptions('POST', raw);
 
   const resp = await fetch(`${host}/v1/events`, options).then((res) => res.json()).catch((error) => console.log(error));
-  if (resp.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: resp.eventId } }));
+  if (resp.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: getFilteredResponse(resp).eventId } }));
 
   console.log('attempted to create event', payload, resp);
   return resp;

@@ -1,6 +1,6 @@
 import { createVenue } from '../../../utils/esp-controller.js';
 import { changeInputValue, getSecret } from '../../../utils/utils.js';
-import getJoinedOutput from '../data-handler.js';
+import getJoinedOutput, { getFilteredResponse } from '../data-handler.js';
 
 async function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');
@@ -91,7 +91,9 @@ function initAutocomplete(el) {
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  // const visibleInPostState = component.querySelector('#checkbox-venue-info-visible').checked;
+  const { eventId } = getFilteredResponse(props.response);
+
+  const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible').checked;
   const venueName = component.querySelector('#venue-info-venue-name').value;
   const address = component.querySelector('#venue-info-venue-address').value;
   const city = component.querySelector('#location-city').value;
@@ -105,8 +107,6 @@ export async function onSubmit(component, props) {
   const gmtOffset = +component.querySelector('#google-place-gmt-offset').value;
 
   const venueData = {
-    // FIXME: need to add this to backend schema
-    // visibleInPostState,
     venueName,
     address,
     city,
@@ -124,13 +124,13 @@ export async function onSubmit(component, props) {
 
   const onEventCreate = async (e) => {
     const venue = await createVenue(e.detail.eventId, venueData);
-    props.payload = { ...props.payload, ...venue };
+    props.payload = { ...props.payload, ...venue, showVenuePostEvent };
     document.removeEventListener('eventcreated', onEventCreate);
   };
 
-  if (props.payload.eventId) {
-    const venue = await createVenue(props.payload.eventId, venueData);
-    props.payload = { ...props.payload, ...venue };
+  if (eventId) {
+    const venue = await createVenue(eventId, venueData);
+    props.payload = { ...props.payload, ...venue, showVenuePostEvent };
   } else {
     document.addEventListener('eventcreated', onEventCreate);
   }

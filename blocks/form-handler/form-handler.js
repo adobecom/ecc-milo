@@ -12,7 +12,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedOutput from './data-handler.js';
+import getJoinedOutput, { getFilteredResponse } from './data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -84,7 +84,7 @@ async function initComponents(props) {
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
 
-  if (eventId) props.payload = await getEvent(eventId);
+  if (eventId) props.response = await getEvent(eventId);
 
   VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
@@ -179,18 +179,18 @@ function decorateForm(el) {
 async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
 
-  if (props.currentStep === 0 && !props.response.eventId) {
+  if (props.currentStep === 0 && !getFilteredResponse(props.response).eventId) {
     const resp = await createEvent(props.payload);
     props.response = resp;
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     const resp = await updateEvent(
-      props.response.eventId,
+      getFilteredResponse(props.response).eventId,
       getJoinedOutput(props.payload, props.response),
     );
     props.response = resp;
   } else if (options.toPublish) {
     const resp = await publishEvent(
-      props.response.eventId,
+      getFilteredResponse(props.response).eventId,
       getJoinedOutput(props.payload, props.response),
     );
     props.response = resp;
@@ -247,7 +247,7 @@ function updateImgDropzoneConfigs(props) {
       const configs = {
         type,
         altText: `Event ${wrappingBlock.classList[1]} image`,
-        targetUrl: `/v1/events/${props.response.eventId}/images`,
+        targetUrl: `/v1/events/${getFilteredResponse(props.response).eventId}/images`,
       };
       dz.setAttribute('configs', JSON.stringify(configs));
       dz.requestUpdate();
@@ -463,13 +463,13 @@ function initNavigation(props) {
 
 function updateDashboardLink(props) {
   // FIXME: presuming first link is dashboard link is not good.
-  if (!props.response.eventId) return;
+  if (!getFilteredResponse(props.response).eventId) return;
   const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
   if (!dashboardLink) return;
 
   const url = new URL(dashboardLink.href);
-  url.searchParams.set('newEventId', props.response.eventId);
+  url.searchParams.set('newEventId', getFilteredResponse(props.response).eventId);
   dashboardLink.href = url.toString();
 }
 
