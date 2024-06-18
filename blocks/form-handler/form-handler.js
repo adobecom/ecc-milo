@@ -238,7 +238,7 @@ function onStepValidate(props) {
 function updateImgDropzoneConfigs(props) {
   const typeMap = {
     hero: 'event-hero-image',
-    thumbnail: 'event-card-image',
+    card: 'event-card-image',
     venue: 'venue-image',
   };
 
