@@ -443,7 +443,7 @@ export default async function init(el) {
   const devMode = urlParams.get('devMode');
 
   const config = await getDashboardConfig(el);
-  const profile = window.bm8tr.get('imsProfile');
+  const profile = window.bm8r.get('imsProfile');
 
   if (devMode === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
     buildDashboard(el, config);
@@ -461,7 +461,7 @@ export default async function init(el) {
   }
 
   if (!profile) {
-    const unsubscribe = window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
+    const unsubscribe = window.bm8r.subscribe('imsProfile', ({ newValue }) => {
       if (newValue?.noProfile || newValue.account_type !== 'type3') {
         buildNoAccessScreen(el);
       } else {

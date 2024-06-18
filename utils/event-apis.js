@@ -4,7 +4,7 @@ const API_QUERY_PARAM = 'featuredCards';
 const pageDataCache = {};
 
 export function getEventId() {
-  return window.bm8tr.get('eventData')?.arbitrary?.[0]?.value;
+  return window.bm8r.get('eventData')?.arbitrary?.[0]?.value;
 }
 
 export function flattenObject(obj, parentKey = '', result = {}) {
@@ -137,10 +137,10 @@ export async function submitToSplashThat(payload) {
 export async function captureProfile() {
   try {
     const profile = await getProfile();
-    window.bm8tr.set('imsProfile', profile);
+    window.bm8r.set('imsProfile', profile);
   } catch {
     if (window.adobeIMS) {
-      window.bm8tr.set('imsProfile', { noProfile: true });
+      window.bm8r.set('imsProfile', { noProfile: true });
     }
   }
 }
@@ -159,12 +159,12 @@ export function lazyCaptureProfile() {
 
     try {
       const profile = await getProfile();
-      window.bm8tr.set('imsProfile', profile);
+      window.bm8r.set('imsProfile', profile);
       clearInterval(profileRetryer);
     } catch {
       if (window.adobeIMS) {
         clearInterval(profileRetryer);
-        window.bm8tr.set('imsProfile', { noProfile: true });
+        window.bm8r.set('imsProfile', { noProfile: true });
       }
 
       attempCounter += 1;
@@ -192,7 +192,7 @@ export default async function fetchPageData(hash, lazyLoadProfile = false) {
     pageDataCache[hash] = pageData;
 
     if (lazyLoadProfile) lazyCaptureProfile();
-    window.bm8tr.set('eventData', pageData);
+    window.bm8r.set('eventData', pageData);
     return pageData;
   } catch (error) {
     window.lana?.log('Fetch error:', error);

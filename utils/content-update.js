@@ -35,11 +35,11 @@ function autoUpdateLinks(scope) {
       }
 
       if (a.href.endsWith('#rsvp-form')) {
-        const profile = window.bm8tr.get('imsProfile');
+        const profile = window.bm8r.get('imsProfile');
         if (profile?.noProfile) {
           handleRegisterButton(a);
         } else if (!profile) {
-          window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
+          window.bm8r.subscribe('imsProfile', ({ newValue }) => {
             if (newValue?.noProfile) {
               handleRegisterButton(a);
             }

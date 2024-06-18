@@ -65,7 +65,7 @@ decorateArea();
 
 const miloLibs = setLibs(LIBS);
 
-window.bm8tr = await import('../deps/block-mediator.min.js').then((mod) => mod.default);
+window.bm8r = await import('../deps/block-mediator.min.js').then((mod) => mod.default);
 
 (function loadStyles() {
   const paths = [`${miloLibs}/styles/styles.css`];

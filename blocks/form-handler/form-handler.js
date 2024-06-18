@@ -513,10 +513,6 @@ async function buildECCForm(el) {
         updateProfileContainer(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
-
-        if (props.payload.eventId) {
-          props.el.dispatchEvent(new CustomEvent('eventcreated'));
-        }
       }
 
       return true;
@@ -556,7 +552,7 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const profile = window.bm8tr.get('imsProfile');
+  const profile = window.bm8r.get('imsProfile');
   const { search } = window.location;
   const urlParams = new URLSearchParams(search);
   const devMode = urlParams.get('devMode');
@@ -579,7 +575,7 @@ export default async function init(el) {
   }
 
   if (!profile) {
-    const unsubscribe = window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
+    const unsubscribe = window.bm8r.subscribe('imsProfile', ({ newValue }) => {
       if (newValue?.noProfile || newValue.account_type !== 'type3') {
         buildNoAccessScreen(el);
       } else {
