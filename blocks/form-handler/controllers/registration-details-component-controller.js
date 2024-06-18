@@ -1,3 +1,5 @@
+import getJoinedOutput from '../data-handler.js';
+
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -23,7 +25,8 @@ export function onSubmit(component, props) {
 }
 
 export default function init(component, props) {
-  if (!props.payload.rsvpData) return;
+  const eventData = getJoinedOutput(props.payload, props.response);
+  if (!eventData.rsvpData) return;
 
   const {
     attendeeLimit,
@@ -33,7 +36,7 @@ export default function init(component, props) {
     title,
     subtitle,
     description,
-  } = props.payload.rsvpData;
+  } = eventData.rsvpData;
 
   const attendeeLimitEl = component.querySelector('#attendee-count-input');
   const allowWaitlistEl = component.querySelector('#registration-allow-waitlist');

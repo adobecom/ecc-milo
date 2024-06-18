@@ -1,6 +1,7 @@
 /* eslint-disable no-use-before-define */
 import { getLibs } from '../../../scripts/utils.js';
 import { changeInputValue } from '../../../utils/utils.js';
+import getJoinedOutput from '../data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -299,6 +300,7 @@ function dateTimeStringToTimestamp(dateString, timeString) {
 }
 
 export default function init(component, props) {
+  const eventData = getJoinedOutput(props.payload, props.response);
   initCalendar(component);
 
   const {
@@ -309,7 +311,7 @@ export default function init(component, props) {
     localStartTime,
     localEndTime,
     gmtOffset,
-  } = props.payload;
+  } = eventData;
   component.querySelector('#info-field-event-title').value = title || '';
   component.querySelector('#info-field-event-description').value = description || '';
   changeInputValue(component.querySelector('#time-picker-start-time'), 'value', localStartTime || '');

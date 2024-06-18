@@ -1,4 +1,5 @@
 import { changeInputValue } from '../../../utils/utils.js';
+import getJoinedOutput from '../data-handler.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return null;
@@ -15,11 +16,12 @@ export function onSubmit(component, props) {
 }
 
 export default function init(component, props) {
+  const eventData = getJoinedOutput(props.payload, props.response);
   const checkbox = component.querySelector('#checkbox-community');
   const input = component.querySelector('#community-url-details');
 
-  changeInputValue(checkbox, 'checked', !!props.payload.communityTopicUrl);
-  changeInputValue(input, 'value', props.payload.communityTopicUrl || '');
+  changeInputValue(checkbox, 'checked', !!eventData.communityTopicUrl);
+  changeInputValue(input, 'value', eventData.communityTopicUrl || '');
 
   const updateInputState = () => {
     input.disabled = !checkbox.checked;

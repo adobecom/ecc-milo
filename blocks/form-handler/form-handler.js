@@ -12,6 +12,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
+import getJoinedOutput from './data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -175,17 +176,24 @@ function decorateForm(el) {
   });
 }
 
-async function saveEvent(props) {
+async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
-  if (props.currentStep === 0 && !props.payload.eventId) {
+
+  if (props.currentStep === 0 && !props.response.eventId) {
     const resp = await createEvent(props.payload);
-    props.payload = { ...props.payload, ...resp };
-  } else if (props.currentStep < props.maxStep) {
-    const resp = await updateEvent(props.payload.eventId, props.payload);
-    props.payload = { ...props.payload, ...resp };
-  } else {
-    const resp = await publishEvent(props.payload.eventId, props.payload);
-    props.payload = { ...props.payload, ...resp };
+    props.response = resp;
+  } else if (props.currentStep <= props.maxStep && !options.toPublish) {
+    const resp = await updateEvent(
+      props.response.eventId,
+      getJoinedOutput(props.payload, props.response),
+    );
+    props.response = resp;
+  } else if (options.toPublish) {
+    const resp = await publishEvent(
+      props.response.eventId,
+      getJoinedOutput(props.payload, props.response),
+    );
+    props.response = resp;
   }
 }
 
@@ -239,7 +247,7 @@ function updateImgDropzoneConfigs(props) {
       const configs = {
         type,
         altText: `Event ${wrappingBlock.classList[1]} image`,
-        targetUrl: `/v1/events/${props.payload.eventId}/images`,
+        targetUrl: `/v1/events/${props.response.eventId}/images`,
       };
       dz.setAttribute('configs', JSON.stringify(configs));
       dz.requestUpdate();
@@ -401,14 +409,15 @@ function initFormCtas(props) {
         cta.addEventListener('click', async (e) => {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
-          await saveEvent(props);
 
           if (ctaUrl.hash === '#next') {
             if (props.currentStep < props.maxStep) {
               navigateForm(props);
+              await saveEvent(props, { toPublish: true });
             } else {
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
               if (dashboardLink) window.location.assign(dashboardLink.href);
+              await saveEvent(props);
             }
           }
           toggleBtnsSubmittingState(false);
@@ -427,8 +436,8 @@ function updatePreviewCtas(props) {
 
   previewBtns.forEach((a) => {
     const testTime = new URL(a.href).hash === '#pre-event' ? +props.payload.localEndTimeMillis - 10 : +props.payload.localEndTimeMillis + 10;
-    if (props.payload.url) {
-      a.href = `https://www.stage.adobe.com/events/${props.payload.url}?previewMode=true&timing=${testTime}`;
+    if (props.response.url) {
+      a.href = `https://www.stage.adobe.com/events/${props.response.url}?previewMode=true&timing=${testTime}`;
       a.classList.remove('preview-not-ready');
     }
   });
@@ -455,13 +464,13 @@ function initNavigation(props) {
 
 function updateDashboardLink(props) {
   // FIXME: presuming first link is dashboard link is not good.
-  if (!props.payload.eventId) return;
+  if (!props.response.eventId) return;
   const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
   if (!dashboardLink) return;
 
   const url = new URL(dashboardLink.href);
-  url.searchParams.set('newEventId', props.payload.eventId);
+  url.searchParams.set('newEventId', props.response.eventId);
   dashboardLink.href = url.toString();
 }
 
@@ -510,9 +519,12 @@ async function buildECCForm(el) {
       }
 
       if (prop === 'payload') {
-        console.log('payload updated:', props.payload);
-        updateImgDropzoneConfigs(props);
+        console.log('payload updated:', props.response);
         updateProfileContainer(props);
+      }
+      if (prop === 'resp') {
+        console.log('resp updated:', props.response);
+        updateImgDropzoneConfigs(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
       }
