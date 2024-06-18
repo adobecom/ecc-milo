@@ -148,14 +148,15 @@ export async function onSubmit(component, props) {
     gmtOffset,
   };
 
-  const onEventCreate = async () => {
-    const venue = await createVenue(props.payload.eventId, venueData);
+  const onEventCreate = async (e) => {
+    const venue = await createVenue(e.detail.eventId, venueData);
     props.payload = { ...props.payload, ...venue };
     document.removeEventListener('eventcreated', onEventCreate);
   };
 
   if (props.payload.eventId) {
-    await onEventCreate();
+    const venue = await createVenue(props.payload.eventId, venueData);
+    props.payload = { ...props.payload, ...venue };
   } else {
     document.addEventListener('eventcreated', onEventCreate);
   }
