@@ -124,13 +124,13 @@ export async function onSubmit(component, props) {
 
   const onEventCreate = async (e) => {
     const venue = await createVenue(e.detail.eventId, venueData);
-    props.payload = { ...props.payload, ...venue, showVenuePostEvent };
+    props.response = { ...props.response, venue, showVenuePostEvent };
     document.removeEventListener('eventcreated', onEventCreate);
   };
 
   if (eventId) {
     const venue = await createVenue(eventId, venueData);
-    props.payload = { ...props.payload, ...venue, showVenuePostEvent };
+    props.response = { ...props.response, venue, showVenuePostEvent };
   } else {
     document.addEventListener('eventcreated', onEventCreate);
   }

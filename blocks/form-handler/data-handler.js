@@ -1,7 +1,8 @@
 let responseCache = {};
 let payloadCache = {};
 
-const payloadWhitelist = [
+const wl = [
+  // from payload and response
   'agenda',
   'speakers',
   'topics',
@@ -26,9 +27,7 @@ const payloadWhitelist = [
   'showVenuePostEvent',
   'rsvpFormFields',
   'relatedProducts',
-];
-
-const responseWhitelist = [
+  // only in response
   'eventId',
   'venue',
   'url',
@@ -47,7 +46,7 @@ function isValidAttribute(attr) {
 export function getFilteredPayload(payload) {
   const output = {};
 
-  payloadWhitelist.forEach((attr) => {
+  wl.forEach((attr) => {
     if (isValidAttribute(payload[attr])) {
       output[attr] = payload[attr];
     }
@@ -62,7 +61,7 @@ export function getFilteredResponse(response) {
 
   const output = {};
 
-  responseWhitelist.forEach((attr) => {
+  wl.forEach((attr) => {
     if (isValidAttribute(response[attr])) {
       output[attr] = response[attr];
     }
