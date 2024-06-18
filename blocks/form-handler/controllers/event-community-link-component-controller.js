@@ -1,7 +1,8 @@
 import { changeInputValue } from '../../../utils/utils.js';
 
 export function onSubmit(component, props) {
-  // TODO: community URL
+  if (component.closest('.fragment')?.classList.contains('hidden')) return null;
+
   const checkbox = component.querySelector('#checkbox-community');
 
   if (checkbox.checked) {
@@ -14,8 +15,6 @@ export function onSubmit(component, props) {
 }
 
 export default function init(component, props) {
-  if (component.closest('.fregment')?.classList.contains('hidden')) return;
-
   const checkbox = component.querySelector('#checkbox-community');
   const input = component.querySelector('#community-url-details');
 

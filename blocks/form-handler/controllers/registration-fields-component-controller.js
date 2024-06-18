@@ -12,7 +12,7 @@ export default function init(component, props) {
 }
 
 export function onSubmit(component, props) {
-  if (component.closest('.fregment')?.classList.contains('hidden')) return;
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const rsvpFormFields = {
     visible: Array.from(component.querySelectorAll('sp-checkbox.check-appear[checked]')).map((f) => f.name),

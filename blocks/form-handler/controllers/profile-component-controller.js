@@ -1,5 +1,5 @@
 export function onSubmit(component, props) {
-  if (component.closest('.fregment')?.classList.contains('hidden')) return;
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const profileContainer = component.querySelector('profile-container');
   if (profileContainer) {

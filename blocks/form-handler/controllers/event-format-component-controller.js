@@ -81,7 +81,7 @@ function getTemplateId(bu) {
 }
 
 export function onSubmit(component, props) {
-  if (component.closest('.fregment')?.classList.contains('hidden')) return;
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const eventType = 'InPerson';
   const cloudType = component.querySelector('#bu-select-input').value;

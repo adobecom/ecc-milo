@@ -1,5 +1,5 @@
 export function onSubmit(component, props) {
-  if (component.closest('.fregment')?.classList.contains('hidden')) return;
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   if (component.classList.contains('venue')) {
     const venueImgVisibleCheck = component.querySelector('#checkbox-venue-image-visible');

@@ -115,7 +115,7 @@ export default async function init(component, props) {
 }
 
 export async function onSubmit(component, props) {
-  if (component.closest('.fregment')?.classList.contains('hidden')) return;
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const visibleInPostState = component.querySelector('#checkbox-venue-info-visible').checked;
   const venueName = component.querySelector('#venue-info-venue-name').value;
