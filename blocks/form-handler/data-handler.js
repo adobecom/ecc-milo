@@ -37,11 +37,15 @@ const attributeWhitelist = [
   'relatedProducts',
 ];
 
+function isValidAttribute(attr) {
+  return attr !== undefined && attr !== null;
+}
+
 export function getFilteredPayload(payload) {
   const output = {};
 
   attributeWhitelist.forEach((attr) => {
-    if (payload[attr] !== undefined) {
+    if (isValidAttribute(payload[attr])) {
       output[attr] = payload[attr];
     }
   });
@@ -56,7 +60,7 @@ export function getFilteredResponse(response) {
   const output = {};
 
   attributeWhitelist.forEach((attr) => {
-    if (response[attr] !== undefined) {
+    if (isValidAttribute(response[attr])) {
       output[attr] = response[attr];
     }
   });
