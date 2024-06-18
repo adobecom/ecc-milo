@@ -25,7 +25,6 @@ const attrsFromPayload = [
   'showVenuePostEvent',
   'rsvpFormFields',
   'relatedProducts',
-  'published',
 ];
 
 const attrsFromResponse = [
