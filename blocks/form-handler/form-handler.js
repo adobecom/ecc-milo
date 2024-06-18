@@ -517,7 +517,7 @@ async function buildECCForm(el) {
       }
 
       if (prop === 'payload') {
-        console.log('payload updated:', props.response);
+        console.log('payload updated:', props.payload);
         updateProfileContainer(props);
       }
       if (prop === 'response') {
