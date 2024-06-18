@@ -134,11 +134,20 @@ export async function createEvent(payload) {
 export async function createSpeaker(profile, seriesId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify({ ...profile, seriesId });
-  console.log(raw);
   const options = await constructRequestOptions('POST', raw);
 
-  const resp = await fetch(`${host}/v1/speakers`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/series/${seriesId}/speakers`, options).then((res) => res.json()).catch((error) => console.log(error));
   console.log('attempted to create speaker', raw, resp);
+  return resp;
+}
+
+export async function updateSpeaker(profile, seriesId, speakerId) {
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const raw = JSON.stringify({ ...profile, seriesId });
+  const options = await constructRequestOptions('PUT', raw);
+
+  const resp = await fetch(`${host}/v1/series/${seriesId}/speakers/${speakerId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  console.log('attempted to update speaker', raw, resp);
   return resp;
 }
 
