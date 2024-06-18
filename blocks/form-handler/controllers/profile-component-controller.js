@@ -1,4 +1,6 @@
 export function onSubmit(component, props) {
+  if (component.closest('.fregment')?.classList.contains('hidden')) return;
+
   const profileContainer = component.querySelector('profile-container');
   if (profileContainer) {
     props.payload = { ...props.payload, speakers: profileContainer.getProfiles() };

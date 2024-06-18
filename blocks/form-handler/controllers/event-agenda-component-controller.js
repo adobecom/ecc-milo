@@ -15,7 +15,8 @@ export function onSubmit(component, props) {
 }
 
 export default function init(component, props) {
-  // TODO: init function and repopulate data from props if exists
+  if (component.closest('.fregment')?.classList.contains('hidden')) return;
+
   const agendaGroup = component.querySelector('agenda-fieldset-group');
   const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info');
 

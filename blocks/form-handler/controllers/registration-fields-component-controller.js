@@ -12,6 +12,8 @@ export default function init(component, props) {
 }
 
 export function onSubmit(component, props) {
+  if (component.closest('.fregment')?.classList.contains('hidden')) return;
+
   const rsvpFormFields = {
     visible: Array.from(component.querySelectorAll('sp-checkbox.check-appear[checked]')).map((f) => f.name),
     required: Array.from(component.querySelectorAll('sp-checkbox.check-require[checked]')).map((f) => f.name),

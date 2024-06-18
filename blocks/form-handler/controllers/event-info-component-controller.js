@@ -326,6 +326,8 @@ export default function init(component, props) {
 }
 
 export function onSubmit(component, props) {
+  if (component.closest('.fregment')?.classList.contains('hidden')) return;
+
   const title = component.querySelector('#info-field-event-title').value;
   const description = component.querySelector('#info-field-event-description').value;
   const datePicker = component.querySelector('#event-info-date-picker');

@@ -1,4 +1,6 @@
 export function onSubmit(component, props) {
+  if (component.closest('.fregment')?.classList.contains('hidden')) return;
+
   const attendeeLimit = component.querySelector('#attendee-count-input')?.value;
   const allowWaitlist = component.querySelector('#registration-allow-waitlist')?.checked;
   const contactHost = component.querySelector('#registration-contact-host')?.checked;
