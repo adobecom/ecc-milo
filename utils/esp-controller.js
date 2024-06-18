@@ -141,7 +141,7 @@ export async function createSpeaker(profile, seriesId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify({ ...profile, seriesId });
   const options = await constructRequestOptions('POST', raw);
-  
+
   const resp = await fetch(`${host}/v1/series/${seriesId}/speakers`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
@@ -150,7 +150,7 @@ export async function createPartner(partner, eventId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify(partner);
   const options = await constructRequestOptions('POST', raw);
-  
+
   const resp = await fetch(`${host}/v1/events/${eventId}/partners`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
