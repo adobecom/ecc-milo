@@ -39,6 +39,26 @@ const wl = [
   'modificationTime',
 ];
 
+function deepSpread(target, ...sources) {
+  sources.forEach((source) => {
+    if (typeof source !== 'object' || source === null) return;
+
+    Object.keys(source).forEach((key) => {
+      const value = source[key];
+
+      if (Array.isArray(value)) {
+        target[key] = deepSpread([], value);
+      } else if (typeof value === 'object' && value !== null) {
+        target[key] = deepSpread(target[key] || {}, value);
+      } else {
+        target[key] = value;
+      }
+    });
+  });
+
+  return target;
+}
+
 function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
 }
@@ -72,11 +92,8 @@ export function getFilteredResponse(response) {
 }
 
 export default function getJoinedOutput(payload, response) {
-  const filteredPayload = getFilteredPayload(payload);
   const filteredResponse = getFilteredResponse(response);
+  const filteredPayload = getFilteredPayload(payload);
 
-  return {
-    ...filteredResponse,
-    ...filteredPayload,
-  };
+  return deepSpread(filteredResponse, filteredPayload);
 }
