@@ -1,4 +1,4 @@
-import { getFilteredResponse } from '../blocks/form-handler/data-handler.js';
+import { getFilteredResponse, setResponseCache } from '../blocks/form-handler/data-handler.js';
 
 export const getCaasTags = (() => {
   let cache;
@@ -107,7 +107,7 @@ export async function uploadBinaryFile(file, configs) {
 
     if (response.ok) {
       const responseData = await response.text();
-      console.log('Success:', responseData);
+      setResponseCache(responseData);
     } else {
       console.error('Error Status:', response.status);
     }

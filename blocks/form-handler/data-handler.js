@@ -64,6 +64,10 @@ function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
 }
 
+export function setPayloadCache(cache) {
+  payloadCache = cache;
+}
+
 export function getFilteredPayload(payload) {
   const output = {};
 
@@ -73,8 +77,12 @@ export function getFilteredPayload(payload) {
     }
   });
 
-  payloadCache = { ...payloadCache, ...output };
+  setPayloadCache({ ...payloadCache, ...output });
   return payloadCache;
+}
+
+export function setResponseCache(cache) {
+  responseCache = cache;
 }
 
 export function getFilteredResponse(response) {
@@ -88,7 +96,7 @@ export function getFilteredResponse(response) {
     }
   });
 
-  responseCache = { ...responseCache, ...output };
+  setResponseCache({ ...responseCache, ...output });
   return responseCache;
 }
 
