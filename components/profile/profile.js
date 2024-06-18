@@ -115,7 +115,7 @@ export class Profile extends LitElement {
     <image-dropzone configs=${JSON.stringify({
     uploadOnEvent: true,
     type: 'speaker-photo',
-    targetUrl: `/v1/speakers/${this.profile.id}/images`,
+    targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`,
   })}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
@@ -142,6 +142,7 @@ export class Profile extends LitElement {
     if (respJson.speakerId) {
       this.profile.id = respJson.speakerId;
       this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload'));
+      delete this.profile.isPlaceholder;
     }
   }}>Save Profile</sp-button>
     `;

@@ -12,6 +12,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
+import getJoinedOutput, { getFilteredResponse, getFilteredPayload } from './data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -83,7 +84,7 @@ async function initComponents(props) {
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
 
-  if (eventId) props.payload = await getEvent(eventId);
+  if (eventId) props.response = await getEvent(eventId);
 
   VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
@@ -175,19 +176,24 @@ function decorateForm(el) {
   });
 }
 
-async function saveEvent(props) {
+async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
-  if (props.currentStep === 0) {
+
+  if (props.currentStep === 0 && !getFilteredResponse(props.response).eventId) {
     const resp = await createEvent(props.payload);
-    props.payload = { ...props.payload, ...resp };
-  } else if (props.currentStep < props.maxStep) {
-    const resp = await updateEvent(props.payload.eventId, props.payload);
-    props.payload = { ...props.payload, ...resp };
-  } else {
-    const resp = await publishEvent(props.payload.eventId, props.payload);
-    props.payload = { ...props.payload, ...resp };
-    const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-    if (dashboardLink) window.location.assign(dashboardLink.href);
+    props.response = resp;
+  } else if (props.currentStep <= props.maxStep && !options.toPublish) {
+    const resp = await updateEvent(
+      getFilteredResponse(props.response).eventId,
+      getJoinedOutput(props.payload, props.response),
+    );
+    props.response = resp;
+  } else if (options.toPublish) {
+    const resp = await publishEvent(
+      getFilteredResponse(props.response).eventId,
+      getJoinedOutput(props.payload, props.response),
+    );
+    props.response = resp;
   }
 }
 
@@ -241,7 +247,7 @@ function updateImgDropzoneConfigs(props) {
       const configs = {
         type,
         altText: `Event ${wrappingBlock.classList[1]} image`,
-        targetUrl: `http://localhost:8499/v1/events/${props.payload.eventId}/images`,
+        targetUrl: `/v1/events/${getFilteredResponse(props.response).eventId}/images`,
       };
       dz.setAttribute('configs', JSON.stringify(configs));
       dz.requestUpdate();
@@ -400,15 +406,19 @@ function initFormCtas(props) {
           }
         }
 
-        cta.addEventListener('click', async () => {
+        cta.addEventListener('click', async (e) => {
+          e.preventDefault();
           toggleBtnsSubmittingState(true);
-          await saveEvent(props);
 
-          if (ctaUrl.hash === '#next') {
-            if (props.currentStep < props.maxStep) {
-              navigateForm(props);
-            }
+          if (ctaUrl.hash === '#next' && props.currentStep === props.maxStep) {
+            await saveEvent(props, { toPublish: true });
+            const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+            if (dashboardLink) window.location.assign(dashboardLink.href);
+          } else {
+            await saveEvent(props);
           }
+
+          navigateForm(props);
           toggleBtnsSubmittingState(false);
         });
       }
@@ -425,8 +435,8 @@ function updatePreviewCtas(props) {
 
   previewBtns.forEach((a) => {
     const testTime = new URL(a.href).hash === '#pre-event' ? +props.payload.localEndTimeMillis - 10 : +props.payload.localEndTimeMillis + 10;
-    if (props.payload.url) {
-      a.href = `https://www.stage.adobe.com/events/${props.payload.url}?previewMode=true&timing=${testTime}`;
+    if (props.response.url) {
+      a.href = `https://www.stage.adobe.com/events/${props.response.url}?previewMode=true&timing=${testTime}`;
       a.classList.remove('preview-not-ready');
     }
   });
@@ -453,13 +463,13 @@ function initNavigation(props) {
 
 function updateDashboardLink(props) {
   // FIXME: presuming first link is dashboard link is not good.
-  if (!props.payload.eventId) return;
+  if (!getFilteredResponse(props.response).eventId) return;
   const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
   if (!dashboardLink) return;
 
   const url = new URL(dashboardLink.href);
-  url.searchParams.set('newEventId', props.payload.eventId);
+  url.searchParams.set('newEventId', getFilteredResponse(props.response).eventId);
   dashboardLink.href = url.toString();
 }
 
@@ -484,7 +494,6 @@ async function buildECCForm(el) {
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
-    // TODO: split payload and response data handler callbacks.
     response: {},
   };
 
@@ -508,15 +517,18 @@ async function buildECCForm(el) {
       }
 
       if (prop === 'payload') {
-        console.log('payload updated:', props.payload);
-        updateImgDropzoneConfigs(props);
+        console.log('payload updated:');
+        console.log('raw payload:', props.payload);
+        console.log('filtered payload:', getFilteredPayload(props.payload));
         updateProfileContainer(props);
+      }
+      if (prop === 'response') {
+        console.log('response updated:');
+        console.log('raw response:', props.response);
+        console.log('filtered response:', getFilteredResponse(props.response));
+        updateImgDropzoneConfigs(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
-
-        if (props.payload.eventId) {
-          props.el.dispatchEvent(new CustomEvent('eventcreated'));
-        }
       }
 
       return true;
@@ -556,7 +568,7 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const profile = window.bm8tr.get('imsProfile');
+  const profile = window.bm8r.get('imsProfile');
   const { search } = window.location;
   const urlParams = new URLSearchParams(search);
   const devMode = urlParams.get('devMode');
@@ -579,7 +591,7 @@ export default async function init(el) {
   }
 
   if (!profile) {
-    const unsubscribe = window.bm8tr.subscribe('imsProfile', ({ newValue }) => {
+    const unsubscribe = window.bm8r.subscribe('imsProfile', ({ newValue }) => {
       if (newValue?.noProfile || newValue.account_type !== 'type3') {
         buildNoAccessScreen(el);
       } else {

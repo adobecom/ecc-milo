@@ -1,3 +1,36 @@
+import { getFilteredResponse } from '../blocks/form-handler/data-handler.js';
+
+export const getCaasTags = (() => {
+  let cache;
+  let promise;
+
+  return () => {
+    if (cache) {
+      return cache;
+    }
+
+    if (!promise) {
+      promise = fetch('https://www.adobe.com/chimera-api/tags')
+        .then((resp) => {
+          if (resp.ok) {
+            return resp.json();
+          }
+          throw new Error('Failed to load tags');
+        })
+        .then((data) => {
+          cache = data;
+          return data;
+        })
+        .catch((err) => {
+          window.lana?.log(`Failed to load products map JSON: ${err}`);
+          throw err;
+        });
+    }
+
+    return promise;
+  };
+})();
+
 function getESLConfig() {
   return {
     local: { host: 'http://localhost:8499' },
@@ -57,9 +90,11 @@ export async function uploadImage(file) {
 
 export async function uploadBinaryFile(file, configs) {
   await waitForAdobeIMS();
+
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const authToken = window.adobeIMS.getAccessToken().token;
   const headers = new Headers();
+  headers.append('x-image-alt-text', configs.altText || '');
   headers.append('x-image-kind', configs.type);
   headers.append('Authorization', `Bearer ${authToken}`);
 
@@ -96,6 +131,8 @@ export async function createEvent(payload) {
   const options = await constructRequestOptions('POST', raw);
 
   const resp = await fetch(`${host}/v1/events`, options).then((res) => res.json()).catch((error) => console.log(error));
+  if (resp.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: getFilteredResponse(resp).eventId } }));
+
   console.log('attempted to create event', payload, resp);
   return resp;
 }
@@ -104,9 +141,8 @@ export async function createSpeaker(profile, seriesId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify({ ...profile, seriesId });
   const options = await constructRequestOptions('POST', raw);
-  console.log('attempted to create speaker with:', raw);
-  const resp = await fetch(`${host}/v1/speakers`, options).then((res) => res.json()).catch((error) => console.log(error));
-  console.log('create speaker response:', resp);
+  
+  const resp = await fetch(`${host}/v1/series/${seriesId}/speakers`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
@@ -114,9 +150,18 @@ export async function createPartner(partner, eventId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify(partner);
   const options = await constructRequestOptions('POST', raw);
-  console.log('attempted to create partner with:', raw);
+  
   const resp = await fetch(`${host}/v1/events/${eventId}/partners`, options).then((res) => res.json()).catch((error) => console.log(error));
-  console.log('create speaker partner:', resp);
+  return resp;
+}
+
+export async function updateSpeaker(profile, seriesId, speakerId) {
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const raw = JSON.stringify({ ...profile, seriesId });
+  const options = await constructRequestOptions('PUT', raw);
+
+  const resp = await fetch(`${host}/v1/series/${seriesId}/speakers/${speakerId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  console.log('attempted to update speaker', raw, resp);
   return resp;
 }
 
@@ -172,20 +217,20 @@ export async function getEvent(eventId) {
   return resp;
 }
 
-export async function getVenue(venueId) {
+export async function getVenue(eventId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
 
-  const resp = await fetch(`${host}/v1/venues/${venueId}`, options).then((res) => res.json()).catch((error) => console.log(error));
+  const resp = await fetch(`${host}/v1/events/${eventId}/venues`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 
 export async function getClouds() {
   // TODO: use ESP to fetch clouds rather than Chimera
-  const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
+  const tags = await getCaasTags();
 
-  if (!resp.error) {
-    const clouds = resp.namespaces.caas.tags['business-unit'].tags;
+  if (tags) {
+    const clouds = tags.namespaces.caas.tags['business-unit'].tags;
     return clouds;
   }
 

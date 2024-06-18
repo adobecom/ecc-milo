@@ -79,7 +79,7 @@ function buildLocationInputGrid(row) {
           type: 'text',
           quiet: true,
           size: 'l',
-          pattern: '^(?:Alabama|AL|Alaska|AK|Arizona|AZ|Arkansas|AR|California|CA|Colorado|CO|Connecticut|CT|Delaware|DE|Florida|FL|Georgia|GA|Hawaii|HI|Idaho|ID|Illinois|IL|Indiana|IN|Iowa|IA|Kansas|KS|Kentucky|KY|Louisiana|LA|Maine|ME|Maryland|MD|Massachusetts|MA|Michigan|MI|Minnesota|MN|Mississippi|MS|Missouri|MO|Montana|MT|Nevada|NV|New\s+Hampshire|NH|New\s+Jersey|NJ|New\s+Mexico|NM|New\s+York|NY|North\s+Carolina|NC|North\s+Dakota|ND|Ohio|OH|Oklahoma|OK|Oregon|OR|Pennsylvania|PA|Rhode\s+Island|RI|South\s+Carolina|SC|South\s+Dakota|SD|Tennessee|TN|Texas|TX|Utah|UT|Vermont|VT|Virginia|VA|Washington|WA|West\s+Virginia|WV|Wisconsin|WI|Wyoming|WY|Nebraska|NE)$',
+          pattern: '^(?:Alabama|AL|Alaska|AK|Arizona|AZ|Arkansas|AR|California|CA|Colorado|CO|Connecticut|CT|Delaware|DE|Florida|FL|Georgia|GA|Hawaii|HI|Idaho|ID|Illinois|IL|Indiana|IN|Iowa|IA|Kansas|KS|Kentucky|KY|Louisiana|LA|Maine|ME|Maryland|MD|Massachusetts|MA|Michigan|MI|Minnesota|MN|Mississippi|MS|Missouri|MO|Montana|MT|Nevada|NV|New\\s+Hampshire|NH|New\\s+Jersey|NJ|New\\s+Mexico|NM|New\\s+York|NY|North\\s+Carolina|NC|North\\s+Dakota|ND|Ohio|OH|Oklahoma|OK|Oregon|OR|Pennsylvania|PA|Rhode\\s+Island|RI|South\\s+Carolina|SC|South\\s+Dakota|SD|Tennessee|TN|Texas|TX|Utah|UT|Vermont|VT|Virginia|VA|Washington|WA|West\\s+Virginia|WV|Wisconsin|WI|Wyoming|WY|Nebraska|NE)$',
         }));
         break;
       case 2:

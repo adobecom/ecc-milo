@@ -1,11 +1,12 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
 import { getLibs } from '../../scripts/utils.js';
+import { isEmptyObject } from '../../utils/utils.js';
 import { style } from './profile-container.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
-const defaultProfile = { socialMedia: [{ url: '' }] };
+const defaultProfile = { socialMedia: [{ url: '' }], isPlaceholder: true };
 
 export class ProfileContainer extends LitElement {
   static properties = {
@@ -30,7 +31,9 @@ export class ProfileContainer extends LitElement {
   }
 
   getProfiles() {
-    return [...this.shadowRoot.querySelectorAll('profile-ui')].map((profileUI) => profileUI.profile);
+    return [...this.shadowRoot.querySelectorAll('profile-ui')]
+      .filter((p) => !p.isPlaceholder && !isEmptyObject(p))
+      .map((profileUI) => profileUI.profile);
   }
 
   render() {

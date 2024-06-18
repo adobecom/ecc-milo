@@ -1,4 +1,5 @@
 import { changeInputValue } from '../../../utils/utils.js';
+import getJoinedOutput from '../data-handler.js';
 
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -56,6 +57,7 @@ function initStepLock(component) {
 }
 
 export default function init(component, props) {
+  const eventData = getJoinedOutput(props.payload, props.response);
   prepopulateTimeZone(component);
   initStepLock(component);
 
@@ -63,7 +65,7 @@ export default function init(component, props) {
     cloudType,
     seriesId,
     rsvpRequired,
-  } = props.payload;
+  } = eventData;
 
   changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType || '');
   changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId || '');
@@ -81,7 +83,8 @@ function getTemplateId(bu) {
 }
 
 export function onSubmit(component, props) {
-  // TODO: init function and repopulate data from props if exists
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+
   const eventType = 'InPerson';
   const cloudType = component.querySelector('#bu-select-input').value;
   const seriesId = component.querySelector('#series-select-input')?.value;

@@ -1,6 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 import { generateToolTip } from '../../utils/utils.js';
-import { getClouds, getSeries } from '../../utils/esp-controller.js';
+import { getCaasTags, getClouds, getSeries } from '../../utils/esp-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -96,10 +96,10 @@ async function decorateNewSeriesModal(column) {
       buSelectWrapper.append(label);
       lightbox.append(buSelectWrapper);
 
-      const resp = await fetch('https://www.adobe.com/chimera-api/tags').then((res) => res.json()).catch((error) => error);
+      const caasTags = await getCaasTags();
 
-      if (!resp.error) {
-        const clouds = resp.namespaces.caas.tags['business-unit'].tags;
+      if (caasTags) {
+        const clouds = caasTags.namespaces.caas.tags['business-unit'].tags;
         buildPickerFromTags(buSelectWrapper, phText, Object.entries(clouds));
       }
     }

@@ -1,4 +1,8 @@
+import getJoinedOutput from '../data-handler.js';
+
 export function onSubmit(component, props) {
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+
   const productGroup = component.querySelector('product-selector-group');
 
   const selectedProducts = productGroup?.getSelectedProducts();
@@ -14,9 +18,10 @@ export function onSubmit(component, props) {
 }
 
 export default async function init(component, props) {
+  const eventData = getJoinedOutput(props.payload, props.response);
   const productGroup = component.querySelector('product-selector-group');
 
-  if (props.payload?.relatedProducts) {
-    productGroup.setAttribute('.selectedProducts', JSON.stringify(props.payload.relatedProducts));
+  if (eventData.relatedProducts) {
+    productGroup.setAttribute('.selectedProducts', JSON.stringify(eventData.relatedProducts));
   }
 }
