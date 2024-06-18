@@ -73,5 +73,5 @@ export default function getJoinedOutput(payload, response) {
   const filteredPayload = getFilteredPayload(payload);
   const filteredResponse = getFilteredResponse(response);
 
-  return { ...filteredResponse, ...filteredPayload };
+  return { ...filteredPayload, ...filteredResponse };
 }
