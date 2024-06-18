@@ -1,63 +1,72 @@
 import { getLibs } from '../../scripts/utils.js';
-import { isEmptyObject } from '../../utils/utils.js';
 import { style } from './partner-selector.css.js';
+import { createPartner } from '../../utils/esp-controller.js';
 
-const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 export default class PartnerSelector extends LitElement {
   static properties = {
-    partners: { type: Array },
     selectedPartner: { type: Object },
+    fieldLabels: { type: Object },
   };
+
+  constructor() {
+    super();
+    this.selectedPartner = {};
+  }
 
   static styles = style;
 
-  handleSelectChange(event) {
-    const partnerName = event.target.value;
-    this.selectedPartner = {
-      ...this.selectedPartner,
-      ...this.partners.find((partner) => partner.name === partnerName),
-      isPlaceholder: false,
-    };
+  firstUpdated() {
+    this.imageDropzone = this.shadowRoot.querySelector('image-dropzone');
+  }
+
+  updateValue(key, value) {
+    this.selectedPartner = { ...this.selectedPartner, [key]: value };
 
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.selectedPartner },
       bubbles: true,
       composed: true,
     }));
-
-    this.requestUpdate();
-  }
-
-  handleCheckChange(event) {
-    const showPartnerLink = event.target.checked;
-    this.selectedPartner = {
-      ...this.selectedPartner,
-      showPartnerLink,
-    };
-
-    this.dispatchEvent(new CustomEvent('update-partner', {
-      detail: { partner: this.selectedPartner },
-      bubbles: true,
-      composed: true,
-    }));
-
-    this.requestUpdate();
-  }
-
-  isValidSelection() {
-    return !this.selectedPartner.isPlaceholder && !isEmptyObject(this.selectedPartner);
   }
 
   render() {
+    const configString = JSON.stringify({
+      uploadOnEvent: true,
+      type: 'partner-image',
+      targetUrl: `/v1/partners/${this.selectedPartner.id}/images`,
+    });
+
     return html`
-      <fieldset class="rsvp-field-wrapper">
-        ${html`<img class="partner-img" src="${this.selectedPartner.imageUrl || '/icons/icon-placeholder.svg'}" alt="${this.selectedPartner.name}">`}  
-        <sp-picker value=${this.selectedPartner.name} class="partner-select-input" label="Select a partner" @change="${this.handleSelectChange}">
-          ${this.partners.map((partner) => html`<sp-menu-item value="${partner.name}">${partner.name}</sp-menu-item>`)}
-        </sp-picker>
-        ${html`<sp-checkbox class="checkbox-partner-link" .disabled=${!this.isValidSelection()} .checked=${this.selectedPartner.showPartnerLink} @change="${this.handleCheckChange}">Link to ${this.selectedPartner.name || '[Partner name]'}</sp-checkbox>`}
+      <fieldset class="partner-field-wrapper">
+      <div>
+        <div class="partner-input-wrapper">
+          <image-dropzone .file=${this.selectedPartner.file} .configs=${configString}>
+        <slot name="img-label" slot="img-label"></slot>
+          </image-dropzone>
+          <div>
+            <div class="partner-input">
+              <label>${this.fieldLabels.nameLabelText}</label>
+              <sp-textfield value=${this.selectedPartner.name} @change=${(event) => this.updateValue('name', event.target.value)}></sp-textfield>
+            </div>
+            <div class="partner-input">
+              <label>${this.fieldLabels.urlLabelText}</label>
+              <sp-textfield value=${this.selectedPartner.externalUrl} @change=${(event) => this.updateValue('externalUrl', event.target.value)}></sp-textfield>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="action-area">
+        <sp-button variant="primary" .disabled=${!this.selectedPartner.name} class="save-partner-button" @click=${async () => {
+  const respJson = await createPartner(this.selectedPartner, this.eventId);
+  if (respJson.partnerId) {
+    this.selectedPartner.id = respJson.partnerId;
+    this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload'));
+  }
+}}>Save Partner</sp-button>
         <slot name="delete-btn"></slot>
+        </div>
       </fieldset>
     `;
   }

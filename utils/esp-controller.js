@@ -33,7 +33,6 @@ export const getCaasTags = (() => {
 
 function getESLConfig() {
   return {
-    // FIXME: stage and local are swapped for demo
     local: { host: 'http://localhost:8499' },
     stage: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
     prod: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
@@ -142,9 +141,17 @@ export async function createSpeaker(profile, seriesId) {
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify({ ...profile, seriesId });
   const options = await constructRequestOptions('POST', raw);
-
+  
   const resp = await fetch(`${host}/v1/series/${seriesId}/speakers`, options).then((res) => res.json()).catch((error) => console.log(error));
-  console.log('attempted to create speaker', raw, resp);
+  return resp;
+}
+
+export async function createPartner(partner, eventId) {
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const raw = JSON.stringify(partner);
+  const options = await constructRequestOptions('POST', raw);
+  
+  const resp = await fetch(`${host}/v1/events/${eventId}/partners`, options).then((res) => res.json()).catch((error) => console.log(error));
   return resp;
 }
 

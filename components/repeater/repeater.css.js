@@ -30,6 +30,7 @@ export const style = css`
   opacity: 0.3;
   transition: opacity 0.2s;
   cursor: pointer;
+  display: block;
 }
 
 .repeater-element-title {
