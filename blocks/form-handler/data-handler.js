@@ -33,7 +33,7 @@ const attrsFromResponse = [
   'url',
 ];
 
-function filterPayload(payload) {
+function updateFilteredPayload(payload) {
   const output = {};
 
   attrsFromPayload.forEach((attr) => {
@@ -42,10 +42,10 @@ function filterPayload(payload) {
     }
   });
 
-  return output;
+  return { ...payload, ...output };
 }
 
-function filterResponse(response) {
+function updateFilteredResponse(response) {
   const output = {};
 
   attrsFromResponse.forEach((attr) => {
@@ -54,12 +54,12 @@ function filterResponse(response) {
     }
   });
 
-  return output;
+  return { ...response, ...output };
 }
 
 export default function getJoinedOutput(payload, response) {
-  const filteredPayload = filterPayload(payload);
-  const filteredResponse = filterResponse(response);
+  const filteredPayload = updateFilteredPayload(payload);
+  const filteredResponse = updateFilteredResponse(response);
 
   return { ...filteredPayload, ...filteredResponse };
 }
