@@ -141,7 +141,12 @@ export class Profile extends LitElement {
     const respJson = await createSpeaker(this.profile, this.seriesId);
     if (respJson.speakerId) {
       this.profile.id = respJson.speakerId;
-      this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload'));
+      this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload', {
+        detail: { targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images` },
+        bubbles: true,
+        composed: true,
+      }));
+
       delete this.profile.isPlaceholder;
     }
   }}>Save Profile</sp-button>
