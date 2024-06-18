@@ -28,9 +28,8 @@ function buildTerms(terms) {
 }
 
 async function loadPreview(component, props) {
-  // const { templateId } = props.payload;
-  // if (!templateId) return;
-  const templateId = '/fragments/event-templates/dx/simple';
+  const { templateId } = props.payload;
+  if (!templateId) return;
 
   const rsvpFormLocation = `https://main--events-milo--adobecom.hlx.page${templateId.substring(0, templateId.lastIndexOf('/'))}/rsvp-form`;
   const resp = await customFetch({ resource: `${rsvpFormLocation}.plain.html`, withCacheRules: true })
@@ -46,7 +45,6 @@ async function loadPreview(component, props) {
   const termsConditionsRow = doc.querySelector('.events-form > div:nth-of-type(3)');
 
   component.append(buildTerms(termsConditionsRow));
-  // component.append(createTag('a', { class: 'con-button outline', href: rsvpFormLocation }, 'Edit (require AEM sidekick plugin)'))
 }
 
 export default async function init(component, props) {
