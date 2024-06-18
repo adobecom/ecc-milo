@@ -186,8 +186,6 @@ async function saveEvent(props) {
   } else {
     const resp = await publishEvent(props.payload.eventId, props.payload);
     props.payload = { ...props.payload, ...resp };
-    const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-    if (dashboardLink) window.location.assign(dashboardLink.href);
   }
 }
 
@@ -407,6 +405,9 @@ function initFormCtas(props) {
           if (ctaUrl.hash === '#next') {
             if (props.currentStep < props.maxStep) {
               navigateForm(props);
+            } else {
+              const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+              if (dashboardLink) window.location.assign(dashboardLink.href);
             }
           }
           toggleBtnsSubmittingState(false);
