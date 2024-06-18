@@ -177,7 +177,7 @@ function decorateForm(el) {
 
 async function saveEvent(props) {
   await gatherValues(props);
-  if (props.currentStep === 0) {
+  if (props.currentStep === 0 && !props.payload.eventId) {
     const resp = await createEvent(props.payload);
     props.payload = { ...props.payload, ...resp };
   } else if (props.currentStep < props.maxStep) {
