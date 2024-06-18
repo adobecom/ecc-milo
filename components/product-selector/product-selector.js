@@ -8,8 +8,13 @@ export default class ProductSelector extends LitElement {
   static properties = {
     products: { type: Object },
     selectedProduct: { type: Object },
-    showBladeCheck: { type: Boolean },
   };
+
+  constructor() {
+    super();
+    this.products = this.products || {};
+    this.selectedProduct = { showProductBlade: false, isPlaceholder: true };
+  }
 
   static styles = style;
 
@@ -35,7 +40,7 @@ export default class ProductSelector extends LitElement {
     const showProductBlade = event.target.checked;
     this.selectedProduct = {
       ...this.selectedProduct,
-      showProductBlade,
+      showProductBlade: !!showProductBlade,
     };
 
     this.dispatchEvent(new CustomEvent('update-product', {
