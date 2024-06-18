@@ -410,16 +410,15 @@ function initFormCtas(props) {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
 
-          if (ctaUrl.hash === '#next') {
-            if (props.currentStep < props.maxStep) {
-              await saveEvent(props);
-              navigateForm(props);
-            } else {
-              await saveEvent(props, { toPublish: true });
-              const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-              if (dashboardLink) window.location.assign(dashboardLink.href);
-            }
+          if (ctaUrl.hash === '#next' && props.currentStep === props.maxStep) {
+            await saveEvent(props, { toPublish: true });
+            const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+            if (dashboardLink) window.location.assign(dashboardLink.href);
+          } else {
+            await saveEvent(props);
           }
+
+          navigateForm(props);
           toggleBtnsSubmittingState(false);
         });
       }
