@@ -127,7 +127,7 @@ export async function createEvent(payload) {
   const options = await constructRequestOptions('POST', raw);
 
   const resp = await fetch(`${host}/v1/events`, options).then((res) => res.json()).catch((error) => console.log(error));
-  document.dispatchEvent(new CustomEvent('eventcreated'), { detail: { eventId: resp.eventId } });
+  document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: resp.eventId } }));
   console.log('attempted to create event', payload, resp);
   return resp;
 }
