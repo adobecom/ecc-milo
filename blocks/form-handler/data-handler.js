@@ -1,3 +1,6 @@
+let responseCache = {};
+let payloadCache = {};
+
 const attrsFromPayload = [
   'agenda',
   'topics',
@@ -33,7 +36,7 @@ const attrsFromResponse = [
   'url',
 ];
 
-function updateFilteredPayload(payload) {
+function getFilteredPayload(payload) {
   const output = {};
 
   attrsFromPayload.forEach((attr) => {
@@ -42,10 +45,11 @@ function updateFilteredPayload(payload) {
     }
   });
 
-  return { ...payload, ...output };
+  payloadCache = output;
+  return output;
 }
 
-function updateFilteredResponse(response) {
+function getFilteredResponse(response) {
   const output = {};
 
   attrsFromResponse.forEach((attr) => {
@@ -54,12 +58,13 @@ function updateFilteredResponse(response) {
     }
   });
 
-  return { ...response, ...output };
+  responseCache = output;
+  return output;
 }
 
 export default function getJoinedOutput(payload, response) {
-  const filteredPayload = updateFilteredPayload(payload);
-  const filteredResponse = updateFilteredResponse(response);
+  const filteredPayload = { ...payloadCache, ...getFilteredPayload(payload) };
+  const filteredResponse = { ...responseCache, ...getFilteredResponse(response) };
 
   return { ...filteredPayload, ...filteredResponse };
 }
