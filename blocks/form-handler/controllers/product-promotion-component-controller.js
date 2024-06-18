@@ -10,7 +10,7 @@ export function onSubmit(component, props) {
   if (selectedProducts) {
     const relatedProducts = selectedProducts.map((p) => ({
       name: p.title,
-      showProductBlade: p.showProductBlade,
+      showProductBlade: !!p.showProductBlade,
     }));
 
     props.payload = { ...props.payload, relatedProducts };
