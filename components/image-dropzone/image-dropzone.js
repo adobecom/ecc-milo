@@ -33,7 +33,8 @@ export class ImageDropzone extends LitElement {
         this.file.url = URL.createObjectURL(this.file);
 
         if (this.configs.uploadOnEvent) {
-          this.addEventListener('shouldupload', () => {
+          this.addEventListener('shouldupload', (e) => {
+            this.configs = { ...this.configs, ...e.detail };
             uploadBinaryFile(this.file, this.configs).then(() => {
               this.requestUpdate();
             });
