@@ -140,8 +140,12 @@ export async function onSubmit(component, props) {
 
 export default async function init(component, props) {
   const eventData = getJoinedOutput(props.payload, props.response);
-  // TODO: init function and repopulate data from props if exists
+
   await loadGoogleMapsAPI(() => initAutocomplete(component));
+
+  const { venue } = eventData;
+
+  if (!venue) return;
 
   const {
     venueName,
@@ -152,7 +156,7 @@ export default async function init(component, props) {
     country,
     placeId,
     mapUrl,
-  } = eventData;
+  } = venue;
 
   changeInputValue(component.querySelector('#venue-info-venue-name'), 'value', venueName);
   changeInputValue(component.querySelector('#venue-info-venue-address'), 'value', address);
@@ -160,8 +164,8 @@ export default async function init(component, props) {
   changeInputValue(component.querySelector('#location-state'), 'value', state);
   changeInputValue(component.querySelector('#location-zip-code'), 'value', postalCode);
   changeInputValue(component.querySelector('#location-country'), 'value', country);
-  changeInputValue(component.querySelector('#google-place-lat'), 'value', eventData.coordinates?.lat);
-  changeInputValue(component.querySelector('#google-place-lng'), 'value', eventData.coordinates?.lon);
+  changeInputValue(component.querySelector('#google-place-lat'), 'value', venue.coordinates?.lat);
+  changeInputValue(component.querySelector('#google-place-lng'), 'value', venue.coordinates?.lon);
   changeInputValue(component.querySelector('#google-place-id'), 'value', placeId);
   changeInputValue(component.querySelector('#google-map-url'), 'value', mapUrl);
 }
