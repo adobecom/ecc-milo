@@ -89,13 +89,15 @@ export async function uploadImage(file) {
 
 export async function uploadBinaryFile(file, configs) {
   await waitForAdobeIMS();
+
+  const { host } = getESLConfig()[window.miloConfig.env.name];
   const authToken = window.adobeIMS.getAccessToken().token;
   const headers = new Headers();
   headers.append('x-image-kind', configs.type);
   headers.append('Authorization', `Bearer ${authToken}`);
 
   try {
-    const response = await fetch(configs.targetUrl, {
+    const response = await fetch(`${host}${configs.targetUrl}`, {
       method: 'POST',
       headers,
       body: file,
