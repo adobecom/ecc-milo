@@ -12,7 +12,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedOutput, { getFilteredResponse, getFilteredPayload } from './data-handler.js';
+import getJoinedOutput, { getFilteredResponse } from './data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -240,7 +240,6 @@ function updateImgDropzoneConfigs(props) {
     hero: 'event-hero-image',
     thumbnail: 'event-card-image',
     venue: 'venue-image',
-    map: 'venue-map-image',
   };
 
   const dropzones = document.querySelectorAll('image-dropzone');
@@ -257,7 +256,6 @@ function updateImgDropzoneConfigs(props) {
         targetUrl: `/v1/events/${getFilteredResponse(props.response).eventId}/images`,
       };
       dz.setAttribute('configs', JSON.stringify(configs));
-      dz.requestUpdate();
     }
   });
 }
@@ -444,7 +442,7 @@ function updatePreviewCtas(props) {
   previewBtns.forEach((a) => {
     const testTime = new URL(a.href).hash === '#pre-event' ? +props.payload.localEndTimeMillis - 10 : +props.payload.localEndTimeMillis + 10;
     if (filteredResponse.detailPagePath) {
-      a.href = `https://www.stage.adobe.com/events/${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
+      a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
       a.classList.remove('preview-not-ready');
     }
   });
