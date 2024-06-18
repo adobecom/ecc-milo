@@ -1,7 +1,17 @@
 let responseCache = {};
 let payloadCache = {};
 
-const attrsFromPayload = [
+const attributeWhitelist = [
+  'eventId',
+  'speakers',
+  'venue',
+  'url',
+  'published',
+  'startDate',
+  'endDate',
+  'duration',
+  'creationTime',
+  'modificationTime',
   'agenda',
   'topics',
   'eventType',
@@ -27,24 +37,10 @@ const attrsFromPayload = [
   'relatedProducts',
 ];
 
-const attrsFromResponse = [
-  'eventId',
-  'speakers',
-  'venue',
-  'url',
-  'published',
-  'startDate',
-  'endDate',
-  'duration',
-  'creationTime',
-  'modificationTime',
-  ...attrsFromPayload,
-];
-
 export function getFilteredPayload(payload) {
   const output = {};
 
-  attrsFromPayload.forEach((attr) => {
+  attributeWhitelist.forEach((attr) => {
     if (payload[attr]) {
       output[attr] = payload[attr];
     }
@@ -59,7 +55,7 @@ export function getFilteredResponse(response) {
 
   const output = {};
 
-  attrsFromResponse.forEach((attr) => {
+  attributeWhitelist.forEach((attr) => {
     if (response[attr]) {
       output[attr] = response[attr];
     }
@@ -73,5 +69,5 @@ export default function getJoinedOutput(payload, response) {
   const filteredPayload = getFilteredPayload(payload);
   const filteredResponse = getFilteredResponse(response);
 
-  return { ...filteredPayload, ...filteredResponse };
+  return { ...filteredResponse, ...filteredPayload };
 }
