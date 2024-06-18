@@ -41,7 +41,7 @@ export function getFilteredPayload(payload) {
   const output = {};
 
   attributeWhitelist.forEach((attr) => {
-    if (payload[attr]) {
+    if (payload[attr] !== undefined) {
       output[attr] = payload[attr];
     }
   });
@@ -56,7 +56,7 @@ export function getFilteredResponse(response) {
   const output = {};
 
   attributeWhitelist.forEach((attr) => {
-    if (response[attr]) {
+    if (response[attr] !== undefined) {
       output[attr] = response[attr];
     }
   });
