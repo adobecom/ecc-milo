@@ -33,7 +33,15 @@ export class ProfileContainer extends LitElement {
   getProfiles() {
     return [...this.shadowRoot.querySelectorAll('profile-ui')]
       .filter((p) => !p.isPlaceholder && !isEmptyObject(p))
-      .map((profileUI) => profileUI.profile);
+      .map((profileUI, index) => {
+        const { id, type } = profileUI.profile;
+
+        return {
+          speakerId: id,
+          ordinal: index,
+          speakerType: type,
+        };
+      });
   }
 
   render() {
