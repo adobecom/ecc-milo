@@ -55,7 +55,7 @@ export default class ProductSelector extends LitElement {
     return html`
       <fieldset class="rsvp-field-wrapper">
       ${html`<img class="product-img" src="${this.selectedProduct.tagImage || '/icons/icon-placeholder.svg'}" alt="${this.selectedProduct.title || nothing}">`}  
-        <sp-picker class="product-select-input" label="Select a product" value=${this.selectedProduct.name || nothing} @change="${this.handleSelectChange}">
+        <sp-picker class="product-select-input" label="Select a product" value=${this.selectedProduct.title || nothing} @change="${this.handleSelectChange}">
           ${Object.values(this.products).map((product) => html`<sp-menu-item value="${product.name}">${product.title}
           </sp-menu-item>`)}
         </sp-picker>
