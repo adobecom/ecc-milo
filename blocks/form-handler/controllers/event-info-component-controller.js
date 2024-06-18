@@ -299,34 +299,6 @@ function dateTimeStringToTimestamp(dateString, timeString) {
   return date.getTime();
 }
 
-export default function init(component, props) {
-  const eventData = getJoinedOutput(props.payload, props.response);
-  initCalendar(component);
-
-  const {
-    title,
-    description,
-    localStartDate,
-    localEndDate,
-    localStartTime,
-    localEndTime,
-    gmtOffset,
-  } = eventData;
-  component.querySelector('#info-field-event-title').value = title || '';
-  component.querySelector('#info-field-event-description').value = description || '';
-  changeInputValue(component.querySelector('#time-picker-start-time'), 'value', localStartTime || '');
-  changeInputValue(component.querySelector('#time-picker-end-time'), 'value', localEndTime || '');
-  changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${gmtOffset}` || '0');
-
-  const datePicker = component.querySelector('#event-info-date-picker');
-  datePicker.dataset.startDate = localStartDate || '';
-  datePicker.dataset.endDate = localEndDate || '';
-  updateInput(component, {
-    selectedStartDate: parseFormatedDate(localStartDate),
-    selectedEndDate: parseFormatedDate(localEndDate),
-  });
-}
-
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -357,4 +329,33 @@ export function onSubmit(component, props) {
   };
 
   props.payload = { ...props.payload, ...eventInfo };
+}
+
+export default function init(component, props) {
+  const eventData = getJoinedOutput(props.payload, props.response);
+  initCalendar(component);
+
+  const {
+    title,
+    description,
+    localStartDate,
+    localEndDate,
+    localStartTime,
+    localEndTime,
+    timezone,
+  } = eventData;
+
+  component.querySelector('#info-field-event-title').value = title || '';
+  component.querySelector('#info-field-event-description').value = description || '';
+  changeInputValue(component.querySelector('#time-picker-start-time'), 'value', localStartTime || '');
+  changeInputValue(component.querySelector('#time-picker-end-time'), 'value', localEndTime || '');
+  changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
+
+  const datePicker = component.querySelector('#event-info-date-picker');
+  datePicker.dataset.startDate = localStartDate || '';
+  datePicker.dataset.endDate = localEndDate || '';
+  updateInput(component, {
+    selectedStartDate: parseFormatedDate(localStartDate),
+    selectedEndDate: parseFormatedDate(localEndDate),
+  });
 }
