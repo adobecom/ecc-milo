@@ -37,7 +37,7 @@ const responseWhitelist = [
   'endDate',
   'duration',
   'creationTime',
-  'modifiaitonTime',
+  'modificationTime',
 ];
 
 function isValidAttribute(attr) {
