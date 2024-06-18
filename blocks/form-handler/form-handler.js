@@ -495,7 +495,6 @@ async function buildECCForm(el) {
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
-    // TODO: split payload and response data handler callbacks.
     response: {},
   };
 
@@ -522,8 +521,8 @@ async function buildECCForm(el) {
         console.log('payload updated:', props.response);
         updateProfileContainer(props);
       }
-      if (prop === 'resp') {
-        console.log('resp updated:', props.response);
+      if (prop === 'response') {
+        console.log('response updated:', props.response);
         updateImgDropzoneConfigs(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
