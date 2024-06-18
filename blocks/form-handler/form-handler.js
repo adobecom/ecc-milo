@@ -12,7 +12,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedOutput, { getFilteredResponse } from './data-handler.js';
+import getJoinedOutput, { getFilteredResponse, getFilteredPayload } from './data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -517,11 +517,15 @@ async function buildECCForm(el) {
       }
 
       if (prop === 'payload') {
-        console.log('payload updated:', props.payload);
+        console.log('payload updated:');
+        console.log('raw payload:', props.payload);
+        console.log('filtered payload:', getFilteredPayload(props.payload));
         updateProfileContainer(props);
       }
       if (prop === 'response') {
-        console.log('response updated:', props.response);
+        console.log('response updated:');
+        console.log('raw response:', props.response);
+        console.log('filtered response:', getFilteredResponse(props.response));
         updateImgDropzoneConfigs(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
