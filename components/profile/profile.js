@@ -146,6 +146,8 @@ export class Profile extends LitElement {
         bubbles: true,
         composed: true,
       }));
+
+      delete this.profile.isPlaceholder;
     }
   }}>Save Profile</sp-button>
     `;
