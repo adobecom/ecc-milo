@@ -413,11 +413,11 @@ function initFormCtas(props) {
           if (ctaUrl.hash === '#next') {
             if (props.currentStep < props.maxStep) {
               navigateForm(props);
-              await saveEvent(props, { toPublish: true });
+              await saveEvent(props);
             } else {
+              await saveEvent(props, { toPublish: true });
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
               if (dashboardLink) window.location.assign(dashboardLink.href);
-              await saveEvent(props);
             }
           }
           toggleBtnsSubmittingState(false);
