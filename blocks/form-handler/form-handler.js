@@ -236,13 +236,20 @@ function onStepValidate(props) {
 }
 
 function updateImgDropzoneConfigs(props) {
+  const typeMap = {
+    hero: 'event-hero-image',
+    thumbnail: 'event-card-image',
+    venue: 'venue-image',
+    map: 'venue-map-image',
+  };
+
   const dropzones = document.querySelectorAll('image-dropzone');
 
   dropzones.forEach((dz) => {
     const wrappingBlock = dz.closest('.form-component');
 
     if (wrappingBlock.classList.contains('img-upload-component')) {
-      const type = `event-${wrappingBlock.classList[1]}-image`;
+      const type = typeMap[wrappingBlock.classList[1]];
 
       const configs = {
         type,
@@ -518,15 +525,9 @@ async function buildECCForm(el) {
       }
 
       if (prop === 'payload') {
-        console.log('payload updated:');
-        console.log('raw payload:', props.payload);
-        console.log('filtered payload:', getFilteredPayload(props.payload));
         updateProfileContainer(props);
       }
       if (prop === 'response') {
-        console.log('response updated:');
-        console.log('raw response:', props.response);
-        console.log('filtered response:', getFilteredResponse(props.response));
         updateImgDropzoneConfigs(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
