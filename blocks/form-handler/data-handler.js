@@ -29,11 +29,17 @@ const attrsFromPayload = [
 ];
 
 const attrsFromResponse = [
-  ...attrsFromPayload,
   'eventId',
   'speakers',
   'venue',
   'url',
+  'published',
+  'startDate',
+  'endDate',
+  'duration',
+  'creationTime',
+  'modificationTime',
+  ...attrsFromPayload,
 ];
 
 function getFilteredPayload(payload) {
