@@ -1,6 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 import { getCaasTags } from '../../utils/esp-controller.js';
-import { generateToolTip } from '../../utils/utils.js';
+import { generateToolTip, isEmptyObject } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -13,6 +13,7 @@ async function buildTopicsCheckboxes(el) {
   const productTags = caasTags.namespaces.caas.tags['product-categories'].tags;
 
   Object.values(productTags).forEach((p) => {
+    if (isEmptyObject(p.tags)) return;
     createTag('sp-checkbox', { name: p.title }, p.title, { parent: cw });
   });
 
