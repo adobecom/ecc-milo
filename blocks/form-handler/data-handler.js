@@ -40,26 +40,6 @@ const wl = [
   'detailPagePath',
 ];
 
-function deepSpread(target, ...sources) {
-  sources.forEach((source) => {
-    if (typeof source !== 'object' || source === null) return;
-
-    Object.keys(source).forEach((key) => {
-      const value = source[key];
-
-      if (Array.isArray(value)) {
-        target[key] = deepSpread([], value);
-      } else if (typeof value === 'object' && value !== null) {
-        target[key] = deepSpread(target[key] || {}, value);
-      } else {
-        target[key] = value;
-      }
-    });
-  });
-
-  return target;
-}
-
 function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
 }
@@ -101,5 +81,5 @@ export default function getJoinedData() {
   const filteredResponse = getFilteredResponse();
   const filteredPayload = getFilteredPayload();
 
-  return deepSpread(filteredResponse, filteredPayload);
+  return { ...filteredResponse, ...filteredPayload };
 }
