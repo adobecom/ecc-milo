@@ -58,13 +58,13 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
     previewPre.href = (() => {
-      const url = new URL(`${window.location.origin}/events/${eventObj.detailPagePath}`);
+      const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
       return url.toString();
     })();
 
     previewPost.href = (() => {
-      const url = new URL(`${window.location.origin}/events/${eventObj.detailPagePath}`);
+      const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
       return url.toString();
     })();
@@ -131,7 +131,7 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(event) {
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${window.location.origin}/events/${event.detailPagePath}` }, event.title);
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${window.location.origin}${event.detailPagePath}` }, event.title);
   return eventTitleTag;
 }
 
