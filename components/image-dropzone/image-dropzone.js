@@ -41,18 +41,17 @@ export class ImageDropzone extends LitElement {
     this.requestUpdate();
   }
 
-  handleImageDrop(e) {
-    const { files } = e.dataTransfer;
+  handleImageDrop(event) {
+    const { files } = event.dataTransfer;
 
     if (files.length > 0) {
-      console.log(files)
       this.setFile(files);
       if (!this.configs.uploadOnCommand) this.uploadImage();
     }
   }
 
-  handleImageUpload(e) {
-    const { files } = e.dataTransfer;
+  handleImageUpload(event) {
+    const { files } = event.dataTransfer;
 
     if (files.length > 0) {
       this.setFile(files);
