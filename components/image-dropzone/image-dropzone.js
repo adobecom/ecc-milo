@@ -36,7 +36,6 @@ export class ImageDropzone extends LitElement {
   }
 
   async uploadImage(url = this.configs.targetUrl) {
-    console.log('uploading image');
     this.configs.targetUrl = url;
     await uploadBinaryFile(this.file, this.configs);
     this.requestUpdate();
