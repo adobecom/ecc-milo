@@ -233,7 +233,7 @@ export class Profile extends LitElement {
     <h2>${fieldLabelsJSON.heading}</h2>
     <overlay-trigger placement="right">
     <img src="/icons/info.svg" alt="info icon" class="icon icon-info" slot="trigger"></img>
-    <sp-tooltip slot="hover-content" open placement="right">
+    <sp-tooltip slot="hover-content" variant="info" open placement="right">
     ${fieldLabelsJSON.tooltipMessage}
     </sp-tooltip>
     </overlay-trigger>

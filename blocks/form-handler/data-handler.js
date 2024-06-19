@@ -86,7 +86,7 @@ export function setResponseCache(cache) {
 }
 
 export function getFilteredResponse(response) {
-  if (response.errors) return responseCache;
+  if (!response || response?.errors) return responseCache;
 
   const output = {};
 

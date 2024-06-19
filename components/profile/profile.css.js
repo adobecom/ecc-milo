@@ -6,7 +6,8 @@ const { css } = await import(`${getLibs()}/deps/lit-all.min.js`);
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
 image-dropzone {
-  width: 40%;
+  width: 300px;
+  max-width: 100%;
 }
 
 .img-file-input-wrapper {
@@ -18,14 +19,16 @@ image-dropzone {
   justify-content: center;
   text-align: center;
   align-items: center;
+  align-self: flex-start;
+  overflow: hidden;
 }
 
 sp-textfield {
-    width: 100%;
+  width: 100%;
 }
 
 p {
-    margin: 0px;
+  margin: 0px;
 }
 
 h2 {
@@ -40,9 +43,9 @@ h5 {
 }
 
 .social-media {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
 .social-media-row {
@@ -50,7 +53,13 @@ h5 {
   flex-direction: row;
   align-items: center;
   gap: 16px;
-  margin-left: 20px;
+}
+
+.social-media-row svg {
+  margin-left: 16px;
+  color: var(--color-black);
+  height: 32px;
+  width: 32px;
 }
 
 .social-media-input {
@@ -74,48 +83,51 @@ h5 {
 }
 
 .edit-profile {
-    margin-left: auto;
+  margin-left: auto;
 }
 
 modal{
-    width: 1000px;
+  width: 1000px;
 }
 
 .profile-view {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .social-media h3 {
-    margin: 0;
+  margin: 0;
 }
 
 .speaker-image {
-    width: 300px;
-    height: 200px;
+  width: 300px;
+  max-width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .feds-social-icon {
-    display: block;
-    width: 24px;
-    height: 24px;
-    color: #808080;
+  display: block;
+  width: 24px;
+  height: 24px;
+  color: #808080;
 }
 
 .feds-footer-icons {
-    display: none;
+  display: none;
 }
 
 .last-updated {
-    width: 100%;
+  width: 100%;
 }
 
 .profile-footer {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
 }
 
 .save-profile-button {
@@ -124,22 +136,31 @@ modal{
 }
 
 .profile-save-footer {
-    display: flex;
-    flex-direction: row-reverse;
+  display: flex;
+  flex-direction: row-reverse;
 }
 
 .footer-button-group {
-    margin-left: auto;
+  margin-left: auto;
 }
 
 .profile-header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.profile-header h2 {
+  margin: 0;
+}
+
+.profile-header overlay-trigger {
+  height: 18px;
 }
 
 .edit-profile-title {
-    color: var(--color-red);
+  color: var(--color-red);
 }
 `;
