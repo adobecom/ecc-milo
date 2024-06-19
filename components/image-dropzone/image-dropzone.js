@@ -41,6 +41,7 @@ export class ImageDropzone extends LitElement {
   }
 
   handleImageDrop(e) {
+    e.preventDefault();
     const { files } = e.dataTransfer;
 
     if (files.length > 0) {
