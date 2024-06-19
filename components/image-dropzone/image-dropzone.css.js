@@ -8,7 +8,7 @@ export const style = css`
 .img-file-input-wrapper {
   border: 2px dashed var(--color-gray-400);
   border-radius: 8px;
-  height: 200px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;

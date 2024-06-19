@@ -12,6 +12,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
+import getJoinedOutput, { getFilteredResponse } from './data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -83,7 +84,7 @@ async function initComponents(props) {
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
 
-  if (eventId) props.payload = await getEvent(eventId);
+  if (eventId) props.response = await getEvent(eventId);
 
   VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
@@ -175,19 +176,24 @@ function decorateForm(el) {
   });
 }
 
-async function saveEvent(props) {
+async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
-  if (props.currentStep === 0 && !props.payload.eventId) {
+
+  if (props.currentStep === 0 && !getFilteredResponse(props.response).eventId) {
     const resp = await createEvent(props.payload);
-    props.payload = { ...props.payload, ...resp };
-  } else if (props.currentStep < props.maxStep) {
-    const resp = await updateEvent(props.payload.eventId, props.payload);
-    props.payload = { ...props.payload, ...resp };
-  } else {
-    const resp = await publishEvent(props.payload.eventId, props.payload);
-    props.payload = { ...props.payload, ...resp };
-    const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-    if (dashboardLink) window.location.assign(dashboardLink.href);
+    props.response = resp;
+  } else if (props.currentStep <= props.maxStep && !options.toPublish) {
+    const resp = await updateEvent(
+      getFilteredResponse(props.response).eventId,
+      getJoinedOutput(props.payload, props.response),
+    );
+    props.response = resp;
+  } else if (options.toPublish) {
+    const resp = await publishEvent(
+      getFilteredResponse(props.response).eventId,
+      getJoinedOutput(props.payload, props.response),
+    );
+    props.response = resp;
   }
 }
 
@@ -230,21 +236,26 @@ function onStepValidate(props) {
 }
 
 function updateImgDropzoneConfigs(props) {
+  const typeMap = {
+    hero: 'event-hero-image',
+    card: 'event-card-image',
+    venue: 'venue-image',
+  };
+
   const dropzones = document.querySelectorAll('image-dropzone');
 
   dropzones.forEach((dz) => {
     const wrappingBlock = dz.closest('.form-component');
 
     if (wrappingBlock.classList.contains('img-upload-component')) {
-      const type = `event-${wrappingBlock.classList[1]}-image`;
+      const type = typeMap[wrappingBlock.classList[1]];
 
       const configs = {
         type,
         altText: `Event ${wrappingBlock.classList[1]} image`,
-        targetUrl: `http://localhost:8499/v1/events/${props.payload.eventId}/images`,
+        targetUrl: `/v1/events/${getFilteredResponse(props.response).eventId}/images`,
       };
       dz.setAttribute('configs', JSON.stringify(configs));
-      dz.requestUpdate();
     }
   });
 }
@@ -400,15 +411,19 @@ function initFormCtas(props) {
           }
         }
 
-        cta.addEventListener('click', async () => {
+        cta.addEventListener('click', async (e) => {
+          e.preventDefault();
           toggleBtnsSubmittingState(true);
-          await saveEvent(props);
 
-          if (ctaUrl.hash === '#next') {
-            if (props.currentStep < props.maxStep) {
-              navigateForm(props);
-            }
+          if (ctaUrl.hash === '#next' && props.currentStep === props.maxStep) {
+            await saveEvent(props, { toPublish: true });
+            const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+            if (dashboardLink) window.location.assign(dashboardLink.href);
+          } else {
+            await saveEvent(props);
           }
+
+          navigateForm(props);
           toggleBtnsSubmittingState(false);
         });
       }
@@ -422,11 +437,12 @@ function initFormCtas(props) {
 
 function updatePreviewCtas(props) {
   const previewBtns = props.el.querySelectorAll('.preview-btns');
+  const filteredResponse = getFilteredResponse(props.response);
 
   previewBtns.forEach((a) => {
     const testTime = new URL(a.href).hash === '#pre-event' ? +props.payload.localEndTimeMillis - 10 : +props.payload.localEndTimeMillis + 10;
-    if (props.payload.url) {
-      a.href = `https://www.stage.adobe.com/events/${props.payload.url}?previewMode=true&timing=${testTime}`;
+    if (filteredResponse.detailPagePath) {
+      a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
       a.classList.remove('preview-not-ready');
     }
   });
@@ -453,13 +469,13 @@ function initNavigation(props) {
 
 function updateDashboardLink(props) {
   // FIXME: presuming first link is dashboard link is not good.
-  if (!props.payload.eventId) return;
+  if (!getFilteredResponse(props.response).eventId) return;
   const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
   if (!dashboardLink) return;
 
   const url = new URL(dashboardLink.href);
-  url.searchParams.set('newEventId', props.payload.eventId);
+  url.searchParams.set('newEventId', getFilteredResponse(props.response).eventId);
   dashboardLink.href = url.toString();
 }
 
@@ -484,7 +500,6 @@ async function buildECCForm(el) {
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
-    // TODO: split payload and response data handler callbacks.
     response: {},
   };
 
@@ -508,9 +523,10 @@ async function buildECCForm(el) {
       }
 
       if (prop === 'payload') {
-        console.log('payload updated:', props.payload);
-        updateImgDropzoneConfigs(props);
         updateProfileContainer(props);
+      }
+      if (prop === 'response') {
+        updateImgDropzoneConfigs(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
       }

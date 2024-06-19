@@ -8,8 +8,13 @@ export default class ProductSelector extends LitElement {
   static properties = {
     products: { type: Object },
     selectedProduct: { type: Object },
-    showBladeCheck: { type: Boolean },
   };
+
+  constructor() {
+    super();
+    this.products = this.products || {};
+    this.selectedProduct = { showProductBlade: false };
+  }
 
   static styles = style;
 

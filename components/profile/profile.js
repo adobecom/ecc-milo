@@ -115,7 +115,7 @@ export class Profile extends LitElement {
     <image-dropzone configs=${JSON.stringify({
     uploadOnEvent: true,
     type: 'speaker-photo',
-    targetUrl: `http://localhost:8499/v1/speakers/${this.profile.id}/images`,
+    targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`,
   })}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
@@ -141,8 +141,9 @@ export class Profile extends LitElement {
     const respJson = await createSpeaker(this.profile, this.seriesId);
     if (respJson.speakerId) {
       this.profile.id = respJson.speakerId;
+      this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.url !== '');
       this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload', {
-        detail: { targetUrl: `http://localhost:8499/v1/speakers/${this.profile.id}/images` },
+        detail: { targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images` },
         bubbles: true,
         composed: true,
       }));

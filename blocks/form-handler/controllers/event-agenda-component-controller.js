@@ -1,3 +1,5 @@
+import getJoinedOutput from '../data-handler.js';
+
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -17,12 +19,13 @@ export function onSubmit(component, props) {
 }
 
 export default function init(component, props) {
+  const eventData = getJoinedOutput(props.payload, props.response);
   const agendaGroup = component.querySelector('agenda-fieldset-group');
   const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info');
 
-  if (props.payload?.agenda) {
-    agendaGroup.dataset.agendaItems = JSON.stringify(props.payload.agenda);
+  if (eventData.agenda) {
+    agendaGroup.dataset.agendaItems = JSON.stringify(eventData.agenda);
   }
 
-  showAgendaPostEvent.checked = props.payload?.showAgendaPostEvent;
+  showAgendaPostEvent.checked = eventData.showAgendaPostEvent;
 }

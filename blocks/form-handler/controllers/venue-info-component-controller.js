@@ -1,5 +1,6 @@
 import { createVenue } from '../../../utils/esp-controller.js';
 import { changeInputValue, getSecret } from '../../../utils/utils.js';
+import getJoinedOutput, { getFilteredResponse } from '../data-handler.js';
 
 async function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');
@@ -87,37 +88,12 @@ function initAutocomplete(el) {
   });
 }
 
-export default async function init(component, props) {
-  // TODO: init function and repopulate data from props if exists
-  await loadGoogleMapsAPI(() => initAutocomplete(component));
-
-  const {
-    venueName,
-    address,
-    city,
-    state,
-    postalCode,
-    country,
-    placeId,
-    mapUrl,
-  } = props.payload;
-
-  changeInputValue(component.querySelector('#venue-info-venue-name'), 'value', venueName);
-  changeInputValue(component.querySelector('#venue-info-venue-address'), 'value', address);
-  changeInputValue(component.querySelector('#location-city'), 'value', city);
-  changeInputValue(component.querySelector('#location-state'), 'value', state);
-  changeInputValue(component.querySelector('#location-zip-code'), 'value', postalCode);
-  changeInputValue(component.querySelector('#location-country'), 'value', country);
-  changeInputValue(component.querySelector('#google-place-lat'), 'value', props.payload.coordinates?.lat);
-  changeInputValue(component.querySelector('#google-place-lng'), 'value', props.payload.coordinates?.lon);
-  changeInputValue(component.querySelector('#google-place-id'), 'value', placeId);
-  changeInputValue(component.querySelector('#google-map-url'), 'value', mapUrl);
-}
-
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  // const visibleInPostState = component.querySelector('#checkbox-venue-info-visible').checked;
+  const { eventId } = getFilteredResponse(props.response);
+
+  const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible').checked;
   const venueName = component.querySelector('#venue-info-venue-name').value;
   const address = component.querySelector('#venue-info-venue-address').value;
   const city = component.querySelector('#location-city').value;
@@ -131,8 +107,6 @@ export async function onSubmit(component, props) {
   const gmtOffset = +component.querySelector('#google-place-gmt-offset').value;
 
   const venueData = {
-    // FIXME: need to add this to backend schema
-    // visibleInPostState,
     venueName,
     address,
     city,
@@ -149,15 +123,49 @@ export async function onSubmit(component, props) {
   };
 
   const onEventCreate = async (e) => {
-    const venue = await createVenue(e.detail.eventId, venueData);
-    props.payload = { ...props.payload, ...venue };
+    const resp = await createVenue(e.detail.eventId, venueData);
+    props.response = resp;
+    props.payload = { ...props.payload, showVenuePostEvent };
     document.removeEventListener('eventcreated', onEventCreate);
   };
 
-  if (props.payload.eventId) {
-    const venue = await createVenue(props.payload.eventId, venueData);
-    props.payload = { ...props.payload, ...venue };
+  if (eventId) {
+    const resp = await createVenue(eventId, venueData);
+    props.response = resp;
+    props.payload = { ...props.payload, showVenuePostEvent };
   } else {
     document.addEventListener('eventcreated', onEventCreate);
   }
+}
+
+export default async function init(component, props) {
+  const eventData = getJoinedOutput(props.payload, props.response);
+
+  await loadGoogleMapsAPI(() => initAutocomplete(component));
+
+  const { venue } = eventData;
+
+  if (!venue) return;
+
+  const {
+    venueName,
+    address,
+    city,
+    state,
+    postalCode,
+    country,
+    placeId,
+    mapUrl,
+  } = venue;
+
+  changeInputValue(component.querySelector('#venue-info-venue-name'), 'value', venueName);
+  changeInputValue(component.querySelector('#venue-info-venue-address'), 'value', address);
+  changeInputValue(component.querySelector('#location-city'), 'value', city);
+  changeInputValue(component.querySelector('#location-state'), 'value', state);
+  changeInputValue(component.querySelector('#location-zip-code'), 'value', postalCode);
+  changeInputValue(component.querySelector('#location-country'), 'value', country);
+  changeInputValue(component.querySelector('#google-place-lat'), 'value', venue.coordinates?.lat);
+  changeInputValue(component.querySelector('#google-place-lng'), 'value', venue.coordinates?.lon);
+  changeInputValue(component.querySelector('#google-place-id'), 'value', placeId);
+  changeInputValue(component.querySelector('#google-map-url'), 'value', mapUrl);
 }

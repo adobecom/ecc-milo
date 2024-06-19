@@ -1,3 +1,5 @@
+import { getFilteredResponse, setResponseCache } from '../blocks/form-handler/data-handler.js';
+
 export const getCaasTags = (() => {
   let cache;
   let promise;
@@ -89,20 +91,24 @@ export async function uploadImage(file) {
 
 export async function uploadBinaryFile(file, configs) {
   await waitForAdobeIMS();
+
+  const { host } = getESLConfig()[window.miloConfig.env.name];
   const authToken = window.adobeIMS.getAccessToken().token;
   const headers = new Headers();
+  headers.append('x-image-alt-text', configs.altText || '');
   headers.append('x-image-kind', configs.type);
   headers.append('Authorization', `Bearer ${authToken}`);
 
   try {
-    const response = await fetch(configs.targetUrl, {
+    const response = await fetch(`${host}${configs.targetUrl}`, {
       method: 'POST',
       headers,
       body: file,
     });
 
     if (response.ok) {
-      await response.text();
+      const responseData = await response.json();
+      setResponseCache(responseData);
     } else {
       window.lana?.log('Unexpected image upload server response. Reponse:', response.status);
     }
@@ -131,7 +137,7 @@ export async function createEvent(payload) {
   const resp = await fetch(`${host}/v1/events`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log('Failed to create event. Error:', error));
-  document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: resp.eventId } }));
+  if (resp.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: getFilteredResponse(resp).eventId } }));
 
   return resp;
 }
@@ -145,6 +151,18 @@ export async function createSpeaker(profile, seriesId) {
     .then((res) => res.json())
     .catch((error) => window.lana?.log('Failed to create speaker. Error:', error));
 
+  return resp;
+}
+
+export async function createPartner(partner, eventId) {
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const raw = JSON.stringify(partner);
+  const options = await constructRequestOptions('POST', raw);
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/partners`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to create partner. Error:', error));
+  
   return resp;
 }
 
