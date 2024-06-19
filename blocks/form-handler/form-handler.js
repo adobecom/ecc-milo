@@ -415,11 +415,14 @@ function initFormCtas(props) {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
 
-          if (ctaUrl.hash === '#next' && props.currentStep === props.maxStep) {
+          if (ctaUrl.hash === '#next') {
             await saveEvent(props, { toPublish: true });
-            const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-            if (dashboardLink) window.location.assign(dashboardLink.href);
-            navigateForm(props);
+            if (props.currentStep === props.maxStep) {
+              const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+              if (dashboardLink) window.location.assign(dashboardLink.href);
+            } else {
+              navigateForm(props);
+            }
           } else {
             await saveEvent(props);
           }
