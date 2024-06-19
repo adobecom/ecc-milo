@@ -139,7 +139,6 @@ export class Profile extends LitElement {
     const quietTextfieldConfig = { size: 'xl', quiet: true };
 
     return html`
-    <h2>${title}</h2>
     ${this.renderProfileTypePicker(fieldLabelsJSON.chooseType)}
     <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('firstName', event.detail.value)}></custom-textfield>
     <custom-textfield data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('lastName', event.detail.value)}></custom-textfield>
@@ -174,7 +173,8 @@ export class Profile extends LitElement {
   renderProfileCreateForm() {
     return html`
     <div class="profile-view">
-    ${this.renderProfileForm(this.fieldlabels.heading)}
+    <h2>${this.fieldlabels.heading}</h2>
+    ${this.renderProfileForm()}
     <div class="profile-save-footer">
       <sp-button variant="primary" class="save-profile-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async () => {
     this.saveProfile();
@@ -193,7 +193,8 @@ export class Profile extends LitElement {
   renderProfileEditForm() {
     return html`
     <div class="profile-view">
-    ${this.renderProfileForm('Edit Profile')}
+    <h2 class="edit-profile-title">Edit Profile</h2>
+    ${this.renderProfileForm()}
     <div class="profile-footer">
     <p class="last-updated">Last update: ${new Date().toLocaleDateString()}</p>
     <sp-button-group class="footer-button-group">
@@ -228,7 +229,15 @@ export class Profile extends LitElement {
     // FIXME: update last updated date to actual date.
     return html`
     <div class="profile-view">
+    <div class="profile-header">
     <h2>${fieldLabelsJSON.heading}</h2>
+    <overlay-trigger placement="right">
+    <img src="/icons/info.svg" alt="info icon" class="icon icon-info" slot="trigger"></img>
+    <sp-tooltip slot="hover-content" open placement="right">
+    ${fieldLabelsJSON.tooltipMessage}
+    </sp-tooltip>
+    </overlay-trigger>
+    </div> 
     ${this.renderProfileTypePicker(fieldLabelsJSON.chooseType)}
     <h3>${this.profile.firstName} ${this.profile.lastName}</h3>
     <div class="img-file-input-wrapper">

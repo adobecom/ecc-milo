@@ -131,4 +131,15 @@ modal{
 .footer-button-group {
     margin-left: auto;
 }
+
+.profile-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
+
+.edit-profile-title {
+    color: var(--color-red);
+}
 `;

@@ -9,6 +9,7 @@ function extractFieldLabels(element) {
 
   const payload = {
     heading: headingDiv.querySelector('h2, h3, h4, h5, h6')?.textContent?.trim(),
+    tooltipMessage: headingDiv.querySelector('p > em')?.textContent?.trim(),
     chooseType: rows[0].querySelector('div')?.textContent?.trim(),
     firstName: rows[1].querySelector('div')?.textContent?.trim(),
     firstNameSubText: rows[1].querySelector('div > div:nth-of-type(2)')?.textContent?.trim(),

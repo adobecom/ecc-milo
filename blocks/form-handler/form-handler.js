@@ -56,6 +56,7 @@ const SPECTRUM_COMPONENTS = [
   'overlay',
   'dialog',
   'button-group',
+  'tooltip',
 ];
 
 function replaceAnchorWithButton(anchor) {
