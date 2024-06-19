@@ -41,8 +41,8 @@ export class ImageDropzone extends LitElement {
     this.requestUpdate();
   }
 
-  handleImageDrop(event) {
-    const { files } = event.dataTransfer;
+  handleImageDrop(e) {
+    const { files } = e.dataTransfer;
 
     if (files.length > 0) {
       this.setFile(files);
@@ -50,8 +50,8 @@ export class ImageDropzone extends LitElement {
     }
   }
 
-  handleImageUpload(event) {
-    const { files } = event.dataTransfer;
+  handleImageUpload(e) {
+    const { files } = e.currentTarget;
 
     if (files.length > 0) {
       this.setFile(files);
