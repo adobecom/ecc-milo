@@ -137,7 +137,7 @@ export async function createEvent(payload) {
   const resp = await fetch(`${host}/v1/events`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log('Failed to create event. Error:', error));
-  if (resp.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: getFilteredResponse(resp).eventId } }));
+  if (resp.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: getFilteredResponse().eventId } }));
 
   return resp;
 }
@@ -162,7 +162,19 @@ export async function createPartner(partner, eventId) {
   const resp = await fetch(`${host}/v1/events/${eventId}/partners`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log('Failed to create partner. Error:', error));
-  
+
+  return resp;
+}
+
+export async function addSpeakerToEvent(speakerData, eventId) {
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const raw = JSON.stringify(speakerData);
+  const options = await constructRequestOptions('POST', raw);
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/speakers`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to add speaker to event. Error: ${error}`));
+
   return resp;
 }
 

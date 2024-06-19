@@ -64,11 +64,7 @@ function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
 }
 
-export function setPayloadCache(cache) {
-  payloadCache = cache;
-}
-
-export function getFilteredPayload(payload) {
+export function setPayloadCache(payload) {
   const output = {};
 
   wl.forEach((attr) => {
@@ -77,17 +73,15 @@ export function getFilteredPayload(payload) {
     }
   });
 
-  setPayloadCache({ ...payloadCache, ...output });
+  payloadCache = { ...payloadCache, ...output };
+}
+
+export function getFilteredPayload() {
   return payloadCache;
 }
 
-export function setResponseCache(cache) {
-  responseCache = cache;
-}
-
-export function getFilteredResponse(response) {
-  if (response.errors) return responseCache;
-
+export function setResponseCache(response) {
+  if (response.errors) return;
   const output = {};
 
   wl.forEach((attr) => {
@@ -96,13 +90,16 @@ export function getFilteredResponse(response) {
     }
   });
 
-  setResponseCache({ ...responseCache, ...output });
+  responseCache = { ...responseCache, ...output };
+}
+
+export function getFilteredResponse() {
   return responseCache;
 }
 
-export default function getJoinedOutput(payload, response) {
-  const filteredResponse = getFilteredResponse(response);
-  const filteredPayload = getFilteredPayload(payload);
+export default function getJoinedData() {
+  const filteredResponse = getFilteredResponse();
+  const filteredPayload = getFilteredPayload();
 
   return deepSpread(filteredResponse, filteredPayload);
 }
