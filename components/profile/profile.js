@@ -3,10 +3,12 @@
 import { getLibs } from '../../scripts/utils.js';
 import { style } from './profile.css.js';
 import { createSpeaker } from '../../utils/esp-controller.js';
+import { getServiceName } from '../../utils/utils.js';
+import { icons } from '../../icons/icons.svg.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
-const defaultFieldLabels = {
+const DEFAULT_FIELD_LABELS = {
   heading: 'Profile',
   chooseType: 'Choose Type',
   name: 'Name',
@@ -17,13 +19,15 @@ const defaultFieldLabels = {
   addSocialMediaRepeater: 'Add Social Media',
 };
 
-const speakerType = ['Presenter', 'Host', 'Speaker', 'Keynote'];
+const SPEAKER_TYPE = ['Presenter', 'Host', 'Speaker', 'Keynote'];
+const SUPPORTED_SOCIAL = ['facebook', 'instagram', 'twitter', 'linkedin', 'pinterest', 'discord', 'behance', 'youtube', 'weibo', 'social-media'];
 
 export class Profile extends LitElement {
   static properties = {
     seriesId: { type: String },
     fieldlabels: { type: Object, reflect: true },
     profile: { type: Object, reflect: true },
+    profileCopy: { type: Object, reflect: true },
   };
 
   static styles = style;
@@ -31,9 +35,10 @@ export class Profile extends LitElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
-    this.fieldlabels = this.fieldlabels ?? defaultFieldLabels;
+    this.fieldlabels = this.fieldlabels ?? DEFAULT_FIELD_LABELS;
 
-    this.profile = this.profile ?? { socialMedia: [{ url: '' }] };
+    this.profile = this.profile ?? { socialMedia: [{ link: '' }] };
+    this.profileCopy = { ...this.profile };
   }
 
   firstUpdated() {
@@ -41,7 +46,7 @@ export class Profile extends LitElement {
   }
 
   addSocialMedia() {
-    const socialMedia = { url: '' };
+    const socialMedia = { link: '' };
     if (this.profile?.socialMedia) {
       this.profile.socialMedia.push(socialMedia);
     } else {
@@ -55,7 +60,7 @@ export class Profile extends LitElement {
   }
 
   updateSocialMedia(index, value) {
-    this.profile.socialMedia[index] = { url: value };
+    this.profile.socialMedia[index] = { link: value, serviceName: getServiceName(value) };
     this.requestUpdate();
   }
 
@@ -64,7 +69,7 @@ export class Profile extends LitElement {
     <div>
     <div><sp-field-label size="l" required>${fieldLabel}</sp-field-label></div>
     <sp-picker label=${fieldLabel} value=${this.profile?.type} size="l" @change=${(event) => this.updateValue('type', event.target.value)}>
-        ${repeat(speakerType, (type) => html`
+        ${repeat(SPEAKER_TYPE, (type) => html`
             <sp-menu-item value="${type}">${type}</sp-menu-item>
         `)}
     </sp-picker>
@@ -73,11 +78,13 @@ export class Profile extends LitElement {
 
   async saveProfile() {
     try {
+      this.profileCopy = { ...this.profile };
       const respJson = await createSpeaker(this.profile, this.seriesId);
       if (respJson.speakerId) {
         this.requestUpdate();
         this.profile.id = respJson.speakerId;
-        this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.url !== '');
+        this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
+        this.profile.image.url = this.imageDropzone.file.url;
         this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload', {
           detail: { targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images` },
           bubbles: true,
@@ -91,7 +98,7 @@ export class Profile extends LitElement {
 
   renderProfileForm(title) {
     const fieldLabelsJSON = {
-      ...defaultFieldLabels,
+      ...DEFAULT_FIELD_LABELS,
       ...(this.fieldlabels ?? {}),
     };
 
@@ -132,7 +139,6 @@ export class Profile extends LitElement {
     const quietTextfieldConfig = { size: 'xl', quiet: true };
 
     return html`
-    <div class="profile-view">
     <h2>${title}</h2>
     ${this.renderProfileTypePicker(fieldLabelsJSON.chooseType)}
     <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('firstName', event.detail.value)}></custom-textfield>
@@ -141,7 +147,7 @@ export class Profile extends LitElement {
     uploadOnEvent: true,
     type: 'speaker-photo',
     targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`,
-  })}>
+  })} file=${JSON.stringify(this.profile.image)}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
     <custom-textfield data=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('title', event.detail.value)}></custom-textfield>
@@ -152,7 +158,7 @@ export class Profile extends LitElement {
     this.profile?.socialMedia,
     (socialMedia, index) => html`
     <div class="social-media-row">
-    <custom-textfield class="social-media-input" data=${JSON.stringify({ ...socialMediaData, value: socialMedia.url ?? undefined })} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateSocialMedia(index, event.detail.value)}></custom-textfield>
+    <custom-textfield class="social-media-input" data=${JSON.stringify({ ...socialMediaData, value: socialMedia.link ?? undefined })} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateSocialMedia(index, event.detail.value)}></custom-textfield>
         ${this.profile?.socialMedia?.length > 1 ? html`<img class="icon icon-remove-circle" src="/icons/remove-circle.svg" alt="remove-repeater" @click=${() => {
     this.profile.socialMedia.splice(index, 1);
     this.requestUpdate();
@@ -162,23 +168,64 @@ export class Profile extends LitElement {
     </div>
     <repeater-element text=${fieldLabelsJSON.addSocialMediaRepeater} @repeat=${() => { this.addSocialMedia(); }}></repeater-element>
     <sp-divider size='s'></sp-divider>
-    <sp-button variant="primary" class="save-profile-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async () => {
+    `;
+  }
+
+  renderProfileCreateForm() {
+    return html`
+    <div class="profile-view">
+    ${this.renderProfileForm(this.fieldlabels.heading)}
+    <div class="profile-save-footer">
+      <sp-button variant="primary" class="save-profile-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async () => {
     this.saveProfile();
-  }}>Save Profile</sp-button>
-  </div>
+  }}>
+  <img src="/icons/user-add.svg" slot="icon"></img>
+  Save Profile</sp-button>
+    </div>
+    `;
+  }
+
+  revertProfile() {
+    this.profile = { ...this.profileCopy };
+    this.requestUpdate();
+  }
+
+  renderProfileEditForm() {
+    return html`
+    <div class="profile-view">
+    ${this.renderProfileForm('Edit Profile')}
+    <div class="profile-footer">
+    <p class="last-updated">Last update: ${new Date().toLocaleDateString()}</p>
+    <sp-button-group class="footer-button-group">
+      <sp-button variant="secondary" class="profile-edit-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async () => {
+    this.revertProfile();
+  }}>Cancel</sp-button>
+      <sp-button variant="primary" class="profile-edit-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async () => {
+    this.saveProfile();
+  }}>
+  <img src="/icons/user-edit.svg" slot="icon"></img>
+  Confirm update</sp-button>
+  </sp-button-group>
+    </div>
     `;
   }
 
   renderSocialMediaLink(socialMedia) {
-    return html`<p>${socialMedia.url}</p>`;
+    const serviceName = SUPPORTED_SOCIAL.includes(socialMedia.serviceName) ? socialMedia.serviceName : 'social-media';
+    return socialMedia.link ? html`<div class="social-media-row">
+    <svg xmlns="http://www.w3.org/2000/svg" class="feds-social-icon" alt="${serviceName} logo">
+      <use href="#footer-icon-${serviceName}"></use>
+    </svg>
+    <h3>${socialMedia.link}</h3></div>` : nothing;
   }
 
   renderProfileView() {
     const fieldLabelsJSON = {
-      ...defaultFieldLabels,
+      ...DEFAULT_FIELD_LABELS,
       ...(this.fieldlabels ?? {}),
     };
 
+    // FIXME: update last updated date to actual date.
     return html`
     <div class="profile-view">
     <h2>${fieldLabelsJSON.heading}</h2>
@@ -199,28 +246,34 @@ export class Profile extends LitElement {
     </div>
     <div class="social-media">
         <h3>${fieldLabelsJSON.socialMedia}</h3>
+        <div class="feds-footer-icons">
+        ${icons}
+    </div>
         ${this.profile?.socialMedia ? repeat(this.profile?.socialMedia, (socialMedia) => this.renderSocialMediaLink(socialMedia)) : nothing}
     </div>
     <sp-divider></sp-divider>
+    <div class="profile-footer">
+    <p class="last-updated">Last update: ${new Date().toLocaleDateString()}</p>
     <overlay-trigger type="modal" class="edit-profile">
     <sp-dialog-wrapper class="edit-profile-dialog"
-        size="l"
+        size="xl"
         slot="click-content"
         dismiss-label="Close"
         underlay
     >
-        ${this.renderProfileForm('Edit Profile')}
+        ${this.renderProfileEditForm('Edit Profile')}
     </sp-dialog-wrapper>
-    <sp-button slot="trigger" variant="primary" class="save-profile-button">Edit Profile</sp-button>
+    <sp-button slot="trigger" variant="primary" class="profile-action-button" @click=${() => { this.profileCopy = { ...this.profile }; }}>
+    <img src="/icons/user-edit.svg" slot="icon"></img>Edit</sp-button>
     </overlay-trigger>
     </div>
-    
+    </div>
     `;
   }
 
   render() {
     if (!this.profile.id) {
-      return this.renderProfileForm(this.fieldlabels.heading);
+      return this.renderProfileCreateForm();
     }
     return this.renderProfileView();
   }

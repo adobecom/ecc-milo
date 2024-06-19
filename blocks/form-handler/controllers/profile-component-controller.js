@@ -11,9 +11,9 @@ export function onSubmit(component, props) {
 
 export default function init(component, props) {
   const eventData = getJoinedOutput(props.payload, props.response);
-  const { profiles } = eventData;
+  const { speakers } = eventData;
   const profileContainer = component.querySelector('profile-container');
-  if (!profiles || !profileContainer) return;
-  profileContainer.profiles = profiles;
+  if (!speakers || !profileContainer) return;
+  profileContainer.profiles = speakers;
   profileContainer.requestUpdate();
 }

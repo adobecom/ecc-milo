@@ -42,7 +42,7 @@ h5 {
 .social-media {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 30px;
 }
 
 .social-media-row {
@@ -50,15 +50,14 @@ h5 {
   flex-direction: row;
   align-items: center;
   gap: 16px;
-  margin-bottom: 32px;
+  margin-left: 20px;
 }
 
 .social-media-input {
   width: 100%;
 }
 
-.save-profile-button {
-  width: fit-content;
+.profile-action-button {
   align-self: end;
 }
 
@@ -75,7 +74,7 @@ h5 {
 }
 
 .edit-profile {
-    align-self: end;
+    margin-left: auto;
 }
 
 modal{
@@ -96,5 +95,40 @@ modal{
 .speaker-image {
     width: 300px;
     height: 200px;
+}
+
+.feds-social-icon {
+    display: block;
+    width: 24px;
+    height: 24px;
+    color: #808080;
+}
+
+.feds-footer-icons {
+    display: none;
+}
+
+.last-updated {
+    width: 100%;
+}
+
+.profile-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+}
+
+.save-profile-button {
+  width: fit-content;
+  align-self: end;
+}
+
+.profile-save-footer {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.footer-button-group {
+    margin-left: auto;
 }
 `;

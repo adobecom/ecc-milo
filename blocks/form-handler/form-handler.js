@@ -55,6 +55,7 @@ const SPECTRUM_COMPONENTS = [
   'progress-circle',
   'overlay',
   'dialog',
+  'button-group',
 ];
 
 function replaceAnchorWithButton(anchor) {
@@ -182,8 +183,8 @@ async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
 
   if (props.currentStep === 0 && !getFilteredResponse(props.response).eventId) {
-    const resp = await createEvent(props.payload);
-    props.response = resp;
+    // const resp = await createEvent(props.payload);
+    // props.response = resp;
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     const resp = await updateEvent(
       getFilteredResponse(props.response).eventId,
@@ -503,13 +504,13 @@ async function buildECCForm(el) {
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {
       // TODO: remove this mock data.
-      profiles: [{
+      speakers: [{
         id: '122',
         firstName: 'John',
         lastName: 'Doe',
         title: 'CEO',
         bio: 'I am a CEO',
-        socialMedia: [{ url: 'www.linkedin.com' }],
+        socialMedia: [{ serviceName: 'linkedin', link: 'www.linkedin.com' }],
         image: { url: 'https://duet-cdn.vox-cdn.com/thumbor/0x0:2012x1341/1200x800/filters:focal(1006x670:1007x671):format(webp)/cdn.vox-cdn.com/uploads/chorus_asset/file/15483559/google2.0.0.1441125613.jpg' },
         type: 'Speaker',
       }],

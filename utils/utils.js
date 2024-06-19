@@ -241,3 +241,9 @@ export async function getSecret(key) {
   const secret = secretCache.find((s) => s.key === key);
   return secret.value;
 }
+
+export function getServiceName(link) {
+  const url = new URL(link);
+
+  return url.hostname.replace('.com', '').replace('www.', '');
+}

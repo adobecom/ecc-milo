@@ -136,20 +136,6 @@ function decorateCheckbox(column) {
   column.append(checkbox);
 }
 
-// async function decorateNewSeriesBtnAndModal(column) {
-//   const pTag = column.querySelector(':scope > p');
-//   const plusIcon = getIcon('add-circle');
-//   const a = column.querySelector('a[href$="#new-series"]');
-
-//   if (a) {
-//     pTag.classList.add('add-series-btn-wrapper');
-//     a.append(plusIcon);
-//     a.classList.add('add-series-modal-btn');
-//   }
-
-//   await decorateNewSeriesModal(column);
-// }
-
 export default function init(el) {
   el.classList.add('form-component');
 
