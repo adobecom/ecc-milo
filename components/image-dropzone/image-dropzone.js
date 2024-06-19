@@ -22,39 +22,40 @@ export class ImageDropzone extends LitElement {
       altText: null,
       targetUrl: null,
       type: null,
-      uploadOnEvent: false,
+      uploadOnCommand: false,
     };
   }
 
-  async handleImageFiles(files) {
-    if (files.length > 0) {
-      [this.file] = files;
-      if (this.file.type.startsWith('image/')) {
-        this.file.url = URL.createObjectURL(this.file);
-
-        if (this.configs.uploadOnEvent) {
-          this.addEventListener('shouldupload', (e) => {
-            this.configs = { ...this.configs, ...e.detail };
-            uploadBinaryFile(this.file, this.configs).then(() => {
-              this.requestUpdate();
-            });
-          });
-        } else {
-          await uploadBinaryFile(this.file, this.configs);
-          this.requestUpdate();
-        }
-      }
+  setFile(files) {
+    [this.file] = files;
+    if (this.file.type.startsWith('image/')) {
+      this.file.url = URL.createObjectURL(this.file);
+      this.requestUpdate();
     }
+  }
+
+  async uploadImage(url = this.configs.targetUrl) {
+    this.configs.targetUrl = url;
+    await uploadBinaryFile(this.file, this.configs);
+    this.requestUpdate();
   }
 
   handleImageDrop(e) {
     const { files } = e.dataTransfer;
-    this.handleImageFiles(files);
+
+    if (files.length > 0) {
+      this.setFile(files);
+      if (!this.configs.uploadOnCommand) this.uploadImage();
+    }
   }
 
-  handleImageUpload(event) {
-    const { files } = event.currentTarget;
-    this.handleImageFiles(files);
+  handleImageUpload(e) {
+    const { files } = e.dataTransfer;
+
+    if (files.length > 0) {
+      this.setFile(files);
+      if (!this.configs.uploadOnCommand) this.uploadImage();
+    }
   }
 
   handleDragover(e) {
