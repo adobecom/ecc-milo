@@ -182,6 +182,7 @@ async function saveEvent(props, options = { toPublish: false }) {
   if (props.currentStep === 0 && !getFilteredResponse().eventId) {
     const resp = await createEvent(props.payload);
     props.response = resp;
+    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated'));
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     const resp = await updateEvent(
       getFilteredResponse().eventId,

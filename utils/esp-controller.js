@@ -140,7 +140,6 @@ export async function createEvent(payload) {
   const resp = await fetch(`${host}/v1/events`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log('Failed to create event. Error:', error));
-  if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: getFilteredResponse().eventId } }));
 
   return resp;
 }
