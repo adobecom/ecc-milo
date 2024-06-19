@@ -265,7 +265,7 @@ export class Profile extends LitElement {
     <p class="last-updated">Last update: ${new Date().toLocaleDateString()}</p>
     <overlay-trigger type="modal" class="edit-profile">
     <sp-dialog-wrapper class="edit-profile-dialog"
-        size="xl"
+        size="l"
         slot="click-content"
         dismiss-label="Close"
         underlay
