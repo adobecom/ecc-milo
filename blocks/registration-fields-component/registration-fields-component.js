@@ -15,7 +15,7 @@ async function decorateRSVPFields(row) {
   const configSheetLocation = row.querySelector('a')?.href;
   const config = await fetch(configSheetLocation)
     .then((resp) => (resp.ok ? resp.json() : null))
-    .catch((err) => console.log(err));
+    .catch((err) => window.lana?.log(`Failed to load RSVP fields config: ${err}`));
 
   const fieldConfigTable = createTag('table', { class: 'field-config-table' });
   const thead = createTag('thead', {}, '', { parent: fieldConfigTable });
