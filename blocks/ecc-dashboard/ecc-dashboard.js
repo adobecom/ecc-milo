@@ -30,7 +30,9 @@ function updateEvent(newPayload, props) {
   if (!newPayload) return;
 
   props.data = props.data.map((event) => {
+    console.log(event, newPayload)
     if (event.eventId === newPayload.eventId) {
+      console.log('updating event', newPayload);
       return newPayload;
     }
     return event;
@@ -446,7 +448,6 @@ async function buildDashboard(el, config) {
         target[prop] = value;
 
         if (prop === 'data') {
-          console.log('data changed');
           props.mutableData = [...value];
         }
 
