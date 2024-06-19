@@ -526,10 +526,12 @@ async function buildECCForm(el) {
       }
 
       if (prop === 'payload') {
+        console.log('payload updated with: ', value);
         updateProfileContainer(props);
         setPayloadCache(value);
       }
       if (prop === 'response') {
+        console.log('response updated with: ', value);
         updateImgDropzoneConfigs(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
