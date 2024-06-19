@@ -12,7 +12,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedData, { getFilteredResponse, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, { getFilteredPayload, getFilteredResponse, setPayloadCache, setResponseCache } from './data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -180,7 +180,7 @@ async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
 
   if (props.currentStep === 0 && !getFilteredResponse().eventId) {
-    const resp = await createEvent(props.payload);
+    const resp = await createEvent(getJoinedData());
     props.response = resp;
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     const resp = await updateEvent(
