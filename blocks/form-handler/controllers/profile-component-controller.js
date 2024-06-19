@@ -7,6 +7,7 @@ export async function onSubmit(component, props) {
   const profileContainer = component.querySelector('profile-container');
   if (profileContainer) {
     const speakers = profileContainer.getProfiles();
+    console.log(speakers);
     if (speakers.length === 0) return;
 
     await speakers.reduce(async (promise, speaker) => {
