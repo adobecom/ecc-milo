@@ -99,6 +99,8 @@ export async function uploadBinaryFile(file, configs) {
   headers.append('x-image-kind', configs.type);
   headers.append('Authorization', `Bearer ${authToken}`);
 
+  let respJson = null;
+
   try {
     const response = await fetch(`${host}${configs.targetUrl}`, {
       method: 'POST',
@@ -107,14 +109,15 @@ export async function uploadBinaryFile(file, configs) {
     });
 
     if (response.ok) {
-      const responseData = await response.json();
-      setResponseCache(responseData);
+      respJson = await response.json();
     } else {
       window.lana?.log('Unexpected image upload server response. Reponse:', response.status);
     }
   } catch (error) {
     window.lana?.log('Failed to upload image. Error:', error);
   }
+
+  return respJson;
 }
 
 export async function createVenue(eventId, venueData) {

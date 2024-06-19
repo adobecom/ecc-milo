@@ -9,15 +9,20 @@ export async function onSubmit(component, props) {
     const speakers = profileContainer.getProfiles();
     if (speakers.length === 0) return;
 
-    speakers.forEach(async (speaker) => {
+    await speakers.reduce(async (promise, speaker) => {
+      await promise;
+
       const resp = await addSpeakerToEvent(speaker, getFilteredResponse().eventId);
-      if (!resp || resp.errors) return;
+      if (!resp || resp.errors) {
+        return;
+      }
+
       props.response = resp;
-    });
+    }, Promise.resolve());
   }
 }
 
-export default function init(component, props) {
+export default function init(component) {
   const eventData = getJoinedData();
   const { profiles } = eventData;
   const profileContainer = component.querySelector('profile-container');
