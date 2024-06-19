@@ -10,7 +10,7 @@ export async function onSubmit(component, props) {
     if (speakers.length === 0) return;
 
     speakers.forEach(async (speaker) => {
-      const resp = await addSpeakerToEvent(speaker, getFilteredResponse());
+      const resp = await addSpeakerToEvent(speaker, getFilteredResponse().eventId);
       if (!resp || resp.errors) return;
       props.response = resp;
     });
