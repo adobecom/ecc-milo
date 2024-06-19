@@ -1,4 +1,4 @@
-import getJoinedOutput from '../data-handler.js';
+import getJoinedData from '../data-handler.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -13,7 +13,13 @@ export function onSubmit(component, props) {
 }
 
 export default function init(component, props) {
-  const eventData = getJoinedOutput(props.payload, props.response);
+  const dropzones = component.querySelectorAll('image-dropzone');
+
+  dropzones.forEach((dz) => {
+    dz.props = props;
+  });
+
+  const eventData = getJoinedData();
   if (component.classList.contains('venue')) {
     const venueImgVisibleCheck = component.querySelector('#checkbox-venue-image-visible');
 

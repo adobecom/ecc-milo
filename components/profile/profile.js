@@ -113,7 +113,7 @@ export class Profile extends LitElement {
     <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('firstName', event.detail.value)}></custom-textfield>
     <custom-textfield data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('lastName', event.detail.value)}></custom-textfield>
     <image-dropzone configs=${JSON.stringify({
-    uploadOnEvent: true,
+    uploadOnCommand: true,
     type: 'speaker-photo',
     targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`,
   })}>
@@ -142,11 +142,7 @@ export class Profile extends LitElement {
     if (respJson.speakerId) {
       this.profile.id = respJson.speakerId;
       this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.url !== '');
-      this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload', {
-        detail: { targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images` },
-        bubbles: true,
-        composed: true,
-      }));
+      this.imageDropzone.uploadImage(`/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`);
 
       delete this.profile.isPlaceholder;
     }

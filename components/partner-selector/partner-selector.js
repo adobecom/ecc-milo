@@ -33,7 +33,7 @@ export default class PartnerSelector extends LitElement {
 
   render() {
     const configString = JSON.stringify({
-      uploadOnEvent: true,
+      uploadOnCommand: true,
       type: 'partner-image',
       targetUrl: `/v1/partners/${this.selectedPartner.id}/images`,
     });
@@ -62,7 +62,7 @@ export default class PartnerSelector extends LitElement {
   const respJson = await createPartner(this.selectedPartner, this.eventId);
   if (respJson.partnerId) {
     this.selectedPartner.id = respJson.partnerId;
-    this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload'));
+    this.imageDropzone.uploadImage();
   }
 }}>Save Partner</sp-button>
         <slot name="delete-btn"></slot>

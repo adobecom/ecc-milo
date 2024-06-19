@@ -4,7 +4,6 @@ let payloadCache = {};
 const wl = [
   // from payload and response
   'agenda',
-  'speakers',
   'topics',
   'eventType',
   'cloudType',
@@ -29,7 +28,6 @@ const wl = [
   'relatedProducts',
   // only in response
   'eventId',
-  'venue',
   'url',
   'published',
   'startDate',
@@ -40,35 +38,13 @@ const wl = [
   'detailPagePath',
 ];
 
-function deepSpread(target, ...sources) {
-  sources.forEach((source) => {
-    if (typeof source !== 'object' || source === null) return;
-
-    Object.keys(source).forEach((key) => {
-      const value = source[key];
-
-      if (Array.isArray(value)) {
-        target[key] = deepSpread([], value);
-      } else if (typeof value === 'object' && value !== null) {
-        target[key] = deepSpread(target[key] || {}, value);
-      } else {
-        target[key] = value;
-      }
-    });
-  });
-
-  return target;
-}
-
 function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
 }
 
-export function setPayloadCache(cache) {
-  payloadCache = cache;
-}
+export function setPayloadCache(payload) {
+  if (!payload) return;
 
-export function getFilteredPayload(payload) {
   const output = {};
 
   wl.forEach((attr) => {
@@ -77,17 +53,15 @@ export function getFilteredPayload(payload) {
     }
   });
 
-  setPayloadCache({ ...payloadCache, ...output });
+  payloadCache = { ...payloadCache, ...output };
+}
+
+export function getFilteredPayload() {
   return payloadCache;
 }
 
-export function setResponseCache(cache) {
-  responseCache = cache;
-}
-
-export function getFilteredResponse(response) {
-  if (response.errors) return responseCache;
-
+export function setResponseCache(response) {
+  if (!response || response?.errors) return;
   const output = {};
 
   wl.forEach((attr) => {
@@ -96,13 +70,16 @@ export function getFilteredResponse(response) {
     }
   });
 
-  setResponseCache({ ...responseCache, ...output });
+  responseCache = { ...responseCache, ...output };
+}
+
+export function getFilteredResponse() {
   return responseCache;
 }
 
-export default function getJoinedOutput(payload, response) {
-  const filteredResponse = getFilteredResponse(response);
-  const filteredPayload = getFilteredPayload(payload);
+export default function getJoinedData() {
+  const filteredResponse = getFilteredResponse();
+  const filteredPayload = getFilteredPayload();
 
-  return deepSpread(filteredResponse, filteredPayload);
+  return { ...filteredResponse, ...filteredPayload };
 }
