@@ -26,6 +26,17 @@ function buildThumbnail(data) {
   return container;
 }
 
+function updateEvent(newPayload, props) {
+  if (!newPayload) return;
+
+  props.data = props.data.map((event) => {
+    if (event.eventId === newPayload.eventId) {
+      return newPayload;
+    }
+    return event;
+  });
+}
+
 function initMoreOptions(props, eventObj, moreOptionsCell) {
   const moreOptionIcon = moreOptionsCell.querySelector('.icon-more-small-list');
 
@@ -42,13 +53,15 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
       const unpub = buildTool(toolBox, 'Unpublish', 'publish-remove');
       unpub.addEventListener('click', async (e) => {
         e.preventDefault();
-        await unpublishEvent(eventObj.eventId, quickFilter(eventObj));
+        const resp = await unpublishEvent(eventObj.eventId, quickFilter(eventObj));
+        updateEvent(resp, props);
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
       pub.addEventListener('click', async (e) => {
         e.preventDefault();
-        await publishEvent(eventObj.eventId, quickFilter(eventObj));
+        const resp = await publishEvent(eventObj.eventId, quickFilter(eventObj));
+        updateEvent(resp, props);
       });
     }
 
@@ -89,7 +102,7 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
     deleteBtn.addEventListener('click', async () => {
       await deleteEvent(eventObj.eventId);
       const newJson = await getEvents();
-      props.mutableData = newJson.events;
+      props.data = newJson.events;
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
@@ -431,6 +444,11 @@ async function buildDashboard(el, config) {
       set(target, prop, value) {
         target[prop] = value;
         populateTable(target);
+
+        if (prop  === 'data') {
+          props.mutableData = [...value];
+        }
+
         return true;
       },
     };
