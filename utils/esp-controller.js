@@ -129,7 +129,8 @@ export async function createVenue(eventId, venueData) {
   return resp;
 }
 
-export async function createEvent(payload) {
+export async function createEvent(props) {
+  const { payload } = props;
   const { host } = getESLConfig()[window.miloConfig.env.name];
   const raw = JSON.stringify(payload);
   const options = await constructRequestOptions('POST', raw);
@@ -137,7 +138,10 @@ export async function createEvent(payload) {
   const resp = await fetch(`${host}/v1/events`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log('Failed to create event. Error:', error));
-  if (resp.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: getFilteredResponse().eventId } }));
+  if (resp.eventId) {
+    props.response = resp;
+    document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: getFilteredResponse().eventId } }));
+  };
 
   return resp;
 }
