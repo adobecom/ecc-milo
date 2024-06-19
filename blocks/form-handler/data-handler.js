@@ -45,6 +45,8 @@ function isValidAttribute(attr) {
 }
 
 export function setPayloadCache(payload) {
+  if (!payload) return;
+
   const output = {};
 
   wl.forEach((attr) => {
@@ -61,7 +63,7 @@ export function getFilteredPayload() {
 }
 
 export function setResponseCache(response) {
-  if (response.errors) return;
+  if (!response || response?.errors) return;
   const output = {};
 
   wl.forEach((attr) => {
