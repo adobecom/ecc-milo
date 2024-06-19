@@ -29,6 +29,7 @@ export class ImageDropzone extends LitElement {
   setFile(files) {
     [this.file] = files;
     if (this.file.type.startsWith('image/')) {
+      console.log(this.file);
       this.file.url = URL.createObjectURL(this.file);
       this.requestUpdate();
     }
@@ -44,6 +45,7 @@ export class ImageDropzone extends LitElement {
     const { files } = e.dataTransfer;
 
     if (files.length > 0) {
+      console.log(files)
       this.setFile(files);
       if (!this.configs.uploadOnCommand) this.uploadImage();
     }
