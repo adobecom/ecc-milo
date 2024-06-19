@@ -30,8 +30,8 @@ export class ProfileContainer extends LitElement {
     this.requestUpdate();
   }
 
-  isValidSpeaker(profile) {
-    return profile.firstName && profile.lastName && profile.title;
+  isValidSpeaker(profileUI) {
+    return profileUI.profile.firstName && profileUI.profile.lastName && profileUI.profile.title;
   }
 
   getProfiles() {

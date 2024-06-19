@@ -4,7 +4,6 @@ let payloadCache = {};
 const wl = [
   // from payload and response
   'agenda',
-  'speakers',
   'topics',
   'eventType',
   'cloudType',
@@ -29,7 +28,6 @@ const wl = [
   'relatedProducts',
   // only in response
   'eventId',
-  'venue',
   'url',
   'published',
   'startDate',
