@@ -10,6 +10,7 @@ export class ImageDropzone extends LitElement {
   static properties = {
     file: { type: Object, reflect: true },
     configs: { type: Object },
+    props: { type: Proxy },
   };
 
   static styles = style;
@@ -36,7 +37,9 @@ export class ImageDropzone extends LitElement {
 
   async uploadImage(url = this.configs.targetUrl) {
     this.configs.targetUrl = url;
-    await uploadBinaryFile(this.file, this.configs);
+    const resp = await uploadBinaryFile(this.file, this.configs);
+
+    if (this.props) this.props.response = resp;
     this.requestUpdate();
   }
 

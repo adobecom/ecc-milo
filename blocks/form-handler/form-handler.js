@@ -419,11 +419,11 @@ function initFormCtas(props) {
             await saveEvent(props, { toPublish: true });
             const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
             if (dashboardLink) window.location.assign(dashboardLink.href);
+            navigateForm(props);
           } else {
             await saveEvent(props);
           }
 
-          navigateForm(props);
           toggleBtnsSubmittingState(false);
         });
       }
