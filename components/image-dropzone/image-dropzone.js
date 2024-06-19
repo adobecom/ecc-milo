@@ -29,7 +29,6 @@ export class ImageDropzone extends LitElement {
   setFile(files) {
     [this.file] = files;
     if (this.file.type.startsWith('image/')) {
-      console.log(this.file);
       this.file.url = URL.createObjectURL(this.file);
       this.requestUpdate();
     }
