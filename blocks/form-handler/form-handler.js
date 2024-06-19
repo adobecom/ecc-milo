@@ -183,8 +183,8 @@ async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
 
   if (props.currentStep === 0 && !getFilteredResponse(props.response).eventId) {
-    // const resp = await createEvent(props.payload);
-    // props.response = resp;
+    const resp = await createEvent(props.payload);
+    props.response = resp;
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     const resp = await updateEvent(
       getFilteredResponse(props.response).eventId,
