@@ -3,6 +3,7 @@ import {
 } from '../../utils/esp-controller.js';
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
+import { quickFilter } from '../form-handler/data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -41,13 +42,13 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
       const unpub = buildTool(toolBox, 'Unpublish', 'publish-remove');
       unpub.addEventListener('click', async (e) => {
         e.preventDefault();
-        await unpublishEvent(eventObj.eventId, eventObj);
+        await unpublishEvent(eventObj.eventId, quickFilter(eventObj));
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
       pub.addEventListener('click', async (e) => {
         e.preventDefault();
-        await publishEvent(eventObj.eventId, eventObj);
+        await publishEvent(eventObj.eventId, quickFilter(eventObj));
       });
     }
 

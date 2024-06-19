@@ -1,4 +1,4 @@
-import { getFilteredResponse, setResponseCache } from '../blocks/form-handler/data-handler.js';
+import { getFilteredCachedResponse, setResponseCache } from '../blocks/form-handler/data-handler.js';
 
 export const getCaasTags = (() => {
   let cache;

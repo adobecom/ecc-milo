@@ -12,7 +12,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedData, { getFilteredPayload, getFilteredResponse, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, { getFilteredCachedResponse, setPayloadCache, setResponseCache } from './data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -179,19 +179,19 @@ function decorateForm(el) {
 async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
 
-  if (props.currentStep === 0 && !getFilteredResponse().eventId) {
+  if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
     const resp = await createEvent(props.payload);
     props.response = resp;
     if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated'));
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     const resp = await updateEvent(
-      getFilteredResponse().eventId,
+      getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.response = resp;
   } else if (options.toPublish) {
     const resp = await publishEvent(
-      getFilteredResponse().eventId,
+      getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.response = resp;
@@ -254,7 +254,7 @@ function updateImgDropzoneConfigs(props) {
       const configs = {
         type,
         altText: `Event ${wrappingBlock.classList[1]} image`,
-        targetUrl: `/v1/events/${getFilteredResponse().eventId}/images`,
+        targetUrl: `/v1/events/${getFilteredCachedResponse().eventId}/images`,
       };
       dz.setAttribute('configs', JSON.stringify(configs));
     }
@@ -441,7 +441,7 @@ function initFormCtas(props) {
 
 function updatePreviewCtas(props) {
   const previewBtns = props.el.querySelectorAll('.preview-btns');
-  const filteredResponse = getFilteredResponse();
+  const filteredResponse = getFilteredCachedResponse();
 
   previewBtns.forEach((a) => {
     const testTime = new URL(a.href).hash === '#pre-event' ? +props.payload.localEndTimeMillis - 10 : +props.payload.localEndTimeMillis + 10;
@@ -473,13 +473,13 @@ function initNavigation(props) {
 
 function updateDashboardLink(props) {
   // FIXME: presuming first link is dashboard link is not good.
-  if (!getFilteredResponse().eventId) return;
+  if (!getFilteredCachedResponse().eventId) return;
   const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
   if (!dashboardLink) return;
 
   const url = new URL(dashboardLink.href);
-  url.searchParams.set('newEventId', getFilteredResponse().eventId);
+  url.searchParams.set('newEventId', getFilteredCachedResponse().eventId);
   dashboardLink.href = url.toString();
 }
 

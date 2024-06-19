@@ -1,5 +1,5 @@
 import { addSpeakerToEvent } from '../../../utils/esp-controller.js';
-import getJoinedData, { getFilteredResponse } from '../data-handler.js';
+import getJoinedData, { getFilteredCachedResponse } from '../data-handler.js';
 
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -13,7 +13,7 @@ export async function onSubmit(component, props) {
     await speakers.reduce(async (promise, speaker) => {
       await promise;
 
-      const resp = await addSpeakerToEvent(speaker, getFilteredResponse().eventId);
+      const resp = await addSpeakerToEvent(speaker, getFilteredCachedResponse().eventId);
       if (!resp || resp.errors) {
         return;
       }

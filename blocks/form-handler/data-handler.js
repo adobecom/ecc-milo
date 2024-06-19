@@ -42,44 +42,41 @@ function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
 }
 
-export function setPayloadCache(payload) {
-  if (!payload) return;
-
+export function quickFilter(obj) {
   const output = {};
 
   wl.forEach((attr) => {
-    if (isValidAttribute(payload[attr])) {
-      output[attr] = payload[attr];
+    if (isValidAttribute(obj[attr])) {
+      output[attr] = obj[attr];
     }
   });
 
+  return output;
+}
+
+export function setPayloadCache(payload) {
+  if (!payload) return;
+  const output = quickFilter(payload);
   payloadCache = { ...payloadCache, ...output };
 }
 
-export function getFilteredPayload() {
+export function getFilteredCachedPayload() {
   return payloadCache;
 }
 
 export function setResponseCache(response) {
   if (!response || response?.errors) return;
-  const output = {};
-
-  wl.forEach((attr) => {
-    if (isValidAttribute(response[attr])) {
-      output[attr] = response[attr];
-    }
-  });
-
+  const output = quickFilter(response);
   responseCache = { ...responseCache, ...output };
 }
 
-export function getFilteredResponse() {
+export function getFilteredCachedResponse() {
   return responseCache;
 }
 
 export default function getJoinedData() {
-  const filteredResponse = getFilteredResponse();
-  const filteredPayload = getFilteredPayload();
+  const filteredResponse = getFilteredCachedResponse();
+  const filteredPayload = getFilteredCachedPayload();
 
   return { ...filteredResponse, ...filteredPayload };
 }
