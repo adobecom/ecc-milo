@@ -440,12 +440,14 @@ async function buildDashboard(el, config) {
   } else {
     props.data = data;
     props.mutableData = [...data];
+
     const dataHandler = {
       set(target, prop, value) {
         target[prop] = value;
         populateTable(target);
 
-        if (prop  === 'data') {
+        if (prop === 'data') {
+          console.log('data changed');
           props.mutableData = [...value];
         }
 
