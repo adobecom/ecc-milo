@@ -41,10 +41,6 @@ export class Profile extends LitElement {
     this.profileCopy = { ...this.profile };
   }
 
-  firstUpdated() {
-    this.imageDropzone = this.shadowRoot.querySelector('image-dropzone');
-  }
-
   addSocialMedia() {
     const socialMedia = { link: '' };
     if (this.profile?.socialMedia) {
@@ -77,18 +73,19 @@ export class Profile extends LitElement {
   }
 
   async saveProfile() {
+    const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
     try {
       this.profileCopy = { ...this.profile };
       const respJson = await createSpeaker(this.profile, this.seriesId);
+
       if (respJson.speakerId) {
-        this.requestUpdate();
         this.profile.id = respJson.speakerId;
         this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
-        this.profile.image = { url: this.imageDropzone.file.url };
-        this.imageDropzone.uploadImage(`/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`);
+        this.profile.image = imageDropzone?.file ? { url: imageDropzone?.file?.url } : null;
+        imageDropzone.uploadImage(`/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`);
       }
     } catch {
-      console.log('error occured while saving profile');
+      window.lana?.log('error occured while saving profile');
     }
   }
 
@@ -236,26 +233,28 @@ export class Profile extends LitElement {
     </div> 
     ${this.renderProfileTypePicker(fieldLabelsJSON.chooseType)}
     <h3>${this.profile.firstName} ${this.profile.lastName}</h3>
-    <div class="img-file-input-wrapper">
     ${this.profile.image?.url ? html`
-    <div class="preview-wrapper">
-      <div class="preview-img-placeholder">
-      <img class="speaker-image" src="${this.profile.image?.url}" alt="preview image">
+    <div class="img-file-input-wrapper">
+      <div class="preview-wrapper">
+        <div class="preview-img-placeholder">
+          <img class="speaker-image" src="${this.profile.image?.url}" alt="preview image">
+        </div>
       </div>
     </div>`
     : nothing}
-    </div>
     <div>
         <h5>${this.profile.title}</h5>
         <p>${this.profile.bio}</p>
     </div>
+    ${this.profile?.socialMedia?.length ? html`
     <div class="social-media">
         <h3>${fieldLabelsJSON.socialMedia}</h3>
         <div class="feds-footer-icons">
         ${icons}
+        </div>
+        ${this.profile?.socialMedia ? repeat(this.profile?.socialMedia, (socialMedia) => this.renderSocialMediaLink(socialMedia)) : nothing }
     </div>
-        ${this.profile?.socialMedia ? repeat(this.profile?.socialMedia, (socialMedia) => this.renderSocialMediaLink(socialMedia)) : nothing}
-    </div>
+    ` : nothing} 
     <sp-divider></sp-divider>
     <div class="profile-footer">
     <p class="last-updated">Last update: ${new Date().toLocaleDateString()}</p>
