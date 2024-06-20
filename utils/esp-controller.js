@@ -138,7 +138,7 @@ export async function createVenue(eventId, venueData) {
 }
 
 export async function createEvent(payload) {
-  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esl[window.miloConfig.env.name];
   const raw = JSON.stringify(payload);
   const options = await constructRequestOptions('POST', raw);
 
