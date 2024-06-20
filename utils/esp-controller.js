@@ -34,11 +34,13 @@ function getAPIConfig() {
   return {
     esl: {
       local: { host: 'http://localhost:8499' },
+      dev: { host: 'https://wcms-events-service-layer-deploy-ethos102-dev-va-9c3ecd.dev.cloud.adobe.io' },
       stage: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
       prod: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
     },
     esp: {
       local: { host: 'http://localhost:8500' },
+      dev: { host: 'https://wcms-events-service-platform-deploy-ethos102-dev-caff5f.dev.cloud.adobe.io' },
       stage: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
       prod: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
     },
