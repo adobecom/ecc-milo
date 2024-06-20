@@ -72,8 +72,12 @@ export class Profile extends LitElement {
     </div>`;
   }
 
-  async saveProfile() {
+  async saveProfile(e) {
     const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
+    const saveButton = e.target;
+
+    saveButton.pending = true;
+
     try {
       this.profileCopy = { ...this.profile };
       const respJson = await createSpeaker(this.profile, this.seriesId);
@@ -88,6 +92,8 @@ export class Profile extends LitElement {
     } catch {
       window.lana?.log('error occured while saving profile');
     }
+
+    saveButton.pending = false;
   }
 
   renderProfileForm() {
@@ -170,8 +176,8 @@ export class Profile extends LitElement {
     <h2>${this.fieldlabels.heading}</h2>
     ${this.renderProfileForm()}
     <div class="profile-save-footer">
-      <sp-button variant="primary" class="save-profile-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async () => {
-    this.saveProfile();
+      <sp-button variant="primary" class="save-profile-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async (e) => {
+    this.saveProfile(e);
   }}>
   <img src="/icons/user-add.svg" slot="icon"></img>
   Save Profile</sp-button>
@@ -195,8 +201,8 @@ export class Profile extends LitElement {
       <sp-button variant="secondary" class="profile-edit-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async () => {
     this.revertProfile();
   }}>Cancel</sp-button>
-      <sp-button variant="primary" class="profile-edit-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async () => {
-    this.saveProfile();
+      <sp-button variant="primary" class="profile-edit-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async (e) => {
+    this.saveProfile(e);
   }}>
   <img src="/icons/user-edit.svg" slot="icon"></img>
   Confirm update</sp-button>
