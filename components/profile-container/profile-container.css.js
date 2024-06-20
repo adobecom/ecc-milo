@@ -27,12 +27,6 @@ repeater-element {
     margin: 24px;
 }
 
-.form-component {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
 .form-component > div:first-of-type > div > h2,
 .form-component > div:first-of-type > div > h3 {
   display: flex;

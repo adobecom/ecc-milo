@@ -40,6 +40,7 @@ export const style = css`
   height: 100%;
   width: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .img-file-input-wrapper label {

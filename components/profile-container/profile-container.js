@@ -6,7 +6,7 @@ import { style } from './profile-container.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
-const defaultProfile = { socialMedia: [{ url: '' }], isPlaceholder: true };
+const defaultProfile = { socialMedia: [{ link: '' }], isPlaceholder: true };
 
 export class ProfileContainer extends LitElement {
   static properties = {
