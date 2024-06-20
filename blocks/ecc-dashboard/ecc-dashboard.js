@@ -444,10 +444,10 @@ async function buildDashboard(el, config) {
     props.mutableData = [...data];
 
     const dataHandler = {
-      set(target, prop, value) {
+      set(target, prop, value, receiver) {
         target[prop] = value;
 
-        populateTable(target);
+        populateTable(receiver);
 
         return true;
       },
