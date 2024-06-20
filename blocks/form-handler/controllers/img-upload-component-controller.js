@@ -13,20 +13,15 @@ export function onSubmit(component, props) {
   }
 }
 
-async function uploadImage(configs, file) {
-  if (!file || !(file instanceof File)) return null;
-
-  const resp = await uploadBinaryFile(file, configs);
-  return resp;
-}
-
 export default function init(component, props) {
   const dropzones = component.querySelectorAll('image-dropzone');
 
   dropzones.forEach((dz) => {
     dz.handleImage = async () => {
-      const { file } = dz;
-      const resp = await uploadImage(JSON.parse(component.dataset.configs), file);
+      const file = dz.getFile();
+
+      if (!file || !(file instanceof File)) return;
+      const resp = await uploadBinaryFile(file, JSON.parse(component.dataset.configs))
 
       if (resp) props.response = resp;
     };

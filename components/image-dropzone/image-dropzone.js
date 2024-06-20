@@ -28,6 +28,10 @@ export class ImageDropzone extends LitElement {
     }
   }
 
+  getFile() {
+    return this.file;
+  }
+
   async handleImageDrop(e) {
     e.preventDefault();
     const { files } = e.dataTransfer;
