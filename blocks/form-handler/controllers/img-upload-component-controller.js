@@ -21,7 +21,7 @@ export default function init(component, props) {
       const file = dz.getFile();
 
       if (!file || !(file instanceof File)) return;
-      const resp = await uploadBinaryFile(file, JSON.parse(component.dataset.configs))
+      const resp = await uploadBinaryFile(file, JSON.parse(component.dataset.configs));
 
       if (resp) props.response = resp;
     };
