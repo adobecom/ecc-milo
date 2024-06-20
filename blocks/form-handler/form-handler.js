@@ -247,7 +247,7 @@ function updateImgUploadComponentConfigs() {
     venue: 'venue-image',
   };
 
-  const imgUploadComps = document.querySelectorAll('img-upload-component');
+  const imgUploadComps = document.querySelectorAll('.img-upload-component');
 
   imgUploadComps.forEach((b) => {
     const type = typeMap[b.classList[1]];
