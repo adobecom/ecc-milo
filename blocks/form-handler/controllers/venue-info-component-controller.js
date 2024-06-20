@@ -1,6 +1,6 @@
 import { createVenue } from '../../../utils/esp-controller.js';
 import { changeInputValue, getSecret } from '../../../utils/utils.js';
-import getJoinedOutput, { getFilteredResponse } from '../data-handler.js';
+import getJoinedData, { getFilteredCachedResponse } from '../data-handler.js';
 
 async function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');
@@ -91,7 +91,7 @@ function initAutocomplete(el) {
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const { eventId } = getFilteredResponse(props.response);
+  const { eventId } = getFilteredCachedResponse();
 
   const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible').checked;
   const venueName = component.querySelector('#venue-info-venue-name').value;
@@ -122,8 +122,8 @@ export async function onSubmit(component, props) {
     gmtOffset,
   };
 
-  const onEventCreate = async (e) => {
-    const resp = await createVenue(e.detail.eventId, venueData);
+  const onEventCreate = async () => {
+    const resp = await createVenue(getFilteredCachedResponse().eventId, venueData);
     props.response = resp;
     props.payload = { ...props.payload, showVenuePostEvent };
     document.removeEventListener('eventcreated', onEventCreate);
@@ -139,7 +139,7 @@ export async function onSubmit(component, props) {
 }
 
 export default async function init(component, props) {
-  const eventData = getJoinedOutput(props.payload, props.response);
+  const eventData = getJoinedData();
 
   await loadGoogleMapsAPI(() => initAutocomplete(component));
 

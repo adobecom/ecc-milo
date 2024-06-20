@@ -4,7 +4,6 @@ let payloadCache = {};
 const wl = [
   // from payload and response
   'agenda',
-  'speakers',
   'topics',
   'eventType',
   'cloudType',
@@ -29,7 +28,6 @@ const wl = [
   'relatedProducts',
   // only in response
   'eventId',
-  'venue',
   'url',
   'published',
   'startDate',
@@ -40,69 +38,45 @@ const wl = [
   'detailPagePath',
 ];
 
-function deepSpread(target, ...sources) {
-  sources.forEach((source) => {
-    if (typeof source !== 'object' || source === null) return;
-
-    Object.keys(source).forEach((key) => {
-      const value = source[key];
-
-      if (Array.isArray(value)) {
-        target[key] = deepSpread([], value);
-      } else if (typeof value === 'object' && value !== null) {
-        target[key] = deepSpread(target[key] || {}, value);
-      } else {
-        target[key] = value;
-      }
-    });
-  });
-
-  return target;
-}
-
 function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
 }
 
-export function setPayloadCache(cache) {
-  payloadCache = cache;
-}
-
-export function getFilteredPayload(payload) {
+export function quickFilter(obj) {
   const output = {};
 
   wl.forEach((attr) => {
-    if (isValidAttribute(payload[attr])) {
-      output[attr] = payload[attr];
+    if (isValidAttribute(obj[attr])) {
+      output[attr] = obj[attr];
     }
   });
 
-  setPayloadCache({ ...payloadCache, ...output });
+  return output;
+}
+
+export function setPayloadCache(payload) {
+  if (!payload) return;
+  const output = quickFilter(payload);
+  payloadCache = { ...payloadCache, ...output };
+}
+
+export function getFilteredCachedPayload() {
   return payloadCache;
 }
 
-export function setResponseCache(cache) {
-  responseCache = cache;
+export function setResponseCache(response) {
+  if (!response || response?.errors) return;
+  const output = quickFilter(response);
+  responseCache = { ...responseCache, ...output };
 }
 
-export function getFilteredResponse(response) {
-  if (!response || response?.errors) return responseCache;
-
-  const output = {};
-
-  wl.forEach((attr) => {
-    if (isValidAttribute(response[attr])) {
-      output[attr] = response[attr];
-    }
-  });
-
-  setResponseCache({ ...responseCache, ...output });
+export function getFilteredCachedResponse() {
   return responseCache;
 }
 
-export default function getJoinedOutput(payload, response) {
-  const filteredResponse = getFilteredResponse(response);
-  const filteredPayload = getFilteredPayload(payload);
+export default function getJoinedData() {
+  const filteredResponse = getFilteredCachedResponse();
+  const filteredPayload = getFilteredCachedPayload();
 
-  return deepSpread(filteredResponse, filteredPayload);
+  return { ...filteredResponse, ...filteredPayload };
 }

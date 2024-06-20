@@ -1,16 +1,30 @@
-import getJoinedOutput from '../data-handler.js';
+import { addSpeakerToEvent } from '../../../utils/esp-controller.js';
+import getJoinedData, { getFilteredCachedResponse } from '../data-handler.js';
 
-export function onSubmit(component, props) {
+export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const profileContainer = component.querySelector('profile-container');
   if (profileContainer) {
-    props.payload = { ...props.payload, speakers: profileContainer.getProfiles() };
+    const speakers = profileContainer.getProfiles();
+    console.log(speakers);
+    if (speakers.length === 0) return;
+
+    await speakers.reduce(async (promise, speaker) => {
+      await promise;
+
+      const resp = await addSpeakerToEvent(speaker, getFilteredCachedResponse().eventId);
+      if (!resp || resp.errors) {
+        return;
+      }
+
+      props.response = resp;
+    }, Promise.resolve());
   }
 }
 
-export default function init(component, props) {
-  const eventData = getJoinedOutput(props.payload, props.response);
+export default function init(component) {
+  const eventData = getJoinedData();
   const { speakers } = eventData;
   const profileContainer = component.querySelector('profile-container');
   if (!speakers || !profileContainer) return;

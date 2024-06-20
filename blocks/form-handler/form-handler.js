@@ -12,7 +12,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedOutput, { getFilteredResponse } from './data-handler.js';
+import getJoinedData, { getFilteredCachedResponse, setPayloadCache, setResponseCache } from './data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -183,19 +183,20 @@ function decorateForm(el) {
 async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
 
-  if (props.currentStep === 0 && !getFilteredResponse(props.response).eventId) {
+  if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
     const resp = await createEvent(props.payload);
     props.response = resp;
+    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated'));
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     const resp = await updateEvent(
-      getFilteredResponse(props.response).eventId,
-      getJoinedOutput(props.payload, props.response),
+      getFilteredCachedResponse().eventId,
+      getJoinedData(),
     );
     props.response = resp;
   } else if (options.toPublish) {
     const resp = await publishEvent(
-      getFilteredResponse(props.response).eventId,
-      getJoinedOutput(props.payload, props.response),
+      getFilteredCachedResponse().eventId,
+      getJoinedData(),
     );
     props.response = resp;
   }
@@ -257,7 +258,7 @@ function updateImgDropzoneConfigs(props) {
       const configs = {
         type,
         altText: `Event ${wrappingBlock.classList[1]} image`,
-        targetUrl: `/v1/events/${getFilteredResponse(props.response).eventId}/images`,
+        targetUrl: `/v1/events/${getFilteredCachedResponse().eventId}/images`,
       };
       dz.setAttribute('configs', JSON.stringify(configs));
     }
@@ -419,15 +420,18 @@ function initFormCtas(props) {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
 
-          if (ctaUrl.hash === '#next' && props.currentStep === props.maxStep) {
+          if (ctaUrl.hash === '#next') {
             await saveEvent(props, { toPublish: true });
-            const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-            if (dashboardLink) window.location.assign(dashboardLink.href);
+            if (props.currentStep === props.maxStep) {
+              const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+              if (dashboardLink) window.location.assign(dashboardLink.href);
+            } else {
+              navigateForm(props);
+            }
           } else {
             await saveEvent(props);
           }
 
-          navigateForm(props);
           toggleBtnsSubmittingState(false);
         });
       }
@@ -441,7 +445,7 @@ function initFormCtas(props) {
 
 function updatePreviewCtas(props) {
   const previewBtns = props.el.querySelectorAll('.preview-btns');
-  const filteredResponse = getFilteredResponse(props.response);
+  const filteredResponse = getFilteredCachedResponse();
 
   previewBtns.forEach((a) => {
     const testTime = new URL(a.href).hash === '#pre-event' ? +props.payload.localEndTimeMillis - 10 : +props.payload.localEndTimeMillis + 10;
@@ -473,13 +477,13 @@ function initNavigation(props) {
 
 function updateDashboardLink(props) {
   // FIXME: presuming first link is dashboard link is not good.
-  if (!getFilteredResponse(props.response).eventId) return;
+  if (!getFilteredCachedResponse().eventId) return;
   const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
   if (!dashboardLink) return;
 
   const url = new URL(dashboardLink.href);
-  url.searchParams.set('newEventId', getFilteredResponse(props.response).eventId);
+  url.searchParams.set('newEventId', getFilteredCachedResponse().eventId);
   dashboardLink.href = url.toString();
 }
 
@@ -527,12 +531,16 @@ async function buildECCForm(el) {
       }
 
       if (prop === 'payload') {
+        console.log('payload updated with: ', value);
         updateProfileContainer(props);
+        setPayloadCache(value);
       }
       if (prop === 'response') {
+        console.log('response updated with: ', value);
         updateImgDropzoneConfigs(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
+        setResponseCache(value);
       }
 
       return true;

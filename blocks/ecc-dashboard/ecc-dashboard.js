@@ -3,6 +3,7 @@ import {
 } from '../../utils/esp-controller.js';
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
+import { quickFilter } from '../form-handler/data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -25,6 +26,19 @@ function buildThumbnail(data) {
   return container;
 }
 
+function updateEvent(newPayload, props) {
+  if (!newPayload) return;
+
+  props.data = props.data.map((event) => {
+    console.log(event, newPayload)
+    if (event.eventId === newPayload.eventId) {
+      console.log('updating event', newPayload);
+      return newPayload;
+    }
+    return event;
+  });
+}
+
 function initMoreOptions(props, eventObj, moreOptionsCell) {
   const moreOptionIcon = moreOptionsCell.querySelector('.icon-more-small-list');
 
@@ -41,13 +55,15 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
       const unpub = buildTool(toolBox, 'Unpublish', 'publish-remove');
       unpub.addEventListener('click', async (e) => {
         e.preventDefault();
-        await unpublishEvent(eventObj.eventId, eventObj);
+        const resp = await unpublishEvent(eventObj.eventId, quickFilter(eventObj));
+        updateEvent(resp, props);
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
       pub.addEventListener('click', async (e) => {
         e.preventDefault();
-        await publishEvent(eventObj.eventId, eventObj);
+        const resp = await publishEvent(eventObj.eventId, quickFilter(eventObj));
+        updateEvent(resp, props);
       });
     }
 
@@ -58,13 +74,13 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
     previewPre.href = (() => {
-      const url = new URL(`${window.location.origin}/events/${eventObj.detailPagePath}`);
+      const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
       return url.toString();
     })();
 
     previewPost.href = (() => {
-      const url = new URL(`${window.location.origin}/events/${eventObj.detailPagePath}`);
+      const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
       return url.toString();
     })();
@@ -88,7 +104,7 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
     deleteBtn.addEventListener('click', async () => {
       await deleteEvent(eventObj.eventId);
       const newJson = await getEvents();
-      props.mutableData = newJson.events;
+      props.data = newJson.events;
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
@@ -131,7 +147,7 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(event) {
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${window.location.origin}/events/${event.detailPagePath}` }, event.title);
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${window.location.origin}${event.detailPagePath}` }, event.title);
   return eventTitleTag;
 }
 
@@ -426,10 +442,17 @@ async function buildDashboard(el, config) {
   } else {
     props.data = data;
     props.mutableData = [...data];
+
     const dataHandler = {
       set(target, prop, value) {
         target[prop] = value;
+
+        if (prop === 'data') {
+          props.mutableData = [...value];
+        }
+
         populateTable(target);
+
         return true;
       },
     };

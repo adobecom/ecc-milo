@@ -85,18 +85,14 @@ export class Profile extends LitElement {
         this.profile.id = respJson.speakerId;
         this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
         this.profile.image.url = this.imageDropzone.file.url;
-        this.imageDropzone.dispatchEvent(new CustomEvent('shouldupload', {
-          detail: { targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images` },
-          bubbles: true,
-          composed: true,
-        }));
+        this.imageDropzone.uploadImage(`/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`);
       }
     } catch {
       console.log('error occured while saving profile');
     }
   }
 
-  renderProfileForm(title) {
+  renderProfileForm() {
     const fieldLabelsJSON = {
       ...DEFAULT_FIELD_LABELS,
       ...(this.fieldlabels ?? {}),
@@ -143,7 +139,7 @@ export class Profile extends LitElement {
     <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('firstName', event.detail.value)}></custom-textfield>
     <custom-textfield data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('lastName', event.detail.value)}></custom-textfield>
     <image-dropzone configs=${JSON.stringify({
-    uploadOnEvent: true,
+    uploadOnCommand: true,
     type: 'speaker-photo',
     targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`,
   })} file=${JSON.stringify(this.profile.image)}>

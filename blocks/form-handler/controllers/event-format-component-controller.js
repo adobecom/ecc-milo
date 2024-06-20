@@ -1,5 +1,5 @@
 import { changeInputValue } from '../../../utils/utils.js';
-import getJoinedOutput from '../data-handler.js';
+import getJoinedData from '../data-handler.js';
 
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -57,7 +57,7 @@ function initStepLock(component) {
 }
 
 export default function init(component, props) {
-  const eventData = getJoinedOutput(props.payload, props.response);
+  const eventData = getJoinedData();
   prepopulateTimeZone(component);
   initStepLock(component);
 

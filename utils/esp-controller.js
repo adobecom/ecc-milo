@@ -1,4 +1,4 @@
-import { getFilteredResponse, setResponseCache } from '../blocks/form-handler/data-handler.js';
+import { getFilteredCachedResponse, setResponseCache } from '../blocks/form-handler/data-handler.js';
 
 export const getCaasTags = (() => {
   let cache;
@@ -93,11 +93,13 @@ export async function uploadBinaryFile(file, configs) {
   await waitForAdobeIMS();
 
   const { host } = getESLConfig()[window.miloConfig.env.name];
-  const authToken = window.adobeIMS.getAccessToken().token;
+  const authToken = window.adobeIMS?.getAccessToken()?.token;
   const headers = new Headers();
   headers.append('x-image-alt-text', configs.altText || '');
   headers.append('x-image-kind', configs.type);
   headers.append('Authorization', `Bearer ${authToken}`);
+
+  let respJson = null;
 
   try {
     const response = await fetch(`${host}${configs.targetUrl}`, {
@@ -107,14 +109,15 @@ export async function uploadBinaryFile(file, configs) {
     });
 
     if (response.ok) {
-      const responseData = await response.json();
-      setResponseCache(responseData);
+      respJson = await response.json();
     } else {
       window.lana?.log('Unexpected image upload server response. Reponse:', response.status);
     }
   } catch (error) {
     window.lana?.log('Failed to upload image. Error:', error);
   }
+
+  return respJson;
 }
 
 export async function createVenue(eventId, venueData) {
@@ -137,7 +140,6 @@ export async function createEvent(payload) {
   const resp = await fetch(`${host}/v1/events`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log('Failed to create event. Error:', error));
-  if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: getFilteredResponse(resp).eventId } }));
 
   return resp;
 }
@@ -162,7 +164,19 @@ export async function createPartner(partner, eventId) {
   const resp = await fetch(`${host}/v1/events/${eventId}/partners`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log('Failed to create partner. Error:', error));
-  
+
+  return resp;
+}
+
+export async function addSpeakerToEvent(speakerData, eventId) {
+  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const raw = JSON.stringify(speakerData);
+  const options = await constructRequestOptions('POST', raw);
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/speakers`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to add speaker to event. Error: ${error}`));
+
   return resp;
 }
 

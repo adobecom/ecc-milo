@@ -1,4 +1,4 @@
-import getJoinedOutput from '../data-handler.js';
+import getJoinedData from '../data-handler.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -18,7 +18,7 @@ export function onSubmit(component, props) {
 }
 
 export default async function init(component, props) {
-  const eventData = getJoinedOutput(props.payload, props.response);
+  const eventData = getJoinedData();
   const productGroup = component.querySelector('product-selector-group');
 
   if (eventData.relatedProducts) {

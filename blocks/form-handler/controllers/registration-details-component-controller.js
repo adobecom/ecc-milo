@@ -1,4 +1,4 @@
-import getJoinedOutput from '../data-handler.js';
+import getJoinedData from '../data-handler.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -25,7 +25,7 @@ export function onSubmit(component, props) {
 }
 
 export default function init(component, props) {
-  const eventData = getJoinedOutput(props.payload, props.response);
+  const eventData = getJoinedData();
   if (!eventData.rsvpData) return;
 
   const {
