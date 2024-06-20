@@ -84,7 +84,7 @@ export class Profile extends LitElement {
         this.requestUpdate();
         this.profile.id = respJson.speakerId;
         this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
-        this.profile.image.url = this.imageDropzone.file.url;
+        this.profile.image = { url: this.imageDropzone.file.url };
         this.imageDropzone.uploadImage(`/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`);
       }
     } catch {
