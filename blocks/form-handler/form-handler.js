@@ -240,14 +240,14 @@ function onStepValidate(props) {
   };
 }
 
-function updateImgUploadComponentConfigs() {
+function updateImgUploadComponentConfigs(props) {
   const typeMap = {
     hero: 'event-hero-image',
     card: 'event-card-image',
     venue: 'venue-image',
   };
 
-  const imgUploadComps = document.querySelectorAll('.img-upload-component');
+  const imgUploadComps = props.el.querySelectorAll('.img-upload-component');
 
   imgUploadComps.forEach((b) => {
     const type = typeMap[b.classList[1]];
