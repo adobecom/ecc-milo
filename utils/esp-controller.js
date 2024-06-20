@@ -30,11 +30,18 @@ export const getCaasTags = (() => {
   };
 })();
 
-function getESLConfig() {
+function getAPIConfig() {
   return {
-    local: { host: 'http://localhost:8499' },
-    stage: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
-    prod: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
+    esl: {
+      local: { host: 'http://localhost:8499' },
+      stage: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
+      prod: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
+    },
+    esp: {
+      local: { host: 'http://localhost:8500' },
+      stage: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
+      prod: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
+    },
   };
 }
 
@@ -70,7 +77,7 @@ async function constructRequestOptions(method, body = null) {
 }
 
 export async function uploadImage(file) {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const formData = new FormData();
   formData.append('file', file);
 
@@ -90,7 +97,7 @@ export async function uploadImage(file) {
 export async function uploadBinaryFile(file, configs) {
   await waitForAdobeIMS();
 
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const authToken = window.adobeIMS?.getAccessToken()?.token;
   const headers = new Headers();
   headers.append('x-image-alt-text', configs.altText || '');
@@ -119,7 +126,7 @@ export async function uploadBinaryFile(file, configs) {
 }
 
 export async function createVenue(eventId, venueData) {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const raw = JSON.stringify(venueData);
   const options = await constructRequestOptions('POST', raw);
 
@@ -131,7 +138,7 @@ export async function createVenue(eventId, venueData) {
 }
 
 export async function createEvent(payload) {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const raw = JSON.stringify(payload);
   const options = await constructRequestOptions('POST', raw);
 
@@ -143,7 +150,7 @@ export async function createEvent(payload) {
 }
 
 export async function createSpeaker(profile, seriesId) {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const raw = JSON.stringify({ ...profile, seriesId });
   const options = await constructRequestOptions('POST', raw);
 
@@ -155,7 +162,7 @@ export async function createSpeaker(profile, seriesId) {
 }
 
 export async function createPartner(partner, eventId) {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const raw = JSON.stringify(partner);
   const options = await constructRequestOptions('POST', raw);
 
@@ -167,7 +174,7 @@ export async function createPartner(partner, eventId) {
 }
 
 export async function addSpeakerToEvent(speakerData, eventId) {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const raw = JSON.stringify(speakerData);
   const options = await constructRequestOptions('POST', raw);
 
@@ -179,7 +186,7 @@ export async function addSpeakerToEvent(speakerData, eventId) {
 }
 
 export async function updateSpeaker(profile, seriesId, speakerId) {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const raw = JSON.stringify({ ...profile, seriesId });
   const options = await constructRequestOptions('PUT', raw);
 
@@ -191,7 +198,7 @@ export async function updateSpeaker(profile, seriesId, speakerId) {
 }
 
 export async function updateEvent(eventId, payload) {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const raw = JSON.stringify(payload);
   const options = await constructRequestOptions('PUT', raw);
 
@@ -203,7 +210,7 @@ export async function updateEvent(eventId, payload) {
 }
 
 export async function publishEvent(eventId, payload) {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const raw = JSON.stringify({ ...payload, published: true });
   const options = await constructRequestOptions('PUT', raw);
 
@@ -214,7 +221,7 @@ export async function publishEvent(eventId, payload) {
 }
 
 export async function unpublishEvent(eventId, payload) {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const raw = JSON.stringify({ ...payload, published: false });
   const options = await constructRequestOptions('PUT', raw);
 
@@ -225,7 +232,7 @@ export async function unpublishEvent(eventId, payload) {
 }
 
 export async function deleteEvent(eventId) {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const options = await constructRequestOptions('DELETE');
 
   const resp = await fetch(`${host}/v1/events/${eventId}`, options)
@@ -235,7 +242,7 @@ export async function deleteEvent(eventId) {
 }
 
 export async function getEvents() {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
 
   const resp = await fetch(`${host}/v1/events`, options)
@@ -245,7 +252,7 @@ export async function getEvents() {
 }
 
 export async function getEvent(eventId) {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
 
   const resp = await fetch(`${host}/v1/events/${eventId}`, options)
@@ -255,7 +262,7 @@ export async function getEvent(eventId) {
 }
 
 export async function getVenue(eventId) {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
 
   const resp = await fetch(`${host}/v1/events/${eventId}/venues`, options)
@@ -278,7 +285,7 @@ export async function getClouds() {
 }
 
 export async function getSeries() {
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
   const resp = await fetch(`${host}/v1/series`, options)
     .then((res) => res.json())
@@ -295,7 +302,7 @@ export async function getSeries() {
 export async function createAttendee(eventId, attendeeData) {
   if (!eventId || !attendeeData) return false;
 
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const raw = JSON.stringify(attendeeData);
   const options = await constructRequestOptions('POST', raw);
 
@@ -308,7 +315,7 @@ export async function createAttendee(eventId, attendeeData) {
 export async function updateAttendee(eventId, attendeeId, attendeeData) {
   if (!eventId || !attendeeData) return false;
 
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const raw = JSON.stringify(attendeeData);
   const options = await constructRequestOptions('PUT', raw);
 
@@ -321,7 +328,7 @@ export async function updateAttendee(eventId, attendeeId, attendeeData) {
 export async function deleteAttendee(eventId, attendeeId) {
   if (!eventId || !attendeeId) return false;
 
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const options = await constructRequestOptions('DELETE');
 
   const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options)
@@ -333,7 +340,7 @@ export async function deleteAttendee(eventId, attendeeId) {
 export async function getAttendees(eventId) {
   if (!eventId) return false;
 
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
 
   const resp = await fetch(`${host}/v1/events/${eventId}/attendees`, options)
@@ -345,7 +352,7 @@ export async function getAttendees(eventId) {
 export async function getAttendee(eventId, attendeeId) {
   if (!eventId || !attendeeId) return false;
 
-  const { host } = getESLConfig()[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
   const options = await constructRequestOptions('GET');
 
   const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options)
