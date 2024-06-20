@@ -232,7 +232,7 @@ export async function unpublishEvent(eventId, payload) {
 }
 
 export async function deleteEvent(eventId) {
-  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
+  const { host } = getAPIConfig().esl[window.miloConfig.env.name];
   const options = await constructRequestOptions('DELETE');
 
   const resp = await fetch(`${host}/v1/events/${eventId}`, options)
