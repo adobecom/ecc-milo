@@ -83,6 +83,7 @@ export class Profile extends LitElement {
         this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
         this.profile.image = imageDropzone?.file ? { url: imageDropzone?.file?.url } : null;
         await imageDropzone.uploadImage(`/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`);
+        this.requestUpdate();
       }
     } catch {
       window.lana?.log('error occured while saving profile');
