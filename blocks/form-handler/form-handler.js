@@ -447,8 +447,6 @@ function updatePreviewCtas(props) {
   const previewBtns = props.el.querySelectorAll('.preview-btns');
   const filteredResponse = getFilteredCachedResponse();
 
-  console.log(filteredResponse);
-
   previewBtns.forEach((a) => {
     const testTime = a.classList.contains('pre-event') ? +getJoinedData().localEndTimeMillis - 10 : +getJoinedData().localEndTimeMillis + 10;
     if (filteredResponse.detailPagePath) {
@@ -534,15 +532,15 @@ async function buildECCForm(el) {
 
       if (prop === 'payload') {
         console.log('payload updated with: ', value);
-        updateProfileContainer(props);
         setPayloadCache(value);
+        updateProfileContainer(props);
       }
       if (prop === 'response') {
         console.log('response updated with: ', value);
+        setResponseCache(value);
         updateImgDropzoneConfigs(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
-        setResponseCache(value);
       }
 
       return true;
