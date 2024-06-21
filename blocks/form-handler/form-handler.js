@@ -88,7 +88,7 @@ async function initComponents(props) {
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
 
-  if (eventId) props.response = { ...props.responseawait, ...getEvent(eventId) };
+  if (eventId) props.response = { ...props.response, ...await getEvent(eventId) };
 
   VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
