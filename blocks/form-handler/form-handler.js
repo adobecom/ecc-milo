@@ -388,7 +388,7 @@ function initFormCtas(props) {
       const ctaUrl = new URL(cta.href);
 
       if (['#pre-event', '#post-event'].includes(ctaUrl.hash)) {
-        cta.classList.add('fill', 'preview-btns', 'preview-not-ready');
+        cta.classList.add('fill', 'preview-btns', 'preview-not-ready', ctaUrl.hash.replace('#', ''));
         cta.addEventListener('click', async (e) => {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
@@ -448,7 +448,7 @@ function updatePreviewCtas(props) {
   const filteredResponse = getFilteredCachedResponse();
 
   previewBtns.forEach((a) => {
-    const testTime = new URL(a.href).hash === '#pre-event' ? +props.payload.localEndTimeMillis - 10 : +props.payload.localEndTimeMillis + 10;
+    const testTime = a.classList.contains('pre-event') ? +props.payload.localEndTimeMillis - 10 : +props.payload.localEndTimeMillis + 10;
     if (filteredResponse.detailPagePath) {
       a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
       a.classList.remove('preview-not-ready');
