@@ -91,7 +91,7 @@ function initAutocomplete(el) {
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const { eventId } = getFilteredCachedResponse();
+  const { eventId, venue } = getFilteredCachedResponse();
 
   const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible').checked;
   const venueName = component.querySelector('#venue-info-venue-name').value;
@@ -129,11 +129,11 @@ export async function onSubmit(component, props) {
     document.removeEventListener('eventcreated', onEventCreate);
   };
 
-  if (eventId) {
+  if (eventId && !venue) {
     const resp = await createVenue(eventId, venueData);
     props.response = resp;
     props.payload = { ...props.payload, showVenuePostEvent };
-  } else {
+  } else if (!eventId) {
     document.addEventListener('eventcreated', onEventCreate);
   }
 }
