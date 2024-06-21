@@ -1,7 +1,6 @@
 /* eslint-disable no-use-before-define */
 import { getLibs } from '../../../scripts/utils.js';
 import { changeInputValue } from '../../../utils/utils.js';
-import getJoinedData from '../data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -332,7 +331,7 @@ export function onSubmit(component, props) {
 }
 
 export default function init(component, props) {
-  const eventData = getJoinedData();
+  const eventData = props.response;
   initCalendar(component);
 
   const {

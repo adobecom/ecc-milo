@@ -1,5 +1,5 @@
 import { addSpeakerToEvent } from '../../../utils/esp-controller.js';
-import getJoinedData, { getFilteredCachedResponse } from '../data-handler.js';
+import { getFilteredCachedResponse } from '../data-handler.js';
 
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -7,7 +7,6 @@ export async function onSubmit(component, props) {
   const profileContainer = component.querySelector('profile-container');
   if (profileContainer) {
     const speakers = profileContainer.getProfiles();
-    console.log(speakers);
     if (speakers.length === 0) return;
 
     await speakers.reduce(async (promise, speaker) => {
@@ -18,13 +17,13 @@ export async function onSubmit(component, props) {
         return;
       }
 
-      props.response = resp;
+      props.response = { ...props.response, ...resp };
     }, Promise.resolve());
   }
 }
 
-export default function init(component) {
-  const eventData = getJoinedData();
+export default function init(component, props) {
+  const eventData = props.response;
   const { speakers } = eventData;
   const profileContainer = component.querySelector('profile-container');
   if (!speakers || !profileContainer) return;

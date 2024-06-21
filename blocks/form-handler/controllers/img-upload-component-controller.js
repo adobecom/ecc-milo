@@ -1,5 +1,3 @@
-import getJoinedData from '../data-handler.js';
-
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -19,7 +17,7 @@ export default function init(component, props) {
     dz.props = props;
   });
 
-  const eventData = getJoinedData();
+  const eventData = props.response;
   if (component.classList.contains('venue')) {
     const venueImgVisibleCheck = component.querySelector('#checkbox-venue-image-visible');
 

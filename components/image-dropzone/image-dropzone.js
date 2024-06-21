@@ -41,7 +41,7 @@ export class ImageDropzone extends LitElement {
     this.configs.targetUrl = url;
     const resp = await uploadBinaryFile(this.file, this.configs);
 
-    if (this.props) this.props.response = resp;
+    if (this.props) this.props.response = { ...props.response, ...resp };
     this.requestUpdate();
   }
 

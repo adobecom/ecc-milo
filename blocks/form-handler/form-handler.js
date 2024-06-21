@@ -88,7 +88,7 @@ async function initComponents(props) {
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
 
-  if (eventId) props.response = await getEvent(eventId);
+  if (eventId) props.response = { ...props.responseawait, ...getEvent(eventId) };
 
   VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
@@ -185,20 +185,20 @@ async function saveEvent(props, options = { toPublish: false }) {
 
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
     const resp = await createEvent(props.payload);
-    props.response = resp;
+    props.response = { ...props.response, ...resp };
     if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated'));
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     const resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
-    props.response = resp;
+    props.response = { ...props.response, ...resp };
   } else if (options.toPublish) {
     const resp = await publishEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
-    props.response = resp;
+    props.response = { ...props.response, ...resp };
   }
 }
 
@@ -447,8 +447,10 @@ function updatePreviewCtas(props) {
   const previewBtns = props.el.querySelectorAll('.preview-btns');
   const filteredResponse = getFilteredCachedResponse();
 
+  console.log(filteredResponse);
+
   previewBtns.forEach((a) => {
-    const testTime = a.classList.contains('pre-event') ? +props.payload.localEndTimeMillis - 10 : +props.payload.localEndTimeMillis + 10;
+    const testTime = a.classList.contains('pre-event') ? +getJoinedData().localEndTimeMillis - 10 : +getJoinedData().localEndTimeMillis + 10;
     if (filteredResponse.detailPagePath) {
       a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
       a.classList.remove('preview-not-ready');

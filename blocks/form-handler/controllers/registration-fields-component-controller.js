@@ -1,5 +1,3 @@
-import getJoinedData from '../data-handler.js';
-
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -12,7 +10,7 @@ export function onSubmit(component, props) {
 }
 
 export default function init(component, props) {
-  const eventData = getJoinedData();
+  const eventData = props.response;
   const appearChecks = component.querySelectorAll('sp-checkbox.check-appear');
   const requireChecks = component.querySelectorAll('sp-checkbox.check-require');
 
