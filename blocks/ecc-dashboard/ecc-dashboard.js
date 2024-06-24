@@ -7,6 +7,47 @@ import { quickFilter } from '../form-handler/data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
+export function cloneFilter(obj) {
+  const wl = [
+    'agenda',
+    'topics',
+    'eventType',
+    'cloudType',
+    'seriesId',
+    'rsvpRequired',
+    'templateId',
+    'communityTopicUrl',
+    'title',
+    'description',
+    'localStartDate',
+    'localEndDate',
+    'localStartTime',
+    'localEndTime',
+    'localStartTimeMillis',
+    'localEndTimeMillis',
+    'timezone',
+    'partners',
+    'showAgendaPostEvent',
+    'showVenuePostEvent',
+    'attendeeLimit',
+    'rsvpDescription',
+    'allowWaitlisting',
+    'hostEmail',
+    'rsvpFormFields',
+    'relatedProducts',
+  ];
+
+  const output = {};
+
+  wl.forEach((attr) => {
+    if (attr !== undefined && attr !== null) {
+      output[attr] = obj[attr];
+    }
+  });
+
+  return output;
+}
+
 function toClassName(name) {
   return name && typeof name === 'string'
     ? name.toLowerCase().replace(/[^0-9a-z]/gi, '-')
@@ -128,10 +169,9 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
     // clone
     clone.addEventListener('click', async () => {
       const payload = { ...eventObj };
-      delete payload.eventId;
       payload.title = `${eventObj.title} - copy`;
 
-      const newEventJSON = await createEvent(quickFilter(payload));
+      const newEventJSON = await createEvent(cloneFilter(payload));
       const reloadUrl = new URL(window.location.href);
       reloadUrl.searchParams.set('clonedEventId', newEventJSON.eventId);
       window.location.assign(reloadUrl.href);
