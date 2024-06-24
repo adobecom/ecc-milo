@@ -2,15 +2,13 @@
 /* eslint-disable class-methods-use-this */
 import { getLibs } from '../../scripts/utils.js';
 import { style } from './image-dropzone.css.js';
-import { uploadBinaryFile } from '../../utils/esp-controller.js';
 
 const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 export class ImageDropzone extends LitElement {
   static properties = {
     file: { type: Object, reflect: true },
-    configs: { type: Object },
-    props: { type: Proxy },
+    handleImage: { type: Function },
   };
 
   static styles = style;
@@ -19,12 +17,7 @@ export class ImageDropzone extends LitElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.file = null;
-    this.configs = {
-      altText: null,
-      targetUrl: null,
-      type: null,
-      uploadOnCommand: false,
-    };
+    this.handleImage = () => {};
   }
 
   setFile(files) {
@@ -45,22 +38,26 @@ export class ImageDropzone extends LitElement {
     this.requestUpdate();
   }
 
-  handleImageDrop(e) {
+  getFile() {
+    return this.file;
+  }
+
+  async handleImageDrop(e) {
     e.preventDefault();
     const { files } = e.dataTransfer;
 
     if (files.length > 0) {
       this.setFile(files);
-      if (!this.configs.uploadOnCommand) this.uploadImage();
+      await this.handleImage();
     }
   }
 
-  handleImageUpload(e) {
+  async onImageChange(e) {
     const { files } = e.currentTarget;
 
     if (files.length > 0) {
       this.setFile(files);
-      if (!this.configs.uploadOnCommand) this.uploadImage();
+      await this.handleImage();
     }
   }
 
@@ -87,7 +84,7 @@ export class ImageDropzone extends LitElement {
       <img src="/icons/delete.svg" alt="delete icon" class="icon icon-delete" @click=${this.deleteImage}>
     </div>`
     : html`<label class="img-file-input-label">
-      <input type="file" class="img-file-input" @change=${this.handleImageUpload} @dragover=${this.handleDragover} @dragleave=${this.handleDragleave} @drop=${this.handleImageDrop}>
+      <input type="file" class="img-file-input" @change=${this.onImageChange} @dragover=${this.handleDragover} @dragleave=${this.handleDragleave} @drop=${this.handleImageDrop}>
       <img src="/icons/image-add.svg" alt="add image icon" class="icon icon-image-add"}>
       <slot name="img-label"></slot>
     </label>`}

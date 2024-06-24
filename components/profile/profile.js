@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 import { getLibs } from '../../scripts/utils.js';
 import { style } from './profile.css.js';
-import { createSpeaker } from '../../utils/esp-controller.js';
+import { createSpeaker, uploadBinaryFile } from '../../utils/esp-controller.js';
 import { getServiceName } from '../../utils/utils.js';
 import { icons } from '../../icons/icons.svg.js';
 
@@ -86,7 +86,16 @@ export class Profile extends LitElement {
         this.profile.id = respJson.speakerId;
         this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
         this.profile.image = imageDropzone?.file ? { url: imageDropzone?.file?.url } : null;
-        await imageDropzone.uploadImage(`/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`);
+        const file = imageDropzone?.getFile();
+
+        if (file && (file instanceof File)) {
+          await uploadBinaryFile(file, {
+            targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`,
+            type: 'speaker-photo',
+            altText: `${this.profile.firstName} ${this.profile.lastName} photo`,
+          });
+        }
+
         this.requestUpdate();
       }
     } catch {
