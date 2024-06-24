@@ -30,11 +30,11 @@ export function readBlockConfig(block) {
         } else if (valueEl.querySelector('p')) {
           const pArr = [...valueEl.querySelectorAll('p')];
           if (pArr.length === 1) {
-            config[name] = pArr[0].textContent;
+            config[name] = pArr[0].innerHTML;
           } else {
-            config[name] = pArr.map((p) => p.textContent);
+            config[name] = pArr.map((p) => p.innerHTML);
           }
-        } else config[name] = row.children[1].textContent;
+        } else config[name] = row.children[1].innerHTML;
       }
     }
 
@@ -241,14 +241,14 @@ async function populateRow(props, config, index) {
   initMoreOptions(props, config, event, moreOptionsCell);
 
   if (event.eventId === sp.get('newEventId')) {
-    const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('\\n') : config['new-event-toast-msg'];
+    const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('\n') : config['new-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
   }
 
   if (event.eventId === sp.get('clonedEventId')) {
-    const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('\\n') : config['clone-event-toast-msg'];
+    const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('\n') : config['clone-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
