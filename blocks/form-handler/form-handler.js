@@ -445,7 +445,7 @@ function updatePreviewCtas(props) {
   const filteredResponse = getFilteredCachedResponse();
 
   previewBtns.forEach((a) => {
-    const testTime = a.classList.contains('pre-event') ? +getJoinedData().localEndTimeMillis - 10 : +getJoinedData().localEndTimeMillis + 10;
+    const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
     if (filteredResponse.detailPagePath) {
       a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
       a.classList.remove('preview-not-ready');
