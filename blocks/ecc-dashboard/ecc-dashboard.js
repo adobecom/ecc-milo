@@ -26,17 +26,17 @@ function buildThumbnail(data) {
   return container;
 }
 
-function updateEvent(newPayload, props) {
+function updateDashboardData(newPayload, props) {
   if (!newPayload) return;
 
   props.data = props.data.map((event) => {
-    console.log(event, newPayload)
     if (event.eventId === newPayload.eventId) {
-      console.log('updating event', newPayload);
       return newPayload;
     }
     return event;
   });
+
+  props.mutableData = props.data;
 }
 
 function initMoreOptions(props, eventObj, moreOptionsCell) {
@@ -56,14 +56,14 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
       unpub.addEventListener('click', async (e) => {
         e.preventDefault();
         const resp = await unpublishEvent(eventObj.eventId, quickFilter(eventObj));
-        updateEvent(resp, props);
+        updateDashboardData(resp, props);
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
       pub.addEventListener('click', async (e) => {
         e.preventDefault();
         const resp = await publishEvent(eventObj.eventId, quickFilter(eventObj));
-        updateEvent(resp, props);
+        updateDashboardData(resp, props);
       });
     }
 
@@ -444,14 +444,10 @@ async function buildDashboard(el, config) {
     props.mutableData = [...data];
 
     const dataHandler = {
-      set(target, prop, value) {
+      set(target, prop, value, receiver) {
         target[prop] = value;
 
-        if (prop === 'data') {
-          props.mutableData = [...value];
-        }
-
-        populateTable(target);
+        populateTable(receiver);
 
         return true;
       },
