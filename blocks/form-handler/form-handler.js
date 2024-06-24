@@ -505,7 +505,7 @@ async function buildECCForm(el) {
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
-    response: {},
+    eventDataResp: {},
   };
 
   const dataHandler = {
@@ -532,7 +532,7 @@ async function buildECCForm(el) {
         setPayloadCache(value);
         updateProfileContainer(props);
       }
-      if (prop === 'response') {
+      if (prop === 'eventDataResp') {
         console.log('response updated with: ', value);
         setResponseCache(value);
         updateImgUploadComponentConfigs(props);
