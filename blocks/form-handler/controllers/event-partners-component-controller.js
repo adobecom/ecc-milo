@@ -7,7 +7,7 @@ export function onSubmit(component, props) {
 }
 
 export default async function init(component, props) {
-  const eventData = props.response;
+  const eventData = props.eventDataResp;
   const partnersGroup = component.querySelector('partner-selector-group');
 
   if (eventData.partners) {

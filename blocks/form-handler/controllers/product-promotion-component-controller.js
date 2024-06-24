@@ -16,7 +16,7 @@ export function onSubmit(component, props) {
 }
 
 export default async function init(component, props) {
-  const eventData = props.response;
+  const eventData = props.eventDataResp;
   const productGroup = component.querySelector('product-selector-group');
 
   if (eventData.relatedProducts) {

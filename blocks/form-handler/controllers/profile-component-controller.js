@@ -17,13 +17,13 @@ export async function onSubmit(component, props) {
         return;
       }
 
-      props.response = { ...props.response, ...resp };
+      props.eventDataResp = { ...props.eventDataResp, ...resp };
     }, Promise.resolve());
   }
 }
 
 export default function init(component, props) {
-  const eventData = props.response;
+  const eventData = props.eventDataResp;
   const { speakers } = eventData;
   const profileContainer = component.querySelector('profile-container');
   if (!speakers || !profileContainer) return;

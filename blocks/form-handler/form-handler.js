@@ -88,7 +88,7 @@ async function initComponents(props) {
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
 
-  if (eventId) props.response = { ...props.response, ...await getEvent(eventId) };
+  if (eventId) props.eventDataResp = { ...props.eventDataResp, ...await getEvent(eventId) };
 
   VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
@@ -185,20 +185,20 @@ async function saveEvent(props, options = { toPublish: false }) {
 
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
     const resp = await createEvent(props.payload);
-    props.response = { ...props.response, ...resp };
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
     if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated'));
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     const resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
-    props.response = { ...props.response, ...resp };
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
   } else if (options.toPublish) {
     const resp = await publishEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
-    props.response = { ...props.response, ...resp };
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
   }
 }
 

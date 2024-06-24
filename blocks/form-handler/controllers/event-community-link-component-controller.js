@@ -15,7 +15,7 @@ export function onSubmit(component, props) {
 }
 
 export default function init(component, props) {
-  const eventData = props.response;
+  const eventData = props.eventDataResp;
   const checkbox = component.querySelector('#checkbox-community');
   const input = component.querySelector('#community-url-details');
 

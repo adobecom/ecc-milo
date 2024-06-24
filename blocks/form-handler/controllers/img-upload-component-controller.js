@@ -26,7 +26,7 @@ export default function init(component, props) {
     };
   });
 
-  const eventData = props.response;
+  const eventData = props.eventDataResp;
   if (component.classList.contains('venue')) {
     const venueImgVisibleCheck = component.querySelector('#checkbox-venue-image-visible');
 

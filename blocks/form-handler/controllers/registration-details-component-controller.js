@@ -23,7 +23,7 @@ export function onSubmit(component, props) {
 }
 
 export default function init(component, props) {
-  const eventData = props.response;
+  const eventData = props.eventDataResp;
   if (!eventData.rsvpData) return;
 
   const {

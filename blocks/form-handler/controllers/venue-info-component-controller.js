@@ -91,7 +91,7 @@ function initAutocomplete(el) {
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const { eventId, venue } = props.response;
+  const { eventId, venue } = props.eventDataResp;
 
   const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible').checked;
   const venueName = component.querySelector('#venue-info-venue-name').value;
@@ -124,14 +124,14 @@ export async function onSubmit(component, props) {
 
   const onEventCreate = async () => {
     const resp = await createVenue(getFilteredCachedResponse().eventId, venueData);
-    props.response = { ...props.response, ...resp };
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
     props.payload = { ...props.payload, showVenuePostEvent };
     document.removeEventListener('eventcreated', onEventCreate);
   };
 
   if (eventId && !venue) {
     const resp = await createVenue(eventId, venueData);
-    props.response = { ...props.response, ...resp };
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
     props.payload = { ...props.payload, showVenuePostEvent };
   } else if (!eventId) {
     document.addEventListener('eventcreated', onEventCreate);
@@ -139,7 +139,7 @@ export async function onSubmit(component, props) {
 }
 
 export default async function init(component, props) {
-  const eventData = props.response;
+  const eventData = props.eventDataResp;
 
   await loadGoogleMapsAPI(() => initAutocomplete(component));
 
