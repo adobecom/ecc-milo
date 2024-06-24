@@ -240,28 +240,25 @@ function onStepValidate(props) {
   };
 }
 
-function updateImgDropzoneConfigs(props) {
+function updateImgUploadComponentConfigs(props) {
   const typeMap = {
     hero: 'event-hero-image',
     card: 'event-card-image',
     venue: 'venue-image',
   };
 
-  const dropzones = document.querySelectorAll('image-dropzone');
+  const imgUploadComps = props.el.querySelectorAll('.img-upload-component');
 
-  dropzones.forEach((dz) => {
-    const wrappingBlock = dz.closest('.form-component');
+  imgUploadComps.forEach((b) => {
+    const type = typeMap[b.classList[1]];
 
-    if (wrappingBlock.classList.contains('img-upload-component')) {
-      const type = typeMap[wrappingBlock.classList[1]];
+    const configs = {
+      type,
+      altText: `Event ${b.classList[1]} image`,
+      targetUrl: `/v1/events/${getFilteredCachedResponse().eventId}/images`,
+    };
 
-      const configs = {
-        type,
-        altText: `Event ${wrappingBlock.classList[1]} image`,
-        targetUrl: `/v1/events/${getFilteredCachedResponse().eventId}/images`,
-      };
-      dz.setAttribute('configs', JSON.stringify(configs));
-    }
+    b.dataset.configs = JSON.stringify(configs);
   });
 }
 
@@ -537,7 +534,7 @@ async function buildECCForm(el) {
       }
       if (prop === 'response') {
         console.log('response updated with: ', value);
-        updateImgDropzoneConfigs(props);
+        updateImgUploadComponentConfigs(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
         setResponseCache(value);

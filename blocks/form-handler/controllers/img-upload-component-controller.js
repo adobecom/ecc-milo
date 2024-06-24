@@ -1,4 +1,5 @@
 import getJoinedData from '../data-handler.js';
+import { uploadBinaryFile } from '../../../utils/esp-controller.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -16,7 +17,14 @@ export default function init(component, props) {
   const dropzones = component.querySelectorAll('image-dropzone');
 
   dropzones.forEach((dz) => {
-    dz.props = props;
+    dz.handleImage = async () => {
+      const file = dz.getFile();
+
+      if (!file || !(file instanceof File)) return;
+      const resp = await uploadBinaryFile(file, JSON.parse(component.dataset.configs));
+
+      if (resp) props.response = resp;
+    };
   });
 
   const eventData = getJoinedData();
