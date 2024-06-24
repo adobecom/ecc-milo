@@ -7,6 +7,82 @@ import { quickFilter } from '../form-handler/data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
+export function cloneFilter(obj) {
+  const wl = [
+    'agenda',
+    'topics',
+    'eventType',
+    'cloudType',
+    'seriesId',
+    'rsvpRequired',
+    'templateId',
+    'communityTopicUrl',
+    'title',
+    'description',
+    'localStartDate',
+    'localEndDate',
+    'localStartTime',
+    'localEndTime',
+    'localStartTimeMillis',
+    'localEndTimeMillis',
+    'timezone',
+    'partners',
+    'showAgendaPostEvent',
+    'showVenuePostEvent',
+    'attendeeLimit',
+    'rsvpDescription',
+    'allowWaitlisting',
+    'hostEmail',
+    'rsvpFormFields',
+    'relatedProducts',
+  ];
+
+  const output = {};
+
+  wl.forEach((attr) => {
+    if (attr !== undefined && attr !== null) {
+      output[attr] = obj[attr];
+    }
+  });
+
+  return output;
+}
+
+function toClassName(name) {
+  return name && typeof name === 'string'
+    ? name.toLowerCase().replace(/[^0-9a-z]/gi, '-')
+    : '';
+}
+
+export function readBlockConfig(block) {
+  return [...block.querySelectorAll(':scope>div')].reduce((config, row) => {
+    if (row.children) {
+      const cols = [...row.children];
+      if (cols[1]) {
+        const valueEl = cols[1];
+        const name = toClassName(cols[0].textContent);
+        if (valueEl.querySelector('a')) {
+          const aArr = [...valueEl.querySelectorAll('a')];
+          if (aArr.length === 1) {
+            config[name] = aArr[0].href;
+          } else {
+            config[name] = aArr.map((a) => a.href);
+          }
+        } else if (valueEl.querySelector('p')) {
+          const pArr = [...valueEl.querySelectorAll('p')];
+          if (pArr.length === 1) {
+            config[name] = pArr[0].innerHTML;
+          } else {
+            config[name] = pArr.map((p) => p.innerHTML);
+          }
+        } else config[name] = row.children[1].innerHTML;
+      }
+    }
+
+    return config;
+  }, {});
+}
+
 function formatLocaleDate(string) {
   const options = {
     weekday: 'long',
@@ -39,7 +115,7 @@ function updateDashboardData(newPayload, props) {
   props.mutableData = props.data;
 }
 
-function initMoreOptions(props, eventObj, moreOptionsCell) {
+function initMoreOptions(props, config, eventObj, moreOptionsCell) {
   const moreOptionIcon = moreOptionsCell.querySelector('.icon-more-small-list');
 
   const buildTool = (parent, text, icon) => {
@@ -86,18 +162,18 @@ function initMoreOptions(props, eventObj, moreOptionsCell) {
     })();
 
     // edit
-    const url = new URL(`${window.location.origin}${props.createFormUrl}`);
+    const url = new URL(`${window.location.origin}${config['create-form-url']}`);
     url.searchParams.set('eventId', eventObj.eventId);
     edit.href = url.toString();
 
     // clone
     clone.addEventListener('click', async () => {
       const payload = { ...eventObj };
-      delete payload.eventId;
+      payload.title = `${eventObj.title} - copy`;
 
-      const newEventJSON = await createEvent(payload);
+      const newEventJSON = await createEvent(cloneFilter(payload));
       const reloadUrl = new URL(window.location.href);
-      reloadUrl.searchParams.set('newEventId', newEventJSON.eventId);
+      reloadUrl.searchParams.set('clonedEventId', newEventJSON.eventId);
       window.location.assign(reloadUrl.href);
     });
 
@@ -161,10 +237,23 @@ async function buildVenueTag(eventObj) {
   return venueTag;
 }
 
-async function populateRow(props, index) {
+function highlightRow(row) {
+  row.classList.add('highlight');
+
+  setTimeout(() => {
+    row.classList.remove('highlight');
+  }, 1000);
+}
+
+function buildToastMsg(eventTitle, msgTemplate) {
+  return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
+}
+
+async function populateRow(props, config, index) {
   const event = props.mutableData[index];
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   const toastArea = props.el.querySelector('.toast-area');
+  const sp = new URLSearchParams(window.location.search);
 
   // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'event-row' }, '', { parent: tBody });
@@ -190,19 +279,24 @@ async function populateRow(props, index) {
     moreOptionsCell,
   );
 
-  initMoreOptions(props, event, moreOptionsCell);
+  initMoreOptions(props, config, event, moreOptionsCell);
 
-  if (event.eventId === new URLSearchParams(window.location.search).get('newEventId')) {
-    createTag('sp-toast', { open: true, variant: 'positive' }, `New event <strong>${event.title}</strong> created`, { parent: toastArea });
-    row.classList.add('highlight');
+  if (event.eventId === sp.get('newEventId')) {
+    const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
+    const toastMsg = buildToastMsg(event.title, msgTemplate);
+    createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
+    highlightRow(row);
+  }
 
-    setTimeout(() => {
-      row.classList.remove('highlight');
-    }, 1000);
+  if (event.eventId === sp.get('clonedEventId')) {
+    const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
+    const toastMsg = buildToastMsg(event.title, msgTemplate);
+    createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
+    highlightRow(row);
   }
 }
 
-function populateTable(props) {
+function populateTable(props, config) {
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' });
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   props.el.append(spTheme);
@@ -211,7 +305,7 @@ function populateTable(props) {
   const endOfPages = Math.min(props.currentPage + 10, props.mutableData.length);
 
   for (let i = props.currentPage - 1; i < endOfPages; i += 1) {
-    populateRow(props, i);
+    populateRow(props, config, i);
   }
 }
 
@@ -313,7 +407,7 @@ function decoratePagination(props) {
   updatePaginationControl(paginationContainer, props.currentPage, totalPages);
 }
 
-function buildDashboardHeader(props) {
+function buildDashboardHeader(props, config) {
   const dashboardHeader = createTag('div', { class: 'dashboard-header' });
   const textContainer = createTag('div', { class: 'dashboard-header-text' });
   const actionsContainer = createTag('div', { class: 'dashboard-actions-container' });
@@ -322,14 +416,14 @@ function buildDashboardHeader(props) {
   createTag('p', { class: 'dashboard-header-events-count' }, `(${props.data.length} events)`, { parent: textContainer });
 
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: actionsContainer });
-  createTag('a', { class: 'con-button blue', href: props.createFormUrl }, 'Create new event', { parent: actionsContainer });
+  createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
   searchInput.addEventListener('input', () => filterData(props, searchInput.value));
 
   dashboardHeader.append(textContainer, actionsContainer);
   props.el.prepend(dashboardHeader);
 }
 
-function buildDashboardTable(props) {
+function buildDashboardTable(props, config) {
   const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
   const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
   const thead = createTag('thead', {}, '', { parent: table });
@@ -369,7 +463,7 @@ function buildDashboardTable(props) {
   });
 
   decoratePagination(props);
-  populateTable(props);
+  populateTable(props, config);
 }
 
 async function getEventsArray() {
@@ -385,36 +479,14 @@ async function getEventsArray() {
   return json.events;
 }
 
-async function getDashboardConfig(el) {
-  const configLinkATag = el.querySelector('a');
-
-  if (!configLinkATag) return {};
-
-  const configLink = configLinkATag.href;
-  const config = {};
-
-  const resp = await fetch(configLink);
-  if (resp.ok) {
-    const json = await resp.json();
-
-    json.data.forEach((placeholder) => {
-      if (placeholder.key) config[placeholder.key] = placeholder.val;
-    });
-  }
-
-  configLinkATag.remove();
-
-  return config;
-}
-
-function buildNoEventScreen(el, props) {
+function buildNoEventScreen(el, config) {
   el.classList.add('no-events');
 
   const h1 = createTag('h1', {}, 'All Events');
   const area = createTag('div', { class: 'no-events-area' });
-  const noEventHeading = createTag('h2', {}, 'You have no events');
-  const noEventDescription = createTag('p', {}, 'Lorem ipsum dolor sit amet consectecteur, adipscing...');
-  const cta = createTag('a', { class: 'con-button blue', href: props.createFormUrl }, 'Create new event');
+  const noEventHeading = createTag('h2', {}, config['no-event-heading']);
+  const noEventDescription = createTag('p', {}, config['no-event-description']);
+  const cta = createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text']);
 
   el.append(h1, area);
   area.append(getIcon('empty-dashboard'), noEventHeading, noEventDescription, cta);
@@ -432,13 +504,12 @@ async function buildDashboard(el, config) {
     el,
     currentPage: 1,
     pageSize: config['page-size'],
-    createFormUrl: config['create-form-url'],
   };
 
   const data = await getEventsArray();
 
   if (!data?.length) {
-    buildNoEventScreen(el, props);
+    buildNoEventScreen(el, config);
   } else {
     props.data = data;
     props.mutableData = [...data];
@@ -453,8 +524,8 @@ async function buildDashboard(el, config) {
       },
     };
     const proxyProps = new Proxy(props, dataHandler);
-    buildDashboardHeader(proxyProps);
-    buildDashboardTable(proxyProps);
+    buildDashboardHeader(proxyProps, config);
+    buildDashboardTable(proxyProps, config);
   }
 }
 
@@ -463,7 +534,8 @@ export default async function init(el) {
   const urlParams = new URLSearchParams(search);
   const devMode = urlParams.get('devMode');
 
-  const config = await getDashboardConfig(el);
+  const config = readBlockConfig(el);
+  el.innerHTML = '';
   const profile = window.bm8r.get('imsProfile');
 
   if (devMode === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
