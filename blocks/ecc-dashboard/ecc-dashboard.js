@@ -242,6 +242,7 @@ async function populateRow(props, config, index) {
 
   if (event.eventId === sp.get('newEventId')) {
     const msgTemplate = config['new-event-toast-msg'];
+    console.log(event.title, msgTemplate);
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
@@ -249,6 +250,7 @@ async function populateRow(props, config, index) {
 
   if (event.eventId === sp.get('clonedEventId')) {
     const msgTemplate = config['clone-event-toast-msg'];
+    console.log(event.title, msgTemplate);
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
