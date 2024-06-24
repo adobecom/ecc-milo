@@ -241,16 +241,14 @@ async function populateRow(props, config, index) {
   initMoreOptions(props, config, event, moreOptionsCell);
 
   if (event.eventId === sp.get('newEventId')) {
-    const msgTemplate = config['new-event-toast-msg'];
-    console.log(event.title, msgTemplate);
+    const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('\n') : config['new-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
   }
 
   if (event.eventId === sp.get('clonedEventId')) {
-    const msgTemplate = config['clone-event-toast-msg'];
-    console.log(event.title, msgTemplate);
+    const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('\n') : config['clone-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
