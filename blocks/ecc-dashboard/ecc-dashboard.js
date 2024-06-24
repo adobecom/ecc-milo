@@ -129,7 +129,7 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
     clone.addEventListener('click', async () => {
       const payload = { ...eventObj };
       delete payload.eventId;
-      payload.title = `${eventObj.title} (clone)`;
+      payload.title = `${eventObj.title} - copy`;
 
       const newEventJSON = await createEvent(quickFilter(payload));
       const reloadUrl = new URL(window.location.href);
