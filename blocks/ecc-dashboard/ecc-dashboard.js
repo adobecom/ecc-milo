@@ -416,7 +416,7 @@ function buildDashboardHeader(props, config) {
   createTag('p', { class: 'dashboard-header-events-count' }, `(${props.data.length} events)`, { parent: textContainer });
 
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: actionsContainer });
-  createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, 'Create new event', { parent: actionsContainer });
+  createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
   searchInput.addEventListener('input', () => filterData(props, searchInput.value));
 
   dashboardHeader.append(textContainer, actionsContainer);
@@ -484,9 +484,9 @@ function buildNoEventScreen(el, config) {
 
   const h1 = createTag('h1', {}, 'All Events');
   const area = createTag('div', { class: 'no-events-area' });
-  const noEventHeading = createTag('h2', {}, 'You have no events');
-  const noEventDescription = createTag('p', {}, 'Lorem ipsum dolor sit amet consectecteur, adipscing...');
-  const cta = createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, 'Create new event');
+  const noEventHeading = createTag('h2', {}, config['no-event-heading']);
+  const noEventDescription = createTag('p', {}, config['no-event-description']);
+  const cta = createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text']);
 
   el.append(h1, area);
   area.append(getIcon('empty-dashboard'), noEventHeading, noEventDescription, cta);
