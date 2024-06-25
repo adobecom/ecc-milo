@@ -19,7 +19,7 @@ const DEFAULT_FIELD_LABELS = {
   addSocialMediaRepeater: 'Add Social Media',
 };
 
-const SPEAKER_TYPE = ['Presenter', 'Host', 'Speaker', 'Keynote'];
+const SPEAKER_TYPE = ['Host', 'Speaker'];
 const SUPPORTED_SOCIAL = ['facebook', 'instagram', 'twitter', 'linkedin', 'pinterest', 'discord', 'behance', 'youtube', 'weibo', 'social-media'];
 
 export class Profile extends LitElement {
