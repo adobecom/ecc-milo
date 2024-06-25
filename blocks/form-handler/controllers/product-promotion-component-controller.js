@@ -11,13 +11,14 @@ export function onSubmit(component, props) {
     const relatedProducts = selectedProducts.map((p) => ({
       name: p.title,
       showProductBlade: !!p.showProductBlade,
+      tagIds: p.tagIds.map((t) => t.tagID),
     }));
 
     props.payload = { ...props.payload, relatedProducts };
   }
 }
 
-export default async function init(component, props) {
+export default async function init(component) {
   const eventData = getJoinedData();
   const productGroup = component.querySelector('product-selector-group');
 

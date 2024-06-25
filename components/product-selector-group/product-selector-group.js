@@ -13,13 +13,24 @@ const defaultProductValue = {
 export default class ProductSelectorGroup extends LitElement {
   static properties = {
     selectedProducts: { type: Array },
+    selectedTopics: { type: Array },
     products: { type: Array },
   };
 
   constructor() {
     super();
     this.selectedProducts = this.selectedProducts || [defaultProductValue];
-    this.products = JSON.parse(this.dataset.products);
+    try {
+      this.products = JSON.parse(this.dataset.products);
+    } catch {
+      this.products = [];
+    }
+
+    try {
+      this.selectedTopics = JSON.parse(this.dataset.topics);
+    } catch {
+      this.selectedTopics = [];
+    }
   }
 
   static styles = style;
@@ -34,9 +45,16 @@ export default class ProductSelectorGroup extends LitElement {
   }
 
   handleProductUpdate(event, index) {
-    const updatedProduct = event.detail.product;
+    const productInfo = event.detail.product;
+    const tagIds = this.products.filter((p) => p.name === productInfo.name);
+
+    const updatedProduct = {
+      ...productInfo,
+      tagIds,
+    };
+
     this.selectedProducts = this.selectedProducts
-      .map((Product, i) => (i === index ? updatedProduct : Product));
+      .map((product, i) => (i === index ? updatedProduct : product));
   }
 
   getSelectedProducts() {
@@ -47,10 +65,27 @@ export default class ProductSelectorGroup extends LitElement {
     return this.selectedProducts.filter((p) => p.showProductBlade).length;
   }
 
+  getUniqueProducts() {
+    const uniqueItems = {};
+    const uniqueProduts = [];
+    this.products.forEach((item) => {
+      if (!uniqueItems[item.name]) {
+        uniqueItems[item.name] = true;
+        uniqueProduts.push(item);
+      }
+    });
+
+    return uniqueProduts;
+  }
+
   render() {
+    this.products = JSON.parse(this.dataset.products);
+    this.selectedTopics = JSON.parse(this.dataset.selectedTopics);
+    const uniqueProducts = this.getUniqueProducts();
+    if (uniqueProducts.length === 0) return html`<div class="error">No product available for topics selected</div>`;
     return html`
       ${repeat(this.selectedProducts, (product, index) => html`
-        <product-selector .selectedProduct=${product} .products=${this.products}
+        <product-selector .selectedProduct=${product} .products=${uniqueProducts}
           @update-product=${(event) => this.handleProductUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.selectedProducts.length > 1 ? html`

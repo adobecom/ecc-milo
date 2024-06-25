@@ -6,13 +6,13 @@ const { LitElement, html, nothing } = await import(`${getLibs()}/deps/lit-all.mi
 
 export default class ProductSelector extends LitElement {
   static properties = {
-    products: { type: Object },
+    products: { type: Array },
     selectedProduct: { type: Object },
   };
 
   constructor() {
     super();
-    this.products = this.products || {};
+    this.products = this.products || [];
     this.selectedProduct = { showProductBlade: false };
   }
 
@@ -61,7 +61,7 @@ export default class ProductSelector extends LitElement {
       <fieldset class="rsvp-field-wrapper">
       ${html`<img class="product-img" src="${this.selectedProduct.tagImage || '/icons/icon-placeholder.svg'}" alt="${this.selectedProduct.title || nothing}">`}  
         <sp-picker class="product-select-input" label="Select a product" value=${this.selectedProduct.name || nothing} @change="${this.handleSelectChange}">
-          ${Object.values(this.products).map((product) => html`<sp-menu-item value="${product.name}">${product.title}
+          ${this.products.map((product) => html`<sp-menu-item value="${product.name}">${product.title}
           </sp-menu-item>`)}
         </sp-picker>
         ${html`<sp-checkbox class="checkbox-product-link" .checked=${this.selectedProduct.showProductBlade} .disabled=${!this.isValidSelection()} @change="${this.handleCheckChange}">Show ${this.selectedProduct.title || '[Product name]'} product blade on event details page</sp-checkbox>`}

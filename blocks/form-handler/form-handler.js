@@ -1,6 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
-import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
+import { createEvent, updateEvent, publishEvent, getEvent, getCaasTags } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
 import { Repeater } from '../../components/repeater/repeater.js';
@@ -322,6 +322,31 @@ function initRepeaters(props) {
   });
 }
 
+async function updateProductSelector(props) {
+  const caasTags = await getCaasTags();
+  const topicsVal = props.payload.fullTopicsValue?.map((x) => JSON.parse(x));
+  if (!caasTags || !topicsVal) return;
+
+  const productGroups = props.el.querySelectorAll('product-selector-group');
+  let products = Object.values(caasTags.namespaces.caas.tags['product-categories'].tags).map((x) => [...Object.values(x.tags).map((y) => y)]).flat();
+
+  products = products.filter((p) => topicsVal.find((t) => p.tagID.includes(t.tagID)));
+
+  productGroups.forEach((p) => {
+    p.setAttribute('data-products', JSON.stringify(products));
+    p.setAttribute('data-selected-topics', JSON.stringify(topicsVal));
+    p.requestUpdate();
+
+    p.shadowRoot.querySelectorAll('product-selector').forEach((ps) => {
+      ps.dispatchEvent(new CustomEvent('update-product', {
+        detail: { product: ps.selectedProduct },
+        bubbles: true,
+        composed: true,
+      }));
+    });
+  });
+}
+
 function renderFormNavigation(props, prevStep, currentStep) {
   const nextBtn = props.el.querySelector('.form-handler-ctas-panel .next-button');
   const backBtn = props.el.querySelector('.form-handler-ctas-panel .back-btn');
@@ -531,6 +556,7 @@ async function buildECCForm(el) {
         console.log('payload updated with: ', value);
         updateProfileContainer(props);
         setPayloadCache(value);
+        updateProductSelector(props);
       }
       if (prop === 'response') {
         console.log('response updated with: ', value);

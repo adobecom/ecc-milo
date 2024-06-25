@@ -14,7 +14,7 @@ async function buildTopicsCheckboxes(el) {
 
   Object.values(productTags).forEach((p) => {
     if (isEmptyObject(p.tags)) return;
-    createTag('sp-checkbox', { name: p.title }, p.title, { parent: cw });
+    createTag('sp-checkbox', { name: p.title, 'data-value': JSON.stringify(p) }, p.title, { parent: cw });
   });
 
   el.append(cw);
