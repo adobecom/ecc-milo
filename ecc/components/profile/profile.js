@@ -276,7 +276,7 @@ export class Profile extends LitElement {
         <div class="feds-footer-icons">
         ${icons}
         </div>
-        ${this.profile?.socialMedia ? repeat(this.profile?.socialMedia, (socialMedia) => this.renderSocialMediaLink(socialMedia)) : nothing }
+        ${this.profile?.socialMedia ? repeat(this.profile?.socialMedia, (socialMedia) => this.renderSocialMediaLink(socialMedia)) : nothing}
     </div>
     ` : nothing} 
     <sp-divider></sp-divider>
