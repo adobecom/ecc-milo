@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs } from '../../events/scripts/utils.js';
 import { style } from './image-dropzone.css.js';
 
 const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);

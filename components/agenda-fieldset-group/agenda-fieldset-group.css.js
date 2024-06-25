@@ -1,4 +1,4 @@
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs } from '../../events/scripts/utils.js';
 
 const { css } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
