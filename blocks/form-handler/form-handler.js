@@ -19,7 +19,6 @@ const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 
 // list of controllers for the handler to load
 const VANILLA_COMPONENTS = [
-  'checkbox',
   'event-format',
   'event-info',
   'img-upload',

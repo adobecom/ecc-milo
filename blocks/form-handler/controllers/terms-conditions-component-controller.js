@@ -36,6 +36,7 @@ async function loadPreview(component, templateId) {
 
   if (!resp?.ok) {
     window.lana?.log(`Could not get fragment: ${rsvpFormLocation}.plain.html`);
+    component.append(createTag('p', {}, 'Could not load terms and conditions. Please try again later.'));
     return;
   }
 
