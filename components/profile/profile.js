@@ -81,21 +81,21 @@ export class Profile extends LitElement {
     try {
       this.profileCopy = { ...this.profile };
       let respJson;
-      if (this.profile.id) {
+      if (this.profile.speakerId) {
         respJson = await updateSpeaker(this.profile, this.seriesId);
       } else {
         respJson = await createSpeaker(this.profile, this.seriesId);
       }
 
       if (respJson.speakerId) {
-        this.profile.id = respJson.speakerId;
+        this.profile.speakerId = respJson.speakerId;
         this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
         this.profile.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
         const file = imageDropzone?.getFile();
 
         if (file && (file instanceof File)) {
           await uploadBinaryFile(file, {
-            targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`,
+            targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.speakerId}/images`,
             type: 'speaker-photo',
             altText: `${this.profile.firstName} ${this.profile.lastName} photo`,
           });
@@ -161,7 +161,7 @@ export class Profile extends LitElement {
     <image-dropzone configs=${JSON.stringify({
     uploadOnCommand: true,
     type: 'speaker-photo',
-    targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`,
+    targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.speakerId}/images`,
   })} file=${JSON.stringify(imagefile)}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
@@ -299,7 +299,7 @@ export class Profile extends LitElement {
   }
 
   render() {
-    if (!this.profile.id) {
+    if (!this.profile.speakerId) {
       return this.renderProfileCreateForm();
     }
     return this.renderProfileView();
