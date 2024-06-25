@@ -25,7 +25,7 @@ function createTag(tag, attributes, html, options = {}) {
 export function getIcon(tag) {
   const img = document.createElement('img');
   img.className = `icon icon-${tag}`;
-  img.src = `/icons/${tag}.svg`;
+  img.src = `${window.miloConfig.codeRoot}/icons/${tag}.svg`;
   img.alt = tag;
 
   return img;

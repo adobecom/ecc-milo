@@ -471,10 +471,7 @@ async function getEventsArray() {
   const json = await getEvents();
 
   if (!json || json.errors?.length > 0) {
-    const mock = await fetch('/blocks/ecc-dashboard/mock.json')
-      .then((resp) => resp.json())
-      .catch((error) => console.log(error));
-    return mock;
+    return [];
   }
 
   return json.events;
