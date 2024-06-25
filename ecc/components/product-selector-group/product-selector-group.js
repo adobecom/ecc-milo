@@ -92,7 +92,7 @@ export default class ProductSelectorGroup extends LitElement {
           @update-product=${(event) => this.handleProductUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.selectedProducts.length > 1 ? html`
-              <img class="icon icon-remove-circle" src="/icons/remove-circle.svg" alt="remove-repeater" @click=${() => this.deleteProduct(index)}></img>
+              <img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => this.deleteProduct(index)}></img>
             ` : nothing}
           </div>
         </product-selector>

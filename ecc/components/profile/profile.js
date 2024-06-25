@@ -175,7 +175,7 @@ export class Profile extends LitElement {
     (socialMedia, index) => html`
     <div class="social-media-row">
     <custom-textfield class="social-media-input" data=${JSON.stringify({ ...socialMediaData, value: socialMedia.link ?? undefined })} config=${JSON.stringify(textfieldConfig)} @input-change=${(event) => this.updateSocialMedia(index, event.detail.value)}></custom-textfield>
-        ${this.profile?.socialMedia?.length > 1 ? html`<img class="icon icon-remove-circle" src="/icons/remove-circle.svg" alt="remove-repeater" @click=${() => {
+        ${this.profile?.socialMedia?.length > 1 ? html`<img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => {
     this.profile.socialMedia.splice(index, 1);
     this.requestUpdate();
   }}></img>` : nothing}
@@ -196,7 +196,7 @@ export class Profile extends LitElement {
       <sp-button variant="primary" class="save-profile-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async (e) => {
     this.saveProfile(e);
   }}>
-  <img src="/icons/user-add.svg" slot="icon"></img>
+  <img src="/ecc/icons/user-add.svg" slot="icon"></img>
   Save Profile</sp-button>
     </div>
     `;
@@ -221,7 +221,7 @@ export class Profile extends LitElement {
       <sp-button variant="primary" class="profile-edit-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async (e) => {
     this.saveProfile(e);
   }}>
-  <img src="/icons/user-edit.svg" slot="icon"></img>
+  <img src="/ecc/icons/user-edit.svg" slot="icon"></img>
   Confirm update</sp-button>
   </sp-button-group>
     </div>
@@ -249,7 +249,7 @@ export class Profile extends LitElement {
     <div class="profile-header">
     <h2>${fieldLabelsJSON.heading}</h2>
     <overlay-trigger placement="right">
-    <img src="/icons/info.svg" alt="info icon" class="icon icon-info" slot="trigger"></img>
+    <img src="/ecc/icons/info.svg" alt="info icon" class="icon icon-info" slot="trigger"></img>
     <sp-tooltip slot="hover-content" variant="info" open placement="right">
     ${fieldLabelsJSON.tooltipMessage}
     </sp-tooltip>
@@ -292,7 +292,7 @@ export class Profile extends LitElement {
         ${this.renderProfileEditForm('Edit Profile')}
     </sp-dialog-wrapper>
     <sp-button slot="trigger" variant="primary" class="profile-action-button" @click=${() => { this.profileCopy = { ...this.profile }; }}>
-    <img src="/icons/user-edit.svg" slot="icon"></img>Edit</sp-button>
+    <img src="/ecc/icons/user-edit.svg" slot="icon"></img>Edit</sp-button>
     </overlay-trigger>
     </div>
     </div>

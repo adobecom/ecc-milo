@@ -19,7 +19,7 @@ export class Repeater extends LitElement {
     return html`
         <div class="repeater-element" @click=${() => this.dispatchEvent(new CustomEvent('repeat'))}>
         <h3 class="repeater-element-title">${this.text}</h3>
-        <img class="icon icon-add-circle" src="/icons/add-circle.svg" alt="add-circle">
+        <img class="icon icon-add-circle" src="/ecc/icons/add-circle.svg" alt="add-circle">
         </img></div>`;
   }
 }
