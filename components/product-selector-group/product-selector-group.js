@@ -46,11 +46,11 @@ export default class ProductSelectorGroup extends LitElement {
 
   handleProductUpdate(event, index) {
     const productInfo = event.detail.product;
-    const tagIds = this.products.filter((p) => p.name === productInfo.name);
+    const tags = this.products.filter((p) => p.name === productInfo.name);
 
     const updatedProduct = {
       ...productInfo,
-      tagIds,
+      tags,
     };
 
     this.selectedProducts = this.selectedProducts

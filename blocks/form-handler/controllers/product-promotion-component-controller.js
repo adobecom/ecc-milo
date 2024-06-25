@@ -11,7 +11,7 @@ export function onSubmit(component, props) {
     const relatedProducts = selectedProducts.map((p) => ({
       name: p.title,
       showProductBlade: !!p.showProductBlade,
-      tagIds: p.tagIds.map((t) => t.tagID),
+      tags: p.tags.map((t) => t.tagID).join(','),
     }));
 
     props.payload = { ...props.payload, relatedProducts };
