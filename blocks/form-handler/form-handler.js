@@ -1,6 +1,8 @@
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
-import { createEvent, updateEvent, publishEvent, getEvent, getSpeaker, getCaasTags } from '../../utils/esp-controller.js';
+import {
+  createEvent, updateEvent, publishEvent, getEvent, getSpeaker, getCaasTags,
+} from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
 import { Repeater } from '../../components/repeater/repeater.js';
@@ -12,6 +14,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
+import { WYSIWYGEditor } from '../../components/wysiwyg-editor/wysiwyg-editor.js';
 import getJoinedData, { getFilteredCachedResponse, setPayloadCache, setResponseCache } from './data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
@@ -125,6 +128,7 @@ async function initComponents(props) {
   customElements.define('product-selector-group', ProductSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
+  customElements.define('wysiwyg-editor', WYSIWYGEditor);
 }
 
 async function gatherValues(props) {
