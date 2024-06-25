@@ -2,53 +2,49 @@ export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const attendeeLimit = component.querySelector('#attendee-count-input')?.value;
-  const allowWaitlist = component.querySelector('#registration-allow-waitlist')?.checked;
+  const allowWaitlisting = component.querySelector('#registration-allow-waitlist')?.checked;
   const contactHost = component.querySelector('#registration-contact-host')?.checked;
   const hostEmail = component.querySelector('#event-host-email-input')?.value;
-  const title = component.querySelector('#rsvp-form-detail-title')?.value;
-  const subtitle = component.querySelector('#rsvp-form-detail-subtitle')?.value;
-  const description = component.querySelector('#rsvp-form-detail-description')?.value;
+  const rsvpDescription = component.querySelector('#rsvp-form-detail-description')?.value;
 
   const rsvpData = {
     attendeeLimit,
-    allowWaitlist,
-    contactHost,
-    hostEmail,
-    title,
-    subtitle,
-    description,
+    allowWaitlisting,
+    hostEmail: contactHost ? hostEmail : '',
+    rsvpDescription,
   };
 
-  props.payload = { ...props.payload, rsvpData };
+  props.payload = { ...props.payload, ...rsvpData };
 }
 
 export default function init(component, props) {
-  const eventData = props.eventDataResp;
-  if (!eventData.rsvpData) return;
-
-  const {
-    attendeeLimit,
-    allowWaitlist,
-    contactHost,
-    hostEmail,
-    title,
-    subtitle,
-    description,
-  } = eventData.rsvpData;
-
-  const attendeeLimitEl = component.querySelector('#attendee-count-input');
-  const allowWaitlistEl = component.querySelector('#registration-allow-waitlist');
   const contactHostEl = component.querySelector('#registration-contact-host');
   const hostEmailEl = component.querySelector('#event-host-email-input');
-  const titleEl = component.querySelector('#rsvp-form-detail-title');
-  const subtitleEl = component.querySelector('#rsvp-form-detail-subtitle');
+  const attendeeLimitEl = component.querySelector('#attendee-count-input');
+  const allowWaitlistEl = component.querySelector('#registration-allow-waitlist');
   const descriptionEl = component.querySelector('#rsvp-form-detail-description');
 
-  if (attendeeLimitEl) attendeeLimitEl.value = attendeeLimit;
-  if (allowWaitlistEl) allowWaitlistEl.checked = allowWaitlist;
-  if (contactHostEl) contactHostEl.checked = contactHost;
-  if (hostEmailEl) hostEmailEl.value = hostEmail;
-  if (titleEl) titleEl.value = title;
-  if (subtitleEl) subtitleEl.value = subtitle;
-  if (descriptionEl) descriptionEl.value = description;
+  if (contactHostEl && hostEmailEl) {
+    hostEmailEl.disabled = !contactHostEl.checked;
+
+    contactHostEl.addEventListener('change', () => {
+      hostEmailEl.disabled = !contactHostEl.checked;
+    });
+  }
+
+  const eventData = props.eventDataResp;
+  if (eventData.rsvpData) {
+    const {
+      attendeeLimit,
+      allowWaitlisting,
+      hostEmail,
+      rsvpDescription,
+    } = eventData;
+
+    if (attendeeLimitEl) attendeeLimitEl.value = attendeeLimit;
+    if (allowWaitlistEl) allowWaitlistEl.checked = allowWaitlisting;
+    if (hostEmailEl) hostEmailEl.value = hostEmail;
+    if (descriptionEl) descriptionEl.value = rsvpDescription;
+    if (hostEmail) contactHostEl.checked = true;
+  }
 }

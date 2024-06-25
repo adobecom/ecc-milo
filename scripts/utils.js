@@ -20,7 +20,6 @@
  * Note: This file should have no self-invoking functions.
  * ------------------------------------------------------------
  */
-import autoUpdateContent from '../utils/content-update.js';
 
 export const [setLibs, getLibs] = (() => {
   let libs;
@@ -56,8 +55,6 @@ export function decorateArea(area = document) {
     // Last image of last column of last row
     eagerLoad(marquee, 'div:last-child > div:last-child img');
   }());
-
-  autoUpdateContent(area);
 }
 
 export async function importMiloUtils() {
