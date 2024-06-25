@@ -33,7 +33,7 @@ export default function init(component, props) {
   }
 
   const eventData = props.eventDataResp;
-  if (eventData.rsvpData) {
+  if (eventData) {
     const {
       attendeeLimit,
       allowWaitlisting,
