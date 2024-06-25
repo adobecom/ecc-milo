@@ -250,11 +250,12 @@ function buildToastMsg(eventTitle, msgTemplate) {
   return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
 }
 
-function buildRSVPDeepLink(event) {
-  const { detailPagePath } = event;
-  const deepLink = `${window.location.origin}/rsvp/${event.eventId}`;
-  const rsvpLink = createTag('a', { href: deepLink }, 'View RSVP data');
-  return rsvpLink;
+function buildRSVPDeepLink(event, config) {
+  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+  url.searchParams.set('eventId', event.eventId);
+  const rsvpDeepLinkText = event.externalId.startsWith('st-') ? 'SplashThat' : 'RSVP configuration screen';
+  const rsvpDeepLink = createTag('a', { href: url }, rsvpDeepLinkText);
+  return rsvpDeepLink;
 }
 
 async function populateRow(props, config, index) {
@@ -272,7 +273,7 @@ async function populateRow(props, config, index) {
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
   const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, await buildVenueTag(event)));
   const timezoneCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getTimezoneName(event.gmtOffset)));
-  const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.externalEventId));
+  const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPDeepLink(event, config)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
   row.append(

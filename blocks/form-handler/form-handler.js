@@ -533,6 +533,12 @@ function initDeepLink(props) {
 
     if (targetFragindex && targetFragindex <= props.farthestStep) {
       navigateForm(props, targetFragindex);
+    } else if (targetFragindex > props.farthestStep) {
+      const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'Please finish a few more steps before editing the RSVP information.', { parent: toastArea });
+      props.append(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 5000);
     }
   }
 }
