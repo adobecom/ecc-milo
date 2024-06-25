@@ -78,24 +78,6 @@ async function constructRequestOptions(method, body = null) {
   return options;
 }
 
-export async function uploadImage(file) {
-  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
-  const formData = new FormData();
-  formData.append('file', file);
-
-  await fetch(`${host}/upload`, {
-    method: 'POST',
-    body: formData,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log('Success:', data);
-    })
-    .catch((error) => {
-      window.lana?.log('Failed to upload image. Error:', error);
-    });
-}
-
 export async function uploadBinaryFile(file, configs) {
   await waitForAdobeIMS();
 
@@ -187,12 +169,13 @@ export async function addSpeakerToEvent(speakerData, eventId) {
   return resp;
 }
 
-export async function updateSpeaker(profile, seriesId, speakerId) {
+export async function updateSpeaker(profile, seriesId) {
   const { host } = getAPIConfig().esp[window.miloConfig.env.name];
-  const raw = JSON.stringify({ ...profile, seriesId });
+  const nProfile = { ...profile, photo: undefined };
+  const raw = JSON.stringify({ ...nProfile, seriesId });
   const options = await constructRequestOptions('PUT', raw);
 
-  const resp = await fetch(`${host}/v1/series/${seriesId}/speakers/${speakerId}`, options)
+  const resp = await fetch(`${host}/v1/series/${seriesId}/speakers/${profile.speakerId}`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to update speaker. Error: ${error}`));
 
@@ -268,6 +251,17 @@ export async function getVenue(eventId) {
   const options = await constructRequestOptions('GET');
 
   const resp = await fetch(`${host}/v1/events/${eventId}/venues`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to get venue details. Error: ${error}`));
+
+  return resp;
+}
+
+export async function getSpeaker(seriesId, speakerId) {
+  const { host } = getAPIConfig().esp[window.miloConfig.env.name];
+  const options = await constructRequestOptions('GET');
+
+  const resp = await fetch(`${host}/v1/series/${seriesId}/speakers/${speakerId}`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get venue details. Error: ${error}`));
 
