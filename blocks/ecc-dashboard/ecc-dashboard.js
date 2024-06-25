@@ -253,7 +253,7 @@ function buildToastMsg(eventTitle, msgTemplate) {
 function buildRSVPDeepLink(event, config) {
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
   url.searchParams.set('eventId', event.eventId);
-  const rsvpDeepLinkText = event.externalId.startsWith('st-') ? 'SplashThat' : 'RSVP configuration screen';
+  const rsvpDeepLinkText = event.externalEventId.startsWith('st-') ? 'SplashThat' : 'RSVP configuration screen';
   const rsvpDeepLink = createTag('a', { href: url }, rsvpDeepLinkText);
   return rsvpDeepLink;
 }
