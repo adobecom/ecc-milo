@@ -7,9 +7,7 @@
 }
 
 .registration-details-component .attendee-fields-wrapper {
-  padding-bottom: 24px;
-  margin-bottom: 40px;
-  border-bottom: 3px solid var(--stroke-color-divider);
+  margin-bottom: 32px;
 }
 
 .registration-details-component .attendee-count-wrapper {
