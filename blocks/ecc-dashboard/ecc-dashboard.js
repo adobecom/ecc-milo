@@ -250,6 +250,13 @@ function buildToastMsg(eventTitle, msgTemplate) {
   return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
 }
 
+function buildRSVPDeepLink(event) {
+  const { detailPagePath } = event;
+  const deepLink = `${window.location.origin}/rsvp/${event.eventId}`;
+  const rsvpLink = createTag('a', { href: deepLink }, 'View RSVP data');
+  return rsvpLink;
+}
+
 async function populateRow(props, config, index) {
   const event = props.mutableData[index];
   const tBody = props.el.querySelector('table.dashboard-table tbody');
