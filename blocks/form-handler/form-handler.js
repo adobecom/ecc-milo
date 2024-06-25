@@ -12,7 +12,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedData, { getFilteredCachedResponse, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
@@ -198,7 +198,7 @@ async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
 
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    const resp = await createEvent(props.payload);
+    const resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated'));
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
