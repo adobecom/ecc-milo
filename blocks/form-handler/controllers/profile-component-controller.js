@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { addSpeakerToEvent } from '../../../utils/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
@@ -20,6 +21,10 @@ export async function onSubmit(component, props) {
       props.eventDataResp = { ...props.eventDataResp, ...resp };
     }, Promise.resolve());
   }
+}
+
+export async function onUpdate(_component, _props) {
+  // Do nothing
 }
 
 export default function init(component, props) {

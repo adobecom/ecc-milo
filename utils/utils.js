@@ -247,3 +247,35 @@ export function getServiceName(link) {
 
   return url.hostname.replace('.com', '').replace('www.', '');
 }
+
+export const fetchThrottledMemoized = (() => {
+  const cache = new Map();
+  const pending = new Map();
+
+  const memoize = async (url, options, fetcher, ttl) => {
+    const key = `${url}-${JSON.stringify(options)}`; // Unique key based on URL and options
+
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+
+    if (pending.has(key)) {
+      return pending.get(key);
+    }
+
+    const fetchPromise = fetcher(url, options);
+    pending.set(key, fetchPromise);
+
+    try {
+      const response = await fetchPromise;
+      const data = await response.json(); // Optionally parse JSON here
+      cache.set(key, data);
+      setTimeout(() => cache.delete(key), ttl); // Set a TTL for cache expiration
+      return data;
+    } finally {
+      pending.delete(key);
+    }
+  };
+
+  return (url, options = {}, { ttl = 3000 } = {}) => memoize(url, options, fetch, ttl);
+})();

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -15,6 +16,10 @@ export function onSubmit(component, props) {
   };
 
   props.payload = { ...props.payload, ...rsvpData };
+}
+
+export async function onUpdate(_component, _props) {
+  // Do nothing
 }
 
 export default function init(component, props) {
