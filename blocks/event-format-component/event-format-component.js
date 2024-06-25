@@ -1,4 +1,4 @@
-import { getLibs } from '../../events/scripts/utils.js';
+import { getLibs } from '../../ecc/scripts/utils.js';
 import { generateToolTip } from '../../utils/utils.js';
 import { getCaasTags, getClouds, getSeries } from '../../utils/esp-controller.js';
 

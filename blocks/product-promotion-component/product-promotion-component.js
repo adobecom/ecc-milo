@@ -1,4 +1,4 @@
-import { getLibs } from '../../events/scripts/utils.js';
+import { getLibs } from '../../ecc/scripts/utils.js';
 import { generateToolTip } from '../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);

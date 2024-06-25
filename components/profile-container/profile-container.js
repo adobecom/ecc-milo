@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
-import { getLibs } from '../../events/scripts/utils.js';
+import { getLibs } from '../../ecc/scripts/utils.js';
 import { isEmptyObject } from '../../utils/utils.js';
 import { style } from './profile-container.css.js';
 

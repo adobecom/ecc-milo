@@ -1,4 +1,4 @@
-import { getLibs } from '../../events/scripts/utils.js';
+import { getLibs } from '../../ecc/scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
 import { createEvent, updateEvent, publishEvent, getEvent, getSpeaker, getCaasTags } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';

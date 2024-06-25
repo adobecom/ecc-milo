@@ -1,4 +1,4 @@
-import { getLibs } from '../events/scripts/utils.js';
+import { getLibs } from '../ecc/scripts/utils.js';
 
 const { svg } = await import(`${getLibs()}/deps/lit-all.min.js`);
 // FIXME : use global footer icons instead.
