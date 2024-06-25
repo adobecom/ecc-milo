@@ -110,12 +110,14 @@ function buildLocationInputGrid(row) {
         break;
     }
   });
+  const stateCodeInput = createTag('input', { id: 'location-state-code', type: 'hidden' });
   const placeIdInput = createTag('input', { id: 'google-place-id', type: 'hidden' });
   const mapUrlInput = createTag('input', { id: 'google-map-url', type: 'hidden' });
   const placeLATInput = createTag('input', { id: 'google-place-lat', type: 'hidden' });
   const placeLNGInput = createTag('input', { id: 'google-place-lng', type: 'hidden' });
   const gmtOffsetInput = createTag('input', { id: 'google-place-gmt-offset', type: 'hidden' });
   locationDetailsWrapper.append(
+    stateCodeInput,
     placeIdInput,
     mapUrlInput,
     placeLATInput,

@@ -25,6 +25,7 @@ function initAutocomplete(el) {
   const address = el.querySelector('#venue-info-venue-address');
   const city = el.querySelector('#location-city');
   const state = el.querySelector('#location-state');
+  const stateCode = el.querySelector('#location-state-code');
   const zip = el.querySelector('#location-zip-code');
   const country = el.querySelector('#location-country');
   const placeId = el.querySelector('#google-place-id');
@@ -61,6 +62,7 @@ function initAutocomplete(el) {
         }
         if (component.types.includes('administrative_area_level_1')) {
           addressInfo.state = component.long_name;
+          addressInfo.stateCode = component.short_name;
         }
         if (component.types.includes('postal_code')) {
           addressInfo.zip = component.long_name;
@@ -74,6 +76,7 @@ function initAutocomplete(el) {
       changeInputValue(address, 'value', addressInfo.address);
       changeInputValue(city, 'value', addressInfo.city);
       changeInputValue(state, 'value', addressInfo.state);
+      changeInputValue(stateCode, 'value', addressInfo.stateCode);
       changeInputValue(zip, 'value', addressInfo.zip);
       changeInputValue(country, 'value', addressInfo.country);
       changeInputValue(placeId, 'value', place.place_id);
@@ -98,6 +101,7 @@ export async function onSubmit(component, props) {
   const address = component.querySelector('#venue-info-venue-address').value;
   const city = component.querySelector('#location-city').value;
   const state = component.querySelector('#location-state').value;
+  const stateCode = component.querySelector('#location-state-code').value;
   const postalCode = component.querySelector('#location-zip-code').value;
   const country = component.querySelector('#location-country').value;
   const placeId = component.querySelector('#google-place-id').value;
@@ -111,6 +115,7 @@ export async function onSubmit(component, props) {
     address,
     city,
     state,
+    stateCode,
     postalCode,
     country,
     placeId,
@@ -152,6 +157,7 @@ export default async function init(component, props) {
     address,
     city,
     state,
+    statecode,
     postalCode,
     country,
     placeId,
@@ -162,6 +168,7 @@ export default async function init(component, props) {
   changeInputValue(component.querySelector('#venue-info-venue-address'), 'value', address);
   changeInputValue(component.querySelector('#location-city'), 'value', city);
   changeInputValue(component.querySelector('#location-state'), 'value', state);
+  changeInputValue(component.querySelector('#location-state-code'), 'value', statecode);
   changeInputValue(component.querySelector('#location-zip-code'), 'value', postalCode);
   changeInputValue(component.querySelector('#location-country'), 'value', country);
   changeInputValue(component.querySelector('#google-place-lat'), 'value', venue.coordinates?.lat);
