@@ -1,4 +1,4 @@
-import { getLibs } from '../../ecc/scripts/utils.js';
+import { getLibs } from '../../scripts/utils.js';
 import { style } from './agenda-fieldset.css.js';
 import { convertTo24HourFormat } from '../../utils/utils.js';
 

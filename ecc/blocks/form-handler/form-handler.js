@@ -1,17 +1,17 @@
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
 import { createEvent, updateEvent, publishEvent, getEvent, getSpeaker, getCaasTags } from '../../utils/esp-controller.js';
-import { ImageDropzone } from '../../../components/image-dropzone/image-dropzone.js';
-import { Profile } from '../../../components/profile/profile.js';
-import { Repeater } from '../../../components/repeater/repeater.js';
-import AgendaFieldset from '../../../components/agenda-fieldset/agenda-fieldset.js';
-import AgendaFieldsetGroup from '../../../components/agenda-fieldset-group/agenda-fieldset-group.js';
-import { ProfileContainer } from '../../../components/profile-container/profile-container.js';
-import { CustomTextfield } from '../../../components/custom-textfield/custom-textfield.js';
-import ProductSelector from '../../../components/product-selector/product-selector.js';
-import ProductSelectorGroup from '../../../components/product-selector-group/product-selector-group.js';
-import PartnerSelector from '../../../components/partner-selector/partner-selector.js';
-import PartnerSelectorGroup from '../../../components/partner-selector-group/partner-selector-group.js';
+import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
+import { Profile } from '../../components/profile/profile.js';
+import { Repeater } from '../../components/repeater/repeater.js';
+import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
+import AgendaFieldsetGroup from '../../components/agenda-fieldset-group/agenda-fieldset-group.js';
+import { ProfileContainer } from '../../components/profile-container/profile-container.js';
+import { CustomTextfield } from '../../components/custom-textfield/custom-textfield.js';
+import ProductSelector from '../../components/product-selector/product-selector.js';
+import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
+import PartnerSelector from '../../components/partner-selector/partner-selector.js';
+import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
