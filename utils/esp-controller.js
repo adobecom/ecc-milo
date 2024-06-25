@@ -287,12 +287,12 @@ export async function getSeries() {
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to fetch series. Error: ${error}`));
 
-  if (!resp.error) {
-    const { series } = resp;
-    return series;
+  if (!resp || !resp.error) {
+    return null;
   }
 
-  return null;
+  const { series } = resp;
+  return series;
 }
 
 export async function createAttendee(eventId, attendeeData) {

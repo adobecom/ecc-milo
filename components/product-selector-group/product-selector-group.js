@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { getLibs } from '../../scripts/utils.js';
 import { isEmptyObject } from '../../utils/utils.js';
 import { style } from './product-selector-group.css.js';
@@ -79,10 +80,12 @@ export default class ProductSelectorGroup extends LitElement {
   }
 
   render() {
-    this.products = JSON.parse(this.dataset.products);
-    this.selectedTopics = JSON.parse(this.dataset.selectedTopics);
+    this.products = this.dataset.products ? JSON.parse(this.dataset.products) : [];
+    this.selectedTopics = this.dataset.selectedTopics ? JSON.parse(this.dataset.selectedTopics) : [];
     const uniqueProducts = this.getUniqueProducts();
+
     if (uniqueProducts.length === 0) return html`<div class="error">No product available for topics selected</div>`;
+
     return html`
       ${repeat(this.selectedProducts, (product, index) => html`
         <product-selector .selectedProduct=${product} .products=${uniqueProducts}
