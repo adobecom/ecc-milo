@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 import { getLibs } from '../../ecc/scripts/utils.js';
 import { style } from './profile.css.js';
-import { createSpeaker, updateSpeaker, uploadBinaryFile } from '../../utils/esp-controller.js';
+import { createSpeaker, getSpeaker, updateSpeaker, uploadBinaryFile } from '../../utils/esp-controller.js';
 import { getServiceName } from '../../utils/utils.js';
 import { icons } from '../../icons/icons.svg.js';
 
@@ -19,7 +19,7 @@ const DEFAULT_FIELD_LABELS = {
   addSocialMediaRepeater: 'Add Social Media',
 };
 
-const SPEAKER_TYPE = ['Presenter', 'Host', 'Speaker', 'Keynote'];
+const SPEAKER_TYPE = ['Host', 'Speaker'];
 const SUPPORTED_SOCIAL = ['facebook', 'instagram', 'twitter', 'linkedin', 'pinterest', 'discord', 'behance', 'youtube', 'weibo', 'social-media'];
 
 export class Profile extends LitElement {
@@ -82,20 +82,21 @@ export class Profile extends LitElement {
       this.profileCopy = { ...this.profile };
       let respJson;
       if (this.profile.speakerId) {
-        respJson = await updateSpeaker(this.profile, this.seriesId); 
+        const speakerData = await getSpeaker(this.seriesId, this.profile.speakerId);
+        respJson = await updateSpeaker({ ...speakerData, ...this.profile }, this.seriesId);
       } else {
         respJson = await createSpeaker(this.profile, this.seriesId);
       }
 
       if (respJson.speakerId) {
-        this.profile.id = respJson.speakerId;
+        this.profile.speakerId = respJson.speakerId;
         this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
         this.profile.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
         const file = imageDropzone?.getFile();
 
         if (file && (file instanceof File)) {
           await uploadBinaryFile(file, {
-            targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`,
+            targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.speakerId}/images`,
             type: 'speaker-photo',
             altText: `${this.profile.firstName} ${this.profile.lastName} photo`,
           });
@@ -161,7 +162,7 @@ export class Profile extends LitElement {
     <image-dropzone configs=${JSON.stringify({
     uploadOnCommand: true,
     type: 'speaker-photo',
-    targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`,
+    targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.speakerId}/images`,
   })} file=${JSON.stringify(imagefile)}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>

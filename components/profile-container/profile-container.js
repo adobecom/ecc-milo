@@ -53,7 +53,7 @@ export class ProfileContainer extends LitElement {
     imageTag.setAttribute('slot', 'img-label');
     imageTag.classList.add('img-upload-text');
     return html`${
-      repeat(this.profiles, (profile) => profile.id, (profile, index) => {
+      repeat(this.profiles, (profile) => profile.speakerId, (profile, index) => {
         const fieldlabels = { ...this.fieldlabels };
         const imgTag = imageTag.cloneNode(true);
         return html`
