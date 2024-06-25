@@ -1,6 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
-import { createEvent, updateEvent, publishEvent, getEvent } from '../../utils/esp-controller.js';
+import { createEvent, updateEvent, publishEvent, getEvent, getSpeaker } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
 import { Repeater } from '../../components/repeater/repeater.js';
@@ -88,7 +88,21 @@ async function initComponents(props) {
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
 
-  if (eventId) props.eventDataResp = { ...props.eventDataResp, ...await getEvent(eventId) };
+  if (eventId) {
+    try {
+      const eventData = await getEvent(eventId);
+      const { seriesId } = eventData;
+      // eslint-disable-next-line max-len
+      const speakers = await Promise.all(eventData.speakers.map(async (sp) => getSpeaker(seriesId, sp.speakerId)));
+      for (let idx = 0; idx < eventData.speakers.length; idx += 1) {
+        eventData.speakers[idx] = { ...eventData.speakers[idx], ...speakers[idx] };
+      }
+      eventData.speakers = speakers;
+      props.eventDataResp = { ...props.eventDataResp, ...eventData };
+    } catch (e) {
+      console.error('Error fetching speaker data: ', e);
+    }
+  }
 
   VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);

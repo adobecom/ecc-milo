@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 import { getLibs } from '../../scripts/utils.js';
 import { style } from './profile.css.js';
-import { createSpeaker, uploadBinaryFile } from '../../utils/esp-controller.js';
+import { createSpeaker, updateSpeaker, uploadBinaryFile } from '../../utils/esp-controller.js';
 import { getServiceName } from '../../utils/utils.js';
 import { icons } from '../../icons/icons.svg.js';
 
@@ -80,12 +80,17 @@ export class Profile extends LitElement {
 
     try {
       this.profileCopy = { ...this.profile };
-      const respJson = await createSpeaker(this.profile, this.seriesId);
+      let respJson;
+      if (this.profile.speakerId) {
+        respJson = await updateSpeaker(this.profile, this.seriesId); 
+      } else {
+        respJson = await createSpeaker(this.profile, this.seriesId);
+      }
 
       if (respJson.speakerId) {
         this.profile.id = respJson.speakerId;
         this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
-        this.profile.image = imageDropzone?.file ? { url: imageDropzone?.file?.url } : null;
+        this.profile.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
         const file = imageDropzone?.getFile();
 
         if (file && (file instanceof File)) {
@@ -98,8 +103,8 @@ export class Profile extends LitElement {
 
         this.requestUpdate();
       }
-    } catch {
-      window.lana?.log('error occured while saving profile');
+    } catch (error) {
+      window.lana?.log(`error occured while saving profile ${error}`);
     }
 
     saveButton.pending = false;
@@ -147,6 +152,8 @@ export class Profile extends LitElement {
     const textfieldConfig = { size: 'xl' };
     const quietTextfieldConfig = { size: 'xl', quiet: true };
 
+    // eslint-disable-next-line max-len
+    const imagefile = this.profile?.photo ? { ...this.profile.photo, url: this.profile.photo.imageUrl } : {};
     return html`
     ${this.renderProfileTypePicker(fieldLabelsJSON.chooseType)}
     <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('firstName', event.detail.value)}></custom-textfield>
@@ -155,7 +162,7 @@ export class Profile extends LitElement {
     uploadOnCommand: true,
     type: 'speaker-photo',
     targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.id}/images`,
-  })} file=${JSON.stringify(this.profile.image)}>
+  })} file=${JSON.stringify(imagefile)}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
     <custom-textfield data=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('title', event.detail.value)}></custom-textfield>
@@ -249,11 +256,11 @@ export class Profile extends LitElement {
     </div> 
     ${this.renderProfileTypePicker(fieldLabelsJSON.chooseType)}
     <h3>${this.profile.firstName} ${this.profile.lastName}</h3>
-    ${this.profile.image?.url ? html`
+    ${this.profile.photo?.imageUrl ? html`
     <div class="img-file-input-wrapper">
       <div class="preview-wrapper">
         <div class="preview-img-placeholder">
-          <img class="speaker-image" src="${this.profile.image?.url}" alt="preview image">
+          <img class="speaker-image" src="${this.profile.photo?.imageUrl}" alt="preview image">
         </div>
       </div>
     </div>`
@@ -292,7 +299,7 @@ export class Profile extends LitElement {
   }
 
   render() {
-    if (!this.profile.id) {
+    if (!this.profile.speakerId) {
       return this.renderProfileCreateForm();
     }
     return this.renderProfileView();
