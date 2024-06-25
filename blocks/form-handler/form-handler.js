@@ -1,6 +1,6 @@
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
-import { createEvent, updateEvent, publishEvent, getEvent, getCaasTags } from '../../utils/esp-controller.js';
+import { createEvent, updateEvent, publishEvent, getEvent, getSpeaker, getCaasTags } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
 import { Repeater } from '../../components/repeater/repeater.js';
@@ -88,7 +88,21 @@ async function initComponents(props) {
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
 
-  if (eventId) props.response = await getEvent(eventId);
+  if (eventId) {
+    try {
+      const eventData = await getEvent(eventId);
+      const { seriesId } = eventData;
+      // eslint-disable-next-line max-len
+      const speakers = await Promise.all(eventData.speakers.map(async (sp) => getSpeaker(seriesId, sp.speakerId)));
+      for (let idx = 0; idx < eventData.speakers.length; idx += 1) {
+        eventData.speakers[idx] = { ...eventData.speakers[idx], ...speakers[idx] };
+      }
+      eventData.speakers = speakers;
+      props.eventDataResp = { ...props.eventDataResp, ...eventData };
+    } catch (e) {
+      console.error('Error fetching speaker data: ', e);
+    }
+  }
 
   VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
@@ -185,20 +199,20 @@ async function saveEvent(props, options = { toPublish: false }) {
 
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
     const resp = await createEvent(props.payload);
-    props.response = resp;
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
     if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated'));
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     const resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
-    props.response = resp;
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
   } else if (options.toPublish) {
     const resp = await publishEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
-    props.response = resp;
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
   }
 }
 
@@ -470,7 +484,7 @@ function updatePreviewCtas(props) {
   const filteredResponse = getFilteredCachedResponse();
 
   previewBtns.forEach((a) => {
-    const testTime = a.classList.contains('pre-event') ? +props.payload.localEndTimeMillis - 10 : +props.payload.localEndTimeMillis + 10;
+    const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
     if (filteredResponse.detailPagePath) {
       a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
       a.classList.remove('preview-not-ready');
@@ -530,7 +544,7 @@ async function buildECCForm(el) {
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
-    response: {},
+    eventDataResp: {},
   };
 
   const dataHandler = {
@@ -554,16 +568,16 @@ async function buildECCForm(el) {
 
       if (prop === 'payload') {
         console.log('payload updated with: ', value);
-        updateProfileContainer(props);
         setPayloadCache(value);
         updateProductSelector(props);
+        updateProfileContainer(props);
       }
-      if (prop === 'response') {
+      if (prop === 'eventDataResp') {
         console.log('response updated with: ', value);
+        setResponseCache(value);
         updateImgUploadComponentConfigs(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
-        setResponseCache(value);
       }
 
       return true;

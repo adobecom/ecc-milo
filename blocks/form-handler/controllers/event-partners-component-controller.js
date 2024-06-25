@@ -1,5 +1,3 @@
-import getJoinedData from '../data-handler.js';
-
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -9,7 +7,7 @@ export function onSubmit(component, props) {
 }
 
 export default async function init(component, props) {
-  const eventData = getJoinedData();
+  const eventData = props.eventDataResp;
   const partnersGroup = component.querySelector('partner-selector-group');
 
   if (eventData.partners) {

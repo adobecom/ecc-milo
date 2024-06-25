@@ -1,4 +1,3 @@
-import getJoinedData from '../data-handler.js';
 import { uploadBinaryFile } from '../../../utils/esp-controller.js';
 
 export function onSubmit(component, props) {
@@ -23,11 +22,11 @@ export default function init(component, props) {
       if (!file || !(file instanceof File)) return;
       const resp = await uploadBinaryFile(file, JSON.parse(component.dataset.configs));
 
-      if (resp) props.response = resp;
+      if (resp) props.eventDataResp = resp;
     };
   });
 
-  const eventData = getJoinedData();
+  const eventData = props.eventDataResp;
   if (component.classList.contains('venue')) {
     const venueImgVisibleCheck = component.querySelector('#checkbox-venue-image-visible');
 
