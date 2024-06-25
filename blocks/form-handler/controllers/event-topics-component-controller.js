@@ -3,8 +3,9 @@ export function onSubmit(component, props) {
 
   const checkedBoxes = component.querySelectorAll('sp-checkbox[checked]');
   const topics = Array.from(checkedBoxes).map((cb) => cb.name);
+  const fullTopicsValue = Array.from(checkedBoxes).map((cb) => cb.dataset.value);
 
-  props.payload = { ...props.payload, topics };
+  props.payload = { ...props.payload, topics, fullTopicsValue };
 }
 
 export default function init(component, props) {
