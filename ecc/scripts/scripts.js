@@ -44,7 +44,7 @@ const LIBS = '/libs';
 
 // Add any config options.
 const CONFIG = {
-  // codeRoot: '',
+  codeRoot: '/ecc',
   // contentRoot: '',
   imsClientId: 'acom_event_mgmt_console',
   // imsScope: 'AdobeID,openid,gnav',
