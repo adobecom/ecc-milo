@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { getLibs } from '../../../scripts/utils.js';
+import { getLibs } from '../../../ecc/scripts/utils.js';
 import HtmlSanitizer from '../../../deps/html-sanitizer.js';
 
 const { customFetch } = await import(`${getLibs()}/utils/helpers.js`);

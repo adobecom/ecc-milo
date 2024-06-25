@@ -1,4 +1,4 @@
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs } from '../../ecc/scripts/utils.js';
 import { getCaasTags } from '../../utils/esp-controller.js';
 import { generateToolTip, isEmptyObject } from '../../utils/utils.js';
 

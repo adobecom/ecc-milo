@@ -1,4 +1,4 @@
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs } from '../../ecc/scripts/utils.js';
 import { style } from './partner-selector.css.js';
 import { createPartner } from '../../utils/esp-controller.js';
 

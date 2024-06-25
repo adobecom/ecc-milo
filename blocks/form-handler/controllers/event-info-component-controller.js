@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import { getLibs } from '../../../scripts/utils.js';
+import { getLibs } from '../../../ecc/scripts/utils.js';
 import { changeInputValue } from '../../../utils/utils.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);

@@ -1,4 +1,4 @@
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs } from '../../ecc/scripts/utils.js';
 import { style } from './agenda-fieldset-group.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);

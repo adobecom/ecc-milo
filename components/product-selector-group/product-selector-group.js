@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs } from '../../ecc/scripts/utils.js';
 import { isEmptyObject } from '../../utils/utils.js';
 import { style } from './product-selector-group.css.js';
 
