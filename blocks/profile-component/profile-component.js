@@ -1,4 +1,4 @@
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs } from '../../events/scripts/utils.js';
 import '../../components/image-dropzone/image-dropzone.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);

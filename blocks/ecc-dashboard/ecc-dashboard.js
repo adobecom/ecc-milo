@@ -1,7 +1,7 @@
 import {
   createEvent, deleteEvent, getEvents, getVenue, publishEvent, unpublishEvent,
 } from '../../utils/esp-controller.js';
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs } from '../../events/scripts/utils.js';
 import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 
