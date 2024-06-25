@@ -181,6 +181,7 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
       await deleteEvent(eventObj.eventId);
       const newJson = await getEvents();
       props.data = newJson.events;
+      props.mutableData = newJson.events;
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
