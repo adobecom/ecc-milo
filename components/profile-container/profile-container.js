@@ -38,10 +38,10 @@ export class ProfileContainer extends LitElement {
     return [...this.shadowRoot.querySelectorAll('profile-ui')]
       .filter((p) => !p.isPlaceholder && !isEmptyObject(p) && this.isValidSpeaker(p))
       .map((profileUI, index) => {
-        const { id, type } = profileUI.profile;
+        const { speakerId, type } = profileUI.profile;
 
         return {
-          speakerId: id,
+          speakerId,
           ordinal: index,
           speakerType: type,
         };
