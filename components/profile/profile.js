@@ -81,8 +81,8 @@ export class Profile extends LitElement {
     try {
       this.profileCopy = { ...this.profile };
       let respJson;
-      if (this.profile.speakerId) {
-        respJson = await updateSpeaker(this.profile, this.seriesId); 
+      if (this.profile.id) {
+        respJson = await updateSpeaker(this.profile, this.seriesId);
       } else {
         respJson = await createSpeaker(this.profile, this.seriesId);
       }
@@ -299,7 +299,7 @@ export class Profile extends LitElement {
   }
 
   render() {
-    if (!this.profile.speakerId) {
+    if (!this.profile.id) {
       return this.renderProfileCreateForm();
     }
     return this.renderProfileView();
