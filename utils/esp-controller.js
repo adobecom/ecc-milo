@@ -287,7 +287,7 @@ export async function getSeries() {
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to fetch series. Error: ${error}`));
 
-  if (!resp || !resp.error) {
+  if (!resp || resp.error) {
     return null;
   }
 
