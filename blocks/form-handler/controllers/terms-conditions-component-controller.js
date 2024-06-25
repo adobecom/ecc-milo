@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { getLibs } from '../../../scripts/utils.js';
 import HtmlSanitizer from '../../../deps/html-sanitizer.js';
 
@@ -51,6 +52,6 @@ export default async function init(component, props) {
   await loadPreview(component, props);
 }
 
-export function onSubmit(component, props) {
+export function onSubmit(_component, _props) {
   // Do nothing
 }

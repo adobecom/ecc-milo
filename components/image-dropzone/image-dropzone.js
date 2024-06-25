@@ -28,6 +28,16 @@ export class ImageDropzone extends LitElement {
     }
   }
 
+  async uploadImage(url = this.configs.targetUrl) {
+    if (!this.file || !(this.file instanceof File)) return;
+
+    this.configs.targetUrl = url;
+    const resp = await uploadBinaryFile(this.file, this.configs);
+
+    if (this.props) this.props.eventDataResp = { ...props.eventDataResp, ...resp };
+    this.requestUpdate();
+  }
+
   getFile() {
     return this.file;
   }
