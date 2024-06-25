@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 import { getLibs } from '../../ecc/scripts/utils.js';
 import { style } from './profile.css.js';
-import { createSpeaker, updateSpeaker, uploadBinaryFile } from '../../utils/esp-controller.js';
+import { createSpeaker, getSpeaker, updateSpeaker, uploadBinaryFile } from '../../utils/esp-controller.js';
 import { getServiceName } from '../../utils/utils.js';
 import { icons } from '../../icons/icons.svg.js';
 
@@ -82,7 +82,8 @@ export class Profile extends LitElement {
       this.profileCopy = { ...this.profile };
       let respJson;
       if (this.profile.speakerId) {
-        respJson = await updateSpeaker(this.profile, this.seriesId);
+        const speakerData = await getSpeaker(this.seriesId, this.profile.speakerId);
+        respJson = await updateSpeaker({ ...speakerData, ...this.profile }, this.seriesId);
       } else {
         respJson = await createSpeaker(this.profile, this.seriesId);
       }
@@ -91,7 +92,6 @@ export class Profile extends LitElement {
         this.profile.speakerId = respJson.speakerId;
         this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
         this.profile.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
-        this.profile.modificationTime = respJson.modificationTime;
         const file = imageDropzone?.getFile();
 
         if (file && (file instanceof File)) {
