@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
 import { getLibs } from '../../../ecc/scripts/utils.js';
 import { changeInputValue } from '../../../utils/utils.js';
@@ -328,6 +329,10 @@ export function onSubmit(component, props) {
   };
 
   props.payload = { ...props.payload, ...eventInfo };
+}
+
+export async function onUpdate(_component, _props) {
+  // Do nothing
 }
 
 export default function init(component, props) {

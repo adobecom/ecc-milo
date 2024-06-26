@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { createVenue } from '../../../utils/esp-controller.js';
 import { changeInputValue, getSecret } from '../../../utils/utils.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
@@ -141,6 +142,10 @@ export async function onSubmit(component, props) {
   } else if (!eventId) {
     document.addEventListener('eventcreated', onEventCreate);
   }
+}
+
+export async function onUpdate(_component, _props) {
+  // Do nothing
 }
 
 export default async function init(component, props) {

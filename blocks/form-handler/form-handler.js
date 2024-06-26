@@ -19,7 +19,6 @@ const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 
 // list of controllers for the handler to load
 const VANILLA_COMPONENTS = [
-  'checkbox',
   'event-format',
   'event-info',
   'img-upload',
@@ -144,6 +143,23 @@ async function gatherValues(props) {
   await Promise.all(allComponentPromises);
 }
 
+async function updateComponents(props) {
+  const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
+    if (!mappedComponents.length) return {};
+
+    const promises = Array.from(mappedComponents).map(async (component) => {
+      const { onUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      const componentPayload = await onUpdate(component, props);
+      return componentPayload;
+    });
+
+    return Promise.all(promises);
+  });
+
+  await Promise.all(allComponentPromises);
+}
+
 function decorateForm(el) {
   const app = createTag('sp-theme', { color: 'light', scale: 'medium' });
   const form = createTag('form', {}, '', { parent: app });
@@ -254,28 +270,6 @@ function onStepValidate(props) {
   };
 }
 
-function updateImgUploadComponentConfigs(props) {
-  const typeMap = {
-    hero: 'event-hero-image',
-    card: 'event-card-image',
-    venue: 'venue-image',
-  };
-
-  const imgUploadComps = props.el.querySelectorAll('.img-upload-component');
-
-  imgUploadComps.forEach((b) => {
-    const type = typeMap[b.classList[1]];
-
-    const configs = {
-      type,
-      altText: `Event ${b.classList[1]} image`,
-      targetUrl: `/v1/events/${getFilteredCachedResponse().eventId}/images`,
-    };
-
-    b.dataset.configs = JSON.stringify(configs);
-  });
-}
-
 function updateProfileContainer(props) {
   const containers = document.querySelectorAll('profile-container');
   containers.forEach((c) => {
@@ -332,31 +326,6 @@ function initRepeaters(props) {
         updateRequiredFields(props);
         initRepeaters(tempProps);
       });
-    });
-  });
-}
-
-async function updateProductSelector(props) {
-  const caasTags = await getCaasTags();
-  const topicsVal = props.payload.fullTopicsValue?.map((x) => JSON.parse(x));
-  if (!caasTags || !topicsVal) return;
-
-  const productGroups = props.el.querySelectorAll('product-selector-group');
-  let products = Object.values(caasTags.namespaces.caas.tags['product-categories'].tags).map((x) => [...Object.values(x.tags).map((y) => y)]).flat();
-
-  products = products.filter((p) => topicsVal.find((t) => p.tagID.includes(t.tagID)));
-
-  productGroups.forEach((p) => {
-    p.setAttribute('data-products', JSON.stringify(products));
-    p.setAttribute('data-selected-topics', JSON.stringify(topicsVal));
-    p.requestUpdate();
-
-    p.shadowRoot.querySelectorAll('product-selector').forEach((ps) => {
-      ps.dispatchEvent(new CustomEvent('update-product', {
-        detail: { product: ps.selectedProduct },
-        bubbles: true,
-        composed: true,
-      }));
     });
   });
 }
@@ -569,13 +538,12 @@ async function buildECCForm(el) {
       if (prop === 'payload') {
         console.log('payload updated with: ', value);
         setPayloadCache(value);
-        updateProductSelector(props);
+        updateComponents(props);
         updateProfileContainer(props);
       }
       if (prop === 'eventDataResp') {
         console.log('response updated with: ', value);
         setResponseCache(value);
-        updateImgUploadComponentConfigs(props);
         updatePreviewCtas(props);
         updateDashboardLink(props);
       }

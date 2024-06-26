@@ -16,6 +16,10 @@ export function onSubmit(component, props) {
   props.payload = { ...props.payload, ...agendaInfo };
 }
 
+export async function onUpdate(_component, _props) {
+  // Do nothing
+}
+
 export default function init(component, props) {
   const eventData = props.eventDataResp;
   const agendaGroup = component.querySelector('agenda-fieldset-group');
