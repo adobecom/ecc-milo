@@ -253,25 +253,24 @@ export const fetchThrottledMemoized = (() => {
   const pending = new Map();
 
   const memoize = async (url, options, fetcher, ttl) => {
-    const key = `${url}-${JSON.stringify(options)}`; // Unique key based on URL and options
+    const key = `${url}-${JSON.stringify(options)}`;
 
-    if (cache.has(key)) {
-      return cache.get(key);
-    }
+    // if (cache.has(key)) {
+    //   return cache.get(key);
+    // }
 
-    if (pending.has(key)) {
-      return pending.get(key);
-    }
+    // if (pending.has(key)) {
+    //   return pending.get(key);
+    // }
 
     const fetchPromise = fetcher(url, options);
     pending.set(key, fetchPromise);
 
     try {
       const response = await fetchPromise;
-      const data = await response.json(); // Optionally parse JSON here
-      cache.set(key, data);
-      setTimeout(() => cache.delete(key), ttl); // Set a TTL for cache expiration
-      return data;
+      cache.set(key, response);
+      setTimeout(() => cache.delete(key), ttl);
+      return response;
     } finally {
       pending.delete(key);
     }
