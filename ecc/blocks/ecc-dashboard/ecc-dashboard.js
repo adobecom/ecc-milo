@@ -113,7 +113,7 @@ function updateDashboardData(newPayload, props) {
   });
 
   props.filteredData = props.data;
-  props.paginateData = props.data;
+  props.paginatedData = props.data;
 }
 
 function initMoreOptions(props, config, eventObj, moreOptionsCell) {
@@ -183,7 +183,7 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
       const newJson = await getEvents();
       props.data = newJson.events;
       props.filteredData = newJson.events;
-      props.paginateData = newJson.events;
+      props.paginatedData = newJson.events;
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
@@ -299,8 +299,8 @@ async function populateRow(props, config, index) {
   }
 }
 
-function paginateData(props, config, page) {
-  props.paginateData = props.data.slice((page - 1) * +config['page-size'], page * +config['page-size']);
+function paginatedData(props, config, page) {
+  props.paginatedData = props.data.slice((page - 1) * +config['page-size'], page * +config['page-size']);
 }
 
 function updatePaginationControl(pagination, currentPage, totalPages) {
@@ -333,21 +333,21 @@ function decoratePagination(props, config) {
       }
 
       updatePaginationControl(paginationContainer, props.currentPage = page, totalPages);
-      paginateData(props, config, page);
+      paginatedData(props, config, page);
     }
   });
 
   chevLeft.addEventListener('click', () => {
     if (props.currentPage > 1) {
       updatePaginationControl(paginationContainer, props.currentPage -= 1, totalPages);
-      paginateData(props, config, props.currentPage);
+      paginatedData(props, config, props.currentPage);
     }
   });
 
   chevRight.addEventListener('click', () => {
     if (props.currentPage < totalPages) {
       updatePaginationControl(paginationContainer, props.currentPage += 1, totalPages);
-      paginateData(props, config, props.currentPage);
+      paginatedData(props, config, props.currentPage);
     }
   });
 
@@ -361,7 +361,7 @@ function populateTable(props, config) {
   props.el.append(spTheme);
   tBody.innerHTML = '';
 
-  const endOfPages = Math.min(props.currentPage + 10, props.paginateData.length);
+  const endOfPages = Math.min(props.currentPage + 10, props.paginatedData.length);
 
   for (let i = props.currentPage - 1; i < endOfPages; i += 1) {
     populateRow(props, config, i);
