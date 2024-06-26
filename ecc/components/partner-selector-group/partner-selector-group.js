@@ -32,7 +32,7 @@ export default class PartnerSelectorGroup extends LitElement {
   }
 
   getSelectedPartners() {
-    return this.selectedPartners.filter((p) => p.hasRequiredAttributes());
+    return this.selectedPartners.filter((p) => p.name);
   }
 
   render() {

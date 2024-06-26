@@ -31,10 +31,6 @@ export default class PartnerSelector extends LitElement {
     }));
   }
 
-  hasRequiredAttributes() {
-    return this.selectedPartner.name;
-  }
-
   render() {
     const configString = JSON.stringify({
       uploadOnCommand: true,

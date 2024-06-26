@@ -35,10 +35,6 @@ export default class ProductSelector extends LitElement {
     this.requestUpdate();
   }
 
-  hasRequiredAttributes() {
-    return this.selectedProduct.name && this.selectedProduct.showProductBlade !== undefined;
-  }
-
   handleCheckChange(event) {
     const showProductBlade = event.target.checked;
     this.selectedProduct = {
