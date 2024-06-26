@@ -300,13 +300,14 @@ async function populateRow(props, config, index) {
 }
 
 function paginateData(props, config, page) {
-  const pageSize = +config['page-size'];
-  if (Number.isNaN(pageSize) || pageSize <= 0) {
+  const ps = +config['page-size'];
+  if (Number.isNaN(ps) || ps <= 0) {
     window.lana?.log('error', 'Invalid page size');
   }
-  const start = (page - 1) * pageSize;
-  const end = page * pageSize;
-  props.paginatedData = props.data.slice(start, end);
+  const start = (page - 1) * ps === 0 ? (page - 1) * ps : (page - 1) * ps - page + 1;
+  const end = page * ps + 1;
+
+  props.paginatedData = props.filteredData.slice(start, end);
 }
 
 function updatePaginationControl(pagination, currentPage, totalPages) {
@@ -367,7 +368,7 @@ function populateTable(props, config) {
   props.el.append(spTheme);
   tBody.innerHTML = '';
 
-  const endOfPages = Math.min(props.currentPage + 10, props.paginatedData.length);
+  const endOfPages = Math.min(+config['page-size'], props.paginatedData.length);
 
   for (let i = props.currentPage - 1; i < endOfPages; i += 1) {
     populateRow(props, config, i);
@@ -377,9 +378,11 @@ function populateTable(props, config) {
   decoratePagination(props, config);
 }
 
-function filterData(props, query) {
+function filterData(props, config, query) {
   const q = query.toLowerCase();
   props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
+  props.currentPage = 1;
+  paginateData(props, config, 1);
 }
 
 function sortData(props, th, field) {
@@ -429,7 +432,7 @@ function buildDashboardHeader(props, config) {
 
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: actionsContainer });
   createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
-  searchInput.addEventListener('input', () => filterData(props, searchInput.value));
+  searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
 
   dashboardHeader.append(textContainer, actionsContainer);
   props.el.prepend(dashboardHeader);
