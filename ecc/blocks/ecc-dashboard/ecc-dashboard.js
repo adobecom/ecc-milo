@@ -371,7 +371,7 @@ function populateTable(props, config) {
 
 function filterData(props, query) {
   const q = query.toLowerCase();
-  props.mutableData = props.data.filter((e) => e.title.toLowerCase().startsWith(q));
+  props.mutableData = props.data.filter((e) => e.title.toLowerCase().includes(q));
 }
 
 function sortData(props, th, field) {
