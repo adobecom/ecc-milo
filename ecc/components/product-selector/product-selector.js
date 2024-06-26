@@ -1,4 +1,5 @@
 import { getLibs } from '../../scripts/utils.js';
+import { isEmptyObject } from '../../utils/utils.js';
 import { style } from './product-selector.css.js';
 
 const { LitElement, html, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
@@ -52,7 +53,7 @@ export default class ProductSelector extends LitElement {
   }
 
   isValidSelection() {
-    return this.hasRequiredAttributes();
+    return this.selectedProduct.name && !isEmptyObject(this.selectedProduct);
   }
 
   render() {
