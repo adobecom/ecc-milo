@@ -97,7 +97,7 @@ function formatLocaleDate(string) {
 
 function buildThumbnail(data) {
   // TODO: use thumbnail instead of just first image or mock image
-  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl || '/icons/icon-placeholder.svg' });
+  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl || '/ecc/icons/icon-placeholder.svg' });
   const container = createTag('td', { class: 'thumbnail-container' }, img);
   return container;
 }
