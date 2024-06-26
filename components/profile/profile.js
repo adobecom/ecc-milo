@@ -82,8 +82,7 @@ export class Profile extends LitElement {
       this.profileCopy = { ...this.profile };
       let respJson;
       if (this.profile.speakerId) {
-        const speakerData = await getSpeaker(this.seriesId, this.profile.speakerId);
-        respJson = await updateSpeaker({ ...speakerData, ...this.profile }, this.seriesId);
+        respJson = await updateSpeaker(this.profile, this.seriesId);
       } else {
         respJson = await createSpeaker(this.profile, this.seriesId);
       }
@@ -95,11 +94,13 @@ export class Profile extends LitElement {
         const file = imageDropzone?.getFile();
 
         if (file && (file instanceof File)) {
-          await uploadBinaryFile(file, {
+          const speakerData = await uploadBinaryFile(file, {
             targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.speakerId}/images`,
             type: 'speaker-photo',
             altText: `${this.profile.firstName} ${this.profile.lastName} photo`,
           });
+
+          this.profile.modificationTime = speakerData.modificationTime;
         }
 
         this.requestUpdate();
