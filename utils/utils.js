@@ -255,13 +255,13 @@ export const fetchThrottledMemoized = (() => {
   const memoize = async (url, options, fetcher, ttl) => {
     const key = `${url}-${JSON.stringify(options)}`;
 
-    // if (cache.has(key)) {
-    //   return cache.get(key);
-    // }
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
 
-    // if (pending.has(key)) {
-    //   return pending.get(key);
-    // }
+    if (pending.has(key)) {
+      return pending.get(key);
+    }
 
     const fetchPromise = fetcher(url, options);
     pending.set(key, fetchPromise);
