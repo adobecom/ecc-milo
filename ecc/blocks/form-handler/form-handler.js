@@ -544,14 +544,15 @@ async function buildECCForm(el) {
       if (prop === 'payload') {
         console.log('payload updated with: ', value);
         setPayloadCache(value);
-        updateComponents(props);
-        updateProfileContainer(props);
+        updateComponents(target);
+        updateProfileContainer(target);
+        initRequiredFieldsValidation(target);
       }
       if (prop === 'eventDataResp') {
         console.log('response updated with: ', value);
         setResponseCache(value);
-        updatePreviewCtas(props);
-        updateDashboardLink(props);
+        updatePreviewCtas(target);
+        updateDashboardLink(target);
       }
 
       return true;

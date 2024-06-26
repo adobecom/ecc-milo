@@ -1,13 +1,9 @@
 import { getLibs } from '../../scripts/utils.js';
 import { generateToolTip } from '../../utils/utils.js';
-import { getCaasTags, getClouds, getSeries } from '../../utils/esp-controller.js';
+import { getCaasTags, getSeries } from '../../utils/esp-controller.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
-
-async function buildPickerFromTags(id, wrapper, phText, options) {
-
-}
 
 async function decorateCloudTagSelect(column) {
   const phText = column.textContent.trim();
