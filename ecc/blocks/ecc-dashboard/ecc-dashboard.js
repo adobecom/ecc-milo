@@ -299,8 +299,14 @@ async function populateRow(props, config, index) {
   }
 }
 
-function paginatedData(props, config, page) {
-  props.paginatedData = props.data.slice((page - 1) * +config['page-size'], page * +config['page-size']);
+function paginateData(props, config, page) {
+  const pageSize = +config['page-size'];
+  if (Number.isNaN(pageSize) || pageSize <= 0) {
+    window.lana?.log('error', 'Invalid page size');
+  }
+  const start = (page - 1) * pageSize;
+  const end = page * pageSize;
+  props.paginatedData = props.data.slice(start, end);
 }
 
 function updatePaginationControl(pagination, currentPage, totalPages) {
@@ -333,21 +339,21 @@ function decoratePagination(props, config) {
       }
 
       updatePaginationControl(paginationContainer, props.currentPage = page, totalPages);
-      paginatedData(props, config, page);
+      paginateData(props, config, page);
     }
   });
 
   chevLeft.addEventListener('click', () => {
     if (props.currentPage > 1) {
       updatePaginationControl(paginationContainer, props.currentPage -= 1, totalPages);
-      paginatedData(props, config, props.currentPage);
+      paginateData(props, config, props.currentPage);
     }
   });
 
   chevRight.addEventListener('click', () => {
     if (props.currentPage < totalPages) {
       updatePaginationControl(paginationContainer, props.currentPage += 1, totalPages);
-      paginatedData(props, config, props.currentPage);
+      paginateData(props, config, props.currentPage);
     }
   });
 
