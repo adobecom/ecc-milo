@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 import { getLibs } from '../../scripts/utils.js';
 import { style } from './profile.css.js';
-import { createSpeaker, getSpeaker, updateSpeaker, uploadBinaryFile } from '../../utils/esp-controller.js';
+import { createSpeaker, updateSpeaker, uploadBinaryFile } from '../../utils/esp-controller.js';
 import { getServiceName } from '../../utils/utils.js';
 import { icons } from '../../icons/icons.svg.js';
 
