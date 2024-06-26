@@ -1,5 +1,4 @@
 import { getLibs } from '../../scripts/utils.js';
-import { isEmptyObject } from '../../utils/utils.js';
 import { style } from './partner-selector-group.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
