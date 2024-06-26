@@ -140,8 +140,7 @@ async function gatherValues(props) {
 
     const promises = Array.from(mappedComponents).map(async (component) => {
       const { onSubmit } = await import(`./controllers/${comp}-component-controller.js`);
-      const componentPayload = await onSubmit(component, props);
-      return componentPayload;
+      await onSubmit(component, props);
     });
 
     return Promise.all(promises);

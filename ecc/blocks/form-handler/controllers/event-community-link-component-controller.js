@@ -8,9 +8,9 @@ export function onSubmit(component, props) {
   if (checkbox.checked) {
     const communityTopicUrl = component.querySelector('#community-url-details').value;
     props.payload = { ...props.payload, communityTopicUrl };
-    return communityTopicUrl;
   }
 
+  delete props.payload.communityTopicUrl;
   return {};
 }
 
