@@ -312,7 +312,7 @@ function updatePaginationControl(pagination, currentPage, totalPages) {
 }
 
 function decoratePagination(props, config) {
-  const totalPages = Math.floor(props.mutableData.length / config.pageSize);
+  const totalPages = Math.floor(props.mutableData.length / +config['page-size']);
   const paginationContainer = createTag('div', { class: 'pagination-container' });
   const chevLeft = getIcon('chev-left');
   const chevRight = getIcon('chev-right');
@@ -518,7 +518,7 @@ async function buildDashboard(el, config) {
       set(target, prop, value, receiver) {
         target[prop] = value;
 
-        populateTable(receiver);
+        populateTable(receiver, config);
 
         return true;
       },
