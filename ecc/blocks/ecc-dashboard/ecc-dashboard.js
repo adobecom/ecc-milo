@@ -297,60 +297,6 @@ async function populateRow(props, config, index) {
   }
 }
 
-function populateTable(props, config) {
-  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' });
-  const tBody = props.el.querySelector('table.dashboard-table tbody');
-  props.el.append(spTheme);
-  tBody.innerHTML = '';
-
-  const endOfPages = Math.min(props.currentPage + 10, props.mutableData.length);
-
-  for (let i = props.currentPage - 1; i < endOfPages; i += 1) {
-    populateRow(props, config, i);
-  }
-}
-
-function filterData(props, query) {
-  const q = query.toLowerCase();
-  props.mutableData = props.data.filter((e) => e.title.toLowerCase().startsWith(q));
-}
-
-function sortData(props, th, field) {
-  let sortAscending = true;
-
-  if (th.classList.contains('active') && !th.classList.contains('desc-sort')) {
-    sortAscending = false;
-    th.classList.add('desc-sort');
-  } else {
-    th.classList.remove('desc-sort');
-  }
-
-  props.mutableData = props.data.sort((a, b) => {
-    let valA;
-    let valB;
-
-    if (field === 'title') {
-      valA = a[field].toLowerCase();
-      valB = b[field].toLowerCase();
-      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    } if (field === 'startDate' || field === 'modificationTime') {
-      valA = new Date(a[field]);
-      valB = new Date(b[field]);
-      return sortAscending ? valA - valB : valB - valA;
-    }
-    valA = a[field].toString().toLowerCase();
-    valB = b[field].toString().toLowerCase();
-    return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-  });
-
-  th.parentNode.querySelectorAll('th').forEach((header) => {
-    if (header !== th) {
-      header.classList.remove('active');
-      header.classList.remove('desc-sort');
-    }
-  });
-  th.classList.add('active');
-}
 
 function paginateData(props, page) {
   props.mutableData = props.data.slice((page - 1) * props.pageSize, page * props.pageSize);
@@ -408,6 +354,63 @@ function decoratePagination(props) {
   updatePaginationControl(paginationContainer, props.currentPage, totalPages);
 }
 
+function populateTable(props, config) {
+  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' });
+  const tBody = props.el.querySelector('table.dashboard-table tbody');
+  props.el.append(spTheme);
+  tBody.innerHTML = '';
+
+  const endOfPages = Math.min(props.currentPage + 10, props.mutableData.length);
+
+  for (let i = props.currentPage - 1; i < endOfPages; i += 1) {
+    populateRow(props, config, i);
+  }
+
+  decoratePagination(props);
+}
+
+function filterData(props, query) {
+  const q = query.toLowerCase();
+  props.mutableData = props.data.filter((e) => e.title.toLowerCase().startsWith(q));
+}
+
+function sortData(props, th, field) {
+  let sortAscending = true;
+
+  if (th.classList.contains('active') && !th.classList.contains('desc-sort')) {
+    sortAscending = false;
+    th.classList.add('desc-sort');
+  } else {
+    th.classList.remove('desc-sort');
+  }
+
+  props.mutableData = props.data.sort((a, b) => {
+    let valA;
+    let valB;
+
+    if (field === 'title') {
+      valA = a[field].toLowerCase();
+      valB = b[field].toLowerCase();
+      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    } if (field === 'startDate' || field === 'modificationTime') {
+      valA = new Date(a[field]);
+      valB = new Date(b[field]);
+      return sortAscending ? valA - valB : valB - valA;
+    }
+    valA = a[field].toString().toLowerCase();
+    valB = b[field].toString().toLowerCase();
+    return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+  });
+
+  th.parentNode.querySelectorAll('th').forEach((header) => {
+    if (header !== th) {
+      header.classList.remove('active');
+      header.classList.remove('desc-sort');
+    }
+  });
+  th.classList.add('active');
+}
+
 function buildDashboardHeader(props, config) {
   const dashboardHeader = createTag('div', { class: 'dashboard-header' });
   const textContainer = createTag('div', { class: 'dashboard-header-text' });
@@ -463,7 +466,6 @@ function buildDashboardTable(props, config) {
     });
   });
 
-  decoratePagination(props);
   populateTable(props, config);
 }
 
