@@ -311,8 +311,8 @@ function updatePaginationControl(pagination, currentPage, totalPages) {
   rightChevron.classList.toggle('disabled', currentPage === totalPages);
 }
 
-function decoratePagination(props) {
-  const totalPages = Math.ceil(props.mutableData.length / props.pageSize);
+function decoratePagination(props, config) {
+  const totalPages = Math.floor(props.mutableData.length / config.pageSize);
   const paginationContainer = createTag('div', { class: 'pagination-container' });
   const chevLeft = getIcon('chev-left');
   const chevRight = getIcon('chev-right');
@@ -366,7 +366,8 @@ function populateTable(props, config) {
     populateRow(props, config, i);
   }
 
-  decoratePagination(props);
+  props.el.querySelector('.pagination-container')?.remove();
+  decoratePagination(props, config);
 }
 
 function filterData(props, query) {
@@ -503,7 +504,6 @@ async function buildDashboard(el, config) {
   const props = {
     el,
     currentPage: 1,
-    pageSize: config['page-size'],
   };
 
   const data = await getEventsArray();
