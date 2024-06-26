@@ -297,9 +297,8 @@ async function populateRow(props, config, index) {
   }
 }
 
-
-function paginateData(props, page) {
-  props.mutableData = props.data.slice((page - 1) * props.pageSize, page * props.pageSize);
+function paginateData(props, config, page) {
+  props.mutableData = props.data.slice((page - 1) * +config['page-size'], page * +config['page-size']);
 }
 
 function updatePaginationControl(pagination, currentPage, totalPages) {
@@ -324,7 +323,7 @@ function decoratePagination(props, config) {
 
   pageInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
-      let page = parseInt(pageInput.value, props.pageSize);
+      let page = parseInt(pageInput.value, +config['page-size']);
       if (page > totalPages) {
         page = totalPages;
       } else if (page < 1) {
@@ -332,21 +331,21 @@ function decoratePagination(props, config) {
       }
 
       updatePaginationControl(paginationContainer, props.currentPage = page, totalPages);
-      paginateData(props, page);
+      paginateData(props, config, page);
     }
   });
 
   chevLeft.addEventListener('click', () => {
     if (props.currentPage > 1) {
       updatePaginationControl(paginationContainer, props.currentPage -= 1, totalPages);
-      paginateData(props, props.currentPage);
+      paginateData(props, config, props.currentPage);
     }
   });
 
   chevRight.addEventListener('click', () => {
     if (props.currentPage < totalPages) {
       updatePaginationControl(paginationContainer, props.currentPage += 1, totalPages);
-      paginateData(props, props.currentPage);
+      paginateData(props, config, props.currentPage);
     }
   });
 
