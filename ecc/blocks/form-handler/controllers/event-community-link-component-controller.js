@@ -14,6 +14,10 @@ export function onSubmit(component, props) {
   return {};
 }
 
+export async function onUpdate(_component, _props) {
+  // Do nothing
+}
+
 export default function init(component, props) {
   const eventData = props.eventDataResp;
   const checkbox = component.querySelector('#checkbox-community');

@@ -1,3 +1,6 @@
+/* eslint-disable no-unused-vars */
+import { getCaasTags } from '../../../utils/esp-controller.js';
+
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -14,6 +17,35 @@ export function onSubmit(component, props) {
 
     props.payload = { ...props.payload, relatedProducts };
   }
+}
+
+async function updateProductSelector(component, props) {
+  const caasTags = await getCaasTags();
+  const topicsVal = props.payload.fullTopicsValue?.map((x) => JSON.parse(x));
+  if (!caasTags || !topicsVal) return;
+
+  const productGroups = component.querySelectorAll('product-selector-group');
+  let products = Object.values(caasTags.namespaces.caas.tags['product-categories'].tags).map((x) => [...Object.values(x.tags).map((y) => y)]).flat();
+
+  products = products.filter((p) => topicsVal.find((t) => p.tagID.includes(t.tagID)));
+
+  productGroups.forEach((p) => {
+    p.setAttribute('data-products', JSON.stringify(products));
+    p.setAttribute('data-selected-topics', JSON.stringify(topicsVal));
+    p.requestUpdate();
+
+    p.shadowRoot.querySelectorAll('product-selector').forEach((ps) => {
+      ps.dispatchEvent(new CustomEvent('update-product', {
+        detail: { product: ps.selectedProduct },
+        bubbles: true,
+        composed: true,
+      }));
+    });
+  });
+}
+
+export async function onUpdate(component, props) {
+  await updateProductSelector(component, props);
 }
 
 export default async function init(component, props) {

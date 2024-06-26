@@ -39,6 +39,10 @@ export default function init(component, props) {
   });
 }
 
-export function onSubmit(component, props) {
+export async function onUpdate(_component, _props) {
+  // Do nothing
+}
 
+export function onSubmit(component, props) {
+  // Do nothing
 }

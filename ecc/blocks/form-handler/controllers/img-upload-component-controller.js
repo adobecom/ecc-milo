@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { uploadBinaryFile } from '../../../utils/esp-controller.js';
+import { getFilteredCachedResponse } from '../data-handler.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -10,6 +12,28 @@ export function onSubmit(component, props) {
       props.payload = { ...props.payload, ...{ showVenueImage: venueImgVisibleCheck.checked } };
     }
   }
+}
+
+function updateImgUploadComponentConfigs(component) {
+  const typeMap = {
+    hero: 'event-hero-image',
+    card: 'event-card-image',
+    venue: 'venue-image',
+  };
+
+  const type = typeMap[component.classList[1]];
+
+  const configs = {
+    type,
+    altText: `Event ${component.classList[1]} image`,
+    targetUrl: `/v1/events/${getFilteredCachedResponse().eventId}/images`,
+  };
+
+  component.dataset.configs = JSON.stringify(configs);
+}
+
+export async function onUpdate(component, props) {
+  updateImgUploadComponentConfigs(component);
 }
 
 export default function init(component, props) {

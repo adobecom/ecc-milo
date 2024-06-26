@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { changeInputValue } from '../../../utils/utils.js';
 
 function prepopulateTimeZone(component) {
@@ -53,6 +54,10 @@ function initStepLock(component) {
   });
 
   onFormatChange();
+}
+
+export async function onUpdate(_component, _props) {
+  // Do nothing
 }
 
 export default function init(component, props) {

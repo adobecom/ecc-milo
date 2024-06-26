@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -6,6 +7,10 @@ export function onSubmit(component, props) {
   const fullTopicsValue = Array.from(checkedBoxes).map((cb) => cb.dataset.value);
 
   props.payload = { ...props.payload, topics, fullTopicsValue };
+}
+
+export async function onUpdate(_component, _props) {
+  // Do nothing
 }
 
 export default function init(component, props) {
