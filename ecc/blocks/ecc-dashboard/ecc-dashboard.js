@@ -112,7 +112,8 @@ function updateDashboardData(newPayload, props) {
     return event;
   });
 
-  props.mutableData = props.data;
+  props.filteredData = props.data;
+  props.paginateData = props.data;
 }
 
 function initMoreOptions(props, config, eventObj, moreOptionsCell) {
@@ -181,7 +182,8 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
       await deleteEvent(eventObj.eventId);
       const newJson = await getEvents();
       props.data = newJson.events;
-      props.mutableData = newJson.events;
+      props.filteredData = newJson.events;
+      props.paginateData = newJson.events;
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
@@ -251,7 +253,7 @@ function buildToastMsg(eventTitle, msgTemplate) {
 }
 
 async function populateRow(props, config, index) {
-  const event = props.mutableData[index];
+  const event = props.paginatedData[index];
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   const toastArea = props.el.querySelector('.toast-area');
   const sp = new URLSearchParams(window.location.search);
@@ -298,7 +300,7 @@ async function populateRow(props, config, index) {
 }
 
 function paginateData(props, config, page) {
-  props.mutableData = props.data.slice((page - 1) * +config['page-size'], page * +config['page-size']);
+  props.paginateData = props.data.slice((page - 1) * +config['page-size'], page * +config['page-size']);
 }
 
 function updatePaginationControl(pagination, currentPage, totalPages) {
@@ -311,7 +313,7 @@ function updatePaginationControl(pagination, currentPage, totalPages) {
 }
 
 function decoratePagination(props, config) {
-  const totalPages = Math.ceil(props.mutableData.length / +config['page-size']);
+  const totalPages = Math.ceil(props.filteredData.length / +config['page-size']);
   const paginationContainer = createTag('div', { class: 'pagination-container' });
   const chevLeft = getIcon('chev-left');
   const chevRight = getIcon('chev-right');
@@ -359,7 +361,7 @@ function populateTable(props, config) {
   props.el.append(spTheme);
   tBody.innerHTML = '';
 
-  const endOfPages = Math.min(props.currentPage + 10, props.mutableData.length);
+  const endOfPages = Math.min(props.currentPage + 10, props.paginateData.length);
 
   for (let i = props.currentPage - 1; i < endOfPages; i += 1) {
     populateRow(props, config, i);
@@ -371,7 +373,7 @@ function populateTable(props, config) {
 
 function filterData(props, query) {
   const q = query.toLowerCase();
-  props.mutableData = props.data.filter((e) => e.title.toLowerCase().includes(q));
+  props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
 }
 
 function sortData(props, th, field) {
@@ -384,7 +386,7 @@ function sortData(props, th, field) {
     th.classList.remove('desc-sort');
   }
 
-  props.mutableData = props.data.sort((a, b) => {
+  props.filteredData = props.data.sort((a, b) => {
     let valA;
     let valB;
 
@@ -511,7 +513,8 @@ async function buildDashboard(el, config) {
     buildNoEventScreen(el, config);
   } else {
     props.data = data;
-    props.mutableData = [...data];
+    props.filteredData = [...data];
+    props.paginatedData = [...data];
 
     const dataHandler = {
       set(target, prop, value, receiver) {
