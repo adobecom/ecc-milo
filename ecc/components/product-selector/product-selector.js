@@ -56,7 +56,7 @@ export default class ProductSelector extends LitElement {
   }
 
   isValidSelection() {
-    return !this.hasRequiredAttributes();
+    return this.hasRequiredAttributes();
   }
 
   render() {
