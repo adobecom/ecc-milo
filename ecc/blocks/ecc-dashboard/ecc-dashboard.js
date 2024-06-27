@@ -179,7 +179,8 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
       window.location.assign(reloadUrl.href);
     });
 
-    deleteBtn.addEventListener('click', async () => {
+    deleteBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
       await deleteEvent(eventObj.eventId);
       const newJson = await getEvents();
       props.data = newJson.events;
