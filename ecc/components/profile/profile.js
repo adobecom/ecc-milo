@@ -79,6 +79,7 @@ export class Profile extends LitElement {
     saveButton.pending = true;
 
     try {
+      this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
       this.profileCopy = { ...this.profile };
       let respJson;
       if (this.profile.speakerId) {
@@ -89,7 +90,6 @@ export class Profile extends LitElement {
 
       if (respJson.speakerId) {
         this.profile.speakerId = respJson.speakerId;
-        this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
         this.profile.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
         const file = imageDropzone?.getFile();
 
