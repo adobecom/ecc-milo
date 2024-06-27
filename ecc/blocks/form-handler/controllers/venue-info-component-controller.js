@@ -128,8 +128,8 @@ export async function onSubmit(component, props) {
     gmtOffset,
   };
 
-  const onEventCreate = async (e) => {
-    const resp = await createVenue(e.detail.eventId, venueData);
+  const onEventCreate = async () => {
+    const resp = await createVenue(getFilteredCachedResponse().eventId, venueData);
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     props.payload = { ...props.payload, showVenuePostEvent };
     document.removeEventListener('eventcreated', onEventCreate);
