@@ -45,8 +45,8 @@ async function prefillProfiles(props) {
   }
 }
 
-export default function init(component, props) {
-  prefillProfiles(props);
+export default async function init(component, props) {
+  await prefillProfiles(props);
   const eventData = props.eventDataResp;
   const { speakers } = eventData;
   const profileContainer = component.querySelector('profile-container');
