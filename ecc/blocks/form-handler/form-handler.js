@@ -92,7 +92,7 @@ function enableSideNavForEditFlow(props) {
   const frags = props.el.querySelectorAll('.fragment');
   frags.forEach((frag, i) => {
     if (frag.querySelector('.form-component.prefilled')) {
-      props.farthestStep = Math.min(props.farthestStep, i);
+      props.farthestStep = Math.max(props.farthestStep, i);
     }
   });
 }
