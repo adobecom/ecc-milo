@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
-  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+  if (!component.closest('.fragment')?.classList.contains('activated')) return;
 
   const partnerVisible = component.querySelector('#partners-visible')?.checked;
 
@@ -16,7 +16,8 @@ export default async function init(component, props) {
   const partnersGroup = component.querySelector('partner-selector-group');
 
   if (eventData.partners) {
-    partnersGroup.setAttribute('.selectedPartners', JSON.stringify(eventData.partners));
+    partnersGroup.selectedPartners = eventData.partners;
+    component.classList.add('prefilled');
   }
 
   const partnerVisible = component.querySelector('#partners-visible');

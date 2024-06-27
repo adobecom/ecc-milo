@@ -5,7 +5,6 @@ import {
   updateEvent,
   publishEvent,
   getEvent,
-  getSpeaker,
 } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
@@ -89,37 +88,16 @@ function getCurrentFragment(props) {
   return currentFrag;
 }
 
-async function initComponents(props) {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const eventId = urlParams.get('eventId');
-
-  if (eventId) {
-    try {
-      const eventData = await getEvent(eventId);
-      const { seriesId } = eventData;
-      // eslint-disable-next-line max-len
-      const speakers = await Promise.all(eventData.speakers.map(async (sp) => getSpeaker(seriesId, sp.speakerId)));
-      for (let idx = 0; idx < eventData.speakers.length; idx += 1) {
-        eventData.speakers[idx] = { ...eventData.speakers[idx], ...speakers[idx] };
-      }
-      eventData.speakers = speakers;
-      props.eventDataResp = { ...props.eventDataResp, ...eventData };
-    } catch (e) {
-      console.error('Error fetching speaker data: ', e);
+function enableSideNavForEditFlow(props) {
+  const frags = props.el.querySelectorAll('.fragment');
+  frags.forEach((frag, i) => {
+    if (frag.querySelector('.form-component.prefilled')) {
+      props.farthestStep = Math.max(props.farthestStep, i);
     }
-  }
-
-  VANILLA_COMPONENTS.forEach((comp) => {
-    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
-    if (!mappedComponents?.length) return;
-
-    mappedComponents.forEach(async (component) => {
-      const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
-      await initComponent(component, props);
-    });
   });
+}
 
+function initCustomLitComponents() {
   customElements.define('image-dropzone', ImageDropzone);
   customElements.define('profile-ui', Profile);
   customElements.define('repeater-element', Repeater);
@@ -131,6 +109,29 @@ async function initComponents(props) {
   customElements.define('product-selector-group', ProductSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
+}
+
+async function initComponents(props) {
+  initCustomLitComponents();
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const eventId = urlParams.get('eventId');
+  const eventData = await getEvent(eventId);
+  props.eventDataResp = { ...props.eventDataResp, ...eventData };
+
+  const componentPromises = VANILLA_COMPONENTS.map(async (comp) => {
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
+    if (!mappedComponents?.length) return;
+
+    const componentInitPromises = Array.from(mappedComponents).map(async (component) => {
+      const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
+      await initComponent(component, props);
+    });
+
+    await Promise.all(componentInitPromises);
+  });
+
+  await Promise.all(componentPromises);
 }
 
 async function gatherValues(props) {
@@ -343,6 +344,7 @@ function renderFormNavigation(props, prevStep, currentStep) {
 
   frags[prevStep].classList.add('hidden');
   frags[currentStep].classList.remove('hidden');
+  frags[currentStep].classList.add('activated');
 
   if (currentStep === props.maxStep) {
     nextBtn.textContent = nextBtn.dataset.finalStateText;
@@ -474,6 +476,8 @@ function initNavigation(props) {
   frags.forEach((frag, i) => {
     if (i !== 0) {
       frag.classList.add('hidden');
+    } else {
+      frag.classList.add('activated');
     }
   });
 
@@ -578,6 +582,7 @@ async function buildECCForm(el) {
   initRepeaters(proxyProps);
   initNavigation(proxyProps);
   updateRequiredFields(proxyProps);
+  enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
 }
 
