@@ -50,7 +50,7 @@ export default async function init(component, props) {
   const eventData = props.eventDataResp;
   const { speakers } = eventData;
   const profileContainer = component.querySelector('profile-container');
-  if (!speakers || !profileContainer) return;
+  if (!speakers || !speakers.length || !profileContainer) return;
   profileContainer.profiles = speakers;
   profileContainer.requestUpdate();
   component.classList.add('prefilled');
