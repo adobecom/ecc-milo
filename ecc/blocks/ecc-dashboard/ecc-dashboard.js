@@ -173,7 +173,7 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
       e.preventDefault();
       const payload = { ...eventObj };
       payload.title = `${eventObj.title} - copy`;
-
+      toolBox.remove();
       const newEventJSON = await createEvent(cloneFilter(payload));
       const reloadUrl = new URL(window.location.href);
       reloadUrl.searchParams.set('clonedEventId', newEventJSON.eventId);
@@ -182,6 +182,7 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
 
     deleteBtn.addEventListener('click', async (e) => {
       e.preventDefault();
+      toolBox.remove();
       await deleteEvent(eventObj.eventId);
       const newJson = await getEvents();
       props.data = newJson.events;
