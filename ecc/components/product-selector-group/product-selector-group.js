@@ -57,7 +57,7 @@ export default class ProductSelectorGroup extends LitElement {
   }
 
   getSelectedProducts() {
-    return this.selectedProducts.filter((p) => p.name && p.showProductBlade !== undefined);
+    return this.selectedProducts.filter((p) => p.name);
   }
 
   countBlades() {
