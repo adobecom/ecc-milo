@@ -16,7 +16,11 @@ export async function onUpdate(_component, _props) {
 export default function init(component, props) {
   const eventData = props.eventDataResp;
   const checkedBoxes = component.querySelectorAll('sp-checkbox');
-  checkedBoxes.forEach((cb) => {
-    if (eventData.topics?.includes(cb.name)) cb.checked = true;
-  });
+  if (eventData.topics?.length !== 0) {
+    checkedBoxes.forEach((cb) => {
+      if (eventData.topics?.includes(cb.name)) cb.checked = true;
+    });
+
+    component.classList.add('prefilled');
+  }
 }

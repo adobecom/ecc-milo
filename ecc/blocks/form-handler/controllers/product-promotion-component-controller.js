@@ -54,5 +54,6 @@ export default async function init(component, props) {
 
   if (eventData.relatedProducts) {
     productGroup.setAttribute('.selectedProducts', JSON.stringify(eventData.relatedProducts));
+    component.classList.add('prefilled');
   }
 }

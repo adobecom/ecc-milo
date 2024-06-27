@@ -19,6 +19,8 @@ export default function init(component, props) {
   const appearChecks = component.querySelectorAll('sp-checkbox.check-appear');
   const requireChecks = component.querySelectorAll('sp-checkbox.check-require');
 
+  if (!eventData.rsvpFormFields) return;
+
   appearChecks.forEach((cb) => {
     if (eventData.rsvpFormFields?.visible?.includes(cb.name)) cb.checked = true;
   });

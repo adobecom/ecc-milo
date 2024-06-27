@@ -51,5 +51,9 @@ export default function init(component, props) {
     if (hostEmailEl) hostEmailEl.value = hostEmail;
     if (descriptionEl) descriptionEl.value = rsvpDescription;
     if (hostEmail) contactHostEl.checked = true;
+
+    if (attendeeLimit || allowWaitlisting || hostEmail || rsvpDescription) {
+      component.classList.add('prefilled');
+    }
   }
 }

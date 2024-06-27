@@ -53,4 +53,5 @@ export default function init(component, props) {
   if (!speakers || !profileContainer) return;
   profileContainer.profiles = speakers;
   profileContainer.requestUpdate();
+  component.classList.add('prefilled');
 }

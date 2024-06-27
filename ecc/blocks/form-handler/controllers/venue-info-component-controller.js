@@ -180,4 +180,6 @@ export default async function init(component, props) {
   changeInputValue(component.querySelector('#google-place-lng'), 'value', venue.coordinates?.lon);
   changeInputValue(component.querySelector('#google-place-id'), 'value', placeId);
   changeInputValue(component.querySelector('#google-map-url'), 'value', mapUrl);
+
+  if (venueName) component.classList.add('prefilled');
 }
