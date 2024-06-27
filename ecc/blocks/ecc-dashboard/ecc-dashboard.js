@@ -169,7 +169,8 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
     edit.href = url.toString();
 
     // clone
-    clone.addEventListener('click', async () => {
+    clone.addEventListener('click', async (e) => {
+      e.preventDefault();
       const payload = { ...eventObj };
       payload.title = `${eventObj.title} - copy`;
 
