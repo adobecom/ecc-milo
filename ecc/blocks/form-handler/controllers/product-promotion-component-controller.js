@@ -53,7 +53,8 @@ export default async function init(component, props) {
   const productGroup = component.querySelector('product-selector-group');
 
   if (eventData.relatedProducts) {
-    productGroup.setAttribute('.selectedProducts', JSON.stringify(eventData.relatedProducts));
+    productGroup.selectedProducts = eventData.relatedProducts;
+    productGroup.requestUpdate();
     component.classList.add('prefilled');
   }
 }
