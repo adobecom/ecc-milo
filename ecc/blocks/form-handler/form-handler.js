@@ -103,7 +103,6 @@ async function initComponents(props) {
   const eventId = urlParams.get('eventId');
   const eventData = await getEvent(eventId);
   props.eventDataResp = { ...props.eventDataResp, ...eventData };
-  enableSideNavForEditFlow(props);
 
   VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
@@ -576,6 +575,7 @@ async function buildECCForm(el) {
   initRepeaters(proxyProps);
   initNavigation(proxyProps);
   updateRequiredFields(proxyProps);
+  enableSideNavForEditFlow(props);
   initDeepLink(proxyProps);
 }
 
