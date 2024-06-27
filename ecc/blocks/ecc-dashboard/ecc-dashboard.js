@@ -305,8 +305,8 @@ function paginateData(props, config, page) {
   if (Number.isNaN(ps) || ps <= 0) {
     window.lana?.log('error', 'Invalid page size');
   }
-  const start = (page - 1) * ps === 0 ? (page - 1) * ps : (page - 1) * ps - page + 1;
-  const end = page * ps + 1;
+  const start = (page - 1) * ps;
+  const end = Math.min(page * ps, props.filteredData.length);
 
   props.paginatedData = props.filteredData.slice(start, end);
 }
@@ -369,9 +369,9 @@ function populateTable(props, config) {
   props.el.append(spTheme);
   tBody.innerHTML = '';
 
-  const endOfPages = Math.min(+config['page-size'], props.paginatedData.length);
+  const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
 
-  for (let i = props.currentPage - 1; i < endOfPages; i += 1) {
+  for (let i = 0; i < endOfPage; i += 1) {
     populateRow(props, config, i);
   }
 
@@ -379,24 +379,22 @@ function populateTable(props, config) {
   decoratePagination(props, config);
 }
 
-function filterData(props, config, query) {
-  const q = query.toLowerCase();
-  props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
-  props.currentPage = 1;
-  paginateData(props, config, 1);
-}
-
-function sortData(props, th, field) {
+function sortData(props, config, keepCurrentSort = false) {
+  const { field, el } = props.currentSort;
   let sortAscending = true;
 
-  if (th.classList.contains('active') && !th.classList.contains('desc-sort')) {
-    sortAscending = false;
-    th.classList.add('desc-sort');
+  if (el.classList.contains('active')) {
+    if (keepCurrentSort) {
+      sortAscending = !el.classList.contains('desc-sort');
+    } else {
+      sortAscending = el.classList.contains('desc-sort');
+    }
+    el.classList.toggle('desc-sort', !sortAscending);
   } else {
-    th.classList.remove('desc-sort');
+    el.classList.remove('desc-sort');
   }
 
-  props.filteredData = props.data.sort((a, b) => {
+  props.filteredData = props.filteredData.sort((a, b) => {
     let valA;
     let valB;
 
@@ -414,13 +412,24 @@ function sortData(props, th, field) {
     return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
   });
 
-  th.parentNode.querySelectorAll('th').forEach((header) => {
-    if (header !== th) {
+  el.parentNode.querySelectorAll('th').forEach((header) => {
+    if (header !== el) {
       header.classList.remove('active');
       header.classList.remove('desc-sort');
     }
   });
-  th.classList.add('active');
+
+  props.currentPage = 1;
+  paginateData(props, config, 1);
+  el.classList.add('active');
+}
+
+function filterData(props, config, query) {
+  const q = query.toLowerCase();
+  props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
+  props.currentPage = 1;
+  paginateData(props, config, 1);
+  sortData(props, config, true);
 }
 
 function buildDashboardHeader(props, config) {
@@ -474,7 +483,11 @@ function buildDashboardTable(props, config) {
         }
       });
       th.classList.add('active');
-      sortData(props, th, key);
+      props.currentSort = {
+        el: th,
+        field: key,
+      };
+      sortData(props, config);
     });
   });
 
@@ -515,6 +528,7 @@ async function buildDashboard(el, config) {
   const props = {
     el,
     currentPage: 1,
+    currentSort: {},
   };
 
   const data = await getEventsArray();

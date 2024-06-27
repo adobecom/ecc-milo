@@ -97,16 +97,9 @@ async function initComponents(props) {
   if (eventId) {
     try {
       const eventData = await getEvent(eventId);
-      const { seriesId } = eventData;
-      // eslint-disable-next-line max-len
-      const speakers = await Promise.all(eventData.speakers.map(async (sp) => getSpeaker(seriesId, sp.speakerId)));
-      for (let idx = 0; idx < eventData.speakers.length; idx += 1) {
-        eventData.speakers[idx] = { ...eventData.speakers[idx], ...speakers[idx] };
-      }
-      eventData.speakers = speakers;
       props.eventDataResp = { ...props.eventDataResp, ...eventData };
     } catch (e) {
-      console.error('Error fetching speaker data: ', e);
+      window.lana?.error('Error fetching event data: ', e);
     }
   }
 
@@ -273,8 +266,6 @@ function onStepValidate(props) {
         cta.classList.toggle('disabled', !stepValid);
       }
     });
-
-    props.furthestStep = Math.max(props.furthestStep, props.currentStep);
   };
 }
 
