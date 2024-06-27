@@ -1,12 +1,12 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { style } from './profile.css.js';
 import { createSpeaker, updateSpeaker, uploadBinaryFile } from '../../utils/esp-controller.js';
 import { getServiceName } from '../../utils/utils.js';
 import { icons } from '../../icons/icons.svg.js';
 
-const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 const DEFAULT_FIELD_LABELS = {
   heading: 'Profile',

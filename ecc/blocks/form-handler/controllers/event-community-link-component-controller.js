@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { changeInputValue } from '../../../utils/utils.js';
 
 export function onSubmit(component, props) {

@@ -1,4 +1,4 @@
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
 import {
   createEvent,
@@ -6,7 +6,6 @@ import {
   publishEvent,
   getEvent,
   getSpeaker,
-  getCaasTags,
 } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
@@ -20,9 +19,10 @@ import ProductSelectorGroup from '../../components/product-selector-group/produc
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
+import BlockMediator from '../../deps/block-mediator.min.js';
 
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
-const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
 
 // list of controllers for the handler to load
 const VANILLA_COMPONENTS = [
@@ -253,7 +253,7 @@ function validateRequiredFields(fields) {
   const urlParams = new URLSearchParams(search);
   const skipValidation = urlParams.get('skipValidation');
 
-  if (skipValidation === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
+  if (skipValidation === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     return true;
   }
 
@@ -583,7 +583,7 @@ async function buildECCForm(el) {
 
 export default async function init(el) {
   el.style.display = 'none';
-  const miloLibs = getLibs();
+  const miloLibs = LIBS;
   const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
     await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
   });
@@ -592,12 +592,12 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const profile = window.bm8r.get('imsProfile');
+  const profile = BlockMediator.get('imsProfile');
   const { search } = window.location;
   const urlParams = new URLSearchParams(search);
   const devMode = urlParams.get('devMode');
 
-  if (devMode === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
+  if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     buildECCForm(el);
     el.removeAttribute('style');
     return;
@@ -615,7 +615,7 @@ export default async function init(el) {
   }
 
   if (!profile) {
-    const unsubscribe = window.bm8r.subscribe('imsProfile', ({ newValue }) => {
+    const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
       if (newValue?.noProfile || newValue.account_type !== 'type3') {
         buildNoAccessScreen(el);
       } else {

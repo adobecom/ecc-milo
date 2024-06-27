@@ -1,3 +1,5 @@
+import { MILO_CONFIG } from '../scripts/scripts.js';
+
 let secretCache = [];
 
 function createTag(tag, attributes, html, options = {}) {
@@ -25,7 +27,7 @@ function createTag(tag, attributes, html, options = {}) {
 export function getIcon(tag) {
   const img = document.createElement('img');
   img.className = `icon icon-${tag}`;
-  img.src = `${window.miloConfig.codeRoot}/icons/${tag}.svg`;
+  img.src = `${MILO_CONFIG.codeRoot}/icons/${tag}.svg`;
   img.alt = tag;
 
   return img;

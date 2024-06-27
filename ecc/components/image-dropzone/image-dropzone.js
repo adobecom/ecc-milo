@@ -1,9 +1,9 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { style } from './image-dropzone.css.js';
 
-const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 export class ImageDropzone extends LitElement {
   static properties = {

@@ -1,8 +1,8 @@
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { isEmptyObject } from '../../utils/utils.js';
 import { style } from './product-selector.css.js';
 
-const { LitElement, html, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 export default class ProductSelector extends LitElement {
   static properties = {

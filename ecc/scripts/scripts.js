@@ -10,8 +10,27 @@
  * governing permissions and limitations under the License.
  */
 
-import { setLibs, decorateArea } from './utils.js';
 import { lazyCaptureProfile } from '../utils/event-apis.js';
+
+export function decorateArea(area = document) {
+  const eagerLoad = (parent, selector) => {
+    const img = parent.querySelector(selector);
+    img?.removeAttribute('loading');
+  };
+
+  (async function loadLCPImage() {
+    const marquee = area.querySelector('.marquee');
+    if (!marquee) {
+      eagerLoad(area, 'img');
+      return;
+    }
+
+    // First image of first row
+    eagerLoad(marquee, 'div:first-child img');
+    // Last image of last column of last row
+    eagerLoad(marquee, 'div:last-child > div:last-child img');
+  }());
+}
 
 const locales = {
   '': { ietf: 'en-US', tk: 'jdq5hay.css' },
@@ -39,9 +58,6 @@ const locales = {
 // Add project-wide style path here.
 const STYLES = '';
 
-// Use 'https://milo.adobe.com/libs' if you cannot map '/libs' to milo's origin.
-const LIBS = '/libs';
-
 // Add any config options.
 const CONFIG = {
   codeRoot: '/ecc',
@@ -63,12 +79,18 @@ decorateArea();
  * ------------------------------------------------------------
  */
 
-const miloLibs = setLibs(LIBS);
+export const LIBS = (() => {
+  const { hostname, search } = window.location;
+  if (!(hostname.includes('.hlx.') || hostname.includes('local'))) return '/libs';
+  const branch = new URLSearchParams(search).get('milolibs') || 'ecc';
+  if (branch === 'local') return 'http://localhost:6456/libs';
+  return branch.includes('--') ? `https://${branch}.hlx.live/libs` : `https://${branch}--milo--adobecom.hlx.live/libs`;
+})();
 
-window.bm8r = await import('../deps/block-mediator.min.js').then((mod) => mod.default);
+export const BlockMediator = await import('../deps/block-mediator.min.js').then((mod) => mod.default);
 
 (function loadStyles() {
-  const paths = [`${miloLibs}/styles/styles.css`];
+  const paths = [`${LIBS}/styles/styles.css`];
   if (STYLES) { paths.push(STYLES); }
   paths.forEach((path) => {
     const link = document.createElement('link');
@@ -78,10 +100,10 @@ window.bm8r = await import('../deps/block-mediator.min.js').then((mod) => mod.de
   });
 }());
 
+const { loadArea, setConfig, loadLana } = await import(`${LIBS}/utils/utils.js`);
+export const MILO_CONFIG = setConfig({ ...CONFIG, miloLibs: LIBS });
+
 (async function loadPage() {
-  const { loadArea, setConfig, loadLana } = await import(`${miloLibs}/utils/utils.js`);
-  const config = setConfig({ ...CONFIG, miloLibs });
-  window.miloConfig = config;
   await loadLana({ clientId: 'ecc-milo' });
   await loadArea().then(() => {
     lazyCaptureProfile();

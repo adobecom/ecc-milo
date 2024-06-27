@@ -1,7 +1,7 @@
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import '../../components/image-dropzone/image-dropzone.js';
 
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function extractFieldLabels(element) {
   const rows = Array.from(element.children);
@@ -40,7 +40,7 @@ async function decorateProfile(element) {
   element.append(profileContainer);
 }
 
-export default async function init(element, proxyProps) {
+export default async function init(element) {
   await decorateProfile(element);
   element.parentNode.classList.remove('section');
 }
