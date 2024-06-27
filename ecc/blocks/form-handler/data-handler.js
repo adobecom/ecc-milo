@@ -28,6 +28,7 @@ const wl = [
   'rsvpDescription',
   'attendeeLimit',
   'allowWaitlisting',
+  'hostEmail',
   // only in response
   'eventId',
   'url',
