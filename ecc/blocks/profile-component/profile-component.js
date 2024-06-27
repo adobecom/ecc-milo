@@ -40,7 +40,7 @@ async function decorateProfile(element) {
   element.append(profileContainer);
 }
 
-export default async function init(element, proxyProps) {
+export default async function init(element) {
   await decorateProfile(element);
   element.parentNode.classList.remove('section');
 }

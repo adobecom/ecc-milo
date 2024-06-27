@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export default function init(component, props) {
   // TODO: init function and repopulate data from props if exists
   const checkboxes = component.querySelectorAll('input[type="checkbox"]');

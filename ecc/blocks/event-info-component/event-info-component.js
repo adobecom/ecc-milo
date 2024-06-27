@@ -56,18 +56,6 @@ function buildTimePicker(column, wrapper) {
   wrapper.append(column);
 }
 
-function getGMTOffset(timeZone) {
-  const match = timeZone.match(/UTC([+-])(\d{2}):(\d{2})/);
-  if (match) {
-    const sign = match[1] === '+' ? 1 : -1;
-    const hours = parseInt(match[2], 10);
-
-    return sign * hours;
-  }
-
-  return 0;
-}
-
 function decorateTimeZoneSelect(cell, wrapper) {
   const phText = cell.querySelector('p')?.textContent.trim();
   const select = createTag('sp-picker', { id: 'time-zone-select-input', class: 'select-input', required: true, label: phText });

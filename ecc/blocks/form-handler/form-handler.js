@@ -6,7 +6,6 @@ import {
   publishEvent,
   getEvent,
   getSpeaker,
-  getCaasTags,
 } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';

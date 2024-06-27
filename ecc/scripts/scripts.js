@@ -104,10 +104,10 @@ export const BlockMediator = await import('../deps/block-mediator.min.js').then(
   });
 }());
 
+const { loadArea, setConfig, loadLana } = await import(`${LIBS}/utils/utils.js`);
+export const MILO_CONFIG = setConfig({ ...CONFIG, LIBS });
+
 (async function loadPage() {
-  const { loadArea, setConfig, loadLana } = await import(`${LIBS}/utils/utils.js`);
-  const config = setConfig({ ...CONFIG, LIBS });
-  window.miloConfig = config;
   await loadLana({ clientId: 'ecc-milo' });
   await loadArea().then(() => {
     lazyCaptureProfile();

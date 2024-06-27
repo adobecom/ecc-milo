@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 

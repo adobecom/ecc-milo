@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { LIBS } from '../../../scripts.js';
+import { LIBS } from '../../../scripts/scripts.js';
 import HtmlSanitizer from '../../../deps/html-sanitizer.js';
 import { fetchThrottledMemoized } from '../../../utils/utils.js';
 

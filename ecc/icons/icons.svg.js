@@ -2,6 +2,7 @@ import { LIBS } from '../scripts/scripts.js';
 
 const { svg } = await import(`${LIBS}/deps/lit-all.min.js`);
 // FIXME : use global footer icons instead.
+// eslint-disable-next-line import/prefer-default-export
 export const icons = svg`<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 
 <symbol id="footer-icon-globe" viewBox="0 0 50 50">
