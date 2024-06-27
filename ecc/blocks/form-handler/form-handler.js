@@ -482,8 +482,9 @@ function initNavigation(props) {
   });
 
   navItems.forEach((nav, i) => {
-    nav.addEventListener('click', () => {
+    nav.addEventListener('click', async () => {
       if (!nav.disabled) {
+        await saveEvent(props);
         navigateForm(props, i);
       }
     });
