@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
-  if (!component.closest('.fragment')?.classList.contains('activated')) return;
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const partnerVisible = component.querySelector('#partners-visible')?.checked;
 

@@ -347,7 +347,6 @@ function renderFormNavigation(props, prevStep, currentStep) {
 
   frags[prevStep].classList.add('hidden');
   frags[currentStep].classList.remove('hidden');
-  frags[currentStep].classList.add('activated');
 
   if (currentStep === props.maxStep) {
     nextBtn.textContent = nextBtn.dataset.finalStateText;
@@ -479,8 +478,6 @@ function initNavigation(props) {
   frags.forEach((frag, i) => {
     if (i !== 0) {
       frag.classList.add('hidden');
-    } else {
-      frag.classList.add('activated');
     }
   });
 

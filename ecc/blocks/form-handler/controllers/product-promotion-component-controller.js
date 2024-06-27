@@ -3,7 +3,7 @@ import { getCaasTags } from '../../../utils/esp-controller.js';
 import { handlize } from '../../../utils/utils.js';
 
 export function onSubmit(component, props) {
-  if (!component.closest('.fragment')?.classList.contains('activated')) return;
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const productGroup = component.querySelector('product-selector-group');
 

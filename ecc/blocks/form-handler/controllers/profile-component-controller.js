@@ -3,7 +3,7 @@ import { addSpeakerToEvent, getSpeaker } from '../../../utils/esp-controller.js'
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 export async function onSubmit(component, props) {
-  if (!component.closest('.fragment')?.classList.contains('activated')) return;
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const profileContainer = component.querySelector('profile-container');
   if (profileContainer) {
