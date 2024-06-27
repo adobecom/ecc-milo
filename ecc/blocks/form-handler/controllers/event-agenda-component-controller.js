@@ -26,7 +26,7 @@ export default function init(component, props) {
   const agendaGroup = component.querySelector('agenda-fieldset-group');
   const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info');
 
-  if (eventData.agenda) {
+  if (eventData.agenda?.length) {
     agendaGroup.agendaItems = eventData.agenda;
     component.classList.add('prefilled');
   }
