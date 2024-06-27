@@ -1,7 +1,7 @@
 import {
   createEvent, deleteEvent, getEvents, getVenue, publishEvent, unpublishEvent,
 } from '../../utils/esp-controller.js';
-import { LIBS } from '../../scripts/scripts.js';
+import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import BlockMediator from '../../deps/block-mediator.min.js';
@@ -550,7 +550,7 @@ export default async function init(el) {
   el.innerHTML = '';
   const profile = BlockMediator.get('imsProfile');
 
-  if (devMode === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
+  if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     buildDashboard(el, config);
     return;
   }

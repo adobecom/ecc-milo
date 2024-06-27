@@ -1,4 +1,4 @@
-import { LIBS } from '../../scripts/scripts.js';
+import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
 import {
   createEvent,
@@ -253,7 +253,7 @@ function validateRequiredFields(fields) {
   const urlParams = new URLSearchParams(search);
   const skipValidation = urlParams.get('skipValidation');
 
-  if (skipValidation === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
+  if (skipValidation === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     return true;
   }
 
@@ -597,7 +597,7 @@ export default async function init(el) {
   const urlParams = new URLSearchParams(search);
   const devMode = urlParams.get('devMode');
 
-  if (devMode === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
+  if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     buildECCForm(el);
     el.removeAttribute('style');
     return;
