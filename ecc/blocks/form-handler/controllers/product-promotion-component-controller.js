@@ -53,7 +53,7 @@ export default async function init(component, props) {
   const eventData = props.eventDataResp;
   const productGroup = component.querySelector('product-selector-group');
 
-  if (eventData.relatedProducts) {
+  if (eventData.relatedProducts?.length) {
     const selectedProducts = eventData.relatedProducts.map((p) => ({
       name: handlize(p.name),
       title: p.name,
