@@ -87,10 +87,6 @@ export const LIBS = (() => {
   return branch.includes('--') ? `https://${branch}.hlx.live/libs` : `https://${branch}--milo--adobecom.hlx.live/libs`;
 })();
 
-export async function importMiloUtils() {
-  return import(`${LIBS}/utils/utils.js`);
-}
-
 export const BlockMediator = await import('../deps/block-mediator.min.js').then((mod) => mod.default);
 
 (function loadStyles() {
