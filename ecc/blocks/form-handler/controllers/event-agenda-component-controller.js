@@ -27,8 +27,7 @@ export default function init(component, props) {
   const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info');
 
   if (eventData.agenda) {
-    console.log(eventData);
-    agendaGroup.dataset.agendaItems = JSON.stringify(eventData.agenda);
+    agendaGroup.agendaItems = eventData.agenda;
   }
 
   showAgendaPostEvent.checked = eventData.showAgendaPostEvent;
