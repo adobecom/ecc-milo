@@ -337,7 +337,32 @@ export async function onUpdate(_component, _props) {
 
 export default function init(component, props) {
   const eventData = props.eventDataResp;
+  const startTimeInput = component.querySelector('#time-picker-start-time');
+  const endTimeInput = component.querySelector('#time-picker-end-time');
+
   initCalendar(component);
+
+  endTimeInput.addEventListener('change', () => {
+    const allOptions = startTimeInput.querySelectorAll('sp-menu-item');
+    allOptions.forEach((option) => {
+      if (option.value >= endTimeInput.value && endTimeInput.value) {
+        option.disabled = true;
+      } else {
+        option.disabled = false;
+      }
+    });
+  });
+
+  startTimeInput.addEventListener('change', () => {
+    const allOptions = endTimeInput.querySelectorAll('sp-menu-item');
+    allOptions.forEach((option) => {
+      if (option.value <= startTimeInput.value && startTimeInput.value) {
+        option.disabled = true;
+      } else {
+        option.disabled = false;
+      }
+    });
+  });
 
   const {
     title,
@@ -351,8 +376,8 @@ export default function init(component, props) {
 
   component.querySelector('#info-field-event-title').value = title || '';
   component.querySelector('#info-field-event-description').value = description || '';
-  changeInputValue(component.querySelector('#time-picker-start-time'), 'value', localStartTime || '');
-  changeInputValue(component.querySelector('#time-picker-end-time'), 'value', localEndTime || '');
+  changeInputValue(startTimeInput, 'value', localStartTime || '');
+  changeInputValue(endTimeInput, 'value', localEndTime || '');
   changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
 
   const datePicker = component.querySelector('#event-info-date-picker');
