@@ -1,5 +1,5 @@
 import {
-  createEvent, deleteEvent, getEvents, getVenue, publishEvent, unpublishEvent,
+  createEvent, deleteEvent, getEvents, publishEvent, unpublishEvent,
 } from '../../utils/esp-controller.js';
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
@@ -233,8 +233,7 @@ function buildEventTitleTag(event) {
 
 // TODO: to retire
 async function buildVenueTag(eventObj) {
-  let { venue } = eventObj;
-  if (!venue) venue = await getVenue(eventObj.eventId);
+  const { venue } = eventObj;
   if (!venue) return null;
 
   const venueTag = createTag('div', { class: 'vanue-name' }, venue.venueName);
