@@ -97,7 +97,22 @@ function enableSideNavForEditFlow(props) {
   });
 }
 
+function initCustomLitComponents() {
+  customElements.define('image-dropzone', ImageDropzone);
+  customElements.define('profile-ui', Profile);
+  customElements.define('repeater-element', Repeater);
+  customElements.define('partner-selector', PartnerSelector);
+  customElements.define('partner-selector-group', PartnerSelectorGroup);
+  customElements.define('agenda-fieldset', AgendaFieldset);
+  customElements.define('agenda-fieldset-group', AgendaFieldsetGroup);
+  customElements.define('product-selector', ProductSelector);
+  customElements.define('product-selector-group', ProductSelectorGroup);
+  customElements.define('profile-container', ProfileContainer);
+  customElements.define('custom-textfield', CustomTextfield);
+}
+
 async function initComponents(props) {
+  initCustomLitComponents();
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
@@ -117,18 +132,6 @@ async function initComponents(props) {
   });
 
   await Promise.all(componentPromises);
-
-  customElements.define('image-dropzone', ImageDropzone);
-  customElements.define('profile-ui', Profile);
-  customElements.define('repeater-element', Repeater);
-  customElements.define('partner-selector', PartnerSelector);
-  customElements.define('partner-selector-group', PartnerSelectorGroup);
-  customElements.define('agenda-fieldset', AgendaFieldset);
-  customElements.define('agenda-fieldset-group', AgendaFieldsetGroup);
-  customElements.define('product-selector', ProductSelector);
-  customElements.define('product-selector-group', ProductSelectorGroup);
-  customElements.define('profile-container', ProfileContainer);
-  customElements.define('custom-textfield', CustomTextfield);
 }
 
 async function gatherValues(props) {
