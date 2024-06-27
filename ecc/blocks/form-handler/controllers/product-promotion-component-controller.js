@@ -63,14 +63,6 @@ export default async function init(component, props) {
 
     productGroup.selectedProducts = selectedProducts;
     productGroup.requestUpdate();
-
-    productGroup.shadowRoot.querySelectorAll('product-selector').forEach((ps) => {
-      ps.dispatchEvent(new CustomEvent('update-product', {
-        detail: { product: ps.selectedProduct },
-        bubbles: true,
-        composed: true,
-      }));
-    });
     component.classList.add('prefilled');
   }
 }
