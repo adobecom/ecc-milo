@@ -63,6 +63,10 @@ export default async function init(component, props) {
 
     productGroup.selectedProducts = selectedProducts;
     productGroup.requestUpdate();
+
+    productGroup.shadowRoot.querySelectorAll('product-selector').forEach((ps) => {
+      ps.requestUpdate();
+    });
     component.classList.add('prefilled');
   }
 }
