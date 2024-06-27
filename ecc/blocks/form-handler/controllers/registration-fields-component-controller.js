@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
-  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+  if (!component.closest('.fragment')?.classList.contains('activated')) return;
 
   const rsvpFormFields = {
     visible: Array.from(component.querySelectorAll('sp-checkbox.check-appear[checked]')).map((f) => f.name),
@@ -18,6 +18,8 @@ export default function init(component, props) {
   const eventData = props.eventDataResp;
   const appearChecks = component.querySelectorAll('sp-checkbox.check-appear');
   const requireChecks = component.querySelectorAll('sp-checkbox.check-require');
+
+  if (!eventData.rsvpFormFields) return;
 
   appearChecks.forEach((cb) => {
     if (eventData.rsvpFormFields?.visible?.includes(cb.name)) cb.checked = true;

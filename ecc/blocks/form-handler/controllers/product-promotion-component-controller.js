@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
 import { getCaasTags } from '../../../utils/esp-controller.js';
+import { handlize } from '../../../utils/utils.js';
 
 export function onSubmit(component, props) {
-  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+  if (!component.closest('.fragment')?.classList.contains('activated')) return;
 
   const productGroup = component.querySelector('product-selector-group');
 
@@ -53,6 +54,15 @@ export default async function init(component, props) {
   const productGroup = component.querySelector('product-selector-group');
 
   if (eventData.relatedProducts) {
-    productGroup.setAttribute('.selectedProducts', JSON.stringify(eventData.relatedProducts));
+    const selectedProducts = eventData.relatedProducts.map((p) => ({
+      name: handlize(p.name),
+      title: p.name,
+      showProductBlade: !!p.showProductBlade,
+      tags: p.tags.split(',').map((tagID) => ({ tagID })),
+    }));
+
+    productGroup.selectedProducts = selectedProducts;
+    productGroup.requestUpdate();
+    component.classList.add('prefilled');
   }
 }
