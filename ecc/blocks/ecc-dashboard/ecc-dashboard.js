@@ -4,6 +4,7 @@ import {
 import { getLibs } from '../../scripts/utils.js';
 import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
+import BlockMediator from '../../deps/block-mediator.min.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
@@ -547,7 +548,7 @@ export default async function init(el) {
 
   const config = readBlockConfig(el);
   el.innerHTML = '';
-  const profile = window.bm8r.get('imsProfile');
+  const profile = BlockMediator.get('imsProfile');
 
   if (devMode === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
     buildDashboard(el, config);
@@ -565,7 +566,7 @@ export default async function init(el) {
   }
 
   if (!profile) {
-    const unsubscribe = window.bm8r.subscribe('imsProfile', ({ newValue }) => {
+    const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
       if (newValue?.noProfile || newValue.account_type !== 'type3') {
         buildNoAccessScreen(el);
       } else {
