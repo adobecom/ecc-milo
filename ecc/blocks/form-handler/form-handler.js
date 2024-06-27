@@ -140,8 +140,7 @@ async function gatherValues(props) {
 
     const promises = Array.from(mappedComponents).map(async (component) => {
       const { onSubmit } = await import(`./controllers/${comp}-component-controller.js`);
-      const componentPayload = await onSubmit(component, props);
-      return componentPayload;
+      await onSubmit(component, props);
     });
 
     return Promise.all(promises);
@@ -545,14 +544,15 @@ async function buildECCForm(el) {
       if (prop === 'payload') {
         console.log('payload updated with: ', value);
         setPayloadCache(value);
-        updateComponents(props);
-        updateProfileContainer(props);
+        updateComponents(target);
+        updateProfileContainer(target);
+        initRequiredFieldsValidation(target);
       }
       if (prop === 'eventDataResp') {
         console.log('response updated with: ', value);
         setResponseCache(value);
-        updatePreviewCtas(props);
-        updateDashboardLink(props);
+        updatePreviewCtas(target);
+        updateDashboardLink(target);
       }
 
       return true;

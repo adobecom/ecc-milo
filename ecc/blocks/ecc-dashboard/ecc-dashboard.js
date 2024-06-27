@@ -97,7 +97,7 @@ function formatLocaleDate(string) {
 
 function buildThumbnail(data) {
   // TODO: use thumbnail instead of just first image or mock image
-  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl || '/icons/icon-placeholder.svg' });
+  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl || '/ecc/icons/icon-placeholder.svg' });
   const container = createTag('td', { class: 'thumbnail-container' }, img);
   return container;
 }
@@ -112,7 +112,8 @@ function updateDashboardData(newPayload, props) {
     return event;
   });
 
-  props.mutableData = props.data;
+  props.filteredData = props.data;
+  props.paginatedData = props.data;
 }
 
 function initMoreOptions(props, config, eventObj, moreOptionsCell) {
@@ -181,7 +182,8 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
       await deleteEvent(eventObj.eventId);
       const newJson = await getEvents();
       props.data = newJson.events;
-      props.mutableData = newJson.events;
+      props.filteredData = newJson.events;
+      props.paginatedData = newJson.events;
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
@@ -251,7 +253,7 @@ function buildToastMsg(eventTitle, msgTemplate) {
 }
 
 async function populateRow(props, config, index) {
-  const event = props.mutableData[index];
+  const event = props.paginatedData[index];
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   const toastArea = props.el.querySelector('.toast-area');
   const sp = new URLSearchParams(window.location.search);
@@ -297,22 +299,90 @@ async function populateRow(props, config, index) {
   }
 }
 
+function paginateData(props, config, page) {
+  const ps = +config['page-size'];
+  if (Number.isNaN(ps) || ps <= 0) {
+    window.lana?.log('error', 'Invalid page size');
+  }
+  const start = (page - 1) * ps === 0 ? (page - 1) * ps : (page - 1) * ps - page + 1;
+  const end = page * ps + 1;
+
+  props.paginatedData = props.filteredData.slice(start, end);
+}
+
+function updatePaginationControl(pagination, currentPage, totalPages) {
+  const input = pagination.querySelector('input');
+  input.value = currentPage;
+  const leftChevron = pagination.querySelector('.icon-chev-left');
+  const rightChevron = pagination.querySelector('.icon-chev-right');
+  leftChevron.classList.toggle('disabled', currentPage === 1);
+  rightChevron.classList.toggle('disabled', currentPage === totalPages);
+}
+
+function decoratePagination(props, config) {
+  const totalPages = Math.ceil(props.filteredData.length / +config['page-size']);
+  const paginationContainer = createTag('div', { class: 'pagination-container' });
+  const chevLeft = getIcon('chev-left');
+  const chevRight = getIcon('chev-right');
+  const paginationText = createTag('div', { class: 'pagination-text' }, `of ${totalPages} pages`);
+  const pageInput = createTag('input', { type: 'text', class: 'page-input' });
+
+  paginationText.prepend(pageInput);
+  paginationContainer.append(chevLeft, paginationText, chevRight);
+
+  pageInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+      let page = parseInt(pageInput.value, +config['page-size']);
+      if (page > totalPages) {
+        page = totalPages;
+      } else if (page < 1) {
+        page = 1;
+      }
+
+      updatePaginationControl(paginationContainer, props.currentPage = page, totalPages);
+      paginateData(props, config, page);
+    }
+  });
+
+  chevLeft.addEventListener('click', () => {
+    if (props.currentPage > 1) {
+      updatePaginationControl(paginationContainer, props.currentPage -= 1, totalPages);
+      paginateData(props, config, props.currentPage);
+    }
+  });
+
+  chevRight.addEventListener('click', () => {
+    if (props.currentPage < totalPages) {
+      updatePaginationControl(paginationContainer, props.currentPage += 1, totalPages);
+      paginateData(props, config, props.currentPage);
+    }
+  });
+
+  props.el.append(paginationContainer);
+  updatePaginationControl(paginationContainer, props.currentPage, totalPages);
+}
+
 function populateTable(props, config) {
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' });
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   props.el.append(spTheme);
   tBody.innerHTML = '';
 
-  const endOfPages = Math.min(props.currentPage + 10, props.mutableData.length);
+  const endOfPages = Math.min(+config['page-size'], props.paginatedData.length);
 
   for (let i = props.currentPage - 1; i < endOfPages; i += 1) {
     populateRow(props, config, i);
   }
+
+  props.el.querySelector('.pagination-container')?.remove();
+  decoratePagination(props, config);
 }
 
-function filterData(props, query) {
+function filterData(props, config, query) {
   const q = query.toLowerCase();
-  props.mutableData = props.data.filter((e) => e.title.toLowerCase().startsWith(q));
+  props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
+  props.currentPage = 1;
+  paginateData(props, config, 1);
 }
 
 function sortData(props, th, field) {
@@ -325,7 +395,7 @@ function sortData(props, th, field) {
     th.classList.remove('desc-sort');
   }
 
-  props.mutableData = props.data.sort((a, b) => {
+  props.filteredData = props.data.sort((a, b) => {
     let valA;
     let valB;
 
@@ -352,62 +422,6 @@ function sortData(props, th, field) {
   th.classList.add('active');
 }
 
-function paginateData(props, page) {
-  props.mutableData = props.data.slice((page - 1) * props.pageSize, page * props.pageSize);
-}
-
-function updatePaginationControl(pagination, currentPage, totalPages) {
-  const input = pagination.querySelector('input');
-  input.value = currentPage;
-  const leftChevron = pagination.querySelector('.icon-chev-left');
-  const rightChevron = pagination.querySelector('.icon-chev-right');
-  leftChevron.classList.toggle('disabled', currentPage === 1);
-  rightChevron.classList.toggle('disabled', currentPage === totalPages);
-}
-
-function decoratePagination(props) {
-  const totalPages = Math.ceil(props.mutableData.length / props.pageSize);
-  const paginationContainer = createTag('div', { class: 'pagination-container' });
-  const chevLeft = getIcon('chev-left');
-  const chevRight = getIcon('chev-right');
-  const paginationText = createTag('div', { class: 'pagination-text' }, `of ${totalPages} pages`);
-  const pageInput = createTag('input', { type: 'text', class: 'page-input' });
-
-  paginationText.prepend(pageInput);
-  paginationContainer.append(chevLeft, paginationText, chevRight);
-
-  pageInput.addEventListener('keypress', (event) => {
-    if (event.key === 'Enter') {
-      let page = parseInt(pageInput.value, props.pageSize);
-      if (page > totalPages) {
-        page = totalPages;
-      } else if (page < 1) {
-        page = 1;
-      }
-
-      updatePaginationControl(paginationContainer, props.currentPage = page, totalPages);
-      paginateData(props, page);
-    }
-  });
-
-  chevLeft.addEventListener('click', () => {
-    if (props.currentPage > 1) {
-      updatePaginationControl(paginationContainer, props.currentPage -= 1, totalPages);
-      paginateData(props, props.currentPage);
-    }
-  });
-
-  chevRight.addEventListener('click', () => {
-    if (props.currentPage < totalPages) {
-      updatePaginationControl(paginationContainer, props.currentPage += 1, totalPages);
-      paginateData(props, props.currentPage);
-    }
-  });
-
-  props.el.append(paginationContainer);
-  updatePaginationControl(paginationContainer, props.currentPage, totalPages);
-}
-
 function buildDashboardHeader(props, config) {
   const dashboardHeader = createTag('div', { class: 'dashboard-header' });
   const textContainer = createTag('div', { class: 'dashboard-header-text' });
@@ -418,7 +432,7 @@ function buildDashboardHeader(props, config) {
 
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: actionsContainer });
   createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
-  searchInput.addEventListener('input', () => filterData(props, searchInput.value));
+  searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
 
   dashboardHeader.append(textContainer, actionsContainer);
   props.el.prepend(dashboardHeader);
@@ -463,7 +477,6 @@ function buildDashboardTable(props, config) {
     });
   });
 
-  decoratePagination(props);
   populateTable(props, config);
 }
 
@@ -501,7 +514,6 @@ async function buildDashboard(el, config) {
   const props = {
     el,
     currentPage: 1,
-    pageSize: config['page-size'],
   };
 
   const data = await getEventsArray();
@@ -510,13 +522,14 @@ async function buildDashboard(el, config) {
     buildNoEventScreen(el, config);
   } else {
     props.data = data;
-    props.mutableData = [...data];
+    props.filteredData = [...data];
+    props.paginatedData = [...data];
 
     const dataHandler = {
       set(target, prop, value, receiver) {
         target[prop] = value;
 
-        populateTable(receiver);
+        populateTable(receiver, config);
 
         return true;
       },

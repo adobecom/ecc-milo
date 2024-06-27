@@ -2,7 +2,7 @@ import { getLibs } from '../../scripts/utils.js';
 import { style } from './partner-selector.css.js';
 import { createPartner } from '../../utils/esp-controller.js';
 
-const { LitElement, html, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 export default class PartnerSelector extends LitElement {
   static properties = {

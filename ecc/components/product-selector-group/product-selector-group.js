@@ -8,7 +8,6 @@ const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/li
 const defaultProductValue = {
   name: '',
   title: '[Product name]',
-  isPlaceholder: true,
 };
 
 export default class ProductSelectorGroup extends LitElement {
@@ -59,7 +58,7 @@ export default class ProductSelectorGroup extends LitElement {
   }
 
   getSelectedProducts() {
-    return this.selectedProducts.filter((p) => !p.isPlaceholder && !isEmptyObject(p));
+    return this.selectedProducts.filter((p) => p.name && p.showProductBlade !== undefined);
   }
 
   countBlades() {

@@ -53,13 +53,13 @@ export default class ProductSelector extends LitElement {
   }
 
   isValidSelection() {
-    return !this.selectedProduct.isPlaceholder && !isEmptyObject(this.selectedProduct);
+    return this.selectedProduct.name && !isEmptyObject(this.selectedProduct);
   }
 
   render() {
     return html`
       <fieldset class="rsvp-field-wrapper">
-      ${html`<img class="product-img" src="${this.selectedProduct.tagImage || '/icons/icon-placeholder.svg'}" alt="${this.selectedProduct.title || nothing}">`}  
+      ${html`<img class="product-img" src="${this.selectedProduct.tagImage || '/ecc/icons/icon-placeholder.svg'}" alt="${this.selectedProduct.title || nothing}">`}  
         <sp-picker class="product-select-input" label="Select a product" value=${this.selectedProduct.name || nothing} @change="${this.handleSelectChange}">
           ${this.products.map((product) => html`<sp-menu-item value="${product.name}">${product.title}
           </sp-menu-item>`)}
