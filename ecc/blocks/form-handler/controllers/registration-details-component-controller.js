@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
-  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+  if (!component.closest('.fragment')?.classList.contains('activated')) return;
 
   const attendeeLimit = component.querySelector('#attendee-count-input')?.value;
   const allowWaitlisting = component.querySelector('#registration-allow-waitlist')?.checked;

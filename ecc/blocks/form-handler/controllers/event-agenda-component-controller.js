@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
-  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+  if (!component.closest('.fragment')?.classList.contains('activated')) return;
 
   const agendaGroup = component.querySelector('agenda-fieldset-group');
   const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info')?.checked;

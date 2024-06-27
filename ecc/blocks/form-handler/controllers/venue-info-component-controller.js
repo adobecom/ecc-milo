@@ -93,7 +93,7 @@ function initAutocomplete(el) {
 }
 
 export async function onSubmit(component, props) {
-  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+  if (!component.closest('.fragment')?.classList.contains('activated')) return;
 
   const { eventId, venue } = props.eventDataResp;
 

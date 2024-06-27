@@ -3,7 +3,7 @@ import { uploadBinaryFile } from '../../../utils/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 export function onSubmit(component, props) {
-  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+  if (!component.closest('.fragment')?.classList.contains('activated')) return;
 
   if (component.classList.contains('venue')) {
     const venueImgVisibleCheck = component.querySelector('#checkbox-venue-image-visible');
