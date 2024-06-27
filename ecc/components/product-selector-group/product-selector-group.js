@@ -18,7 +18,7 @@ export default class ProductSelectorGroup extends LitElement {
 
   constructor() {
     super();
-    this.selectedProducts = this.selectedProducts?.length > 0 ? this.selectedProducts : [defaultProductValue];
+    this.selectedProducts = this.selectedProducts && this.selectedProducts?.length > 0 ? this.selectedProducts : [defaultProductValue];
 
     try {
       this.products = JSON.parse(this.dataset.products);
