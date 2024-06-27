@@ -226,7 +226,7 @@ async function saveEvent(props, options = { toPublish: false }) {
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
     const resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated'), { detail: { eventId: resp.eventId } });
+    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: resp.eventId } }));
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     const resp = await updateEvent(
       getFilteredCachedResponse().eventId,
