@@ -72,9 +72,12 @@ export default function init(component, props) {
     rsvpRequired,
   } = eventData;
 
-  changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType || '');
-  changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId || '');
-  changeInputValue(component.querySelector('#rsvp-required-check'), 'checked', rsvpRequired || 0);
+  if (cloudType && seriesId) {
+    changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType);
+    changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId);
+    changeInputValue(component.querySelector('#rsvp-required-check'), 'checked', rsvpRequired || 0);
+    component.classList.add('prefilled');
+  }
 }
 
 function getTemplateId(bu) {

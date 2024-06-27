@@ -5,7 +5,6 @@ import {
   updateEvent,
   publishEvent,
   getEvent,
-  getSpeaker,
 } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
@@ -89,37 +88,16 @@ function getCurrentFragment(props) {
   return currentFrag;
 }
 
-async function initComponents(props) {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const eventId = urlParams.get('eventId');
-
-  if (eventId) {
-    try {
-      const eventData = await getEvent(eventId);
-      const { seriesId } = eventData;
-      // eslint-disable-next-line max-len
-      const speakers = await Promise.all(eventData.speakers.map(async (sp) => getSpeaker(seriesId, sp.speakerId)));
-      for (let idx = 0; idx < eventData.speakers.length; idx += 1) {
-        eventData.speakers[idx] = { ...eventData.speakers[idx], ...speakers[idx] };
-      }
-      eventData.speakers = speakers;
-      props.eventDataResp = { ...props.eventDataResp, ...eventData };
-    } catch (e) {
-      console.error('Error fetching speaker data: ', e);
+function enableSideNavForEditFlow(props) {
+  const frags = props.el.querySelectorAll('.fragment');
+  frags.forEach((frag, i) => {
+    if (frag.querySelector('.form-component.prefilled')) {
+      props.farthestStep = Math.max(props.farthestStep, i);
     }
-  }
-
-  VANILLA_COMPONENTS.forEach((comp) => {
-    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
-    if (!mappedComponents?.length) return;
-
-    mappedComponents.forEach(async (component) => {
-      const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
-      await initComponent(component, props);
-    });
   });
+}
 
+function initCustomLitComponents() {
   customElements.define('image-dropzone', ImageDropzone);
   customElements.define('profile-ui', Profile);
   customElements.define('repeater-element', Repeater);
@@ -131,6 +109,32 @@ async function initComponents(props) {
   customElements.define('product-selector-group', ProductSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
+}
+
+async function initComponents(props) {
+  initCustomLitComponents();
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const eventId = urlParams.get('eventId');
+
+  if (eventId) {
+    const eventData = await getEvent(eventId);
+    props.eventDataResp = { ...props.eventDataResp, ...eventData };
+  }
+
+  const componentPromises = VANILLA_COMPONENTS.map(async (comp) => {
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
+    if (!mappedComponents?.length) return;
+
+    const componentInitPromises = Array.from(mappedComponents).map(async (component) => {
+      const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
+      await initComponent(component, props);
+    });
+
+    await Promise.all(componentInitPromises);
+  });
+
+  await Promise.all(componentPromises);
 }
 
 async function gatherValues(props) {
@@ -222,7 +226,7 @@ async function saveEvent(props, options = { toPublish: false }) {
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
     const resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated'));
+    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: resp.eventId } }));
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     const resp = await updateEvent(
       getFilteredCachedResponse().eventId,
@@ -478,8 +482,9 @@ function initNavigation(props) {
   });
 
   navItems.forEach((nav, i) => {
-    nav.addEventListener('click', () => {
+    nav.addEventListener('click', async () => {
       if (!nav.disabled) {
+        await saveEvent(props);
         navigateForm(props, i);
       }
     });
@@ -578,6 +583,7 @@ async function buildECCForm(el) {
   initRepeaters(proxyProps);
   initNavigation(proxyProps);
   updateRequiredFields(proxyProps);
+  enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
 }
 
