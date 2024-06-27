@@ -1,0 +1,70 @@
+.venue-info-component {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.venue-info-component sp-textfield {
+  font-family: var();
+  box-sizing: border-box;
+  font-size: var(--type-heading-m-size);
+  border: none;
+  outline: none;
+  width: 100%;
+}
+
+.venue-info-component .timezone-picker-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.venue-info-component .timezone-picker-wrapper .select-input {
+  padding: 9px 11px;
+  border-radius: 5px;
+}
+
+.venue-info-component .info-field-wrapper .input-wrapper {
+  margin-bottom: 15px;
+}
+
+.venue-info-component .info-field-wrapper .attr-text {
+  font-size: var(--type-body-xs-size);
+  text-align: right;
+}
+
+.venue-info-component .venue-info-field-location .location-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.venue-info-component .venue-info-field-location .location-input {
+  font-size: var(--type-body-m-size);
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  outline: none;
+  width: 40%;
+  color: var(--color-gray-900);
+}
+
+.venue-info-component .venue-info-addition-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.venue-info-component .venue-info-addition-wrapper .venue-info-addition {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  align-items: end;
+}
+
+.venue-info-component .venue-info-addition-wrapper .image-dropzone {
+  max-width: 240px;
+}
+
+.venue-info-component .venue-info-addition-wrapper .additional-comment {
+  line-height: 0.1;
+  padding-left: 24px;
+}

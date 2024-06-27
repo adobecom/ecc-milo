@@ -1,0 +1,9 @@
+.event-topics-component h3 {
+  font-size: var(--type-heading-s-size);
+}
+
+.event-topics-component .checkbox-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+}

@@ -1,0 +1,341 @@
+.form-handler {
+  display: block;
+  padding: 0 40px;
+}
+
+.form-handler .side-menu button {
+  font-family: var(--body-font-family);
+}
+
+.form-handler sp-textfield {
+  display: unset;
+  outline: none;
+}
+
+.form-handler sp-textfield[quiet]:focus {
+  outline: 1px var(--color-gray-500) solid;
+  border-radius: 4px;
+}
+
+.form-handler > div:first-child {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 50vh;
+}
+
+.form-handler .side-menu h3 {
+  font-size: var(--type-body-xs-size);
+  color: var(--color-gray-400);
+  margin-bottom: 0;
+  margin-top: 24px;
+  padding: 0 24px;
+}
+
+.form-handler .side-menu ul {
+  margin-top: 0;
+  padding: 0;
+}
+
+.form-handler .side-menu ul li {
+  list-style: none;
+  font-size: var(--type-body-xs-size);
+  line-height: normal;
+  border-radius: 8px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.form-handler .side-menu ul li a {
+  color: var(--color-black);
+}
+
+.form-handler .side-menu ul li a,
+.form-handler .side-menu ul li button {
+  text-align: left;
+  border: none;
+  background-color: transparent;
+  padding-left: 24px;
+  padding-right: 24px;
+  width: 100%;
+}
+
+.form-handler .side-menu ul li:not(:has(ul)) {
+  padding-left: 0;
+  padding-right: 0;
+  margin: 12px 0;
+  display: flex;
+}
+
+.form-handler .side-menu ul li ul {
+  margin-top: 12px;
+}
+
+.form-handler .side-menu ul li ul li:not(:has(ul)) {
+  margin: 4px 0;
+}
+
+.form-handler .side-menu ul li:not(:has(ul)) a,
+.form-handler .side-menu ul li:not(:has(ul)) button {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  cursor: pointer;
+}
+
+.form-handler .side-menu ul li:not(:has(ul)):has(a):hover,
+.form-handler .side-menu ul li:not(:has(ul)):has(a).active,
+.form-handler .side-menu ul li:not(:has(ul)):has(button:not(:disabled)):hover,
+.form-handler .side-menu ul li:not(:has(ul)):has(button:not(:disabled)).active {
+  background-color: var(--color-red);
+  color: var(--color-white);
+  font-weight: 700;
+  letter-spacing: -0.02em
+}
+
+.form-handler .side-menu ul li:not(:has(ul)):has(a):hover a,
+.form-handler .side-menu ul li:not(:has(ul)):has(a).active a,
+.form-handler .side-menu ul li:not(:has(ul)):has(button:not(:disabled)).active button,
+.form-handler .side-menu ul li:not(:has(ul)):has(button:not(:disabled)):hover button {
+  color: var(--color-white);
+  font-weight: 700;
+  letter-spacing: -0.02em
+}
+
+.form-handler .side-menu .nav-item {
+  cursor: pointer;
+}
+
+.form-handler .side-menu .nav-item.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.form-handler .main-frame {
+  flex-grow: 1;
+}
+
+.form-handler .main-frame .section .content {
+  max-width: none;
+}
+
+.form-handler .main-frame .section:first-of-type .content {
+  margin: 16px 24px;
+  max-width: none;
+  display: grid;
+  align-items: center;
+  justify-content: space-between;
+  grid-template-columns: 1fr 1fr;
+}
+
+.form-handler .main-frame .section:first-of-type .content p {
+  font-size: var(--type-body-xs-size);
+}
+
+.form-handler .main-frame .section:first-of-type .content p:first-of-type {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.form-handler .main-frame .section:first-of-type h2 {
+  margin: 0;
+  font-weight: 900;
+  color: var(--color-red);
+}
+
+.form-handler .main-frame .section:not(:first-of-type) {
+  padding: 24px 56px;
+  border-radius: 10px;
+  margin: 24px;
+  box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
+}
+
+.form-handler .fragment.hidden {
+  display: none;
+}
+
+.form-handler .form-component {
+  padding: 32px 12px;
+}
+
+.form-handler .form-component:not(:last-of-type):not(.no-divider) {
+  border-bottom: 3px solid var(--stroke-color-divider);
+}
+
+.form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon {
+  height: 16px;
+  width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+}
+
+.form-handler .form-component > div:first-of-type > div > h2 {
+  font-size: var(--type-heading-xl-size);
+  line-height: var(--type-heading-xl-lh);
+}
+
+.form-handler .section:not(:first-of-type) > div.content > h2,
+.form-handler .section:not(:first-of-type) > div.content > h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0;
+  padding: 0 12px;
+}
+
+.form-handler .form-component > div:first-of-type > div > h2,
+.form-handler .form-component > div:first-of-type > div > h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 32px 0;
+}
+
+.form-handler .event-heading-tooltip-wrapper {
+  position: relative;
+  font-size: var(--type-body-s-size);
+  font-weight: normal;
+}
+
+.form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon ~ .event-heading-tooltip-box {
+  display: none;
+  position: absolute;
+  width: max-content;
+  color: var(--color-white);
+  margin-left: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 8px;
+  border-radius: 4px;
+  background-color: var(--color-accent);
+  box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
+  font-size: var(--type-body-xxs-size);
+  line-height: normal;
+}
+
+.form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon ~ .event-heading-tooltip-box::before {
+  content: '';
+  position: absolute;
+  height: 8px;
+  width: 8px;
+  background: var(--color-accent);
+  transform: rotate(45deg) translateY(-50%);
+  left: -6px;
+  top: 50%;
+}
+
+.form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon:hover ~ .event-heading-tooltip-box {
+  display: unset;
+}
+
+.form-handler .form-handler-ctas-panel {
+  position: sticky;
+  transform: translateX(-40px);
+  box-sizing: border-box;
+  bottom: 0;
+  padding: 16px 60px;
+  background-color: var(--color-red);
+  width: calc(100% + 80px);
+  z-index: 9;
+  display: flex;
+  justify-content: center;
+}
+
+.form-handler .form-handler-ctas-panel .form-handler-panel-wrapper {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1440px;
+}
+
+.form-handler .form-handler-ctas-panel .form-handler-panel-wrapper > div {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.form-handler .form-handler-ctas-panel .form-handler-backward-wrapper .back-btn {
+  padding: 8px;
+  border: 2px solid var(--color-white);
+  border-radius: 24px;
+  cursor: pointer;
+}
+
+.form-handler .form-handler-ctas-panel .form-handler-backward-wrapper .back-btn .icon {
+  display: block;
+  height: 20px;
+  width: 20px;
+}
+
+.form-handler .form-handler-ctas-panel .form-handler-forward-wrapper > div:first-of-type {
+  padding-right: 16px;
+  border-right: 2px solid var(--color-black);
+}
+
+.form-handler .form-handler-ctas-panel a {
+  font-size: var(--type-body-s-size);
+}
+
+.form-handler .form-handler-ctas-panel a.disabled,
+.form-handler .form-handler-ctas-panel a.preview-not-ready,
+.form-handler .form-handler-ctas-panel a.submitting {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.form-handler .form-handler-ctas-panel a.next-button {
+  background-color: var(--color-gray-800);
+  border-color: var(--color-gray-800);
+}
+
+.form-handler .form-handler-ctas-panel a.next-button:hover {
+  filter: invert();
+}
+
+.form-handler .form-handler-ctas-panel a.fill {
+  background-color: var(--color-gray-200);
+  color: var(--color-black);
+  font-weight: 700;
+  border-radius: 20px;
+  line-height: 20px;
+  min-height: 21px;
+  padding: 7px 18px 8px;
+  border: 2px solid var(--color-white);
+  display: inline-block;
+}
+
+.form-handler .form-handler-ctas-panel a.fill:hover {
+  text-decoration: none;
+  filter: invert();
+}
+
+.form-handler .form-handler-ctas-panel .con-button.outline {
+  color: var(--color-white);
+  border-color: var(--color-white);
+}
+
+.form-handler .form-handler-ctas-panel .con-button.outline:hover {
+  background-color: var(--color-white);
+  color: var(--color-red);
+}
+
+.form-handler .hidden {
+  display: none;
+}
+
+.form-handler .img-upload-text p {
+  margin: 0;
+  font-size: var(--type-body-xs-size);
+  line-height: normal;
+}
+
+@media screen and (min-width: 900px) {
+  .form-handler > div:first-child {
+    flex-direction: row;
+  }
+
+  .form-handler .main-frame {
+    max-width: var(--grid-container-width);
+  }
+}

@@ -1,0 +1,22 @@
+.registration-fields-component .rsvp-checkboxes {
+  padding: 32px 64px;
+  background-color: #f8f8f8;
+  border-radius: 6px;
+  margin: 0 auto 40px;
+}
+
+.registration-fields-component .field-config-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.registration-fields-component .cat-text,
+.registration-fields-component .table-heading {
+  font-weight: 700;
+  font-size: var(--type-body-xxs-size);
+}
+
+.registration-fields-component .field-row {
+  height: 54px;
+  padding-bottom: 50px;
+}

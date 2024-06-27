@@ -1,0 +1,43 @@
+.registration-details-component {
+  padding-bottom: 40px;
+}
+
+.registration-details-component .text-field-row {
+  margin-bottom: 36px;
+}
+
+.registration-details-component .attendee-fields-wrapper {
+  margin-bottom: 32px;
+}
+
+.registration-details-component .attendee-count-wrapper {
+  margin-bottom: 24px;
+}
+
+.registration-details-component .attendee-count-wrapper input {
+  max-width: 64px;
+  margin-right: 16px;
+}
+
+.registration-details-component .rsvp-field-wrapper sp-textfield {
+  width: 100%;
+}
+
+.registration-details-component .rsvp-field-wrapper .attr-text {
+  text-align: right;
+}
+
+.registration-details-component fieldset.checkboxes-wrapper,
+.host-contact-wrapper {
+  display: flex;
+  gap: 32px;
+}
+
+.registration-details-component .attendee-fields-wrapper fieldset.checkboxes-wrapper {
+  justify-content: space-between;
+}
+
+.registration-details-component .rsvp-checkboxes {
+  margin-top: 40px;
+  border-top: 3px solid var(--stroke-color-divider);
+}

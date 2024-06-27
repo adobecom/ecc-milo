@@ -1,0 +1,22 @@
+.event-agenda-component .field-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 35px;
+}
+
+.event-agenda-component .checkbox-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+ 
+.event-agenda-component .checkbox-input {
+  margin-right: 8px;
+}
+ 
+.event-agenda-component .checkbox-label {
+  font-size: var(--type-body-xs-size);
+  font-weight: normal;
+}
+ 
