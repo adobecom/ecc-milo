@@ -105,7 +105,7 @@ export const BlockMediator = await import('../deps/block-mediator.min.js').then(
 }());
 
 const { loadArea, setConfig, loadLana } = await import(`${LIBS}/utils/utils.js`);
-export const MILO_CONFIG = setConfig({ ...CONFIG, LIBS });
+export const MILO_CONFIG = setConfig({ ...CONFIG, miloLibs: LIBS });
 
 (async function loadPage() {
   await loadLana({ clientId: 'ecc-milo' });
