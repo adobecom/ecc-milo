@@ -116,8 +116,11 @@ async function initComponents(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
-  const eventData = await getEvent(eventId);
-  props.eventDataResp = { ...props.eventDataResp, ...eventData };
+
+  if (eventId) {
+    const eventData = await getEvent(eventId);
+    props.eventDataResp = { ...props.eventDataResp, ...eventData };
+  }
 
   const componentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
