@@ -38,6 +38,7 @@ export default class AgendaFieldsetGroup extends LitElement {
   }
 
   render() {
+    console.log(this.agendas);
     return html`
       ${repeat(this.agendas, (agenda, index) => html`
         <agenda-fieldset .agendas=${this.agendas} .agenda=${agenda} .timeslots=${this.timeslots} .options=${this.options}

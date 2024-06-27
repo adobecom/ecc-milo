@@ -27,7 +27,7 @@ export async function onUpdate(_component, _props) {
   // Do nothing
 }
 
-async function prefillProfiles(component, props) {
+async function prefillProfiles(props) {
   const d = await props.eventDataResp;
   if (d?.eventId && d.seriesId) {
     const { seriesId } = d;
@@ -46,7 +46,7 @@ async function prefillProfiles(component, props) {
 }
 
 export default function init(component, props) {
-  prefillProfiles(component, props);
+  prefillProfiles(props);
   const eventData = props.eventDataResp;
   const { speakers } = eventData;
   const profileContainer = component.querySelector('profile-container');

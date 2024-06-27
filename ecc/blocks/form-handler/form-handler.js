@@ -89,6 +89,15 @@ function getCurrentFragment(props) {
   return currentFrag;
 }
 
+function enableSideNavForEditFlow(props) {
+  const frags = props.el.querySelectorAll('.fragment');
+  frags.forEach((frag, i) => {
+    if (frag.querySelector('.form-component.prefilled')) {
+      props.farthestStep = i;
+    }
+  });
+}
+
 async function initComponents(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
@@ -98,6 +107,7 @@ async function initComponents(props) {
     try {
       const eventData = await getEvent(eventId);
       props.eventDataResp = { ...props.eventDataResp, ...eventData };
+      enableSideNavForEditFlow(props);
     } catch (e) {
       window.lana?.error('Error fetching event data: ', e);
     }
