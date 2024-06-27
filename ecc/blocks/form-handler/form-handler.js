@@ -104,15 +104,19 @@ async function initComponents(props) {
   const eventData = await getEvent(eventId);
   props.eventDataResp = { ...props.eventDataResp, ...eventData };
 
-  VANILLA_COMPONENTS.forEach((comp) => {
+  const componentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents?.length) return;
 
-    mappedComponents.forEach(async (component) => {
+    const componentInitPromises = Array.from(mappedComponents).map(async (component) => {
       const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
       await initComponent(component, props);
     });
+
+    await Promise.all(componentInitPromises);
   });
+
+  await Promise.all(componentPromises);
 
   customElements.define('image-dropzone', ImageDropzone);
   customElements.define('profile-ui', Profile);
