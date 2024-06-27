@@ -18,8 +18,7 @@ export default class ProductSelectorGroup extends LitElement {
 
   constructor() {
     super();
-    this.selectedProducts = this.selectedProducts?.length > 0 ? this.selectedProducts : [defaultProductValue];
-
+    this.selectedProducts = this.selectedProducts || [defaultProductValue];
     try {
       this.products = JSON.parse(this.dataset.products);
     } catch {
@@ -58,7 +57,7 @@ export default class ProductSelectorGroup extends LitElement {
   }
 
   getSelectedProducts() {
-    return this.selectedProducts.filter((p) => p.name);
+    return this.selectedProducts.filter((p) => p.name && p.showProductBlade !== undefined);
   }
 
   countBlades() {

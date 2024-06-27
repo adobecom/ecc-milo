@@ -2,7 +2,7 @@
 import { changeInputValue } from '../../../utils/utils.js';
 
 export function onSubmit(component, props) {
-  if (!component.closest('.fragment')?.classList.contains('activated')) return null;
+  if (component.closest('.fragment')?.classList.contains('hidden')) return null;
 
   const checkbox = component.querySelector('#checkbox-community');
 
@@ -24,11 +24,8 @@ export default function init(component, props) {
   const checkbox = component.querySelector('#checkbox-community');
   const input = component.querySelector('#community-url-details');
 
-  if (eventData.communityTopicUrl) {
-    changeInputValue(checkbox, 'checked', !!eventData.communityTopicUrl);
-    changeInputValue(input, 'value', eventData.communityTopicUrl || '');
-    component.classList.add('prefilled');
-  }
+  changeInputValue(checkbox, 'checked', !!eventData.communityTopicUrl);
+  changeInputValue(input, 'value', eventData.communityTopicUrl || '');
 
   const updateInputState = () => {
     input.disabled = !checkbox.checked;

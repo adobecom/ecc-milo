@@ -305,8 +305,8 @@ function paginateData(props, config, page) {
   if (Number.isNaN(ps) || ps <= 0) {
     window.lana?.log('error', 'Invalid page size');
   }
-  const start = (page - 1) * ps;
-  const end = Math.min(page * ps, props.filteredData.length);
+  const start = (page - 1) * ps === 0 ? (page - 1) * ps : (page - 1) * ps - page + 1;
+  const end = page * ps + 1;
 
   props.paginatedData = props.filteredData.slice(start, end);
 }
@@ -369,9 +369,9 @@ function populateTable(props, config) {
   props.el.append(spTheme);
   tBody.innerHTML = '';
 
-  const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
+  const endOfPages = Math.min(+config['page-size'], props.paginatedData.length);
 
-  for (let i = 0; i < endOfPage; i += 1) {
+  for (let i = props.currentPage - 1; i < endOfPages; i += 1) {
     populateRow(props, config, i);
   }
 
@@ -379,22 +379,24 @@ function populateTable(props, config) {
   decoratePagination(props, config);
 }
 
-function sortData(props, config, keepCurrentSort = false) {
-  const { field, el } = props.currentSort;
+function filterData(props, config, query) {
+  const q = query.toLowerCase();
+  props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
+  props.currentPage = 1;
+  paginateData(props, config, 1);
+}
+
+function sortData(props, th, field) {
   let sortAscending = true;
 
-  if (el.classList.contains('active')) {
-    if (keepCurrentSort) {
-      sortAscending = !el.classList.contains('desc-sort');
-    } else {
-      sortAscending = el.classList.contains('desc-sort');
-    }
-    el.classList.toggle('desc-sort', !sortAscending);
+  if (th.classList.contains('active') && !th.classList.contains('desc-sort')) {
+    sortAscending = false;
+    th.classList.add('desc-sort');
   } else {
-    el.classList.remove('desc-sort');
+    th.classList.remove('desc-sort');
   }
 
-  props.filteredData = props.filteredData.sort((a, b) => {
+  props.filteredData = props.data.sort((a, b) => {
     let valA;
     let valB;
 
@@ -412,24 +414,13 @@ function sortData(props, config, keepCurrentSort = false) {
     return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
   });
 
-  el.parentNode.querySelectorAll('th').forEach((header) => {
-    if (header !== el) {
+  th.parentNode.querySelectorAll('th').forEach((header) => {
+    if (header !== th) {
       header.classList.remove('active');
       header.classList.remove('desc-sort');
     }
   });
-
-  props.currentPage = 1;
-  paginateData(props, config, 1);
-  el.classList.add('active');
-}
-
-function filterData(props, config, query) {
-  const q = query.toLowerCase();
-  props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
-  props.currentPage = 1;
-  paginateData(props, config, 1);
-  sortData(props, config, true);
+  th.classList.add('active');
 }
 
 function buildDashboardHeader(props, config) {
@@ -483,11 +474,7 @@ function buildDashboardTable(props, config) {
         }
       });
       th.classList.add('active');
-      props.currentSort = {
-        el: th,
-        field: key,
-      };
-      sortData(props, config);
+      sortData(props, th, key);
     });
   });
 
@@ -528,7 +515,6 @@ async function buildDashboard(el, config) {
   const props = {
     el,
     currentPage: 1,
-    currentSort: {},
   };
 
   const data = await getEventsArray();

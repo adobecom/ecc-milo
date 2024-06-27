@@ -41,7 +41,6 @@ async function decorateProfile(element) {
 }
 
 export default async function init(element) {
-  element.classList.add('form-component');
   await decorateProfile(element);
   element.parentNode.classList.remove('section');
 }

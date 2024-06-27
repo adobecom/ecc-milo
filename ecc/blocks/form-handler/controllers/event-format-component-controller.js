@@ -72,12 +72,9 @@ export default function init(component, props) {
     rsvpRequired,
   } = eventData;
 
-  if (cloudType && seriesId) {
-    changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType);
-    changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId);
-    changeInputValue(component.querySelector('#rsvp-required-check'), 'checked', rsvpRequired || 0);
-    component.classList.add('prefilled');
-  }
+  changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType || '');
+  changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId || '');
+  changeInputValue(component.querySelector('#rsvp-required-check'), 'checked', rsvpRequired || 0);
 }
 
 function getTemplateId(bu) {
@@ -91,7 +88,7 @@ function getTemplateId(bu) {
 }
 
 export function onSubmit(component, props) {
-  if (!component.closest('.fragment')?.classList.contains('activated')) return;
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const eventType = 'InPerson';
   const cloudType = component.querySelector('#bu-select-input').value;

@@ -186,7 +186,7 @@ export async function decorateTextfield(cell, extraOptions) {
 }
 
 export function changeInputValue(input, attr, value) {
-  if (!input || !value) return;
+  if (!input) return;
   input[attr] = value;
   input.dispatchEvent(new Event('change'));
 }
