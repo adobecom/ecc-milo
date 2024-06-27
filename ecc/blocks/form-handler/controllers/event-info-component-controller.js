@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
-import { getLibs } from '../../../scripts/utils.js';
+import { LIBS } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../utils/utils.js';
 
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function formatDate(date) {
   let month = `${date.getMonth() + 1}`;

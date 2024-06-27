@@ -1,9 +1,9 @@
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { generateToolTip } from '../../utils/utils.js';
 import { getCaasTags, getSeries } from '../../utils/esp-controller.js';
 
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
-const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
 
 async function decorateCloudTagSelect(column) {
   const phText = column.textContent.trim();

@@ -1,6 +1,6 @@
-import { getLibs } from '../scripts/utils.js';
+import { LIBS } from '../scripts/scripts.js';
 
-const { svg } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { svg } = await import(`${LIBS}/deps/lit-all.min.js`);
 // FIXME : use global footer icons instead.
 export const icons = svg`<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 

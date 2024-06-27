@@ -1,12 +1,12 @@
 import {
   createEvent, deleteEvent, getEvents, getVenue, publishEvent, unpublishEvent,
 } from '../../utils/esp-controller.js';
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import BlockMediator from '../../deps/block-mediator.min.js';
 
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 export function cloneFilter(obj) {
   const wl = [
@@ -505,7 +505,7 @@ function buildNoEventScreen(el, config) {
 }
 
 async function buildDashboard(el, config) {
-  const miloLibs = getLibs();
+  const miloLibs = LIBS;
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
