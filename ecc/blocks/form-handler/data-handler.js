@@ -26,6 +26,7 @@ const wl = [
   'showVenuePostEvent',
   'rsvpFormFields',
   'relatedProducts',
+  'rsvpDescription',
   // only in response
   'eventId',
   'url',
