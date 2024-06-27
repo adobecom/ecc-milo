@@ -28,6 +28,7 @@ export default function init(component, props) {
 
   if (eventData.agenda) {
     agendaGroup.agendaItems = eventData.agenda;
+    component.classList.add('prefilled');
   }
 
   showAgendaPostEvent.checked = eventData.showAgendaPostEvent;
