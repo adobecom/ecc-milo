@@ -5,7 +5,6 @@ import {
   updateEvent,
   publishEvent,
   getEvent,
-  getSpeaker,
 } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
@@ -102,16 +101,9 @@ async function initComponents(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
-
-  if (eventId) {
-    try {
-      const eventData = await getEvent(eventId);
-      props.eventDataResp = { ...props.eventDataResp, ...eventData };
-      enableSideNavForEditFlow(props);
-    } catch (e) {
-      window.lana?.error('Error fetching event data: ', e);
-    }
-  }
+  const eventData = await getEvent(eventId);
+  props.eventDataResp = { ...props.eventDataResp, ...eventData };
+  enableSideNavForEditFlow(props);
 
   VANILLA_COMPONENTS.forEach((comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);

@@ -5,6 +5,7 @@ const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all
 
 export default class AgendaFieldsetGroup extends LitElement {
   static properties = {
+    agendaItems: { type: Array },
     agendas: { type: Array },
     timeslots: { type: Array },
     options: { type: Object },
@@ -38,7 +39,6 @@ export default class AgendaFieldsetGroup extends LitElement {
   }
 
   render() {
-    console.log(this.dataset.agendaItems, this.agendas);
     return html`
       ${repeat(this.agendas, (agenda, index) => html`
         <agenda-fieldset .agendas=${this.agendas} .agenda=${agenda} .timeslots=${this.timeslots} .options=${this.options}
