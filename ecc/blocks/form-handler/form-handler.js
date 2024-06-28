@@ -320,7 +320,7 @@ function onStepValidate(props) {
 
     sideNavs.forEach((nav, i) => {
       if (i !== props.currentStep) {
-        nav.disabled = !stepValid;
+        nav.disabled = stepValid;
       }
     });
   };
