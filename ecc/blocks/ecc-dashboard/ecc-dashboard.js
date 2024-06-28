@@ -399,8 +399,9 @@ function sortData(props, config, resort = false) {
       valB = new Date(b[field]);
       return sortAscending ? valA - valB : valB - valA;
     }
-    valA = a[field].toString().toLowerCase();
-    valB = b[field].toString().toLowerCase();
+
+    valA = a[field]?.toString().toLowerCase();
+    valB = b[field]?.toString().toLowerCase();
     return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
   });
 
