@@ -507,7 +507,7 @@ function buildDashboardTable(props, config) {
 
   const usp = new URLSearchParams(window.location.search);
   if (usp.get('newEventId') || usp.get('clonedEventId')) {
-    const modTimeHeader = props.el.querySelector('thsortable.modificationTime');
+    const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
     if (modTimeHeader) props.currentSort = { key: 'modificationTime', el: modTimeHeader };
   }
 }
