@@ -350,8 +350,9 @@
 
 .form-handler .toast-area {
   position: sticky;
-  right: 40px;
-  bottom: 92px;
+  left: 100%;
+  bottom: 88px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
