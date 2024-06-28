@@ -296,7 +296,7 @@ async function populateRow(props, config, index) {
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
-    props.toasted = true;
+    props.noop = { ...props.noop, toasted: true };
   }
 
   if (event.eventId === sp.get('clonedEventId') && !props.toasted) {
@@ -304,7 +304,7 @@ async function populateRow(props, config, index) {
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
-    props.toasted = true;
+    props.noop = { ...props.noop, toasted: true };
   }
 }
 
@@ -547,7 +547,7 @@ async function buildDashboard(el, config) {
     el,
     currentPage: 1,
     currentSort: {},
-    toasted: false,
+    noop: { toasted: false },
   };
 
   const data = await getEventsArray();
@@ -562,8 +562,7 @@ async function buildDashboard(el, config) {
     const dataHandler = {
       set(target, prop, value, receiver) {
         target[prop] = value;
-        populateTable(receiver, config);
-
+        if (prop !== 'noop') populateTable(receiver, config);
         return true;
       },
     };
