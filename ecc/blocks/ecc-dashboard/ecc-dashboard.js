@@ -563,7 +563,6 @@ export default async function init(el) {
   const devMode = urlParams.get('devMode');
 
   const config = readBlockConfig(el);
-  config['create-form-url'] = config['create-form-url'] ?? '/event/create/t3';
   el.innerHTML = '';
   const profile = BlockMediator.get('imsProfile');
 
