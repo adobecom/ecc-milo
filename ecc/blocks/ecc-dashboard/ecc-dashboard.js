@@ -512,10 +512,8 @@ function buildDashboardTable(props, config) {
   const thead = createTag('thead', {}, '', { parent: table });
   createTag('tbody', {}, '', { parent: table });
   createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
-
-  populateTable(props, config);
-
   initSorting(props, config);
+  populateTable(props, config);
 }
 
 async function getEventsArray() {
