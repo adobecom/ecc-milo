@@ -287,18 +287,20 @@ async function populateRow(props, config, index) {
 
   initMoreOptions(props, config, event, moreOptionsCell);
 
-  if (event.eventId === sp.get('newEventId')) {
+  if (event.eventId === sp.get('newEventId') && !props.toasted) {
     const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
+    props.toasteed = true;
   }
 
-  if (event.eventId === sp.get('clonedEventId')) {
+  if (event.eventId === sp.get('clonedEventId') && !props.toasted) {
     const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
+    props.toasteed = true;
   }
 }
 
