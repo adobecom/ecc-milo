@@ -537,6 +537,7 @@ async function buildDashboard(el, config) {
     el,
     currentPage: 1,
     currentSort: {},
+    toasted: false,
   };
 
   const data = await getEventsArray();
