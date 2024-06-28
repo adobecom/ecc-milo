@@ -223,23 +223,27 @@ function decorateForm(el) {
 async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
 
+  let resp;
+
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    const resp = await createEvent(quickFilter(props.payload));
+    resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: resp.eventId } }));
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
-    const resp = await updateEvent(
+    resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
   } else if (options.toPublish) {
-    const resp = await publishEvent(
+    resp = await publishEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
   }
+
+  return resp;
 }
 
 function updateSideNav(props) {
@@ -269,12 +273,19 @@ function onStepValidate(props) {
     const currentFrag = getCurrentFragment(props);
     const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
     const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
+    const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
 
     ctas.forEach((cta) => {
       if (cta.classList.contains('back-btn')) {
         cta.classList.toggle('disabled', props.currentStep === 0);
       } else {
         cta.classList.toggle('disabled', !stepValid);
+      }
+    });
+
+    sideNavs.forEach((nav, i) => {
+      if (i !== props.currentStep) {
+        nav.disabled = !stepValid;
       }
     });
   };
@@ -408,8 +419,17 @@ function initFormCtas(props) {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
           if (cta.classList.contains('preview-not-ready')) return;
-          await saveEvent(props);
-          window.open(cta.href);
+          const resp = await saveEvent(props);
+
+          if (resp?.errors) {
+            // TODO: use toast instead of alert
+            window.alert(resp.errors.join('\n'));
+          } else if (resp?.message) {
+            window.alert(resp.message);
+          } else if (resp) {
+            window.open(cta.href);
+          }
+
           toggleBtnsSubmittingState(false);
         });
       }
@@ -436,15 +456,26 @@ function initFormCtas(props) {
           toggleBtnsSubmittingState(true);
 
           if (ctaUrl.hash === '#next') {
-            await saveEvent(props, { toPublish: true });
-            if (props.currentStep === props.maxStep) {
+            const resp = await saveEvent(props, { toPublish: true });
+            if (resp.errors) {
+            // TODO: use toast instead of alert
+              window.alert(resp?.errors.join('\n'));
+            } else if (resp.message) {
+              window.alert(resp?.message);
+            } else if (props.currentStep === props.maxStep) {
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
               if (dashboardLink) window.location.assign(dashboardLink.href);
             } else {
               navigateForm(props);
             }
           } else {
-            await saveEvent(props);
+            const resp = await saveEvent(props);
+            if (resp.errors) {
+            // TODO: use toast instead of alert
+              window.alert(resp?.errors.join('\n'));
+            } else if (resp.message) {
+              window.alert(resp?.message);
+            }
           }
 
           toggleBtnsSubmittingState(false);
@@ -484,8 +515,15 @@ function initNavigation(props) {
   navItems.forEach((nav, i) => {
     nav.addEventListener('click', async () => {
       if (!nav.disabled) {
-        await saveEvent(props);
-        navigateForm(props, i);
+        const resp = await saveEvent(props);
+        if (resp.errors) {
+        // TODO: use toast instead of alert
+          window.alert(resp?.errors.join('\n'));
+        } else if (resp.message) {
+          window.alert(resp?.message);
+        } else {
+          navigateForm(props, i);
+        }
       }
     });
   });
@@ -558,6 +596,9 @@ async function buildECCForm(el) {
         setResponseCache(value);
         updatePreviewCtas(target);
         updateDashboardLink(target);
+        if (value.message || value.errors) {
+          props.el.classList.add('show-error');
+        }
       }
 
       return true;

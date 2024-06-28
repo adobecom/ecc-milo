@@ -1,6 +1,24 @@
 .form-handler {
   display: block;
   padding: 0 40px;
+
+  --mod-textfield-icon-size-invalid: 0;
+  --stroke-color-divider: #6E6E6E;
+  --color-red: #EB1000;
+  --mod-textfield-focus-indicator-width: 0;
+  --mod-textfield-border-color-invalid-default: #000;
+  --mod-textfield-border-color-invalid-focus: #000;
+  --mod-textfield-border-color-invalid-focus-hover: #000;
+  --mod-textfield-border-color-invalid-hover: #000;
+  --mod-textfield-border-color-invalid-keyboard-focus: #000;
+  --mod-textfield-font-family: 'Adobe Clean', adobe-clean, 'Trebuchet MS', sans-serif;
+  --mod-textfield-font-weight: 700;
+  --mod-textfield-spacing-block-start: 8px;
+  --mod-textfield-spacing-inline-quiet: 12px;
+}
+
+.form-handler.show-error {
+  --mod-textfield-icon-size-invalid: 16px;
 }
 
 .form-handler .side-menu button {
