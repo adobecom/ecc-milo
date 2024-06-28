@@ -291,20 +291,20 @@ async function populateRow(props, config, index) {
 
   initMoreOptions(props, config, event, moreOptionsCell);
 
-  if (event.eventId === sp.get('newEventId') && !props.untracked.toasted) {
+  if (event.eventId === sp.get('newEventId') && !props.toasted) {
     const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
-    props.untracked.toasteed = true;
+    props.toasteed = true;
   }
 
-  if (event.eventId === sp.get('clonedEventId') && !props.untracked.toasted) {
+  if (event.eventId === sp.get('clonedEventId') && !props.toasted) {
     const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
-    props.untracked.toasteed = true;
+    props.toasteed = true;
   }
 }
 
@@ -372,7 +372,7 @@ function decoratePagination(props, config) {
 }
 
 function sortData(props, config, resort = false) {
-  const { field, el } = props.untracked.currentSort;
+  const { field, el } = props.currentSort;
   let sortAscending = true;
 
   if (el.classList.contains('active')) {
@@ -447,7 +447,7 @@ function initSorting(props, config) {
         }
       });
       th.classList.add('active');
-      props.untracked.currentSort = {
+      props.currentSort = {
         el: th,
         field: key,
       };
@@ -508,7 +508,7 @@ function buildDashboardTable(props, config) {
   const usp = new URLSearchParams(window.location.search);
   if (usp.get('newEventId') || usp.get('clonedEventId')) {
     const modTimeHeader = props.el.querySelector('thsortable.modificationTime');
-    if (modTimeHeader) props.untracked.currentSort = { key: 'modificationTime', el: modTimeHeader };
+    if (modTimeHeader) props.currentSort = { key: 'modificationTime', el: modTimeHeader };
   }
 }
 
@@ -546,10 +546,8 @@ async function buildDashboard(el, config) {
   const props = {
     el,
     currentPage: 1,
-    untracked: {
-      toasted: false,
-      currentSort: {},
-    },
+    currentSort: {},
+    toasted: false,
   };
 
   const data = await getEventsArray();
@@ -564,10 +562,7 @@ async function buildDashboard(el, config) {
     const dataHandler = {
       set(target, prop, value, receiver) {
         target[prop] = value;
-
-        if (prop !== 'untracked') {
-          populateTable(receiver, config);
-        }
+        populateTable(receiver, config);
 
         return true;
       },
