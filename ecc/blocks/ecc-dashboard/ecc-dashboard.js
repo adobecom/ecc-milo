@@ -1,5 +1,9 @@
 import {
-  createEvent, deleteEvent, getEvents, publishEvent, unpublishEvent,
+  createEvent,
+  deleteEvent,
+  getEvents,
+  publishEvent,
+  unpublishEvent,
 } from '../../utils/esp-controller.js';
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
@@ -292,7 +296,7 @@ async function populateRow(props, config, index) {
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     const modTimeHeader = props.el.querySelector('th.modificationTime');
-    if (modTimeHeader) props.currentSort = { key: 'modificationTime', modTimeHeader };
+    if (modTimeHeader) props.currentSort = { key: 'modificationTime', el: modTimeHeader };
     highlightRow(row);
     props.toasteed = true;
   }
@@ -302,7 +306,7 @@ async function populateRow(props, config, index) {
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     const modTimeHeader = props.el.querySelector('th.modificationTime');
-    if (modTimeHeader) props.currentSort = { key: 'modificationTime', modTimeHeader };
+    if (modTimeHeader) props.currentSort = { key: 'modificationTime', el: modTimeHeader };
     highlightRow(row);
     props.toasteed = true;
   }
