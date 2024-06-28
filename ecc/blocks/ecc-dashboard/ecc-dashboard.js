@@ -510,7 +510,7 @@ function buildDashboardTable(props, config) {
   if (usp.get('newEventId') || usp.get('clonedEventId')) {
     const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
     if (modTimeHeader) {
-      props.currentSort = { key: 'modificationTime', el: modTimeHeader };
+      props.currentSort = { field: 'modificationTime', el: modTimeHeader };
       sortData(props, config);
     }
   }
