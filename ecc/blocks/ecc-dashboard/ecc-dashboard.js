@@ -296,7 +296,7 @@ async function populateRow(props, config, index) {
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
-    props.toasteed = true;
+    props.toasted = true;
   }
 
   if (event.eventId === sp.get('clonedEventId') && !props.toasted) {
@@ -304,7 +304,7 @@ async function populateRow(props, config, index) {
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
-    props.toasteed = true;
+    props.toasted = true;
   }
 }
 
