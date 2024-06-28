@@ -470,10 +470,6 @@ function populateTable(props, config) {
 
   props.el.querySelector('.pagination-container')?.remove();
   decoratePagination(props, config);
-
-  if (props.currentSort) {
-    sortData(props, config, true);
-  }
 }
 
 function filterData(props, config, query) {
@@ -569,6 +565,7 @@ async function buildDashboard(el, config) {
 
         if (prop !== 'untracked') {
           populateTable(receiver, config);
+          sortData(receiver, config, true);
         }
 
         return true;
