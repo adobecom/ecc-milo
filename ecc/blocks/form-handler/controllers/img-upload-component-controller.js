@@ -63,6 +63,7 @@ export default function init(component, props) {
     if (photoObj) {
       dropzones.forEach((dz) => {
         dz.file = { ...photoObj, url: photoObj.imageURL };
+        dz.requestUpdate();
       });
     }
   }
