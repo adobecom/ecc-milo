@@ -80,7 +80,7 @@ function buildErrorMessage(props, resp) {
     const messages = [];
 
     resp.errors.forEach((error) => {
-      const errorPathSegments = resp.error.split('/');
+      const errorPathSegments = error.path.split('/');
       const text = `${errorPathSegments[errorPathSegments.length - 1]} ${error.message}`;
       messages.push(text);
     });
