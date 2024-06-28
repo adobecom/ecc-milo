@@ -476,6 +476,10 @@ function populateTable(props, config) {
 
   props.el.querySelector('.pagination-container')?.remove();
   decoratePagination(props, config);
+
+  if (props.currentSort) {
+    sortData(props, config, true);
+  }
 }
 
 function filterData(props, config, query) {
