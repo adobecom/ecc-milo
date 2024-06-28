@@ -454,12 +454,6 @@ function initSorting(props, config) {
       sortData(props, config);
     });
   });
-
-  const usp = new URLSearchParams(window.location.search);
-  if (usp.get('newEventId') || usp.get('clonedEventId')) {
-    const modTimeHeader = props.el.querySelector('thsortable.modificationTime');
-    if (modTimeHeader) props.currentSort = { key: 'modificationTime', el: modTimeHeader };
-  }
 }
 
 function populateTable(props, config) {
@@ -514,6 +508,12 @@ function buildDashboardTable(props, config) {
   createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
   initSorting(props, config);
   populateTable(props, config);
+
+  const usp = new URLSearchParams(window.location.search);
+  if (usp.get('newEventId') || usp.get('clonedEventId')) {
+    const modTimeHeader = props.el.querySelector('thsortable.modificationTime');
+    if (modTimeHeader) props.currentSort = { key: 'modificationTime', el: modTimeHeader };
+  }
 }
 
 async function getEventsArray() {
