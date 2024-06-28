@@ -291,20 +291,20 @@ async function populateRow(props, config, index) {
 
   initMoreOptions(props, config, event, moreOptionsCell);
 
-  if (event.eventId === sp.get('newEventId') && !props.noop.toasted) {
+  if (event.eventId === sp.get('newEventId') && !props.el.classList.contains('toast-shown')) {
     const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
-    props.noop = { ...props.noop, toasted: true };
+    props.el.classList.add('toast-shown');
   }
 
-  if (event.eventId === sp.get('clonedEventId') && !props.noop.toasted) {
+  if (event.eventId === sp.get('clonedEventId') && !props.el.classList.contains('toast-shown')) {
     const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
-    props.noop = { ...props.noop, toasted: true };
+    props.el.classList.add('toast-shown');
   }
 }
 
@@ -547,7 +547,6 @@ async function buildDashboard(el, config) {
     el,
     currentPage: 1,
     currentSort: {},
-    noop: { toasted: false },
   };
 
   const data = await getEventsArray();
@@ -562,7 +561,7 @@ async function buildDashboard(el, config) {
     const dataHandler = {
       set(target, prop, value, receiver) {
         target[prop] = value;
-        if (prop !== 'noop') populateTable(receiver, config);
+        populateTable(receiver, config);
         return true;
       },
     };
