@@ -52,7 +52,7 @@ export const style = css`
   width: 100%;
 }
 
-.img-file-input-wrapper div:hover {
+.img-file-input-wrapper label:hover {
   background-color: var(--color-gray-100);
 }
 
