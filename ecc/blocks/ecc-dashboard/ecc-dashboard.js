@@ -470,8 +470,6 @@ function populateTable(props, config) {
 
   const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
 
-  initSorting(props, config);
-
   for (let i = 0; i < endOfPage; i += 1) {
     populateRow(props, config, i);
   }
@@ -512,6 +510,8 @@ function buildDashboardTable(props, config) {
   createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
 
   populateTable(props, config);
+
+  initSorting(props, config);
 }
 
 async function getEventsArray() {
