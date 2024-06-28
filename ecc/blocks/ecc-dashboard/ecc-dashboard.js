@@ -371,22 +371,6 @@ function decoratePagination(props, config) {
   updatePaginationControl(paginationContainer, props.currentPage, totalPages);
 }
 
-function populateTable(props, config) {
-  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' });
-  const tBody = props.el.querySelector('table.dashboard-table tbody');
-  props.el.append(spTheme);
-  tBody.innerHTML = '';
-
-  const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
-
-  for (let i = 0; i < endOfPage; i += 1) {
-    populateRow(props, config, i);
-  }
-
-  props.el.querySelector('.pagination-container')?.remove();
-  decoratePagination(props, config);
-}
-
 function sortData(props, config, keepCurrentSort = false) {
   const { field, el } = props.currentSort;
   let sortAscending = true;
@@ -432,30 +416,6 @@ function sortData(props, config, keepCurrentSort = false) {
   el.classList.add('active');
 }
 
-function filterData(props, config, query) {
-  const q = query.toLowerCase();
-  props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
-  props.currentPage = 1;
-  paginateData(props, config, 1);
-  sortData(props, config, true);
-}
-
-function buildDashboardHeader(props, config) {
-  const dashboardHeader = createTag('div', { class: 'dashboard-header' });
-  const textContainer = createTag('div', { class: 'dashboard-header-text' });
-  const actionsContainer = createTag('div', { class: 'dashboard-actions-container' });
-
-  createTag('h1', { class: 'dashboard-header-heading' }, 'All Events', { parent: textContainer });
-  createTag('p', { class: 'dashboard-header-events-count' }, `(${props.data.length} events)`, { parent: textContainer });
-
-  const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: actionsContainer });
-  createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
-  searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
-
-  dashboardHeader.append(textContainer, actionsContainer);
-  props.el.prepend(dashboardHeader);
-}
-
 function initSorting(props, config) {
   const thead = props.el.querySelector('thead');
   const thRow = thead.querySelector('tr');
@@ -497,9 +457,51 @@ function initSorting(props, config) {
 
   const usp = new URLSearchParams(window.location.search);
   if (usp.get('newEventId') || usp.get('clonedEventId')) {
-    const modTimeHeader = props.el.querySelector('th.modificationTime');
+    const modTimeHeader = props.el.querySelector('thsortable.modificationTime');
     if (modTimeHeader) props.currentSort = { key: 'modificationTime', el: modTimeHeader };
   }
+}
+
+function populateTable(props, config) {
+  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' });
+  const tBody = props.el.querySelector('table.dashboard-table tbody');
+  props.el.append(spTheme);
+  tBody.innerHTML = '';
+
+  const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
+
+  initSorting(props, config);
+
+  for (let i = 0; i < endOfPage; i += 1) {
+    populateRow(props, config, i);
+  }
+
+  props.el.querySelector('.pagination-container')?.remove();
+  decoratePagination(props, config);
+}
+
+function filterData(props, config, query) {
+  const q = query.toLowerCase();
+  props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
+  props.currentPage = 1;
+  paginateData(props, config, 1);
+  sortData(props, config, true);
+}
+
+function buildDashboardHeader(props, config) {
+  const dashboardHeader = createTag('div', { class: 'dashboard-header' });
+  const textContainer = createTag('div', { class: 'dashboard-header-text' });
+  const actionsContainer = createTag('div', { class: 'dashboard-actions-container' });
+
+  createTag('h1', { class: 'dashboard-header-heading' }, 'All Events', { parent: textContainer });
+  createTag('p', { class: 'dashboard-header-events-count' }, `(${props.data.length} events)`, { parent: textContainer });
+
+  const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: actionsContainer });
+  createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
+  searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
+
+  dashboardHeader.append(textContainer, actionsContainer);
+  props.el.prepend(dashboardHeader);
 }
 
 function buildDashboardTable(props, config) {
@@ -508,7 +510,7 @@ function buildDashboardTable(props, config) {
   const thead = createTag('thead', {}, '', { parent: table });
   createTag('tbody', {}, '', { parent: table });
   createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
-  initSorting(props, config);
+
   populateTable(props, config);
 }
 
