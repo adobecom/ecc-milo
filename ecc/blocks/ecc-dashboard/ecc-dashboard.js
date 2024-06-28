@@ -371,12 +371,12 @@ function decoratePagination(props, config) {
   updatePaginationControl(paginationContainer, props.currentPage, totalPages);
 }
 
-function sortData(props, config, keepCurrentSort = false) {
-  const { field, el } = props.currentSort;
+function sortData(props, config, resort = false) {
+  const { field, el } = props.untracked.currentSort;
   let sortAscending = true;
 
   if (el.classList.contains('active')) {
-    if (keepCurrentSort) {
+    if (resort) {
       sortAscending = !el.classList.contains('desc-sort');
     } else {
       sortAscending = el.classList.contains('desc-sort');
@@ -447,7 +447,7 @@ function initSorting(props, config) {
         }
       });
       th.classList.add('active');
-      props.currentSort = {
+      props.untracked.currentSort = {
         el: th,
         field: key,
       };
@@ -508,7 +508,7 @@ function buildDashboardTable(props, config) {
   const usp = new URLSearchParams(window.location.search);
   if (usp.get('newEventId') || usp.get('clonedEventId')) {
     const modTimeHeader = props.el.querySelector('thsortable.modificationTime');
-    if (modTimeHeader) props.currentSort = { key: 'modificationTime', el: modTimeHeader };
+    if (modTimeHeader) props.untracked.currentSort = { key: 'modificationTime', el: modTimeHeader };
   }
 }
 
@@ -546,8 +546,10 @@ async function buildDashboard(el, config) {
   const props = {
     el,
     currentPage: 1,
-    currentSort: {},
-    untracked: { toasted: false },
+    untracked: {
+      toasted: false,
+      currentSort: {},
+    },
   };
 
   const data = await getEventsArray();
@@ -565,7 +567,6 @@ async function buildDashboard(el, config) {
 
         if (prop !== 'untracked') {
           populateTable(receiver, config);
-          sortData(receiver, config, true);
         }
 
         return true;
