@@ -349,7 +349,7 @@
 }
 
 .form-handler .toast-area {
-  position: fixed;
+  position: sticky;
   right: 40px;
   bottom: 92px;
   display: flex;
