@@ -451,7 +451,6 @@ function initSorting(props, config) {
         el: th,
         field: key,
       };
-      sortData(props, config);
     });
   });
 }
@@ -565,6 +564,9 @@ async function buildDashboard(el, config) {
 
         if (prop !== 'untracked') {
           populateTable(receiver, config);
+        }
+
+        if (prop === 'currentSort') {
           sortData(receiver, config, true);
         }
 
