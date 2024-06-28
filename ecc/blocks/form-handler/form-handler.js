@@ -1,5 +1,5 @@
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
+import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip, camelToSentenceCase } from '../../utils/utils.js';
 import {
   createEvent,
   updateEvent,
@@ -81,7 +81,7 @@ function buildErrorMessage(props, resp) {
 
     resp.errors.forEach((error) => {
       const errorPathSegments = error.path.split('/');
-      const text = `${errorPathSegments[errorPathSegments.length - 1]} ${error.message}`;
+      const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${error.message}`;
       messages.push(text);
     });
 
