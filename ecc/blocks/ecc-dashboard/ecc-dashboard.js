@@ -295,8 +295,6 @@ async function populateRow(props, config, index) {
     const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
-    const modTimeHeader = props.el.querySelector('th.modificationTime');
-    if (modTimeHeader) props.currentSort = { key: 'modificationTime', el: modTimeHeader };
     highlightRow(row);
     props.toasteed = true;
   }
@@ -305,8 +303,6 @@ async function populateRow(props, config, index) {
     const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
-    const modTimeHeader = props.el.querySelector('th.modificationTime');
-    if (modTimeHeader) props.currentSort = { key: 'modificationTime', el: modTimeHeader };
     highlightRow(row);
     props.toasteed = true;
   }
@@ -460,11 +456,9 @@ function buildDashboardHeader(props, config) {
   props.el.prepend(dashboardHeader);
 }
 
-function buildDashboardTable(props, config) {
-  const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
-  const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
-  const thead = createTag('thead', {}, '', { parent: table });
-  createTag('tbody', {}, '', { parent: table });
+function initSorting(props, config) {
+  const thead = props.el.querySelector('thead');
+  const thRow = thead.querySelector('tr');
 
   const headers = {
     thumbnail: '',
@@ -478,11 +472,9 @@ function buildDashboardTable(props, config) {
     manage: 'MANAGE',
   };
 
-  const tr = createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
-
   Object.entries(headers).forEach(([key, val]) => {
     const thText = createTag('span', {}, val);
-    const th = createTag('th', {}, thText, { parent: tr });
+    const th = createTag('th', {}, thText, { parent: thRow });
 
     if (['thumbnail', 'manage'].includes(key)) return;
 
@@ -503,6 +495,20 @@ function buildDashboardTable(props, config) {
     });
   });
 
+  const usp = new URLSearchParams(window.location.search);
+  if (usp.get('newEventId') || usp.get('clonedEventId')) {
+    const modTimeHeader = props.el.querySelector('th.modificationTime');
+    if (modTimeHeader) props.currentSort = { key: 'modificationTime', el: modTimeHeader };
+  }
+}
+
+function buildDashboardTable(props, config) {
+  const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
+  const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
+  const thead = createTag('thead', {}, '', { parent: table });
+  createTag('tbody', {}, '', { parent: table });
+  createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
+  initSorting(props, config);
   populateTable(props, config);
 }
 
@@ -541,7 +547,7 @@ async function buildDashboard(el, config) {
     el,
     currentPage: 1,
     currentSort: {},
-    toasted: false,
+    untracked: { toasted: false },
   };
 
   const data = await getEventsArray();
@@ -557,7 +563,9 @@ async function buildDashboard(el, config) {
       set(target, prop, value, receiver) {
         target[prop] = value;
 
-        populateTable(receiver, config);
+        if (prop !== 'untracked') {
+          populateTable(receiver, config);
+        }
 
         return true;
       },
