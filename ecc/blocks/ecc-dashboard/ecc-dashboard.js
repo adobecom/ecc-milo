@@ -291,6 +291,8 @@ async function populateRow(props, config, index) {
     const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
+    const modTimeHeader = props.el.querySelector('th.modificationTime');
+    if (modTimeHeader) props.currentSort = { key: 'modificationTime', modTimeHeader };
     highlightRow(row);
     props.toasteed = true;
   }
@@ -299,6 +301,8 @@ async function populateRow(props, config, index) {
     const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
+    const modTimeHeader = props.el.querySelector('th.modificationTime');
+    if (modTimeHeader) props.currentSort = { key: 'modificationTime', modTimeHeader };
     highlightRow(row);
     props.toasteed = true;
   }
