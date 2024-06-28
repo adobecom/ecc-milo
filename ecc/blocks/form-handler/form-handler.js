@@ -62,7 +62,35 @@ const SPECTRUM_COMPONENTS = [
   'dialog',
   'button-group',
   'tooltip',
+  'toast',
 ];
+
+function buildErrorMessage(props, resp) {
+  if (!resp) return;
+  
+  let toastArea = props.el.querySelector('.toast-area');
+
+  if (!toastArea) {
+    const spTheme = props.el.querySelector('sp-theme');
+    if (!spTheme) return;
+    toastArea = createTag('div', { class: 'toast-area' }, '', { parent: spTheme });
+  }
+  
+  if (resp.errors) {
+    const messages = [];
+
+    resp.errors.forEach((error) => {
+      const text = `${error.path.split('/')[error.path.length - 1]} ${error.message}`
+      messages.push(text);
+    });
+
+    messages.forEach((msg) => {
+      createTag('sp-toast', { open: true, variant: 'invalid' }, msg, { parent: toastArea });
+    });
+  } else if (resp?.message) {
+    createTag('sp-toast', { open: true, variant: 'invalid' }, msg, { parent: toastArea });
+  }
+}
 
 function replaceAnchorWithButton(anchor) {
   if (!anchor || anchor.tagName !== 'A') {
@@ -421,12 +449,9 @@ function initFormCtas(props) {
           if (cta.classList.contains('preview-not-ready')) return;
           const resp = await saveEvent(props);
 
-          if (resp?.errors) {
-            // TODO: use toast instead of alert
-            window.alert(resp.errors.join('\n'));
-          } else if (resp?.message) {
-            window.alert(resp.message);
-          } else if (resp) {
+          if (resp?.errors || resp?.message) {
+            buildErrorMessage(props, resp);
+          } else {
             window.open(cta.href);
           }
 
@@ -457,11 +482,8 @@ function initFormCtas(props) {
 
           if (ctaUrl.hash === '#next') {
             const resp = await saveEvent(props, { toPublish: true });
-            if (resp.errors) {
-            // TODO: use toast instead of alert
-              window.alert(resp?.errors.join('\n'));
-            } else if (resp.message) {
-              window.alert(resp?.message);
+            if (resp?.errors || resp?.message) {
+              buildErrorMessage(props, resp);
             } else if (props.currentStep === props.maxStep) {
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
               if (dashboardLink) window.location.assign(dashboardLink.href);
@@ -470,11 +492,8 @@ function initFormCtas(props) {
             }
           } else {
             const resp = await saveEvent(props);
-            if (resp.errors) {
-            // TODO: use toast instead of alert
-              window.alert(resp?.errors.join('\n'));
-            } else if (resp.message) {
-              window.alert(resp?.message);
+            if (resp?.errors || resp?.message) {
+              buildErrorMessage(props, resp);
             }
           }
 
@@ -516,11 +535,8 @@ function initNavigation(props) {
     nav.addEventListener('click', async () => {
       if (!nav.disabled) {
         const resp = await saveEvent(props);
-        if (resp.errors) {
-        // TODO: use toast instead of alert
-          window.alert(resp?.errors.join('\n'));
-        } else if (resp.message) {
-          window.alert(resp?.message);
+        if (resp?.errors || resp?.message) {
+          buildErrorMessage(props, resp);
         } else {
           navigateForm(props, i);
         }
@@ -598,6 +614,8 @@ async function buildECCForm(el) {
         updateDashboardLink(target);
         if (value.message || value.errors) {
           props.el.classList.add('show-error');
+        } else {
+          props.el.classList.remove('show-error');
         }
       }
 

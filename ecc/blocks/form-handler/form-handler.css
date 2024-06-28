@@ -348,6 +348,15 @@
   line-height: normal;
 }
 
+.form-handler .toast-area {
+  position: fixed;
+  right: 40px;
+  bottom: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 @media screen and (min-width: 900px) {
   .form-handler > div:first-child {
     flex-direction: row;
