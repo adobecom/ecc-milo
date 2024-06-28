@@ -351,7 +351,7 @@
 .form-handler .toast-area {
   position: fixed;
   right: 40px;
-  bottom: 180px;
+  bottom: 92px;
   display: flex;
   flex-direction: column;
   gap: 16px;

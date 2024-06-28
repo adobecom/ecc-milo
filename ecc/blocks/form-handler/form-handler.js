@@ -67,7 +67,7 @@ const SPECTRUM_COMPONENTS = [
 
 function buildErrorMessage(props, resp) {
   if (!resp) return;
-  
+
   let toastArea = props.el.querySelector('.toast-area');
 
   if (!toastArea) {
@@ -75,20 +75,27 @@ function buildErrorMessage(props, resp) {
     if (!spTheme) return;
     toastArea = createTag('div', { class: 'toast-area' }, '', { parent: spTheme });
   }
-  
+
   if (resp.errors) {
     const messages = [];
 
     resp.errors.forEach((error) => {
-      const text = `${error.path.split('/')[error.path.length - 1]} ${error.message}`
+      const errorPathSegments = resp.error.split('/');
+      const text = `${errorPathSegments[errorPathSegments.length - 1]} ${error.message}`;
       messages.push(text);
     });
 
-    messages.forEach((msg) => {
-      createTag('sp-toast', { open: true, variant: 'invalid' }, msg, { parent: toastArea });
+    messages.forEach((msg, i) => {
+      const toast = createTag('sp-toast', { open: true, variant: 'negative' }, msg, { parent: toastArea });
+      setTimeout(() => {
+        toast.remove();
+      }, 5000 + (i * 1000));
     });
-  } else if (resp?.message) {
-    createTag('sp-toast', { open: true, variant: 'invalid' }, msg, { parent: toastArea });
+  } else if (resp.message) {
+    const toast = createTag('sp-toast', { open: true, variant: 'negative' }, resp.message, { parent: toastArea });
+    setTimeout(() => {
+      toast.remove();
+    }, 5000);
   }
 }
 
