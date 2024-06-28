@@ -479,7 +479,7 @@ function buildDashboardTable(props, config) {
     if (['thumbnail', 'manage'].includes(key)) return;
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
-    th.classList.add('sortable');
+    th.classList.add('sortable', key);
     th.addEventListener('click', () => {
       thead.querySelectorAll('th').forEach((h) => {
         if (th !== h) {
