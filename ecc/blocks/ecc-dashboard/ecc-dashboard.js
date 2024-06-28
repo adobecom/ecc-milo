@@ -496,10 +496,10 @@ function initSorting(props, config) {
   });
 
   const usp = new URLSearchParams(window.location.search);
-  // if (usp.get('newEventId') || usp.get('clonedEventId')) {
-  //   const modTimeHeader = props.el.querySelector('th.modificationTime');
-  //   if (modTimeHeader) props.currentSort = { key: 'modificationTime', el: modTimeHeader };
-  // }
+  if (usp.get('newEventId') || usp.get('clonedEventId')) {
+    const modTimeHeader = props.el.querySelector('th.modificationTime');
+    if (modTimeHeader) props.currentSort = { key: 'modificationTime', el: modTimeHeader };
+  }
 }
 
 function buildDashboardTable(props, config) {
