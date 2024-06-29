@@ -386,7 +386,10 @@ function sortData(props, config, options) {
     el.classList.remove('desc-sort');
   }
 
-  if (options.direction) sortAscending = options.direction === 'asc';
+  if (options.direction) {
+    sortAscending = options.direction === 'asc';
+    el.classList.toggle('desc-sort', !sortAscending);
+  }
 
   props.filteredData = props.filteredData.sort((a, b) => {
     let valA;
