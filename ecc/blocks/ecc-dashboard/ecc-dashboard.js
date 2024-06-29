@@ -511,7 +511,7 @@ function buildDashboardTable(props, config) {
     const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
     if (modTimeHeader) {
       props.currentSort = { field: 'modificationTime', el: modTimeHeader };
-      sortData(props, config, true);
+      sortData(props, config);
     }
   }
 }
