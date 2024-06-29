@@ -40,6 +40,20 @@
   gap: 16px;
 }
 
+.ecc-dashboard .dashboard-actions-container .search-input-wrapper {
+  position: relative;
+}
+
+.ecc-dashboard .dashboard-actions-container .search-input-wrapper img.icon-search {
+  position: absolute;
+  display: block;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 10px;
+  height: 1rem;
+  width: 1rem;
+}
+
 .ecc-dashboard .dashboard-actions-container input {
   border-radius: 16px;
   border: 2px solid var(--color-gray-500);
@@ -49,8 +63,8 @@
 }
 
 .ecc-dashboard .dashboard-actions-container input:placeholder-shown {
-  padding-left: 40px;
-  width: 116px;
+  padding-left: 32px;
+  width: 124px;
 }
 
 .ecc-dashboard .dashboard-table-container {
