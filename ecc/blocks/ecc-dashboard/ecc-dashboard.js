@@ -386,11 +386,6 @@ function sortData(props, config, options) {
     el.classList.remove('desc-sort');
   }
 
-  if (options.direction) {
-    sortAscending = options.direction === 'asc';
-    el.classList.toggle('desc-sort', !sortAscending);
-  }
-
   props.filteredData = props.filteredData.sort((a, b) => {
     let valA;
     let valB;
@@ -516,7 +511,7 @@ function buildDashboardTable(props, config) {
     const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
     if (modTimeHeader) {
       props.currentSort = { field: 'modificationTime', el: modTimeHeader };
-      sortData(props, config, { direction: 'desc' });
+      sortData(props, config, { resort: true });
     }
   }
 }
