@@ -373,7 +373,7 @@ function decoratePagination(props, config) {
 
 function sortData(props, config, options) {
   const { field, el } = props.currentSort;
-  let sortAscending = false;
+  let sortAscending = true;
 
   if (el.classList.contains('active')) {
     if (options.resort) {
@@ -511,7 +511,7 @@ function buildDashboardTable(props, config) {
     const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
     if (modTimeHeader) {
       props.currentSort = { field: 'modificationTime', el: modTimeHeader };
-      sortData(props, config, { resort: true });
+      sortData(props, config);
     }
   }
 }
