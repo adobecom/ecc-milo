@@ -53,18 +53,6 @@
   width: 116px;
 }
 
-.ecc-dashboard .dashboard-actions-container input:placeholder-shown::before {
-  content: '';
-  background-image: url('/ecc/icons/search.svg');
-  position: absolute;
-  left: 16px;
-  height: 24px;
-  width: 24px;
-  top: 50%;
-  transform: translateY(-50%);
-
-}
-
 .ecc-dashboard .dashboard-table-container {
   max-width: 100%;
   overflow: auto;
