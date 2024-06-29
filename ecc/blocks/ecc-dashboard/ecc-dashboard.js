@@ -373,7 +373,7 @@ function decoratePagination(props, config) {
 
 function sortData(props, config, options) {
   const { field, el } = props.currentSort;
-  let sortAscending = true;
+  let sortAscending = false;
 
   if (el.classList.contains('active')) {
     if (options.resort) {
