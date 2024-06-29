@@ -121,6 +121,75 @@ function updateDashboardData(newPayload, props) {
   props.paginatedData = props.data;
 }
 
+function paginateData(props, config, page) {
+  const ps = +config['page-size'];
+  if (Number.isNaN(ps) || ps <= 0) {
+    window.lana?.log('error', 'Invalid page size');
+  }
+  const start = (page - 1) * ps;
+  const end = Math.min(page * ps, props.filteredData.length);
+
+  props.paginatedData = props.filteredData.slice(start, end);
+}
+
+function sortData(props, config, options = {}) {
+  const { field, el } = props.currentSort;
+
+  let sortAscending = true;
+
+  if (el.classList.contains('active')) {
+    if (options.resort) {
+      sortAscending = !el.classList.contains('desc-sort');
+    } else {
+      sortAscending = el.classList.contains('desc-sort');
+    }
+    el.classList.toggle('desc-sort', !sortAscending);
+  } else {
+    el.classList.remove('desc-sort');
+  }
+
+  if (options.direction) {
+    sortAscending = options.direction === 'asc';
+    el.classList.toggle('desc-sort', !sortAscending);
+  }
+
+  props.filteredData = props.filteredData.sort((a, b) => {
+    let valA;
+    let valB;
+
+    if (field === 'title') {
+      valA = a[field].toLowerCase();
+      valB = b[field].toLowerCase();
+      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    }
+
+    if (field === 'startDate' || field === 'modificationTime') {
+      valA = new Date(a[field]);
+      valB = new Date(b[field]);
+      return sortAscending ? valA - valB : valB - valA;
+    }
+
+    if (a[field] !== undefined && b[field] !== undefined) {
+      valA = a[field].toString().toLowerCase();
+      valB = b[field].toString().toLowerCase();
+      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    }
+
+    return null;
+  });
+
+  el.parentNode.querySelectorAll('th').forEach((header) => {
+    if (header !== el) {
+      header.classList.remove('active');
+      header.classList.remove('desc-sort');
+    }
+  });
+
+  props.currentPage = 1;
+  paginateData(props, config, 1);
+  el.classList.add('active');
+}
+
 function initMoreOptions(props, config, eventObj, row) {
   const moreOptionsCell = row.querySelector('.option-col');
   const moreOptionIcon = moreOptionsCell.querySelector('.icon-more-small-list');
@@ -199,6 +268,8 @@ function initMoreOptions(props, config, eventObj, row) {
       props.data = newJson.events;
       props.filteredData = newJson.events;
       props.paginatedData = newJson.events;
+
+      sortData(props, config, { resort: true });
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
@@ -315,17 +386,6 @@ async function populateRow(props, config, index) {
   }
 }
 
-function paginateData(props, config, page) {
-  const ps = +config['page-size'];
-  if (Number.isNaN(ps) || ps <= 0) {
-    window.lana?.log('error', 'Invalid page size');
-  }
-  const start = (page - 1) * ps;
-  const end = Math.min(page * ps, props.filteredData.length);
-
-  props.paginatedData = props.filteredData.slice(start, end);
-}
-
 function updatePaginationControl(pagination, currentPage, totalPages) {
   const input = pagination.querySelector('input');
   input.value = currentPage;
@@ -376,64 +436,6 @@ function decoratePagination(props, config) {
 
   props.el.append(paginationContainer);
   updatePaginationControl(paginationContainer, props.currentPage, totalPages);
-}
-
-function sortData(props, config, options = {}) {
-  const { field, el } = props.currentSort;
-
-  let sortAscending = true;
-
-  if (el.classList.contains('active')) {
-    if (options.resort) {
-      sortAscending = !el.classList.contains('desc-sort');
-    } else {
-      sortAscending = el.classList.contains('desc-sort');
-    }
-    el.classList.toggle('desc-sort', !sortAscending);
-  } else {
-    el.classList.remove('desc-sort');
-  }
-
-  if (options.direction) {
-    sortAscending = options.direction === 'asc';
-    el.classList.toggle('desc-sort', !sortAscending);
-  }
-
-  props.filteredData = props.filteredData.sort((a, b) => {
-    let valA;
-    let valB;
-
-    if (field === 'title') {
-      valA = a[field].toLowerCase();
-      valB = b[field].toLowerCase();
-      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    }
-
-    if (field === 'startDate' || field === 'modificationTime') {
-      valA = new Date(a[field]);
-      valB = new Date(b[field]);
-      return sortAscending ? valA - valB : valB - valA;
-    }
-
-    if (a[field] !== undefined && b[field] !== undefined) {
-      valA = a[field].toString().toLowerCase();
-      valB = b[field].toString().toLowerCase();
-      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    }
-
-    return null;
-  });
-
-  el.parentNode.querySelectorAll('th').forEach((header) => {
-    if (header !== el) {
-      header.classList.remove('active');
-      header.classList.remove('desc-sort');
-    }
-  });
-
-  props.currentPage = 1;
-  paginateData(props, config, 1);
-  el.classList.add('active');
 }
 
 function initSorting(props, config) {
