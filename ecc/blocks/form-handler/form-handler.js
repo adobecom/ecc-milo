@@ -1,5 +1,5 @@
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
+import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip, camelToSentenceCase } from '../../utils/utils.js';
 import {
   createEvent,
   updateEvent,
@@ -62,7 +62,42 @@ const SPECTRUM_COMPONENTS = [
   'dialog',
   'button-group',
   'tooltip',
+  'toast',
 ];
+
+function buildErrorMessage(props, resp) {
+  if (!resp) return;
+
+  let toastArea = props.el.querySelector('.toast-area');
+
+  if (!toastArea) {
+    const spTheme = props.el.querySelector('sp-theme');
+    if (!spTheme) return;
+    toastArea = createTag('div', { class: 'toast-area' }, '', { parent: spTheme });
+  }
+
+  if (resp.errors) {
+    const messages = [];
+
+    resp.errors.forEach((error) => {
+      const errorPathSegments = error.path.split('/');
+      const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${error.message}`;
+      messages.push(text);
+    });
+
+    messages.forEach((msg, i) => {
+      const toast = createTag('sp-toast', { open: true, variant: 'negative' }, msg, { parent: toastArea });
+      setTimeout(() => {
+        toast.remove();
+      }, 5000 + (i * 1000));
+    });
+  } else if (resp.message) {
+    const toast = createTag('sp-toast', { open: true, variant: 'negative' }, resp.message, { parent: toastArea });
+    setTimeout(() => {
+      toast.remove();
+    }, 5000);
+  }
+}
 
 function replaceAnchorWithButton(anchor) {
   if (!anchor || anchor.tagName !== 'A') {
@@ -223,23 +258,27 @@ function decorateForm(el) {
 async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
 
+  let resp;
+
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    const resp = await createEvent(quickFilter(props.payload));
+    resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: resp.eventId } }));
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
-    const resp = await updateEvent(
+    resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
   } else if (options.toPublish) {
-    const resp = await publishEvent(
+    resp = await publishEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
   }
+
+  return resp;
 }
 
 function updateSideNav(props) {
@@ -269,12 +308,19 @@ function onStepValidate(props) {
     const currentFrag = getCurrentFragment(props);
     const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
     const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
+    const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
 
     ctas.forEach((cta) => {
       if (cta.classList.contains('back-btn')) {
         cta.classList.toggle('disabled', props.currentStep === 0);
       } else {
         cta.classList.toggle('disabled', !stepValid);
+      }
+    });
+
+    sideNavs.forEach((nav, i) => {
+      if (i !== props.currentStep) {
+        nav.disabled = !stepValid;
       }
     });
   };
@@ -408,8 +454,14 @@ function initFormCtas(props) {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
           if (cta.classList.contains('preview-not-ready')) return;
-          await saveEvent(props);
-          window.open(cta.href);
+          const resp = await saveEvent(props);
+
+          if (resp?.errors || resp?.message) {
+            buildErrorMessage(props, resp);
+          } else {
+            window.open(cta.href);
+          }
+
           toggleBtnsSubmittingState(false);
         });
       }
@@ -436,15 +488,20 @@ function initFormCtas(props) {
           toggleBtnsSubmittingState(true);
 
           if (ctaUrl.hash === '#next') {
-            await saveEvent(props, { toPublish: true });
-            if (props.currentStep === props.maxStep) {
+            const resp = await saveEvent(props, { toPublish: true });
+            if (resp?.errors || resp?.message) {
+              buildErrorMessage(props, resp);
+            } else if (props.currentStep === props.maxStep) {
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
               if (dashboardLink) window.location.assign(dashboardLink.href);
             } else {
               navigateForm(props);
             }
           } else {
-            await saveEvent(props);
+            const resp = await saveEvent(props);
+            if (resp?.errors || resp?.message) {
+              buildErrorMessage(props, resp);
+            }
           }
 
           toggleBtnsSubmittingState(false);
@@ -484,8 +541,12 @@ function initNavigation(props) {
   navItems.forEach((nav, i) => {
     nav.addEventListener('click', async () => {
       if (!nav.disabled) {
-        await saveEvent(props);
-        navigateForm(props, i);
+        const resp = await saveEvent(props);
+        if (resp?.errors || resp?.message) {
+          buildErrorMessage(props, resp);
+        } else {
+          navigateForm(props, i);
+        }
       }
     });
   });
@@ -558,6 +619,11 @@ async function buildECCForm(el) {
         setResponseCache(value);
         updatePreviewCtas(target);
         updateDashboardLink(target);
+        if (value.message || value.errors) {
+          props.el.classList.add('show-error');
+        } else {
+          props.el.classList.remove('show-error');
+        }
       }
 
       return true;

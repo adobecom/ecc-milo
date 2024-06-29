@@ -28,6 +28,7 @@ export default function init(component, props) {
     const topics = checkedBoxes.map((cb) => cb.name);
     const fullTopicsValue = Array.from(checkedBoxes).map((cb) => cb.dataset.value);
     props.payload = { ...props.payload, topics, fullTopicsValue };
-    component.classList.add('prefilled');
+
+    if (topics.length) component.classList.add('prefilled');
   }
 }
