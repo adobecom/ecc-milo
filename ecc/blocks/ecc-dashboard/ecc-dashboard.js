@@ -377,16 +377,13 @@ function sortData(props, config, options) {
   let sortAscending = true;
   if (direction && direction !== 'asc') sortAscending = false;
 
-  if (resort) {
-    if (el.classList.contains('active') && !el.classList.contains('desc-sort')) {
-      el.classList.remove('desc-sort');
+  if (el.classList.contains('active')) {
+    if (resort) {
+      sortAscending = !el.classList.contains('desc-sort');
     } else {
-      sortAscending = false;
-      el.classList.add('desc-sort');
+      sortAscending = el.classList.contains('desc-sort');
     }
-  } else if (el.classList.contains('active') && !el.classList.contains('desc-sort')) {
-    sortAscending = false;
-    el.classList.add('desc-sort');
+    el.classList.toggle('desc-sort', !sortAscending);
   } else {
     el.classList.remove('desc-sort');
   }
@@ -457,7 +454,7 @@ function initSorting(props, config) {
         el: th,
         field: key,
       };
-      sortData(props, config);
+      sortData(props, config, {});
     });
   });
 }
