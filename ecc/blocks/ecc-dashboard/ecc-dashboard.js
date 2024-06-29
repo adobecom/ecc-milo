@@ -375,7 +375,7 @@ function sortData(props, config, options) {
   const { field, el } = props.currentSort;
   const { resort, direction } = options;
   let sortAscending = true;
-  if (direction !== 'asc') sortAscending = false;
+  if (direction && direction !== 'asc') sortAscending = false;
 
   if (el.classList.contains('active')) {
     if (resort) {
