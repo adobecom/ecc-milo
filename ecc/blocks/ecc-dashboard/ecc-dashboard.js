@@ -396,8 +396,6 @@ function sortData(props, config, options = {}) {
     let valA;
     let valB;
 
-    console.log(a[field], b[field]);
-
     if (field === 'title') {
       valA = a[field].toLowerCase();
       valB = b[field].toLowerCase();
@@ -410,7 +408,7 @@ function sortData(props, config, options = {}) {
       return sortAscending ? valA - valB : valB - valA;
     }
 
-    if (a[field] && b[field]) {
+    if (a[field] !== undefined && b[field] !== undefined) {
       valA = a[field].toString().toLowerCase();
       valB = b[field].toString().toLowerCase();
       return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
