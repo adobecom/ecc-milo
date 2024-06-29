@@ -454,7 +454,7 @@ function initSorting(props, config) {
         el: th,
         field: key,
       };
-      sortData(props, config, {});
+      sortData(props, config);
     });
   });
 }
