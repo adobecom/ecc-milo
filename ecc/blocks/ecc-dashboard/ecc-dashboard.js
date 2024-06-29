@@ -512,7 +512,7 @@ function buildDashboardHeader(props, config) {
 
   const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
-  searchInputWrapper.prepend(getIcon('search'));
+  searchInputWrapper.append(getIcon('search'));
   createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
   searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
 

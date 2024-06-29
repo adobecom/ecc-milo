@@ -49,7 +49,7 @@
   display: block;
   top: 50%;
   transform: translateY(-50%);
-  left: 10px;
+  right: 10px;
   height: 1rem;
   width: 1rem;
 }
@@ -62,9 +62,8 @@
   width: 140px;
 }
 
-.ecc-dashboard .dashboard-actions-container input:placeholder-shown {
-  padding-left: 32px;
-  width: 124px;
+.ecc-dashboard .dashboard-actions-container input:placeholder-shown + img.icon-search {
+  display: none;
 }
 
 .ecc-dashboard .dashboard-table-container {
