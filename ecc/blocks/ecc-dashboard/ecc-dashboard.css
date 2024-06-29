@@ -217,6 +217,11 @@
   width: 16px;
 }
 
+.ecc-dashboard .event-row.pending {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .ecc-dashboard .toast-area {
   position: fixed;
   right: 40px;

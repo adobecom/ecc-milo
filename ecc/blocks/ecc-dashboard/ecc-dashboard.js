@@ -121,7 +121,8 @@ function updateDashboardData(newPayload, props) {
   props.paginatedData = props.data;
 }
 
-function initMoreOptions(props, config, eventObj, moreOptionsCell) {
+function initMoreOptions(props, config, eventObj, row) {
+  const moreOptionsCell = row.querySelector('.option-col');
   const moreOptionIcon = moreOptionsCell.querySelector('.icon-more-small-list');
 
   const buildTool = (parent, text, icon) => {
@@ -137,6 +138,8 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
       const unpub = buildTool(toolBox, 'Unpublish', 'publish-remove');
       unpub.addEventListener('click', async (e) => {
         e.preventDefault();
+        toolBox.remove();
+        row.classList.add('pending');
         const resp = await unpublishEvent(eventObj.eventId, quickFilter(eventObj));
         updateDashboardData(resp, props);
       });
@@ -144,6 +147,8 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
       pub.addEventListener('click', async (e) => {
         e.preventDefault();
+        toolBox.remove();
+        row.classList.add('pending');
         const resp = await publishEvent(eventObj.eventId, quickFilter(eventObj));
         updateDashboardData(resp, props);
       });
@@ -178,6 +183,7 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
       const payload = { ...eventObj };
       payload.title = `${eventObj.title} - copy`;
       toolBox.remove();
+      row.classList.add('pending');
       const newEventJSON = await createEvent(cloneFilter(payload));
       const reloadUrl = new URL(window.location.href);
       reloadUrl.searchParams.set('clonedEventId', newEventJSON.eventId);
@@ -187,6 +193,7 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
     deleteBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       toolBox.remove();
+      row.classList.add('pending');
       await deleteEvent(eventObj.eventId);
       const newJson = await getEvents();
       props.data = newJson.events;
@@ -289,7 +296,7 @@ async function populateRow(props, config, index) {
     moreOptionsCell,
   );
 
-  initMoreOptions(props, config, event, moreOptionsCell);
+  initMoreOptions(props, config, event, row);
 
   if (event.eventId === sp.get('newEventId') && !props.el.classList.contains('toast-shown')) {
     const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
