@@ -54,9 +54,12 @@
 }
 
 .ecc-dashboard .dashboard-actions-container input:placeholder-shown::before {
-  content: url('/ecc/icons/search.svg');
+  content: '';
+  background-image: url('/ecc/icons/search.svg');
   position: absolute;
   left: 16px;
+  height: 24px;
+  width: 24px;
   top: 50%;
   transform: translateY(-50%);
 
