@@ -396,7 +396,9 @@ function sortData(props, config, options = {}) {
     let valA;
     let valB;
 
-    if (field === 'title' || field === 'published') {
+    console.log(a[field], b[field]);
+
+    if (field === 'title') {
       valA = a[field].toLowerCase();
       valB = b[field].toLowerCase();
       return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
