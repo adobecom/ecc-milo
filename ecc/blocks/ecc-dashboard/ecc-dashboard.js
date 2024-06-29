@@ -510,7 +510,9 @@ function buildDashboardHeader(props, config) {
   createTag('h1', { class: 'dashboard-header-heading' }, 'All Events', { parent: textContainer });
   createTag('p', { class: 'dashboard-header-events-count' }, `(${props.data.length} events)`, { parent: textContainer });
 
-  const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, getIcon('search'), { parent: actionsContainer });
+  const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
+  const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
+  searchInputWrapper.prepend(getIcon('search'));
   createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
   searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
 
