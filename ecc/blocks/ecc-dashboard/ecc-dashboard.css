@@ -62,7 +62,7 @@
   width: 140px;
 }
 
-.ecc-dashboard .dashboard-actions-container input:placeholder-shown + img.icon-search {
+.ecc-dashboard .dashboard-actions-container input:not(:placeholder-shown) + img.icon-search {
   display: none;
 }
 
