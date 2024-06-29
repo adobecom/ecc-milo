@@ -371,9 +371,11 @@ function decoratePagination(props, config) {
   updatePaginationControl(paginationContainer, props.currentPage, totalPages);
 }
 
-function sortData(props, config, resort = false) {
+function sortData(props, config, options) {
   const { field, el } = props.currentSort;
+  const { resort, direction } = options;
   let sortAscending = true;
+  if (direction !== 'asc') sortAscending = false;
 
   if (el.classList.contains('active')) {
     if (resort) {
@@ -478,7 +480,7 @@ function filterData(props, config, query) {
   props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
   props.currentPage = 1;
   paginateData(props, config, 1);
-  sortData(props, config, true);
+  sortData(props, config, { resort: true });
 }
 
 function buildDashboardHeader(props, config) {
@@ -511,7 +513,7 @@ function buildDashboardTable(props, config) {
     const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
     if (modTimeHeader) {
       props.currentSort = { field: 'modificationTime', el: modTimeHeader };
-      sortData(props, config, true);
+      sortData(props, config, { direction: 'desc' });
     }
   }
 }
