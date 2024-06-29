@@ -371,8 +371,9 @@ function decoratePagination(props, config) {
   updatePaginationControl(paginationContainer, props.currentPage, totalPages);
 }
 
-function sortData(props, config, options) {
+function sortData(props, config, options = {}) {
   const { field, el } = props.currentSort;
+  console.log(field, el, options);
   let sortAscending = true;
 
   if (el.classList.contains('active')) {
@@ -386,6 +387,11 @@ function sortData(props, config, options) {
     el.classList.remove('desc-sort');
   }
 
+  if (options.direction) {
+    sortAscending = options.direction === 'asc';
+    el.classList.toggle('desc-sort', !sortAscending);
+  }
+
   props.filteredData = props.filteredData.sort((a, b) => {
     let valA;
     let valB;
@@ -394,15 +400,21 @@ function sortData(props, config, options) {
       valA = a[field].toLowerCase();
       valB = b[field].toLowerCase();
       return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    } if (field === 'startDate' || field === 'modificationTime') {
+    }
+
+    if (field === 'startDate' || field === 'modificationTime') {
       valA = new Date(a[field]);
       valB = new Date(b[field]);
       return sortAscending ? valA - valB : valB - valA;
     }
 
-    valA = a[field]?.toString().toLowerCase();
-    valB = b[field]?.toString().toLowerCase();
-    return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    if (a[field] && b[field]) {
+      valA = a[field].toString().toLowerCase();
+      valB = b[field].toString().toLowerCase();
+      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    }
+
+    return null;
   });
 
   el.parentNode.querySelectorAll('th').forEach((header) => {
@@ -511,7 +523,7 @@ function buildDashboardTable(props, config) {
     const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
     if (modTimeHeader) {
       props.currentSort = { field: 'modificationTime', el: modTimeHeader };
-      sortData(props, config);
+      sortData(props, config, { direction: 'desc' });
     }
   }
 }
