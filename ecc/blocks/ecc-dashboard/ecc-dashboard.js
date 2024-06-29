@@ -373,7 +373,7 @@ function decoratePagination(props, config) {
 
 function sortData(props, config, options = {}) {
   const { field, el } = props.currentSort;
-  console.log(field, el, options);
+
   let sortAscending = true;
 
   if (el.classList.contains('active')) {
@@ -396,7 +396,7 @@ function sortData(props, config, options = {}) {
     let valA;
     let valB;
 
-    if (field === 'title') {
+    if (field === 'title' || field === 'published') {
       valA = a[field].toLowerCase();
       valB = b[field].toLowerCase();
       return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
