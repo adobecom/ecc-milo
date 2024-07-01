@@ -35,9 +35,9 @@ export function decorateArea(area = document) {
 function getECCEnv(miloConfig) {
   const { env } = miloConfig;
 
-  if (env === 'prod') return 'prod';
+  if (env.name === 'prod') return 'prod';
 
-  if (env === 'stage') {
+  if (env.name === 'stage') {
     const { host, search } = window.location;
     const usp = new URLSearchParams(search);
     const eccEnv = usp.get('eccEnv');
@@ -48,8 +48,8 @@ function getECCEnv(miloConfig) {
     if (host.startsWith('dev--') || host.startsWith('www.dev')) return 'dev';
   }
 
-  // fallback to Milo env
-  return env;
+  // fallback to Milo env name
+  return env.name;
 }
 
 const locales = {
