@@ -1,8 +1,8 @@
 import { addSponsorToEvent } from '../../../utils/esp-controller.js';
-import { getFilteredCachedPayload } from '../data-handler.js';
+import { getFilteredCachedResponse } from '../data-handler.js';
 
 /* eslint-disable no-unused-vars */
-export function onSubmit(component, props) {
+export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const partnerVisible = component.querySelector('#partners-visible')?.checked;
@@ -10,13 +10,19 @@ export function onSubmit(component, props) {
 
   if (partnerSelectorGroup) {
     const partners = partnerSelectorGroup.getSavedPartners();
-    partners.forEach((partner) => {
+    await partners.reduce(async (promise, partner) => {
+      await promise;
       const { sponsorId, sponsorType } = partner;
-      addSponsorToEvent({
+      const resp = await addSponsorToEvent({
         sponsorId,
         sponsorType,
-      }, getFilteredCachedPayload().eventId);
-    });
+      }, getFilteredCachedResponse().eventId);
+      if (!resp || resp.errors) {
+        return;
+      }
+
+      props.eventDataResp = { ...props.eventDataResp, ...resp };
+    }, Promise.resolve());
   }
 
   props.payload = { ...props.payload, partnerVisible };

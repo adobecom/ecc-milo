@@ -33,8 +33,8 @@ export default class PartnerSelectorGroup extends LitElement {
   }
 
   getSavedPartners() {
-    return this.partners.filter((p) => p.sponsorId).map((partnerSelector) => {
-      const { sponsorId, name, link } = partnerSelector.partner;
+    return this.partners.filter((p) => p.sponsorId).map((partner) => {
+      const { sponsorId, name, link } = partner;
 
       const data = {
         sponsorId,
