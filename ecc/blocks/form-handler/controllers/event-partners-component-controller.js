@@ -7,8 +7,9 @@ export async function onSubmit(component, props) {
 
   const partnerVisible = component.querySelector('#partners-visible')?.checked;
   const partnerSelectorGroup = component.querySelector('partner-selector-group');
+  const { eventId } = getFilteredCachedResponse();
 
-  if (partnerSelectorGroup) {
+  if (partnerSelectorGroup && eventId) {
     const partners = partnerSelectorGroup.getSavedPartners();
     await partners.reduce(async (promise, partner) => {
       await promise;
@@ -16,7 +17,7 @@ export async function onSubmit(component, props) {
       const resp = await addSponsorToEvent({
         sponsorId,
         sponsorType,
-      }, getFilteredCachedResponse().eventId);
+      }, eventId);
       if (!resp || resp.errors) {
         return;
       }
