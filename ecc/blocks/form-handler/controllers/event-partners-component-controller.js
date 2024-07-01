@@ -16,7 +16,7 @@ export default async function init(component, props) {
   const partnersGroup = component.querySelector('partner-selector-group');
 
   if (eventData.partners) {
-    partnersGroup.selectedPartners = eventData.partners;
+    partnersGroup.partners = eventData.partners;
     component.classList.add('prefilled');
   }
 
