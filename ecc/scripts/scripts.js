@@ -32,6 +32,26 @@ export function decorateArea(area = document) {
   }());
 }
 
+function getECCEnv(miloConfig) {
+  const { env } = miloConfig;
+
+  if (env.name === 'prod') return 'prod';
+
+  if (env.name === 'stage') {
+    const { host, search } = window.location;
+    const usp = new URLSearchParams(search);
+    const eccEnv = usp.get('eccEnv');
+
+    if (eccEnv) return eccEnv;
+
+    if (host.startsWith('stage--') || host.startsWith('www.stage')) return 'stage';
+    if (host.startsWith('dev--') || host.startsWith('www.dev')) return 'dev';
+  }
+
+  // fallback to Milo env name
+  return env.name;
+}
+
 const locales = {
   '': { ietf: 'en-US', tk: 'jdq5hay.css' },
   br: { ietf: 'pt-BR', tk: 'inq1xob.css' },
@@ -102,6 +122,7 @@ export const BlockMediator = await import('../deps/block-mediator.min.js').then(
 
 const { loadArea, setConfig, loadLana } = await import(`${LIBS}/utils/utils.js`);
 export const MILO_CONFIG = setConfig({ ...CONFIG, miloLibs: LIBS });
+export const ECC_ENV = getECCEnv(MILO_CONFIG);
 
 (async function loadPage() {
   await loadLana({ clientId: 'ecc-milo' });
