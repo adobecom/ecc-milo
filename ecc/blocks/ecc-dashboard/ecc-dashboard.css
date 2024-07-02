@@ -40,11 +40,30 @@
   gap: 16px;
 }
 
+.ecc-dashboard .dashboard-actions-container .search-input-wrapper {
+  position: relative;
+}
+
+.ecc-dashboard .dashboard-actions-container .search-input-wrapper img.icon-search {
+  position: absolute;
+  display: block;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
+  height: 1rem;
+  width: 1rem;
+}
+
 .ecc-dashboard .dashboard-actions-container input {
-  border-radius: 4px;
-  border: 1px solid var(--color-gray-500);
+  border-radius: 16px;
+  border: 2px solid var(--color-gray-500);
   height: 24px;
   padding: 0 16px;
+  width: 140px;
+}
+
+.ecc-dashboard .dashboard-actions-container input:not(:placeholder-shown) + img.icon-search {
+  display: none;
 }
 
 .ecc-dashboard .dashboard-table-container {
@@ -215,6 +234,11 @@
 
 .ecc-dashboard .event-row .dashboard-event-tool-box a.dash-event-tool img.icon {
   width: 16px;
+}
+
+.ecc-dashboard .event-row.pending {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .ecc-dashboard .toast-area {
