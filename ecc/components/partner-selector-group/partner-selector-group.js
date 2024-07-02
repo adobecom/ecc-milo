@@ -5,34 +5,46 @@ const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all
 
 export default class PartnerSelectorGroup extends LitElement {
   static properties = {
-    selectedPartners: { type: Array },
+    partners: { type: Array },
     fieldlabels: { type: Object },
+    seriesId: { type: String },
   };
 
   constructor() {
     super();
-    this.selectedPartners = this.selectedPartners || [[]];
+    this.partners = this.partners || [[]];
   }
 
   static styles = style;
 
   addPartner() {
-    this.selectedPartners = [...this.selectedPartners, {}];
+    this.partners = [...this.partners, {}];
   }
 
   deletePartner(index) {
-    this.selectedPartners = this.selectedPartners.filter((_, i) => i !== index);
+    this.partners = this.partners.filter((_, i) => i !== index);
     this.requestUpdate();
   }
 
   handlePartnerUpdate(event, index) {
     const updatedPartner = event.detail.partner;
-    this.selectedPartners = this.selectedPartners
+    this.partners = this.partners
       .map((Partner, i) => (i === index ? updatedPartner : Partner));
   }
 
-  getSelectedPartners() {
-    return this.selectedPartners.filter((p) => p.name);
+  getSavedPartners() {
+    return this.partners.filter((p) => p.sponsorId).map((partner) => {
+      const { sponsorId, name, link } = partner;
+
+      const data = {
+        sponsorId,
+        name,
+        link,
+        sponsorType: 'Partner',
+      };
+
+      return data;
+    });
   }
 
   render() {
@@ -41,20 +53,20 @@ export default class PartnerSelectorGroup extends LitElement {
     imageTag.classList.add('img-upload-text');
 
     return html`
-      ${repeat(this.selectedPartners, (partner, index) => {
+      ${repeat(this.partners, (partner, index) => {
     const imgTag = imageTag.cloneNode(true);
     return html`
-        <partner-selector .fieldLabels=${this.fieldlabels} .selectedPartner=${partner}
+        <partner-selector .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
           @update-partner=${(event) => this.handlePartnerUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
-            ${this.selectedPartners.length > 1 ? html`
+            ${this.partners.length > 1 ? html`
               <img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => this.deletePartner(index)}></img>
             ` : nothing}
           </div>
           ${imgTag}
         </partner-selector>
 
-      ${index < this.selectedPartners.length - 1 ? html`<sp-divider size='s'></sp-divider>` : nothing}
+      ${index < this.partners.length - 1 ? html`<sp-divider size='s'></sp-divider>` : nothing}
       `;
   })}
       <repeater-element text="Add partner" @repeat=${this.addPartner}></repeater-element>

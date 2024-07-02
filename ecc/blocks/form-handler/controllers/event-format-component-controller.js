@@ -57,8 +57,19 @@ function initStepLock(component) {
   onFormatChange();
 }
 
-export async function onUpdate(_component, _props) {
-  // Do nothing
+export async function onUpdate(component, props) {
+  const { seriesId } = props.payload;
+  if (seriesId) {
+    const partnerSelectorGroups = document.querySelectorAll('partner-selector-group');
+    if (partnerSelectorGroups.length) {
+      partnerSelectorGroups.forEach((group) => {
+        if (group.seriesId !== seriesId) {
+          group.seriesId = seriesId;
+          group.requestUpdate();
+        }
+      });
+    }
+  }
 }
 
 export default function init(component, props) {
