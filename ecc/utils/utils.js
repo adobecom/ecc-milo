@@ -43,6 +43,12 @@ export function handlize(str) {
   return str?.toLowerCase().trim().replaceAll(' ', '-');
 }
 
+export function camelToSentenceCase(camelCaseStr) {
+  let sentenceCaseStr = camelCaseStr.replace(/([A-Z])/g, ' $1').toLowerCase();
+  sentenceCaseStr = sentenceCaseStr.charAt(0).toUpperCase() + sentenceCaseStr.slice(1);
+  return sentenceCaseStr;
+}
+
 export function isEmptyObject(o) {
   return Object.keys(o).length === 0 && o.constructor === Object;
 }

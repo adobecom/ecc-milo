@@ -1,5 +1,9 @@
 import {
-  createEvent, deleteEvent, getEvents, publishEvent, unpublishEvent,
+  createEvent,
+  deleteEvent,
+  getEvents,
+  publishEvent,
+  unpublishEvent,
 } from '../../utils/esp-controller.js';
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
@@ -117,7 +121,77 @@ function updateDashboardData(newPayload, props) {
   props.paginatedData = props.data;
 }
 
-function initMoreOptions(props, config, eventObj, moreOptionsCell) {
+function paginateData(props, config, page) {
+  const ps = +config['page-size'];
+  if (Number.isNaN(ps) || ps <= 0) {
+    window.lana?.log('error', 'Invalid page size');
+  }
+  const start = (page - 1) * ps;
+  const end = Math.min(page * ps, props.filteredData.length);
+
+  props.paginatedData = props.filteredData.slice(start, end);
+}
+
+function sortData(props, config, options = {}) {
+  const { field, el } = props.currentSort;
+
+  let sortAscending = true;
+
+  if (el.classList.contains('active')) {
+    if (options.resort) {
+      sortAscending = !el.classList.contains('desc-sort');
+    } else {
+      sortAscending = el.classList.contains('desc-sort');
+    }
+    el.classList.toggle('desc-sort', !sortAscending);
+  } else {
+    el.classList.remove('desc-sort');
+  }
+
+  if (options.direction) {
+    sortAscending = options.direction === 'asc';
+    el.classList.toggle('desc-sort', !sortAscending);
+  }
+
+  props.filteredData = props.filteredData.sort((a, b) => {
+    let valA;
+    let valB;
+
+    if (field === 'title' || field === 'venueId') {
+      valA = a[field].toLowerCase();
+      valB = b[field].toLowerCase();
+      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    }
+
+    if (field === 'startDate' || field === 'modificationTime') {
+      valA = new Date(a[field]);
+      valB = new Date(b[field]);
+      return sortAscending ? valA - valB : valB - valA;
+    }
+
+    if (a[field] !== undefined && b[field] !== undefined) {
+      valA = a[field].toString().toLowerCase();
+      valB = b[field].toString().toLowerCase();
+      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    }
+
+    return null;
+  });
+
+  el.parentNode.querySelectorAll('th').forEach((header) => {
+    if (header !== el) {
+      header.classList.remove('active');
+      header.classList.remove('desc-sort');
+    }
+  });
+
+  props.currentPage = 1;
+  paginateData(props, config, 1);
+  el.classList.add('active');
+}
+
+function initMoreOptions(props, config, eventObj, row) {
+  const moreOptionsCell = row.querySelector('.option-col');
   const moreOptionIcon = moreOptionsCell.querySelector('.icon-more-small-list');
 
   const buildTool = (parent, text, icon) => {
@@ -133,6 +207,8 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
       const unpub = buildTool(toolBox, 'Unpublish', 'publish-remove');
       unpub.addEventListener('click', async (e) => {
         e.preventDefault();
+        toolBox.remove();
+        row.classList.add('pending');
         const resp = await unpublishEvent(eventObj.eventId, quickFilter(eventObj));
         updateDashboardData(resp, props);
       });
@@ -140,6 +216,8 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
       pub.addEventListener('click', async (e) => {
         e.preventDefault();
+        toolBox.remove();
+        row.classList.add('pending');
         const resp = await publishEvent(eventObj.eventId, quickFilter(eventObj));
         updateDashboardData(resp, props);
       });
@@ -174,6 +252,7 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
       const payload = { ...eventObj };
       payload.title = `${eventObj.title} - copy`;
       toolBox.remove();
+      row.classList.add('pending');
       const newEventJSON = await createEvent(cloneFilter(payload));
       const reloadUrl = new URL(window.location.href);
       reloadUrl.searchParams.set('clonedEventId', newEventJSON.eventId);
@@ -183,11 +262,14 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
     deleteBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       toolBox.remove();
+      row.classList.add('pending');
       await deleteEvent(eventObj.eventId);
       const newJson = await getEvents();
       props.data = newJson.events;
       props.filteredData = newJson.events;
       props.paginatedData = newJson.events;
+
+      sortData(props, config, { resort: true });
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
@@ -285,32 +367,23 @@ async function populateRow(props, config, index) {
     moreOptionsCell,
   );
 
-  initMoreOptions(props, config, event, moreOptionsCell);
+  initMoreOptions(props, config, event, row);
 
-  if (event.eventId === sp.get('newEventId')) {
+  if (event.eventId === sp.get('newEventId') && !props.el.classList.contains('toast-shown')) {
     const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
+    props.el.classList.add('toast-shown');
   }
 
-  if (event.eventId === sp.get('clonedEventId')) {
+  if (event.eventId === sp.get('clonedEventId') && !props.el.classList.contains('toast-shown')) {
     const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
+    props.el.classList.add('toast-shown');
   }
-}
-
-function paginateData(props, config, page) {
-  const ps = +config['page-size'];
-  if (Number.isNaN(ps) || ps <= 0) {
-    window.lana?.log('error', 'Invalid page size');
-  }
-  const start = (page - 1) * ps;
-  const end = Math.min(page * ps, props.filteredData.length);
-
-  props.paginatedData = props.filteredData.slice(start, end);
 }
 
 function updatePaginationControl(pagination, currentPage, totalPages) {
@@ -365,6 +438,46 @@ function decoratePagination(props, config) {
   updatePaginationControl(paginationContainer, props.currentPage, totalPages);
 }
 
+function initSorting(props, config) {
+  const thead = props.el.querySelector('thead');
+  const thRow = thead.querySelector('tr');
+
+  const headers = {
+    thumbnail: '',
+    title: 'EVENT NAME',
+    published: 'PUBLISH STATUS',
+    startDate: 'DATE RUN',
+    modificationTime: 'LAST MODIFIED',
+    venueId: 'VENUE NAME',
+    timezone: 'GEO',
+    externalEventId: 'RSVP DATA',
+    manage: 'MANAGE',
+  };
+
+  Object.entries(headers).forEach(([key, val]) => {
+    const thText = createTag('span', {}, val);
+    const th = createTag('th', {}, thText, { parent: thRow });
+
+    if (['thumbnail', 'manage'].includes(key)) return;
+
+    th.append(getIcon('chev-down'), getIcon('chev-up'));
+    th.classList.add('sortable', key);
+    th.addEventListener('click', () => {
+      thead.querySelectorAll('th').forEach((h) => {
+        if (th !== h) {
+          h.classList.remove('active');
+        }
+      });
+      th.classList.add('active');
+      props.currentSort = {
+        el: th,
+        field: key,
+      };
+      sortData(props, config);
+    });
+  });
+}
+
 function populateTable(props, config) {
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' });
   const tBody = props.el.querySelector('table.dashboard-table tbody');
@@ -379,51 +492,6 @@ function populateTable(props, config) {
 
   props.el.querySelector('.pagination-container')?.remove();
   decoratePagination(props, config);
-}
-
-function sortData(props, config, keepCurrentSort = false) {
-  const { field, el } = props.currentSort;
-  let sortAscending = true;
-
-  if (el.classList.contains('active')) {
-    if (keepCurrentSort) {
-      sortAscending = !el.classList.contains('desc-sort');
-    } else {
-      sortAscending = el.classList.contains('desc-sort');
-    }
-    el.classList.toggle('desc-sort', !sortAscending);
-  } else {
-    el.classList.remove('desc-sort');
-  }
-
-  props.filteredData = props.filteredData.sort((a, b) => {
-    let valA;
-    let valB;
-
-    if (field === 'title') {
-      valA = a[field].toLowerCase();
-      valB = b[field].toLowerCase();
-      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    } if (field === 'startDate' || field === 'modificationTime') {
-      valA = new Date(a[field]);
-      valB = new Date(b[field]);
-      return sortAscending ? valA - valB : valB - valA;
-    }
-    valA = a[field].toString().toLowerCase();
-    valB = b[field].toString().toLowerCase();
-    return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-  });
-
-  el.parentNode.querySelectorAll('th').forEach((header) => {
-    if (header !== el) {
-      header.classList.remove('active');
-      header.classList.remove('desc-sort');
-    }
-  });
-
-  props.currentPage = 1;
-  paginateData(props, config, 1);
-  el.classList.add('active');
 }
 
 function filterData(props, config, query) {
@@ -442,7 +510,9 @@ function buildDashboardHeader(props, config) {
   createTag('h1', { class: 'dashboard-header-heading' }, 'All Events', { parent: textContainer });
   createTag('p', { class: 'dashboard-header-events-count' }, `(${props.data.length} events)`, { parent: textContainer });
 
-  const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: actionsContainer });
+  const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
+  const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
+  searchInputWrapper.append(getIcon('search'));
   createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
   searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
 
@@ -455,45 +525,18 @@ function buildDashboardTable(props, config) {
   const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
   const thead = createTag('thead', {}, '', { parent: table });
   createTag('tbody', {}, '', { parent: table });
-
-  const headers = {
-    thumbnail: '',
-    title: 'EVENT NAME',
-    published: 'PUBLISH STATUS',
-    startDate: 'DATE RUN',
-    modificationTime: 'LAST MODIFIED',
-    venueId: 'VENUE NAME',
-    timezone: 'GEO',
-    externalEventId: 'RSVP DATA',
-    manage: 'MANAGE',
-  };
-
-  const tr = createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
-
-  Object.entries(headers).forEach(([key, val]) => {
-    const thText = createTag('span', {}, val);
-    const th = createTag('th', {}, thText, { parent: tr });
-
-    if (['thumbnail', 'manage'].includes(key)) return;
-
-    th.append(getIcon('chev-down'), getIcon('chev-up'));
-    th.classList.add('sortable');
-    th.addEventListener('click', () => {
-      thead.querySelectorAll('th').forEach((h) => {
-        if (th !== h) {
-          h.classList.remove('active');
-        }
-      });
-      th.classList.add('active');
-      props.currentSort = {
-        el: th,
-        field: key,
-      };
-      sortData(props, config);
-    });
-  });
-
+  createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
+  initSorting(props, config);
   populateTable(props, config);
+
+  const usp = new URLSearchParams(window.location.search);
+  if (usp.get('newEventId') || usp.get('clonedEventId')) {
+    const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
+    if (modTimeHeader) {
+      props.currentSort = { field: 'modificationTime', el: modTimeHeader };
+      sortData(props, config, { direction: 'desc' });
+    }
+  }
 }
 
 async function getEventsArray() {
@@ -545,9 +588,7 @@ async function buildDashboard(el, config) {
     const dataHandler = {
       set(target, prop, value, receiver) {
         target[prop] = value;
-
         populateTable(receiver, config);
-
         return true;
       },
     };
