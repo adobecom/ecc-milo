@@ -509,7 +509,7 @@ function filterData(props, config, query) {
   props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
   props.currentPage = 1;
   paginateData(props, config, 1);
-  sortData(props, config, true);
+  sortData(props, config, { resort: true });
 }
 
 function buildDashboardHeader(props, config) {
