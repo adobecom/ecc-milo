@@ -230,13 +230,15 @@ function initMoreOptions(props, config, eventObj, row) {
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
     previewPre.href = (() => {
-      const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
+      const pagePath = eventObj.detailPagePath ? `${window.location.origin}${eventObj.detailPagePath}` : '#';
+      const url = new URL(pagePath);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
       return url.toString();
     })();
 
     previewPost.href = (() => {
-      const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
+      const pagePath = eventObj.detailPagePath ? `${window.location.origin}${eventObj.detailPagePath}` : '#';
+      const url = new URL(pagePath);
       url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
       return url.toString();
     })();
