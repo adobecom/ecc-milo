@@ -229,19 +229,22 @@ function initMoreOptions(props, config, eventObj, row) {
     const clone = buildTool(toolBox, 'Clone', 'clone');
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
-    previewPre.href = (() => {
-      const pagePath = eventObj.detailPagePath ? `${window.location.origin}${eventObj.detailPagePath}` : '#';
-      const url = new URL(pagePath);
-      url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
-      return url.toString();
-    })();
+    if (eventObj.detailPagePath) {
+      previewPre.href = (() => {
+        const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
+        url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
+        return url.toString();
+      })();
+      previewPost.href = (() => {
+        const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
+        url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
+        return url.toString();
+      })();
+    } else {
+      previewPre.classList.add('disabled');
+      previewPost.classList.add('disabled');
+    }
 
-    previewPost.href = (() => {
-      const pagePath = eventObj.detailPagePath ? `${window.location.origin}${eventObj.detailPagePath}` : '#';
-      const url = new URL(pagePath);
-      url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
-      return url.toString();
-    })();
 
     // edit
     const url = new URL(`${window.location.origin}${config['create-form-url']}`);
@@ -319,7 +322,7 @@ function buildEventTitleTag(event) {
     return eventTitleTag;
   }
 
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: '#' }, event.title);
+  const eventTitleTag = createTag('a', { class: 'event-title-link disabled' }, event.title);
   return eventTitleTag;
 }
 
