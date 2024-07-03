@@ -312,7 +312,12 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(event) {
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${window.location.origin}${event.detailPagePath}` }, event.title);
+  if (event.detailPagePath) {
+    const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${window.location.origin}${event.detailPagePath}` }, event.title);
+    return eventTitleTag;
+  }
+
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: '#' }, event.title);
   return eventTitleTag;
 }
 
