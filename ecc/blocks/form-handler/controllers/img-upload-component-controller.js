@@ -43,7 +43,6 @@ export async function onUpdate(component, props) {
 export default function init(component, props) {
   const type = getComponentImageType(component);
   const dropzones = component.querySelectorAll('image-dropzone');
-  const eventData = props.eventDataResp;
 
   dropzones.forEach((dz) => {
     dz.handleImage = async () => {
@@ -52,8 +51,8 @@ export default function init(component, props) {
 
       if (!file || !(file instanceof File)) return;
 
-      if (eventData.photos) {
-        const photoObj = eventData.photos.find((p) => p.imageKind === type);
+      if (props.eventDataResp?.photos) {
+        const photoObj = props.eventDataResp.photos.find((p) => p.imageKind === type);
         if (photoObj) imageId = photoObj.imageId;
       }
 
@@ -63,6 +62,7 @@ export default function init(component, props) {
     };
   });
 
+  const eventData = props.eventDataResp;
   if (eventData.photos) {
     const photoObj = eventData.photos.find((p) => p.imageKind === type);
 
