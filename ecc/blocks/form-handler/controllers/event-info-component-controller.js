@@ -331,8 +331,19 @@ export function onSubmit(component, props) {
   props.payload = { ...props.payload, ...eventInfo };
 }
 
-export async function onUpdate(_component, _props) {
-  // Do nothing
+export async function onUpdate(component, props) {
+  if (props.payload.localStartDate !== props.payload.localEndDate) {
+    const startTimeInput = component.querySelector('#time-picker-start-time');
+    const endTimeInput = component.querySelector('#time-picker-end-time');
+
+    startTimeInput?.querySelectorAll('sp-menu-item')?.forEach((option) => {
+      option.disabled = false;
+    });
+
+    endTimeInput?.querySelectorAll('sp-menu-item')?.forEach((option) => {
+      option.disabled = false;
+    });
+  }
 }
 
 export default function init(component, props) {
@@ -343,6 +354,7 @@ export default function init(component, props) {
   initCalendar(component);
 
   endTimeInput.addEventListener('change', () => {
+    if (props.payload.localStartDate !== props.payload.localEndDate) return;
     const allOptions = startTimeInput.querySelectorAll('sp-menu-item');
     allOptions.forEach((option) => {
       if (option.value >= endTimeInput.value && endTimeInput.value) {
@@ -354,6 +366,7 @@ export default function init(component, props) {
   });
 
   startTimeInput.addEventListener('change', () => {
+    if (props.payload.localStartDate !== props.payload.localEndDate) return;
     const allOptions = endTimeInput.querySelectorAll('sp-menu-item');
     allOptions.forEach((option) => {
       if (option.value <= startTimeInput.value && startTimeInput.value) {
