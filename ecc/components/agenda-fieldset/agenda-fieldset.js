@@ -1,8 +1,8 @@
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { style } from './agenda-fieldset.css.js';
 import { convertTo24HourFormat } from '../../utils/utils.js';
 
-const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 export default class AgendaFieldset extends LitElement {
   static properties = {
@@ -37,7 +37,7 @@ export default class AgendaFieldset extends LitElement {
           </div>
         </div>
         <div class="text-field-wrapper">
-          <sp-textfield class="text-input" placeholder=${this.options.placeholder} value=${this.agenda.description || nothing} ?required=${this.options.isRequired && this.agendas.length > 1} quiet size="xl" maxlength=${this.options.maxCharNum} @change=${(event) => {
+          <sp-textfield class="text-input" placeholder=${this.options.placeholder} value=${this.agenda.description || nothing} ?required=${this.options.isRequired && (this.agendas.length > 1 || this.agenda.startTime)} quiet size="xl" maxlength=${this.options.maxCharNum} @change=${(event) => {
   this.updateValue('description', event.target.value);
 }}></sp-textfield>
           <div class="attr-text">${this.options.maxLengthText}</div>

@@ -128,8 +128,8 @@ export async function onSubmit(component, props) {
     gmtOffset,
   };
 
-  const onEventCreate = async () => {
-    const resp = await createVenue(getFilteredCachedResponse().eventId, venueData);
+  const onEventCreate = async (e) => {
+    const resp = await createVenue(e.detail.eventId, venueData);
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     props.payload = { ...props.payload, showVenuePostEvent };
     document.removeEventListener('eventcreated', onEventCreate);
@@ -180,4 +180,6 @@ export default async function init(component, props) {
   changeInputValue(component.querySelector('#google-place-lng'), 'value', venue.coordinates?.lon);
   changeInputValue(component.querySelector('#google-place-id'), 'value', placeId);
   changeInputValue(component.querySelector('#google-map-url'), 'value', mapUrl);
+
+  if (venueName) component.classList.add('prefilled');
 }

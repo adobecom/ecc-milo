@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { changeInputValue } from '../../../utils/utils.js';
 
 export function onSubmit(component, props) {
@@ -23,8 +24,11 @@ export default function init(component, props) {
   const checkbox = component.querySelector('#checkbox-community');
   const input = component.querySelector('#community-url-details');
 
-  changeInputValue(checkbox, 'checked', !!eventData.communityTopicUrl);
-  changeInputValue(input, 'value', eventData.communityTopicUrl || '');
+  if (eventData.communityTopicUrl) {
+    changeInputValue(checkbox, 'checked', !!eventData.communityTopicUrl);
+    changeInputValue(input, 'value', eventData.communityTopicUrl || '');
+    component.classList.add('prefilled');
+  }
 
   const updateInputState = () => {
     input.disabled = !checkbox.checked;

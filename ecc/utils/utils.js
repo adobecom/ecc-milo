@@ -1,3 +1,5 @@
+import { MILO_CONFIG } from '../scripts/scripts.js';
+
 let secretCache = [];
 
 function createTag(tag, attributes, html, options = {}) {
@@ -25,7 +27,7 @@ function createTag(tag, attributes, html, options = {}) {
 export function getIcon(tag) {
   const img = document.createElement('img');
   img.className = `icon icon-${tag}`;
-  img.src = `${window.miloConfig.codeRoot}/icons/${tag}.svg`;
+  img.src = `${MILO_CONFIG.codeRoot}/icons/${tag}.svg`;
   img.alt = tag;
 
   return img;
@@ -39,6 +41,12 @@ export function yieldToMain() {
 
 export function handlize(str) {
   return str?.toLowerCase().trim().replaceAll(' ', '-');
+}
+
+export function camelToSentenceCase(camelCaseStr) {
+  let sentenceCaseStr = camelCaseStr.replace(/([A-Z])/g, ' $1').toLowerCase();
+  sentenceCaseStr = sentenceCaseStr.charAt(0).toUpperCase() + sentenceCaseStr.slice(1);
+  return sentenceCaseStr;
 }
 
 export function isEmptyObject(o) {
@@ -184,7 +192,7 @@ export async function decorateTextfield(cell, extraOptions) {
 }
 
 export function changeInputValue(input, attr, value) {
-  if (!input) return;
+  if (!input || !value) return;
   input[attr] = value;
   input.dispatchEvent(new Event('change'));
 }
