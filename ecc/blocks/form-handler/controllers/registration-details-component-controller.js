@@ -2,12 +2,13 @@
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const attendeeLimit = component.querySelector('#attendee-count-input')?.value;
+  const attendeeLimitVal = component.querySelector('#attendee-count-input')?.value;
   const allowWaitlisting = component.querySelector('#registration-allow-waitlist')?.checked;
   const contactHost = component.querySelector('#registration-contact-host')?.checked;
   const hostEmail = component.querySelector('#event-host-email-input')?.value;
   const rsvpDescription = component.querySelector('#rsvp-form-detail-description')?.value;
 
+  const attendeeLimit = Number.isNaN(+attendeeLimitVal) ? null : +attendeeLimitVal;
   const rsvpData = {
     attendeeLimit,
     allowWaitlisting,
