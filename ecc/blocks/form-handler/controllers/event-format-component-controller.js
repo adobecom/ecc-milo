@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { MILO_CONFIG } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../utils/utils.js';
 
 function prepopulateTimeZone(component) {
@@ -24,7 +25,7 @@ function initStepLock(component) {
   const urlParams = new URLSearchParams(search);
   const skipValidation = urlParams.get('skipValidation');
 
-  if (skipValidation === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
+  if (skipValidation === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     return;
   }
 
@@ -71,9 +72,12 @@ export default function init(component, props) {
     rsvpRequired,
   } = eventData;
 
-  changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType || '');
-  changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId || '');
-  changeInputValue(component.querySelector('#rsvp-required-check'), 'checked', rsvpRequired || 0);
+  if (cloudType && seriesId) {
+    changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType);
+    changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId);
+    changeInputValue(component.querySelector('#rsvp-required-check'), 'checked', rsvpRequired || 0);
+    component.classList.add('prefilled');
+  }
 }
 
 function getTemplateId(bu) {

@@ -1,9 +1,8 @@
 /* eslint-disable max-len */
-import { getLibs } from '../../scripts/utils.js';
-import { isEmptyObject } from '../../utils/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { style } from './product-selector-group.css.js';
 
-const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 const defaultProductValue = {
   name: '',
@@ -19,7 +18,8 @@ export default class ProductSelectorGroup extends LitElement {
 
   constructor() {
     super();
-    this.selectedProducts = this.selectedProducts || [defaultProductValue];
+    this.selectedProducts = this.selectedProducts?.length || [defaultProductValue];
+
     try {
       this.products = JSON.parse(this.dataset.products);
     } catch {
@@ -58,7 +58,7 @@ export default class ProductSelectorGroup extends LitElement {
   }
 
   getSelectedProducts() {
-    return this.selectedProducts.filter((p) => p.name && p.showProductBlade !== undefined);
+    return this.selectedProducts.filter((p) => p.name);
   }
 
   countBlades() {

@@ -1,8 +1,8 @@
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { isEmptyObject } from '../../utils/utils.js';
 import { style } from './product-selector.css.js';
 
-const { LitElement, html, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 export default class ProductSelector extends LitElement {
   static properties = {
@@ -57,9 +57,10 @@ export default class ProductSelector extends LitElement {
   }
 
   render() {
+    const match = this.products.find((product) => product.name === this.selectedProduct.name);
     return html`
       <fieldset class="rsvp-field-wrapper">
-      ${html`<img class="product-img" src="${this.selectedProduct.tagImage || '/ecc/icons/icon-placeholder.svg'}" alt="${this.selectedProduct.title || nothing}">`}  
+      ${html`<img class="product-img" src="${this.selectedProduct.tagImage || match?.tagImage || '/ecc/icons/icon-placeholder.svg'}" alt="${this.selectedProduct.title || nothing}">`}  
         <sp-picker class="product-select-input" label="Select a product" value=${this.selectedProduct.name || nothing} @change="${this.handleSelectChange}">
           ${this.products.map((product) => html`<sp-menu-item value="${product.name}">${product.title}
           </sp-menu-item>`)}

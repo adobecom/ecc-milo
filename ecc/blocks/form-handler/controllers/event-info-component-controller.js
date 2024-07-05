@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
-import { getLibs } from '../../../scripts/utils.js';
+import { LIBS } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../utils/utils.js';
 
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function formatDate(date) {
   let month = `${date.getMonth() + 1}`;
@@ -374,17 +374,27 @@ export default function init(component, props) {
     timezone,
   } = eventData;
 
-  component.querySelector('#info-field-event-title').value = title || '';
-  component.querySelector('#info-field-event-description').value = description || '';
-  changeInputValue(startTimeInput, 'value', localStartTime || '');
-  changeInputValue(endTimeInput, 'value', localEndTime || '');
-  changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
+  if (title
+    && description
+    && localStartDate
+    && localEndDate
+    && localStartTime
+    && localEndTime
+    && timezone) {
+    component.querySelector('#info-field-event-title').value = title || '';
+    component.querySelector('#info-field-event-description').value = description || '';
+    changeInputValue(startTimeInput, 'value', localStartTime || '');
+    changeInputValue(endTimeInput, 'value', localEndTime || '');
+    changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
 
-  const datePicker = component.querySelector('#event-info-date-picker');
-  datePicker.dataset.startDate = localStartDate || '';
-  datePicker.dataset.endDate = localEndDate || '';
-  updateInput(component, {
-    selectedStartDate: parseFormatedDate(localStartDate),
-    selectedEndDate: parseFormatedDate(localEndDate),
-  });
+    const datePicker = component.querySelector('#event-info-date-picker');
+    datePicker.dataset.startDate = localStartDate || '';
+    datePicker.dataset.endDate = localEndDate || '';
+    updateInput(component, {
+      selectedStartDate: parseFormatedDate(localStartDate),
+      selectedEndDate: parseFormatedDate(localEndDate),
+    });
+
+    component.classList.add('prefilled');
+  }
 }

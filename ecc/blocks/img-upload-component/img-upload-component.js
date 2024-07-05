@@ -1,7 +1,7 @@
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { handlize, generateToolTip } from '../../utils/utils.js';
 
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function buildCheckbox(col) {
   col.classList.add('venue-image-visible-toggle');

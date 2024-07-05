@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -25,8 +26,9 @@ export default function init(component, props) {
   const agendaGroup = component.querySelector('agenda-fieldset-group');
   const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info');
 
-  if (eventData.agenda) {
-    agendaGroup.dataset.agendaItems = JSON.stringify(eventData.agenda);
+  if (eventData.agenda?.length) {
+    agendaGroup.agendaItems = eventData.agenda;
+    component.classList.add('prefilled');
   }
 
   showAgendaPostEvent.checked = eventData.showAgendaPostEvent;

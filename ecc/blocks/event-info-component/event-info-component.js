@@ -1,7 +1,7 @@
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { getIcon, generateToolTip, decorateTextfield, decorateTextarea, convertTo24HourFormat } from '../../utils/utils.js';
 
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function buildDatePicker(column) {
   column.classList.add('date-picker');
@@ -54,18 +54,6 @@ function buildTimePicker(column, wrapper) {
   timePickerWrappers.forEach((w) => { column.append(w); });
 
   wrapper.append(column);
-}
-
-function getGMTOffset(timeZone) {
-  const match = timeZone.match(/UTC([+-])(\d{2}):(\d{2})/);
-  if (match) {
-    const sign = match[1] === '+' ? 1 : -1;
-    const hours = parseInt(match[2], 10);
-
-    return sign * hours;
-  }
-
-  return 0;
 }
 
 function decorateTimeZoneSelect(cell, wrapper) {

@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
-import { getLibs } from '../../../scripts/utils.js';
+import { LIBS } from '../../../scripts/scripts.js';
 import HtmlSanitizer from '../../../deps/html-sanitizer.js';
 import { fetchThrottledMemoized } from '../../../utils/utils.js';
 
-const { customFetch } = await import(`${getLibs()}/utils/helpers.js`);
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+const { customFetch } = await import(`${LIBS}/utils/helpers.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function buildTerms(terms) {
   const termsWrapper = createTag('div', { class: 'terms-conditions-preview' });
@@ -35,8 +35,7 @@ async function loadPreview(component, templateId) {
     .catch(() => ({}));
 
   if (!resp?.ok) {
-    window.lana?.log(`Could not get fragment: ${rsvpFormLocation}.plain.html`);
-    component.append(createTag('p', {}, 'Could not load terms and conditions. Please try again later.'));
+    component.remove();
     return;
   }
 

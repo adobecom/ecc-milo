@@ -1,12 +1,10 @@
-import { getLibs } from '../../scripts/utils.js';
-import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
+import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
+import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip, camelToSentenceCase } from '../../utils/utils.js';
 import {
   createEvent,
   updateEvent,
   publishEvent,
   getEvent,
-  getSpeaker,
-  getCaasTags,
 } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
@@ -20,9 +18,10 @@ import ProductSelectorGroup from '../../components/product-selector-group/produc
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
+import BlockMediator from '../../deps/block-mediator.min.js';
 
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
-const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
 
 // list of controllers for the handler to load
 const VANILLA_COMPONENTS = [
@@ -63,7 +62,42 @@ const SPECTRUM_COMPONENTS = [
   'dialog',
   'button-group',
   'tooltip',
+  'toast',
 ];
+
+function buildErrorMessage(props, resp) {
+  if (!resp) return;
+
+  let toastArea = props.el.querySelector('.toast-area');
+
+  if (!toastArea) {
+    const spTheme = props.el.querySelector('sp-theme');
+    if (!spTheme) return;
+    toastArea = createTag('div', { class: 'toast-area' }, '', { parent: spTheme });
+  }
+
+  if (resp.errors) {
+    const messages = [];
+
+    resp.errors.forEach((error) => {
+      const errorPathSegments = error.path.split('/');
+      const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${error.message}`;
+      messages.push(text);
+    });
+
+    messages.forEach((msg, i) => {
+      const toast = createTag('sp-toast', { open: true, variant: 'negative' }, msg, { parent: toastArea });
+      setTimeout(() => {
+        toast.remove();
+      }, 5000 + (i * 1000));
+    });
+  } else if (resp.message) {
+    const toast = createTag('sp-toast', { open: true, variant: 'negative' }, resp.message, { parent: toastArea });
+    setTimeout(() => {
+      toast.remove();
+    }, 5000);
+  }
+}
 
 function replaceAnchorWithButton(anchor) {
   if (!anchor || anchor.tagName !== 'A') {
@@ -89,37 +123,16 @@ function getCurrentFragment(props) {
   return currentFrag;
 }
 
-async function initComponents(props) {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const eventId = urlParams.get('eventId');
-
-  if (eventId) {
-    try {
-      const eventData = await getEvent(eventId);
-      const { seriesId } = eventData;
-      // eslint-disable-next-line max-len
-      const speakers = await Promise.all(eventData.speakers.map(async (sp) => getSpeaker(seriesId, sp.speakerId)));
-      for (let idx = 0; idx < eventData.speakers.length; idx += 1) {
-        eventData.speakers[idx] = { ...eventData.speakers[idx], ...speakers[idx] };
-      }
-      eventData.speakers = speakers;
-      props.eventDataResp = { ...props.eventDataResp, ...eventData };
-    } catch (e) {
-      console.error('Error fetching speaker data: ', e);
+function enableSideNavForEditFlow(props) {
+  const frags = props.el.querySelectorAll('.fragment');
+  frags.forEach((frag, i) => {
+    if (frag.querySelector('.form-component.prefilled')) {
+      props.farthestStep = Math.max(props.farthestStep, i);
     }
-  }
-
-  VANILLA_COMPONENTS.forEach((comp) => {
-    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
-    if (!mappedComponents?.length) return;
-
-    mappedComponents.forEach(async (component) => {
-      const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
-      await initComponent(component, props);
-    });
   });
+}
 
+function initCustomLitComponents() {
   customElements.define('image-dropzone', ImageDropzone);
   customElements.define('profile-ui', Profile);
   customElements.define('repeater-element', Repeater);
@@ -131,6 +144,32 @@ async function initComponents(props) {
   customElements.define('product-selector-group', ProductSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
+}
+
+async function initComponents(props) {
+  initCustomLitComponents();
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const eventId = urlParams.get('eventId');
+
+  if (eventId) {
+    const eventData = await getEvent(eventId);
+    props.eventDataResp = { ...props.eventDataResp, ...eventData };
+  }
+
+  const componentPromises = VANILLA_COMPONENTS.map(async (comp) => {
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
+    if (!mappedComponents?.length) return;
+
+    const componentInitPromises = Array.from(mappedComponents).map(async (component) => {
+      const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
+      await initComponent(component, props);
+    });
+
+    await Promise.all(componentInitPromises);
+  });
+
+  await Promise.all(componentPromises);
 }
 
 async function gatherValues(props) {
@@ -219,23 +258,27 @@ function decorateForm(el) {
 async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
 
+  let resp;
+
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    const resp = await createEvent(quickFilter(props.payload));
+    resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated'));
+    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: resp.eventId } }));
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
-    const resp = await updateEvent(
+    resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
   } else if (options.toPublish) {
-    const resp = await publishEvent(
+    resp = await publishEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
   }
+
+  return resp;
 }
 
 function updateSideNav(props) {
@@ -253,7 +296,7 @@ function validateRequiredFields(fields) {
   const urlParams = new URLSearchParams(search);
   const skipValidation = urlParams.get('skipValidation');
 
-  if (skipValidation === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
+  if (skipValidation === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     return true;
   }
 
@@ -265,12 +308,19 @@ function onStepValidate(props) {
     const currentFrag = getCurrentFragment(props);
     const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
     const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
+    const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
 
     ctas.forEach((cta) => {
       if (cta.classList.contains('back-btn')) {
         cta.classList.toggle('disabled', props.currentStep === 0);
       } else {
         cta.classList.toggle('disabled', !stepValid);
+      }
+    });
+
+    sideNavs.forEach((nav, i) => {
+      if (i !== props.currentStep) {
+        nav.disabled = !stepValid;
       }
     });
   };
@@ -404,8 +454,14 @@ function initFormCtas(props) {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
           if (cta.classList.contains('preview-not-ready')) return;
-          await saveEvent(props);
-          window.open(cta.href);
+          const resp = await saveEvent(props);
+
+          if (resp?.errors || resp?.message) {
+            buildErrorMessage(props, resp);
+          } else {
+            window.open(cta.href);
+          }
+
           toggleBtnsSubmittingState(false);
         });
       }
@@ -432,15 +488,20 @@ function initFormCtas(props) {
           toggleBtnsSubmittingState(true);
 
           if (ctaUrl.hash === '#next') {
-            await saveEvent(props, { toPublish: true });
-            if (props.currentStep === props.maxStep) {
+            const resp = await saveEvent(props, { toPublish: true });
+            if (resp?.errors || resp?.message) {
+              buildErrorMessage(props, resp);
+            } else if (props.currentStep === props.maxStep) {
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
               if (dashboardLink) window.location.assign(dashboardLink.href);
             } else {
               navigateForm(props);
             }
           } else {
-            await saveEvent(props);
+            const resp = await saveEvent(props);
+            if (resp?.errors || resp?.message) {
+              buildErrorMessage(props, resp);
+            }
           }
 
           toggleBtnsSubmittingState(false);
@@ -478,9 +539,14 @@ function initNavigation(props) {
   });
 
   navItems.forEach((nav, i) => {
-    nav.addEventListener('click', () => {
+    nav.addEventListener('click', async () => {
       if (!nav.disabled) {
-        navigateForm(props, i);
+        const resp = await saveEvent(props);
+        if (resp?.errors || resp?.message) {
+          buildErrorMessage(props, resp);
+        } else {
+          navigateForm(props, i);
+        }
       }
     });
   });
@@ -553,6 +619,11 @@ async function buildECCForm(el) {
         setResponseCache(value);
         updatePreviewCtas(target);
         updateDashboardLink(target);
+        if (value.message || value.errors) {
+          props.el.classList.add('show-error');
+        } else {
+          props.el.classList.remove('show-error');
+        }
       }
 
       return true;
@@ -578,12 +649,13 @@ async function buildECCForm(el) {
   initRepeaters(proxyProps);
   initNavigation(proxyProps);
   updateRequiredFields(proxyProps);
+  enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
 }
 
 export default async function init(el) {
   el.style.display = 'none';
-  const miloLibs = getLibs();
+  const miloLibs = LIBS;
   const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
     await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
   });
@@ -592,12 +664,12 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const profile = window.bm8r.get('imsProfile');
+  const profile = BlockMediator.get('imsProfile');
   const { search } = window.location;
   const urlParams = new URLSearchParams(search);
   const devMode = urlParams.get('devMode');
 
-  if (devMode === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
+  if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     buildECCForm(el);
     el.removeAttribute('style');
     return;
@@ -615,7 +687,7 @@ export default async function init(el) {
   }
 
   if (!profile) {
-    const unsubscribe = window.bm8r.subscribe('imsProfile', ({ newValue }) => {
+    const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
       if (newValue?.noProfile || newValue.account_type !== 'type3') {
         buildNoAccessScreen(el);
       } else {
