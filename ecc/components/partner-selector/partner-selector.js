@@ -87,7 +87,7 @@ export default class PartnerSelector extends LitElement {
             </div>
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>
-              <sp-textfield pattern="^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$" value=${this.partner.externalUrl} @change=${(event) => {
+              <sp-textfield pattern="^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$" value=${this.partner.link} @change=${(event) => {
   this.updateValue('link', event.target.value);
 }}></sp-textfield>
             </div>
