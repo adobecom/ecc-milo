@@ -45,13 +45,13 @@ export default class PartnerSelector extends LitElement {
     let respJson;
 
     saveButton.pending = true;
+    const payload = {
+      name: this.partner.name,
+      link: this.partner.link,
+    };
     if (!this.partner.sponsorId) {
-      respJson = await createSponsor(this.partner, this.seriesId);
+      respJson = await createSponsor(payload, this.seriesId);
     } else {
-      const payload = {
-        name: this.partner.name,
-        link: this.partner.link,
-      };
       respJson = await updateSponsor(payload, this.partner.sponsorId, this.seriesId);
     }
 
@@ -86,7 +86,7 @@ export default class PartnerSelector extends LitElement {
       <fieldset class="partner-field-wrapper">
       <div>
         <div class="partner-input-wrapper">
-          <image-dropzone file=${imageFile}>
+          <image-dropzone .file=${imageFile}>
         <slot name="img-label" slot="img-label"></slot>
           </image-dropzone>
           <div>
@@ -106,7 +106,7 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" .disabled=${!this.partner.name && !this.allInputsValid()} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
+        <sp-button variant="primary" disabled=${!this.partner.name && !this.allInputsValid()} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
