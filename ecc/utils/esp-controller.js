@@ -109,7 +109,6 @@ export async function uploadImage(file, configs, imageId = null) {
       });
     }
 
-
     if (response.ok) {
       respJson = await response.json();
     } else {

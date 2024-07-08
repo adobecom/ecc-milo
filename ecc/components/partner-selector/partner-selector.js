@@ -34,17 +34,13 @@ export default class PartnerSelector extends LitElement {
     }));
   }
 
-  allInputsValid() {
-    const allSpTextfields = this.shadowRoot.querySelectorAll('sp-textfield');
-    return Array.from(allSpTextfields).every((spTextfield) => !spTextfield.invalid);
-  }
-
   async savePartner(e) {
     const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
     const saveButton = e.target;
     let respJson;
 
     saveButton.pending = true;
+
     const payload = {
       name: this.partner.name,
       link: this.partner.link,
@@ -106,7 +102,7 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" disabled=${!this.partner.name && !this.allInputsValid()} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
+        <sp-button variant="primary" disabled=${!this.partner.name} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
