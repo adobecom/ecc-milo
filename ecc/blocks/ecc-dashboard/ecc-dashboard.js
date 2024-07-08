@@ -229,17 +229,22 @@ function initMoreOptions(props, config, eventObj, row) {
     const clone = buildTool(toolBox, 'Clone', 'clone');
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
-    previewPre.href = (() => {
-      const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
-      url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
-      return url.toString();
-    })();
+    if (eventObj.detailPagePath) {
+      previewPre.href = (() => {
+        const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
+        url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
+        return url.toString();
+      })();
+      previewPost.href = (() => {
+        const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
+        url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
+        return url.toString();
+      })();
+    } else {
+      previewPre.classList.add('disabled');
+      previewPost.classList.add('disabled');
+    }
 
-    previewPost.href = (() => {
-      const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
-      url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
-      return url.toString();
-    })();
 
     // edit
     const url = new URL(`${window.location.origin}${config['create-form-url']}`);
@@ -312,7 +317,12 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(event) {
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${window.location.origin}${event.detailPagePath}` }, event.title);
+  if (event.detailPagePath) {
+    const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${window.location.origin}${event.detailPagePath}` }, event.title);
+    return eventTitleTag;
+  }
+
+  const eventTitleTag = createTag('a', { class: 'event-title-link disabled' }, event.title);
   return eventTitleTag;
 }
 
@@ -499,7 +509,7 @@ function filterData(props, config, query) {
   props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
   props.currentPage = 1;
   paginateData(props, config, 1);
-  sortData(props, config, true);
+  sortData(props, config, { resort: true });
 }
 
 function buildDashboardHeader(props, config) {
