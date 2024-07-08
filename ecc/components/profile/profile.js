@@ -2,7 +2,7 @@
 /* eslint-disable class-methods-use-this */
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './profile.css.js';
-import { createSpeaker, updateSpeaker, uploadBinaryFile } from '../../utils/esp-controller.js';
+import { createSpeaker, updateSpeaker, uploadImage } from '../../utils/esp-controller.js';
 import { getServiceName } from '../../utils/utils.js';
 import { icons } from '../../icons/icons.svg.js';
 
@@ -94,7 +94,7 @@ export class Profile extends LitElement {
         const file = imageDropzone?.getFile();
 
         if (file && (file instanceof File)) {
-          const speakerData = await uploadBinaryFile(file, {
+          const speakerData = await uploadImage(file, {
             targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.speakerId}/images`,
             type: 'speaker-photo',
             altText: `${this.profile.firstName} ${this.profile.lastName} photo`,

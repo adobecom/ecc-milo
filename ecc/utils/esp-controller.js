@@ -80,7 +80,7 @@ async function constructRequestOptions(method, body = null) {
   return options;
 }
 
-export async function uploadBinaryFile(file, configs) {
+export async function uploadImage(file, configs, imageId = null) {
   await waitForAdobeIMS();
 
   const { host } = getAPIConfig().esp[ECC_ENV];
@@ -93,11 +93,22 @@ export async function uploadBinaryFile(file, configs) {
   let respJson = null;
 
   try {
-    const response = await fetch(`${host}${configs.targetUrl}`, {
-      method: 'POST',
-      headers,
-      body: file,
-    });
+    let response;
+
+    if (imageId) {
+      response = await fetch(`${host}${configs.targetUrl}/${imageId}`, {
+        method: 'PUT',
+        headers,
+        body: file,
+      });
+    } else {
+      response = await fetch(`${host}${configs.targetUrl}`, {
+        method: 'POST',
+        headers,
+        body: file,
+      });
+    }
+
 
     if (response.ok) {
       respJson = await response.json();
