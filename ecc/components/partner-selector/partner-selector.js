@@ -32,7 +32,7 @@ export default class PartnerSelector extends LitElement {
     }));
   }
 
-  allInputValid() {
+  allInputsValid() {
     const allSpTextfields = this.shadowRoot.querySelectorAll('sp-textfield');
     return Array.from(allSpTextfields).every((spTextfield) => spTextfield.value === '' || spTextfield.valid);
   }
@@ -95,7 +95,7 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" .disabled=${!this.partner.name} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
+        <sp-button variant="primary" .disabled=${!this.partner.name && this.allInputsValid()} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
