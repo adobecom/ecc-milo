@@ -24,6 +24,8 @@ export default class PartnerSelector extends LitElement {
 
   updateValue(key, value) {
     this.partner = { ...this.partner, [key]: value };
+    const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
+    this.partner.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
 
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
@@ -55,7 +57,6 @@ export default class PartnerSelector extends LitElement {
 
     if (respJson.sponsorId) {
       this.partner.sponsorId = respJson.sponsorId;
-      this.partner.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
       const file = imageDropzone?.getFile();
 
       if (file && (file instanceof File)) {
