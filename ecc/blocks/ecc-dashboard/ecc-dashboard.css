@@ -165,6 +165,12 @@
   -webkit-box-orient: vertical;
 }
 
+.ecc-dashboard table .event-row td:not(.thumbnail-container) .td-wrapper a.disabled,
+.ecc-dashboard table .event-row .dash-event-tool.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .ecc-dashboard table .event-row .icon-more-small-list {
   cursor: pointer;
   height: 24px;

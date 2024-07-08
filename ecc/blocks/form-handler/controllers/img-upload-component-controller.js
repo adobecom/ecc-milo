@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { uploadBinaryFile } from '../../../utils/esp-controller.js';
+import { uploadImage } from '../../../utils/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 function getComponentImageType(component) {
@@ -47,16 +47,22 @@ export default function init(component, props) {
   dropzones.forEach((dz) => {
     dz.handleImage = async () => {
       const file = dz.getFile();
+      let imageId = null;
 
       if (!file || !(file instanceof File)) return;
-      const resp = await uploadBinaryFile(file, JSON.parse(component.dataset.configs));
+
+      if (props.eventDataResp?.photos) {
+        const photoObj = props.eventDataResp.photos.find((p) => p.imageKind === type);
+        if (photoObj) imageId = photoObj.imageId;
+      }
+
+      const resp = await uploadImage(file, JSON.parse(component.dataset.configs), imageId);
 
       if (resp) props.eventDataResp = resp;
     };
   });
 
   const eventData = props.eventDataResp;
-
   if (eventData.photos) {
     const photoObj = eventData.photos.find((p) => p.imageKind === type);
 
