@@ -1,6 +1,6 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './partner-selector.css.js';
-import { createSponsor, updateSponsor, uploadBinaryFile } from '../../utils/esp-controller.js';
+import { createSponsor, updateSponsor, uploadImage } from '../../utils/esp-controller.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -50,7 +50,7 @@ export default class PartnerSelector extends LitElement {
       const file = imageDropzone?.getFile();
 
       if (file && (file instanceof File)) {
-        const speakerData = await uploadBinaryFile(file, {
+        const speakerData = await uploadImage(file, {
           targetUrl: `/v1/series/${this.seriesId}/sponsors/${this.partner.sponsorId}/images`,
           type: 'sponsor-image',
           altText: `${this.partner.name} image`,

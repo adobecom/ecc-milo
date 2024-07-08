@@ -245,7 +245,6 @@ function initMoreOptions(props, config, eventObj, row) {
       previewPost.classList.add('disabled');
     }
 
-
     // edit
     const url = new URL(`${window.location.origin}${config['create-form-url']}`);
     url.searchParams.set('eventId', eventObj.eventId);
