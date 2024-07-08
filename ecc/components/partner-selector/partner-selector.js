@@ -34,7 +34,7 @@ export default class PartnerSelector extends LitElement {
 
   allInputsValid() {
     const allSpTextfields = this.shadowRoot.querySelectorAll('sp-textfield');
-    return Array.from(allSpTextfields).every((spTextfield) => spTextfield.value === '' || spTextfield.valid);
+    return Array.from(allSpTextfields).every((spTextfield) => !spTextfield.invalid);
   }
 
   async savePartner(e) {
