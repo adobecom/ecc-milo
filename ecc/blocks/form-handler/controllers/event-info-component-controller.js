@@ -331,18 +331,20 @@ export function onSubmit(component, props) {
   props.payload = { ...props.payload, ...eventInfo };
 }
 
-export async function onUpdate(_component, _props) {
-  // Do nothing
+export async function onUpdate(component, props) {
+
 }
 
 export default function init(component, props) {
   const eventData = props.eventDataResp;
   const startTimeInput = component.querySelector('#time-picker-start-time');
   const endTimeInput = component.querySelector('#time-picker-end-time');
+  const datePicker = component.querySelector('#event-info-date-picker');
 
   initCalendar(component);
 
   endTimeInput.addEventListener('change', () => {
+    if (props.payload.localStartDate !== props.payload.localEndDate) return;
     const allOptions = startTimeInput.querySelectorAll('sp-menu-item');
     allOptions.forEach((option) => {
       if (option.value >= endTimeInput.value && endTimeInput.value) {
@@ -354,6 +356,7 @@ export default function init(component, props) {
   });
 
   startTimeInput.addEventListener('change', () => {
+    if (props.payload.localStartDate !== props.payload.localEndDate) return;
     const allOptions = endTimeInput.querySelectorAll('sp-menu-item');
     allOptions.forEach((option) => {
       if (option.value <= startTimeInput.value && startTimeInput.value) {
@@ -362,6 +365,17 @@ export default function init(component, props) {
         option.disabled = false;
       }
     });
+  });
+
+  datePicker.addEventListener('change', () => {
+    if (datePicker.dataset.startDate !== datePicker.dataset.endDate) {
+      startTimeInput?.querySelectorAll('sp-menu-item')?.forEach((option) => {
+        option.disabled = false;
+      });
+      endTimeInput?.querySelectorAll('sp-menu-item')?.forEach((option) => {
+        option.disabled = false;
+      });
+    }
   });
 
   const {
@@ -387,14 +401,12 @@ export default function init(component, props) {
     changeInputValue(endTimeInput, 'value', localEndTime || '');
     changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
 
-    const datePicker = component.querySelector('#event-info-date-picker');
     datePicker.dataset.startDate = localStartDate || '';
     datePicker.dataset.endDate = localEndDate || '';
     updateInput(component, {
       selectedStartDate: parseFormatedDate(localStartDate),
       selectedEndDate: parseFormatedDate(localEndDate),
     });
-
     component.classList.add('prefilled');
   }
 }
