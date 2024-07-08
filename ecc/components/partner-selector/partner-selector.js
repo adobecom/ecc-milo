@@ -32,6 +32,11 @@ export default class PartnerSelector extends LitElement {
     }));
   }
 
+  allInputValid() {
+    const allSpTextfields = this.shadowRoot.querySelectorAll('sp-textfield');
+    return Array.from(allSpTextfields).every((spTextfield) => spTextfield.value === '' || spTextfield.valid);
+  }
+
   async savePartner(e) {
     const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
     const saveButton = e.target;
@@ -82,7 +87,7 @@ export default class PartnerSelector extends LitElement {
             </div>
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>
-              <sp-textfield value=${this.partner.externalUrl} @change=${(event) => {
+              <sp-textfield pattern="^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$" value=${this.partner.externalUrl} @change=${(event) => {
   this.updateValue('link', event.target.value);
 }}></sp-textfield>
             </div>
