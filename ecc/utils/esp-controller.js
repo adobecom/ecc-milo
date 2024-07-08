@@ -158,14 +158,38 @@ export async function createSpeaker(profile, seriesId) {
   return resp;
 }
 
-export async function createPartner(partner, eventId) {
+export async function createSponsor(data, seriesId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify(partner);
+  const raw = JSON.stringify(data);
   const options = await constructRequestOptions('POST', raw);
 
-  const resp = await fetch(`${host}/v1/events/${eventId}/partners`, options)
+  const resp = await fetch(`${host}/v1/series/${seriesId}/sponsors`, options)
     .then((res) => res.json())
-    .catch((error) => window.lana?.log('Failed to create partner. Error:', error));
+    .catch((error) => window.lana?.log('Failed to create sponsor. Error:', error));
+
+  return resp;
+}
+
+export async function updateSponsor(data, sponsorId, seriesId) {
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const raw = JSON.stringify(data);
+  const options = await constructRequestOptions('PUT', raw);
+
+  const resp = await fetch(`${host}/v1/series/${seriesId}/sponsors/${sponsorId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to update partner. Error:', error));
+
+  return resp;
+}
+
+export async function addSponsorToEvent(data, eventId) {
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const raw = JSON.stringify(data);
+  const options = await constructRequestOptions('POST', raw);
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/sponsors`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to update partner. Error:', error));
 
   return resp;
 }
