@@ -160,11 +160,7 @@ export class Profile extends LitElement {
     ${this.renderProfileTypePicker(fieldLabelsJSON.chooseType)}
     <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('firstName', event.detail.value)}></custom-textfield>
     <custom-textfield data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('lastName', event.detail.value)}></custom-textfield>
-    <image-dropzone configs=${JSON.stringify({
-    uploadOnCommand: true,
-    type: 'speaker-photo',
-    targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.speakerId}/images`,
-  })} file=${JSON.stringify(imagefile)}>
+    <image-dropzone file=${JSON.stringify(imagefile)}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
     <custom-textfield data=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @input-change=${(event) => this.updateValue('title', event.detail.value)}></custom-textfield>

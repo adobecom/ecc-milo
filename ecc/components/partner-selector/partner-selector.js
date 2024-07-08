@@ -75,7 +75,7 @@ export default class PartnerSelector extends LitElement {
       <fieldset class="partner-field-wrapper">
       <div>
         <div class="partner-input-wrapper">
-          <image-dropzone file=${this.partner.file}>
+          <image-dropzone file=${JSON.stringify(this.partner.file)}>
         <slot name="img-label" slot="img-label"></slot>
           </image-dropzone>
           <div>
