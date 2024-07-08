@@ -55,13 +55,15 @@ export default class PartnerSelector extends LitElement {
       const file = imageDropzone?.getFile();
 
       if (file && (file instanceof File)) {
-        const speakerData = await uploadImage(file, {
+        const sponsorData = await uploadImage(file, {
           targetUrl: `/v1/series/${this.seriesId}/sponsors/${this.partner.sponsorId}/images`,
           type: 'sponsor-image',
           altText: `${this.partner.name} image`,
         });
 
-        this.partner.modificationTime = speakerData.modificationTime;
+        if (sponsorData) {
+          this.partner.modificationTime = sponsorData.modificationTime;
+        }
       }
 
       this.requestUpdate();
