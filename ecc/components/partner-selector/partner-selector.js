@@ -25,7 +25,7 @@ export default class PartnerSelector extends LitElement {
   updateValue(key, value) {
     this.partner = { ...this.partner, [key]: value };
     const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
-    this.partner.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
+    this.partner.photo = imageDropzone?.file || null;
 
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
@@ -74,15 +74,11 @@ export default class PartnerSelector extends LitElement {
   }
 
   render() {
-    const imageFile = this.partner.photo ? {
-      ...this.partner.photo,
-      url: this.partner.photo.imageUrl,
-    } : {};
     return html`
       <fieldset class="partner-field-wrapper">
       <div>
         <div class="partner-input-wrapper">
-          <image-dropzone .file=${imageFile}>
+          <image-dropzone .file=${this.partner.photo}>
         <slot name="img-label" slot="img-label"></slot>
           </image-dropzone>
           <div>
@@ -102,7 +98,7 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" ?disabled=${!this.partner.name || !this.partner.link.match('^$|^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$')} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
+        <sp-button variant="primary" .disabled=${!this.partner.name || !this.partner.link.match('^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$')} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
