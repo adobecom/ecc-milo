@@ -499,8 +499,8 @@ function initFormCtas(props) {
               buildErrorMessage(props, resp);
             } else if (props.currentStep === props.maxStep) {
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-              const msg = createTag('div', { class: 'toast-message' }, 'Success! This event has been published.', { parent: cta });
-              createTag('sp-button', { class: 'outline primary', href: dashboardLink.href }, 'Go to dashboard', { parent: msg });
+              const msg = createTag('div', { class: 'toast-message dark' }, 'Success! This event has been published.', { parent: cta });
+              createTag('a', { class: 'con-button outline', href: dashboardLink.href }, 'Go to dashboard', { parent: msg });
               let toastArea = props.el.querySelector('.toast-area');
 
               if (!toastArea) {
