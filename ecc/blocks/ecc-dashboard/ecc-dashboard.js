@@ -270,8 +270,8 @@ function initMoreOptions(props, config, eventObj, row) {
       const spTheme = props.el.querySelector('sp-theme');
       if (!spTheme) return;
 
-      const underlay = createTag('sp-underlay', {}, '', { parent: spTheme });
-      const dialog = createTag('sp-dialog', { open: true }, '', { parent: spTheme });
+      const underlay = spTheme.querySelector('sp-underlay');
+      const dialog = spTheme.querySelector('sp-dialog');
       createTag('h2', {}, 'You are deleting this event.', { parent: dialog });
       createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
       const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
@@ -280,8 +280,8 @@ function initMoreOptions(props, config, eventObj, row) {
 
       dialogDeleteBtn.addEventListener('click', async () => {
         toolBox.remove();
-        underlay.remove();
-        dialog.remove();
+        underlay.open = false;
+        dialog.innerHTML = '';
         row.classList.add('pending');
         await deleteEvent(eventObj.eventId);
         const newJson = await getEvents();
@@ -294,8 +294,8 @@ function initMoreOptions(props, config, eventObj, row) {
 
       dialogCancelBtn.addEventListener('click', () => {
         toolBox.remove();
-        underlay.remove();
-        dialog.remove();
+        underlay.open = false;
+        dialog.innerHTML = '';
       });
     });
 
@@ -603,7 +603,9 @@ async function buildDashboard(el, config) {
     import(`${miloLibs}/features/spectrum-web-components/dist/underlay.js`),
   ]);
 
-  createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
+  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
+  createTag('sp-underlay', { open: false }, '', { parent: spTheme });
+  createTag('sp-dialog', {}, '', { parent: spTheme });
 
   const props = {
     el,
