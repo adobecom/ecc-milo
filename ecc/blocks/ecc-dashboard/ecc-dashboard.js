@@ -266,15 +266,34 @@ function initMoreOptions(props, config, eventObj, row) {
 
     deleteBtn.addEventListener('click', async (e) => {
       e.preventDefault();
-      toolBox.remove();
-      row.classList.add('pending');
-      await deleteEvent(eventObj.eventId);
-      const newJson = await getEvents();
-      props.data = newJson.events;
-      props.filteredData = newJson.events;
-      props.paginatedData = newJson.events;
 
-      sortData(props, config, { resort: true });
+      const underlay = createTag('sp-underlay');
+      const dialog = createTag('sp-dialog', { open: true });
+      createTag('h2', {}, 'You are deleting this event.', { parent: dialog });
+      createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
+      const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+      const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary' }, 'Yes, I want to delete this event', { parent: buttonContainer });
+      const dialogCancelBtn = createTag('sp-button', { variant: 'cta' }, 'Do not delete', { parent: buttonContainer });
+
+      dialogDeleteBtn.addEventListener('click', async () => {
+        toolBox.remove();
+        underlay.remove();
+        dialog.remove();
+        row.classList.add('pending');
+        await deleteEvent(eventObj.eventId);
+        const newJson = await getEvents();
+        props.data = newJson.events;
+        props.filteredData = newJson.events;
+        props.paginatedData = newJson.events;
+
+        sortData(props, config, { resort: true });
+      });
+
+      dialogCancelBtn.addEventListener('click', () => {
+        toolBox.remove();
+        underlay.remove();
+        dialog.remove();
+      });
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
@@ -578,6 +597,9 @@ async function buildDashboard(el, config) {
     import(`${miloLibs}/deps/lit-all.min.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/toast.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/button.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/dialog.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/underlay.js`),
   ]);
 
   const props = {
