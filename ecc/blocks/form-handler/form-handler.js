@@ -547,8 +547,6 @@ function updateCtas(props) {
     }
 
     if (a.classList.contains('next-button')) {
-      a.classList.remove('disabled');
-
       if (a.textContent === a.dataset.doneStateText) {
         if (props.currentStep === props.maxStep) {
           a.textContent = a.dataset.republishStateText;
