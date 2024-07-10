@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-import { getCaasTags } from '../../../utils/esp-controller.js';
-import { handlize } from '../../../utils/utils.js';
+import { getCaasTags } from '../../../scripts/esp-controller.js';
+import { handlize } from '../../../scripts/utils.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;

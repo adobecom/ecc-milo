@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { LIBS } from '../../../scripts/scripts.js';
-import HtmlSanitizer from '../../../deps/html-sanitizer.js';
-import { fetchThrottledMemoized } from '../../../utils/utils.js';
+import HtmlSanitizer from '../../../scripts/deps/html-sanitizer.js';
+import { fetchThrottledMemoized } from '../../../scripts/utils.js';
 
 const { customFetch } = await import(`${LIBS}/utils/helpers.js`);
 const { createTag } = await import(`${LIBS}/utils/utils.js`);

@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-import { createVenue } from '../../../utils/esp-controller.js';
-import { changeInputValue, getSecret } from '../../../utils/utils.js';
+import { createVenue } from '../../../scripts/esp-controller.js';
+import { changeInputValue, getSecret } from '../../../scripts/utils.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 async function loadGoogleMapsAPI(callback) {

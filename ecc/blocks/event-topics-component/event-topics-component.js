@@ -1,6 +1,6 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { getCaasTags } from '../../utils/esp-controller.js';
-import { generateToolTip, isEmptyObject } from '../../utils/utils.js';
+import { getCaasTags } from '../../scripts/esp-controller.js';
+import { generateToolTip, isEmptyObject } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 

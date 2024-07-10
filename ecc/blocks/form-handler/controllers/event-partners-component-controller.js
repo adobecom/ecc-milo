@@ -1,4 +1,4 @@
-import { addSponsorToEvent } from '../../../utils/esp-controller.js';
+import { addSponsorToEvent } from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 /* eslint-disable no-unused-vars */

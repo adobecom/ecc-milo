@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { uploadImage } from '../../../utils/esp-controller.js';
+import { uploadImage } from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 function getComponentImageType(component) {

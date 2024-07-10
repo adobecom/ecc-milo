@@ -1,5 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { getIcon, generateToolTip, decorateTextfield, decorateTextarea, convertTo24HourFormat } from '../../utils/utils.js';
+import { getIcon, generateToolTip, decorateTextfield, decorateTextarea, convertTo24HourFormat } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
