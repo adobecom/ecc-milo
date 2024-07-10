@@ -190,6 +190,10 @@ function sortData(props, config, options = {}) {
   el.classList.add('active');
 }
 
+function buildToastMsg(eventTitle, msgTemplate) {
+  return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
+}
+
 function initMoreOptions(props, config, eventObj, row) {
   const moreOptionsCell = row.querySelector('.option-col');
   const moreOptionIcon = moreOptionsCell.querySelector('.icon-more-small-list');
@@ -292,6 +296,7 @@ function initMoreOptions(props, config, eventObj, row) {
         props.paginatedData = newJson.events;
 
         sortData(props, config, { resort: true });
+        createTag('sp-toast', { open: true }, config['delete-event-toast-msg'], { parent: spTheme });
       });
 
       dialogCancelBtn.addEventListener('click', () => {
@@ -365,10 +370,6 @@ function highlightRow(row) {
   setTimeout(() => {
     row.classList.remove('highlight');
   }, 1000);
-}
-
-function buildToastMsg(eventTitle, msgTemplate) {
-  return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
 }
 
 async function populateRow(props, config, index) {
