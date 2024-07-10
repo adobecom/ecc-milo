@@ -476,7 +476,7 @@ function initFormCtas(props) {
           cta.dataset.doneStateText = doneStateText;
           cta.dataset.republishStateText = republishStateText;
 
-          if (props.currentStep === frags.length - 1) {
+          if (props.currentStep === props.maxStep) {
             if (getJoinedData().published) {
               cta.textContent = republishStateText;
             } else {
@@ -547,6 +547,18 @@ function updateCtas(props) {
       if (filteredResponse.detailPagePath) {
         a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
         a.classList.remove('preview-not-ready');
+      }
+    }
+
+    if (a.classList.contains('next-button')) {
+      if (props.currentStep === props.maxStep) {
+        if (filteredResponse.published) {
+          a.textContent = a.dataset.republishStateText;
+        } else {
+          a.textContent = a.dataset.finalStateText;
+        }
+      } else {
+        a.textContent = a.dataset.nextStateText;
       }
     }
   });
