@@ -1,4 +1,4 @@
-import { ECC_ENV } from '../scripts/scripts.js';
+import { ECC_ENV } from './scripts.js';
 
 export const getCaasTags = (() => {
   let cache;

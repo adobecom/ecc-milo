@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-import { lazyCaptureProfile } from '../utils/event-apis.js';
+import { lazyCaptureProfile } from './event-apis.js';
 
 export function decorateArea(area = document) {
   const eagerLoad = (parent, selector) => {
@@ -107,7 +107,7 @@ export const LIBS = (() => {
   return branch.includes('--') ? `https://${branch}.hlx.live/libs` : `https://${branch}--milo--adobecom.hlx.live/libs`;
 })();
 
-export const BlockMediator = await import('../deps/block-mediator.min.js').then((mod) => mod.default);
+export const BlockMediator = await import('./deps/block-mediator.min.js').then((mod) => mod.default);
 
 (function loadStyles() {
   const paths = [`${LIBS}/styles/styles.css`];

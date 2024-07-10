@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { MILO_CONFIG } from '../../../scripts/scripts.js';
-import { changeInputValue } from '../../../utils/utils.js';
+import { changeInputValue } from '../../../scripts/utils.js';
 
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -94,10 +94,10 @@ export default function init(component, props) {
 function getTemplateId(bu) {
   switch (bu) {
     case 'DX':
-      return '/fragments/event-templates/dx/simple';
+      return '/events/fragments/event-templates/dx/simple';
     case 'CreativeCloud':
     default:
-      return '/fragments/event-templates/dme/simple';
+      return '/events/fragments/event-templates/dme/simple';
   }
 }
 
