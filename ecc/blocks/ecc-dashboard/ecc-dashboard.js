@@ -4,9 +4,9 @@ import {
   getEvents,
   publishEvent,
   unpublishEvent,
-} from '../../utils/esp-controller.js';
+} from '../../scripts/esp-controller.js';
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
+import { getIcon, buildNoAccessScreen } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import BlockMediator from '../../deps/block-mediator.min.js';
 

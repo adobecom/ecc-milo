@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-import { lazyCaptureProfile } from '../utils/event-apis.js';
+import { lazyCaptureProfile } from './event-apis.js';
 
 export function decorateArea(area = document) {
   const eagerLoad = (parent, selector) => {

@@ -1,4 +1,4 @@
-import { MILO_CONFIG } from '../scripts/scripts.js';
+import { MILO_CONFIG } from './scripts.js';
 
 let secretCache = [];
 

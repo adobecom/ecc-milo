@@ -1,6 +1,6 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { generateToolTip } from '../../utils/utils.js';
-import { getSeries } from '../../utils/esp-controller.js';
+import { generateToolTip } from '../../scripts/utils.js';
+import { getSeries } from '../../scripts/esp-controller.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 

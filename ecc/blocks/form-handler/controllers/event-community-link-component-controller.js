@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { changeInputValue } from '../../../utils/utils.js';
+import { changeInputValue } from '../../../scripts/utils.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return null;
