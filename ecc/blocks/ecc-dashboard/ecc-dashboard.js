@@ -267,8 +267,11 @@ function initMoreOptions(props, config, eventObj, row) {
     deleteBtn.addEventListener('click', async (e) => {
       e.preventDefault();
 
-      const underlay = createTag('sp-underlay', {}, '', { parent: props.el });
-      const dialog = createTag('sp-dialog', { open: true }, '', { parent: props.el });
+      const spTheme = props.el.querySelector('sp-theme');
+      if (!spTheme) return;
+
+      const underlay = createTag('sp-underlay', {}, '', { parent: spTheme });
+      const dialog = createTag('sp-dialog', { open: true }, '', { parent: spTheme });
       createTag('h2', {}, 'You are deleting this event.', { parent: dialog });
       createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
       const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
@@ -508,9 +511,7 @@ function initSorting(props, config) {
 }
 
 function populateTable(props, config) {
-  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' });
   const tBody = props.el.querySelector('table.dashboard-table tbody');
-  props.el.append(spTheme);
   tBody.innerHTML = '';
 
   const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
@@ -601,6 +602,8 @@ async function buildDashboard(el, config) {
     import(`${miloLibs}/features/spectrum-web-components/dist/dialog.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/underlay.js`),
   ]);
+
+  createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
 
   const props = {
     el,
