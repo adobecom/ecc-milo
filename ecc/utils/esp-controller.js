@@ -393,3 +393,15 @@ export async function getAttendee(eventId, attendeeId) {
     .catch((error) => window.lana?.log(`Failed to get details of attendee ${attendeeId} for event ${eventId}. Error: ${error}`));
   return resp;
 }
+
+export async function getSpeakers(seriesId) {
+  if (!seriesId) return false;
+
+  const { host } = getAPIConfig().esl[MILO_CONFIG.env.name];
+  const options = await constructRequestOptions('GET');
+
+  const resp = await fetch(`${host}/v1/series/${seriesId}/speakers`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error: ${error}`));
+  return resp;
+}

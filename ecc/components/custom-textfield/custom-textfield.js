@@ -34,7 +34,7 @@ export class CustomTextfield extends LitElement {
 
   render() {
     return html`
-    <sp-textfield placeholder=${this.data.placeholder} ?quiet=${this.config.quiet} size=${this.config.size} ?grows=${this.config.grows} ?multiline=${this.config.multiline} class='text-input' value=${this.data.value} @change=${(event) => this.dispatchEvent(new CustomEvent('input-change', { detail: { value: event.target.value } }))}></sp-textfield>
+    <sp-textfield placeholder=${this.data.placeholder} ?quiet=${this.config.quiet} size=${this.config.size} ?grows=${this.config.grows} ?multiline=${this.config.multiline} class='text-input' value=${this.data.value} @change=${(event) => { event.stopPropagation(); this.dispatchEvent(new CustomEvent('change-custom', { detail: { value: event.target.value } })); }} @input=${(event) => { event.stopPropagation(); this.dispatchEvent(new CustomEvent('input-custom', { detail: { value: event.target.value } })); }}></sp-textfield>
     <sp-helptext class="helper-text">${this.data.helperText}</sp-helptext>`;
   }
 }

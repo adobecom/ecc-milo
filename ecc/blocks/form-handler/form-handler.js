@@ -5,6 +5,7 @@ import {
   updateEvent,
   publishEvent,
   getEvent,
+  getSpeakers,
 } from '../../utils/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
@@ -19,6 +20,7 @@ import PartnerSelector from '../../components/partner-selector/partner-selector.
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import BlockMediator from '../../deps/block-mediator.min.js';
+import { CustomSearch } from '../../components/custom-search/custom-search.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -62,6 +64,8 @@ const SPECTRUM_COMPONENTS = [
   'dialog',
   'button-group',
   'tooltip',
+  'popover',
+  'search',
   'toast',
 ];
 
@@ -144,6 +148,7 @@ function initCustomLitComponents() {
   customElements.define('product-selector-group', ProductSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
+  customElements.define('custom-search', CustomSearch);
 }
 
 async function initComponents(props) {
