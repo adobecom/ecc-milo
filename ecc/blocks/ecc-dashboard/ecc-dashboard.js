@@ -271,8 +271,8 @@ function initMoreOptions(props, config, eventObj, row) {
       if (!spTheme) return;
 
       const underlay = spTheme.querySelector('sp-underlay');
-      const dialog = spTheme.querySelector('sp-dialog', { size: 's' });
-      createTag('h2', {}, 'You are deleting this event.', { parent: dialog, slot: 'heading' });
+      const dialog = spTheme.querySelector('sp-dialog');
+      createTag('h1', { slot: 'heading' }, 'You are deleting this event.', { parent: dialog });
       createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
       const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
       const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to delete this event', { parent: buttonContainer });
@@ -607,7 +607,7 @@ async function buildDashboard(el, config) {
 
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
   createTag('sp-underlay', {}, '', { parent: spTheme });
-  createTag('sp-dialog', {}, '', { parent: spTheme });
+  createTag('sp-dialog', { size: 's' }, '', { parent: spTheme });
 
   const props = {
     el,
