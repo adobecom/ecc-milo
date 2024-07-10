@@ -331,14 +331,6 @@ function onStepValidate(props) {
   };
 }
 
-function updateProfileContainer(props) {
-  const containers = document.querySelectorAll('profile-container');
-  containers.forEach((c) => {
-    c.setAttribute('seriesId', props.payload.seriesId);
-    c.requestUpdate();
-  });
-}
-
 function updateRequiredFields(props) {
   const currentFrag = getCurrentFragment(props);
   props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(INPUT_TYPES.join());
@@ -584,10 +576,7 @@ function initDeepLink(props) {
 }
 
 async function initProfilesData(props, payload, oldValue) {
-  if (payload.seriesId && payload.seriesId !== oldValue.seriesId) {
-    const speakers = await getSpeakers(payload.seriesId);
-    props.speakersSearchData = speakers;
-  }
+
 }
 
 async function buildECCForm(el) {
@@ -626,11 +615,9 @@ async function buildECCForm(el) {
         case 'payload': {
           console.log('payload updated with: ', value);
           setPayloadCache(value);
-          initProfilesData(props, value, oldValue);
           updateComponents(target);
           updateProfileContainer(target);
           initRequiredFieldsValidation(target);
-          initProfilesData(props, value, oldValue);
           break;
         }
         case 'eventDataResp': {
@@ -643,10 +630,6 @@ async function buildECCForm(el) {
           } else {
             props.el.classList.remove('show-error');
           }
-          break;
-        }
-        case 'speakersSearchData': {
-          updateComponents(target);
           break;
         }
         default:
