@@ -344,7 +344,7 @@ export default function init(component, props) {
   initCalendar(component);
 
   endTimeInput.addEventListener('change', () => {
-    if (props.payload.localStartDate !== props.payload.localEndDate) return;
+    if (datePicker.dataset.startDate !== datePicker.dataset.endDate) return;
     const allOptions = startTimeInput.querySelectorAll('sp-menu-item');
     allOptions.forEach((option) => {
       if (option.value >= endTimeInput.value && endTimeInput.value) {
@@ -356,7 +356,7 @@ export default function init(component, props) {
   });
 
   startTimeInput.addEventListener('change', () => {
-    if (props.payload.localStartDate !== props.payload.localEndDate) return;
+    if (datePicker.dataset.startDate !== datePicker.dataset.endDate) return;
     const allOptions = endTimeInput.querySelectorAll('sp-menu-item');
     allOptions.forEach((option) => {
       if (option.value <= startTimeInput.value && startTimeInput.value) {
