@@ -20,6 +20,35 @@
   align-items: flex-start;
 }
 
+.ecc-dashboard sp-theme sp-underlay + sp-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  background: var(--spectrum-gray-100);
+  width: 400px;
+  padding: 40px;
+}
+
+.ecc-dashboard sp-theme sp-underlay + sp-dialog h1 {
+  font-size: var(--type-heading-s-size);
+}
+
+.ecc-dashboard sp-theme sp-underlay + sp-dialog p {
+  font-size: var(--type-body-s-size);
+}
+
+.ecc-dashboard sp-theme sp-underlay + sp-dialog .button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.ecc-dashboard sp-theme sp-underlay:not([open]) + sp-dialog {
+  display: none;
+}
+
 .ecc-dashboard .dashboard-header-text {
   display: flex;
   align-items: flex-end;
@@ -255,19 +284,6 @@
   flex-direction: column;
   gap: 16px;
   z-index: 9;
-}
-
-.ecc-dashboard sp-theme sp-underlay + sp-dialog {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
-  background: var(--spectrum-gray-100);
-}
-
-.ecc-dashboard sp-theme sp-underlay:not([open]) + sp-dialog {
-  display: none;
 }
 
 @media screen and (min-width: 900px) {
