@@ -278,6 +278,8 @@ function initMoreOptions(props, config, eventObj, row) {
       const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary' }, 'Yes, I want to delete this event', { parent: buttonContainer });
       const dialogCancelBtn = createTag('sp-button', { variant: 'cta' }, 'Do not delete', { parent: buttonContainer });
 
+      underlay.open = true;
+
       dialogDeleteBtn.addEventListener('click', async () => {
         toolBox.remove();
         underlay.open = false;
