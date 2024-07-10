@@ -175,6 +175,11 @@
   cursor: pointer;
   height: 24px;
   width: 24px;
+  transition: opacity 0.3s;
+}
+
+.ecc-dashboard table .event-row .icon-more-small-list:hover {
+  opacity: 0.8;
 }
 
 .ecc-dashboard .event-row .dashboard-event-tool-box {
