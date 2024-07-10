@@ -247,13 +247,26 @@
   pointer-events: none;
 }
 
-.ecc-dashboard .toast-area {
+.ecc-dashboard sp-theme.toast-area {
   position: fixed;
   right: 40px;
   bottom: 40px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.ecc-dashboard sp-theme sp-underlay + sp-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  background: var(--spectrum-gray-100);
+}
+
+.ecc-dashboard sp-theme sp-underlay:not([open]) + sp-dialog {
+  display: none;
 }
 
 @media screen and (min-width: 900px) {
