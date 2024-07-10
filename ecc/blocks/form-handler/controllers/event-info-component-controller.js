@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
 import { LIBS } from '../../../scripts/scripts.js';
-import { changeInputValue } from '../../../utils/utils.js';
+import { changeInputValue } from '../../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -332,7 +332,7 @@ export function onSubmit(component, props) {
 }
 
 export async function onUpdate(component, props) {
-
+  // do nothing
 }
 
 export default function init(component, props) {

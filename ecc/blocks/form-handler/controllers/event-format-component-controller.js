@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { MILO_CONFIG } from '../../../scripts/scripts.js';
-import { changeInputValue } from '../../../utils/utils.js';
+import { changeInputValue } from '../../../scripts/utils.js';
 
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;

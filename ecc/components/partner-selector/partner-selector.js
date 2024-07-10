@@ -1,6 +1,6 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './partner-selector.css.js';
-import { createSponsor, updateSponsor, uploadImage } from '../../utils/esp-controller.js';
+import { createSponsor, updateSponsor, uploadImage } from '../../scripts/esp-controller.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
