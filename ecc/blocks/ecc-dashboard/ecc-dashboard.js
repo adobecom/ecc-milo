@@ -137,7 +137,7 @@ function sortData(props, config, options = {}) {
 
   let sortAscending = true;
 
-  if (el.classList.contains('active')) {
+  if (el?.classList.contains('active')) {
     if (options.resort) {
       sortAscending = !el.classList.contains('desc-sort');
     } else {
@@ -145,12 +145,12 @@ function sortData(props, config, options = {}) {
     }
     el.classList.toggle('desc-sort', !sortAscending);
   } else {
-    el.classList.remove('desc-sort');
+    el?.classList.remove('desc-sort');
   }
 
   if (options.direction) {
     sortAscending = options.direction === 'asc';
-    el.classList.toggle('desc-sort', !sortAscending);
+    el?.classList.toggle('desc-sort', !sortAscending);
   }
 
   props.filteredData = props.filteredData.sort((a, b) => {
@@ -178,7 +178,7 @@ function sortData(props, config, options = {}) {
     return null;
   });
 
-  el.parentNode.querySelectorAll('th').forEach((header) => {
+  el?.parentNode.querySelectorAll('th').forEach((header) => {
     if (header !== el) {
       header.classList.remove('active');
       header.classList.remove('desc-sort');
@@ -187,7 +187,7 @@ function sortData(props, config, options = {}) {
 
   props.currentPage = 1;
   paginateData(props, config, 1);
-  el.classList.add('active');
+  el?.classList.add('active');
 }
 
 function buildToastMsg(eventTitle, msgTemplate) {
