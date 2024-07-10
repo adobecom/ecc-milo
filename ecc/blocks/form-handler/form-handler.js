@@ -504,6 +504,7 @@ function initFormCtas(props) {
               createTag('a', { class: 'con-button outline', href: dashboardLink.href }, 'Go to dashboard', { parent: msg });
               let toastArea = props.el.querySelector('.toast-area');
               cta.textContent = cta.dataset.doneStateText;
+              cta.classList.add('disabled');
               if (!toastArea) {
                 const spTheme = props.el.querySelector('sp-theme');
                 if (!spTheme) return;
@@ -548,6 +549,7 @@ function updateCtas(props) {
     if (a.classList.contains('next-button')) {
       if (filteredResponse.published && a.textContent === a.dataset.doneStateText) {
         a.textContent = a.dataset.republishStateText;
+        a.classList.remove('disabled');
       }
     }
   });
