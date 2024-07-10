@@ -28,7 +28,6 @@
   z-index: 1;
   background: var(--spectrum-gray-100);
   width: 400px;
-  padding: 40px;
 }
 
 .ecc-dashboard sp-theme sp-underlay + sp-dialog h1 {
