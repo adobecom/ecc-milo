@@ -29,7 +29,7 @@ export default class PartnerSelectorGroup extends LitElement {
   handlePartnerUpdate(event, index) {
     const updatedPartner = event.detail.partner;
     this.partners = this.partners
-      .map((Partner, i) => (i === index ? updatedPartner : Partner));
+      .map((partner, i) => (i === index ? updatedPartner : partner));
   }
 
   getSavedPartners() {

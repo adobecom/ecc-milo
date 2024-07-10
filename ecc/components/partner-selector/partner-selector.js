@@ -24,6 +24,8 @@ export default class PartnerSelector extends LitElement {
 
   updateValue(key, value) {
     this.partner = { ...this.partner, [key]: value };
+    const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
+    this.partner.photo = imageDropzone?.file || null;
 
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
@@ -38,25 +40,31 @@ export default class PartnerSelector extends LitElement {
     let respJson;
 
     saveButton.pending = true;
+
+    const payload = {
+      name: this.partner.name,
+      link: this.partner.link,
+    };
     if (!this.partner.sponsorId) {
-      respJson = await createSponsor(this.partner, this.seriesId);
+      respJson = await createSponsor(payload, this.seriesId);
     } else {
-      respJson = await updateSponsor(this.partner, this.partner.sponsorId, this.seriesId);
+      respJson = await updateSponsor(payload, this.partner.sponsorId, this.seriesId);
     }
 
     if (respJson.sponsorId) {
       this.partner.sponsorId = respJson.sponsorId;
-      this.partner.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
       const file = imageDropzone?.getFile();
 
       if (file && (file instanceof File)) {
-        const speakerData = await uploadImage(file, {
+        const sponsorData = await uploadImage(file, {
           targetUrl: `/v1/series/${this.seriesId}/sponsors/${this.partner.sponsorId}/images`,
           type: 'sponsor-image',
           altText: `${this.partner.name} image`,
         });
 
-        this.partner.modificationTime = speakerData.modificationTime;
+        if (sponsorData) {
+          this.partner.modificationTime = sponsorData.modificationTime;
+        }
       }
 
       this.requestUpdate();
@@ -70,7 +78,7 @@ export default class PartnerSelector extends LitElement {
       <fieldset class="partner-field-wrapper">
       <div>
         <div class="partner-input-wrapper">
-          <image-dropzone .file=${this.partner.file}>
+          <image-dropzone .file=${this.partner.photo}>
         <slot name="img-label" slot="img-label"></slot>
           </image-dropzone>
           <div>
@@ -82,7 +90,7 @@ export default class PartnerSelector extends LitElement {
             </div>
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>
-              <sp-textfield value=${this.partner.externalUrl} @change=${(event) => {
+              <sp-textfield pattern="^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$" value=${this.partner.link} @change=${(event) => {
   this.updateValue('link', event.target.value);
 }}></sp-textfield>
             </div>
@@ -90,7 +98,7 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" .disabled=${!this.partner.name} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
+        <sp-button variant="primary" .disabled=${!this.partner.name || !this.partner.link.match('^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$')} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
