@@ -359,10 +359,10 @@
   gap: 16px;
 }
 
-.form-handler .toast-area .toast-message.flex {
+.form-handler .toast-area .toast-message.dark.success-message {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 @media screen and (min-width: 900px) {
