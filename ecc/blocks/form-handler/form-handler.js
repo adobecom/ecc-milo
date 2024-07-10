@@ -18,7 +18,7 @@ import ProductSelectorGroup from '../../components/product-selector-group/produc
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import BlockMediator from '../../deps/block-mediator.min.js';
+import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);

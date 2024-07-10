@@ -8,7 +8,7 @@ import {
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import { getIcon, buildNoAccessScreen } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
-import BlockMediator from '../../deps/block-mediator.min.js';
+import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
