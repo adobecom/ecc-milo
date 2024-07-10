@@ -586,59 +586,7 @@ function initDeepLink(props) {
 async function initProfilesData(props, payload, oldValue) {
   if (payload.seriesId && payload.seriesId !== oldValue.seriesId) {
     const speakers = await getSpeakers(payload.seriesId);
-    // FIX ME : Remove this. This is just a dummy data.
-const profiles = [
-  {
-    firstName: 'Todd',
-    lastName: 'Donahue',
-    photo: {
-            "imageId": "14641519-969f-4542-ab76-c979b02499e7",
-            "s3Key": "static/images/speakers/0d0f8015-7e30-4878-a9cd-6696dcbb988f/speaker-photo.jpg",
-            "altText": "Speaker photo for: Todd Donahue",
-            "creationTime": 1718839287059,
-            "sharepointUrl": "https://some.sharepoint.com/burl",
-            "modificationTime": 1719342323484,
-            "imageUrl": "https://d3twuv2bbltbb.cloudfront.net/images/speakers/0d0f8015-7e30-4878-a9cd-6696dcbb988f/speaker-photo.jpg",
-            "mimeType": "image/jpeg",
-            "imageKind": "speaker-photo",
-            "s3Bucket": "adobe-events-platform-data-dev"
-        },
-        "speakerId": "0d0f8015-7e30-4878-a9cd-6696dcbb988f",
-        "title": "a.com Architect, Adobe",
-        "creationTime": 1718837948410,
-        "modificationTime": 1719342323484
-    },
-    {
-        "firstName": "Audi",
-        "lastName": "Ramesh",
-        "speakerId": "5c599ee0-eff6-472d-a536-3d41e8bcb0ef",
-        "title": "Senior Engineering Manager, Adobe",
-        "creationTime": 1718839513252,
-        "modificationTime": 1719464109927
-    },
-    {
-        "firstName": "The Real AG",
-        "lastName": "starts with a G",
-        "photo": {
-            "imageId": "2aae1642-a9af-4cf1-92ed-0aceae84196b",
-            "s3Key": "static/images/series/dba31198-e58a-4a43-a19e-bd2b5e73128e/speakers/bbd2d916-be8d-402f-92f1-bd38a97bfaea/speaker-photo.png",
-            "altText": "Speaker photo for: The Real AG starts with a G",
-            "creationTime": 1719468224869,
-            "sharepointUrl": null,
-            "modificationTime": 1719468224869,
-            "imageUrl": "https://d3twuv2bbltbb.cloudfront.net/images/series/dba31198-e58a-4a43-a19e-bd2b5e73128e/speakers/bbd2d916-be8d-402f-92f1-bd38a97bfaea/speaker-photo.png",
-            "mimeType": "image/png",
-            "imageKind": "speaker-photo",
-            "s3Bucket": "adobe-events-platform-data-dev"
-        },
-        "speakerId": "bbd2d916-be8d-402f-92f1-bd38a97bfaea",
-        "title": "Senior Computer Scientist, Adobe",
-        "creationTime": 1719467810963,
-        "modificationTime": 1719468224869
-    }
-];
-    props.speakersSearchData = profiles;
-
+    props.speakersSearchData = speakers;
   }
 }
 
