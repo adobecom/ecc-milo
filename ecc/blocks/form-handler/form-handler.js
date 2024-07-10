@@ -469,10 +469,11 @@ function initFormCtas(props) {
       if (['#save', '#next'].includes(ctaUrl.hash)) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
-          const [nextStateText, finalStateText, republishStateText] = cta.textContent.split('||');
+          const [nextStateText, finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
           cta.textContent = nextStateText;
           cta.dataset.nextStateText = nextStateText;
           cta.dataset.finalStateText = finalStateText;
+          cta.dataset.doneStateText = doneStateText;
           cta.dataset.republishStateText = republishStateText;
 
           if (props.currentStep === frags.length - 1) {
@@ -502,7 +503,7 @@ function initFormCtas(props) {
               const msg = createTag('div', { class: 'toast-message flex dark' }, 'Success! This event has been published.', { parent: cta });
               createTag('a', { class: 'con-button outline', href: dashboardLink.href }, 'Go to dashboard', { parent: msg });
               let toastArea = props.el.querySelector('.toast-area');
-
+              cta.textContent = cta.dataset.doneStateText;
               if (!toastArea) {
                 const spTheme = props.el.querySelector('sp-theme');
                 if (!spTheme) return;
@@ -531,15 +532,23 @@ function initFormCtas(props) {
   });
 }
 
-function updatePreviewCtas(props) {
-  const previewBtns = props.el.querySelectorAll('.preview-btns');
+function updateCtas(props) {
+  const formCtas = props.el.querySelectorAll('.form-handler-ctas-panel a');
   const filteredResponse = getFilteredCachedResponse();
 
-  previewBtns.forEach((a) => {
-    const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
-    if (filteredResponse.detailPagePath) {
-      a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
-      a.classList.remove('preview-not-ready');
+  formCtas.forEach((a) => {
+    if (a.classList.contains('preview-btns')) {
+      const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
+      if (filteredResponse.detailPagePath) {
+        a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
+        a.classList.remove('preview-not-ready');
+      }
+    }
+
+    if (a.classList.contains('next-button')) {
+      if (filteredResponse.published && a.textContent === a.dataset.doneStateText) {
+        a.textContent = a.dataset.republishStateText;
+      }
     }
   });
 }
@@ -633,7 +642,7 @@ async function buildECCForm(el) {
       if (prop === 'eventDataResp') {
         console.log('response updated with: ', value);
         setResponseCache(value);
-        updatePreviewCtas(target);
+        updateCtas(target);
         updateDashboardLink(target);
         if (value.message || value.errors) {
           props.el.classList.add('show-error');
