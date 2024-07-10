@@ -604,7 +604,7 @@ async function buildDashboard(el, config) {
   ]);
 
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
-  createTag('sp-underlay', { open: false }, '', { parent: spTheme });
+  createTag('sp-underlay', {}, '', { parent: spTheme });
   createTag('sp-dialog', {}, '', { parent: spTheme });
 
   const props = {
