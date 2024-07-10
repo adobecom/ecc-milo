@@ -267,8 +267,8 @@ function initMoreOptions(props, config, eventObj, row) {
     deleteBtn.addEventListener('click', async (e) => {
       e.preventDefault();
 
-      const underlay = createTag('sp-underlay');
-      const dialog = createTag('sp-dialog', { open: true });
+      const underlay = createTag('sp-underlay', {}, '', { parent: props.el });
+      const dialog = createTag('sp-dialog', { open: true }, '', { parent: props.el });
       createTag('h2', {}, 'You are deleting this event.', { parent: dialog });
       createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
       const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
