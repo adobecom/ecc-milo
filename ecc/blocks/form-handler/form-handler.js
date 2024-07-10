@@ -86,16 +86,16 @@ function buildErrorMessage(props, resp) {
     });
 
     messages.forEach((msg, i) => {
-      const toast = createTag('sp-toast', { open: true, variant: 'negative' }, msg, { parent: toastArea });
-      setTimeout(() => {
+      const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 + (i * 1000) }, msg, { parent: toastArea });
+      toast.addEventListener('close', () => {
         toast.remove();
-      }, 5000 + (i * 1000));
+      });
     });
   } else if (resp.message) {
-    const toast = createTag('sp-toast', { open: true, variant: 'negative' }, resp.message, { parent: toastArea });
-    setTimeout(() => {
+    const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, resp.message, { parent: toastArea });
+    toast.addEventListener('close', () => {
       toast.remove();
-    }, 5000);
+    });
   }
 }
 
@@ -515,7 +515,10 @@ function initFormCtas(props) {
                 toastArea = createTag('div', { class: 'toast-area' }, '', { parent: spTheme });
               }
 
-              createTag('sp-toast', { open: true, variant: 'positive' }, msg, { parent: toastArea });
+              const toast = createTag('sp-toast', { open: true, variant: 'positive' }, msg, { parent: toastArea });
+              toast.addEventListener('close', () => {
+                toast.remove();
+              });
             } else {
               navigateForm(props);
             }
