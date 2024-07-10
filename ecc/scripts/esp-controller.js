@@ -1,4 +1,4 @@
-import { ECC_ENV } from '../scripts/scripts.js';
+import { ECC_ENV } from './scripts.js';
 
 export const getCaasTags = (() => {
   let cache;
@@ -108,7 +108,6 @@ export async function uploadImage(file, configs, imageId = null) {
         body: file,
       });
     }
-
 
     if (response.ok) {
       respJson = await response.json();
