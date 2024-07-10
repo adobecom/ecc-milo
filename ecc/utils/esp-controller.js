@@ -397,7 +397,7 @@ export async function getAttendee(eventId, attendeeId) {
 export async function getSpeakers(seriesId) {
   if (!seriesId) return false;
 
-  const { host } = getAPIConfig().esl[MILO_CONFIG.env.name];
+  const { host } = getAPIConfig().esp[ECC_ENV];
   const options = await constructRequestOptions('GET');
 
   const resp = await fetch(`${host}/v1/series/${seriesId}/speakers`, options)

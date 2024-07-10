@@ -12,7 +12,7 @@ export class CustomSearch extends LitElement {
     isPopoverOpen: { type: Boolean },
     config: { type: Object, reflect: true },
     data: { type: Object, reflect: true },
-    searchData: { type: Array },
+    searchdata: { type: Array },
     searchResults: { type: Array },
   };
 
@@ -43,7 +43,7 @@ export class CustomSearch extends LitElement {
 
     this.searchResults = this.searchInput?.trim().length !== 0
       // eslint-disable-next-line max-len
-      ? this.searchData.filter((profile) => (profile.firstName.toLowerCase().includes(searchKey) || profile.lastName.toLowerCase().includes(searchKey))) : [];
+      ? this.searchdata.filter((profile) => (profile.firstName.toLowerCase().includes(searchKey) || profile.lastName.toLowerCase().includes(searchKey))) : [];
 
     if (this.searchResults.length === 0) {
       return;

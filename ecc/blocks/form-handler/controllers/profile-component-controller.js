@@ -23,8 +23,12 @@ export async function onSubmit(component, props) {
   }
 }
 
-export async function onUpdate(_component, _props) {
-  // Do nothing
+export async function onUpdate(component, props) {
+  const profileContainer = component.querySelector('profile-container');
+  if (profileContainer) {
+    profileContainer.searchdata = props.speakersSearchData;
+    profileContainer.requestUpdate();
+  }
 }
 
 async function prefillProfiles(props) {
