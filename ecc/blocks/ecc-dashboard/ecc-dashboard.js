@@ -214,6 +214,7 @@ function initMoreOptions(props, config, eventObj, row) {
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
+      if (!eventObj.detailPagePath) pub.classList.add('disabled');
       pub.addEventListener('click', async (e) => {
         e.preventDefault();
         toolBox.remove();

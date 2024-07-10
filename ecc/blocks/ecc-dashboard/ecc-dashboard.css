@@ -68,7 +68,6 @@
 
 .ecc-dashboard .dashboard-table-container {
   max-width: 100%;
-  overflow: auto;
 }
 
 .ecc-dashboard table {
@@ -189,14 +188,10 @@
   background-color: var(--color-white);
   border-radius: 4px;
   padding: 4px;
-  right: 100%;
+  left: 20px;
   z-index: 1;
   box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
   width: 182px;
-}
-
-.ecc-dashboard .event-row:last-child .dashboard-event-tool-box {
-  bottom: 0;
 }
 
 .ecc-dashboard .event-row .dashboard-event-tool-box a.dash-event-tool {
