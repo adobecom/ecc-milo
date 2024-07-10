@@ -616,7 +616,6 @@ async function buildECCForm(el) {
           console.log('payload updated with: ', value);
           setPayloadCache(value);
           updateComponents(target);
-          updateProfileContainer(target);
           initRequiredFieldsValidation(target);
           break;
         }
