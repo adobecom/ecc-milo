@@ -488,12 +488,28 @@ function initFormCtas(props) {
           toggleBtnsSubmittingState(true);
 
           if (ctaUrl.hash === '#next') {
-            const resp = await saveEvent(props, { toPublish: true });
+            let resp;
+            if (props.currentStep === props.maxStep) {
+              resp = await saveEvent(props, { toPublish: true });
+            } else {
+              resp = await saveEvent(props);
+            }
+
             if (resp?.errors || resp?.message) {
               buildErrorMessage(props, resp);
             } else if (props.currentStep === props.maxStep) {
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-              if (dashboardLink) window.location.assign(dashboardLink.href);
+              const msg = createTag('div', { class: 'toast-message' }, 'Success! This event has been published.', { parent: cta });
+              msg.append(dashboardLink);
+              let toastArea = props.el.querySelector('.toast-area');
+
+              if (!toastArea) {
+                const spTheme = props.el.querySelector('sp-theme');
+                if (!spTheme) return;
+                toastArea = createTag('div', { class: 'toast-area' }, '', { parent: spTheme });
+              }
+
+              createTag('sp-toast', { open: true, variant: 'positive' }, msg, { parent: toastArea });
             } else {
               navigateForm(props);
             }
