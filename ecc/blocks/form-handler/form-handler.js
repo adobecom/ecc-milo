@@ -547,9 +547,14 @@ function updateCtas(props) {
     }
 
     if (a.classList.contains('next-button')) {
-      if (filteredResponse.published && a.textContent === a.dataset.doneStateText) {
-        a.textContent = a.dataset.republishStateText;
-        a.classList.remove('disabled');
+      a.classList.remove('disabled');
+
+      if (a.textContent === a.dataset.doneStateText) {
+        if (props.currentStep === props.maxStep) {
+          a.textContent = a.dataset.republishStateText;
+        } else {
+          a.textContent = a.dataset.nextStateText;
+        }
       }
     }
   });
