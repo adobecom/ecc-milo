@@ -18,10 +18,7 @@ export async function getProfile() {
 
   const profile = await getUserProfile();
 
-  if (profile) {
-    console.log('Fetched user profile:', profile);
-    return profile;
-  }
+  if (profile) return profile;
 
   window.lana?.log('Failed to get user profile data.');
   return {};

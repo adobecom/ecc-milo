@@ -647,14 +647,12 @@ async function buildECCForm(el) {
       }
 
       if (prop === 'payload') {
-        console.log('payload updated with: ', value);
         setPayloadCache(value);
         updateComponents(target);
         updateProfileContainer(target);
         initRequiredFieldsValidation(target);
       }
       if (prop === 'eventDataResp') {
-        console.log('response updated with: ', value);
         setResponseCache(value);
         updateCtas(target);
         updateDashboardLink(target);
