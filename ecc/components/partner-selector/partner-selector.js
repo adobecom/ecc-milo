@@ -3,6 +3,7 @@ import { style } from './partner-selector.css.js';
 import { createSponsor, updateSponsor, uploadImage } from '../../scripts/esp-controller.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
+const LINK_REGEX = '^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$';
 
 export default class PartnerSelector extends LitElement {
   static properties = {
@@ -31,7 +32,7 @@ export default class PartnerSelector extends LitElement {
     this.partner = { ...this.partner, [key]: value };
     const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
     this.partner.photo = imageDropzone?.file || null;
-    this.checkValidity()
+    this.checkValidity();
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
       bubbles: true,
@@ -40,7 +41,7 @@ export default class PartnerSelector extends LitElement {
   }
 
   checkValidity() {
-    this.partner.isValid = this.partner.name?.length >= 3 && this.partner.link?.match('^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$');
+    this.partner.isValid = this.partner.name?.length >= 3 && this.partner.link?.match(LINK_REGEX);
     this.requestUpdate();
   }
 
@@ -100,7 +101,7 @@ export default class PartnerSelector extends LitElement {
             </div>
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>
-              <sp-textfield pattern="^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$" value=${this.partner.link} @change=${(event) => {
+              <sp-textfield pattern=${LINK_REGEX} value=${this.partner.link} @change=${(event) => {
   this.updateValue('link', event.target.value);
 }}></sp-textfield>
             </div>

@@ -81,7 +81,5 @@ export default function getJoinedData() {
   const filteredResponse = getFilteredCachedResponse();
   const filteredPayload = getFilteredCachedPayload();
 
-  console.log(filteredPayload, filteredResponse);
-
   return { ...filteredResponse, ...filteredPayload };
 }
