@@ -28,10 +28,13 @@ export default class PartnerSelector extends LitElement {
   }
 
   updateValue(key, value) {
-    this.partner = { ...this.partner, [key]: value };
     const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
+    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
+    if (saveButton) saveButton.textContent = 'Save Partner';
+
+    this.partner = { ...this.partner, [key]: value };
     this.partner.photo = imageDropzone?.file || null;
-    // this.checkValidity();
+
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
       bubbles: true,
@@ -73,11 +76,14 @@ export default class PartnerSelector extends LitElement {
 
         if (sponsorData) {
           this.partner.modificationTime = sponsorData.modificationTime;
-          if (saveButton) saveButton.disabled = true;
+          if (saveButton) {
+            saveButton.disabled = true;
+            saveButton.textContent = 'Saved';
+          }
         }
       }
 
-      this.requestUpdate();
+      // this.requestUpdate();
     }
 
     saveButton.pending = false;
