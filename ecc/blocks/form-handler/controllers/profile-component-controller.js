@@ -24,13 +24,13 @@ export async function onSubmit(component, props) {
 }
 
 export async function onUpdate(component, props) {
-  const containers = document.querySelectorAll('profile-container');
+  const containers = component.querySelectorAll('profile-container');
   containers.forEach(async (container) => {
     if (props.payload.seriesId && props.payload.seriesId !== container.seriesId) {
+      container.setAttribute('seriesId', props.payload.seriesId);
       const { speakers } = await getSpeakers(props.payload.seriesId);
       container.searchdata = speakers ?? [];
     }
-    container.setAttribute('seriesId', props.payload.seriesId);
     container.requestUpdate();
   });
 }
