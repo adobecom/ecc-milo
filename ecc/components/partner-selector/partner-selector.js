@@ -14,7 +14,7 @@ export default class PartnerSelector extends LitElement {
 
   constructor() {
     super();
-    this.partner = this.partner || {
+    this.partner = { ...this.partner, isValid: true } || {
       isValid: false,
       name: '',
       link: '',
@@ -75,6 +75,7 @@ export default class PartnerSelector extends LitElement {
 
         if (sponsorData) {
           this.partner.modificationTime = sponsorData.modificationTime;
+          if (saveButton) saveButton.disabled = true;
         }
       }
 

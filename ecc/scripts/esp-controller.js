@@ -193,6 +193,18 @@ export async function addSponsorToEvent(data, eventId) {
   return resp;
 }
 
+export async function getSponsor(seriesId, sponsorId) {
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const raw = JSON.stringify(data);
+  const options = await constructRequestOptions('GET', raw);
+
+  const resp = await fetch(`${host}/v1/series/${seriesId}/sponsors/${sponsorId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to update partner. Error:', error));
+
+  return resp;
+}
+
 export async function addSpeakerToEvent(speakerData, eventId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
   const raw = JSON.stringify(speakerData);

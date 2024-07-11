@@ -1,4 +1,4 @@
-import { addSponsorToEvent } from '../../../scripts/esp-controller.js';
+import { addSponsorToEvent, getSponsor } from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 /* eslint-disable no-unused-vars */
@@ -37,8 +37,30 @@ export default async function init(component, props) {
   const eventData = props.eventDataResp;
   const partnersGroup = component.querySelector('partner-selector-group');
 
-  if (eventData.partners) {
-    partnersGroup.partners = eventData.partners;
+  if (eventData.sponsors) {
+    const partners = await Promise.all(eventData.sponsors.map(async (sponsor, index) => {
+      if (sponsor.sponsorType === 'Partner') {
+        const partnerData = await getSponsor(eventData.seriesId, sponsor.sponsorId);
+
+        if (partnerData) {
+          let photo;
+          const { name, link } = partnerData;
+          if (partnerData.image) {
+            photo = { ...partnerData.image, url: partnerData.image.imageUrl };
+          }
+
+          return { name, link, isValid: true, photo, index };
+        }
+      }
+      return { index, isValid: false };
+    }));
+
+    const filteredPartners = partners
+      .filter((partner) => partner.isValid)
+      .sort((a, b) => a.index - b.index)
+      .map(({ name, link, photo }) => ({ name, link, photo }));
+
+    partnersGroup.partners = filteredPartners;
     component.classList.add('prefilled');
   }
 
