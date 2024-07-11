@@ -119,6 +119,11 @@ export class Profile extends LitElement {
     this.requestUpdate();
   }
 
+  saveDisabled() {
+    // eslint-disable-next-line max-len
+    return !this.profile.firstName || !this.profile.lastName || !this.profile.title || !this.profile.bio;
+  }
+
   renderProfileForm() {
     // eslint-disable-next-line max-len
     const {
@@ -254,9 +259,9 @@ export class Profile extends LitElement {
     <h2>${this.fieldlabels.heading}</h2>
     ${this.renderProfileForm()}
     <div class="profile-save-footer">
-      <sp-button variant="primary" class="save-profile-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async (e) => {
+      <sp-button variant="primary" class="save-profile-button" @click=${async (e) => {
     this.saveProfile(e);
-  }}>
+  }} ?disabled=${this.saveDisabled()}>
   <img src="/ecc/icons/user-add.svg" slot="icon"></img>
   Save Profile</sp-button>
     </div>
@@ -281,7 +286,7 @@ export class Profile extends LitElement {
   }}>Cancel</sp-button>
       <sp-button variant="primary" class="profile-edit-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));" @click=${async (e) => {
     this.saveProfile(e);
-  }}>
+  }} ?disabled=${this.saveDisabled()}>
   <img src="/ecc/icons/user-edit.svg" slot="icon"></img>
   Confirm update</sp-button>
   </sp-button-group>
