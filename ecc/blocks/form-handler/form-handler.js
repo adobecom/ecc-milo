@@ -86,16 +86,16 @@ function buildErrorMessage(props, resp) {
     });
 
     messages.forEach((msg, i) => {
-      const toast = createTag('sp-toast', { open: true, variant: 'negative' }, msg, { parent: toastArea });
-      setTimeout(() => {
+      const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 + (i * 3000) }, msg, { parent: toastArea });
+      toast.addEventListener('close', () => {
         toast.remove();
-      }, 5000 + (i * 1000));
+      });
     });
   } else if (resp.message) {
-    const toast = createTag('sp-toast', { open: true, variant: 'negative' }, resp.message, { parent: toastArea });
-    setTimeout(() => {
+    const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, resp.message, { parent: toastArea });
+    toast.addEventListener('close', () => {
       toast.remove();
-    }, 5000);
+    });
   }
 }
 
@@ -469,14 +469,19 @@ function initFormCtas(props) {
       if (['#save', '#next'].includes(ctaUrl.hash)) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
-          const [nextStateText, finalStateText, republishStateText] = cta.textContent.split('||');
+          const [nextStateText, finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
           cta.textContent = nextStateText;
           cta.dataset.nextStateText = nextStateText;
           cta.dataset.finalStateText = finalStateText;
+          cta.dataset.doneStateText = doneStateText;
           cta.dataset.republishStateText = republishStateText;
 
-          if (props.currentStep === frags.length - 1) {
-            cta.textContent = finalStateText;
+          if (props.currentStep === props.maxStep) {
+            if (getJoinedData().published) {
+              cta.textContent = republishStateText;
+            } else {
+              cta.textContent = finalStateText;
+            }
             cta.prepend(getIcon('golden-rocket'));
           } else {
             cta.textContent = nextStateText;
@@ -488,12 +493,32 @@ function initFormCtas(props) {
           toggleBtnsSubmittingState(true);
 
           if (ctaUrl.hash === '#next') {
-            const resp = await saveEvent(props, { toPublish: true });
+            let resp;
+            if (props.currentStep === props.maxStep) {
+              resp = await saveEvent(props, { toPublish: true });
+            } else {
+              resp = await saveEvent(props);
+            }
+
             if (resp?.errors || resp?.message) {
               buildErrorMessage(props, resp);
             } else if (props.currentStep === props.maxStep) {
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-              if (dashboardLink) window.location.assign(dashboardLink.href);
+              const msg = createTag('div', { class: 'toast-message dark success-message' }, 'Success! This event has been published.', { parent: cta });
+              createTag('a', { class: 'con-button outline', href: dashboardLink.href }, 'Go to dashboard', { parent: msg });
+              let toastArea = props.el.querySelector('.toast-area');
+              cta.textContent = cta.dataset.doneStateText;
+              cta.classList.add('disabled');
+              if (!toastArea) {
+                const spTheme = props.el.querySelector('sp-theme');
+                if (!spTheme) return;
+                toastArea = createTag('div', { class: 'toast-area' }, '', { parent: spTheme });
+              }
+
+              const toast = createTag('sp-toast', { open: true, variant: 'positive' }, msg, { parent: toastArea });
+              toast.addEventListener('close', () => {
+                toast.remove();
+              });
             } else {
               navigateForm(props);
             }
@@ -515,15 +540,29 @@ function initFormCtas(props) {
   });
 }
 
-function updatePreviewCtas(props) {
-  const previewBtns = props.el.querySelectorAll('.preview-btns');
+function updateCtas(props) {
+  const formCtas = props.el.querySelectorAll('.form-handler-ctas-panel a');
   const filteredResponse = getFilteredCachedResponse();
 
-  previewBtns.forEach((a) => {
-    const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
-    if (filteredResponse.detailPagePath) {
-      a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
-      a.classList.remove('preview-not-ready');
+  formCtas.forEach((a) => {
+    if (a.classList.contains('preview-btns')) {
+      const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
+      if (filteredResponse.detailPagePath) {
+        a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
+        a.classList.remove('preview-not-ready');
+      }
+    }
+
+    if (a.classList.contains('next-button')) {
+      if (props.currentStep === props.maxStep) {
+        if (filteredResponse.published) {
+          a.textContent = a.dataset.republishStateText;
+        } else {
+          a.textContent = a.dataset.finalStateText;
+        }
+      } else {
+        a.textContent = a.dataset.nextStateText;
+      }
     }
   });
 }
@@ -617,7 +656,7 @@ async function buildECCForm(el) {
       if (prop === 'eventDataResp') {
         console.log('response updated with: ', value);
         setResponseCache(value);
-        updatePreviewCtas(target);
+        updateCtas(target);
         updateDashboardLink(target);
         if (value.message || value.errors) {
           props.el.classList.add('show-error');
