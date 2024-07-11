@@ -195,7 +195,7 @@ export async function addSponsorToEvent(data, eventId) {
 
 export async function removeSponsorFromEvent(sponsorId, eventId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const options = await constructRequestOptions('DELETE', raw);
+  const options = await constructRequestOptions('DELETE');
 
   const resp = await fetch(`${host}/v1/events/${eventId}/sponsors/${sponsorId}`, options)
     .then((res) => res.json())
