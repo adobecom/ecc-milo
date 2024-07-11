@@ -41,7 +41,7 @@ export class CustomSearch extends LitElement {
 
     const searchKey = this.searchInput.toLowerCase();
 
-    this.searchResults = this.searchInput?.trim().length !== 0
+    this.searchResults = this.searchInput?.trim().length !== 0 && this.searchdata.length > 0
       // eslint-disable-next-line max-len
       ? this.searchdata.filter((profile) => (profile.firstName.toLowerCase().includes(searchKey) || profile.lastName.toLowerCase().includes(searchKey))) : [];
 

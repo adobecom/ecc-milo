@@ -28,7 +28,7 @@ export async function onUpdate(component, props) {
   containers.forEach(async (container) => {
     if (props.payload.seriesId && props.payload.seriesId !== container.seriesId) {
       const { speakers } = await getSpeakers(props.payload.seriesId);
-      container.searchdata = speakers;
+      container.searchdata = speakers ?? [];
     }
     container.setAttribute('seriesId', props.payload.seriesId);
     container.requestUpdate();
