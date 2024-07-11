@@ -39,6 +39,7 @@ const wl = [
   'creationTime',
   'modificationTime',
   'detailPagePath',
+  'sponsors',
 ];
 
 function isValidAttribute(attr) {
