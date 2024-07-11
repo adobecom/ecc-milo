@@ -83,6 +83,9 @@ export default class PartnerSelector extends LitElement {
             saveButton.textContent = 'Saved';
           }
         }
+      } else if (saveButton) {
+        this.hasUnsavedChange = false;
+        saveButton.textContent = 'Saved';
       }
 
       this.requestUpdate();
