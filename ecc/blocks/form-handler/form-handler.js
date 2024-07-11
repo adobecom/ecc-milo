@@ -575,10 +575,6 @@ function initDeepLink(props) {
   }
 }
 
-async function initProfilesData(props, payload, oldValue) {
-
-}
-
 async function buildECCForm(el) {
   const props = {
     el,
