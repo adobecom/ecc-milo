@@ -21,6 +21,26 @@ export default function init(component, props) {
   const appearChecks = component.querySelectorAll('sp-checkbox.check-appear');
   const requireChecks = component.querySelectorAll('sp-checkbox.check-require');
 
+  requireChecks.forEach((cb) => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) {
+        appearChecks.forEach((ac) => {
+          if (ac.name === cb.name) ac.checked = true;
+        });
+      }
+    });
+  });
+
+  appearChecks.forEach((cb) => {
+    cb.addEventListener('change', () => {
+      if (!cb.checked) {
+        requireChecks.forEach((rc) => {
+          if (rc.name === cb.name) rc.checked = false;
+        });
+      }
+    });
+  });
+
   if (!eventData.rsvpFormFields) return;
 
   appearChecks.forEach((cb) => {
