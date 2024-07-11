@@ -23,10 +23,8 @@ export class CustomSearch extends LitElement {
     this.attachShadow({ mode: 'open' });
     this.searchInput = '';
     this.isPopoverOpen = false;
-    this.searchResultsPopover = null;
     this.closeOverlay = () => {};
     this.searchTimeoutId = null;
-    this.popover = null;
     this.searchField = null;
     this.openPopoverLock = false;
     this.searchResults = [];
@@ -55,7 +53,7 @@ export class CustomSearch extends LitElement {
     const options = { placement: 'bottom-start' };
     // eslint-disable-next-line max-len, no-underscore-dangle
     this.closeOverlay = await window.__merch__spectrum_Overlay.open(searchField, interaction, popover, options);
-    await this.searchResultsPopover?.updateComplete;
+    await popover.updateComplete;
     this.openPopoverLock = false;
   }
 
@@ -149,7 +147,6 @@ export class CustomSearch extends LitElement {
   }}
           @sp-closed=${() => {
     this.isPopoverOpen = false;
-    this.searchResultsPopover = null;
   }}
           @keydown=${this.handleKeydown}
       ></custom-textfield>
