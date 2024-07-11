@@ -1,4 +1,4 @@
-import { addSponsorToEvent, getSponsor } from '../../../scripts/esp-controller.js';
+import { addSponsorToEvent, getSponsor, removeSponsorFromEvent } from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 /* eslint-disable no-unused-vars */
@@ -7,9 +7,28 @@ export async function onSubmit(component, props) {
 
   const partnerVisible = component.querySelector('#partners-visible')?.checked;
   const partnerSelectorGroup = component.querySelector('partner-selector-group');
-  const { eventId } = getFilteredCachedResponse();
+  const { eventId, sponsors } = getFilteredCachedResponse();
 
   if (partnerSelectorGroup && eventId) {
+    if (sponsors) {
+      const responses = await Promise.all(sponsors.map(async (sponsor) => {
+        if (sponsor.sponsorType === 'Partner') {
+          const resp = await removeSponsorFromEvent(sponsor.sponsorId, eventId);
+          if (resp && !resp.errors) {
+            return { ...resp, sponsorId: sponsor.sponsorId };
+          }
+        }
+        return null;
+      }));
+
+      const validResponses = responses.filter((resp) => resp !== null);
+      validResponses.sort((a, b) => a.modificationTime - b.modificationTime);
+
+      validResponses.forEach((resp) => {
+        props.eventDataResp = { ...props.eventDataResp, ...resp };
+      });
+    }
+
     const partners = partnerSelectorGroup.getSavedPartners();
     await partners.reduce(async (promise, partner) => {
       await promise;

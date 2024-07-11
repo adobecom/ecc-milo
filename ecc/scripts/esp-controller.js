@@ -188,7 +188,18 @@ export async function addSponsorToEvent(data, eventId) {
 
   const resp = await fetch(`${host}/v1/events/${eventId}/sponsors`, options)
     .then((res) => res.json())
-    .catch((error) => window.lana?.log('Failed to update partner. Error:', error));
+    .catch((error) => window.lana?.log('Failed to add partner to event. Error:', error));
+
+  return resp;
+}
+
+export async function removeSponsorFromEvent(sponsorId, eventId) {
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const options = await constructRequestOptions('DELETE', raw);
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/sponsors/${sponsorId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to delete partner from event. Error:', error));
 
   return resp;
 }
@@ -199,7 +210,7 @@ export async function getSponsor(seriesId, sponsorId) {
 
   const resp = await fetch(`${host}/v1/series/${seriesId}/sponsors/${sponsorId}`, options)
     .then((res) => res.json())
-    .catch((error) => window.lana?.log('Failed to update partner. Error:', error));
+    .catch((error) => window.lana?.log('Failed to get partner. Error:', error));
 
   return resp;
 }

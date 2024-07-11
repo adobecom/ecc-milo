@@ -418,7 +418,6 @@ function navigateForm(props, stepIndex) {
 
 function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
-  const frags = props.el.querySelectorAll('.fragment');
   decorateButtons(ctaRow, 'button-l');
   const ctas = ctaRow.querySelectorAll('a');
 
