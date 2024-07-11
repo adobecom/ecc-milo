@@ -13,25 +13,35 @@ export default class PartnerSelector extends LitElement {
 
   constructor() {
     super();
-    this.partner = {};
+    this.partner = this.partner || {
+      isValid: false,
+      name: '',
+      link: '',
+    };
   }
 
   static styles = style;
 
   firstUpdated() {
     this.imageDropzone = this.shadowRoot.querySelector('image-dropzone');
+    this.checkValidity();
   }
 
   updateValue(key, value) {
     this.partner = { ...this.partner, [key]: value };
     const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
     this.partner.photo = imageDropzone?.file || null;
-
+    this.checkValidity()
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
       bubbles: true,
       composed: true,
     }));
+  }
+
+  checkValidity() {
+    this.partner.isValid = this.partner.name?.length >= 3 && this.partner.link?.match('^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$');
+    this.requestUpdate();
   }
 
   async savePartner(e) {
@@ -98,7 +108,7 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" .disabled=${!this.partner.name || !this.partner.link.match('^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$')} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
+        <sp-button variant="primary" .disabled=${!this.partner.isValid} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
