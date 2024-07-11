@@ -7,11 +7,11 @@ export async function onSubmit(component, props) {
 
   const partnerVisible = component.querySelector('#partners-visible')?.checked;
   const partnerSelectorGroup = component.querySelector('partner-selector-group');
-  const { eventId, sponsors } = getFilteredCachedResponse();
+  const { eventId } = getFilteredCachedResponse();
 
   if (partnerSelectorGroup && eventId) {
-    if (sponsors) {
-      const responses = await Promise.all(sponsors.map(async (sponsor) => {
+    if (props.eventDataResp?.sponsors) {
+      const responses = await Promise.all(props.eventDataResp?.sponsors.map(async (sponsor) => {
         if (sponsor.sponsorType === 'Partner') {
           const resp = await removeSponsorFromEvent(sponsor.sponsorId, eventId);
           if (resp && !resp.errors) {
