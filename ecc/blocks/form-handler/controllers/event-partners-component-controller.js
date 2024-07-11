@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import { addSponsorToEvent, getSponsor, removeSponsorFromEvent } from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
@@ -11,22 +12,18 @@ export async function onSubmit(component, props) {
 
   if (partnerSelectorGroup && eventId) {
     if (props.eventDataResp?.sponsors) {
-      const responses = await Promise.all(props.eventDataResp?.sponsors.map(async (sponsor) => {
+      for (const sponsor of props.eventDataResp.sponsors) {
         if (sponsor.sponsorType === 'Partner') {
+          // eslint-disable-next-line no-await-in-loop
           const resp = await removeSponsorFromEvent(sponsor.sponsorId, eventId);
-          if (resp && !resp.errors) {
-            return { ...resp, sponsorId: sponsor.sponsorId };
+          if (!resp || resp.errors) {
+            // eslint-disable-next-line no-continue
+            continue;
           }
+
+          props.eventDataResp = { ...props.eventDataResp, ...resp };
         }
-        return null;
-      }));
-
-      const validResponses = responses.filter((resp) => resp !== null);
-      validResponses.sort((a, b) => a.modificationTime - b.modificationTime);
-
-      validResponses.forEach((resp) => {
-        props.eventDataResp = { ...props.eventDataResp, ...resp };
-      });
+      }
     }
 
     const partners = partnerSelectorGroup.getSavedPartners();
@@ -77,7 +74,7 @@ export default async function init(component, props) {
     const filteredPartners = partners
       .filter((partner) => partner.isValidPartner)
       .sort((a, b) => a.index - b.index)
-      .map(({ name, link, photo }) => ({ name, link, photo }));
+      .map(({ name, link, photo, sponsorId }) => ({ name, link, photo, sponsorId }));
 
     partnersGroup.partners = filteredPartners;
     component.classList.add('prefilled');
