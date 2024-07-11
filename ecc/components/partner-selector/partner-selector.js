@@ -85,7 +85,7 @@ export default class PartnerSelector extends LitElement {
         }
       }
 
-      // this.requestUpdate();
+      this.requestUpdate();
     }
 
     saveButton.pending = false;
