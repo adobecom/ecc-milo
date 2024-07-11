@@ -10,6 +10,7 @@ export default class PartnerSelector extends LitElement {
     partner: { type: Object },
     fieldLabels: { type: Object },
     seriesId: { type: String },
+    hasUnsavedChange: { type: Boolean },
   };
 
   constructor() {
