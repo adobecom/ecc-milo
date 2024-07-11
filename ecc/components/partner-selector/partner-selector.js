@@ -14,8 +14,7 @@ export default class PartnerSelector extends LitElement {
 
   constructor() {
     super();
-    this.partner = { ...this.partner, isValid: true } || {
-      isValid: false,
+    this.partner = this.partner || {
       name: '',
       link: '',
     };
@@ -41,8 +40,7 @@ export default class PartnerSelector extends LitElement {
   }
 
   checkValidity() {
-    this.partner.isValid = this.partner.name?.length >= 3 && this.partner.link?.match(LINK_REGEX);
-    this.requestUpdate();
+    return this.partner.name?.length >= 3 && this.partner.link?.match(LINK_REGEX);
   }
 
   async savePartner(e) {

@@ -49,14 +49,14 @@ export default async function init(component, props) {
             photo = { ...partnerData.image, url: partnerData.image.imageUrl };
           }
 
-          return { name, link, isValid: true, photo, index };
+          return { name, link, isValidPartner: true, photo, index };
         }
       }
-      return { index, isValid: false };
+      return { index, isValidPartner: false };
     }));
 
     const filteredPartners = partners
-      .filter((partner) => partner.isValid)
+      .filter((partner) => partner.isValidPartner)
       .sort((a, b) => a.index - b.index)
       .map(({ name, link, photo }) => ({ name, link, photo }));
 
