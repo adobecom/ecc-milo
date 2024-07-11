@@ -1,4 +1,4 @@
-import BlockMediator from '../deps/block-mediator.min.js';
+import BlockMediator from './deps/block-mediator.min.js';
 
 export async function getProfile() {
   const { feds, adobeProfile, fedsConfig, adobeIMS } = window;

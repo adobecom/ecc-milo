@@ -2,8 +2,8 @@
 /* eslint-disable class-methods-use-this */
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './profile.css.js';
-import { createSpeaker, updateSpeaker, uploadImage } from '../../utils/esp-controller.js';
-import { getServiceName } from '../../utils/utils.js';
+import { createSpeaker, updateSpeaker, uploadImage } from '../../scripts/esp-controller.js';
+import { getServiceName } from '../../scripts/utils.js';
 import { icons } from '../../icons/icons.svg.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);

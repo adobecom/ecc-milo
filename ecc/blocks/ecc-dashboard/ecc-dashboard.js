@@ -4,11 +4,11 @@ import {
   getEvents,
   publishEvent,
   unpublishEvent,
-} from '../../utils/esp-controller.js';
+} from '../../scripts/esp-controller.js';
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
+import { getIcon, buildNoAccessScreen } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
-import BlockMediator from '../../deps/block-mediator.min.js';
+import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -137,7 +137,7 @@ function sortData(props, config, options = {}) {
 
   let sortAscending = true;
 
-  if (el.classList.contains('active')) {
+  if (el?.classList.contains('active')) {
     if (options.resort) {
       sortAscending = !el.classList.contains('desc-sort');
     } else {
@@ -145,12 +145,12 @@ function sortData(props, config, options = {}) {
     }
     el.classList.toggle('desc-sort', !sortAscending);
   } else {
-    el.classList.remove('desc-sort');
+    el?.classList.remove('desc-sort');
   }
 
   if (options.direction) {
     sortAscending = options.direction === 'asc';
-    el.classList.toggle('desc-sort', !sortAscending);
+    el?.classList.toggle('desc-sort', !sortAscending);
   }
 
   props.filteredData = props.filteredData.sort((a, b) => {
@@ -178,7 +178,7 @@ function sortData(props, config, options = {}) {
     return null;
   });
 
-  el.parentNode.querySelectorAll('th').forEach((header) => {
+  el?.parentNode.querySelectorAll('th').forEach((header) => {
     if (header !== el) {
       header.classList.remove('active');
       header.classList.remove('desc-sort');
@@ -187,7 +187,11 @@ function sortData(props, config, options = {}) {
 
   props.currentPage = 1;
   paginateData(props, config, 1);
-  el.classList.add('active');
+  el?.classList.add('active');
+}
+
+function buildToastMsg(eventTitle, msgTemplate) {
+  return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
 }
 
 function initMoreOptions(props, config, eventObj, row) {
@@ -214,6 +218,7 @@ function initMoreOptions(props, config, eventObj, row) {
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
+      if (!eventObj.detailPagePath) pub.classList.add('disabled');
       pub.addEventListener('click', async (e) => {
         e.preventDefault();
         toolBox.remove();
@@ -265,15 +270,40 @@ function initMoreOptions(props, config, eventObj, row) {
 
     deleteBtn.addEventListener('click', async (e) => {
       e.preventDefault();
-      toolBox.remove();
-      row.classList.add('pending');
-      await deleteEvent(eventObj.eventId);
-      const newJson = await getEvents();
-      props.data = newJson.events;
-      props.filteredData = newJson.events;
-      props.paginatedData = newJson.events;
 
-      sortData(props, config, { resort: true });
+      const spTheme = props.el.querySelector('sp-theme');
+      if (!spTheme) return;
+
+      const underlay = spTheme.querySelector('sp-underlay');
+      const dialog = spTheme.querySelector('sp-dialog');
+      createTag('h1', { slot: 'heading' }, 'You are deleting this event.', { parent: dialog });
+      createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
+      const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+      const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to delete this event', { parent: buttonContainer });
+      const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not delete', { parent: buttonContainer });
+
+      underlay.open = true;
+
+      dialogDeleteBtn.addEventListener('click', async () => {
+        toolBox.remove();
+        underlay.open = false;
+        dialog.innerHTML = '';
+        row.classList.add('pending');
+        await deleteEvent(eventObj.eventId);
+        const newJson = await getEvents();
+        props.data = newJson.events;
+        props.filteredData = newJson.events;
+        props.paginatedData = newJson.events;
+
+        sortData(props, config, { resort: true });
+        createTag('sp-toast', { open: true }, config['delete-event-toast-msg'], { parent: spTheme });
+      });
+
+      dialogCancelBtn.addEventListener('click', () => {
+        toolBox.remove();
+        underlay.open = false;
+        dialog.innerHTML = '';
+      });
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
@@ -340,10 +370,6 @@ function highlightRow(row) {
   setTimeout(() => {
     row.classList.remove('highlight');
   }, 1000);
-}
-
-function buildToastMsg(eventTitle, msgTemplate) {
-  return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
 }
 
 async function populateRow(props, config, index) {
@@ -488,9 +514,7 @@ function initSorting(props, config) {
 }
 
 function populateTable(props, config) {
-  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' });
   const tBody = props.el.querySelector('table.dashboard-table tbody');
-  props.el.append(spTheme);
   tBody.innerHTML = '';
 
   const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
@@ -577,7 +601,14 @@ async function buildDashboard(el, config) {
     import(`${miloLibs}/deps/lit-all.min.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/toast.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/button.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/dialog.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/underlay.js`),
   ]);
+
+  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
+  createTag('sp-underlay', {}, '', { parent: spTheme });
+  createTag('sp-dialog', { size: 's' }, '', { parent: spTheme });
 
   const props = {
     el,

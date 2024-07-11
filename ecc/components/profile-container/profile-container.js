@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
 import { LIBS } from '../../scripts/scripts.js';
-import { isEmptyObject } from '../../utils/utils.js';
+import { isEmptyObject } from '../../scripts/utils.js';
 import { style } from './profile-container.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
