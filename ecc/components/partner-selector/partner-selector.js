@@ -32,7 +32,7 @@ export default class PartnerSelector extends LitElement {
     this.partner = { ...this.partner, [key]: value };
     const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
     this.partner.photo = imageDropzone?.file || null;
-    this.checkValidity();
+    // this.checkValidity();
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
       bubbles: true,
@@ -110,7 +110,7 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" .disabled=${!this.partner.isValid} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
+        <sp-button variant="primary" ?disabled=${!this.checkValidity()} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
