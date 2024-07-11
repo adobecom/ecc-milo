@@ -28,6 +28,7 @@ export class CustomSearch extends LitElement {
     this.searchField = null;
     this.openPopoverLock = false;
     this.searchResults = [];
+    this.searchResultsPopover = null;
   }
 
   async updateSearchResults(searchField) {
@@ -50,7 +51,7 @@ export class CustomSearch extends LitElement {
     this.openPopoverLock = true;
     this.searchResultsPopover = popover;
     const interaction = 'click';
-    const options = { placement: 'bottom-start' };
+    const options = { placement: 'bottom-start', receivesFocus: 'false' };
     // eslint-disable-next-line max-len, no-underscore-dangle
     this.closeOverlay = await window.__merch__spectrum_Overlay.open(searchField, interaction, popover, options);
     await popover.updateComplete;
@@ -131,6 +132,9 @@ export class CustomSearch extends LitElement {
     if (shouldFocusResultsList) {
       event.preventDefault();
       event.stopPropagation();
+      const spMenu = (this.searchResultsPopover.querySelector('sp-menu-item'));
+      spMenu?.setAttribute('focused', 'true');
+      spMenu?.focus();
     }
   }
 
