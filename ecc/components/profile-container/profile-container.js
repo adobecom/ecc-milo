@@ -37,15 +37,15 @@ export class ProfileContainer extends LitElement {
     this.requestUpdate();
   }
 
-  isValidSpeaker(profileUI) {
-    return profileUI.profile.firstName && profileUI.profile.lastName && profileUI.profile.title;
+  isValidSpeaker(profile) {
+    return profile.firstName && profile.lastName && profile.title && profile.bio;
   }
 
   getProfiles() {
     return this.profiles
       .filter((p) => !p.isPlaceholder && !isEmptyObject(p) && this.isValidSpeaker(p))
-      .map((profileUI, index) => {
-        const { speakerId, type } = profileUI.profile;
+      .map((profile, index) => {
+        const { speakerId, type } = profile;
 
         return {
           speakerId,
