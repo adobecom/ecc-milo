@@ -86,7 +86,7 @@ function buildErrorMessage(props, resp) {
     });
 
     messages.forEach((msg, i) => {
-      const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 + (i * 1000) }, msg, { parent: toastArea });
+      const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 + (i * 3000) }, msg, { parent: toastArea });
       toast.addEventListener('close', () => {
         toast.remove();
       });
