@@ -31,6 +31,16 @@ export default function init(component, props) {
     });
   });
 
+  appearChecks.forEach((cb) => {
+    cb.addEventListener('change', () => {
+      if (!cb.checked) {
+        requireChecks.forEach((rc) => {
+          if (rc.name === cb.name) rc.checked = false;
+        });
+      }
+    });
+  });
+
   if (!eventData.rsvpFormFields) return;
 
   appearChecks.forEach((cb) => {
