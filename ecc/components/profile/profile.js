@@ -39,7 +39,7 @@ export class Profile extends LitElement {
     this.fieldlabels = this.fieldlabels ?? DEFAULT_FIELD_LABELS;
 
     this.profile = this.profile ?? { socialMedia: [{ link: '' }] };
-    this.profileCopy = { ...this.profile };
+    this.profileCopy = {};
   }
 
   addSocialMedia() {
@@ -52,8 +52,9 @@ export class Profile extends LitElement {
     this.requestUpdate();
   }
 
-  updateValue(key, value) {
-    this.profile = { ...this.profile, [key]: value };
+  updateProfile(profile) {
+    const updatedProfile = { ...this.profile, ...profile };
+    this.dispatchEvent(new CustomEvent('update-profile', { detail: { profile: updatedProfile } }));
   }
 
   updateSocialMedia(index, value) {
@@ -61,11 +62,13 @@ export class Profile extends LitElement {
     this.requestUpdate();
   }
 
-  renderProfileTypePicker(fieldLabel) {
+  renderProfileTypePicker() {
+    // eslint-disable-next-line max-len
+    const fieldLabel = this.getRequiredProps().fieldLabelsJSON.chooseType ?? DEFAULT_FIELD_LABELS.chooseType;
     return html`
     <div>
     <div><sp-field-label size="l" required>${fieldLabel}</sp-field-label></div>
-    <sp-picker label=${fieldLabel} value=${this.profile?.type} size="l" @change-custom=${(event) => this.updateValue('type', event.target.value)}>
+    <sp-picker label=${fieldLabel} value=${this.profile?.type} size="l" @change-custom=${(event) => this.updateProfile({ type: event.target.value })}>
         ${repeat(SPEAKER_TYPE, (type) => html`
             <sp-menu-item value="${type}">${type}</sp-menu-item>
         `)}
@@ -80,18 +83,20 @@ export class Profile extends LitElement {
     saveButton.pending = true;
 
     try {
-      this.profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
-      this.profileCopy = { ...this.profile };
+      const profile = { ...this.profile };
+      profile.isPlaceholder = false;
+      profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
+      this.profileCopy = { };
       let respJson;
       if (this.profile.speakerId) {
-        respJson = await updateSpeaker(this.profile, this.seriesId);
+        respJson = await updateSpeaker(profile, this.seriesId);
       } else {
-        respJson = await createSpeaker(this.profile, this.seriesId);
+        respJson = await createSpeaker(profile, this.seriesId);
       }
 
       if (respJson.speakerId) {
-        this.profile.speakerId = respJson.speakerId;
-        this.profile.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
+        profile.speakerId = respJson.speakerId;
+        profile.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
         const file = imageDropzone?.getFile();
 
         if (file && (file instanceof File)) {
@@ -101,9 +106,10 @@ export class Profile extends LitElement {
             altText: `${this.profile.firstName} ${this.profile.lastName} photo`,
           });
 
-          this.profile.modificationTime = speakerData.modificationTime;
+          profile.modificationTime = speakerData.modificationTime;
         }
 
+        this.updateProfile(profile);
         this.requestUpdate();
       }
     } catch (error) {
@@ -115,8 +121,7 @@ export class Profile extends LitElement {
 
   handleProfileSelection(e) {
     console.log('profile selected', e.detail);
-    this.profile = { ...(e.detail.profile) };
-    this.requestUpdate();
+    this.dispatchEvent(new CustomEvent('update-profile', { detail: e.detail }));
   }
 
   saveDisabled() {
@@ -124,20 +129,24 @@ export class Profile extends LitElement {
     return !this.profile.firstName || !this.profile.lastName || !this.profile.title || !this.profile.bio;
   }
 
-  renderProfileForm() {
-    // eslint-disable-next-line max-len
+  renderNameFieldWithSearchIntegrated() {
+    const { firstNameData, quietTextfieldConfig, lastNameData } = this.getRequiredProps();
+    return html`
+    <custom-search data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom2=${(event) => this.updateProfile({ firstName: event.detail.value })} @profile-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)}></custom-search>
+    <custom-search data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom2=${(event) => this.updateProfile({ lastName: event.detail.value })} @profile-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)}></custom-search>
+    `;
+  }
+
+  renderRemainingFormBody() {
     const {
       // eslint-disable-next-line max-len
-      fieldLabelsJSON, firstNameData, quietTextfieldConfig, lastNameData, titleData, bioData, textareaConfig, socialMediaData, textfieldConfig,
+      fieldLabelsJSON, quietTextfieldConfig, titleData, bioData, textareaConfig, socialMediaData, textfieldConfig,
     } = this.getRequiredProps();
 
     // eslint-disable-next-line max-len
     const imagefile = this.profile?.photo ? { ...this.profile.photo, url: this.profile.photo.imageUrl } : {};
-    return html`
-    ${this.renderProfileTypePicker(fieldLabelsJSON.chooseType)}
-    <custom-search data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom2=${(event) => this.updateValue('firstName', event.detail.value)} @profile-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)}></custom-search>
-    <custom-search data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom2=${(event) => this.updateValue('lastName', event.detail.value)} @profile-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)}></custom-search>
 
+    return html`
     <image-dropzone configs=${JSON.stringify({
     uploadOnCommand: true,
     type: 'speaker-photo',
@@ -145,8 +154,8 @@ export class Profile extends LitElement {
   })} file=${JSON.stringify(imagefile)}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
-    <custom-textfield data=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateValue('title', event.detail.value)}></custom-textfield>
-    <custom-textfield data=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @change-custom=${(event) => this.updateValue('bio', event.detail.value)}></custom-textfield>
+    <custom-textfield data=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ title: event.detail.value })}></custom-textfield>
+    <custom-textfield data=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @change-custom=${(event) => this.updateProfile({ bio: event.detail.value })}></custom-textfield>
     <div class="social-media">
     <h3>${fieldLabelsJSON.socialMedia}</h3>
     ${this.profile?.socialMedia ? repeat(
@@ -162,47 +171,30 @@ export class Profile extends LitElement {
   ) : nothing}
     </div>
     <repeater-element text=${fieldLabelsJSON.addSocialMediaRepeater} @repeat=${() => { this.addSocialMedia(); }}></repeater-element>
-    <sp-divider size='s'></sp-divider>
+    <sp-divider size='s'></sp-divider>`;
+  }
+
+  renderProfileForm() {
+    return html`
+    ${this.renderProfileTypePicker()}
+    ${this.renderNameFieldWithSearchIntegrated()}
+    ${this.renderRemainingFormBody()}`;
+  }
+
+  renderNameFields() {
+    const { firstNameData, quietTextfieldConfig, lastNameData } = this.getRequiredProps();
+
+    return html`    
+    <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ firstName: event.detail.value })}></custom-textfield>
+    <custom-textfield data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ lastName: event.detail.value })}></custom-textfield>
     `;
   }
 
   renderProfileEditForm() {
-    const {
-      // eslint-disable-next-line max-len
-      fieldLabelsJSON, firstNameData, quietTextfieldConfig, lastNameData, titleData, bioData, textareaConfig, socialMediaData, textfieldConfig 
-    } = this.getRequiredProps();
-
-    // eslint-disable-next-line max-len
-    const imagefile = this.profile?.photo ? { ...this.profile.photo, url: this.profile.photo.imageUrl } : {};
     return html`
-    ${this.renderProfileTypePicker(fieldLabelsJSON.chooseType)}
-    <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateValue('firstName', event.detail.value)}></custom-textfield>
-    <custom-textfield data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateValue('lastName', event.detail.value)}></custom-textfield>
-    <image-dropzone configs=${JSON.stringify({
-    uploadOnCommand: true,
-    type: 'speaker-photo',
-    targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.speakerId}/images`,
-  })} file=${JSON.stringify(imagefile)}>
-        <slot name="img-label" slot="img-label"></slot>
-    </image-dropzone>
-    <custom-textfield data=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateValue('title', event.detail.value)}></custom-textfield>
-    <custom-textfield data=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @change-custom=${(event) => this.updateValue('bio', event.detail.value)}></custom-textfield>
-    <div class="social-media">
-    <h3>${fieldLabelsJSON.socialMedia}</h3>
-    ${this.profile?.socialMedia ? repeat(
-    this.profile?.socialMedia,
-    (socialMedia, index) => html`
-    <div class="social-media-row">
-    <custom-textfield class="social-media-input" data=${JSON.stringify({ ...socialMediaData, value: socialMedia.link ?? undefined })} config=${JSON.stringify(textfieldConfig)} @change-custom=${(event) => this.updateSocialMedia(index, event.detail.value)}></custom-textfield>
-        ${this.profile?.socialMedia?.length > 1 ? html`<img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => {
-    this.profile.socialMedia.splice(index, 1);
-    this.requestUpdate();
-  }}></img>` : nothing}
-        </div>`,
-  ) : nothing}
-    </div>
-    <repeater-element text=${fieldLabelsJSON.addSocialMediaRepeater} @repeat=${() => { this.addSocialMedia(); }}></repeater-element>
-    <sp-divider size='s'></sp-divider>
+    ${this.renderProfileTypePicker()}
+    ${this.renderNameFields()}
+    ${this.renderRemainingFormBody()}
     `;
   }
 
@@ -249,7 +241,7 @@ export class Profile extends LitElement {
     const quietTextfieldConfig = { size: 'xl', quiet: true };
     return {
     // eslint-disable-next-line max-len
-      fieldLabelsJSON, firstNameData, quietTextfieldConfig, lastNameData, titleData, bioData, textareaConfig, socialMediaData, textfieldConfig
+      fieldLabelsJSON, firstNameData, quietTextfieldConfig, lastNameData, titleData, bioData, textareaConfig, socialMediaData, textfieldConfig,
     };
   }
 
