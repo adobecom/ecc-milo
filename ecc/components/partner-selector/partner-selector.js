@@ -25,17 +25,19 @@ export default class PartnerSelector extends LitElement {
 
   firstUpdated() {
     this.imageDropzone = this.shadowRoot.querySelector('image-dropzone');
+    this.imageDropzone.handleImage = () => {
+      this.hasUnsavedChange = true;
+    };
     this.checkValidity();
   }
 
   updateValue(key, value) {
     this.hasUnsavedChange = true;
-    const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
     const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     if (saveButton) saveButton.textContent = 'Save Partner';
 
     this.partner = { ...this.partner, [key]: value };
-    this.partner.photo = imageDropzone?.file || null;
+    this.partner.photo = this.imageDropzone?.file || null;
 
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
@@ -49,7 +51,6 @@ export default class PartnerSelector extends LitElement {
   }
 
   async savePartner(e) {
-    const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
     const saveButton = e.target;
     let respJson;
 
@@ -67,7 +68,7 @@ export default class PartnerSelector extends LitElement {
 
     if (respJson.sponsorId) {
       this.partner.sponsorId = respJson.sponsorId;
-      const file = imageDropzone?.getFile();
+      const file = this.imageDropzone?.getFile();
 
       if (file && (file instanceof File)) {
         const sponsorData = await uploadImage(file, {
