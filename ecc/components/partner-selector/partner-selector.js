@@ -18,6 +18,7 @@ export default class PartnerSelector extends LitElement {
       name: '',
       link: '',
     };
+    this.hasUnsavedChange = false;
   }
 
   static styles = style;
@@ -28,6 +29,7 @@ export default class PartnerSelector extends LitElement {
   }
 
   updateValue(key, value) {
+    this.hasUnsavedChange = true;
     const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
     const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     if (saveButton) saveButton.textContent = 'Save Partner';
@@ -77,7 +79,7 @@ export default class PartnerSelector extends LitElement {
         if (sponsorData) {
           this.partner.modificationTime = sponsorData.modificationTime;
           if (saveButton) {
-            saveButton.disabled = true;
+            this.hasUnsavedChange = false;
             saveButton.textContent = 'Saved';
           }
         }
@@ -114,7 +116,7 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" ?disabled=${!this.checkValidity()} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
+        <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.hasUnsavedChange} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
