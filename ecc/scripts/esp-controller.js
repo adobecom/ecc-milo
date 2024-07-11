@@ -195,8 +195,7 @@ export async function addSponsorToEvent(data, eventId) {
 
 export async function getSponsor(seriesId, sponsorId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify(data);
-  const options = await constructRequestOptions('GET', raw);
+  const options = await constructRequestOptions('GET');
 
   const resp = await fetch(`${host}/v1/series/${seriesId}/sponsors/${sponsorId}`, options)
     .then((res) => res.json())
