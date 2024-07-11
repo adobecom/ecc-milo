@@ -60,12 +60,19 @@ export default async function init(component, props) {
 
         if (partnerData) {
           let photo;
-          const { name, link } = partnerData;
+          const { name, link, sponsorId } = partnerData;
           if (partnerData.image) {
             photo = { ...partnerData.image, url: partnerData.image.imageUrl };
           }
 
-          return { name, link, isValidPartner: true, photo, index };
+          return {
+            name,
+            link,
+            sponsorId,
+            isValidPartner: true,
+            photo,
+            index,
+          };
         }
       }
       return { index, isValidPartner: false };
