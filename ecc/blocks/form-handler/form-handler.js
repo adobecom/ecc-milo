@@ -152,7 +152,7 @@ async function initComponents(props) {
         const toastArea = props.el.querySelector('.toast-area');
         if (!toastArea) return;
 
-        const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
+        const toast = createTag('sp-toast', { open: true }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
         toast.addEventListener('close', () => {
           toast.remove();
         });
@@ -217,7 +217,7 @@ function decorateForm(el) {
   const ctaRow = el.querySelector(':scope > div:last-of-type');
 
   if (ctaRow) {
-    const toastParent = createTag('sp-theme', { class: 'toast-parent', color: 'light', scale: 'medium' }, { parent: ctaRow });
+    const toastParent = createTag('sp-theme', { class: 'toast-parent', color: 'light', scale: 'medium' }, '', { parent: ctaRow });
     createTag('div', { class: 'toast-area' }, '', { parent: toastParent });
   }
 
