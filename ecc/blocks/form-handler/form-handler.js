@@ -548,7 +548,12 @@ function initFormCtas(props) {
   });
 
   backBtn.addEventListener('click', async () => {
-    props.currentStep -= 1;
+    const resp = await saveEvent(props);
+    if (resp?.errors || resp?.message) {
+      buildErrorMessage(props, resp);
+    } else {
+      props.currentStep -= 1;
+    }
   });
 }
 
