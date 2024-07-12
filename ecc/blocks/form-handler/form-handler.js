@@ -210,8 +210,8 @@ function decorateForm(el) {
   }
 
   formDivs.forEach((formDiv) => {
-    formDiv.parentElement.replaceChild(app, formDiv);
-    form.append(formDiv);
+    formDiv.parentElement.parentElement.replaceChild(app, formDiv.parentElement);
+    form.append(formDiv.parentElement);
   });
 
   const cols = el.querySelectorAll(':scope > div:first-of-type > div');
