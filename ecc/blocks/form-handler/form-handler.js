@@ -1,5 +1,5 @@
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip, camelToSentenceCase, buildSPToast } from '../../scripts/utils.js';
+import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip, camelToSentenceCase } from '../../scripts/utils.js';
 import {
   createEvent,
   updateEvent,
