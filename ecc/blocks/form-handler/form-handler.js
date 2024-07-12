@@ -46,6 +46,7 @@ const INPUT_TYPES = [
   'textarea[required]',
   'sp-textfield[required]',
   'sp-checkbox[required]',
+  'sp-picker[required]',
 ];
 
 const SPECTRUM_COMPONENTS = [
@@ -152,7 +153,7 @@ async function initComponents(props) {
         const toastArea = props.el.querySelector('.toast-area');
         if (!toastArea) return;
 
-        const toast = createTag('sp-toast', { open: true }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
+        const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
         toast.addEventListener('close', () => {
           toast.remove();
         });
