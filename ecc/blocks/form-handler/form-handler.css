@@ -223,6 +223,23 @@
   margin: 0 0 32px 0;
 }
 
+.form-handler .section:not(:first-of-type) > div.content > h2 sp-action-button,
+.form-handler .section:not(:first-of-type) > div.content > h3 sp-action-button,
+.form-handler .form-component > div:first-of-type > div > h2 sp-action-button,
+.form-handler .form-component > div:first-of-type > div > h3 sp-action-button {
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: help
+}
+
+.form-handler .section:not(:first-of-type) > div.content > h2 sp-action-button .icon-info,
+.form-handler .section:not(:first-of-type) > div.content > h3 sp-action-button .icon-info,
+.form-handler .form-component > div:first-of-type > div > h2 sp-action-button .icon-info,
+.form-handler .form-component > div:first-of-type > div > h3 sp-action-button .icon-info {
+  display: block;
+}
+
 .form-handler .event-heading-tooltip-wrapper {
   position: relative;
   font-size: var(--type-body-s-size);

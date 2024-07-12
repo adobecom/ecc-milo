@@ -58,12 +58,10 @@ export function convertTo24HourFormat(timeStr) {
 
 export function addTooltipToHeading(em, heading) {
   const tooltipText = em.textContent.trim();
-  const toolTipIcon = createTag('span', { class: 'event-heading-tooltip-icon' }, getIcon('info'));
-  const toolTipBox = createTag('div', { class: 'event-heading-tooltip-box' }, tooltipText);
-  const toolTipWrapper = createTag('div', { class: 'event-heading-tooltip-wrapper' });
+  const toolTipTrigger = createTag('sp-action-button', { size: 's' }, getIcon('info'));
+  createTag('sp-tooltip', { 'self-managed': true, variant: 'info' }, tooltipText, { parent: toolTipTrigger });
 
-  toolTipWrapper.append(toolTipIcon, toolTipBox);
-  heading.append(toolTipWrapper);
+  heading.append(toolTipTrigger);
   em.parentElement?.remove();
 }
 
