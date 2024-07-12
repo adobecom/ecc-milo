@@ -27,7 +27,6 @@ export default class PartnerSelector extends LitElement {
     this.imageDropzone = this.shadowRoot.querySelector('image-dropzone');
     this.imageDropzone.addEventListener('image-change', () => {
       this.partner.hasUnsavedChanges = true;
-      this.requestUpdate();
     });
     this.checkValidity();
   }
