@@ -68,13 +68,7 @@ const SPECTRUM_COMPONENTS = [
 function buildErrorMessage(props, resp) {
   if (!resp) return;
 
-  let toastArea = props.el.querySelector('.toast-area');
-
-  if (!toastArea) {
-    const spTheme = props.el.querySelector('sp-theme');
-    if (!spTheme) return;
-    toastArea = createTag('div', { class: 'toast-area' }, '', { parent: spTheme });
-  }
+  const toastArea = props.el.querySelector('.toast-area');
 
   if (resp.errors) {
     const messages = [];
@@ -153,8 +147,22 @@ async function initComponents(props) {
   const eventId = urlParams.get('eventId');
 
   if (eventId) {
+    setTimeout(() => {
+      if (!props.eventDataResp.eventId) {
+        const toastArea = props.el.querySelector('.toast-area');
+        if (!toastArea) return;
+
+        const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
+        toast.addEventListener('close', () => {
+          toast.remove();
+        });
+      }
+    }, 5000);
+
+    props.el.classList.add('disabled');
     const eventData = await getEvent(eventId);
     props.eventDataResp = { ...props.eventDataResp, ...eventData };
+    props.el.classList.remove('disabled');
   }
 
   const componentPromises = VANILLA_COMPONENTS.map(async (comp) => {
@@ -216,8 +224,8 @@ function decorateForm(el) {
   }
 
   formDivs.forEach((formDiv) => {
-    formDiv.parentElement.replaceChild(app, formDiv);
-    form.append(formDiv);
+    formDiv.parentElement.parentElement.replaceChild(app, formDiv.parentElement);
+    form.append(formDiv.parentElement);
   });
 
   const cols = el.querySelectorAll(':scope > div:first-of-type > div');
@@ -249,6 +257,8 @@ function decorateForm(el) {
       });
     }
   });
+
+  createTag('div', { class: 'toast-area' }, '', { parent: app });
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -418,7 +428,6 @@ function navigateForm(props, stepIndex) {
 
 function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
-  const frags = props.el.querySelectorAll('.fragment');
   decorateButtons(ctaRow, 'button-l');
   const ctas = ctaRow.querySelectorAll('a');
 
@@ -682,9 +691,9 @@ async function buildECCForm(el) {
   });
 
   initFormCtas(proxyProps);
+  initNavigation(proxyProps);
   await initComponents(proxyProps);
   initRepeaters(proxyProps);
-  initNavigation(proxyProps);
   updateRequiredFields(proxyProps);
   enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);

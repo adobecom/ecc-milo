@@ -176,7 +176,7 @@ export async function updateSponsor(data, sponsorId, seriesId) {
 
   const resp = await fetch(`${host}/v1/series/${seriesId}/sponsors/${sponsorId}`, options)
     .then((res) => res.json())
-    .catch((error) => window.lana?.log('Failed to update partner. Error:', error));
+    .catch((error) => window.lana?.log('Failed to update sponsor. Error:', error));
 
   return resp;
 }
@@ -188,7 +188,41 @@ export async function addSponsorToEvent(data, eventId) {
 
   const resp = await fetch(`${host}/v1/events/${eventId}/sponsors`, options)
     .then((res) => res.json())
-    .catch((error) => window.lana?.log('Failed to update partner. Error:', error));
+    .catch((error) => window.lana?.log('Failed to add sponsor to event. Error:', error));
+
+  return resp;
+}
+
+export async function updateSponsorInEvent(data, sponsorId, eventId) {
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const raw = JSON.stringify(data);
+  const options = await constructRequestOptions('PUT', raw);
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/sponsors/${sponsorId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to update sponsor in event. Error:', error));
+
+  return resp;
+}
+
+export async function removeSponsorFromEvent(sponsorId, eventId) {
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const options = await constructRequestOptions('DELETE');
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/sponsors/${sponsorId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to delete sponsor from event. Error:', error));
+
+  return resp;
+}
+
+export async function getSponsor(seriesId, sponsorId) {
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const options = await constructRequestOptions('GET');
+
+  const resp = await fetch(`${host}/v1/series/${seriesId}/sponsors/${sponsorId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to get sponsor. Error:', error));
 
   return resp;
 }
