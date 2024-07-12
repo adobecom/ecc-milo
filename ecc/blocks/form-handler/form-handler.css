@@ -1,6 +1,7 @@
 .form-handler {
   display: block;
   padding: 0 40px;
+  transition: opacity 0.3s;
 
   --mod-textfield-icon-size-invalid: 0;
   --stroke-color-divider: #6E6E6E;
@@ -19,6 +20,11 @@
 
 .form-handler.show-error {
   --mod-textfield-icon-size-invalid: 16px;
+}
+
+.form-handler.disabled {
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 .form-handler .side-menu button {
