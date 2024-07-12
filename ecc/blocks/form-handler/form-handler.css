@@ -22,7 +22,8 @@
   --mod-textfield-icon-size-invalid: 16px;
 }
 
-.form-handler.disabled {
+.form-handler.disabled .main-frame,
+.form-handler.disabled .form-handler-ctas-panel {
   opacity: 0.7;
   pointer-events: none;
 }
