@@ -79,7 +79,7 @@ async function populateSeriesOptions(component) {
   const seriesSelect = component.querySelector('#series-select-input');
   if (!seriesSelect) return;
 
-  const series = getSeries();
+  const series = await getSeries();
   if (!series) {
     seriesSelect.pending = false;
     seriesSelect.disabled = true;
