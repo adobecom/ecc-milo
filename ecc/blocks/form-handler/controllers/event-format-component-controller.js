@@ -1,6 +1,9 @@
 /* eslint-disable no-unused-vars */
-import { MILO_CONFIG } from '../../../scripts/scripts.js';
+import { getSeries } from '../../../scripts/esp-controller.js';
+import { MILO_CONFIG, LIBS } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../scripts/utils.js';
+
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -72,10 +75,30 @@ export async function onUpdate(component, props) {
   }
 }
 
-export default function init(component, props) {
+async function populateSeriesOptions(component) {
+  const seriesSelect = component.querySelector('#series-select-input');
+  if (!seriesSelect) return;
+
+  const series = await getSeries();
+  if (!series) {
+    seriesSelect.pending = false;
+    seriesSelect.disabled = true;
+    return;
+  }
+
+  Object.values(series).forEach((val) => {
+    const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
+    seriesSelect.append(opt);
+  });
+
+  seriesSelect.pending = false;
+}
+
+export default async function init(component, props) {
   const eventData = props.eventDataResp;
   prepopulateTimeZone(component);
   initStepLock(component);
+  await populateSeriesOptions(component);
 
   const {
     cloudType,
@@ -89,6 +112,20 @@ export default function init(component, props) {
     changeInputValue(component.querySelector('#rsvp-required-check'), 'checked', rsvpRequired || 0);
     component.classList.add('prefilled');
   }
+
+  setTimeout(() => {
+    const seriesSelect = component.querySelector('#series-select-input');
+
+    if (seriesSelect.pending || seriesSelect.disabled) {
+      const toastArea = props.el.querySelector('.toast-area');
+      if (!toastArea) return;
+
+      const toast = createTag('sp-toast', { open: true, timeout: 8000 }, 'Series ID is taking longer than usual to load. Please check if the Adobe corp. VPN is connected.', { parent: toastArea });
+      toast.addEventListener('close', () => {
+        toast.remove();
+      });
+    }
+  }, 5000);
 }
 
 function getTemplateId(bu) {
