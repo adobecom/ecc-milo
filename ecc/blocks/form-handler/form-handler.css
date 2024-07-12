@@ -361,10 +361,13 @@
   line-height: normal;
 }
 
+.form-handler .toast-parent {
+  position: absolute;
+  bottom: 100%;
+  right: 60px;
+}
+
 .form-handler .toast-area {
-  position: sticky;
-  right: 0;
-  bottom: 88px;
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;

@@ -434,9 +434,6 @@ function navigateForm(props, stepIndex) {
 
 function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
-  decorateButtons(ctaRow, 'button-l');
-  const ctas = ctaRow.querySelectorAll('a');
-
   ctaRow.classList.add('form-handler-ctas-panel');
 
   const forwardActionsWrappers = ctaRow.querySelectorAll(':scope > div');
@@ -448,6 +445,9 @@ function initFormCtas(props) {
   forwardActionsWrappers.forEach((w) => {
     forwardWrapper.append(w);
   });
+
+  decorateButtons(forwardActionsWrappers, 'button-l');
+  const ctas = forwardActionsWrappers.querySelectorAll('a');
 
   const backBtn = createTag('a', { class: 'back-btn' }, getIcon('chev-left-white'));
 
