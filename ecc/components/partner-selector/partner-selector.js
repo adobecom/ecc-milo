@@ -10,7 +10,6 @@ export default class PartnerSelector extends LitElement {
     partner: { type: Object },
     fieldLabels: { type: Object },
     seriesId: { type: String },
-    hasUnsavedChange: { type: Boolean },
   };
 
   constructor() {
@@ -18,8 +17,8 @@ export default class PartnerSelector extends LitElement {
     this.partner = this.partner || {
       name: '',
       link: '',
+      hasUnsavedChange: false,
     };
-    this.hasUnsavedChange = false;
   }
 
   static styles = style;
@@ -27,14 +26,14 @@ export default class PartnerSelector extends LitElement {
   firstUpdated() {
     this.imageDropzone = this.shadowRoot.querySelector('image-dropzone');
     this.imageDropzone.addEventListener('image-change', () => {
-      this.hasUnsavedChange = true;
+      this.partner.hasUnsavedChanges = true;
       this.requestUpdate();
     });
     this.checkValidity();
   }
 
   updateValue(key, value) {
-    this.hasUnsavedChange = true;
+    this.partner.hasUnsavedChanges = true;
     const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     if (saveButton) saveButton.textContent = 'Save Partner';
 
@@ -82,12 +81,12 @@ export default class PartnerSelector extends LitElement {
         if (sponsorData) {
           this.partner.modificationTime = sponsorData.modificationTime;
           if (saveButton) {
-            this.hasUnsavedChange = false;
+            this.partner.hasUnsavedChanges = false;
             saveButton.textContent = 'Saved';
           }
         }
       } else if (saveButton) {
-        this.hasUnsavedChange = false;
+        this.partner.hasUnsavedChanges = false;
         saveButton.textContent = 'Saved';
       }
 
@@ -122,7 +121,7 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.hasUnsavedChange} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
+        <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
