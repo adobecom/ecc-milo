@@ -14,7 +14,6 @@
   --mod-textfield-font-family: 'Adobe Clean', adobe-clean, 'Trebuchet MS', sans-serif;
   --mod-textfield-font-weight: 700;
   --mod-textfield-spacing-block-start: 8px;
-  --mod-textfield-spacing-inline-quiet: 12px;
 }
 
 .form-handler.show-error {
@@ -224,41 +223,21 @@
   margin: 0 0 32px 0;
 }
 
-.form-handler .event-heading-tooltip-wrapper {
-  position: relative;
-  font-size: var(--type-body-s-size);
-  font-weight: normal;
+.form-handler .section:not(:first-of-type) > div.content > h2 sp-action-button,
+.form-handler .section:not(:first-of-type) > div.content > h3 sp-action-button,
+.form-handler .form-component > div:first-of-type > div > h2 sp-action-button,
+.form-handler .form-component > div:first-of-type > div > h3 sp-action-button {
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: help
 }
 
-.form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon ~ .event-heading-tooltip-box {
-  display: none;
-  position: absolute;
-  width: max-content;
-  color: var(--color-white);
-  margin-left: 32px;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 8px;
-  border-radius: 4px;
-  background-color: var(--color-accent);
-  box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
-  font-size: var(--type-body-xxs-size);
-  line-height: normal;
-}
-
-.form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon ~ .event-heading-tooltip-box::before {
-  content: '';
-  position: absolute;
-  height: 8px;
-  width: 8px;
-  background: var(--color-accent);
-  transform: rotate(45deg) translateY(-50%);
-  left: -6px;
-  top: 50%;
-}
-
-.form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon:hover ~ .event-heading-tooltip-box {
-  display: unset;
+.form-handler .section:not(:first-of-type) > div.content > h2 sp-action-button .icon-info,
+.form-handler .section:not(:first-of-type) > div.content > h3 sp-action-button .icon-info,
+.form-handler .form-component > div:first-of-type > div > h2 sp-action-button .icon-info,
+.form-handler .form-component > div:first-of-type > div > h3 sp-action-button .icon-info {
+  display: block;
 }
 
 .form-handler .form-handler-ctas-panel {
@@ -362,10 +341,13 @@
   line-height: normal;
 }
 
+.form-handler .toast-parent {
+  position: absolute;
+  bottom: 100%;
+  right: 60px;
+}
+
 .form-handler .toast-area {
-  position: sticky;
-  right: 0;
-  bottom: 88px;
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;

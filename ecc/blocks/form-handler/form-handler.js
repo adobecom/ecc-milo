@@ -46,6 +46,7 @@ const INPUT_TYPES = [
   'textarea[required]',
   'sp-textfield[required]',
   'sp-checkbox[required]',
+  'sp-picker[required]',
 ];
 
 const SPECTRUM_COMPONENTS = [
@@ -63,6 +64,8 @@ const SPECTRUM_COMPONENTS = [
   'button-group',
   'tooltip',
   'toast',
+  'icon',
+  'action-button',
 ];
 
 function buildErrorMessage(props, resp) {
@@ -214,7 +217,15 @@ async function updateComponents(props) {
 }
 
 function decorateForm(el) {
+  const ctaRow = el.querySelector(':scope > div:last-of-type');
+
+  if (ctaRow) {
+    const toastParent = createTag('sp-theme', { class: 'toast-parent', color: 'light', scale: 'medium' }, '', { parent: ctaRow });
+    createTag('div', { class: 'toast-area' }, '', { parent: toastParent });
+  }
+
   const app = createTag('sp-theme', { color: 'light', scale: 'medium' });
+
   const form = createTag('form', {}, '', { parent: app });
   const formDivs = el.querySelectorAll('.fragment');
 
@@ -257,8 +268,6 @@ function decorateForm(el) {
       });
     }
   });
-
-  createTag('div', { class: 'toast-area' }, '', { parent: app });
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -430,7 +439,6 @@ function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
   decorateButtons(ctaRow, 'button-l');
   const ctas = ctaRow.querySelectorAll('a');
-
   ctaRow.classList.add('form-handler-ctas-panel');
 
   const forwardActionsWrappers = ctaRow.querySelectorAll(':scope > div');
@@ -515,19 +523,16 @@ function initFormCtas(props) {
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
               const msg = createTag('div', { class: 'toast-message dark success-message' }, 'Success! This event has been published.', { parent: cta });
               createTag('a', { class: 'con-button outline', href: dashboardLink.href }, 'Go to dashboard', { parent: msg });
-              let toastArea = props.el.querySelector('.toast-area');
+              const toastArea = props.el.querySelector('.toast-area');
               cta.textContent = cta.dataset.doneStateText;
               cta.classList.add('disabled');
-              if (!toastArea) {
-                const spTheme = props.el.querySelector('sp-theme');
-                if (!spTheme) return;
-                toastArea = createTag('div', { class: 'toast-area' }, '', { parent: spTheme });
-              }
 
-              const toast = createTag('sp-toast', { open: true, variant: 'positive' }, msg, { parent: toastArea });
-              toast.addEventListener('close', () => {
-                toast.remove();
-              });
+              if (toastArea) {
+                const toast = createTag('sp-toast', { open: true, variant: 'positive' }, msg, { parent: toastArea });
+                toast.addEventListener('close', () => {
+                  toast.remove();
+                });
+              }
             } else {
               navigateForm(props);
             }
@@ -545,7 +550,12 @@ function initFormCtas(props) {
   });
 
   backBtn.addEventListener('click', async () => {
-    props.currentStep -= 1;
+    const resp = await saveEvent(props);
+    if (resp?.errors || resp?.message) {
+      buildErrorMessage(props, resp);
+    } else {
+      props.currentStep -= 1;
+    }
   });
 }
 

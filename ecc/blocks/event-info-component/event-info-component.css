@@ -284,4 +284,8 @@
   .event-info-component .time-inputs-wrapper {
     width: auto;
   }
+
+  .event-info-component .date-time-row > p {
+    margin-left: 24px;
+  }
 }
