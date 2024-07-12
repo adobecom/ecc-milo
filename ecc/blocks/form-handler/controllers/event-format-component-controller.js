@@ -79,19 +79,20 @@ async function populateSeriesOptions(component) {
   const seriesSelect = component.querySelector('#series-select-input');
   if (!seriesSelect) return;
 
-  const series = await getSeries();
-  if (!series) {
+  getSeries().then((series) => {
+    if (!series) {
+      seriesSelect.pending = false;
+      seriesSelect.disabled = true;
+      return;
+    }
+
+    Object.values(series).forEach((val) => {
+      const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
+      seriesSelect.append(opt);
+    });
+
     seriesSelect.pending = false;
-    seriesSelect.disabled = true;
-    return;
-  }
-
-  Object.values(series).forEach((val) => {
-    const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
-    seriesSelect.append(opt);
   });
-
-  seriesSelect.pending = false;
 }
 
 export default function init(component, props) {
