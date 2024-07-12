@@ -68,13 +68,7 @@ const SPECTRUM_COMPONENTS = [
 function buildErrorMessage(props, resp) {
   if (!resp) return;
 
-  let toastArea = props.el.querySelector('.toast-area');
-
-  if (!toastArea) {
-    const spTheme = props.el.querySelector('sp-theme');
-    if (!spTheme) return;
-    toastArea = createTag('div', { class: 'toast-area' }, '', { parent: spTheme });
-  }
+  const toastArea = props.el.querySelector('.toast-area');
 
   if (resp.errors) {
     const messages = [];
@@ -249,6 +243,8 @@ function decorateForm(el) {
       });
     }
   });
+
+  createTag('div', { class: 'toast-area' }, '', { parent: app });
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
