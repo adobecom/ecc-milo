@@ -79,27 +79,26 @@ async function populateSeriesOptions(component) {
   const seriesSelect = component.querySelector('#series-select-input');
   if (!seriesSelect) return;
 
-  getSeries().then((series) => {
-    if (!series) {
-      seriesSelect.pending = false;
-      seriesSelect.disabled = true;
-      return;
-    }
-
-    Object.values(series).forEach((val) => {
-      const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
-      seriesSelect.append(opt);
-    });
-
+  const series = getSeries();
+  if (!series) {
     seriesSelect.pending = false;
+    seriesSelect.disabled = true;
+    return;
+  }
+
+  Object.values(series).forEach((val) => {
+    const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
+    seriesSelect.append(opt);
   });
+
+  seriesSelect.pending = false;
 }
 
-export default function init(component, props) {
+export default async function init(component, props) {
   const eventData = props.eventDataResp;
   prepopulateTimeZone(component);
   initStepLock(component);
-  populateSeriesOptions(component);
+  await populateSeriesOptions(component);
 
   const {
     cloudType,
