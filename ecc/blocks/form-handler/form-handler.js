@@ -217,7 +217,7 @@ function decorateForm(el) {
   const ctaRow = el.querySelector(':scope > div:last-of-type');
 
   if (ctaRow) {
-    const toastParent = createTag('sp-theme', { class: 'toast-parent', color: 'light', scale: 'medium' });
+    const toastParent = createTag('sp-theme', { class: 'toast-parent', color: 'light', scale: 'medium' }, { parent: ctaRow });
     createTag('div', { class: 'toast-area' }, '', { parent: toastParent });
   }
 
