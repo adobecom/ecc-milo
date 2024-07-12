@@ -270,6 +270,12 @@ async function saveEvent(props, options = { toPublish: false }) {
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
+
+    const toastArea = props.el.querySelector('.toast-area');
+    const toast = createTag('sp-toast', { open: true, timeout: 8000 }, 'Form saved', { parent: toastArea });
+    toast.addEventListener('close', () => {
+      toast.remove();
+    });
   } else if (options.toPublish) {
     resp = await publishEvent(
       getFilteredCachedResponse().eventId,
