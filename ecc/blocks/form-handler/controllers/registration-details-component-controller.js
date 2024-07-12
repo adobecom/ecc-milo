@@ -9,12 +9,14 @@ export function onSubmit(component, props) {
   const rsvpDescription = component.querySelector('#rsvp-form-detail-description')?.value;
 
   const attendeeLimit = Number.isNaN(+attendeeLimitVal) ? null : +attendeeLimitVal;
+
   const rsvpData = {
     attendeeLimit,
     allowWaitlisting,
-    hostEmail: contactHost ? hostEmail : '',
     rsvpDescription,
   };
+
+  if (contactHost) rsvpData.hostEmail = hostEmail;
 
   props.payload = { ...props.payload, ...rsvpData };
 }
