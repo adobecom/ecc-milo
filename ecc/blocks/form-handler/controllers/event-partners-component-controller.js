@@ -14,6 +14,7 @@ export async function onSubmit(component, props) {
     const partners = partnerSelectorGroup.getSavedPartners();
     await partners.reduce(async (promise, partner) => {
       await promise;
+
       const { sponsorId, sponsorType } = partner;
 
       if (!props.eventDataResp.sponsors) {
@@ -21,12 +22,13 @@ export async function onSubmit(component, props) {
           sponsorId,
           sponsorType,
         }, eventId);
+
         if (!resp || resp.errors) {
           return;
         }
 
         props.eventDataResp = { ...props.eventDataResp, ...resp };
-      } else if (props.eventDataResp.sponsors) {
+      } else {
         const existingPartner = props.eventDataResp.sponsors.find((sponsor) => {
           const idMatch = sponsor.sponsorId === sponsorId;
           const typeMatch = sponsor.sponsorType === sponsorType;
@@ -38,19 +40,21 @@ export async function onSubmit(component, props) {
             sponsorId,
             sponsorType,
           }, eventId);
+
           if (!resp || resp.errors) {
             return;
           }
 
           props.eventDataResp = { ...props.eventDataResp, ...resp };
         } else if (partner.hasUnsavedChanges) {
-          // do nothing
+          // If there are unsaved changes, do nothing
         } else {
           const updatableData = {
             sponsorId,
             sponsorType,
           };
           const resp = await updateSponsorInEvent(updatableData, partner.sponsorId, eventId);
+
           if (!resp || resp.errors) {
             return;
           }
