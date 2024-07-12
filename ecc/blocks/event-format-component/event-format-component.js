@@ -1,6 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { generateToolTip } from '../../scripts/utils.js';
-import { getSeries } from '../../scripts/esp-controller.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -31,20 +30,6 @@ async function decorateSeriesSelect(column) {
 
   column.innerHTML = '';
   column.append(seriesSelectWrapper);
-
-  const series = await getSeries();
-  if (!series) {
-    select.pending = false;
-    select.disabled = true;
-    return;
-  }
-
-  Object.values(series).forEach((val) => {
-    const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
-    select.append(opt);
-  });
-
-  select.pending = false;
 }
 
 function decorateTimeZoneSelect(column) {

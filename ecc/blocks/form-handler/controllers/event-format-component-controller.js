@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { getSeries } from '../../../scripts/esp-controller.js';
 import { MILO_CONFIG, LIBS } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../scripts/utils.js';
 
@@ -74,10 +75,30 @@ export async function onUpdate(component, props) {
   }
 }
 
+async function populateSeriesOptions(component) {
+  const seriesSelect = component.querySelector('#series-select-input');
+  if (!seriesSelect) return;
+
+  const series = await getSeries();
+  if (!series) {
+    seriesSelect.pending = false;
+    seriesSelect.disabled = true;
+    return;
+  }
+
+  Object.values(series).forEach((val) => {
+    const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
+    seriesSelect.append(opt);
+  });
+
+  seriesSelect.pending = false;
+}
+
 export default function init(component, props) {
   const eventData = props.eventDataResp;
   prepopulateTimeZone(component);
   initStepLock(component);
+  populateSeriesOptions(component);
 
   const {
     cloudType,
