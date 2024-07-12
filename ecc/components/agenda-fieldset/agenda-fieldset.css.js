@@ -28,7 +28,7 @@ export const style = css`
 .time-picker > p::before {
   content: '';
   display: inline-block;
-  background-image: url('../../icons/clock.svg');
+  background-image: url('/ecc/icons/clock.svg');
   background-repeat: no-repeat;
   background-position: center;
   width: 32px;

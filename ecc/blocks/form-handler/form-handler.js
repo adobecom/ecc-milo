@@ -46,6 +46,7 @@ const INPUT_TYPES = [
   'textarea[required]',
   'sp-textfield[required]',
   'sp-checkbox[required]',
+  'sp-picker[required]',
 ];
 
 const SPECTRUM_COMPONENTS = [
@@ -63,18 +64,14 @@ const SPECTRUM_COMPONENTS = [
   'button-group',
   'tooltip',
   'toast',
+  'icon',
+  'action-button',
 ];
 
 function buildErrorMessage(props, resp) {
   if (!resp) return;
 
-  let toastArea = props.el.querySelector('.toast-area');
-
-  if (!toastArea) {
-    const spTheme = props.el.querySelector('sp-theme');
-    if (!spTheme) return;
-    toastArea = createTag('div', { class: 'toast-area' }, '', { parent: spTheme });
-  }
+  const toastArea = props.el.querySelector('.toast-area');
 
   if (resp.errors) {
     const messages = [];
@@ -153,8 +150,22 @@ async function initComponents(props) {
   const eventId = urlParams.get('eventId');
 
   if (eventId) {
+    setTimeout(() => {
+      if (!props.eventDataResp.eventId) {
+        const toastArea = props.el.querySelector('.toast-area');
+        if (!toastArea) return;
+
+        const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
+        toast.addEventListener('close', () => {
+          toast.remove();
+        });
+      }
+    }, 5000);
+
+    props.el.classList.add('disabled');
     const eventData = await getEvent(eventId);
     props.eventDataResp = { ...props.eventDataResp, ...eventData };
+    props.el.classList.remove('disabled');
   }
 
   const componentPromises = VANILLA_COMPONENTS.map(async (comp) => {
@@ -206,7 +217,15 @@ async function updateComponents(props) {
 }
 
 function decorateForm(el) {
+  const ctaRow = el.querySelector(':scope > div:last-of-type');
+
+  if (ctaRow) {
+    const toastParent = createTag('sp-theme', { class: 'toast-parent', color: 'light', scale: 'medium' }, '', { parent: ctaRow });
+    createTag('div', { class: 'toast-area' }, '', { parent: toastParent });
+  }
+
   const app = createTag('sp-theme', { color: 'light', scale: 'medium' });
+
   const form = createTag('form', {}, '', { parent: app });
   const formDivs = el.querySelectorAll('.fragment');
 
@@ -216,8 +235,8 @@ function decorateForm(el) {
   }
 
   formDivs.forEach((formDiv) => {
-    formDiv.parentElement.replaceChild(app, formDiv);
-    form.append(formDiv);
+    formDiv.parentElement.parentElement.replaceChild(app, formDiv.parentElement);
+    form.append(formDiv.parentElement);
   });
 
   const cols = el.querySelectorAll(':scope > div:first-of-type > div');
@@ -418,10 +437,8 @@ function navigateForm(props, stepIndex) {
 
 function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
-  const frags = props.el.querySelectorAll('.fragment');
   decorateButtons(ctaRow, 'button-l');
   const ctas = ctaRow.querySelectorAll('a');
-
   ctaRow.classList.add('form-handler-ctas-panel');
 
   const forwardActionsWrappers = ctaRow.querySelectorAll(':scope > div');
@@ -506,19 +523,16 @@ function initFormCtas(props) {
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
               const msg = createTag('div', { class: 'toast-message dark success-message' }, 'Success! This event has been published.', { parent: cta });
               createTag('a', { class: 'con-button outline', href: dashboardLink.href }, 'Go to dashboard', { parent: msg });
-              let toastArea = props.el.querySelector('.toast-area');
+              const toastArea = props.el.querySelector('.toast-area');
               cta.textContent = cta.dataset.doneStateText;
               cta.classList.add('disabled');
-              if (!toastArea) {
-                const spTheme = props.el.querySelector('sp-theme');
-                if (!spTheme) return;
-                toastArea = createTag('div', { class: 'toast-area' }, '', { parent: spTheme });
-              }
 
-              const toast = createTag('sp-toast', { open: true, variant: 'positive' }, msg, { parent: toastArea });
-              toast.addEventListener('close', () => {
-                toast.remove();
-              });
+              if (toastArea) {
+                const toast = createTag('sp-toast', { open: true, variant: 'positive' }, msg, { parent: toastArea });
+                toast.addEventListener('close', () => {
+                  toast.remove();
+                });
+              }
             } else {
               navigateForm(props);
             }
@@ -536,7 +550,12 @@ function initFormCtas(props) {
   });
 
   backBtn.addEventListener('click', async () => {
-    props.currentStep -= 1;
+    const resp = await saveEvent(props);
+    if (resp?.errors || resp?.message) {
+      buildErrorMessage(props, resp);
+    } else {
+      props.currentStep -= 1;
+    }
   });
 }
 
@@ -682,9 +701,9 @@ async function buildECCForm(el) {
   });
 
   initFormCtas(proxyProps);
+  initNavigation(proxyProps);
   await initComponents(proxyProps);
   initRepeaters(proxyProps);
-  initNavigation(proxyProps);
   updateRequiredFields(proxyProps);
   enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
