@@ -47,8 +47,8 @@ export async function onSubmit(component, props) {
           // do nothing
         } else {
           const updatableData = {
-            name: partner.name,
-            link: partner.link,
+            sponsorId,
+            sponsorType,
           };
           const resp = await updateSponsorInEvent(updatableData, partner.sponsorId, eventId);
           if (!resp || resp.errors) {
