@@ -99,7 +99,7 @@ export default function init(component, props) {
       const toastArea = props.el.querySelector('.toast-area');
       if (!toastArea) return;
 
-      const toast = createTag('sp-toast', { open: true }, 'Series ID is taking longer than usual to load. Please check if the Adobe corp. VPN is connected.', { parent: toastArea });
+      const toast = createTag('sp-toast', { open: true, timeout: 8000 }, 'Series ID is taking longer than usual to load. Please check if the Adobe corp. VPN is connected.', { parent: toastArea });
       toast.addEventListener('close', () => {
         toast.remove();
       });
