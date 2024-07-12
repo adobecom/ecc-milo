@@ -142,6 +142,9 @@
 .form-handler .main-frame sp-theme {
   min-height: 100%;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .form-handler .main-frame .section .content {
@@ -361,9 +364,10 @@
 }
 
 .form-handler .toast-area {
-  position: absolute;
+  position: sticky;
   right: 0;
-  bottom: 40px;
+  bottom: 88px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
