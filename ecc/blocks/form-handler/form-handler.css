@@ -342,12 +342,12 @@
   filter: invert();
 }
 
-.form-handler .form-handler-ctas-panel .con-button.outline {
+.form-handler .form-handler-ctas-panel .form-handler-panel-wrapper .con-button.outline {
   color: var(--color-white);
   border-color: var(--color-white);
 }
 
-.form-handler .form-handler-ctas-panel .con-button.outline:hover {
+.form-handler .form-handler-ctas-panel .form-handler-panel-wrapper .con-button.outline:hover {
   background-color: var(--color-white);
   color: var(--color-red);
 }
