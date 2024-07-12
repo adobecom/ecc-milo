@@ -32,15 +32,11 @@ async function decorateSeriesSelect(column) {
   column.innerHTML = '';
   column.append(seriesSelectWrapper);
 
-  let series = await getSeries();
-  // if (!series) return;
+  const series = await getSeries();
   if (!series) {
-    series = [
-      {
-        seriesId: 'b75765b5-ceba-484c-9afc-c96955afabfb',
-        seriesName: 'Create Now Series (test)',
-      },
-    ];
+    select.pending = false;
+    select.disabled = true;
+    return;
   }
 
   Object.values(series).forEach((val) => {

@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
-import { MILO_CONFIG } from '../../../scripts/scripts.js';
+import { MILO_CONFIG, LIBS } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../scripts/utils.js';
+
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -89,6 +91,20 @@ export default function init(component, props) {
     changeInputValue(component.querySelector('#rsvp-required-check'), 'checked', rsvpRequired || 0);
     component.classList.add('prefilled');
   }
+
+  setTimeout(() => {
+    const seriesSelect = component.querySelector('#series-select-input');
+
+    if (seriesSelect.pending || seriesSelect.disabled) {
+      const toastArea = props.el.querySelector('.toast-area');
+      if (!toastArea) return;
+
+      const toast = createTag('sp-toast', { open: true }, 'Series ID is taking longer than usual to load. Please check if the Adobe corp. VPN is connected.', { parent: toastArea });
+      toast.addEventListener('close', () => {
+        toast.remove();
+      });
+    }
+  }, 5000);
 }
 
 function getTemplateId(bu) {
