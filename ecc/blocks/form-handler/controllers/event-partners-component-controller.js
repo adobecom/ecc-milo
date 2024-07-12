@@ -46,7 +46,11 @@ export async function onSubmit(component, props) {
         } else if (partner.hasUnsavedChanges) {
           // do nothing
         } else {
-          const resp = await updateSponsorInEvent(partner, partner.sponsorId, eventId);
+          const updatableData = {
+            name: partner.name,
+            link: partner.link,
+          };
+          const resp = await updateSponsorInEvent(updatableData, partner.sponsorId, eventId);
           if (!resp || resp.errors) {
             return;
           }
