@@ -24,10 +24,12 @@ export default class PartnerSelector extends LitElement {
   static styles = style;
 
   firstUpdated() {
+    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     this.imageDropzone = this.shadowRoot.querySelector('image-dropzone');
     this.imageDropzone.addEventListener('image-change', (e) => {
       this.partner.hasUnsavedChanges = true;
       this.partner.photo = e.detail.file;
+      if (saveButton) saveButton.textContent = 'Save Partner';
       this.requestUpdate();
     });
     this.checkValidity();
