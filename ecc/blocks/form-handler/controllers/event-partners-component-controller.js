@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax */
-import { addSponsorToEvent, getSponsor, removeSponsorFromEvent } from '../../../scripts/esp-controller.js';
+import { addSponsorToEvent, getSponsor, removeSponsorFromEvent, updateSponsorInEvent } from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 /* eslint-disable no-unused-vars */
@@ -11,35 +11,68 @@ export async function onSubmit(component, props) {
   const { eventId } = getFilteredCachedResponse();
 
   if (partnerSelectorGroup && eventId) {
-    if (props.eventDataResp?.sponsors) {
-      for (const sponsor of props.eventDataResp.sponsors) {
-        if (sponsor.sponsorType === 'Partner') {
-          // eslint-disable-next-line no-await-in-loop
-          const resp = await removeSponsorFromEvent(sponsor.sponsorId, eventId);
+    const partners = partnerSelectorGroup.getSavedPartners();
+    await partners.reduce(async (promise, partner) => {
+      await promise;
+      const { sponsorId, sponsorType } = partner;
+
+      if (!props.eventDataResp.sponsors) {
+        const resp = await addSponsorToEvent({
+          sponsorId,
+          sponsorType,
+        }, eventId);
+        if (!resp || resp.errors) {
+          return;
+        }
+
+        props.eventDataResp = { ...props.eventDataResp, ...resp };
+      } else if (props.eventDataResp.sponsors) {
+        const existingPartner = props.eventDataResp.sponsors.find((sponsor) => {
+          const idMatch = sponsor.sponsorId === sponsorId;
+          const typeMatch = sponsor.sponsorType === sponsorType;
+          return idMatch && typeMatch;
+        });
+
+        if (!existingPartner) {
+          const resp = await addSponsorToEvent({
+            sponsorId,
+            sponsorType,
+          }, eventId);
           if (!resp || resp.errors) {
-            // eslint-disable-next-line no-continue
-            continue;
+            return;
+          }
+
+          props.eventDataResp = { ...props.eventDataResp, ...resp };
+        } else if (partner.hasUnsavedChanges) {
+          // do nothing
+        } else {
+          const resp = await updateSponsorInEvent(partner, partner.sponsorId, eventId);
+          if (!resp || resp.errors) {
+            return;
           }
 
           props.eventDataResp = { ...props.eventDataResp, ...resp };
         }
       }
-    }
-
-    const partners = partnerSelectorGroup.getSavedPartners();
-    await partners.reduce(async (promise, partner) => {
-      await promise;
-      const { sponsorId, sponsorType } = partner;
-      const resp = await addSponsorToEvent({
-        sponsorId,
-        sponsorType,
-      }, eventId);
-      if (!resp || resp.errors) {
-        return;
-      }
-
-      props.eventDataResp = { ...props.eventDataResp, ...resp };
     }, Promise.resolve());
+
+    if (props.eventDataResp.sponsors) {
+      const savedPartners = props.eventDataResp.sponsors.filter((sponsor) => sponsor.sponsorType === 'Partner');
+      await savedPartners.reduce(async (promise, partner) => {
+        await promise;
+        const { sponsorId } = partner;
+        const stillNeeded = partners.find((p) => p.sponsorId === sponsorId);
+
+        if (!stillNeeded) {
+          const resp = await removeSponsorFromEvent(sponsorId, eventId);
+          if (!resp || resp.errors) {
+            return;
+          }
+
+          props.eventDataResp = { ...props.eventDataResp, ...resp };
+        }
+      }, Promise.resolve());
+    }
   }
 
   props.payload = { ...props.payload, partnerVisible };
