@@ -75,7 +75,7 @@ export async function onUpdate(component, props) {
   }
 }
 
-function populateSeriesOptions(component) {
+async function populateSeriesOptions(component) {
   const seriesSelect = component.querySelector('#series-select-input');
   if (!seriesSelect) return;
 
