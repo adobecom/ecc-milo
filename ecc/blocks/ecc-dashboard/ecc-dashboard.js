@@ -109,9 +109,25 @@ function formatLocaleDate(string) {
 }
 
 function buildThumbnail(data) {
-  // TODO: use thumbnail instead of just first image or mock image
-  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl || '/ecc/icons/icon-placeholder.svg' });
-  const container = createTag('td', { class: 'thumbnail-container' }, img);
+  const container = createTag('td', { class: 'thumbnail-container' });
+  if (!data.photos) return container;
+
+  const cardImage = data.photos.find((photo) => photo.imageKind === 'event-card-image');
+  const heroImage = data.photos.find((photo) => photo.imageKind === 'event-hero-image');
+  const venueImage = data.photos.find((photo) => photo.imageKind === 'venue-image');
+  const img = createTag('img', {
+    class: 'event-thumbnail-img',
+    src: cardImage?.sharepointUrl
+    || cardImage?.imageUrl
+    || heroImage?.sharepointUrl
+    || heroImage?.imageUrl
+    || venueImage?.sharepointUrl
+    || venueImage?.imageUrl
+    || data.photos[0]?.imageUrl
+    || '/ecc/icons/icon-placeholder.svg',
+  });
+  container.append(img);
+
   return container;
 }
 
