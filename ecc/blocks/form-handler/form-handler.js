@@ -19,6 +19,7 @@ import PartnerSelector from '../../components/partner-selector/partner-selector.
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
+import { CustomSearch } from '../../components/custom-search/custom-search.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -63,6 +64,8 @@ const SPECTRUM_COMPONENTS = [
   'dialog',
   'button-group',
   'tooltip',
+  'popover',
+  'search',
   'toast',
   'icon',
   'action-button',
@@ -141,6 +144,7 @@ function initCustomLitComponents() {
   customElements.define('product-selector-group', ProductSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
+  customElements.define('custom-search', CustomSearch);
 }
 
 async function initComponents(props) {
@@ -343,14 +347,6 @@ function onStepValidate(props) {
       }
     });
   };
-}
-
-function updateProfileContainer(props) {
-  const containers = document.querySelectorAll('profile-container');
-  containers.forEach((c) => {
-    c.setAttribute('seriesId', props.payload.seriesId);
-    c.requestUpdate();
-  });
 }
 
 function updateRequiredFields(props) {
@@ -655,31 +651,41 @@ async function buildECCForm(el) {
         initRequiredFieldsValidation(target);
       }
 
-      if (prop === 'currentStep') {
-        renderFormNavigation(target, oldValue, value);
-        updateSideNav(target);
-        initRequiredFieldsValidation(target);
-      }
-
-      if (prop === 'farthestStep') {
-        updateSideNav(target);
-      }
-
-      if (prop === 'payload') {
-        setPayloadCache(value);
-        updateComponents(target);
-        updateProfileContainer(target);
-        initRequiredFieldsValidation(target);
-      }
-      if (prop === 'eventDataResp') {
-        setResponseCache(value);
-        updateCtas(target);
-        updateDashboardLink(target);
-        if (value.message || value.errors) {
-          props.el.classList.add('show-error');
-        } else {
-          props.el.classList.remove('show-error');
+      switch (prop) {
+        case 'currentStep':
+        {
+          renderFormNavigation(target, oldValue, value);
+          updateSideNav(target);
+          initRequiredFieldsValidation(target);
+          break;
         }
+
+        case 'farthestStep': {
+          updateSideNav(target);
+          break;
+        }
+
+        case 'payload': {
+          setPayloadCache(value);
+          updateComponents(target);
+          initRequiredFieldsValidation(target);
+          break;
+        }
+
+        case 'eventDataResp': {
+          setResponseCache(value);
+          updateCtas(target);
+          updateDashboardLink(target);
+          if (value.message || value.errors) {
+            props.el.classList.add('show-error');
+          } else {
+            props.el.classList.remove('show-error');
+          }
+          break;
+        }
+ 
+        default:
+          break;
       }
 
       return true;

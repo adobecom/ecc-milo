@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { addSpeakerToEvent, getSpeaker } from '../../../scripts/esp-controller.js';
+import { addSpeakerToEvent, getSpeaker, getSpeakers } from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 export async function onSubmit(component, props) {
@@ -23,8 +23,16 @@ export async function onSubmit(component, props) {
   }
 }
 
-export async function onUpdate(_component, _props) {
-  // Do nothing
+export async function onUpdate(component, props) {
+  const containers = component.querySelectorAll('profile-container');
+  containers.forEach(async (container) => {
+    if (props.payload.seriesId && props.payload.seriesId !== container.seriesId) {
+      container.setAttribute('seriesId', props.payload.seriesId);
+      const { speakers } = await getSpeakers(props.payload.seriesId);
+      container.searchdata = speakers ?? [];
+    }
+    container.requestUpdate();
+  });
 }
 
 async function prefillProfiles(props) {
