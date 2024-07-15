@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { addSpeakerToEvent, getSpeaker, getSpeakers } from '../../../scripts/esp-controller.js';
+import { addSpeakerToEvent, getSpeaker, getSpeakers, updateSpeakerInEvent, removeSpeakerFromEvent } from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 export async function onSubmit(component, props) {
@@ -10,16 +10,79 @@ export async function onSubmit(component, props) {
     const speakers = profileContainer.getProfiles();
     if (speakers.length === 0) return;
 
+    const { eventId } = getFilteredCachedResponse();
+
+    // await speakers.reduce(async (promise, speaker) => {
+    //   await promise;
+
+    //   const resp = await addSpeakerToEvent(speaker, eventId);
+    //   if (!resp || resp.errors) {
+    //     return;
+    //   }
+
+    //   props.eventDataResp = { ...props.eventDataResp, ...resp };
+    // }, Promise.resolve());
     await speakers.reduce(async (promise, speaker) => {
       await promise;
 
-      const resp = await addSpeakerToEvent(speaker, getFilteredCachedResponse().eventId);
-      if (!resp || resp.errors) {
-        return;
-      }
+      const { speakerId, speakerType } = speaker;
 
-      props.eventDataResp = { ...props.eventDataResp, ...resp };
+      if (!props.eventDataResp.sponsors) {
+        const resp = await addSpeakerToEvent(speaker, eventId);
+
+        if (!resp || resp.errors) {
+          return;
+        }
+
+        props.eventDataResp = { ...props.eventDataResp, ...resp };
+      } else {
+        const existingSpeaker = props.eventDataResp.speakers.find((profile) => {
+          const idMatch = profile.speakerId === speakerId;
+          const typeMatch = profile.sponsorType === speakerType;
+          const ordinalMatch = profile.ordinal === speaker.ordinal;
+          return idMatch && typeMatch && ordinalMatch;
+        });
+
+        if (!existingSpeaker) {
+          const resp = await addSpeakerToEvent(speaker, eventId);
+
+          if (!resp || resp.errors) {
+            return;
+          }
+
+          props.eventDataResp = { ...props.eventDataResp, ...resp };
+        } else if (speaker.hasUnsavedChanges) {
+          // If there are unsaved changes, do nothing
+        } else {
+          const updatableData = speaker;
+          const resp = await updateSpeakerInEvent(updatableData, speaker.speakerId, eventId);
+
+          if (!resp || resp.errors) {
+            return;
+          }
+
+          props.eventDataResp = { ...props.eventDataResp, ...resp };
+        }
+      }
     }, Promise.resolve());
+
+    if (props.eventDataResp.speakers) {
+      const savedSpeakers = props.eventDataResp.speakers;
+      await savedSpeakers.reduce(async (promise, speaker) => {
+        await promise;
+        const { speakerId } = speaker;
+        const stillNeeded = speakers.find((profile) => profile.speakerId === speakerId);
+
+        if (!stillNeeded) {
+          const resp = await removeSpeakerFromEvent(speakerId, eventId);
+          if (!resp || resp.errors) {
+            return;
+          }
+
+          props.eventDataResp = { ...props.eventDataResp, ...resp };
+        }
+      }, Promise.resolve());
+    }
   }
 }
 
