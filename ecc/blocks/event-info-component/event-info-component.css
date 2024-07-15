@@ -42,7 +42,7 @@
   cursor: pointer;
 }
 
-.event-info-component .date-time-row > .date-picker label {
+.event-info-component .date-time-row > .date-picker input::placeholder {
   font-size: var(--type-heading-m-size);
 }
 
