@@ -1,5 +1,5 @@
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip, camelToSentenceCase } from '../../scripts/utils.js';
+import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip, camelToSentenceCase, getEventPageHost } from '../../scripts/utils.js';
 import {
   createEvent,
   updateEvent,
@@ -567,7 +567,7 @@ function updateCtas(props) {
     if (a.classList.contains('preview-btns')) {
       const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
       if (filteredResponse.detailPagePath) {
-        a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
+        a.href = `https://${getEventPageHost(filteredResponse.published)}${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
         a.classList.remove('preview-not-ready');
       }
     }
@@ -671,6 +671,7 @@ async function buildECCForm(el) {
         updateProfileContainer(target);
         initRequiredFieldsValidation(target);
       }
+
       if (prop === 'eventDataResp') {
         setResponseCache(value);
         updateCtas(target);
