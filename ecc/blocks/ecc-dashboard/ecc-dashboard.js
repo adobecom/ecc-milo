@@ -5,8 +5,8 @@ import {
   publishEvent,
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
-import { ECC_ENV, LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen } from '../../scripts/utils.js';
+import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
+import { getIcon, buildNoAccessScreen, getEventPageHost } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 
@@ -57,14 +57,6 @@ function toClassName(name) {
   return name && typeof name === 'string'
     ? name.toLowerCase().replace(/[^0-9a-z]/gi, '-')
     : '';
-}
-
-function getEventPageHost() {
-  if (ECC_ENV === 'dev') {
-    return 'https://dev--events-milo--adobecom.hlx.page';
-  }
-
-  return window.location.origin;
 }
 
 export function readBlockConfig(block) {
@@ -260,12 +252,12 @@ function initMoreOptions(props, config, eventObj, row) {
 
     if (eventObj.detailPagePath) {
       previewPre.href = (() => {
-        const url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+        const url = new URL(`${getEventPageHost(eventObj.published)}${eventObj.detailPagePath}`);
         url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
         return url.toString();
       })();
       previewPost.href = (() => {
-        const url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+        const url = new URL(`${getEventPageHost(eventObj.published)}${eventObj.detailPagePath}`);
         url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
         return url.toString();
       })();
@@ -371,7 +363,7 @@ function buildStatusTag(event) {
 
 function buildEventTitleTag(event) {
   if (event.detailPagePath) {
-    const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${getEventPageHost()}${event.detailPagePath}` }, event.title);
+    const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${getEventPageHost(event.published)}${event.detailPagePath}` }, event.title);
     return eventTitleTag;
   }
 

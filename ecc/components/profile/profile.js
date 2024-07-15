@@ -101,7 +101,7 @@ export class Profile extends LitElement {
 
         if (file && (file instanceof File)) {
           const speakerData = await uploadImage(file, {
-            targetUrl: `/v1/series/${this.seriesId}/speakers/${this.profile.speakerId}/images`,
+            targetUrl: `/v1/series/${this.seriesId}/speakers/${profile.speakerId}/images`,
             type: 'speaker-photo',
             altText: `${this.profile.firstName} ${this.profile.lastName} photo`,
           });

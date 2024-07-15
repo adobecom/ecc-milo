@@ -1,4 +1,4 @@
-import { MILO_CONFIG, LIBS } from './scripts.js';
+import { MILO_CONFIG, LIBS, ECC_ENV } from './scripts.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -54,6 +54,14 @@ export function convertTo24HourFormat(timeStr) {
   const formattedMinutes = minutes.toString().padStart(2, '0');
 
   return `${formattedHours}:${formattedMinutes}:00`;
+}
+
+export function getEventPageHost(published) {
+  if (window.location.href.includes('.hlx.') || !published) {
+    return window.location.origin.replace(window.location.hostname, `${ECC_ENV}--events-milo--adobecom.hlx.page`);
+  }
+
+  return window.location.origin;
 }
 
 export function addTooltipToHeading(em, heading) {
@@ -234,7 +242,7 @@ export function getServiceName(link) {
   return url.hostname.replace('.com', '').replace('www.', '');
 }
 
-export const fetchThrottledMemoized = (() => {
+export const fetchThrottledMemoizedText = (() => {
   const cache = new Map();
   const pending = new Map();
 
@@ -254,9 +262,10 @@ export const fetchThrottledMemoized = (() => {
 
     try {
       const response = await fetchPromise;
-      cache.set(key, response);
+      const text = await response.text();
+      cache.set(key, text);
       setTimeout(() => cache.delete(key), ttl);
-      return response;
+      return text;
     } finally {
       pending.delete(key);
     }

@@ -1,5 +1,12 @@
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip, camelToSentenceCase } from '../../scripts/utils.js';
+import {
+  getIcon,
+  buildNoAccessScreen,
+  yieldToMain,
+  generateToolTip,
+  camelToSentenceCase,
+  getEventPageHost,
+} from '../../scripts/utils.js';
 import {
   createEvent,
   updateEvent,
@@ -563,7 +570,7 @@ function updateCtas(props) {
     if (a.classList.contains('preview-btns')) {
       const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
       if (filteredResponse.detailPagePath) {
-        a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
+        a.href = `https://${getEventPageHost(filteredResponse.published)}${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
         a.classList.remove('preview-not-ready');
       }
     }
@@ -632,6 +639,22 @@ function initDeepLink(props) {
   }
 }
 
+function showSaveSuccessMessage(props) {
+  const toastArea = props.el.querySelector('.toast-area');
+  if (!toastArea) return;
+
+  const previousMsgs = toastArea.querySelectorAll('.save-success-msg');
+
+  previousMsgs.forEach((msg) => {
+    msg.remove();
+  });
+
+  const toast = createTag('sp-toast', { class: 'save-success-msg', open: true, variant: 'positive', timeout: 6000 }, 'Edits saved successfully', { parent: toastArea });
+  toast.addEventListener('close', () => {
+    toast.remove();
+  });
+}
+
 async function buildECCForm(el) {
   const props = {
     el,
@@ -680,10 +703,11 @@ async function buildECCForm(el) {
             props.el.classList.add('show-error');
           } else {
             props.el.classList.remove('show-error');
+            showSaveSuccessMessage(props);
           }
           break;
         }
- 
+
         default:
           break;
       }
