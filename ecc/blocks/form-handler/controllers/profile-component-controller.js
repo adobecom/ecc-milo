@@ -12,16 +12,6 @@ export async function onSubmit(component, props) {
 
     const { eventId } = getFilteredCachedResponse();
 
-    // await speakers.reduce(async (promise, speaker) => {
-    //   await promise;
-
-    //   const resp = await addSpeakerToEvent(speaker, eventId);
-    //   if (!resp || resp.errors) {
-    //     return;
-    //   }
-
-    //   props.eventDataResp = { ...props.eventDataResp, ...resp };
-    // }, Promise.resolve());
     await speakers.reduce(async (promise, speaker) => {
       await promise;
 
