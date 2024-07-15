@@ -1,4 +1,4 @@
-import { MILO_CONFIG, LIBS } from './scripts.js';
+import { MILO_CONFIG, LIBS, ECC_ENV } from './scripts.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -54,6 +54,14 @@ export function convertTo24HourFormat(timeStr) {
   const formattedMinutes = minutes.toString().padStart(2, '0');
 
   return `${formattedHours}:${formattedMinutes}:00`;
+}
+
+export function getEventPageHost(published) {
+  if (window.location.href.includes('.hlx.') || !published) {
+    return window.location.origin.replace(window.location.hostname, `${ECC_ENV}--events-milo--adobecom.hlx.page`);
+  }
+
+  return window.location.origin;
 }
 
 export function addTooltipToHeading(em, heading) {
