@@ -242,7 +242,7 @@ export function getServiceName(link) {
   return url.hostname.replace('.com', '').replace('www.', '');
 }
 
-export const fetchThrottledMemoized = (() => {
+export const fetchThrottledMemoizedText = (() => {
   const cache = new Map();
   const pending = new Map();
 
@@ -262,9 +262,10 @@ export const fetchThrottledMemoized = (() => {
 
     try {
       const response = await fetchPromise;
-      cache.set(key, response);
+      const text = await response.text();
+      cache.set(key, text);
       setTimeout(() => cache.delete(key), ttl);
-      return response;
+      return text;
     } finally {
       pending.delete(key);
     }

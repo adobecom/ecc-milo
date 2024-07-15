@@ -31,8 +31,8 @@ function buildTerms(terms) {
 
 async function loadPreview(component, templateId) {
   const rsvpFormLocation = `https://main--events-milo--adobecom.hlx.page${templateId.substring(0, templateId.lastIndexOf('/'))}/rsvp-form`;
-  const resp = await fetch(`${rsvpFormLocation}.plain.html`, { headers: { authorization: 'token MM/NpTtq0gAnckOSl96C4SGB67kFjbO6a4N9vYwb0gd5' } })
-    .catch(() => ({ ok: false }));
+  const resp = await fetchThrottledMemoized(`${rsvpFormLocation}.plain.html`, { headers: { authorization: 'token MM/NpTtq0gAnckOSl96C4SGB67kFjbO6a4N9vYwb0gd5' } }).catch(() => ({}))
+    .catch(() => ({}));
 
   if (!resp?.ok) {
     component.remove();
