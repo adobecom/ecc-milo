@@ -707,7 +707,7 @@ async function buildECCForm(el) {
           }
           break;
         }
- 
+
         default:
           break;
       }
