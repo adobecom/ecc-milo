@@ -649,7 +649,7 @@ function showSaveSuccessMessage(props) {
     msg.remove();
   });
 
-  const toast = createTag('sp-toast', { class: 'save-success-msg', open: true, timeout: 6000 }, 'Edits saved successfully', { parent: toastArea });
+  const toast = createTag('sp-toast', { class: 'save-success-msg', open: true, variant: 'positive', timeout: 6000 }, 'Edits saved successfully', { parent: toastArea });
   toast.addEventListener('close', () => {
     toast.remove();
   });
