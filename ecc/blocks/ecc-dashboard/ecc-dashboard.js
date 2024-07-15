@@ -60,9 +60,11 @@ function toClassName(name) {
 }
 
 function getEventPageHost() {
-  if (ECC_ENV === 'dev') {
-    return 'https://dev--events-milo--adobecom.hlx.page';
+  if (window.location.href.includes('.hlx.')) {
+    return window.location.origin.replace('--ecc-milo--', '--events-milo--');
   }
+  // TODO: how are we going to show prod preview content?
+  // adobe.com/events/* shouldn't work for draft pages.
 
   return window.location.origin;
 }
