@@ -15,24 +15,34 @@ export default class PartnerSelector extends LitElement {
   constructor() {
     super();
     this.partner = this.partner || {
-      isValid: false,
       name: '',
       link: '',
+      hasUnsavedChange: false,
     };
   }
 
   static styles = style;
 
   firstUpdated() {
+    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     this.imageDropzone = this.shadowRoot.querySelector('image-dropzone');
+    this.imageDropzone.addEventListener('image-change', (e) => {
+      this.partner.hasUnsavedChanges = true;
+      this.partner.photo = e.detail.file;
+      if (saveButton) saveButton.textContent = 'Save Partner';
+      this.requestUpdate();
+    });
     this.checkValidity();
   }
 
   updateValue(key, value) {
+    this.partner.hasUnsavedChanges = true;
+    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
+    if (saveButton) saveButton.textContent = 'Save Partner';
+
     this.partner = { ...this.partner, [key]: value };
-    const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
-    this.partner.photo = imageDropzone?.file || null;
-    this.checkValidity();
+    this.partner.photo = this.imageDropzone?.file || null;
+
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
       bubbles: true,
@@ -41,12 +51,10 @@ export default class PartnerSelector extends LitElement {
   }
 
   checkValidity() {
-    this.partner.isValid = this.partner.name?.length >= 3 && this.partner.link?.match(LINK_REGEX);
-    this.requestUpdate();
+    return this.partner.name?.length >= 3 && this.partner.link?.match(LINK_REGEX);
   }
 
   async savePartner(e) {
-    const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
     const saveButton = e.target;
     let respJson;
 
@@ -64,7 +72,7 @@ export default class PartnerSelector extends LitElement {
 
     if (respJson.sponsorId) {
       this.partner.sponsorId = respJson.sponsorId;
-      const file = imageDropzone?.getFile();
+      const file = this.imageDropzone?.getFile();
 
       if (file && (file instanceof File)) {
         const sponsorData = await uploadImage(file, {
@@ -75,7 +83,14 @@ export default class PartnerSelector extends LitElement {
 
         if (sponsorData) {
           this.partner.modificationTime = sponsorData.modificationTime;
+          if (saveButton) {
+            this.partner.hasUnsavedChanges = false;
+            saveButton.textContent = 'Saved';
+          }
         }
+      } else if (saveButton) {
+        this.partner.hasUnsavedChanges = false;
+        saveButton.textContent = 'Saved';
       }
 
       this.requestUpdate();
@@ -109,7 +124,7 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" .disabled=${!this.partner.isValid} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
+        <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>

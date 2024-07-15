@@ -10,7 +10,7 @@ export const style = css`
     border: none;
     padding: 32px 0;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
     width: 100%;
   }

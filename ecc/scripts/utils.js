@@ -1,28 +1,8 @@
-import { MILO_CONFIG } from './scripts.js';
+import { MILO_CONFIG, LIBS } from './scripts.js';
+
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 let secretCache = [];
-
-function createTag(tag, attributes, html, options = {}) {
-  const el = document.createElement(tag);
-  if (html) {
-    if (html instanceof HTMLElement
-      || html instanceof SVGElement
-      || html instanceof DocumentFragment) {
-      el.append(html);
-    } else if (Array.isArray(html)) {
-      el.append(...html);
-    } else {
-      el.insertAdjacentHTML('beforeend', html);
-    }
-  }
-  if (attributes) {
-    Object.entries(attributes).forEach(([key, val]) => {
-      el.setAttribute(key, val);
-    });
-  }
-  options.parent?.append(el);
-  return el;
-}
 
 export function getIcon(tag) {
   const img = document.createElement('img');
@@ -78,12 +58,10 @@ export function convertTo24HourFormat(timeStr) {
 
 export function addTooltipToHeading(em, heading) {
   const tooltipText = em.textContent.trim();
-  const toolTipIcon = createTag('span', { class: 'event-heading-tooltip-icon' }, getIcon('info'));
-  const toolTipBox = createTag('div', { class: 'event-heading-tooltip-box' }, tooltipText);
-  const toolTipWrapper = createTag('div', { class: 'event-heading-tooltip-wrapper' });
+  const toolTipTrigger = createTag('sp-action-button', { size: 's' }, getIcon('info'));
+  createTag('sp-tooltip', { 'self-managed': true, variant: 'info' }, tooltipText, { parent: toolTipTrigger });
 
-  toolTipWrapper.append(toolTipIcon, toolTipBox);
-  heading.append(toolTipWrapper);
+  heading.append(toolTipTrigger);
   em.parentElement?.remove();
 }
 

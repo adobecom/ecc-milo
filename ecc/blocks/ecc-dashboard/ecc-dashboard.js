@@ -5,7 +5,7 @@ import {
   publishEvent,
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
-import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
+import { ECC_ENV, LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import { getIcon, buildNoAccessScreen } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
@@ -59,6 +59,14 @@ function toClassName(name) {
     : '';
 }
 
+function getEventPageHost() {
+  if (ECC_ENV === 'dev') {
+    return 'https://dev--events-milo--adobecom.hlx.page';
+  }
+
+  return window.location.origin;
+}
+
 export function readBlockConfig(block) {
   return [...block.querySelectorAll(':scope>div')].reduce((config, row) => {
     if (row.children) {
@@ -101,9 +109,25 @@ function formatLocaleDate(string) {
 }
 
 function buildThumbnail(data) {
-  // TODO: use thumbnail instead of just first image or mock image
-  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl || '/ecc/icons/icon-placeholder.svg' });
-  const container = createTag('td', { class: 'thumbnail-container' }, img);
+  const container = createTag('td', { class: 'thumbnail-container' });
+  if (!data.photos) return container;
+
+  const cardImage = data.photos.find((photo) => photo.imageKind === 'event-card-image');
+  const heroImage = data.photos.find((photo) => photo.imageKind === 'event-hero-image');
+  const venueImage = data.photos.find((photo) => photo.imageKind === 'venue-image');
+  const img = createTag('img', {
+    class: 'event-thumbnail-img',
+    src: cardImage?.sharepointUrl
+    || cardImage?.imageUrl
+    || heroImage?.sharepointUrl
+    || heroImage?.imageUrl
+    || venueImage?.sharepointUrl
+    || venueImage?.imageUrl
+    || data.photos[0]?.imageUrl
+    || '/ecc/icons/icon-placeholder.svg',
+  });
+  container.append(img);
+
   return container;
 }
 
@@ -236,12 +260,12 @@ function initMoreOptions(props, config, eventObj, row) {
 
     if (eventObj.detailPagePath) {
       previewPre.href = (() => {
-        const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
+        const url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
         url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
         return url.toString();
       })();
       previewPost.href = (() => {
-        const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
+        const url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
         url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
         return url.toString();
       })();
@@ -347,7 +371,7 @@ function buildStatusTag(event) {
 
 function buildEventTitleTag(event) {
   if (event.detailPagePath) {
-    const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${window.location.origin}${event.detailPagePath}` }, event.title);
+    const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${getEventPageHost()}${event.detailPagePath}` }, event.title);
     return eventTitleTag;
   }
 
