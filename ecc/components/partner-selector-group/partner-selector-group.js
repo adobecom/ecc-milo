@@ -3,6 +3,8 @@ import { style } from './partner-selector-group.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
+const defaultPartner = { name: '', link: '', hasUnsavedChanges: false };
+
 export default class PartnerSelectorGroup extends LitElement {
   static properties = {
     partners: { type: Array },
@@ -12,7 +14,7 @@ export default class PartnerSelectorGroup extends LitElement {
 
   constructor() {
     super();
-    this.partners = this.partners || [[]];
+    this.partners = this.partners || [defaultPartner];
   }
 
   static styles = style;
