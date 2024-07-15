@@ -59,12 +59,10 @@ function toClassName(name) {
     : '';
 }
 
-function getEventPageHost() {
-  if (window.location.href.includes('.hlx.')) {
-    return window.location.origin.replace('--ecc-milo--', '--events-milo--');
+function getEventPageHost(eventStatus) {
+  if (window.location.href.includes('.hlx.') || eventStatus.toLowerCase() === 'draft') {
+    return window.location.origin.replace(window.location.hostname, `${ECC_ENV}--events-milo--adobecom.hlx.page`);
   }
-  // TODO: how are we going to show prod preview content?
-  // adobe.com/events/* shouldn't work for draft pages.
 
   return window.location.origin;
 }
