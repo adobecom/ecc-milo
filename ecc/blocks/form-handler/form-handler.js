@@ -1,5 +1,12 @@
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip, camelToSentenceCase, getEventPageHost } from '../../scripts/utils.js';
+import {
+  getIcon,
+  buildNoAccessScreen,
+  yieldToMain,
+  generateToolTip,
+  camelToSentenceCase,
+  getEventPageHost,
+} from '../../scripts/utils.js';
 import {
   createEvent,
   updateEvent,
@@ -636,6 +643,22 @@ function initDeepLink(props) {
   }
 }
 
+function showSaveSuccessMessage(props) {
+  const toastArea = props.el.querySelector('.toast-area');
+  if (!toastArea) return;
+
+  const previousMsgs = toastArea.querySelectorAll('.save-success-msg');
+
+  previousMsgs.forEach((msg) => {
+    msg.remove();
+  });
+
+  const toast = createTag('sp-toast', { class: 'save-success-msg', open: true, timeout: 6000 }, 'Edits saved successfully', { parent: toastArea });
+  toast.addEventListener('close', () => {
+    toast.remove();
+  });
+}
+
 async function buildECCForm(el) {
   const props = {
     el,
@@ -680,6 +703,7 @@ async function buildECCForm(el) {
           props.el.classList.add('show-error');
         } else {
           props.el.classList.remove('show-error');
+          showSaveSuccessMessage(props);
         }
       }
 
