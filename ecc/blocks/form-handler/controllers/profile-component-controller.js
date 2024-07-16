@@ -98,7 +98,6 @@ async function prefillProfiles(props) {
       for (let idx = 0; idx < d.speakers.length; idx += 1) {
         d.speakers[idx] = { ...d.speakers[idx], ...speakers[idx] };
       }
-      d.speakers = speakers;
       props.eventDataResp = { ...props.eventDataResp, ...d };
     } catch (e) {
       window.lana?.error('Error fetching speaker data: ', e);
