@@ -239,17 +239,6 @@ export async function addSpeakerToEvent(speakerData, eventId) {
   return resp;
 }
 
-export async function removeSpeakerFromEvent(speakerId, eventId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
-  const options = await constructRequestOptions('DELETE');
-
-  const resp = await fetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options)
-    .then((res) => res.json())
-    .catch((error) => window.lana?.log('Failed to delete speaker from event. Error:', error));
-
-  return resp;
-}
-
 export async function updateSpeakerInEvent(data, speakerId, eventId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
   const raw = JSON.stringify(data);
@@ -258,6 +247,17 @@ export async function updateSpeakerInEvent(data, speakerId, eventId) {
   const resp = await fetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log('Failed to update speaker in event. Error:', error));
+
+  return resp;
+}
+
+export async function removeSpeakerFromEvent(speakerId, eventId) {
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const options = await constructRequestOptions('DELETE');
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to delete speaker from event. Error:', error));
 
   return resp;
 }
@@ -459,28 +459,5 @@ export async function getSpeakers(seriesId) {
   const resp = await fetch(`${host}/v1/series/${seriesId}/speakers`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error: ${error}`));
-  return resp;
-}
-
-export async function removeSpeakerFromEvent(speakerId, eventId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
-  const options = await constructRequestOptions('DELETE');
-
-  await fetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options)
-    .then((res) => res.json())
-    .catch((error) => window.lana?.log('Failed to delete speaker from event. Error:', error));
-
-  return getEvent(eventId);
-}
-
-export async function updateSpeakerInEvent(data, speakerId, eventId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify(data);
-  const options = await constructRequestOptions('PUT', raw);
-
-  const resp = await fetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options)
-    .then((res) => res.json())
-    .catch((error) => window.lana?.log('Failed to update speaker in event. Error:', error));
-
   return resp;
 }
