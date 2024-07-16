@@ -23,6 +23,7 @@ const wl = [
   'partners',
   'showAgendaPostEvent',
   'showVenuePostEvent',
+  'showVenueImage',
   'rsvpFormFields',
   'relatedProducts',
   'rsvpDescription',
