@@ -20,7 +20,6 @@ const wl = [
   'localStartTimeMillis',
   'localEndTimeMillis',
   'timezone',
-  'sponsors',
   'showAgendaPostEvent',
   'showVenuePostEvent',
   'showVenueImage',
