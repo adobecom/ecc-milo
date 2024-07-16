@@ -56,7 +56,8 @@ export class ProfileContainer extends LitElement {
   }
 
   enableRepeater() {
-    return this.profiles.every((profile) => !profile.isPlaceholder);
+    // eslint-disable-next-line max-len
+    return this.profiles.every((profile) => !profile.isPlaceholder && profile?.speakerType === undefined );
   }
 
   render() {
