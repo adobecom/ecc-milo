@@ -120,8 +120,8 @@ export class Profile extends LitElement {
   }
 
   handleProfileSelection(e) {
-    console.log('profile selected', e.detail);
-    this.dispatchEvent(new CustomEvent('update-profile', { detail: e.detail }));
+    const profile = { ...e.detail, type: this.profile.type };
+    this.dispatchEvent(new CustomEvent('update-profile', { detail: profile }));
   }
 
   saveDisabled() {

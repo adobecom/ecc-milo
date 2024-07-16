@@ -55,6 +55,10 @@ export class ProfileContainer extends LitElement {
       });
   }
 
+  enableRepeater() {
+    return this.profiles.all((profile) => !profile.isPlaceholder);
+  }
+
   render() {
     const imageTag = this.fieldlabels.image;
     imageTag.setAttribute('slot', 'img-label');
@@ -79,6 +83,6 @@ export class ProfileContainer extends LitElement {
   }}></img>` : nothing}
           </div>`;
       })}
-      <repeater-element text=${this.fieldlabels?.addProfileRepeater} @repeat=${this.addProfile}></repeater-element>`;
+      ${this.enableRepeater() ? html`<repeater-element text=${this.fieldlabels?.addProfileRepeater} @repeat=${this.addProfile}></repeater-element>` : nothing}`;
   }
 }
