@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { createVenue } from '../../../scripts/esp-controller.js';
+import { createVenue, replaceVenue } from '../../../scripts/esp-controller.js';
 import { changeInputValue, getSecret } from '../../../scripts/utils.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
@@ -137,6 +137,10 @@ export async function onSubmit(component, props) {
 
   if (eventId && !venue) {
     const resp = await createVenue(eventId, venueData);
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    props.payload = { ...props.payload, showVenuePostEvent };
+  } else if (venue.placeId !== venueData.placeId) {
+    const resp = await replaceVenue(eventId, venue.venueId, venueData);
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     props.payload = { ...props.payload, showVenuePostEvent };
   } else if (!eventId) {
