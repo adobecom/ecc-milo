@@ -15,9 +15,9 @@ export async function onSubmit(component, props) {
     await speakers.reduce(async (promise, speaker) => {
       await promise;
 
-      const { speakerId, speakerType } = speaker;
+      const { speakerId, speakerType, ordinal } = speaker;
 
-      if (!props.eventDataResp.sponsors) {
+      if (!props.eventDataResp.speakers) {
         const resp = await addSpeakerToEvent(speaker, eventId);
 
         if (!resp || resp.errors) {
@@ -29,29 +29,32 @@ export async function onSubmit(component, props) {
         const existingSpeaker = props.eventDataResp.speakers.find((profile) => {
           const idMatch = profile.speakerId === speakerId;
           const typeMatch = profile.sponsorType === speakerType;
-          const ordinalMatch = profile.ordinal === speaker.ordinal;
+          const ordinalMatch = profile.ordinal === ordinal;
           return idMatch && typeMatch && ordinalMatch;
         });
 
-        if (!existingSpeaker) {
-          const resp = await addSpeakerToEvent(speaker, eventId);
-
-          if (!resp || resp.errors) {
-            return;
-          }
-
-          props.eventDataResp = { ...props.eventDataResp, ...resp };
-        } else if (speaker.hasUnsavedChanges) {
-          // If there are unsaved changes, do nothing
+        if (existingSpeaker) {
+          // do nothing
         } else {
-          const updatableData = speaker;
-          const resp = await updateSpeakerInEvent(updatableData, speaker.speakerId, eventId);
+          // eslint-disable-next-line max-len
+          const updateSpeaker = props.eventDataResp.speakers.find((profile) => profile.speakerId === speakerId);
+          if (updateSpeaker) {
+            const resp = await updateSpeakerInEvent(speaker, speakerId, eventId);
 
-          if (!resp || resp.errors) {
-            return;
+            if (!resp || resp.errors) {
+              return;
+            }
+
+            props.eventDataResp = { ...props.eventDataResp, ...resp };
+          } else {
+            const resp = await addSpeakerToEvent(speaker, eventId);
+
+            if (!resp || resp.errors) {
+              return;
+            }
+
+            props.eventDataResp = { ...props.eventDataResp, ...resp };
           }
-
-          props.eventDataResp = { ...props.eventDataResp, ...resp };
         }
       }
     }, Promise.resolve());
@@ -96,9 +99,9 @@ async function prefillProfiles(props) {
       // eslint-disable-next-line max-len
       const speakers = await Promise.all(d.speakers.map(async (sp) => getSpeaker(seriesId, sp.speakerId)));
       for (let idx = 0; idx < d.speakers.length; idx += 1) {
-        d.speakers[idx] = { ...d.speakers[idx], ...speakers[idx] };
+        // eslint-disable-next-line max-len
+        d.speakers[idx] = { ...d.speakers[idx], type: d.speakers[idx].speakerType, ...speakers[idx] };
       }
-      d.speakers = speakers;
       props.eventDataResp = { ...props.eventDataResp, ...d };
     } catch (e) {
       window.lana?.error('Error fetching speaker data: ', e);

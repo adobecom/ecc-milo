@@ -55,6 +55,11 @@ export class ProfileContainer extends LitElement {
       });
   }
 
+  enableRepeater() {
+    // eslint-disable-next-line max-len
+    return this.profiles.every((profile) => !profile.isPlaceholder && profile.type);
+  }
+
   render() {
     const imageTag = this.fieldlabels.image;
     imageTag.setAttribute('slot', 'img-label');
@@ -79,6 +84,6 @@ export class ProfileContainer extends LitElement {
   }}></img>` : nothing}
           </div>`;
       })}
-      <repeater-element text=${this.fieldlabels?.addProfileRepeater} @repeat=${this.addProfile}></repeater-element>`;
+      ${this.enableRepeater() ? html`<repeater-element text=${this.fieldlabels?.addProfileRepeater} @repeat=${this.addProfile}></repeater-element>` : nothing}`;
   }
 }
