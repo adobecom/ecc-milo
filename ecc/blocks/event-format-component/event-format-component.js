@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { LIBS } from '../../scripts/scripts.js';
 import { generateToolTip } from '../../scripts/utils.js';
 
@@ -12,8 +13,10 @@ async function decorateCloudTagSelect(column) {
   buSelectWrapper.append(select);
   column.append(buSelectWrapper);
 
+  // FIXME: cloulds shouldn't be hardcoded
   // const clouds = await getClouds();
-  const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
+  // const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
+  const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }];
 
   Object.entries(clouds).forEach(([, val]) => {
     const opt = createTag('sp-menu-item', { value: val.id }, val.name);
