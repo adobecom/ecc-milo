@@ -43,3 +43,15 @@ fieldset {
 .section > div.no-access .no-access-area .icon.icon-browser-access-forbidden-lg {
   margin: 40px;
 }
+
+p.flex-center-align,
+a.flex-center-align {
+  display: flex;
+  align-items: center;
+}
+
+p.flex-center-align img,
+a.flex-center-align img {
+  margin-right: 8px;
+  display: block;
+}

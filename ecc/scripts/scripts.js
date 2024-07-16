@@ -12,7 +12,8 @@
 
 import { lazyCaptureProfile } from './event-apis.js';
 
-function convertEccIcon(text) {
+function convertEccIcon(n) {
+  const text = n.innerHTML;
   const eccIcons = [
     'ecc-content',
     'ecc-star-wire',
@@ -21,6 +22,7 @@ function convertEccIcon(text) {
   const iconRegex = /@@(.*?)@@/g;
   return text.replace(iconRegex, (match, iconName) => {
     if (eccIcons.includes(iconName)) {
+      n.classList.add('flex-center-align');
       return `<span><img src="/ecc/icons/${iconName}.svg" alt="${iconName} icon"></span>`;
     }
 
@@ -47,10 +49,15 @@ export function decorateArea(area = document) {
     eagerLoad(marquee, 'div:last-child > div:last-child img');
   }());
 
-  const paragraphs = area.querySelectorAll('p');
-
-  paragraphs.forEach((p) => {
-    p.innerHTML = convertEccIcon(p.innerHTML);
+  const allElements = area.querySelectorAll('*');
+  allElements.forEach((element) => {
+    if (element.childNodes.length) {
+      element.childNodes.forEach((n) => {
+        if (n.tagName === 'P' || n.tagName === 'A') {
+          n.innerHTML = convertEccIcon(n);
+        }
+      });
+    }
   });
 }
 
