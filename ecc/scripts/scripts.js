@@ -12,6 +12,23 @@
 
 import { lazyCaptureProfile } from './event-apis.js';
 
+function convertEccIcon(n) {
+  const text = n.innerHTML;
+  const eccIcons = [
+    'ecc-content',
+    'ecc-star-wire',
+  ];
+
+  const iconRegex = /@@(.*?)@@/g;
+  return text.replace(iconRegex, (match, iconName) => {
+    if (eccIcons.includes(iconName)) {
+      return `<img src="/ecc/icons/${iconName}.svg" alt="${iconName} icon" class="ecc-icon">`;
+    }
+
+    return '';
+  });
+}
+
 export function decorateArea(area = document) {
   const eagerLoad = (parent, selector) => {
     const img = parent.querySelector(selector);
@@ -30,6 +47,17 @@ export function decorateArea(area = document) {
     // Last image of last column of last row
     eagerLoad(marquee, 'div:last-child > div:last-child img');
   }());
+
+  const allElements = area.querySelectorAll('*');
+  allElements.forEach((element) => {
+    if (element.childNodes.length) {
+      element.childNodes.forEach((n) => {
+        if (n.tagName === 'P' || n.tagName === 'A' || n.tagName === 'LI') {
+          n.innerHTML = convertEccIcon(n);
+        }
+      });
+    }
+  });
 }
 
 function getECCEnv(miloConfig) {
