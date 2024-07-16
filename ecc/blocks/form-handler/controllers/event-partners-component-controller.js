@@ -124,8 +124,10 @@ export default async function init(component, props) {
       .sort((a, b) => a.index - b.index)
       .map(({ name, link, photo, sponsorId }) => ({ name, link, photo, sponsorId }));
 
-    partnersGroup.partners = filteredPartners;
-    component.classList.add('prefilled');
+    if (filteredPartners.length) {
+      partnersGroup.partners = filteredPartners;
+      component.classList.add('prefilled');
+    }
   }
 
   const partnerVisible = component.querySelector('#partners-visible');
