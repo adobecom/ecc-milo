@@ -239,18 +239,6 @@ export async function addSpeakerToEvent(speakerData, eventId) {
   return resp;
 }
 
-export async function updateSpeakerInEvent(data, speakerId, eventId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify(data);
-  const options = await constructRequestOptions('PUT', raw);
-
-  const resp = await fetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options)
-    .then((res) => res.json())
-    .catch((error) => window.lana?.log('Failed to update speaker in event. Error:', error));
-
-  return resp;
-}
-
 export async function updateSpeaker(profile, seriesId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
   const nProfile = { ...profile, photo: undefined };
