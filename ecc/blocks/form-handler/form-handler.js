@@ -78,7 +78,7 @@ const SPECTRUM_COMPONENTS = [
   'action-button',
 ];
 
-function buildErrorMessage(props, resp) {
+export function buildErrorMessage(props, resp) {
   if (!resp) return;
 
   const toastArea = props.el.querySelector('.toast-area');

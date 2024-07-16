@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { createVenue, replaceVenue } from '../../../scripts/esp-controller.js';
 import { changeInputValue, getSecret } from '../../../scripts/utils.js';
+import { buildErrorMessage } from '../form-handler.js';
 
 async function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');
@@ -143,6 +144,11 @@ export async function onSubmit(component, props) {
       ...venueData,
       modificationTime: venue.modificationTime,
     });
+
+    if (resp?.errors || resp?.message) {
+      buildErrorMessage(props, resp);
+    }
+
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     props.payload = { ...props.payload, showVenuePostEvent };
   } else if (!eventId) {
