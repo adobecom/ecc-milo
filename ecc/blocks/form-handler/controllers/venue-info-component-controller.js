@@ -139,9 +139,12 @@ export async function onSubmit(component, props) {
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     props.payload = { ...props.payload, showVenuePostEvent };
   } else if (venue.placeId !== venueData.placeId) {
-    const resp = await replaceVenue(eventId, venue.venueId, venueData);
+    const resp = await replaceVenue(eventId, venue.venueId, {
+      ...venueData,
+      modificationTime: props.eventDataResp.modificationTime
+    });
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    props.payload = { ...props.payload, showVenuePostEvent };
+    props.payload = { ...props.payload, showVenuePostEvent};
   } else if (!eventId) {
     document.addEventListener('eventcreated', onEventCreate);
   }
