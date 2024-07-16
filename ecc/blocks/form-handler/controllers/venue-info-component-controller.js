@@ -141,7 +141,7 @@ export async function onSubmit(component, props) {
   } else if (venue.placeId !== venueData.placeId) {
     const resp = await replaceVenue(eventId, venue.venueId, {
       ...venueData,
-      modificationTime: props.eventDataResp.modificationTime,
+      modificationTime: venue.modificationTime,
     });
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     props.payload = { ...props.payload, showVenuePostEvent };
