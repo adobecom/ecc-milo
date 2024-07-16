@@ -56,7 +56,7 @@ export class ProfileContainer extends LitElement {
   }
 
   enableRepeater() {
-    return this.profiles.all((profile) => !profile.isPlaceholder);
+    return this.profiles.every((profile) => !profile.isPlaceholder);
   }
 
   render() {
