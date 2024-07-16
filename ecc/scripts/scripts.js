@@ -22,7 +22,7 @@ function convertEccIcon(n) {
   const iconRegex = /@@(.*?)@@/g;
   return text.replace(iconRegex, (match, iconName) => {
     if (eccIcons.includes(iconName)) {
-      return `<span><img src="/ecc/icons/${iconName}.svg" alt="${iconName} icon" class="ecc-icon"></span>`;
+      return `<img src="/ecc/icons/${iconName}.svg" alt="${iconName} icon" class="ecc-icon">`;
     }
 
     return '';

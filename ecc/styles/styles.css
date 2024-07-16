@@ -44,12 +44,6 @@ fieldset {
   margin: 40px;
 }
 
-.flex-center-align {
-  display: flex;
-  align-items: center;
-}
-
-.flex-center-align img {
-  margin-right: 8px;
-  display: block;
+img.ecc-icon {
+  vertical-align: middle;
 }
