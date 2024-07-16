@@ -48,8 +48,8 @@ function getECCEnv(miloConfig) {
     if (host.startsWith('dev--') || host.startsWith('www.dev')) return 'dev';
   }
 
-  // fallback to Milo env name
-  return env.name;
+  // fallback to dev
+  return 'dev';
 }
 
 const locales = {
