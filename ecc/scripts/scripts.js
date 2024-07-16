@@ -53,9 +53,7 @@ export function decorateArea(area = document) {
   allElements.forEach((element) => {
     if (element.childNodes.length) {
       element.childNodes.forEach((n) => {
-        if (n.tagName === 'P' || n.tagName === 'A') {
-          n.innerHTML = convertEccIcon(n);
-        }
+        n.innerHTML = convertEccIcon(n);
       });
     }
   });
