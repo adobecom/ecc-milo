@@ -285,6 +285,22 @@ function decorateForm(el) {
   });
 }
 
+function showSaveSuccessMessage(props) {
+  const toastArea = props.el.querySelector('.toast-area');
+  if (!toastArea) return;
+
+  const previousMsgs = toastArea.querySelectorAll('.save-success-msg');
+
+  previousMsgs.forEach((msg) => {
+    msg.remove();
+  });
+
+  const toast = createTag('sp-toast', { class: 'save-success-msg', open: true, variant: 'positive', timeout: 6000 }, 'Edits saved successfully', { parent: toastArea });
+  toast.addEventListener('close', () => {
+    toast.remove();
+  });
+}
+
 async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
 
@@ -300,6 +316,9 @@ async function saveEvent(props, options = { toPublish: false }) {
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
+    if (!resp.errors || !resp.message) {
+      showSaveSuccessMessage(props);
+    }
   } else if (options.toPublish) {
     resp = await publishEvent(
       getFilteredCachedResponse().eventId,
@@ -639,22 +658,6 @@ function initDeepLink(props) {
   }
 }
 
-function showSaveSuccessMessage(props) {
-  const toastArea = props.el.querySelector('.toast-area');
-  if (!toastArea) return;
-
-  const previousMsgs = toastArea.querySelectorAll('.save-success-msg');
-
-  previousMsgs.forEach((msg) => {
-    msg.remove();
-  });
-
-  const toast = createTag('sp-toast', { class: 'save-success-msg', open: true, variant: 'positive', timeout: 6000 }, 'Edits saved successfully', { parent: toastArea });
-  toast.addEventListener('close', () => {
-    toast.remove();
-  });
-}
-
 async function buildECCForm(el) {
   const props = {
     el,
@@ -703,7 +706,6 @@ async function buildECCForm(el) {
             props.el.classList.add('show-error');
           } else {
             props.el.classList.remove('show-error');
-            if (oldValue.eventId) showSaveSuccessMessage(props);
           }
           break;
         }
