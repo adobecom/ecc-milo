@@ -461,3 +461,15 @@ export async function removeSpeakerFromEvent(speakerId, eventId) {
 
   return getEvent(eventId);
 }
+
+export async function updateSpeakerInEvent(data, speakerId, eventId) {
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const raw = JSON.stringify(data);
+  const options = await constructRequestOptions('PUT', raw);
+
+  await fetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to update speaker in event. Error:', error));
+
+  return getEvent(eventId);
+}
