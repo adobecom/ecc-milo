@@ -33,22 +33,28 @@ export async function onSubmit(component, props) {
           return idMatch && typeMatch && ordinalMatch;
         });
 
-        if (!existingSpeaker) {
-          const resp = await addSpeakerToEvent(speaker, eventId);
-
-          if (!resp || resp.errors) {
-            return;
-          }
-
-          props.eventDataResp = { ...props.eventDataResp, ...resp };
+        if (existingSpeaker) {
+          // do nothing
         } else {
-          const resp = await updateSpeakerInEvent(speaker, speakerId, eventId);
+          // eslint-disable-next-line max-len
+          const updateSpeaker = props.eventDataResp.speakers.find((profile) => profile.speakerId === speakerId);
+          if (updateSpeaker) {
+            const resp = await updateSpeakerInEvent(speaker, speakerId, eventId);
 
-          if (!resp || resp.errors) {
-            return;
+            if (!resp || resp.errors) {
+              return;
+            }
+
+            props.eventDataResp = { ...props.eventDataResp, ...resp };
+          } else {
+            const resp = await addSpeakerToEvent(speaker, eventId);
+
+            if (!resp || resp.errors) {
+              return;
+            }
+
+            props.eventDataResp = { ...props.eventDataResp, ...resp };
           }
-
-          props.eventDataResp = { ...props.eventDataResp, ...resp };
         }
       }
     }, Promise.resolve());
