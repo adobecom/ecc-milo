@@ -95,6 +95,20 @@ async function populateSeriesOptions(component) {
 }
 
 export default async function init(component, props) {
+  setTimeout(() => {
+    const seriesSelect = component.querySelector('#series-select-input');
+
+    if (seriesSelect.pending || seriesSelect.disabled) {
+      const toastArea = props.el.querySelector('.toast-area');
+      if (!toastArea) return;
+
+      const toast = createTag('sp-toast', { open: true, timeout: 8000 }, 'Series ID is taking longer than usual to load. Please check if the Adobe corp. VPN is connected.', { parent: toastArea });
+      toast.addEventListener('close', () => {
+        toast.remove();
+      });
+    }
+  }, 5000);
+
   const eventData = props.eventDataResp;
   prepopulateTimeZone(component);
   initStepLock(component);
@@ -112,20 +126,6 @@ export default async function init(component, props) {
     changeInputValue(component.querySelector('#rsvp-required-check'), 'checked', rsvpRequired || 0);
     component.classList.add('prefilled');
   }
-
-  setTimeout(() => {
-    const seriesSelect = component.querySelector('#series-select-input');
-
-    if (seriesSelect.pending || seriesSelect.disabled) {
-      const toastArea = props.el.querySelector('.toast-area');
-      if (!toastArea) return;
-
-      const toast = createTag('sp-toast', { open: true, timeout: 8000 }, 'Series ID is taking longer than usual to load. Please check if the Adobe corp. VPN is connected.', { parent: toastArea });
-      toast.addEventListener('close', () => {
-        toast.remove();
-      });
-    }
-  }, 5000);
 }
 
 function getTemplateId(bu) {
