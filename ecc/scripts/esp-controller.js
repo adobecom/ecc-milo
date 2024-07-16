@@ -133,6 +133,18 @@ export async function createVenue(eventId, venueData) {
   return resp;
 }
 
+export async function replaceVenue(eventId, venueId, venueData) {
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const raw = JSON.stringify(venueData);
+  const options = await constructRequestOptions('PUT', raw);
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/venues/${venueId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to replace venue. Error:', error));
+
+  return resp;
+}
+
 export async function createEvent(payload) {
   const { host } = getAPIConfig().esl[ECC_ENV];
   const raw = JSON.stringify(payload);
