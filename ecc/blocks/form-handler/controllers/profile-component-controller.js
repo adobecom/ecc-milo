@@ -96,6 +96,7 @@ async function prefillProfiles(props) {
       // eslint-disable-next-line max-len
       const speakers = await Promise.all(d.speakers.map(async (sp) => getSpeaker(seriesId, sp.speakerId)));
       for (let idx = 0; idx < d.speakers.length; idx += 1) {
+        speakers[idx] = { ...speakers[idx], type: speakers[idx].speakerType };
         d.speakers[idx] = { ...d.speakers[idx], ...speakers[idx] };
       }
       props.eventDataResp = { ...props.eventDataResp, ...d };
