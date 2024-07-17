@@ -610,7 +610,8 @@ function updateCtas(props) {
 
 function initNavigation(props) {
   const frags = props.el.querySelectorAll('.fragment');
-  const navItems = props.el.querySelectorAll('.side-menu .nav-item');
+  const sideMenu = props.el.querySelector('.side-menu');
+  const navItems = sideMenu.querySelectorAll('.nav-item');
 
   frags.forEach((frag, i) => {
     if (i !== 0) {
@@ -620,11 +621,8 @@ function initNavigation(props) {
 
   navItems.forEach((nav, i) => {
     nav.addEventListener('click', async () => {
-      const availableNavs = Array.from(navItems).filter((n) => !n.disabled);
-      if (!nav.disabled) {
-        availableNavs.forEach((n) => {
-          n.disabled = true;
-        });
+      if (!nav.disabled && !sideMenu.classList.contains('disabled')) {
+        sideMenu.classList.add('disabled');
 
         const resp = await saveEvent(props);
         if (resp?.errors || resp?.message) {
@@ -633,9 +631,7 @@ function initNavigation(props) {
           navigateForm(props, i);
         }
 
-        availableNavs.forEach((n) => {
-          n.disabled = false;
-        });
+        sideMenu.classList.remove('disabled');
       }
     });
   });
