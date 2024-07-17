@@ -5,12 +5,11 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function buildDatePicker(column) {
   column.classList.add('date-picker');
-  const dateLabel = createTag('label', { for: 'event-info-date-picker' }, column.textContent.trim());
-  const datePicker = createTag('input', { id: 'event-info-date-picker', name: 'event-date', class: 'date-input', required: true });
+  const datePicker = createTag('input', { id: 'event-info-date-picker', name: 'event-date', class: 'date-input', required: true, placeholder: column.textContent.trim() });
   const calendarIcon = getIcon('calendar-add');
 
   column.innerHTML = '';
-  column.append(dateLabel, datePicker, calendarIcon);
+  column.append(datePicker, calendarIcon);
 }
 
 function buildTimePicker(column, wrapper) {

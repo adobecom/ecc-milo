@@ -12,6 +12,37 @@
 
 import { lazyCaptureProfile } from './event-apis.js';
 
+function convertEccIcon(n) {
+  const createSVGIcon = (iconName) => {
+    const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgElement.setAttribute('width', '20');
+    svgElement.setAttribute('height', '20');
+    svgElement.setAttribute('class', 'ecc-icon');
+
+    const useElement = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    useElement.setAttributeNS('http://www.w3.org/1999/xlink', 'href', `/ecc/icons/ecc-icons.svg#${iconName}`);
+
+    svgElement.appendChild(useElement);
+
+    return svgElement;
+  };
+
+  const text = n.innerHTML;
+  const eccIcons = [
+    'ecc-content',
+    'ecc-star-wire',
+  ];
+
+  const iconRegex = /@@(.*?)@@/g;
+  return text.replace(iconRegex, (match, iconName) => {
+    if (eccIcons.includes(iconName)) {
+      return createSVGIcon(iconName).outerHTML;
+    }
+
+    return '';
+  });
+}
+
 export function decorateArea(area = document) {
   const eagerLoad = (parent, selector) => {
     const img = parent.querySelector(selector);
@@ -30,6 +61,17 @@ export function decorateArea(area = document) {
     // Last image of last column of last row
     eagerLoad(marquee, 'div:last-child > div:last-child img');
   }());
+
+  const allElements = area.querySelectorAll('*');
+  allElements.forEach((element) => {
+    if (element.childNodes.length) {
+      element.childNodes.forEach((n) => {
+        if (n.tagName === 'P' || n.tagName === 'A' || n.tagName === 'LI') {
+          n.innerHTML = convertEccIcon(n);
+        }
+      });
+    }
+  });
 }
 
 function getECCEnv(miloConfig) {
@@ -48,8 +90,8 @@ function getECCEnv(miloConfig) {
     if (host.startsWith('dev--') || host.startsWith('www.dev')) return 'dev';
   }
 
-  // fallback to Milo env name
-  return env.name;
+  // fallback to dev
+  return 'dev';
 }
 
 const locales = {
@@ -81,7 +123,7 @@ const STYLES = '';
 // Add any config options.
 const CONFIG = {
   codeRoot: '/ecc',
-  // contentRoot: '',
+  contentRoot: '/ecc',
   imsClientId: 'acom_event_mgmt_console',
   // imsScope: 'AdobeID,openid,gnav',
   // geoRouting: 'off',

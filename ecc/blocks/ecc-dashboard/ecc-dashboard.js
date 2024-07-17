@@ -5,8 +5,8 @@ import {
   publishEvent,
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
-import { ECC_ENV, LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen } from '../../scripts/utils.js';
+import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
+import { getIcon, buildNoAccessScreen, getEventPageHost } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 
@@ -34,6 +34,7 @@ export function cloneFilter(obj) {
     'partners',
     'showAgendaPostEvent',
     'showVenuePostEvent',
+    'showVenueImage',
     'attendeeLimit',
     'rsvpDescription',
     'allowWaitlisting',
@@ -57,14 +58,6 @@ function toClassName(name) {
   return name && typeof name === 'string'
     ? name.toLowerCase().replace(/[^0-9a-z]/gi, '-')
     : '';
-}
-
-function getEventPageHost() {
-  if (ECC_ENV === 'dev') {
-    return 'https://dev--events-milo--adobecom.hlx.page';
-  }
-
-  return window.location.origin;
 }
 
 export function readBlockConfig(block) {
@@ -108,10 +101,36 @@ function formatLocaleDate(string) {
   return new Date(string).toLocaleString('en-GB', options);
 }
 
+function highlightRow(row) {
+  if (!row) return;
+
+  row.classList.add('highlight');
+
+  setTimeout(() => {
+    row.classList.remove('highlight');
+  }, 1000);
+}
+
 function buildThumbnail(data) {
-  // TODO: use thumbnail instead of just first image or mock image
-  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl || '/ecc/icons/icon-placeholder.svg' });
-  const container = createTag('td', { class: 'thumbnail-container' }, img);
+  const container = createTag('td', { class: 'thumbnail-container' });
+  if (!data.photos) return container;
+
+  const cardImage = data.photos.find((photo) => photo.imageKind === 'event-card-image');
+  const heroImage = data.photos.find((photo) => photo.imageKind === 'event-hero-image');
+  const venueImage = data.photos.find((photo) => photo.imageKind === 'venue-image');
+  const img = createTag('img', {
+    class: 'event-thumbnail-img',
+    src: cardImage?.sharepointUrl
+    || cardImage?.imageUrl
+    || heroImage?.sharepointUrl
+    || heroImage?.imageUrl
+    || venueImage?.sharepointUrl
+    || venueImage?.imageUrl
+    || data.photos[0]?.imageUrl
+    || '/ecc/icons/icon-placeholder.svg',
+  });
+  container.append(img);
+
   return container;
 }
 
@@ -244,12 +263,12 @@ function initMoreOptions(props, config, eventObj, row) {
 
     if (eventObj.detailPagePath) {
       previewPre.href = (() => {
-        const url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+        const url = new URL(`${getEventPageHost(eventObj.published)}${eventObj.detailPagePath}`);
         url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
         return url.toString();
       })();
       previewPost.href = (() => {
-        const url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+        const url = new URL(`${getEventPageHost(eventObj.published)}${eventObj.detailPagePath}`);
         url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
         return url.toString();
       })();
@@ -266,16 +285,29 @@ function initMoreOptions(props, config, eventObj, row) {
     // clone
     clone.addEventListener('click', async (e) => {
       e.preventDefault();
+      const spTheme = props.el.querySelector('sp-theme');
       const payload = { ...eventObj };
       payload.title = `${eventObj.title} - copy`;
       toolBox.remove();
       row.classList.add('pending');
       const newEventJSON = await createEvent(cloneFilter(payload));
-      const reloadUrl = new URL(window.location.href);
-      reloadUrl.searchParams.set('clonedEventId', newEventJSON.eventId);
-      window.location.assign(reloadUrl.href);
+      const newJson = await getEvents();
+      props.data = newJson.events;
+      props.filteredData = newJson.events;
+      props.paginatedData = newJson.events;
+      const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
+      if (modTimeHeader) {
+        props.currentSort = { field: 'modificationTime', el: modTimeHeader };
+        sortData(props, config, { direction: 'desc' });
+      }
+      const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
+      const toastMsg = buildToastMsg(newEventJSON.title, msgTemplate);
+      createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: spTheme });
+      const newRow = props.el.querySelector(`tr[data-event-id="${newEventJSON.eventId}"]`);
+      highlightRow(newRow);
     });
 
+    // delete
     deleteBtn.addEventListener('click', async (e) => {
       e.preventDefault();
 
@@ -355,7 +387,7 @@ function buildStatusTag(event) {
 
 function buildEventTitleTag(event) {
   if (event.detailPagePath) {
-    const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${getEventPageHost()}${event.detailPagePath}` }, event.title);
+    const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${getEventPageHost(event.published)}${event.detailPagePath}` }, event.title);
     return eventTitleTag;
   }
 
@@ -372,14 +404,6 @@ async function buildVenueTag(eventObj) {
   return venueTag;
 }
 
-function highlightRow(row) {
-  row.classList.add('highlight');
-
-  setTimeout(() => {
-    row.classList.remove('highlight');
-  }, 1000);
-}
-
 async function populateRow(props, config, index) {
   const event = props.paginatedData[index];
   const tBody = props.el.querySelector('table.dashboard-table tbody');
@@ -387,7 +411,7 @@ async function populateRow(props, config, index) {
   const sp = new URLSearchParams(window.location.search);
 
   // TODO: build each column's element specifically rather than just text
-  const row = createTag('tr', { class: 'event-row' }, '', { parent: tBody });
+  const row = createTag('tr', { class: 'event-row', 'data-event-id': event.eventId }, '', { parent: tBody });
   const thumbnailCell = buildThumbnail(event);
   const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(event)));
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
@@ -414,14 +438,6 @@ async function populateRow(props, config, index) {
 
   if (event.eventId === sp.get('newEventId') && !props.el.classList.contains('toast-shown')) {
     const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
-    const toastMsg = buildToastMsg(event.title, msgTemplate);
-    createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
-    highlightRow(row);
-    props.el.classList.add('toast-shown');
-  }
-
-  if (event.eventId === sp.get('clonedEventId') && !props.el.classList.contains('toast-shown')) {
-    const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
     const toastMsg = buildToastMsg(event.title, msgTemplate);
     createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
     highlightRow(row);
@@ -571,7 +587,7 @@ function buildDashboardTable(props, config) {
   populateTable(props, config);
 
   const usp = new URLSearchParams(window.location.search);
-  if (usp.get('newEventId') || usp.get('clonedEventId')) {
+  if (usp.get('newEventId')) {
     const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
     if (modTimeHeader) {
       props.currentSort = { field: 'modificationTime', el: modTimeHeader };

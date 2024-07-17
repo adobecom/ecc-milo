@@ -43,3 +43,7 @@ fieldset {
 .section > div.no-access .no-access-area .icon.icon-browser-access-forbidden-lg {
   margin: 40px;
 }
+
+svg.ecc-icon {
+  vertical-align: middle;
+}

@@ -1,5 +1,12 @@
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip, camelToSentenceCase } from '../../scripts/utils.js';
+import {
+  getIcon,
+  buildNoAccessScreen,
+  yieldToMain,
+  generateToolTip,
+  camelToSentenceCase,
+  getEventPageHost,
+} from '../../scripts/utils.js';
 import {
   createEvent,
   updateEvent,
@@ -19,6 +26,7 @@ import PartnerSelector from '../../components/partner-selector/partner-selector.
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
+import { CustomSearch } from '../../components/custom-search/custom-search.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -63,12 +71,14 @@ const SPECTRUM_COMPONENTS = [
   'dialog',
   'button-group',
   'tooltip',
+  'popover',
+  'search',
   'toast',
   'icon',
   'action-button',
 ];
 
-function buildErrorMessage(props, resp) {
+export function buildErrorMessage(props, resp) {
   if (!resp) return;
 
   const toastArea = props.el.querySelector('.toast-area');
@@ -141,6 +151,7 @@ function initCustomLitComponents() {
   customElements.define('product-selector-group', ProductSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
+  customElements.define('custom-search', CustomSearch);
 }
 
 async function initComponents(props) {
@@ -274,6 +285,22 @@ function decorateForm(el) {
   });
 }
 
+function showSaveSuccessMessage(props) {
+  const toastArea = props.el.querySelector('.toast-area');
+  if (!toastArea) return;
+
+  const previousMsgs = toastArea.querySelectorAll('.save-success-msg');
+
+  previousMsgs.forEach((msg) => {
+    msg.remove();
+  });
+
+  const toast = createTag('sp-toast', { class: 'save-success-msg', open: true, variant: 'positive', timeout: 6000 }, 'Edits saved successfully', { parent: toastArea });
+  toast.addEventListener('close', () => {
+    toast.remove();
+  });
+}
+
 async function saveEvent(props, options = { toPublish: false }) {
   await gatherValues(props);
 
@@ -289,6 +316,9 @@ async function saveEvent(props, options = { toPublish: false }) {
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
+    if (!resp.errors || !resp.message) {
+      showSaveSuccessMessage(props);
+    }
   } else if (options.toPublish) {
     resp = await publishEvent(
       getFilteredCachedResponse().eventId,
@@ -343,14 +373,6 @@ function onStepValidate(props) {
       }
     });
   };
-}
-
-function updateProfileContainer(props) {
-  const containers = document.querySelectorAll('profile-container');
-  containers.forEach((c) => {
-    c.setAttribute('seriesId', props.payload.seriesId);
-    c.requestUpdate();
-  });
 }
 
 function updateRequiredFields(props) {
@@ -456,7 +478,7 @@ function initFormCtas(props) {
   backwardWrapper.append(backBtn);
 
   const toggleBtnsSubmittingState = (submitting) => {
-    ctas.forEach((c) => {
+    [...ctas, backBtn].forEach((c) => {
       c.classList.toggle('submitting', submitting);
     });
   };
@@ -494,7 +516,7 @@ function initFormCtas(props) {
           cta.dataset.republishStateText = republishStateText;
 
           if (props.currentStep === props.maxStep) {
-            if (getJoinedData().published) {
+            if (props.eventDataResp.published) {
               cta.textContent = republishStateText;
             } else {
               cta.textContent = finalStateText;
@@ -567,7 +589,7 @@ function updateCtas(props) {
     if (a.classList.contains('preview-btns')) {
       const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
       if (filteredResponse.detailPagePath) {
-        a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
+        a.href = `${getEventPageHost(filteredResponse.published)}${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
         a.classList.remove('preview-not-ready');
       }
     }
@@ -588,7 +610,8 @@ function updateCtas(props) {
 
 function initNavigation(props) {
   const frags = props.el.querySelectorAll('.fragment');
-  const navItems = props.el.querySelectorAll('.side-menu .nav-item');
+  const sideMenu = props.el.querySelector('.side-menu');
+  const navItems = sideMenu.querySelectorAll('.nav-item');
 
   frags.forEach((frag, i) => {
     if (i !== 0) {
@@ -598,13 +621,17 @@ function initNavigation(props) {
 
   navItems.forEach((nav, i) => {
     nav.addEventListener('click', async () => {
-      if (!nav.disabled) {
+      if (!nav.disabled && !sideMenu.classList.contains('disabled')) {
+        sideMenu.classList.add('disabled');
+
         const resp = await saveEvent(props);
         if (resp?.errors || resp?.message) {
           buildErrorMessage(props, resp);
         } else {
           navigateForm(props, i);
         }
+
+        sideMenu.classList.remove('disabled');
       }
     });
   });
@@ -655,31 +682,41 @@ async function buildECCForm(el) {
         initRequiredFieldsValidation(target);
       }
 
-      if (prop === 'currentStep') {
-        renderFormNavigation(target, oldValue, value);
-        updateSideNav(target);
-        initRequiredFieldsValidation(target);
-      }
-
-      if (prop === 'farthestStep') {
-        updateSideNav(target);
-      }
-
-      if (prop === 'payload') {
-        setPayloadCache(value);
-        updateComponents(target);
-        updateProfileContainer(target);
-        initRequiredFieldsValidation(target);
-      }
-      if (prop === 'eventDataResp') {
-        setResponseCache(value);
-        updateCtas(target);
-        updateDashboardLink(target);
-        if (value.message || value.errors) {
-          props.el.classList.add('show-error');
-        } else {
-          props.el.classList.remove('show-error');
+      switch (prop) {
+        case 'currentStep':
+        {
+          renderFormNavigation(target, oldValue, value);
+          updateSideNav(target);
+          initRequiredFieldsValidation(target);
+          break;
         }
+
+        case 'farthestStep': {
+          updateSideNav(target);
+          break;
+        }
+
+        case 'payload': {
+          setPayloadCache(value);
+          updateComponents(target);
+          initRequiredFieldsValidation(target);
+          break;
+        }
+
+        case 'eventDataResp': {
+          setResponseCache(value);
+          updateCtas(target);
+          updateDashboardLink(target);
+          if (value.message || value.errors) {
+            props.el.classList.add('show-error');
+          } else {
+            props.el.classList.remove('show-error');
+          }
+          break;
+        }
+
+        default:
+          break;
       }
 
       return true;

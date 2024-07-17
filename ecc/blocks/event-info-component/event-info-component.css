@@ -38,12 +38,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 13px 0;
+  margin-top: 16px;
   cursor: pointer;
 }
 
-.event-info-component .date-time-row > .date-picker label {
+.event-info-component .date-time-row > .date-picker input::placeholder {
   font-size: var(--type-heading-m-size);
+  font-weight: 700;
+  font-family: var(--body-font-family);
 }
 
 .event-info-component .date-time-row > div:last-of-type {
@@ -119,8 +121,9 @@
 
 /* Calendar container styling */
 .event-info-component .calendar-container {
-  top: 100%;
-  right: calc(-50% + 40px);
+  top: calc(100% + 8px);
+  right: 50%;
+  transform: translateX(50%);
   padding: 16px;
   width: 317px;
   position: absolute;

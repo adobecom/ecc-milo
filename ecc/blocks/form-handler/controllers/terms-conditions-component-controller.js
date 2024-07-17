@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { LIBS } from '../../../scripts/scripts.js';
 import HtmlSanitizer from '../../../scripts/deps/html-sanitizer.js';
-import { fetchThrottledMemoized } from '../../../scripts/utils.js';
+import { fetchThrottledMemoizedText } from '../../../scripts/utils.js';
 
 const { customFetch } = await import(`${LIBS}/utils/helpers.js`);
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -31,7 +31,7 @@ function buildTerms(terms) {
 
 async function loadPreview(component, templateId) {
   const rsvpFormLocation = `https://main--events-milo--adobecom.hlx.page${templateId.substring(0, templateId.lastIndexOf('/'))}/rsvp-form`;
-  const resp = await fetchThrottledMemoized(`${rsvpFormLocation}.plain.html`, { headers: { authorization: 'token MM/NpTtq0gAnckOSl96C4SGB67kFjbO6a4N9vYwb0gd5' } })
+  const resp = await fetchThrottledMemoizedText(`${rsvpFormLocation}.plain.html`, { headers: { authorization: 'token MM/NpTtq0gAnckOSl96C4SGB67kFjbO6a4N9vYwb0gd5' } }).catch(() => ({}))
     .catch(() => ({}));
 
   if (!resp?.ok) {

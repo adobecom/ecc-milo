@@ -1,3 +1,4 @@
+// FIXME: this whole data handler thing can be done better
 let responseCache = {};
 let payloadCache = {};
 
@@ -20,9 +21,9 @@ const wl = [
   'localStartTimeMillis',
   'localEndTimeMillis',
   'timezone',
-  'partners',
   'showAgendaPostEvent',
   'showVenuePostEvent',
+  'showVenueImage',
   'rsvpFormFields',
   'relatedProducts',
   'rsvpDescription',

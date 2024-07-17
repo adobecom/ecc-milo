@@ -279,7 +279,7 @@ function initCalendar(component) {
   });
 
   document.addEventListener('click', (e) => {
-    if (!(e.target.closest('.date-picker') || e.target.parentElement.classList.contains('calendar-grid')) && calendar) {
+    if (!(e.target.closest('.date-picker') || e.target.parentElement?.classList.contains('calendar-grid')) && calendar) {
       calendar.remove();
       calendar = '';
     }
