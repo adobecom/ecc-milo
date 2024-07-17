@@ -1,3 +1,4 @@
+// FIXME: this whole data handler thing can be done better
 let responseCache = {};
 let payloadCache = {};
 
