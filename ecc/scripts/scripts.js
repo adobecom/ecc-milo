@@ -123,7 +123,7 @@ const STYLES = '';
 // Add any config options.
 const CONFIG = {
   codeRoot: '/ecc',
-  // contentRoot: '',
+  contentRoot: '/ecc',
   imsClientId: 'acom_event_mgmt_console',
   // imsScope: 'AdobeID,openid,gnav',
   // geoRouting: 'off',
