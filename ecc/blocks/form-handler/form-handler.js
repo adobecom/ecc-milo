@@ -478,7 +478,7 @@ function initFormCtas(props) {
   backwardWrapper.append(backBtn);
 
   const toggleBtnsSubmittingState = (submitting) => {
-    ctas.forEach((c) => {
+    [...ctas, backBtn].forEach((c) => {
       c.classList.toggle('submitting', submitting);
     });
   };
@@ -516,7 +516,7 @@ function initFormCtas(props) {
           cta.dataset.republishStateText = republishStateText;
 
           if (props.currentStep === props.maxStep) {
-            if (getJoinedData().published) {
+            if (props.eventDataResp.published) {
               cta.textContent = republishStateText;
             } else {
               cta.textContent = finalStateText;
@@ -621,12 +621,21 @@ function initNavigation(props) {
   navItems.forEach((nav, i) => {
     nav.addEventListener('click', async () => {
       if (!nav.disabled) {
+        const availableNavs = navItems.filter((n) => !n.disabled);
+        availableNavs.forEach((n) => {
+          n.disabled = true;
+        });
+
         const resp = await saveEvent(props);
         if (resp?.errors || resp?.message) {
           buildErrorMessage(props, resp);
         } else {
           navigateForm(props, i);
         }
+
+        availableNavs.forEach((n) => {
+          n.disabled = false;
+        });
       }
     });
   });
