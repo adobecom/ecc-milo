@@ -16,6 +16,10 @@ export const style = css`
   align-items: center;
 }
 
+.solid-border {
+  border: 2px solid var(--color-gray-400);
+}
+
 .img-file-input-wrapper .preview-wrapper {
   width: 100%;
   height: 100%;
