@@ -222,7 +222,7 @@ export async function decorateTextarea(cell, extraOptions) {
 
 export async function getSecret(key) {
   if (secretCache.length === 0) {
-    const resp = await fetch('/system/secrets.json', { headers: { authorization: 'token milo-events-ecc' } })
+    const resp = await fetch('/ecc/system/secrets.json', { headers: { authorization: 'token milo-events-ecc' } })
       .then((r) => r)
       .catch((e) => window.lana?.log(`Failed to fetch Google Places API key: ${e}`));
 
