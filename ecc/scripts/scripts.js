@@ -13,6 +13,20 @@
 import { lazyCaptureProfile } from './event-apis.js';
 
 function convertEccIcon(n) {
+  const createSVGIcon = (iconName) => {
+    const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgElement.setAttribute('width', '20');
+    svgElement.setAttribute('height', '20');
+    svgElement.setAttribute('class', 'ecc-icon');
+
+    const useElement = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    useElement.setAttributeNS('http://www.w3.org/1999/xlink', 'href', `/ecc/icons/ecc-icons.svg#${iconName}`);
+
+    svgElement.appendChild(useElement);
+
+    return svgElement;
+  };
+
   const text = n.innerHTML;
   const eccIcons = [
     'ecc-content',
@@ -22,7 +36,7 @@ function convertEccIcon(n) {
   const iconRegex = /@@(.*?)@@/g;
   return text.replace(iconRegex, (match, iconName) => {
     if (eccIcons.includes(iconName)) {
-      return `<img src="/ecc/icons/${iconName}.svg" alt="${iconName} icon" class="ecc-icon">`;
+      return createSVGIcon(iconName).outerHTML;
     }
 
     return '';
