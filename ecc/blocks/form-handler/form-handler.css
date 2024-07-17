@@ -123,13 +123,6 @@
   letter-spacing: -0.02em
 }
 
-.form-handler .side-menu ul li:not(:has(ul)):has(a):hover img.ecc-icon,
-.form-handler .side-menu ul li:not(:has(ul)):has(a).active img.ecc-icon,
-.form-handler .side-menu ul li:not(:has(ul)):has(button:not(:disabled)):hover img.ecc-icon,
-.form-handler .side-menu ul li:not(:has(ul)):has(button:not(:disabled)).active img.ecc-icon {
-  filter: invert(1);
-}
-
 .form-handler .side-menu .nav-item {
   cursor: pointer;
 }
