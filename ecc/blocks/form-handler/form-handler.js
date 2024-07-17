@@ -621,7 +621,7 @@ function initNavigation(props) {
   navItems.forEach((nav, i) => {
     nav.addEventListener('click', async () => {
       if (!nav.disabled) {
-        const availableNavs = navItems.filter((n) => !n.disabled);
+        const availableNavs = Array.from(navItems).filter((n) => !n.disabled);
         availableNavs.forEach((n) => {
           n.disabled = true;
         });
