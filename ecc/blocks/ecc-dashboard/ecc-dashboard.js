@@ -121,11 +121,11 @@ function buildThumbnail(data) {
 
   const img = createTag('img', {
     class: 'event-thumbnail-img',
-    src: (cardImage?.sharepointUrl && cardImage?.sharepointUrl.replace('www.adobe.com', getEventPageHost(data.published)))
+    src: (cardImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
     || cardImage?.imageUrl
-    || (heroImage?.sharepointUrl && cardImage?.sharepointUrl.replace('www.adobe.com', getEventPageHost(data.published)))
+    || (heroImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
     || heroImage?.imageUrl
-    || (venueImage?.sharepointUrl && cardImage?.sharepointUrl.replace('www.adobe.com', getEventPageHost(data.published)))
+    || (venueImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
     || venueImage?.imageUrl
     || data.photos[0]?.imageUrl
     || '/ecc/icons/icon-placeholder.svg',
