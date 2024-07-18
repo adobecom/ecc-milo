@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars */
 import { createVenue, replaceVenue } from '../../../scripts/esp-controller.js';
+import { ECC_ENV } from '../../../scripts/scripts.js';
 import { changeInputValue, getSecret } from '../../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler.js';
 
 async function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');
-  const apiKey = await getSecret('google-places-api');
+  const apiKey = await getSecret(`${ECC_ENV}-google-places-api`);
   script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=onGoogleMapsApiLoaded`;
   script.async = true;
   script.defer = true;

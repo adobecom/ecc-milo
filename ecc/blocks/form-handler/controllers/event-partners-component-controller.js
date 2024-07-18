@@ -6,7 +6,7 @@ import { getFilteredCachedResponse } from '../data-handler.js';
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const partnerVisible = component.querySelector('#partners-visible')?.checked;
+  const showSponsors = component.querySelector('#partners-visible')?.checked;
   const partnerSelectorGroup = component.querySelector('partner-selector-group');
   const { eventId } = getFilteredCachedResponse();
 
@@ -83,7 +83,7 @@ export async function onSubmit(component, props) {
     }
   }
 
-  props.payload = { ...props.payload, partnerVisible };
+  props.payload = { ...props.payload, showSponsors };
 }
 
 export async function onUpdate(_component, _props) {
@@ -131,5 +131,5 @@ export default async function init(component, props) {
   }
 
   const partnerVisible = component.querySelector('#partners-visible');
-  partnerVisible.checked = eventData.partnerVisible;
+  partnerVisible.checked = eventData.showSponsors;
 }

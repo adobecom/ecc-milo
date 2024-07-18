@@ -242,6 +242,8 @@ function initMoreOptions(props, config, eventObj, row) {
         row.classList.add('pending');
         const resp = await unpublishEvent(eventObj.eventId, quickFilter(eventObj));
         updateDashboardData(resp, props);
+
+        sortData(props, config, { resort: true });
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
@@ -252,6 +254,8 @@ function initMoreOptions(props, config, eventObj, row) {
         row.classList.add('pending');
         const resp = await publishEvent(eventObj.eventId, quickFilter(eventObj));
         updateDashboardData(resp, props);
+
+        sortData(props, config, { resort: true });
       });
     }
 
