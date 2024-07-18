@@ -118,13 +118,14 @@ function buildThumbnail(data) {
   const cardImage = data.photos.find((photo) => photo.imageKind === 'event-card-image');
   const heroImage = data.photos.find((photo) => photo.imageKind === 'event-hero-image');
   const venueImage = data.photos.find((photo) => photo.imageKind === 'venue-image');
+
   const img = createTag('img', {
     class: 'event-thumbnail-img',
-    src: cardImage?.sharepointUrl
+    src: (cardImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
     || cardImage?.imageUrl
-    || heroImage?.sharepointUrl
+    || (heroImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
     || heroImage?.imageUrl
-    || venueImage?.sharepointUrl
+    || (venueImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
     || venueImage?.imageUrl
     || data.photos[0]?.imageUrl
     || '/ecc/icons/icon-placeholder.svg',
@@ -184,9 +185,9 @@ function sortData(props, config, options = {}) {
     let valA;
     let valB;
 
-    if (field === 'title' || field === 'venueId') {
-      valA = a[field].toLowerCase();
-      valB = b[field].toLowerCase();
+    if ((field === 'title' || field === 'venueId')) {
+      valA = a[field]?.toLowerCase() || '';
+      valB = b[field]?.toLowerCase() || '';
       return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
     }
 
@@ -196,13 +197,9 @@ function sortData(props, config, options = {}) {
       return sortAscending ? valA - valB : valB - valA;
     }
 
-    if (a[field] !== undefined && b[field] !== undefined) {
-      valA = a[field].toString().toLowerCase();
-      valB = b[field].toString().toLowerCase();
-      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    }
-
-    return null;
+    valA = a[field]?.toString().toLowerCase() || '';
+    valB = b[field]?.toString().toLowerCase() || '';
+    return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
   });
 
   el?.parentNode.querySelectorAll('th').forEach((header) => {
