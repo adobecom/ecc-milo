@@ -28,7 +28,7 @@ export async function onSubmit(component, props) {
       } else {
         const existingSpeaker = props.eventDataResp.speakers.find((profile) => {
           const idMatch = profile.speakerId === speakerId;
-          const typeMatch = profile.sponsorType === speakerType;
+          const typeMatch = profile.speakerType === speakerType;
           const ordinalMatch = profile.ordinal === ordinal;
           return idMatch && typeMatch && ordinalMatch;
         });

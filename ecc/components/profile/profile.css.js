@@ -11,7 +11,7 @@ image-dropzone {
 }
 
 .img-file-input-wrapper {
-  border: 2px dashed var(--color-gray-400);
+  border: 2px solid var(--color-gray-400);
   border-radius: 8px;
   height: 200px;
   display: flex;

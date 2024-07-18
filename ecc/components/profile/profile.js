@@ -5,6 +5,7 @@ import { style } from './profile.css.js';
 import { createSpeaker, updateSpeaker, uploadImage } from '../../scripts/esp-controller.js';
 import { getServiceName } from '../../scripts/utils.js';
 import { icons } from '../../icons/icons.svg.js';
+import { LINK_REGEX } from '../../constants/constants.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -140,7 +141,7 @@ export class Profile extends LitElement {
   renderRemainingFormBody() {
     const {
       // eslint-disable-next-line max-len
-      fieldLabelsJSON, quietTextfieldConfig, titleData, bioData, textareaConfig, socialMediaData, textfieldConfig,
+      fieldLabelsJSON, quietTextfieldConfig, titleData, bioData, textareaConfig, socialMediaData, socialMediaConfig,
     } = this.getRequiredProps();
 
     // eslint-disable-next-line max-len
@@ -162,7 +163,7 @@ export class Profile extends LitElement {
     this.profile?.socialMedia,
     (socialMedia, index) => html`
     <div class="social-media-row">
-    <custom-textfield class="social-media-input" data=${JSON.stringify({ ...socialMediaData, value: socialMedia.link ?? undefined })} config=${JSON.stringify(textfieldConfig)} @change-custom=${(event) => this.updateSocialMedia(index, event.detail.value)}></custom-textfield>
+    <custom-textfield class="social-media-input" data=${JSON.stringify({ ...socialMediaData, value: socialMedia.link ?? undefined })} config=${JSON.stringify(socialMediaConfig)} @change-custom=${(event) => this.updateSocialMedia(index, event.detail.value)}></custom-textfield>
         ${this.profile?.socialMedia?.length > 1 ? html`<img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => {
     this.profile.socialMedia.splice(index, 1);
     this.requestUpdate();
@@ -237,11 +238,11 @@ export class Profile extends LitElement {
       quiet: true,
     };
 
-    const textfieldConfig = { size: 'xl' };
+    const socialMediaConfig = { size: 'xl', pattern: LINK_REGEX };
     const quietTextfieldConfig = { size: 'xl', quiet: true };
     return {
     // eslint-disable-next-line max-len
-      fieldLabelsJSON, firstNameData, quietTextfieldConfig, lastNameData, titleData, bioData, textareaConfig, socialMediaData, textfieldConfig,
+      fieldLabelsJSON, firstNameData, quietTextfieldConfig, lastNameData, titleData, bioData, textareaConfig, socialMediaData, socialMediaConfig,
     };
   }
 
