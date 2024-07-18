@@ -135,25 +135,33 @@ export async function onSubmit(component, props) {
     document.removeEventListener('eventcreated', onEventCreate);
   };
 
-  if (eventId && !venue) {
-    const resp = await createVenue(eventId, venueData);
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
-    props.payload = { ...props.payload, showVenuePostEvent };
-  } else if (venue.placeId !== venueData.placeId) {
-    const resp = await replaceVenue(eventId, venue.venueId, {
-      ...venue,
-      ...venueData,
-    });
-
-    if (resp?.errors || resp?.message) {
-      buildErrorMessage(props, resp);
+  const handleVenue = async () => {
+    if (!eventId) {
+      document.addEventListener('eventcreated', onEventCreate);
+      return;
     }
 
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
-    props.payload = { ...props.payload, showVenuePostEvent };
-  } else if (!eventId) {
-    document.addEventListener('eventcreated', onEventCreate);
-  }
+    let resp;
+    if (!venue) {
+      resp = await createVenue(eventId, venueData);
+    } else if (venue.placeId !== venueData.placeId) {
+      resp = await replaceVenue(eventId, venue.venueId, {
+        ...venue,
+        ...venueData,
+      });
+
+      if (resp?.errors || resp?.message) {
+        buildErrorMessage(props, resp);
+      }
+    }
+
+    if (resp) {
+      props.eventDataResp = { ...props.eventDataResp, ...resp };
+      props.payload = { ...props.payload, showVenuePostEvent };
+    }
+  };
+
+  handleVenue();
 }
 
 export async function onUpdate(_component, _props) {
