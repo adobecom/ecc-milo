@@ -24,6 +24,7 @@ const wl = [
   'showAgendaPostEvent',
   'showVenuePostEvent',
   'showVenueImage',
+  'showSponsors',
   'rsvpFormFields',
   'relatedProducts',
   'rsvpDescription',
