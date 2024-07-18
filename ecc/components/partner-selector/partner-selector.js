@@ -1,9 +1,9 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './partner-selector.css.js';
 import { createSponsor, updateSponsor, uploadImage } from '../../scripts/esp-controller.js';
+import { LINK_REGEX } from '../../constants/constants.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
-const LINK_REGEX = '^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$';
 
 export default class PartnerSelector extends LitElement {
   static properties = {
