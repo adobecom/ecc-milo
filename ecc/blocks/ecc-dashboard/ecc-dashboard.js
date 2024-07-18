@@ -118,13 +118,14 @@ function buildThumbnail(data) {
   const cardImage = data.photos.find((photo) => photo.imageKind === 'event-card-image');
   const heroImage = data.photos.find((photo) => photo.imageKind === 'event-hero-image');
   const venueImage = data.photos.find((photo) => photo.imageKind === 'venue-image');
+
   const img = createTag('img', {
     class: 'event-thumbnail-img',
-    src: cardImage?.sharepointUrl
+    src: (cardImage?.sharepointUrl && cardImage?.sharepointUrl.replace('www.adobe.com', getEventPageHost(data.published)))
     || cardImage?.imageUrl
-    || heroImage?.sharepointUrl
+    || (heroImage?.sharepointUrl && cardImage?.sharepointUrl.replace('www.adobe.com', getEventPageHost(data.published)))
     || heroImage?.imageUrl
-    || venueImage?.sharepointUrl
+    || (venueImage?.sharepointUrl && cardImage?.sharepointUrl.replace('www.adobe.com', getEventPageHost(data.published)))
     || venueImage?.imageUrl
     || data.photos[0]?.imageUrl
     || '/ecc/icons/icon-placeholder.svg',
