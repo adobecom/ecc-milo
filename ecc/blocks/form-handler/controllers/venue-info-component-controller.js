@@ -135,7 +135,7 @@ export async function onSubmit(component, props) {
     document.removeEventListener('eventcreated', onEventCreate);
   };
 
-  const updateVenue = async () => {
+  const handleVenue = async () => {
     if (!eventId) {
       document.addEventListener('eventcreated', onEventCreate);
       return;
@@ -161,7 +161,7 @@ export async function onSubmit(component, props) {
     }
   };
 
-  updateVenue();
+  handleVenue();
 }
 
 export async function onUpdate(_component, _props) {
