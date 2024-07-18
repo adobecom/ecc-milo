@@ -185,8 +185,8 @@ function sortData(props, config, options = {}) {
     let valB;
 
     if ((field === 'title' || field === 'venueId')) {
-      valA = a[field]?.toLowerCase() || '0';
-      valB = b[field]?.toLowerCase() || '0';
+      valA = a[field]?.toLowerCase() || '';
+      valB = b[field]?.toLowerCase() || '';
       return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
     }
 
@@ -196,8 +196,8 @@ function sortData(props, config, options = {}) {
       return sortAscending ? valA - valB : valB - valA;
     }
 
-    valA = a[field]?.toString().toLowerCase() || '0';
-    valB = b[field]?.toString().toLowerCase() || '0';
+    valA = a[field]?.toString().toLowerCase() || '';
+    valB = b[field]?.toString().toLowerCase() || '';
     return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
   });
 
