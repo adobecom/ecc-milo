@@ -184,19 +184,19 @@ function sortData(props, config, options = {}) {
     let valA;
     let valB;
 
-    if (field === 'title' || field === 'venueId') {
-      valA = a[field].toLowerCase();
-      valB = b[field].toLowerCase();
-      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    }
-
-    if (field === 'startDate' || field === 'modificationTime') {
-      valA = new Date(a[field]);
-      valB = new Date(b[field]);
-      return sortAscending ? valA - valB : valB - valA;
-    }
-
     if (a[field] !== undefined && b[field] !== undefined) {
+      if ((field === 'title' || field === 'venueId')) {
+        valA = a[field].toLowerCase();
+        valB = b[field].toLowerCase();
+        return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      }
+
+      if (field === 'startDate' || field === 'modificationTime') {
+        valA = new Date(a[field]);
+        valB = new Date(b[field]);
+        return sortAscending ? valA - valB : valB - valA;
+      }
+
       valA = a[field].toString().toLowerCase();
       valB = b[field].toString().toLowerCase();
       return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
