@@ -83,7 +83,7 @@ export async function onSubmit(component, props) {
     }
   }
 
-  props.payload = { ...props.payload, partnerVisible };
+  props.payload = { ...props.payload, showEventSponsors: partnerVisible };
 }
 
 export async function onUpdate(_component, _props) {
@@ -131,5 +131,5 @@ export default async function init(component, props) {
   }
 
   const partnerVisible = component.querySelector('#partners-visible');
-  partnerVisible.checked = eventData.partnerVisible;
+  partnerVisible.checked = eventData.showEventSponsors;
 }
