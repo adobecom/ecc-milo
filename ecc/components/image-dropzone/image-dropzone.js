@@ -21,9 +21,13 @@ export class ImageDropzone extends LitElement {
   }
 
   setFile(files) {
-    [this.file] = files;
-    if (this.file.type.startsWith('image/')) {
-      this.file.url = URL.createObjectURL(this.file);
+    const [file] = files;
+    if (file.size > 26214400) {
+      return;
+    }
+    if (file.type.startsWith('image/')) {
+      this.file = file;
+      this.file.url = URL.createObjectURL(file);
       this.requestUpdate();
     }
   }
@@ -73,21 +77,22 @@ export class ImageDropzone extends LitElement {
   }
 
   render() {
-    return html`
+    return this.file?.url ? html`
+      <div class="img-file-input-wrapper solid-border">
+        <div class="preview-wrapper">
+          <div class="preview-img-placeholder">
+            <img src="${this.file.url}" alt="preview image">
+          </div>
+          <img src="/ecc/icons/delete.svg" alt="delete icon" class="icon icon-delete" @click=${this.deleteImage}>
+        </div>
+      </div>`
+      : html`
     <div class="img-file-input-wrapper">
-    ${this.file?.url ? html`
-    <div class="preview-wrapper">
-      <div class="preview-img-placeholder">
-      <img src="${this.file.url}" alt="preview image">
-      </div>
-      <img src="/ecc/icons/delete.svg" alt="delete icon" class="icon icon-delete" @click=${this.deleteImage}>
-    </div>`
-    : html`<label class="img-file-input-label" @dragover=${this.handleDragover} @dragleave=${this.handleDragleave} @drop=${this.handleImageDrop}>
-      <input type="file" class="img-file-input" accept="image/png, image/jpeg" @change=${this.onImageChange}>
-      <img src="/ecc/icons/image-add.svg" alt="add image icon" class="icon icon-image-add"}>
-      <slot name="img-label"></slot>
-    </label>`}
-    </div>
-    `;
+      <label class="img-file-input-label" @dragover=${this.handleDragover} @dragleave=${this.handleDragleave} @drop=${this.handleImageDrop}>
+        <input type="file" class="img-file-input" accept="image/png, image/jpeg" @change=${this.onImageChange}>
+        <img src="/ecc/icons/image-add.svg" alt="add image icon" class="icon icon-image-add"}>
+        <slot name="img-label"></slot>
+      </label>
+    </div>`;
   }
 }
