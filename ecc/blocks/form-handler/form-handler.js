@@ -316,7 +316,7 @@ async function saveEvent(props, options = { toPublish: false }) {
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (!resp.errors || !resp.message) {
+    if (!resp.errors && !resp.message) {
       showSaveSuccessMessage(props);
     }
   } else if (options.toPublish) {
