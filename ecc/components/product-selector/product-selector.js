@@ -8,16 +8,13 @@ export default class ProductSelector extends LitElement {
   static properties = {
     products: { type: Array },
     selectedProduct: { type: Object },
+    groupContainer: { type: Object },
   };
 
   constructor() {
     super();
     this.products = this.products || [];
     this.selectedProduct = { showProductBlade: false };
-  }
-
-  firstUpdated() {
-    this.productSelectorGroup = this.closest('product-selector-group');
   }
 
   static styles = style;
@@ -61,8 +58,8 @@ export default class ProductSelector extends LitElement {
   }
 
   getAvailableProducts() {
-    const selectedProducts = this.productSelectorGroup
-      ? this.productSelectorGroup.getSelectedProducts().map((p) => p.name) : [];
+    const selectedProducts = this.groupContainer
+      ? this.groupContainer.getSelectedProducts().map((p) => p.name) : [];
     return this.products.filter((product) => !selectedProducts.includes(product.name))
       .map((product) => html`<sp-menu-item value="${product.name}">${product.title}</sp-menu-item>`);
   }
