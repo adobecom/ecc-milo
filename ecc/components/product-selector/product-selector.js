@@ -26,8 +26,6 @@ export default class ProductSelector extends LitElement {
       ...Object.values(this.products).find((product) => product.name === productName),
     };
 
-    delete this.selectedProduct.isPlaceholder;
-
     this.dispatchEvent(new CustomEvent('update-product', {
       detail: { product: this.selectedProduct },
       bubbles: true,
@@ -78,7 +76,7 @@ export default class ProductSelector extends LitElement {
       <fieldset class="rsvp-field-wrapper">
         <img class="product-img" src="${imageSource}" alt="${title || nothing}">
         <sp-picker class="product-select-input" label="Select a product" value=${name || nothing} @change="${this.handleSelectChange}">
-          ${availableProducts}
+          ${[this.selectedProduct, ...availableProducts]}
         </sp-picker>
         <sp-checkbox class="checkbox-product-link" .checked=${showProductBlade} .disabled=${!this.isValidSelection()} @change="${this.handleCheckChange}">
           Show ${title || '[Product name]'} product blade on event details page
