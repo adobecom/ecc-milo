@@ -75,12 +75,12 @@ function initAutocomplete(el) {
       });
 
       if (place.name) changeInputValue(venueName, 'value', place.name);
-      changeInputValue(address, 'value', addressInfo.address);
-      changeInputValue(city, 'value', addressInfo.city);
-      changeInputValue(state, 'value', addressInfo.state);
-      changeInputValue(stateCode, 'value', addressInfo.stateCode);
-      changeInputValue(zip, 'value', addressInfo.zip);
-      changeInputValue(country, 'value', addressInfo.country);
+      changeInputValue(address, 'value', addressInfo.address, true);
+      changeInputValue(city, 'value', addressInfo.city, true);
+      changeInputValue(state, 'value', addressInfo.state, true);
+      changeInputValue(stateCode, 'value', addressInfo.stateCode, true);
+      changeInputValue(zip, 'value', addressInfo.zip, true);
+      changeInputValue(country, 'value', addressInfo.country, true);
       changeInputValue(placeId, 'value', place.place_id);
       changeInputValue(mapUrl, 'value', place.url);
     }
@@ -186,12 +186,12 @@ export default async function init(component, props) {
     } = venue;
 
     changeInputValue(component.querySelector('#venue-info-venue-name'), 'value', venueName);
-    changeInputValue(component.querySelector('#venue-info-venue-address'), 'value', address);
-    changeInputValue(component.querySelector('#location-city'), 'value', city);
-    changeInputValue(component.querySelector('#location-state'), 'value', state);
-    changeInputValue(component.querySelector('#location-state-code'), 'value', statecode);
-    changeInputValue(component.querySelector('#location-zip-code'), 'value', postalCode);
-    changeInputValue(component.querySelector('#location-country'), 'value', country);
+    changeInputValue(component.querySelector('#venue-info-venue-address'), 'value', address, true);
+    changeInputValue(component.querySelector('#location-city'), 'value', city, true);
+    changeInputValue(component.querySelector('#location-state'), 'value', state, true);
+    changeInputValue(component.querySelector('#location-state-code'), 'value', statecode, true);
+    changeInputValue(component.querySelector('#location-zip-code'), 'value', postalCode, true);
+    changeInputValue(component.querySelector('#location-country'), 'value', country, true);
     changeInputValue(component.querySelector('#google-place-lat'), 'value', venue.coordinates?.lat);
     changeInputValue(component.querySelector('#google-place-lng'), 'value', venue.coordinates?.lon);
     changeInputValue(component.querySelector('#google-place-id'), 'value', placeId);
