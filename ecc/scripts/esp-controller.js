@@ -473,3 +473,15 @@ export async function getSpeakers(seriesId) {
     .catch((error) => window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error: ${error}`));
   return resp;
 }
+
+export async function getEventImages(eventId) {
+  if (!eventId) return false;
+
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const options = await constructRequestOptions('GET');
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/images`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to get event images for event ${eventId}. Error: ${error}`));
+  return resp;
+}

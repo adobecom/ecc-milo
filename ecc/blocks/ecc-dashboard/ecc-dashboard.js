@@ -1,6 +1,7 @@
 import {
   createEvent,
   deleteEvent,
+  getEventImages,
   getEvents,
   publishEvent,
   unpublishEvent,
@@ -113,24 +114,26 @@ function highlightRow(row) {
 
 function buildThumbnail(data) {
   const container = createTag('td', { class: 'thumbnail-container' });
-  if (!data.photos) return container;
+  getEventImages(data.eventId).then(({ images }) => {
+    if (!images) return;
 
-  const cardImage = data.photos.find((photo) => photo.imageKind === 'event-card-image');
-  const heroImage = data.photos.find((photo) => photo.imageKind === 'event-hero-image');
-  const venueImage = data.photos.find((photo) => photo.imageKind === 'venue-image');
+    const cardImage = images.find((photo) => photo.imageKind === 'event-card-image');
+    const heroImage = images.find((photo) => photo.imageKind === 'event-hero-image');
+    const venueImage = images.find((photo) => photo.imageKind === 'venue-image');
 
-  const img = createTag('img', {
-    class: 'event-thumbnail-img',
-    src: (cardImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
-    || cardImage?.imageUrl
-    || (heroImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
-    || heroImage?.imageUrl
-    || (venueImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
-    || venueImage?.imageUrl
-    || data.photos[0]?.imageUrl
-    || '/ecc/icons/icon-placeholder.svg',
+    const img = createTag('img', {
+      class: 'event-thumbnail-img',
+      src: (cardImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
+      || cardImage?.imageUrl
+      || (heroImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
+      || heroImage?.imageUrl
+      || (venueImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
+      || venueImage?.imageUrl
+      || images[0]?.imageUrl
+      || '/ecc/icons/icon-placeholder.svg',
+    });
+    container.append(img);
   });
-  container.append(img);
 
   return container;
 }
@@ -397,7 +400,7 @@ function buildEventTitleTag(event) {
 }
 
 // TODO: to retire
-async function buildVenueTag(eventObj) {
+function buildVenueTag(eventObj) {
   const { venue } = eventObj;
   if (!venue) return null;
 
@@ -418,7 +421,7 @@ async function populateRow(props, config, index) {
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, await buildVenueTag(event)));
+  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(event)));
   const timezoneCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getTimezoneName(event.gmtOffset)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.externalEventId));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
