@@ -57,24 +57,33 @@ export default class ProductSelector extends LitElement {
     return this.selectedProduct.name && !isEmptyObject(this.selectedProduct);
   }
 
+  getAvailableProducts() {
+    const selectedProducts = this.groupContainer
+      ? this.groupContainer.getSelectedProducts().map((p) => p.name) : [];
+    return this.products.filter((product) => !selectedProducts.includes(product.name))
+      .map((product) => html`<sp-menu-item value="${product.name}">${product.title}</sp-menu-item>`);
+  }
+
+  getImageSource() {
+    const { tagImage, name } = this.selectedProduct;
+    const match = this.products.find((product) => product.name === name);
+    return tagImage || match?.tagImage || '/ecc/icons/icon-placeholder.svg';
+  }
+
   render() {
-    const match = this.products.find((product) => product.name === this.selectedProduct.name);
-    const availableProducts = this.products.filter((p) => {
-      if (this.groupContainer) {
-        return !this.groupContainer.getSelectedProducts()
-          .find((selectedProduct) => selectedProduct.name === p.name);
-      }
-      return true;
-    }).map((product) => html`<sp-menu-item value="${product.name}">${product.title}
-    </sp-menu-item>`);
+    const { name, title, showProductBlade } = this.selectedProduct;
+    const availableProducts = this.getAvailableProducts();
+    const imageSource = this.getImageSource();
 
     return html`
       <fieldset class="rsvp-field-wrapper">
-      ${html`<img class="product-img" src="${this.selectedProduct.tagImage || match?.tagImage || '/ecc/icons/icon-placeholder.svg'}" alt="${this.selectedProduct.title || nothing}">`}  
-        <sp-picker class="product-select-input" label="Select a product" value=${this.selectedProduct.name || nothing} @change="${this.handleSelectChange}">
-          ${availableProducts};
+        <img class="product-img" src="${imageSource}" alt="${title || nothing}">
+        <sp-picker class="product-select-input" label="Select a product" value=${name || nothing} @change="${this.handleSelectChange}">
+          ${availableProducts}
         </sp-picker>
-        ${html`<sp-checkbox class="checkbox-product-link" .checked=${this.selectedProduct.showProductBlade} .disabled=${!this.isValidSelection()} @change="${this.handleCheckChange}">Show ${this.selectedProduct.title || '[Product name]'} product blade on event details page</sp-checkbox>`}
+        <sp-checkbox class="checkbox-product-link" .checked=${showProductBlade} .disabled=${!this.isValidSelection()} @change="${this.handleCheckChange}">
+          Show ${title || '[Product name]'} product blade on event details page
+        </sp-checkbox>
         <slot name="delete-btn"></slot>
       </fieldset>
     `;
