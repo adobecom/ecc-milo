@@ -94,10 +94,6 @@ function initAutocomplete(el) {
 }
 
 export async function onSubmit(component, props) {
-  // do nothing as venue calls always need to wait for event update
-}
-
-export async function onUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const { eventId, venue } = props.eventDataResp;
@@ -133,18 +129,8 @@ export async function onUpdate(component, props) {
     gmtOffset,
   };
 
-  const onEventCreate = async (e) => {
-    const resp = await createVenue(e.detail.eventId, venueData);
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
-    props.payload = { ...props.payload, showVenuePostEvent };
-    document.removeEventListener('eventcreated', onEventCreate);
-  };
-
-  const handleVenue = async () => {
-    if (!eventId) {
-      document.addEventListener('eventcreated', onEventCreate);
-      return;
-    }
+  const onEventUpdate = async () => {
+    if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
     let resp;
     if (!venue) {
@@ -166,7 +152,11 @@ export async function onUpdate(component, props) {
     }
   };
 
-  handleVenue();
+  props.el.addEventListener('eventUpdated', onEventUpdate);
+}
+
+export async function onUpdate(component, props) {
+  // do nothing
 }
 
 export default async function init(component, props) {
