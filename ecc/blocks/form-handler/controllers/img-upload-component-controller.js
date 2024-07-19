@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { uploadImage } from '../../../scripts/esp-controller.js';
+import { getEventImages, uploadImage } from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 function getComponentImageType(component) {
@@ -40,7 +40,7 @@ export async function onUpdate(component, props) {
   updateImgUploadComponentConfigs(component);
 }
 
-export default function init(component, props) {
+export default async function init(component, props) {
   const type = getComponentImageType(component);
   const dropzones = component.querySelectorAll('image-dropzone');
 
@@ -51,9 +51,13 @@ export default function init(component, props) {
 
       if (!file || !(file instanceof File)) return;
 
-      if (props.eventDataResp?.photos) {
-        const photoObj = props.eventDataResp.photos.find((p) => p.imageKind === type);
-        if (photoObj) imageId = photoObj.imageId;
+      if (props.eventDataResp.eventId) {
+        const { images } = await getEventImages(props.eventDataResp.eventId);
+
+        if (images) {
+          const photoObj = images.find((p) => p.imageKind === type);
+          if (photoObj) imageId = photoObj.imageId;
+        }
       }
 
       const resp = await uploadImage(file, JSON.parse(component.dataset.configs), imageId);
@@ -63,14 +67,18 @@ export default function init(component, props) {
   });
 
   const eventData = props.eventDataResp;
-  if (eventData.photos) {
-    const photoObj = eventData.photos.find((p) => p.imageKind === type);
+  if (eventData.eventId) {
+    const { images } = await getEventImages(eventData.eventId);
 
-    if (photoObj) {
-      dropzones.forEach((dz) => {
-        dz.file = { ...photoObj, url: photoObj.imageUrl };
-        dz.requestUpdate();
-      });
+    if (images) {
+      const photoObj = images.find((p) => p.imageKind === type);
+
+      if (photoObj) {
+        dropzones.forEach((dz) => {
+          dz.file = { ...photoObj, url: photoObj.imageUrl };
+          dz.requestUpdate();
+        });
+      }
     }
   }
 
