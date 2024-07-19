@@ -57,7 +57,11 @@ export default class ProductSelector extends LitElement {
 
   getAvailableProducts() {
     const selectedProducts = this.existingProducts || [];
-    return this.products.filter((product) => !selectedProducts.includes(product.name))
+    return this.products.filter((product) => {
+      const notSelectedByOthers = !selectedProducts.some((p) => p.name === product.name);
+      const isCurrentProduct = product.name === this.selectedProduct.name;
+      return notSelectedByOthers || isCurrentProduct;
+    })
       .map((product) => html`<sp-menu-item value="${product.name}">${product.title}</sp-menu-item>`);
   }
 
@@ -76,7 +80,7 @@ export default class ProductSelector extends LitElement {
       <fieldset class="rsvp-field-wrapper">
         <img class="product-img" src="${imageSource}" alt="${title || nothing}">
         <sp-picker class="product-select-input" label="Select a product" value=${name || nothing} @change="${this.handleSelectChange}">
-          ${[this.selectedProduct, ...availableProducts]}
+          ${availableProducts}
         </sp-picker>
         <sp-checkbox class="checkbox-product-link" .checked=${showProductBlade} .disabled=${!this.isValidSelection()} @change="${this.handleCheckChange}">
           Show ${title || '[Product name]'} product blade on event details page
