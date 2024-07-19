@@ -21,7 +21,7 @@ const DEFAULT_FIELD_LABELS = {
 };
 
 const SPEAKER_TYPE = ['Host', 'Speaker'];
-const SUPPORTED_SOCIAL = ['facebook', 'instagram', 'twitter', 'linkedin', 'pinterest', 'discord', 'behance', 'youtube', 'weibo', 'social-media'];
+const SUPPORTED_SOCIAL = ['facebook', 'instagram', 'x', 'twitter', 'linkedin', 'pinterest', 'discord', 'behance', 'youtube', 'weibo', 'social-media'];
 
 export class Profile extends LitElement {
   static properties = {
