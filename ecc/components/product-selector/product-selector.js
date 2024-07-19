@@ -8,7 +8,7 @@ export default class ProductSelector extends LitElement {
   static properties = {
     products: { type: Array },
     selectedProduct: { type: Object },
-    groupContainer: { type: Object },
+    existingProducts: { type: Array },
   };
 
   constructor() {
@@ -58,8 +58,7 @@ export default class ProductSelector extends LitElement {
   }
 
   getAvailableProducts() {
-    const selectedProducts = this.groupContainer
-      ? this.groupContainer.getSelectedProducts().map((p) => p.name) : [];
+    const selectedProducts = this.existingProducts || [];
     return this.products.filter((product) => !selectedProducts.includes(product.name))
       .map((product) => html`<sp-menu-item value="${product.name}">${product.title}</sp-menu-item>`);
   }
