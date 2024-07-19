@@ -94,6 +94,10 @@ function initAutocomplete(el) {
 }
 
 export async function onSubmit(component, props) {
+  // do nothing as venue calls always need to wait for event update
+}
+
+export async function onUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const { eventId, venue } = props.eventDataResp;
@@ -163,10 +167,6 @@ export async function onSubmit(component, props) {
   };
 
   handleVenue();
-}
-
-export async function onUpdate(_component, _props) {
-  // Do nothing
 }
 
 export default async function init(component, props) {
