@@ -96,39 +96,44 @@ function initAutocomplete(el) {
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible').checked;
-  const venueName = component.querySelector('#venue-info-venue-name').value;
-  const address = component.querySelector('#venue-info-venue-address').value;
-  const city = component.querySelector('#location-city').value;
-  const state = component.querySelector('#location-state').value;
-  const stateCode = component.querySelector('#location-state-code').value;
-  const postalCode = component.querySelector('#location-zip-code').value;
-  const country = component.querySelector('#location-country').value;
-  const placeId = component.querySelector('#google-place-id').value;
-  const mapUrl = component.querySelector('#google-map-url').value;
-  const lat = +component.querySelector('#google-place-lat').value;
-  const lon = +component.querySelector('#google-place-lng').value;
-  const gmtOffset = +component.querySelector('#google-place-gmt-offset').value;
+  const getVenueDataInForm = () => {
+    const venueName = component.querySelector('#venue-info-venue-name').value;
+    const address = component.querySelector('#venue-info-venue-address').value;
+    const city = component.querySelector('#location-city').value;
+    const state = component.querySelector('#location-state').value;
+    const stateCode = component.querySelector('#location-state-code').value;
+    const postalCode = component.querySelector('#location-zip-code').value;
+    const country = component.querySelector('#location-country').value;
+    const placeId = component.querySelector('#google-place-id').value;
+    const mapUrl = component.querySelector('#google-map-url').value;
+    const lat = +component.querySelector('#google-place-lat').value;
+    const lon = +component.querySelector('#google-place-lng').value;
+    const gmtOffset = +component.querySelector('#google-place-gmt-offset').value;
 
-  const venueData = {
-    venueName,
-    address,
-    city,
-    state,
-    stateCode,
-    postalCode,
-    country,
-    placeId,
-    mapUrl,
-    coordinates: {
-      lat,
-      lon,
-    },
-    gmtOffset,
+    const venueData = {
+      venueName,
+      address,
+      city,
+      state,
+      stateCode,
+      postalCode,
+      country,
+      placeId,
+      mapUrl,
+      coordinates: {
+        lat,
+        lon,
+      },
+      gmtOffset,
+    };
+
+    return venueData;
   };
 
   const onEventUpdate = async () => {
     if (component.closest('.fragment')?.classList.contains('hidden')) return;
+
+    const venueData = getVenueDataInForm();
 
     let resp;
     if (!props.eventDataResp.venue) {
@@ -146,7 +151,10 @@ export async function onSubmit(component, props) {
 
     if (resp) {
       props.eventDataResp = { ...props.eventDataResp, ...resp };
-      props.payload = { ...props.payload, showVenuePostEvent };
+      props.payload = {
+        ...props.payload,
+        showVenuePostEvent: venueData.showVenuePostEvent,
+      };
     }
   };
 
