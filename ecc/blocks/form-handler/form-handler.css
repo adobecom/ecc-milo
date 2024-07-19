@@ -21,6 +21,24 @@
   --mod-textfield-icon-size-invalid: 16px;
 }
 
+.form-handler .main-frame {
+  flex-grow: 1;
+  min-height: 100%;
+}
+
+.form-handler .form-handler-ctas-panel {
+  position: sticky;
+  transform: translateX(-40px);
+  box-sizing: border-box;
+  bottom: 0;
+  padding: 16px 60px;
+  background-color: var(--color-red);
+  width: calc(100% + 80px);
+  z-index: 9;
+  display: flex;
+  justify-content: center;
+}
+
 .form-handler.disabled .main-frame,
 .form-handler.disabled .form-handler-ctas-panel {
   pointer-events: none;
@@ -76,6 +94,10 @@
   border-radius: 8px;
   padding-left: 24px;
   padding-right: 24px;
+}
+
+.form-handler .form-handler-ctas-panel a {
+  font-size: var(--type-body-s-size);
 }
 
 .form-handler .side-menu ul li a {
@@ -142,11 +164,6 @@
   opacity: 0.5;
 }
 
-.form-handler .main-frame {
-  flex-grow: 1;
-  min-height: 100%;
-}
-
 .form-handler .main-frame sp-theme {
   min-height: 100%;
   position: relative;
@@ -168,6 +185,12 @@
   grid-template-columns: 1fr 1fr;
 }
 
+.form-handler .img-upload-text p {
+  margin: 0;
+  font-size: var(--type-body-xs-size);
+  line-height: normal;
+}
+
 .form-handler .main-frame .section:first-of-type .content p {
   font-size: var(--type-body-xs-size);
 }
@@ -175,6 +198,20 @@
 .form-handler .main-frame .section:first-of-type .content p:first-of-type {
   display: flex;
   flex-direction: row-reverse;
+}
+
+.form-handler .form-component > div:first-of-type > div > h2 {
+  font-size: var(--type-heading-xl-size);
+  line-height: var(--type-heading-xl-lh);
+}
+
+.form-handler .form-component > div:first-of-type > div > h2,
+.form-handler .form-component > div:first-of-type > div > h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  margin-bottom: 32px;
 }
 
 .form-handler .main-frame .section:first-of-type h2 {
@@ -211,11 +248,6 @@
   cursor: help;
 }
 
-.form-handler .form-component > div:first-of-type > div > h2 {
-  font-size: var(--type-heading-xl-size);
-  line-height: var(--type-heading-xl-lh);
-}
-
 .form-handler .section:not(:first-of-type) > div.content > h2,
 .form-handler .section:not(:first-of-type) > div.content > h3 {
   display: flex;
@@ -225,42 +257,21 @@
   padding: 0 12px;
 }
 
-.form-handler .form-component > div:first-of-type > div > h2,
-.form-handler .form-component > div:first-of-type > div > h3 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 32px 0;
-}
-
-.form-handler .section:not(:first-of-type) > div.content > h2 sp-action-button,
-.form-handler .section:not(:first-of-type) > div.content > h3 sp-action-button,
 .form-handler .form-component > div:first-of-type > div > h2 sp-action-button,
-.form-handler .form-component > div:first-of-type > div > h3 sp-action-button {
+.form-handler .form-component > div:first-of-type > div > h3 sp-action-button,
+.form-handler .section:not(:first-of-type) > div.content > h2 sp-action-button,
+.form-handler .section:not(:first-of-type) > div.content > h3 sp-action-button {
   padding: 0;
   background: none;
   border: none;
   cursor: help
 }
 
-.form-handler .section:not(:first-of-type) > div.content > h2 sp-action-button .icon-info,
-.form-handler .section:not(:first-of-type) > div.content > h3 sp-action-button .icon-info,
 .form-handler .form-component > div:first-of-type > div > h2 sp-action-button .icon-info,
-.form-handler .form-component > div:first-of-type > div > h3 sp-action-button .icon-info {
+.form-handler .form-component > div:first-of-type > div > h3 sp-action-button .icon-info,
+.form-handler .section:not(:first-of-type) > div.content > h2 sp-action-button .icon-info,
+.form-handler .section:not(:first-of-type) > div.content > h3 sp-action-button .icon-info {
   display: block;
-}
-
-.form-handler .form-handler-ctas-panel {
-  position: sticky;
-  transform: translateX(-40px);
-  box-sizing: border-box;
-  bottom: 0;
-  padding: 16px 60px;
-  background-color: var(--color-red);
-  width: calc(100% + 80px);
-  z-index: 9;
-  display: flex;
-  justify-content: center;
 }
 
 .form-handler .form-handler-ctas-panel .form-handler-panel-wrapper {
@@ -292,10 +303,6 @@
 .form-handler .form-handler-ctas-panel .form-handler-forward-wrapper > div:first-of-type {
   padding-right: 16px;
   border-right: 2px solid var(--color-black);
-}
-
-.form-handler .form-handler-ctas-panel a {
-  font-size: var(--type-body-s-size);
 }
 
 .form-handler .form-handler-ctas-panel a.disabled,
@@ -343,12 +350,6 @@
 
 .form-handler .hidden {
   display: none;
-}
-
-.form-handler .img-upload-text p {
-  margin: 0;
-  font-size: var(--type-body-xs-size);
-  line-height: normal;
 }
 
 .form-handler .toast-parent {
