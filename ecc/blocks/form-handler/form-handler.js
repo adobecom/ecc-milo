@@ -306,25 +306,32 @@ async function saveEvent(props, options = { toPublish: false }) {
 
   let resp;
 
+  const onEventSave = () => {
+    if (!resp.errors && !resp.message) {
+      showSaveSuccessMessage(props);
+    }
+
+    if (resp?.eventId) props.el.dispatchEvent(new CustomEvent('eventUpdated', { detail: { eventId: resp.eventId } }));
+  };
+
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
     resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: resp.eventId } }));
+    onEventSave();
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (!resp.errors && !resp.message) {
-      showSaveSuccessMessage(props);
-    }
+    onEventSave();
   } else if (options.toPublish) {
     resp = await publishEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
+    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventUpdated', { detail: { eventId: resp.eventId } }));
   }
 
   return resp;
@@ -645,6 +652,9 @@ function updateDashboardLink(props) {
   if (!dashboardLink) return;
 
   const url = new URL(dashboardLink.href);
+
+  if (url.searchParams.has('eventId')) return;
+
   url.searchParams.set('newEventId', getFilteredCachedResponse().eventId);
   dashboardLink.href = url.toString();
 }

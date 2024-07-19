@@ -177,9 +177,10 @@ export async function decorateTextfield(cell, extraOptions) {
   cell.append(wrapper);
 }
 
-export function changeInputValue(input, attr, value) {
+export function changeInputValue(input, attr, value, toDisable = false) {
   if (!input || !value) return;
   input[attr] = value;
+  if (toDisable) input.disabled = true;
   input.dispatchEvent(new Event('change'));
 }
 
