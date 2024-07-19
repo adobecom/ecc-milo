@@ -3,7 +3,7 @@
 import { LIBS } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../scripts/utils.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 function formatDate(date) {
   let month = `${date.getMonth() + 1}`;
@@ -171,7 +171,17 @@ function updateInput(component, state) {
     if (state.selectedStartDate) dateInput.dataset.startDate = formatDate(state.selectedStartDate);
     if (state.selectedEndDate) dateInput.dataset.endDate = formatDate(state.selectedEndDate);
 
-    if (dateInput.dataset.startDate && dateInput.dataset.endDate) dateInput.value = `${dateInput.dataset.startDate} - ${dateInput.dataset.endDate}`;
+    if (dateInput.dataset.startDate && dateInput.dataset.endDate) {
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      const dateLocale = getConfig().locale?.ietf || 'en-US';
+      const startDateTime = new Date(dateInput.dataset.startDate)
+        .toLocaleDateString(dateLocale, options);
+      const endDateTime = new Date(dateInput.dataset.endDate)
+        .toLocaleDateString(dateLocale, options);
+      const dateValue = dateInput.dataset.startDate === dateInput.dataset.endDate
+        ? startDateTime : `${startDateTime} - ${endDateTime}`;
+      dateInput.value = dateValue;
+    }
   }
 }
 
