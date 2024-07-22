@@ -101,9 +101,16 @@ modal{
   margin: 0;
 }
 
+.preview-wrapper {
+  height: 200px;
+}
+
+.preview-img-placeholder {
+  height: 100%;
+}
+
 .speaker-image {
   width: 300px;
-  max-width: 100%;
   height: 100%;
   display: block;
   object-fit: cover;
