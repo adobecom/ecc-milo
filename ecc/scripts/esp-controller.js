@@ -301,7 +301,6 @@ export async function updateSpeaker(profile, seriesId) {
   const raw = JSON.stringify({ ...nSpeaker, seriesId });
   const options = await constructRequestOptions('PUT', raw);
 
-
   const resp = await fetch(`${host}/v1/series/${seriesId}/speakers/${profile.speakerId}`, options)
     .then((res) => res.json());
 
@@ -386,7 +385,7 @@ export async function getVenue(eventId) {
 function convertToSpeaker(speaker) {
   const {
     // eslint-disable-next-line max-len
-    speakerId, firstName, lastName, title, company, bio, socialLinks, creationTime, modificationTime,
+    speakerId, firstName, lastName, title, company, bio, socialLinks, creationTime, modificationTime, photo,
   } = speaker;
 
   return {
@@ -396,6 +395,7 @@ function convertToSpeaker(speaker) {
     title,
     company,
     bio,
+    photo,
     socialMedia: socialLinks || [],
     creationTime,
     modificationTime,

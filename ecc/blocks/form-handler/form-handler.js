@@ -753,6 +753,11 @@ async function buildECCForm(el) {
   updateRequiredFields(proxyProps);
   enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
+  el.addEventListener('show-error-toast', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    buildErrorMessage(proxyProps, e.detail);
+  });
 }
 
 export default async function init(el) {
