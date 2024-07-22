@@ -18,8 +18,6 @@ const submissionFilter = [
   'localEndDate',
   'localStartTime',
   'localEndTime',
-  'localStartTimeMillis',
-  'localEndTimeMillis',
   'timezone',
   'showAgendaPostEvent',
   'showVenuePostEvent',
@@ -33,8 +31,6 @@ const submissionFilter = [
   'hostEmail',
   'eventId',
   'published',
-  'startDate',
-  'endDate',
   'creationTime',
   'modificationTime',
 ];
