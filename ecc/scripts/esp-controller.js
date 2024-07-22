@@ -301,9 +301,9 @@ export async function updateSpeaker(profile, seriesId) {
   const raw = JSON.stringify({ ...nSpeaker, seriesId });
   const options = await constructRequestOptions('PUT', raw);
 
+
   const resp = await fetch(`${host}/v1/series/${seriesId}/speakers/${profile.speakerId}`, options)
-    .then((res) => res.json())
-    .catch((error) => window.lana?.log(`Failed to update speaker. Error: ${error}`));
+    .then((res) => res.json());
 
   return resp;
 }
