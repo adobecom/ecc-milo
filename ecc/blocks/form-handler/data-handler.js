@@ -2,7 +2,7 @@
 let responseCache = {};
 let payloadCache = {};
 
-const wl = [
+const submissionFilter = [
   // from payload and response
   'agenda',
   'topics',
@@ -31,16 +31,12 @@ const wl = [
   'attendeeLimit',
   'allowWaitlisting',
   'hostEmail',
-  // only in response
   'eventId',
-  'url',
   'published',
   'startDate',
   'endDate',
-  'duration',
   'creationTime',
   'modificationTime',
-  'detailPagePath',
 ];
 
 function isValidAttribute(attr) {
@@ -50,7 +46,7 @@ function isValidAttribute(attr) {
 export function quickFilter(obj) {
   const output = {};
 
-  wl.forEach((attr) => {
+  submissionFilter.forEach((attr) => {
     if (isValidAttribute(obj[attr])) {
       output[attr] = obj[attr];
     }
@@ -83,5 +79,9 @@ export default function getJoinedData() {
   const filteredResponse = getFilteredCachedResponse();
   const filteredPayload = getFilteredCachedPayload();
 
-  return { ...filteredResponse, ...filteredPayload };
+  return {
+    ...filteredResponse,
+    ...filteredPayload,
+    modificationTime: filteredResponse.modificationTime,
+  };
 }
