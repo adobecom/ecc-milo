@@ -160,7 +160,7 @@ export async function createEvent(payload) {
 function convertToNSpeaker(profile) {
   const {
     // eslint-disable-next-line max-len
-    speakerId, firstName, lastName, title, company, bio, socialLinks, creationTime, modificationTime,
+    speakerId, firstName, lastName, title, company, bio, socialMedia, creationTime, modificationTime,
   } = profile;
 
   return {
@@ -170,7 +170,7 @@ function convertToNSpeaker(profile) {
     title,
     company,
     bio,
-    socialLinks,
+    socialLinks: socialMedia,
     creationTime,
     modificationTime,
   };
@@ -383,9 +383,23 @@ export async function getVenue(eventId) {
   return resp;
 }
 
-function convertNspeakerToSpeaker(speaker) {
-  speaker.isPlaceholder = false;
-  return speaker;
+function convertToSpeaker(speaker) {
+  const {
+    // eslint-disable-next-line max-len
+    speakerId, firstName, lastName, title, company, bio, socialLinks, creationTime, modificationTime,
+  } = speaker;
+
+  return {
+    speakerId,
+    firstName,
+    lastName,
+    title,
+    company,
+    bio,
+    socialMedia: socialLinks || [],
+    creationTime,
+    modificationTime,
+  };
 }
 
 export async function getSpeaker(seriesId, speakerId) {
@@ -396,7 +410,7 @@ export async function getSpeaker(seriesId, speakerId) {
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get venue details. Error: ${error}`));
 
-  return convertNspeakerToSpeaker(resp);
+  return convertToSpeaker(resp);
 }
 
 export async function getClouds() {
@@ -498,7 +512,7 @@ export async function getSpeakers(seriesId) {
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error: ${error}`));
 
-  return { speakers: resp.speakers.map(convertNspeakerToSpeaker) };
+  return { speakers: resp.speakers.map(convertToSpeaker) };
 }
 
 export async function getEventImages(eventId) {
