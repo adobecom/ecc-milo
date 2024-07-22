@@ -21,7 +21,9 @@ const DEFAULT_FIELD_LABELS = {
 };
 
 const SPEAKER_TYPE = ['Host', 'Speaker'];
-const SUPPORTED_SOCIAL = ['facebook', 'instagram', 'x', 'twitter', 'linkedin', 'pinterest', 'discord', 'behance', 'youtube', 'weibo', 'social-media'];
+// eslint-disable-next-line max-len
+// const SUPPORTED_SOCIAL = ['facebook', 'instagram', 'x', 'twitter', 'linkedin', 'pinterest', 'discord', 'behance', 'youtube', 'weibo', 'social-media'];
+const SUPPORTED_SOCIAL = ['YouTube', 'LinkedIn', 'Web', 'X', 'TikTok', 'Instagram', 'Facebook', 'Pinterest'];
 
 export class Profile extends LitElement {
   static properties = {
@@ -59,8 +61,16 @@ export class Profile extends LitElement {
   }
 
   updateSocialMedia(index, value) {
-    this.profile.socialMedia[index] = { link: value, serviceName: getServiceName(value) };
-    this.requestUpdate();
+    const tempServiceName = getServiceName(value);
+    // eslint-disable-next-line max-len
+    const serviceName = SUPPORTED_SOCIAL.find((service) => service.toLowerCase() === tempServiceName.toLowerCase());
+    if (serviceName === undefined) {
+      this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Invalid social media not accepted' }, bubbles: true, composed: true }));
+    } else {
+      // eslint-disable-next-line max-len
+      this.profile.socialMedia[index] = { link: value, serviceName };
+      this.requestUpdate();
+    }
   }
 
   renderProfileTypePicker() {
@@ -68,7 +78,7 @@ export class Profile extends LitElement {
     const fieldLabel = this.getRequiredProps().fieldLabelsJSON.chooseType ?? DEFAULT_FIELD_LABELS.chooseType;
     return html`
     <div>
-    <div><sp-field-label size="l" required>${fieldLabel}</sp-field-label></div>
+    <div><sp-field-label size="l" required>${fieldLabel} *</sp-field-label></div>
     <sp-picker label=${fieldLabel} value=${this.profile?.type} size="l" @change=${(event) => this.updateProfile({ type: event.target.value })}>
         ${repeat(SPEAKER_TYPE, (type) => html`
             <sp-menu-item value="${type}">${type}</sp-menu-item>
@@ -95,10 +105,19 @@ export class Profile extends LitElement {
         respJson = await createSpeaker(profile, this.seriesId);
       }
 
+      if (respJson.errors || respJson.message) {
+        window.lana?.log(`error occured while saving profile ${respJson.errors ?? respJson.message}`);
+        saveButton.pending = false;
+        const { errors, message } = respJson;
+        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { errors, message }, bubbles: true, composed: true }));
+        return;
+      }
+
       if (respJson.speakerId) {
         profile.speakerId = respJson.speakerId;
         profile.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
         const file = imageDropzone?.getFile();
+        profile.modificationTime = respJson.modificationTime;
 
         if (file && (file instanceof File)) {
           const speakerData = await uploadImage(file, {
@@ -288,7 +307,7 @@ export class Profile extends LitElement {
   }
 
   renderSocialMediaLink(socialMedia) {
-    const serviceName = SUPPORTED_SOCIAL.includes(socialMedia.serviceName) ? socialMedia.serviceName : 'social-media';
+    const serviceName = SUPPORTED_SOCIAL.includes(socialMedia.serviceName) ? socialMedia.serviceName.toLowerCase() : 'social-media';
     return socialMedia.link ? html`<div class="social-media-row">
     <svg xmlns="http://www.w3.org/2000/svg" class="feds-social-icon" alt="${serviceName} logo">
       <use href="#footer-icon-${serviceName}"></use>

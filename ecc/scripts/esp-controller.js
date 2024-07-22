@@ -157,9 +157,30 @@ export async function createEvent(payload) {
   return resp;
 }
 
+function convertToNSpeaker(profile) {
+  const {
+    // eslint-disable-next-line max-len
+    speakerId, firstName, lastName, title, company, bio, socialMedia, creationTime, modificationTime,
+  } = profile;
+
+  return {
+    speakerId,
+    firstName,
+    lastName,
+    title,
+    company,
+    bio,
+    socialLinks: socialMedia,
+    creationTime,
+    modificationTime,
+  };
+}
+
 export async function createSpeaker(profile, seriesId) {
+  const nSpeaker = convertToNSpeaker(profile);
+
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify({ ...profile, seriesId });
+  const raw = JSON.stringify({ ...nSpeaker, seriesId });
   const options = await constructRequestOptions('POST', raw);
 
   const resp = await fetch(`${host}/v1/series/${seriesId}/speakers`, options)
@@ -286,9 +307,9 @@ export async function removeSpeakerFromEvent(speakerId, eventId) {
 }
 
 export async function updateSpeaker(profile, seriesId) {
+  const nSpeaker = convertToNSpeaker(profile);
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const nProfile = { ...profile, photo: undefined };
-  const raw = JSON.stringify({ ...nProfile, seriesId });
+  const raw = JSON.stringify({ ...nSpeaker, seriesId });
   const options = await constructRequestOptions('PUT', raw);
 
   const resp = await fetch(`${host}/v1/series/${seriesId}/speakers/${profile.speakerId}`, options)
@@ -373,6 +394,26 @@ export async function getVenue(eventId) {
   return resp;
 }
 
+function convertToSpeaker(speaker) {
+  const {
+    // eslint-disable-next-line max-len
+    speakerId, firstName, lastName, title, company, bio, socialLinks, creationTime, modificationTime, photo,
+  } = speaker;
+
+  return {
+    speakerId,
+    firstName,
+    lastName,
+    title,
+    company,
+    bio,
+    photo,
+    socialMedia: socialLinks || [],
+    creationTime,
+    modificationTime,
+  };
+}
+
 export async function getSpeaker(seriesId, speakerId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
   const options = await constructRequestOptions('GET');
@@ -381,7 +422,7 @@ export async function getSpeaker(seriesId, speakerId) {
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get venue details. Error: ${error}`));
 
-  return resp;
+  return convertToSpeaker(resp);
 }
 
 export async function getClouds() {
@@ -482,7 +523,8 @@ export async function getSpeakers(seriesId) {
   const resp = await fetch(`${host}/v1/series/${seriesId}/speakers`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error: ${error}`));
-  return resp;
+
+  return { speakers: resp.speakers.map(convertToSpeaker) };
 }
 
 export async function getEventImages(eventId) {
