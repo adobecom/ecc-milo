@@ -399,41 +399,6 @@ function initRequiredFieldsValidation(props) {
   inputValidationCB();
 }
 
-// function setRemoveEventListener(removeElement) {
-//   removeElement.addEventListener('click', (event) => {
-//     // FIXME : Use a generic approach to call remove of the handler.
-//     // event.currentTarget.getAttribute('deleteHandler')();
-//     event.currentTarget.parentNode.parentNode.parentNode.remove();
-//   });
-// }
-
-// function initRepeaters(props) {
-//   const repeaters = props.el.querySelectorAll('.repeater-element');
-//   repeaters.forEach((element) => {
-//     const vanillaNode = element.previousElementSibling.cloneNode(true);
-//     element.addEventListener('click', (event) => {
-//       const clonedNode = vanillaNode.cloneNode(true);
-//       const prevNode = event.currentTarget.previousElementSibling;
-//       clonedNode.setAttribute('repeatIdx', parseInt(prevNode.getAttribute('repeatIdx'), 10) + 1);
-
-//       // Reset delete icon state and add listener.
-//       const deleteIcon = clonedNode.querySelector('.repeater-delete-button');
-
-//       if (deleteIcon) {
-//         deleteIcon.classList.remove('hidden');
-//         setRemoveEventListener(deleteIcon);
-//       }
-
-//       prevNode.after(clonedNode);
-//       const tempProps = { el: clonedNode };
-//       yieldToMain().then(() => {
-//         updateRequiredFields(props);
-//         initRepeaters(tempProps);
-//       });
-//     });
-//   });
-// }
-
 function renderFormNavigation(props, prevStep, currentStep) {
   const nextBtn = props.el.querySelector('.form-handler-ctas-panel .next-button');
   const backBtn = props.el.querySelector('.form-handler-ctas-panel .back-btn');
