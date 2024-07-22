@@ -78,7 +78,7 @@ export class Profile extends LitElement {
     const fieldLabel = this.getRequiredProps().fieldLabelsJSON.chooseType ?? DEFAULT_FIELD_LABELS.chooseType;
     return html`
     <div>
-    <div><sp-field-label size="l" required>${fieldLabel}</sp-field-label></div>
+    <div><sp-field-label size="l" required>${fieldLabel} *</sp-field-label></div>
     <sp-picker label=${fieldLabel} value=${this.profile?.type} size="l" @change=${(event) => this.updateProfile({ type: event.target.value })}>
         ${repeat(SPEAKER_TYPE, (type) => html`
             <sp-menu-item value="${type}">${type}</sp-menu-item>
