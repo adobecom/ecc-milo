@@ -750,7 +750,6 @@ async function buildECCForm(el) {
   initFormCtas(proxyProps);
   initNavigation(proxyProps);
   await initComponents(proxyProps);
-  initRepeaters(proxyProps);
   updateRequiredFields(proxyProps);
   enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
