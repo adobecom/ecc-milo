@@ -37,6 +37,7 @@ const submissionFilter = [
   'endDate',
   'creationTime',
   'modificationTime',
+  'duration',
 ];
 
 function isValidAttribute(attr) {
