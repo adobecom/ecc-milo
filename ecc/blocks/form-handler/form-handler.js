@@ -555,20 +555,20 @@ function initFormCtas(props) {
 
 function updateCtas(props) {
   const formCtas = props.el.querySelectorAll('.form-handler-ctas-panel a');
-  const filteredResponse = getFilteredCachedResponse();
+  const { eventDataResp } = props;
 
   formCtas.forEach((a) => {
     if (a.classList.contains('preview-btns')) {
       const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
-      if (filteredResponse.detailPagePath) {
-        a.href = `${getEventPageHost(filteredResponse.published)}${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
+      if (eventDataResp.detailPagePath) {
+        a.href = `${getEventPageHost(eventDataResp.published)}${eventDataResp.detailPagePath}?previewMode=true&timing=${testTime}`;
         a.classList.remove('preview-not-ready');
       }
     }
 
     if (a.classList.contains('next-button')) {
       if (props.currentStep === props.maxStep) {
-        if (filteredResponse.published) {
+        if (eventDataResp.published) {
           a.textContent = a.dataset.republishStateText;
         } else {
           a.textContent = a.dataset.finalStateText;
