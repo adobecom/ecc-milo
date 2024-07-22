@@ -383,6 +383,11 @@ export async function getVenue(eventId) {
   return resp;
 }
 
+function convertNspeakerToSpeaker(speaker) {
+  speaker.isPlaceholder = false;
+  return speaker;
+}
+
 export async function getSpeaker(seriesId, speakerId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
   const options = await constructRequestOptions('GET');
@@ -391,7 +396,7 @@ export async function getSpeaker(seriesId, speakerId) {
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get venue details. Error: ${error}`));
 
-  return resp;
+  return convertNspeakerToSpeaker(resp);
 }
 
 export async function getClouds() {
@@ -493,12 +498,7 @@ export async function getSpeakers(seriesId) {
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error: ${error}`));
 
-  return {
-    speakers: resp.speakers.map((speaker) => {
-      speaker.isPlaceholder = false;
-      return speaker;
-    }),
-  };
+  return { speakers: resp.speakers.map(convertNspeakerToSpeaker) };
 }
 
 export async function getEventImages(eventId) {
