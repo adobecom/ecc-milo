@@ -32,7 +32,6 @@ export function cloneFilter(obj) {
     'localStartTimeMillis',
     'localEndTimeMillis',
     'timezone',
-    'partners',
     'showAgendaPostEvent',
     'showVenuePostEvent',
     'showVenueImage',
