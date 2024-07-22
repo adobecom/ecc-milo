@@ -493,10 +493,12 @@ export async function getSpeakers(seriesId) {
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error: ${error}`));
 
-  return resp.map((speaker) => {
-    speaker.isPlaceholder = false;
-    return speaker;
-  });
+  return {
+    speakers: resp.speakers.map((speaker) => {
+      speaker.isPlaceholder = false;
+      return speaker;
+    }),
+  };
 }
 
 export async function getEventImages(eventId) {
