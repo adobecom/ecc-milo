@@ -239,6 +239,17 @@ export async function getSponsor(seriesId, sponsorId) {
   return resp;
 }
 
+export async function getSponsorImages(seriesId, sponsorId) {
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const options = await constructRequestOptions('GET');
+
+  const resp = await fetch(`${host}/v1/series/${seriesId}/sponsors/${sponsorId}/images`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to get sponsor images. Error:', error));
+
+  return resp;
+}
+
 export async function addSpeakerToEvent(speakerData, eventId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
   const raw = JSON.stringify(speakerData);
