@@ -94,7 +94,51 @@ function initAutocomplete(el) {
 }
 
 export async function onSubmit(component, props) {
-  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+  // do nothing. Depend on eventUpdated event.
+}
+
+export async function onUpdate(component, props) {
+  // do nothing
+}
+
+export default async function init(component, props) {
+  const eventData = props.eventDataResp;
+
+  await loadGoogleMapsAPI(() => initAutocomplete(component));
+
+  const { venue, showVenuePostEvent } = eventData;
+
+  if (venue) {
+    const {
+      venueName,
+      address,
+      city,
+      state,
+      statecode,
+      postalCode,
+      country,
+      placeId,
+      mapUrl,
+    } = venue;
+
+    changeInputValue(component.querySelector('#venue-info-venue-name'), 'value', venueName);
+    changeInputValue(component.querySelector('#venue-info-venue-address'), 'value', address, true);
+    changeInputValue(component.querySelector('#location-city'), 'value', city, true);
+    changeInputValue(component.querySelector('#location-state'), 'value', state, true);
+    changeInputValue(component.querySelector('#location-state-code'), 'value', statecode, true);
+    changeInputValue(component.querySelector('#location-zip-code'), 'value', postalCode, true);
+    changeInputValue(component.querySelector('#location-country'), 'value', country, true);
+    changeInputValue(component.querySelector('#google-place-lat'), 'value', venue.coordinates?.lat);
+    changeInputValue(component.querySelector('#google-place-lng'), 'value', venue.coordinates?.lon);
+    changeInputValue(component.querySelector('#google-place-id'), 'value', placeId);
+    changeInputValue(component.querySelector('#google-map-url'), 'value', mapUrl);
+
+    if (venueName) component.classList.add('prefilled');
+  }
+
+  if (showVenuePostEvent) {
+    changeInputValue(component.querySelector('#checkbox-venue-info-visible'), 'checked', showVenuePostEvent);
+  }
 
   const getVenueDataInForm = () => {
     const venueName = component.querySelector('#venue-info-venue-name').value;
@@ -159,48 +203,4 @@ export async function onSubmit(component, props) {
   };
 
   props.el.addEventListener('eventUpdated', onEventUpdate);
-}
-
-export async function onUpdate(component, props) {
-  // do nothing
-}
-
-export default async function init(component, props) {
-  const eventData = props.eventDataResp;
-
-  await loadGoogleMapsAPI(() => initAutocomplete(component));
-
-  const { venue, showVenuePostEvent } = eventData;
-
-  if (venue) {
-    const {
-      venueName,
-      address,
-      city,
-      state,
-      statecode,
-      postalCode,
-      country,
-      placeId,
-      mapUrl,
-    } = venue;
-
-    changeInputValue(component.querySelector('#venue-info-venue-name'), 'value', venueName);
-    changeInputValue(component.querySelector('#venue-info-venue-address'), 'value', address, true);
-    changeInputValue(component.querySelector('#location-city'), 'value', city, true);
-    changeInputValue(component.querySelector('#location-state'), 'value', state, true);
-    changeInputValue(component.querySelector('#location-state-code'), 'value', statecode, true);
-    changeInputValue(component.querySelector('#location-zip-code'), 'value', postalCode, true);
-    changeInputValue(component.querySelector('#location-country'), 'value', country, true);
-    changeInputValue(component.querySelector('#google-place-lat'), 'value', venue.coordinates?.lat);
-    changeInputValue(component.querySelector('#google-place-lng'), 'value', venue.coordinates?.lon);
-    changeInputValue(component.querySelector('#google-place-id'), 'value', placeId);
-    changeInputValue(component.querySelector('#google-map-url'), 'value', mapUrl);
-
-    if (venueName) component.classList.add('prefilled');
-  }
-
-  if (showVenuePostEvent) {
-    changeInputValue(component.querySelector('#checkbox-venue-info-visible'), 'checked', showVenuePostEvent);
-  }
 }
