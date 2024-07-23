@@ -4,6 +4,8 @@ import { style } from './agenda-fieldset-group.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
+const defaultAgenda = { startTime: '', description: '' };
+
 export default class AgendaFieldsetGroup extends LitElement {
   static properties = {
     agendaItems: { type: Array },
@@ -27,10 +29,7 @@ export default class AgendaFieldsetGroup extends LitElement {
   deleteAgenda(index) {
     this.agendaItems = this.agendaItems.filter((_, i) => i !== index);
     if (this.agendaItems.length === 0) {
-      this.agendaItems = [{
-        startTime: '',
-        description: '',
-      }];
+      this.agendaItems = [defaultAgenda];
     }
 
     this.requestUpdate();
