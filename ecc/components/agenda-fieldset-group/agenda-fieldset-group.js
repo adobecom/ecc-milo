@@ -45,7 +45,7 @@ export default class AgendaFieldsetGroup extends LitElement {
   }
 
   hasOnlyEmptyAgendaLeft() {
-    return this.agendaItems[0].startTime === '' && this.agendaItems[0].description === '';
+    return !this.agendaItems[0]?.startTime && !this.agendaItems[0]?.description;
   }
 
   render() {
