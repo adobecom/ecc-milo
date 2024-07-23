@@ -47,15 +47,11 @@ export default async function init(component, props) {
   const type = getComponentImageType(component);
   const dropzones = component.querySelectorAll('image-dropzone');
 
+  const progressWrapper = component.querySelector('.progress-wrapper');
+  const progress = component.querySelector('sp-progress-circle');
+
   dropzones.forEach((dz) => {
-    const progressWrapper = createTag('div', { class: 'progress-bar-wrapper hidden' });
-    const progress = createTag('sp-progress-circle', { label: 'Uploading image' }, '', { parent: progressWrapper });
-
-    const inputWrapper = dz.shadowRoot.querySelector('.img-file-input-wrapper');
-
     let imageId = null;
-
-    if (inputWrapper) inputWrapper.append(progressWrapper);
 
     dz.handleImage = async () => {
       const file = dz.getFile();
