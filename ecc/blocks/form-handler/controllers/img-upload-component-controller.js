@@ -1,6 +1,9 @@
 /* eslint-disable no-unused-vars */
 import { getEventImages, uploadImage } from '../../../scripts/esp-controller.js';
+import { LIBS } from '../../../scripts/scripts.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
+
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function getComponentImageType(component) {
   const typeMap = {
@@ -45,9 +48,15 @@ export default async function init(component, props) {
   const dropzones = component.querySelectorAll('image-dropzone');
 
   dropzones.forEach((dz) => {
+    const progressBarWrapper = createTag('div', { class: 'progress-bar-wrapper hidden' });
+    const progressBar = createTag('sp-progress-bar', { label: 'Uploading image' }, '', { parent: progressBarWrapper });
+
+    let imageId = null;
+
+    dz.append(progressBarWrapper);
+
     dz.handleImage = async () => {
       const file = dz.getFile();
-      let imageId = null;
 
       if (!file || !(file instanceof File)) return;
 
@@ -60,9 +69,14 @@ export default async function init(component, props) {
         }
       }
 
-      const resp = await uploadImage(file, JSON.parse(component.dataset.configs), imageId);
+      const resp = await uploadImage(
+        file,
+        JSON.parse(component.dataset.configs),
+        progressBar,
+        imageId,
+      );
 
-      console.log(resp);
+      if (resp?.imageId) imageId = resp.imageId;
     };
   });
 

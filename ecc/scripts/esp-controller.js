@@ -80,45 +80,55 @@ async function constructRequestOptions(method, body = null) {
   return options;
 }
 
-export async function uploadImage(file, configs, imageId = null) {
+export async function uploadImage(file, configs, progressBar, imageId = null) {
   await waitForAdobeIMS();
 
   const { host } = getAPIConfig().esp[ECC_ENV];
   const authToken = window.adobeIMS?.getAccessToken()?.token;
-  const headers = new Headers();
-  headers.append('x-image-alt-text', configs.altText || '');
-  headers.append('x-image-kind', configs.type);
-  headers.append('Authorization', `Bearer ${authToken}`);
 
   let respJson = null;
 
-  try {
-    let response;
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const method = imageId ? 'PUT' : 'POST';
+    const url = imageId ? `${host}${configs.targetUrl}/${imageId}` : `${host}${configs.targetUrl}`;
 
-    if (imageId) {
-      response = await fetch(`${host}${configs.targetUrl}/${imageId}`, {
-        method: 'PUT',
-        headers,
-        body: file,
-      });
-    } else {
-      response = await fetch(`${host}${configs.targetUrl}`, {
-        method: 'POST',
-        headers,
-        body: file,
-      });
-    }
+    xhr.open(method, url);
+    xhr.setRequestHeader('x-image-alt-text', configs.altText || '');
+    xhr.setRequestHeader('x-image-kind', configs.type);
+    xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
 
-    if (response.ok) {
-      respJson = await response.json();
-    } else {
-      window.lana?.log('Unexpected image upload server response. Reponse:', response.status);
-    }
-  } catch (error) {
-    window.lana?.log('Failed to upload image. Error:', error);
-  }
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percentComplete = (event.loaded / event.total) * 100;
+        if (progressBar) {
+          progressBar.progress = percentComplete;
+        }
+      }
+    };
 
-  return respJson;
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          respJson = JSON.parse(xhr.responseText);
+          resolve(respJson);
+        } catch (e) {
+          window.lana?.log('Failed to parse image upload response. Error:', e);
+          reject(e);
+        }
+      } else {
+        window.lana?.log('Unexpected image upload server response. Response:', xhr.status);
+        reject(new Error(`Upload failed with status: ${xhr.status}`));
+      }
+    };
+
+    xhr.onerror = () => {
+      window.lana?.log('Failed to upload image. Error:', xhr.statusText);
+      reject(new Error(`Upload failed with status: ${xhr.statusText}`));
+    };
+
+    xhr.send(file);
+  });
 }
 
 export async function createVenue(eventId, venueData) {
