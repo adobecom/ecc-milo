@@ -2,7 +2,6 @@ import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import {
   getIcon,
   buildNoAccessScreen,
-  yieldToMain,
   generateToolTip,
   camelToSentenceCase,
   getEventPageHost,
@@ -76,6 +75,7 @@ const SPECTRUM_COMPONENTS = [
   'toast',
   'icon',
   'action-button',
+  'progress-bar',
 ];
 
 export function buildErrorMessage(props, resp) {
