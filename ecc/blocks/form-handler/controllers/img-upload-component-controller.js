@@ -114,6 +114,8 @@ export default async function init(component, props) {
 
       dialogDeleteBtn.addEventListener('click', async () => {
         try {
+          dialogDeleteBtn.disabled = true;
+          dialogCancelBtn.disabled = true;
           const resp = await deleteImage(configs, imageId);
           if (!(resp.errors || resp.message)) {
             dz.deleteImage();
