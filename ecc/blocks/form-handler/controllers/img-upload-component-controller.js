@@ -51,9 +51,11 @@ export default async function init(component, props) {
     const progressWrapper = createTag('div', { class: 'progress-bar-wrapper hidden' });
     const progress = createTag('sp-progress-circle', { label: 'Uploading image' }, '', { parent: progressWrapper });
 
+    const inputWrapper = dz.querySelector('.img-file-input-wrapper');
+
     let imageId = null;
 
-    dz.append(progressWrapper);
+    if (inputWrapper) inputWrapper.append(progressWrapper);
 
     dz.handleImage = async () => {
       const file = dz.getFile();
@@ -69,6 +71,7 @@ export default async function init(component, props) {
         }
       }
 
+      progressWrapper.classList.remove('hidden');
       const resp = await uploadImage(
         file,
         JSON.parse(component.dataset.configs),
@@ -77,6 +80,7 @@ export default async function init(component, props) {
       );
 
       if (resp?.imageId) imageId = resp.imageId;
+      progressWrapper.classList.add('hidden');
     };
   });
 
