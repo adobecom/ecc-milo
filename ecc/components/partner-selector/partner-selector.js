@@ -51,7 +51,7 @@ export default class PartnerSelector extends LitElement {
   }
 
   checkValidity() {
-    return this.partner.name?.length >= 3 && this.partner.link?.match(LINK_REGEX());
+    return this.partner.name?.length >= 3 && this.partner.link?.match(LINK_REGEX);
   }
 
   async savePartner(e) {
@@ -116,7 +116,7 @@ export default class PartnerSelector extends LitElement {
             </div>
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>
-              <sp-textfield pattern=${LINK_REGEX('HTML')} value=${this.partner.link} @change=${(event) => {
+              <sp-textfield pattern=${LINK_REGEX} value=${this.partner.link} @change=${(event) => {
   this.updateValue('link', event.target.value);
 }}></sp-textfield>
             </div>
