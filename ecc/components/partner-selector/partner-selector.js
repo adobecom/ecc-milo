@@ -63,6 +63,7 @@ export default class PartnerSelector extends LitElement {
     const payload = {
       name: this.partner.name,
       link: this.partner.link,
+      sponsorId: this.partner.sponsorId,
     };
     if (!this.partner.sponsorId) {
       respJson = await createSponsor(payload, this.seriesId);
