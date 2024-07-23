@@ -1,6 +1,9 @@
 /* eslint-disable no-unused-vars */
 import { getEventImages, uploadImage } from '../../../scripts/esp-controller.js';
+import { LIBS } from '../../../scripts/scripts.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
+
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function getComponentImageType(component) {
   const typeMap = {
@@ -44,10 +47,14 @@ export default async function init(component, props) {
   const type = getComponentImageType(component);
   const dropzones = component.querySelectorAll('image-dropzone');
 
+  const progressWrapper = component.querySelector('.progress-wrapper');
+  const progress = component.querySelector('sp-progress-circle');
+
   dropzones.forEach((dz) => {
+    let imageId = null;
+
     dz.handleImage = async () => {
       const file = dz.getFile();
-      let imageId = null;
 
       if (!file || !(file instanceof File)) return;
 
@@ -60,9 +67,16 @@ export default async function init(component, props) {
         }
       }
 
-      const resp = await uploadImage(file, JSON.parse(component.dataset.configs), imageId);
+      progressWrapper.classList.remove('hidden');
+      const resp = await uploadImage(
+        file,
+        JSON.parse(component.dataset.configs),
+        progress,
+        imageId,
+      );
 
-      if (resp) props.eventDataResp = resp;
+      if (resp?.imageId) imageId = resp.imageId;
+      progressWrapper.classList.add('hidden');
     };
   });
 
