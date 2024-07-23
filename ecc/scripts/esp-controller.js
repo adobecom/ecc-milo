@@ -138,7 +138,7 @@ export async function deleteImage(configs, imageId) {
 
   const resp = await fetch(`${host}${configs.targetUrl}/${imageId}`, options)
     .then((res) => res.json())
-    .catch((error) => window.lana?.log('Failed to replace venue. Error:', error));
+    .catch((error) => window.lana?.log('Failed to delete image. Error:', error));
 
   return resp;
 }
