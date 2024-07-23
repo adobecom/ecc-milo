@@ -41,6 +41,9 @@ export default class ProductSelectorGroup extends LitElement {
 
   deleteProduct(index) {
     this.selectedProducts = this.selectedProducts.filter((_, i) => i !== index);
+    if (this.selectedProducts.length === 0) {
+      this.selectedProducts = [defaultProductValue];
+    }
     this.requestUpdate();
   }
 
@@ -78,6 +81,10 @@ export default class ProductSelectorGroup extends LitElement {
     return uniqueProduts;
   }
 
+  hasOnlyEmptyProductLeft() {
+    return this.selectedProducts[0].name === '' && this.selectedProducts[0].title === defaultProductValue.title;
+  }
+
   render() {
     this.products = this.dataset.products ? JSON.parse(this.dataset.products) : [];
     this.selectedTopics = this.dataset.selectedTopics ? JSON.parse(this.dataset.selectedTopics) : [];
@@ -90,9 +97,9 @@ export default class ProductSelectorGroup extends LitElement {
         <product-selector .selectedProduct=${product} .products=${uniqueProducts} .existingProducts=${this.getSelectedProducts()}
           @update-product=${(event) => this.handleProductUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
-            ${this.selectedProducts.length > 1 ? html`
+            ${this.selectedProducts.length === 1 && this.hasOnlyEmptyProductLeft() ? nothing : html`
               <img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => this.deleteProduct(index)}></img>
-            ` : nothing}
+            `}
           </div>
         </product-selector>
       `)}
