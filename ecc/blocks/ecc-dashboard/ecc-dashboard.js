@@ -17,6 +17,8 @@ export function cloneFilter(obj) {
   const wl = [
     'agenda',
     'topics',
+    'speakers',
+    'sponsors',
     'eventType',
     'cloudType',
     'seriesId',
@@ -32,7 +34,6 @@ export function cloneFilter(obj) {
     'localStartTimeMillis',
     'localEndTimeMillis',
     'timezone',
-    'partners',
     'showAgendaPostEvent',
     'showVenuePostEvent',
     'showVenueImage',
