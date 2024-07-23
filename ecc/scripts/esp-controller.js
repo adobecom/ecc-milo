@@ -84,8 +84,7 @@ export async function uploadImage(file, configs, progressBar, imageId = null) {
   await waitForAdobeIMS();
 
   const { host } = getAPIConfig().esp[ECC_ENV];
-  // const authToken = window.adobeIMS?.getAccessToken()?.token;
-  const authToken = '';
+  const authToken = window.adobeIMS?.getAccessToken()?.token;
 
   let respJson = null;
 
@@ -97,7 +96,7 @@ export async function uploadImage(file, configs, progressBar, imageId = null) {
     xhr.open(method, url);
     xhr.setRequestHeader('x-image-alt-text', configs.altText || '');
     xhr.setRequestHeader('x-image-kind', configs.type);
-    xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+    // xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {
