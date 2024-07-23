@@ -75,7 +75,7 @@ const SPECTRUM_COMPONENTS = [
   'toast',
   'icon',
   'action-button',
-  'progress-bar',
+  'progress-circle',
 ];
 
 export function buildErrorMessage(props, resp) {

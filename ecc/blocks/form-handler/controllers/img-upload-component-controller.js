@@ -48,12 +48,12 @@ export default async function init(component, props) {
   const dropzones = component.querySelectorAll('image-dropzone');
 
   dropzones.forEach((dz) => {
-    const progressBarWrapper = createTag('div', { class: 'progress-bar-wrapper hidden' });
-    const progressBar = createTag('sp-progress-bar', { label: 'Uploading image' }, '', { parent: progressBarWrapper });
+    const progressWrapper = createTag('div', { class: 'progress-bar-wrapper hidden' });
+    const progress = createTag('sp-progress-circle', { label: 'Uploading image' }, '', { parent: progressWrapper });
 
     let imageId = null;
 
-    dz.append(progressBarWrapper);
+    dz.append(progressWrapper);
 
     dz.handleImage = async () => {
       const file = dz.getFile();
@@ -72,7 +72,7 @@ export default async function init(component, props) {
       const resp = await uploadImage(
         file,
         JSON.parse(component.dataset.configs),
-        progressBar,
+        progress,
         imageId,
       );
 
