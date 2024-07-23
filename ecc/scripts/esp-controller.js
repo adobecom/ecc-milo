@@ -80,45 +80,55 @@ async function constructRequestOptions(method, body = null) {
   return options;
 }
 
-export async function uploadImage(file, configs, imageId = null) {
+export async function uploadImage(file, configs, progressBar, imageId = null) {
   await waitForAdobeIMS();
 
   const { host } = getAPIConfig().esp[ECC_ENV];
   const authToken = window.adobeIMS?.getAccessToken()?.token;
-  const headers = new Headers();
-  headers.append('x-image-alt-text', configs.altText || '');
-  headers.append('x-image-kind', configs.type);
-  headers.append('Authorization', `Bearer ${authToken}`);
 
   let respJson = null;
 
-  try {
-    let response;
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const method = imageId ? 'PUT' : 'POST';
+    const url = imageId ? `${host}${configs.targetUrl}/${imageId}` : `${host}${configs.targetUrl}`;
 
-    if (imageId) {
-      response = await fetch(`${host}${configs.targetUrl}/${imageId}`, {
-        method: 'PUT',
-        headers,
-        body: file,
-      });
-    } else {
-      response = await fetch(`${host}${configs.targetUrl}`, {
-        method: 'POST',
-        headers,
-        body: file,
-      });
-    }
+    xhr.open(method, url);
+    xhr.setRequestHeader('x-image-alt-text', configs.altText || '');
+    xhr.setRequestHeader('x-image-kind', configs.type);
+    xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
 
-    if (response.ok) {
-      respJson = await response.json();
-    } else {
-      window.lana?.log('Unexpected image upload server response. Reponse:', response.status);
-    }
-  } catch (error) {
-    window.lana?.log('Failed to upload image. Error:', error);
-  }
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percentComplete = (event.loaded / event.total) * 100;
+        if (progressBar) {
+          progressBar.progress = percentComplete;
+        }
+      }
+    };
 
-  return respJson;
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          respJson = JSON.parse(xhr.responseText);
+          resolve(respJson);
+        } catch (e) {
+          window.lana?.log('Failed to parse image upload response. Error:', e);
+          reject(e);
+        }
+      } else {
+        window.lana?.log('Unexpected image upload server response. Response:', xhr.status);
+        reject(new Error(`Upload failed with status: ${xhr.status}`));
+      }
+    };
+
+    xhr.onerror = () => {
+      window.lana?.log('Failed to upload image. Error:', xhr.statusText);
+      reject(new Error(`Upload failed with status: ${xhr.statusText}`));
+    };
+
+    xhr.send(file);
+  });
 }
 
 export async function createVenue(eventId, venueData) {
@@ -157,9 +167,30 @@ export async function createEvent(payload) {
   return resp;
 }
 
+function convertToNSpeaker(profile) {
+  const {
+    // eslint-disable-next-line max-len
+    speakerId, firstName, lastName, title, company, bio, socialMedia, creationTime, modificationTime,
+  } = profile;
+
+  return {
+    speakerId,
+    firstName,
+    lastName,
+    title,
+    company,
+    bio,
+    socialLinks: socialMedia,
+    creationTime,
+    modificationTime,
+  };
+}
+
 export async function createSpeaker(profile, seriesId) {
+  const nSpeaker = convertToNSpeaker(profile);
+
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify({ ...profile, seriesId });
+  const raw = JSON.stringify({ ...nSpeaker, seriesId });
   const options = await constructRequestOptions('POST', raw);
 
   const resp = await fetch(`${host}/v1/series/${seriesId}/speakers`, options)
@@ -239,6 +270,17 @@ export async function getSponsor(seriesId, sponsorId) {
   return resp;
 }
 
+export async function getSponsorImages(seriesId, sponsorId) {
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const options = await constructRequestOptions('GET');
+
+  const resp = await fetch(`${host}/v1/series/${seriesId}/sponsors/${sponsorId}/images`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to get sponsor images. Error:', error));
+
+  return resp;
+}
+
 export async function addSpeakerToEvent(speakerData, eventId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
   const raw = JSON.stringify(speakerData);
@@ -275,9 +317,9 @@ export async function removeSpeakerFromEvent(speakerId, eventId) {
 }
 
 export async function updateSpeaker(profile, seriesId) {
+  const nSpeaker = convertToNSpeaker(profile);
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const nProfile = { ...profile, photo: undefined };
-  const raw = JSON.stringify({ ...nProfile, seriesId });
+  const raw = JSON.stringify({ ...nSpeaker, seriesId });
   const options = await constructRequestOptions('PUT', raw);
 
   const resp = await fetch(`${host}/v1/series/${seriesId}/speakers/${profile.speakerId}`, options)
@@ -362,6 +404,26 @@ export async function getVenue(eventId) {
   return resp;
 }
 
+function convertToSpeaker(speaker) {
+  const {
+    // eslint-disable-next-line max-len
+    speakerId, firstName, lastName, title, company, bio, socialLinks, creationTime, modificationTime, photo,
+  } = speaker;
+
+  return {
+    speakerId,
+    firstName,
+    lastName,
+    title,
+    company,
+    bio,
+    photo,
+    socialMedia: socialLinks || [],
+    creationTime,
+    modificationTime,
+  };
+}
+
 export async function getSpeaker(seriesId, speakerId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
   const options = await constructRequestOptions('GET');
@@ -370,7 +432,7 @@ export async function getSpeaker(seriesId, speakerId) {
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get venue details. Error: ${error}`));
 
-  return resp;
+  return convertToSpeaker(resp);
 }
 
 export async function getClouds() {
@@ -471,5 +533,18 @@ export async function getSpeakers(seriesId) {
   const resp = await fetch(`${host}/v1/series/${seriesId}/speakers`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error: ${error}`));
+
+  return { speakers: resp.speakers.map(convertToSpeaker) };
+}
+
+export async function getEventImages(eventId) {
+  if (!eventId) return false;
+
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const options = await constructRequestOptions('GET');
+
+  const resp = await fetch(`${host}/v1/events/${eventId}/images`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to get event images for event ${eventId}. Error: ${error}`));
   return resp;
 }

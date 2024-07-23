@@ -98,7 +98,7 @@ export class CustomSearch extends LitElement {
     this.dispatchEvent(
       new CustomEvent(
         'profile-selected',
-        { detail: { profile: { ...profile } } },
+        { detail: { profile: { ...profile, isPlaceholder: false } } },
       ),
     );
   }

@@ -113,22 +113,6 @@ export function querySelectorAllDeep(selector, root = document) {
   return elements;
 }
 
-export function addRepeater(element, title) {
-  if (!element) return;
-  element.setAttribute('repeatIdx', 0);
-
-  const tag = createTag('div');
-  tag.classList.add('repeater-element');
-
-  const heading = createTag('h3', { class: 'repeater-element-title' }, title);
-  tag.append(heading);
-
-  const plusIcon = getIcon('add-circle');
-  tag.append(plusIcon);
-
-  element.after(tag);
-}
-
 function mergeOptions(defaultOptions, overrideOptions) {
   const combinedOptions = { ...defaultOptions, ...overrideOptions };
 
@@ -177,9 +161,10 @@ export async function decorateTextfield(cell, extraOptions) {
   cell.append(wrapper);
 }
 
-export function changeInputValue(input, attr, value) {
+export function changeInputValue(input, attr, value, toDisable = false) {
   if (!input || !value) return;
   input[attr] = value;
+  if (toDisable) input.disabled = true;
   input.dispatchEvent(new Event('change'));
 }
 

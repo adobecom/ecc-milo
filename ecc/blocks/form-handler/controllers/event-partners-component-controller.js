@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax */
-import { addSponsorToEvent, getSponsor, removeSponsorFromEvent, updateSponsorInEvent } from '../../../scripts/esp-controller.js';
+import { addSponsorToEvent, getSponsor, getSponsorImages, removeSponsorFromEvent, updateSponsorInEvent } from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 /* eslint-disable no-unused-vars */
@@ -104,6 +104,15 @@ export default async function init(component, props) {
           const { name, link, sponsorId } = partnerData;
           if (partnerData.image) {
             photo = { ...partnerData.image, url: partnerData.image.imageUrl };
+          } else {
+            const sponsorImages = await getSponsorImages(eventData.seriesId, sponsorId);
+
+            if (sponsorImages) {
+              const sponsorImage = sponsorImages.find((image) => image.imageKind === 'sponsor-image');
+              if (sponsorImage) {
+                photo = { ...sponsorImage, url: sponsorImage.imageUrl };
+              }
+            }
           }
 
           return {

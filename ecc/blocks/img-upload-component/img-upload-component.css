@@ -5,6 +5,10 @@
   margin-bottom: 24px;
 }
 
+.img-upload-component .img-dropzone-wrapper {
+  position: relative;
+}
+
 .img-upload-component .img-file-input-wrapper {
   border: 2px dashed var(--color-gray-400);
   border-radius: 8px;
@@ -78,8 +82,19 @@
 }
 
 .img-upload-component fieldset.checkboxes .additional-comment {
-  line-height: 0.1;
   padding-left: 24px;
+}
+
+.img-upload-component .progress-wrapper {
+  z-index: 1;
+  position: absolute;
+  height: calc(100% + 4px);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--highlight-background-color);
+  top: 0;
 }
 
 @media (min-width: 900px) {

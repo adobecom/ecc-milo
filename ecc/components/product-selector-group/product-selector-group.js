@@ -87,7 +87,7 @@ export default class ProductSelectorGroup extends LitElement {
 
     return html`
       ${repeat(this.selectedProducts, (product, index) => html`
-        <product-selector .selectedProduct=${product} .products=${uniqueProducts}
+        <product-selector .selectedProduct=${product} .products=${uniqueProducts} .existingProducts=${this.getSelectedProducts()}
           @update-product=${(event) => this.handleProductUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.selectedProducts.length > 1 ? html`

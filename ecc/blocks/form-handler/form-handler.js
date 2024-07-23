@@ -2,7 +2,6 @@ import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import {
   getIcon,
   buildNoAccessScreen,
-  yieldToMain,
   generateToolTip,
   camelToSentenceCase,
   getEventPageHost,
@@ -76,6 +75,7 @@ const SPECTRUM_COMPONENTS = [
   'toast',
   'icon',
   'action-button',
+  'progress-circle',
 ];
 
 export function buildErrorMessage(props, resp) {
@@ -306,25 +306,32 @@ async function saveEvent(props, options = { toPublish: false }) {
 
   let resp;
 
+  const onEventSave = () => {
+    if (!resp.errors && !resp.message) {
+      showSaveSuccessMessage(props);
+    }
+
+    if (resp?.eventId) props.el.dispatchEvent(new CustomEvent('eventUpdated', { detail: { eventId: resp.eventId } }));
+  };
+
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
     resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated', { detail: { eventId: resp.eventId } }));
+    onEventSave();
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (!resp.errors && !resp.message) {
-      showSaveSuccessMessage(props);
-    }
+    onEventSave();
   } else if (options.toPublish) {
     resp = await publishEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
+    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventUpdated', { detail: { eventId: resp.eventId } }));
   }
 
   return resp;
@@ -390,41 +397,6 @@ function initRequiredFieldsValidation(props) {
   });
 
   inputValidationCB();
-}
-
-function setRemoveEventListener(removeElement) {
-  removeElement.addEventListener('click', (event) => {
-    // FIXME : Use a generic approach to call remove of the handler.
-    // event.currentTarget.getAttribute('deleteHandler')();
-    event.currentTarget.parentNode.parentNode.parentNode.remove();
-  });
-}
-
-function initRepeaters(props) {
-  const repeaters = props.el.querySelectorAll('.repeater-element');
-  repeaters.forEach((element) => {
-    const vanillaNode = element.previousElementSibling.cloneNode(true);
-    element.addEventListener('click', (event) => {
-      const clonedNode = vanillaNode.cloneNode(true);
-      const prevNode = event.currentTarget.previousElementSibling;
-      clonedNode.setAttribute('repeatIdx', parseInt(prevNode.getAttribute('repeatIdx'), 10) + 1);
-
-      // Reset delete icon state and add listener.
-      const deleteIcon = clonedNode.querySelector('.repeater-delete-button');
-
-      if (deleteIcon) {
-        deleteIcon.classList.remove('hidden');
-        setRemoveEventListener(deleteIcon);
-      }
-
-      prevNode.after(clonedNode);
-      const tempProps = { el: clonedNode };
-      yieldToMain().then(() => {
-        updateRequiredFields(props);
-        initRepeaters(tempProps);
-      });
-    });
-  });
 }
 
 function renderFormNavigation(props, prevStep, currentStep) {
@@ -583,20 +555,20 @@ function initFormCtas(props) {
 
 function updateCtas(props) {
   const formCtas = props.el.querySelectorAll('.form-handler-ctas-panel a');
-  const filteredResponse = getFilteredCachedResponse();
+  const { eventDataResp } = props;
 
   formCtas.forEach((a) => {
     if (a.classList.contains('preview-btns')) {
       const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
-      if (filteredResponse.detailPagePath) {
-        a.href = `${getEventPageHost(filteredResponse.published)}${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
+      if (eventDataResp.detailPagePath) {
+        a.href = `${getEventPageHost(eventDataResp.published)}${eventDataResp.detailPagePath}?previewMode=true&timing=${testTime}`;
         a.classList.remove('preview-not-ready');
       }
     }
 
     if (a.classList.contains('next-button')) {
       if (props.currentStep === props.maxStep) {
-        if (filteredResponse.published) {
+        if (eventDataResp.published) {
           a.textContent = a.dataset.republishStateText;
         } else {
           a.textContent = a.dataset.finalStateText;
@@ -645,6 +617,9 @@ function updateDashboardLink(props) {
   if (!dashboardLink) return;
 
   const url = new URL(dashboardLink.href);
+
+  if (url.searchParams.has('eventId')) return;
+
   url.searchParams.set('newEventId', getFilteredCachedResponse().eventId);
   dashboardLink.href = url.toString();
 }
@@ -740,10 +715,14 @@ async function buildECCForm(el) {
   initFormCtas(proxyProps);
   initNavigation(proxyProps);
   await initComponents(proxyProps);
-  initRepeaters(proxyProps);
   updateRequiredFields(proxyProps);
   enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
+  el.addEventListener('show-error-toast', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    buildErrorMessage(proxyProps, e.detail);
+  });
 }
 
 export default async function init(el) {

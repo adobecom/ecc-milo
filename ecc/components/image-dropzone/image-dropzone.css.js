@@ -32,6 +32,7 @@ export const style = css`
   top: 8px;
   right: 8px;
   cursor: pointer;
+  filter: drop-shadow(1px 1px 1px white);
 }
 
 .img-file-input-wrapper .preview-img-placeholder {
