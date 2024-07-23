@@ -257,7 +257,7 @@ export class Profile extends LitElement {
       quiet: true,
     };
 
-    const socialMediaConfig = { size: 'xl', pattern: LINK_REGEX };
+    const socialMediaConfig = { size: 'xl', pattern: LINK_REGEX('HTML') };
     const quietTextfieldConfig = { size: 'xl', quiet: true };
     return {
     // eslint-disable-next-line max-len
