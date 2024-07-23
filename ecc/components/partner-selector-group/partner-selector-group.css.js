@@ -25,5 +25,8 @@ export const style = css`
 
   .delete-btn {
     height: 24px;
+    position: absolute;
+    top: 32px;
+    right: 0;
   }
 `;
