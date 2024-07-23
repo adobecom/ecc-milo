@@ -83,7 +83,7 @@ export default class PartnerSelector extends LitElement {
           targetUrl: `/v1/series/${this.seriesId}/sponsors/${this.partner.sponsorId}/images`,
           type: 'sponsor-image',
           altText: `${this.partner.name} image`,
-        });
+        }, null, respJson.image?.imageId);
 
         if (sponsorData) {
           this.partner.modificationTime = sponsorData.modificationTime;
