@@ -105,10 +105,10 @@ export default async function init(component, props) {
           if (partnerData.image) {
             photo = { ...partnerData.image, url: partnerData.image.imageUrl };
           } else {
-            const sponsorImages = await getSponsorImages(eventData.seriesId, sponsorId);
+            const resp = await getSponsorImages(eventData.seriesId, sponsorId);
 
-            if (sponsorImages) {
-              const sponsorImage = sponsorImages.find((image) => image.imageKind === 'sponsor-image');
+            if (resp?.images) {
+              const sponsorImage = resp?.images.find((image) => image.imageKind === 'sponsor-image');
               if (sponsorImage) {
                 photo = { ...sponsorImage, url: sponsorImage.imageUrl };
               }
