@@ -115,19 +115,16 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
         } catch (e) {
           window.lana?.log('Failed to parse image upload response. Error:', e);
           reject(e);
-          resolve(xhr);
         }
       } else {
         window.lana?.log('Unexpected image upload server response. Response:', xhr.status);
         reject(new Error(`Upload failed with status: ${xhr.status}`));
-        resolve(xhr);
       }
     };
 
     xhr.onerror = () => {
       window.lana?.log('Failed to upload image. Error:', xhr.statusText);
       reject(new Error(`Upload failed with status: ${xhr.statusText}`));
-      resolve(xhr);
     };
 
     xhr.send(file);

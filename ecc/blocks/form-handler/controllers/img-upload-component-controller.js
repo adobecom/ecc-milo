@@ -71,17 +71,21 @@ export default async function init(component, props) {
         }
       }
 
-      const resp = await uploadImage(
-        file,
-        JSON.parse(component.dataset.configs),
-        progress,
-        imageId,
-      );
+      try {
+        const resp = await uploadImage(
+          file,
+          JSON.parse(component.dataset.configs),
+          progress,
+          imageId,
+        );
 
-      console.log(resp);
-
-      if (resp?.imageId) imageId = resp.imageId;
-      progressWrapper.classList.add('hidden');
+        if (resp?.imageId) imageId = resp.imageId;
+      } catch (error) {
+        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
+        dz.deleteImage();
+      } finally {
+        progressWrapper.classList.add('hidden');
+      }
     };
   });
 
