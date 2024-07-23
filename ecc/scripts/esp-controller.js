@@ -84,7 +84,8 @@ export async function uploadImage(file, configs, progressBar, imageId = null) {
   await waitForAdobeIMS();
 
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const authToken = window.adobeIMS?.getAccessToken()?.token;
+  // const authToken = window.adobeIMS?.getAccessToken()?.token;
+  const authToken = '';
 
   let respJson = null;
 
