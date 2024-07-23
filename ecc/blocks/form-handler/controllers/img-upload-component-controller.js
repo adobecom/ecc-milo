@@ -44,6 +44,7 @@ export async function onUpdate(component, props) {
 }
 
 export default async function init(component, props) {
+  const configs = JSON.parse(component.dataset.configs);
   const type = getComponentImageType(component);
   const dropzones = component.querySelectorAll('image-dropzone');
 
@@ -73,7 +74,7 @@ export default async function init(component, props) {
       try {
         const resp = await uploadImage(
           file,
-          JSON.parse(component.dataset.configs),
+          configs,
           progress,
           imageId,
         );
@@ -90,12 +91,32 @@ export default async function init(component, props) {
     dz.handleDelete = async () => {
       if (!imageId) return;
 
-      try {
-        await deleteImage(JSON.parse(component.dataset.configs), imageId);
-      } catch (error) {
-        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
-        dz.file = file;
-      }
+      const underlay = props.el.querySelector('sp-underlay');
+      const dialog = props.el.querySelector('sp-dialog');
+      createTag('h1', { slot: 'heading' }, `You are deleting the ${configs.altText.toLowerCase()}.`, { parent: dialog });
+      createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
+      const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+      const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to delete this image', { parent: buttonContainer });
+      const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not delete', { parent: buttonContainer });
+
+      underlay.open = true;
+
+      dialogDeleteBtn.addEventListener('click', async () => {
+        try {
+          await deleteImage(configs, imageId);
+        } catch (error) {
+          dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
+          dz.file = file;
+        }
+
+        underlay.open = false;
+        dialog.innerHTML = '';
+      });
+
+      dialogCancelBtn.addEventListener('click', () => {
+        underlay.open = false;
+        dialog.innerHTML = '';
+      });
     };
   });
 

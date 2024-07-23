@@ -17,6 +17,35 @@
   --mod-textfield-spacing-block-start: 8px;
 }
 
+
+.form-handler sp-theme sp-underlay + sp-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  background: var(--spectrum-gray-100);
+  min-width: 480px;
+}
+
+.form-handler sp-theme sp-underlay + sp-dialog h1 {
+  font-size: var(--type-heading-s-size);
+}
+
+.form-handler sp-theme sp-underlay + sp-dialog p {
+  font-size: var(--type-body-s-size);
+}
+
+.form-handler sp-theme sp-underlay + sp-dialog .button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.form-handler sp-theme sp-underlay:not([open]) + sp-dialog {
+  display: none;
+}
+
 .form-handler.show-error {
   --mod-textfield-icon-size-invalid: 16px;
 }
