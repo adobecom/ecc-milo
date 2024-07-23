@@ -58,22 +58,27 @@ export default async function init(component, props) {
 
       if (!file || !(file instanceof File)) return;
 
-      if (props.eventDataResp.eventId) {
-        const { images } = await getEventImages(props.eventDataResp.eventId);
+      progressWrapper.classList.remove('hidden');
 
-        if (images) {
-          const photoObj = images.find((p) => p.imageKind === type);
+      if (props.eventDataResp.eventId) {
+        const eventImagesResp = await getEventImages(props.eventDataResp.eventId);
+
+        if (eventImagesResp?.images) {
+          const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
           if (photoObj) imageId = photoObj.imageId;
+        } else {
+          console.log(eventImagesResp);
         }
       }
 
-      progressWrapper.classList.remove('hidden');
       const resp = await uploadImage(
         file,
         JSON.parse(component.dataset.configs),
         progress,
         imageId,
       );
+
+      console.log(resp);
 
       if (resp?.imageId) imageId = resp.imageId;
       progressWrapper.classList.add('hidden');

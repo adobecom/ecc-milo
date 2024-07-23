@@ -66,8 +66,8 @@ async function constructRequestOptions(method, body = null) {
   await waitForAdobeIMS();
 
   const headers = new Headers();
-  const authToken = window.adobeIMS?.getAccessToken()?.token;
-  headers.append('Authorization', `Bearer ${authToken}`);
+  // const authToken = window.adobeIMS?.getAccessToken()?.token;
+  // headers.append('Authorization', `Bearer ${authToken}`);
   headers.append('content-type', 'application/json');
 
   const options = {
