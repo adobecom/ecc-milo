@@ -80,7 +80,7 @@ async function constructRequestOptions(method, body = null) {
   return options;
 }
 
-export async function uploadImage(file, configs, progressBar, imageId = null) {
+export async function uploadImage(file, configs, tracker, imageId = null) {
   await waitForAdobeIMS();
 
   const { host } = getAPIConfig().esp[ECC_ENV];
@@ -98,14 +98,14 @@ export async function uploadImage(file, configs, progressBar, imageId = null) {
     xhr.setRequestHeader('x-image-kind', configs.type);
     xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
 
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percentComplete = (event.loaded / event.total) * 100;
-        if (progressBar) {
-          progressBar.progress = percentComplete;
+    if (tracker) {
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100;
+          tracker.progress = percentComplete;
         }
-      }
-    };
+      };
+    }
 
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
@@ -129,6 +129,18 @@ export async function uploadImage(file, configs, progressBar, imageId = null) {
 
     xhr.send(file);
   });
+}
+
+export async function deleteImage(configs, imageId) {
+  await waitForAdobeIMS();
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const options = await constructRequestOptions('DELETE');
+
+  const resp = await fetch(`${host}${configs.targetUrl}/${imageId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to delete image. Error:', error));
+
+  return resp;
 }
 
 export async function createVenue(eventId, venueData) {

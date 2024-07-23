@@ -4,6 +4,8 @@ import { style } from './agenda-fieldset-group.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
+const defaultAgenda = { startTime: '', description: '' };
+
 export default class AgendaFieldsetGroup extends LitElement {
   static properties = {
     agendaItems: { type: Array },
@@ -26,6 +28,10 @@ export default class AgendaFieldsetGroup extends LitElement {
 
   deleteAgenda(index) {
     this.agendaItems = this.agendaItems.filter((_, i) => i !== index);
+    if (this.agendaItems.length === 0) {
+      this.agendaItems = [defaultAgenda];
+    }
+
     this.requestUpdate();
   }
 
@@ -38,15 +44,19 @@ export default class AgendaFieldsetGroup extends LitElement {
     return this.agendaItems.filter((o) => !(Object.keys(o).length === 0 && o.constructor === Object));
   }
 
+  hasOnlyEmptyAgendaLeft() {
+    return !this.agendaItems[0]?.startTime && !this.agendaItems[0]?.description;
+  }
+
   render() {
     return html`
       ${repeat(this.agendaItems, (agendaItem, index) => html`
         <agenda-fieldset .agendas=${this.agendaItems} .agenda=${agendaItem} .timeslots=${this.timeslots} .options=${this.options}
           @update-agenda=${(event) => this.handleAgendaUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
-            ${this.agendaItems.length > 1 ? html`
+            ${this.agendaItems.length === 1 && this.hasOnlyEmptyAgendaLeft() ? nothing : html`
               <img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => this.deleteAgenda(index)}></img>
-            ` : nothing}
+            `}
           </div>
         </agenda-fieldset>
       `)}

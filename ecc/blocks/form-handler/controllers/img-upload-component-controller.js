@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { getEventImages, uploadImage } from '../../../scripts/esp-controller.js';
+import { deleteImage, getEventImages, uploadImage } from '../../../scripts/esp-controller.js';
 import { LIBS } from '../../../scripts/scripts.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
@@ -52,31 +52,88 @@ export default async function init(component, props) {
 
   dropzones.forEach((dz) => {
     let imageId = null;
+    let file = null;
 
     dz.handleImage = async () => {
-      const file = dz.getFile();
+      const configs = JSON.parse(component.dataset.configs);
+      file = dz.getFile();
 
-      if (!file || !(file instanceof File)) return;
+      if (!file || !(file instanceof File) || !configs) return;
+
+      progressWrapper.classList.remove('hidden');
 
       if (props.eventDataResp.eventId) {
-        const { images } = await getEventImages(props.eventDataResp.eventId);
+        const eventImagesResp = await getEventImages(props.eventDataResp.eventId);
 
-        if (images) {
-          const photoObj = images.find((p) => p.imageKind === type);
+        if (eventImagesResp?.images) {
+          const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
           if (photoObj) imageId = photoObj.imageId;
         }
       }
 
-      progressWrapper.classList.remove('hidden');
-      const resp = await uploadImage(
-        file,
-        JSON.parse(component.dataset.configs),
-        progress,
-        imageId,
-      );
+      try {
+        const resp = await uploadImage(
+          file,
+          configs,
+          progress,
+          imageId,
+        );
 
-      if (resp?.imageId) imageId = resp.imageId;
-      progressWrapper.classList.add('hidden');
+        if (resp?.imageId) imageId = resp.imageId;
+      } catch (error) {
+        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
+        dz.deleteImage();
+      } finally {
+        progressWrapper.classList.add('hidden');
+      }
+    };
+
+    dz.handleDelete = async () => {
+      const configs = JSON.parse(component.dataset.configs);
+
+      if (props.eventDataResp.eventId) {
+        const eventImagesResp = await getEventImages(props.eventDataResp.eventId);
+
+        if (eventImagesResp?.images) {
+          const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
+          if (photoObj) imageId = photoObj.imageId;
+        }
+      }
+
+      if (!imageId || !configs) return;
+
+      const underlay = props.el.querySelector('sp-underlay');
+      const dialog = props.el.querySelector('sp-dialog');
+      createTag('h1', { slot: 'heading' }, `You are deleting the ${configs.altText.toLowerCase()}.`, { parent: dialog });
+      createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
+      const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+      const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to delete this image', { parent: buttonContainer });
+      const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not delete', { parent: buttonContainer });
+
+      underlay.open = true;
+
+      dialogDeleteBtn.addEventListener('click', async () => {
+        try {
+          dialogDeleteBtn.disabled = true;
+          dialogCancelBtn.disabled = true;
+          const resp = await deleteImage(configs, imageId);
+          if (!(resp.errors || resp.message)) {
+            dz.deleteImage();
+          } else {
+            dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
+          }
+        } catch (error) {
+          dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
+        }
+
+        underlay.open = false;
+        dialog.innerHTML = '';
+      });
+
+      dialogCancelBtn.addEventListener('click', () => {
+        underlay.open = false;
+        dialog.innerHTML = '';
+      });
     };
   });
 

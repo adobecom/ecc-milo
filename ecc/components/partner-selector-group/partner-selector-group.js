@@ -25,6 +25,9 @@ export default class PartnerSelectorGroup extends LitElement {
 
   deletePartner(index) {
     this.partners = this.partners.filter((_, i) => i !== index);
+    if (this.partners.length === 0) {
+      this.partners = [defaultPartner];
+    }
     this.requestUpdate();
   }
 
@@ -50,6 +53,10 @@ export default class PartnerSelectorGroup extends LitElement {
     });
   }
 
+  hasOnlyEmptyPartnerLeft() {
+    return !this.partners[0].name && !this.partners[0].link && !this.partners[0].file;
+  }
+
   render() {
     const imageTag = this.fieldlabels.image;
     imageTag.setAttribute('slot', 'img-label');
@@ -62,9 +69,9 @@ export default class PartnerSelectorGroup extends LitElement {
         <partner-selector .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
           @update-partner=${(event) => this.handlePartnerUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
-            ${this.partners.length > 1 ? html`
+            ${this.partners.length === 1 && this.hasOnlyEmptyPartnerLeft() ? nothing : html`
               <img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => this.deletePartner(index)}></img>
-            ` : nothing}
+            `}
           </div>
           ${imgTag}
         </partner-selector>

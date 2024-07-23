@@ -101,7 +101,7 @@ export default async function init(component, props) {
 
         if (partnerData) {
           let photo;
-          const { name, link, sponsorId } = partnerData;
+          const { name, link, sponsorId, modificationTime } = partnerData;
           if (partnerData.image) {
             photo = { ...partnerData.image, url: partnerData.image.imageUrl };
           } else {
@@ -122,6 +122,7 @@ export default async function init(component, props) {
             isValidPartner: true,
             photo,
             index,
+            modificationTime,
           };
         }
       }
@@ -131,7 +132,19 @@ export default async function init(component, props) {
     const filteredPartners = partners
       .filter((partner) => partner.isValidPartner)
       .sort((a, b) => a.index - b.index)
-      .map(({ name, link, photo, sponsorId }) => ({ name, link, photo, sponsorId }));
+      .map(({
+        name,
+        link,
+        photo,
+        sponsorId,
+        modificationTime,
+      }) => ({
+        name,
+        link,
+        photo,
+        sponsorId,
+        modificationTime,
+      }));
 
     if (filteredPartners.length) {
       partnersGroup.partners = filteredPartners;

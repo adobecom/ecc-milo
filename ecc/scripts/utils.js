@@ -56,7 +56,7 @@ export function convertTo24HourFormat(timeStr) {
   return `${formattedHours}:${formattedMinutes}:00`;
 }
 
-export function getEventPageHost(published) {
+export function getEventPageHost(published = false) {
   if (window.location.href.includes('.hlx.') || !published) {
     return window.location.origin.replace(window.location.hostname, `${ECC_ENV}--events-milo--adobecom.hlx.page`);
   }

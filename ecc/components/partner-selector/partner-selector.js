@@ -1,6 +1,6 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './partner-selector.css.js';
-import { createSponsor, updateSponsor, uploadImage } from '../../scripts/esp-controller.js';
+import { createSponsor, deleteImage, updateSponsor, uploadImage } from '../../scripts/esp-controller.js';
 import { LINK_REGEX } from '../../constants/constants.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
@@ -63,7 +63,10 @@ export default class PartnerSelector extends LitElement {
     const payload = {
       name: this.partner.name,
       link: this.partner.link,
+      sponsorId: this.partner.sponsorId,
+      modificationTime: this.partner.modificationTime,
     };
+
     if (!this.partner.sponsorId) {
       respJson = await createSponsor(payload, this.seriesId);
     } else {
@@ -72,6 +75,7 @@ export default class PartnerSelector extends LitElement {
 
     if (respJson.sponsorId) {
       this.partner.sponsorId = respJson.sponsorId;
+      this.partner.modificationTime = respJson.modificationTime;
       const file = this.imageDropzone?.getFile();
 
       if (file && (file instanceof File)) {
@@ -79,7 +83,7 @@ export default class PartnerSelector extends LitElement {
           targetUrl: `/v1/series/${this.seriesId}/sponsors/${this.partner.sponsorId}/images`,
           type: 'sponsor-image',
           altText: `${this.partner.name} image`,
-        });
+        }, null, respJson.image?.imageId);
 
         if (sponsorData) {
           this.partner.modificationTime = sponsorData.modificationTime;
@@ -87,6 +91,15 @@ export default class PartnerSelector extends LitElement {
             this.partner.hasUnsavedChanges = false;
             saveButton.textContent = 'Saved';
           }
+        }
+      } else if (!file && respJson.image?.imageId) {
+        try {
+          const resp = await deleteImage({ targetUrl: `/v1/series/${this.seriesId}/sponsors/${this.partner.sponsorId}/images` }, respJson.image?.imageId);
+          if (resp.errors || resp.message) {
+            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
+          }
+        } catch (error) {
+          this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
         }
       } else if (saveButton) {
         this.partner.hasUnsavedChanges = false;

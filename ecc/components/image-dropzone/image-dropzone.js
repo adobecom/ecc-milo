@@ -9,6 +9,7 @@ export class ImageDropzone extends LitElement {
   static properties = {
     file: { type: Object, reflect: true },
     handleImage: { type: Function },
+    handleDelete: { type: Function },
   };
 
   static styles = style;
@@ -18,6 +19,7 @@ export class ImageDropzone extends LitElement {
     this.attachShadow({ mode: 'open' });
     this.file = null;
     this.handleImage = () => {};
+    this.handleDelete = this.handleDelete || null;
   }
 
   setFile(files) {
@@ -75,6 +77,8 @@ export class ImageDropzone extends LitElement {
 
   deleteImage() {
     this.file = null;
+
+    this.dispatchEvent(new CustomEvent('image-change', { detail: { file: this.file } }));
   }
 
   render() {
@@ -84,7 +88,7 @@ export class ImageDropzone extends LitElement {
           <div class="preview-img-placeholder">
             <img src="${this.file.url}" alt="preview image">
           </div>
-          <img src="/ecc/icons/delete.svg" alt="delete icon" class="icon icon-delete" @click=${this.deleteImage}>
+          <img src="/ecc/icons/delete.svg" alt="delete icon" class="icon icon-delete" @click=${this.handleDelete ? this.handleDelete : this.deleteImage}>
         </div>
       </div>`
       : html`
