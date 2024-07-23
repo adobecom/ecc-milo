@@ -44,7 +44,6 @@ export async function onUpdate(component, props) {
 }
 
 export default async function init(component, props) {
-  const configs = JSON.parse(component.dataset.configs);
   const type = getComponentImageType(component);
   const dropzones = component.querySelectorAll('image-dropzone');
 
@@ -56,9 +55,10 @@ export default async function init(component, props) {
     let file = null;
 
     dz.handleImage = async () => {
+      const configs = JSON.parse(component.dataset.configs);
       file = dz.getFile();
 
-      if (!file || !(file instanceof File)) return;
+      if (!file || !(file instanceof File) || !configs) return;
 
       progressWrapper.classList.remove('hidden');
 
@@ -89,7 +89,8 @@ export default async function init(component, props) {
     };
 
     dz.handleDelete = async () => {
-      if (!imageId) return;
+      const configs = JSON.parse(component.dataset.configs);
+      if (!imageId || !configs) return;
 
       const underlay = props.el.querySelector('sp-underlay');
       const dialog = props.el.querySelector('sp-dialog');
