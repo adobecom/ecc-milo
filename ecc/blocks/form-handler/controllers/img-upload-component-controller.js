@@ -62,7 +62,7 @@ export default async function init(component, props) {
 
       const resp = await uploadImage(file, JSON.parse(component.dataset.configs), imageId);
 
-      if (resp) props.eventDataResp = resp;
+      console.log(resp);
     };
   });
 
