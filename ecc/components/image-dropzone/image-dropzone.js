@@ -77,6 +77,8 @@ export class ImageDropzone extends LitElement {
 
   deleteImage() {
     this.file = null;
+
+    this.dispatchEvent(new CustomEvent('image-change', { detail: { file: this.file } }));
   }
 
   render() {
