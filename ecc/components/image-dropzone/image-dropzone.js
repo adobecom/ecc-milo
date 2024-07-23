@@ -19,7 +19,7 @@ export class ImageDropzone extends LitElement {
     this.attachShadow({ mode: 'open' });
     this.file = null;
     this.handleImage = () => {};
-    this.handleDelete = () => {};
+    this.handleDelete = null;
   }
 
   setFile(files) {
@@ -76,8 +76,12 @@ export class ImageDropzone extends LitElement {
   }
 
   deleteImage() {
+    if (this.handleDelete) {
+      this.handleDelete();
+      return;
+    }
+
     this.file = null;
-    this.handleDelete();
   }
 
   render() {
