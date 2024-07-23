@@ -96,7 +96,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
     xhr.open(method, url);
     xhr.setRequestHeader('x-image-alt-text', configs.altText || '');
     xhr.setRequestHeader('x-image-kind', configs.type);
-    // xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+    xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
 
     if (tracker) {
       xhr.upload.onprogress = (event) => {
@@ -129,6 +129,18 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
 
     xhr.send(file);
   });
+}
+
+export async function deleteImage(configs, imageId) {
+  await waitForAdobeIMS();
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const options = await constructRequestOptions('DELETE');
+
+  const resp = await fetch(`${host}${configs.targetUrl}/${imageId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log('Failed to replace venue. Error:', error));
+
+  return resp;
 }
 
 export async function createVenue(eventId, venueData) {

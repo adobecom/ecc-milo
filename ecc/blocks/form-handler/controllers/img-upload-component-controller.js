@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { getEventImages, uploadImage } from '../../../scripts/esp-controller.js';
+import { deleteImage, getEventImages, uploadImage } from '../../../scripts/esp-controller.js';
 import { LIBS } from '../../../scripts/scripts.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
@@ -52,9 +52,10 @@ export default async function init(component, props) {
 
   dropzones.forEach((dz) => {
     let imageId = null;
+    let file = null;
 
     dz.handleImage = async () => {
-      const file = dz.getFile();
+      file = dz.getFile();
 
       if (!file || !(file instanceof File)) return;
 
@@ -83,6 +84,17 @@ export default async function init(component, props) {
         dz.deleteImage();
       } finally {
         progressWrapper.classList.add('hidden');
+      }
+    };
+
+    dz.handleDelete = async () => {
+      if (!imageId) return;
+
+      try {
+        await deleteImage(JSON.parse(component.dataset.configs), imageId);
+      } catch (error) {
+        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
+        dz.file = file;
       }
     };
   });
