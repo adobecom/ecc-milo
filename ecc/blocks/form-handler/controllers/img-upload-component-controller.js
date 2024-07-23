@@ -66,8 +66,6 @@ export default async function init(component, props) {
         if (eventImagesResp?.images) {
           const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
           if (photoObj) imageId = photoObj.imageId;
-        } else {
-          console.log(eventImagesResp);
         }
       }
 
@@ -81,7 +79,7 @@ export default async function init(component, props) {
 
         if (resp?.imageId) imageId = resp.imageId;
       } catch (error) {
-        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
+        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
         dz.deleteImage();
       } finally {
         progressWrapper.classList.add('hidden');
