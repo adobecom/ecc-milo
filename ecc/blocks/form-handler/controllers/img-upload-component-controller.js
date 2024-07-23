@@ -90,6 +90,16 @@ export default async function init(component, props) {
 
     dz.handleDelete = async () => {
       const configs = JSON.parse(component.dataset.configs);
+
+      if (props.eventDataResp.eventId) {
+        const eventImagesResp = await getEventImages(props.eventDataResp.eventId);
+
+        if (eventImagesResp?.images) {
+          const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
+          if (photoObj) imageId = photoObj.imageId;
+        }
+      }
+
       if (!imageId || !configs) return;
 
       const underlay = props.el.querySelector('sp-underlay');
