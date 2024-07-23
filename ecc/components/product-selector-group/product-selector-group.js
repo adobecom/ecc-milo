@@ -82,7 +82,7 @@ export default class ProductSelectorGroup extends LitElement {
   }
 
   hasOnlyEmptyProductLeft() {
-    return this.selectedProducts[0].name === '' && this.selectedProducts[0].title === defaultProductValue.title;
+    return !this.selectedProducts[0].name && this.selectedProducts[0].title === defaultProductValue.title;
   }
 
   render() {

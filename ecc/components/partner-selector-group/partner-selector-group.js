@@ -54,7 +54,7 @@ export default class PartnerSelectorGroup extends LitElement {
   }
 
   hasOnlyEmptyPartnerLeft() {
-    return this.partners[0].name === '' && this.partners[0].link === '' && !this.partners[0].file;
+    return !this.partners[0].name && !this.partners[0].link && !this.partners[0].file;
   }
 
   render() {

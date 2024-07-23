@@ -2,7 +2,7 @@ import { LIBS } from '../../scripts/scripts.js';
 import { style } from './agenda-fieldset.css.js';
 import { convertTo24HourFormat } from '../../scripts/utils.js';
 
-const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 export default class AgendaFieldset extends LitElement {
   static properties = {
