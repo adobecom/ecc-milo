@@ -51,7 +51,7 @@ export default async function init(component, props) {
     const progressWrapper = createTag('div', { class: 'progress-bar-wrapper hidden' });
     const progress = createTag('sp-progress-circle', { label: 'Uploading image' }, '', { parent: progressWrapper });
 
-    const inputWrapper = dz.querySelector('.img-file-input-wrapper');
+    const inputWrapper = dz.shadowRoot.querySelector('.img-file-input-wrapper');
 
     let imageId = null;
 
