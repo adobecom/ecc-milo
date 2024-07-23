@@ -117,12 +117,15 @@ export default async function init(component, props) {
           dialogDeleteBtn.disabled = true;
           dialogCancelBtn.disabled = true;
           const resp = await deleteImage(configs, imageId);
-          if (resp.errors || resp.message) {
+          if (resp?.errors || resp?.message) {
             dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
           } else {
-            dz.deleteImage();
+            dz.file = null;
+            imageId = null;
+            dz.requestUpdate();
           }
         } catch (error) {
+          window.lana?.log('Failed to perform image DELETE operation. Error:', error);
           dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
         }
 
