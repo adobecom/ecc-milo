@@ -80,7 +80,7 @@ async function constructRequestOptions(method, body = null) {
   return options;
 }
 
-export async function uploadImage(file, configs, progressBar, imageId = null) {
+export async function uploadImage(file, configs, tracker, imageId = null) {
   await waitForAdobeIMS();
 
   const { host } = getAPIConfig().esp[ECC_ENV];
@@ -98,14 +98,14 @@ export async function uploadImage(file, configs, progressBar, imageId = null) {
     xhr.setRequestHeader('x-image-kind', configs.type);
     // xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
 
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percentComplete = (event.loaded / event.total) * 100;
-        if (progressBar) {
-          progressBar.progress = percentComplete;
+    if (tracker) {
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100;
+          tracker.progress = percentComplete;
         }
-      }
-    };
+      };
+    }
 
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
@@ -115,16 +115,19 @@ export async function uploadImage(file, configs, progressBar, imageId = null) {
         } catch (e) {
           window.lana?.log('Failed to parse image upload response. Error:', e);
           reject(e);
+          resolve(xhr);
         }
       } else {
         window.lana?.log('Unexpected image upload server response. Response:', xhr.status);
         reject(new Error(`Upload failed with status: ${xhr.status}`));
+        resolve(xhr);
       }
     };
 
     xhr.onerror = () => {
       window.lana?.log('Failed to upload image. Error:', xhr.statusText);
       reject(new Error(`Upload failed with status: ${xhr.statusText}`));
+      resolve(xhr);
     };
 
     xhr.send(file);
