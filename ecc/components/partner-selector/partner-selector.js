@@ -134,7 +134,7 @@ export default class PartnerSelector extends LitElement {
   }
 
   handleAutocomplete(e) {
-    const partner = { ...e.detail };
+    const partner = { ...e.detail.data };
     this.updateValue('name', partner.name);
     this.updateValue('link', partner.link);
     this.updateValue('sponsorId', partner.sponsorId);
@@ -154,7 +154,7 @@ export default class PartnerSelector extends LitElement {
           <div>
             <div class="partner-input">
               <label>${this.fieldLabels.nameLabelText}</label>
-              <custom-search searchMap=${JSON.stringify([{ searchKey: 'name', renderKey: 'name' }])} data=${JSON.stringify(nameFieldData)} config=${JSON.stringify({})} @change-custom2=${(event) => {
+              <custom-search searchMap=${JSON.stringify([{ searchKey: 'name', renderKey: 'name' }])} data=${JSON.stringify(nameFieldData)} config=${JSON.stringify({})} @change-custom-search=${(event) => {
   this.updateValue('name', event.target.value);
 }} @entry-selected=${this.handleAutocomplete} searchdata=${JSON.stringify(this.seriesPartners)} identifier='sponsorId'></custom-search>
             </div>

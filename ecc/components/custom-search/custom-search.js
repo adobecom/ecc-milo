@@ -102,7 +102,7 @@ export class CustomSearch extends LitElement {
     this.dispatchEvent(
       new CustomEvent(
         'entry-selected',
-        { detail: { entryData: { ...entryData, isPlaceholder: false } } },
+        { detail: { data: { ...entryData } } },
       ),
     );
   }
@@ -148,7 +148,7 @@ export class CustomSearch extends LitElement {
           config=${JSON.stringify(this.config)}
           @input-custom=${this.onSearchInput}
           @submit=${this.onSubmitSearch}
-          @change-custom=${(e) => { e.stopPropagation(); this.dispatchEvent(new CustomEvent('change-custom2', { detail: { value: this.searchInput } })); }}
+          @change-custom=${(e) => { e.stopPropagation(); this.dispatchEvent(new CustomEvent('change-custom-search', { detail: { value: this.searchInput } })); }}
           @sp-opened=${() => {
     this.isPopoverOpen = true;
   }}
