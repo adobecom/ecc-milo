@@ -61,7 +61,6 @@ const SPECTRUM_COMPONENTS = [
   'textfield',
   'picker',
   'menu',
-  'menu-item',
   'checkbox',
   'field-label',
   'divider',
