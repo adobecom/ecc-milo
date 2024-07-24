@@ -156,13 +156,13 @@ export default class PartnerSelector extends LitElement {
             <div class="partner-input">
               <label>${this.fieldLabels.nameLabelText}</label>
               <custom-search searchMap=${JSON.stringify(searchMap)} data=${JSON.stringify(nameFieldData)} config=${JSON.stringify({})} @change-custom-search=${(event) => {
-  this.updateValue('name', event.target.value);
+  this.updateValue('name', event.detail.value);
 }} @entry-selected=${this.handleAutocomplete} searchdata=${JSON.stringify(this.seriesPartners)} identifier='sponsorId'></custom-search>
             </div>
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>
               <sp-textfield pattern=${LINK_REGEX} value=${this.partner.link} placeholder="Enter partner full URL", @change=${(event) => {
-  this.updateValue('link', event.target.value);
+  this.updateValue('link', event.detail.value);
 }}></sp-textfield>
             </div>
           </div>

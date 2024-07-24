@@ -121,13 +121,6 @@ export class CustomSearch extends LitElement {
     this.closePopover();
   }
 
-  handleSearchChange(event) {
-    const { value } = event.target.data;
-    if (value.length === 0) {
-      this.closePopover();
-    }
-  }
-
   // eslint-disable-next-line class-methods-use-this
   handleKeydown(event) {
     const { code } = event;
