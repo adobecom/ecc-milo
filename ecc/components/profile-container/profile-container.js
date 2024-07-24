@@ -71,13 +71,14 @@ export class ProfileContainer extends LitElement {
       }
       return true;
     });
+
     return html`${
       repeat(this.profiles, (profile, index) => {
         const fieldlabels = { ...this.fieldlabels };
         const imgTag = imageTag.cloneNode(true);
         return html`
         <div class="profile-container">
-        <profile-ui seriesId=${this.seriesId} profile=${JSON.stringify(profile)} fieldlabels=${JSON.stringify(fieldlabels)} class="form-component" searchdata=${JSON.stringify(searchDataReduced)} @update-profile=${(event) => this.updateProfile(index, event.detail.profile)}>${imgTag}</profile-ui>
+        <profile-ui seriesId=${this.seriesId} profile=${JSON.stringify(profile)} fieldlabels=${JSON.stringify(fieldlabels)} class="form-component" searchdata=${JSON.stringify(searchDataReduced)} @update-profile=${(event) => this.updateProfile(index, event.detail)}>${imgTag}</profile-ui>
         ${this.profiles?.length > 1 ? html`<img class="icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => {
     this.profiles.splice(index, 1);
     this.requestUpdate();
