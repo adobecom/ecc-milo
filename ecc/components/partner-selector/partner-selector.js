@@ -3,10 +3,11 @@ import { style } from './partner-selector.css.js';
 import { createSponsor, deleteImage, updateSponsor, uploadImage } from '../../scripts/esp-controller.js';
 import { LINK_REGEX } from '../../constants/constants.js';
 
-const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 export default class PartnerSelector extends LitElement {
   static properties = {
+    seriesPartners: { type: Array },
     partner: { type: Object },
     fieldLabels: { type: Object },
     seriesId: { type: String },
@@ -53,6 +54,14 @@ export default class PartnerSelector extends LitElement {
 
   checkValidity() {
     return this.partner.name?.length >= 3 && this.partner.link?.match(LINK_REGEX);
+  }
+
+  filterSeriesPartners(name) {
+    const lcn = name.toLowerCase();
+    this.seriesPartners = this.seriesSponsors.filter((partner) => {
+      const lcp = partner.name.toLowerCase();
+      return lcp.includes(lcn) && lcp !== lcn;
+    });
   }
 
   async savePartner(e) {
@@ -127,9 +136,21 @@ export default class PartnerSelector extends LitElement {
           <div>
             <div class="partner-input">
               <label>${this.fieldLabels.nameLabelText}</label>
-              <sp-textfield value=${this.partner.name} @change=${(event) => {
+              <sp-textfield id="partner-name-input" value=${this.partner.name} @change=${(event) => {
   this.updateValue('name', event.target.value);
+  this.filterSeriesPartners(event.target.value);
 }}></sp-textfield>
+              <sp-overlay trigger="partner-name-input@change">
+                ${repeat(this.seriesPartners, (partner) => html`
+                  <sp-menu-item @click=${() => {
+    this.updateValue('name', partner.name);
+    this.updateValue('link', partner.link);
+    this.updateValue('sponsorId', partner.sponsorId);
+    this.updateValue('modificationTime', partner.modificationTime);
+    if (partner.image) this.updateValue('photo', { ...partner.image, url: partner.image.imageUrl });
+  }}>${partner.name}</sp-menu-item>
+                `)}
+              </sp-overlay>
             </div>
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>
