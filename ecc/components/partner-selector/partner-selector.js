@@ -51,7 +51,7 @@ export default class PartnerSelector extends LitElement {
     if (saveButton) saveButton.textContent = 'Save Partner';
 
     this.partner = { ...this.partner, [key]: value };
-    this.partner.photo = this.imageDropzone?.file || null;
+    // this.partner.photo = this.imageDropzone?.file || null;
 
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
