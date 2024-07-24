@@ -58,7 +58,7 @@ export default class PartnerSelector extends LitElement {
 
   filterSeriesPartners(name) {
     const lcn = name.toLowerCase();
-    this.seriesPartners = this.seriesSponsors.filter((partner) => {
+    this.seriesPartners = this.seriesPartners.filter((partner) => {
       const lcp = partner.name.toLowerCase();
       return lcp.includes(lcn) && lcp !== lcn;
     });
