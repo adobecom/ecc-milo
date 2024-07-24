@@ -236,7 +236,8 @@ function decorateForm(el) {
   }
 
   const app = createTag('sp-theme', { color: 'light', scale: 'medium' });
-
+  createTag('sp-underlay', {}, '', { parent: app });
+  createTag('sp-dialog', { size: 's' }, '', { parent: app });
   const form = createTag('form', {}, '', { parent: app });
   const formDivs = el.querySelectorAll('.fragment');
 

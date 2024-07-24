@@ -1,5 +1,12 @@
 /* eslint-disable no-unused-vars */
-import { addSpeakerToEvent, getSpeaker, getSpeakers, updateSpeakerInEvent, removeSpeakerFromEvent } from '../../../scripts/esp-controller.js';
+import {
+  addSpeakerToEvent,
+  getSpeaker,
+  getSpeakers,
+  updateSpeakerInEvent,
+  removeSpeakerFromEvent,
+  getEvent,
+} from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 export async function onSubmit(component, props) {
@@ -72,7 +79,8 @@ export async function onSubmit(component, props) {
             return;
           }
 
-          props.eventDataResp = { ...props.eventDataResp, ...resp };
+          const latestEventResp = await getEvent(eventId);
+          props.eventDataResp = { ...props.eventDataResp, ...latestEventResp };
         }
       }, Promise.resolve());
     }
