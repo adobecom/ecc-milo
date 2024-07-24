@@ -247,7 +247,7 @@ export const fetchThrottledMemoizedText = (() => {
 
     try {
       const response = await fetchPromise;
-      const text = await response.text();
+      const text = response.ok ? await response.text() : null;
       cache.set(key, text);
       setTimeout(() => cache.delete(key), ttl);
       return text;
