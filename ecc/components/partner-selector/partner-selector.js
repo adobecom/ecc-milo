@@ -97,6 +97,9 @@ export default class PartnerSelector extends LitElement {
           const resp = await deleteImage({ targetUrl: `/v1/series/${this.seriesId}/sponsors/${this.partner.sponsorId}/images` }, respJson.image?.imageId);
           if (resp.errors || resp.message) {
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
+          } else {
+            this.partner.hasUnsavedChanges = false;
+            saveButton.textContent = 'Saved';
           }
         } catch (error) {
           this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
