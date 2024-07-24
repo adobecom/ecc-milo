@@ -140,7 +140,7 @@ export default class PartnerSelector extends LitElement {
   this.updateValue('name', event.target.value);
   this.filterSeriesPartners(event.target.value);
 }}></sp-textfield>
-              <sp-overlay .trigger="partner-name-input@change" .placement="bottom">
+              <sp-overlay .trigger="partner-name-input@input" .placement="bottom">
                 ${repeat(this.seriesPartners, (partner) => html`
                   <sp-menu-item @click=${() => {
     this.updateValue('name', partner.name);
