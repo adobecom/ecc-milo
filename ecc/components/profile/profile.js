@@ -150,10 +150,16 @@ export class Profile extends LitElement {
   }
 
   renderNameFieldWithSearchIntegrated() {
-    const { firstNameData, quietTextfieldConfig, lastNameData } = this.getRequiredProps();
+    const {
+      firstNameData,
+      quietTextfieldConfig,
+      lastNameData,
+      searchMap,
+    } = this.getRequiredProps();
+
     return html`
-    <custom-search searchKeys=['firstName'] data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom2=${(event) => this.updateProfile({ firstName: event.detail.value })} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)} identifier='speakerId'></custom-search>
-    <custom-search searchKeys=['lastName'] data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom2=${(event) => this.updateProfile({ lastName: event.detail.value })} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)} identifier='speakerId'></custom-search>
+    <custom-search searchMap=${JSON.stringify(searchMap)} data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom2=${(event) => this.updateProfile({ firstName: event.detail.value })} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)} identifier='speakerId'></custom-search>
+    <custom-search searchMap=${JSON.stringify(searchMap)} data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom2=${(event) => this.updateProfile({ lastName: event.detail.value })} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)} identifier='speakerId'></custom-search>
     `;
   }
 
@@ -259,9 +265,23 @@ export class Profile extends LitElement {
 
     const socialMediaConfig = { size: 'xl', pattern: LINK_REGEX };
     const quietTextfieldConfig = { size: 'xl', quiet: true };
+
+    const searchMap = [
+      { searchKey: 'firstName', renderKey: 'firstName' },
+      { searchKey: 'lastName', renderKey: 'lastName' },
+    ];
+
     return {
-    // eslint-disable-next-line max-len
-      fieldLabelsJSON, firstNameData, quietTextfieldConfig, lastNameData, titleData, bioData, textareaConfig, socialMediaData, socialMediaConfig,
+      fieldLabelsJSON,
+      firstNameData,
+      quietTextfieldConfig,
+      lastNameData,
+      titleData,
+      bioData,
+      textareaConfig,
+      socialMediaData,
+      socialMediaConfig,
+      searchMap,
     };
   }
 

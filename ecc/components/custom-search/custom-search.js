@@ -9,7 +9,7 @@ const SEARCH_TIMEOUT_MS = 500;
 export class CustomSearch extends LitElement {
   static properties = {
     identifier: { type: String },
-    searchKeys: { type: Array },
+    searchMap: { type: Array },
     searchInput: { type: String },
     isPopoverOpen: { type: Boolean },
     config: { type: Object, reflect: true },
@@ -24,7 +24,7 @@ export class CustomSearch extends LitElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.identifier = '';
-    this.searchKeys = [];
+    this.searchMap = [];
     this.searchInput = '';
     this.isPopoverOpen = false;
     this.closeOverlay = () => {};
@@ -46,7 +46,7 @@ export class CustomSearch extends LitElement {
 
     this.searchResults = this.searchInput?.trim().length !== 0 && this.searchdata.length > 0
       // eslint-disable-next-line max-len
-      ? this.searchdata.filter((item) => (this.searchKeys.some((k) => item[k].toLowerCase().includes(searchVal)))) : [];
+      ? this.searchdata.filter((item) => (this.searchMap.some((s) => item[s.searchKey].toLowerCase().includes(searchVal)))) : [];
 
     if (this.searchResults.length === 0) {
       return;
@@ -112,7 +112,7 @@ export class CustomSearch extends LitElement {
         ${repeat(this.searchResults, (item) => item[this.identifier], (entry) => html`
         <sp-menu-item @click=${() => {
     this.selectEntry(entry);
-  }}>${this.searchKeys.map((key) => entry[key]).join(' ')}</sp-menu-item>`)}`;
+  }}>${this.searchMap.map((s) => entry[s.renderKey]).join(' ')}</sp-menu-item>`)}`;
   }
 
   onSubmitSearch(e) {
