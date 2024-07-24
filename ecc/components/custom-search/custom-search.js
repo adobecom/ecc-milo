@@ -109,10 +109,10 @@ export class CustomSearch extends LitElement {
 
   renderMenuItems() {
     return html` 
-        ${repeat(this.searchResults, (item) => item.speakerId, (profile) => html`
+        ${repeat(this.searchResults, (item) => item[this.identifier], (entry) => html`
         <sp-menu-item @click=${() => {
-    this.selectProfile(profile);
-  }}>${profile.firstName} ${profile.lastName}</sp-menu-item>`)}`;
+    this.selectEntry(entry);
+  }}>${this.searchKeys.map((key) => entry[key]).join(' ')}</sp-menu-item>`)}`;
   }
 
   onSubmitSearch(e) {
