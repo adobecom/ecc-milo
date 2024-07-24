@@ -148,7 +148,7 @@ export class CustomSearch extends LitElement {
           config=${JSON.stringify(this.config)}
           @input-custom=${this.onSearchInput}
           @submit=${this.onSubmitSearch}
-          @change-custom=${(e) => { e.stopPropagation(); this.dispatchEvent(new CustomEvent('change-custom-search', { detail: { value: this.searchInput } })); }}
+          @change-custom=${(e) => { e.stopPropagation(); this.dispatchEvent(new CustomEvent('change-custom-search', { detail: { value: e.detail.value } })); }}
           @sp-opened=${() => {
     this.isPopoverOpen = true;
   }}
