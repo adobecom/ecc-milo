@@ -5,11 +5,6 @@ import { LINK_REGEX } from '../../constants/constants.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
-const nameFieldData = {
-  value: this.partner.name,
-  placeholder: 'Enter partner name',
-};
-
 export default class PartnerSelector extends LitElement {
   static properties = {
     seriesPartners: { type: Array },
@@ -29,6 +24,14 @@ export default class PartnerSelector extends LitElement {
   }
 
   static styles = style;
+
+  getRequiredProps() {
+    const nameFieldData = {
+      value: this.partner.name,
+      placeholder: 'Enter partner name',
+    };
+    return { nameFieldData };
+  }
 
   firstUpdated() {
     const saveButton = this.shadowRoot.querySelector('.save-partner-button');
@@ -140,6 +143,7 @@ export default class PartnerSelector extends LitElement {
   }
 
   render() {
+    const { nameFieldData } = this.getRequiredProps();
     return html`
       <fieldset class="partner-field-wrapper">
       <div>
