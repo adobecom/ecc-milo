@@ -5,7 +5,6 @@ import {
   getSpeakers,
   updateSpeakerInEvent,
   removeSpeakerFromEvent,
-  getEvent,
 } from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
@@ -79,8 +78,7 @@ export async function onSubmit(component, props) {
             return;
           }
 
-          const latestEventResp = await getEvent(eventId);
-          props.eventDataResp = { ...props.eventDataResp, ...latestEventResp };
+          props.eventDataResp = { ...props.eventDataResp, ...resp };
         }
       }, Promise.resolve());
     }
