@@ -17,6 +17,7 @@ export default class PartnerSelector extends LitElement {
     this.partner = this.partner || {
       name: '',
       link: '',
+      photo: null,
       hasUnsavedChange: false,
     };
   }

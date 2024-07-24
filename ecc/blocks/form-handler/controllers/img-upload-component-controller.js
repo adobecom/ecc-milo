@@ -104,6 +104,9 @@ export default async function init(component, props) {
 
       const underlay = props.el.querySelector('sp-underlay');
       const dialog = props.el.querySelector('sp-dialog');
+
+      dialog.innerHTML = '';
+
       createTag('h1', { slot: 'heading' }, `You are deleting the ${configs.altText.toLowerCase()}.`, { parent: dialog });
       createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
       const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });

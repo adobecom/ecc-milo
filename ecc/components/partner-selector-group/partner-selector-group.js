@@ -1,12 +1,14 @@
+import { getSponsors } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './partner-selector-group.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
-const defaultPartner = { name: '', link: '', hasUnsavedChanges: false };
+const defaultPartner = {};
 
 export default class PartnerSelectorGroup extends LitElement {
   static properties = {
+    seriesSponsors: { type: Array },
     partners: { type: Array },
     fieldlabels: { type: Object },
     seriesId: { type: String },
@@ -14,6 +16,7 @@ export default class PartnerSelectorGroup extends LitElement {
 
   constructor() {
     super();
+    this.seriesSponsors = this.seriesSponsors || [];
     this.partners = this.partners || [defaultPartner];
   }
 
