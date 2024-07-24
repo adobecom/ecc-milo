@@ -201,7 +201,7 @@ async function gatherValues(props) {
 
     const promises = Array.from(mappedComponents).map(async (component) => {
       const { onSubmit } = await import(`./controllers/${comp}-component-controller.js`);
-      await onSubmit(component, props);
+      return onSubmit(component, props);
     });
 
     return Promise.all(promises);
@@ -303,7 +303,11 @@ function showSaveSuccessMessage(props) {
 }
 
 async function saveEvent(props, options = { toPublish: false }) {
-  await gatherValues(props);
+  try {
+    await gatherValues(props);
+  } catch (e) {
+    return { message: e.message };
+  }
 
   let resp;
 
