@@ -30,7 +30,9 @@ export default class PartnerSelector extends LitElement {
       value: this.partner.name,
       placeholder: 'Enter partner name',
     };
-    return { nameFieldData };
+
+    const searchMap = [{ searchKey: 'name', renderKey: 'name' }];
+    return { searchMap, nameFieldData };
   }
 
   firstUpdated() {
@@ -51,7 +53,6 @@ export default class PartnerSelector extends LitElement {
     if (saveButton) saveButton.textContent = 'Save Partner';
 
     this.partner = { ...this.partner, [key]: value };
-    // this.partner.photo = this.imageDropzone?.file || null;
 
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
@@ -143,7 +144,7 @@ export default class PartnerSelector extends LitElement {
   }
 
   render() {
-    const { nameFieldData } = this.getRequiredProps();
+    const { nameFieldData, searchMap } = this.getRequiredProps();
     return html`
       <fieldset class="partner-field-wrapper">
       <div>
@@ -154,13 +155,13 @@ export default class PartnerSelector extends LitElement {
           <div>
             <div class="partner-input">
               <label>${this.fieldLabels.nameLabelText}</label>
-              <custom-search searchMap=${JSON.stringify([{ searchKey: 'name', renderKey: 'name' }])} data=${JSON.stringify(nameFieldData)} config=${JSON.stringify({})} @change-custom-search=${(event) => {
+              <custom-search searchMap=${JSON.stringify(searchMap)} data=${JSON.stringify(nameFieldData)} config=${JSON.stringify({})} @change-custom-search=${(event) => {
   this.updateValue('name', event.target.value);
 }} @entry-selected=${this.handleAutocomplete} searchdata=${JSON.stringify(this.seriesPartners)} identifier='sponsorId'></custom-search>
             </div>
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>
-              <sp-textfield pattern=${LINK_REGEX} value=${this.partner.link} @change=${(event) => {
+              <sp-textfield pattern=${LINK_REGEX} value=${this.partner.link} placeholder="Enter partner full URL", @change=${(event) => {
   this.updateValue('link', event.target.value);
 }}></sp-textfield>
             </div>
