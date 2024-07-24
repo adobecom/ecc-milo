@@ -135,11 +135,14 @@ export default class PartnerSelector extends LitElement {
   }
 
   handleAutocomplete(e) {
+    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     const partner = { ...e.detail.data };
     this.updateValue('name', partner.name);
     this.updateValue('link', partner.link);
     this.updateValue('sponsorId', partner.sponsorId);
     this.updateValue('modificationTime', partner.modificationTime);
+    this.updateValue('hasUnsavedChanges', false);
+    if (saveButton) saveButton.textContent = 'Saved';
     if (partner.image) this.updateValue('photo', { ...partner.image, url: partner.image.imageUrl });
   }
 
