@@ -3,7 +3,12 @@ import { style } from './partner-selector.css.js';
 import { createSponsor, deleteImage, updateSponsor, uploadImage } from '../../scripts/esp-controller.js';
 import { LINK_REGEX } from '../../constants/constants.js';
 
-const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
+
+const nameFieldData = {
+  value: this.partner.name,
+  placeholder: 'Enter partner name',
+};
 
 export default class PartnerSelector extends LitElement {
   static properties = {
@@ -145,7 +150,7 @@ export default class PartnerSelector extends LitElement {
           <div>
             <div class="partner-input">
               <label>${this.fieldLabels.nameLabelText}</label>
-              <custom-search searchKeys=['name'] data=${{ value: this.partner.name }} @change-custom2=${(event) => {
+              <custom-search searchKeys=['name'] data=${nameFieldData} @change-custom2=${(event) => {
   this.updateValue('name', event.target.value);
 }} @entry-selected=${this.handleAutocomplete} searchdata=${JSON.stringify(this.seriesPartners)} identifier='sponsorId'></custom-search>
             </div>

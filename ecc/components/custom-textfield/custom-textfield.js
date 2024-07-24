@@ -3,7 +3,7 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './custom-textfield.css.js';
 
-const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 const defaultConfig = {
   grows: false,
@@ -35,6 +35,6 @@ export class CustomTextfield extends LitElement {
   render() {
     return html`
     <sp-textfield placeholder=${this.data.placeholder} pattern=${this.config.pattern} ?quiet=${this.config.quiet} size=${this.config.size} ?grows=${this.config.grows} ?multiline=${this.config.multiline} class='text-input' value=${this.data.value} @change=${(event) => { event.stopPropagation(); this.dispatchEvent(new CustomEvent('change-custom', { detail: { value: event.target.value } })); }} @input=${(event) => { event.stopPropagation(); this.dispatchEvent(new CustomEvent('input-custom', { detail: { value: event.target.value } })); }}></sp-textfield>
-    <sp-helptext class="helper-text">${this.data.helperText}</sp-helptext>`;
+    ${this.data.helperText ? html`<sp-helptext class="helper-text">${this.data.helperText}</sp-helptext>` : nothing}`;
   }
 }
