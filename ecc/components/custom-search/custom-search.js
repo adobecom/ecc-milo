@@ -123,7 +123,6 @@ export class CustomSearch extends LitElement {
 
   handleSearchChange(event) {
     const { value } = event.target.data;
-    console.log('event target', event.target);
     if (value.length === 0) {
       this.closePopover();
     }
