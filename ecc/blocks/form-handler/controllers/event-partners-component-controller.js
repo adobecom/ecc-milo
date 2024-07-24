@@ -1,5 +1,12 @@
 /* eslint-disable no-restricted-syntax */
-import { addSponsorToEvent, getSponsor, getSponsorImages, getSponsors, removeSponsorFromEvent, updateSponsorInEvent } from '../../../scripts/esp-controller.js';
+import {
+  addSponsorToEvent,
+  getSponsor,
+  getSponsorImages,
+  getSponsors,
+  removeSponsorFromEvent,
+  updateSponsorInEvent,
+} from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
 /* eslint-disable no-unused-vars */
@@ -94,8 +101,8 @@ export default async function init(component, props) {
   const eventData = props.eventDataResp;
   const partnersGroup = component.querySelector('partner-selector-group');
 
-  const seriesSponsors = await getSponsors(eventData.seriesId);
-  if (seriesSponsors) partnersGroup.seriesSponsors = seriesSponsors;
+  const spResp = await getSponsors(eventData.seriesId);
+  if (spResp) partnersGroup.seriesSponsors = spResp.sponsors;
 
   if (eventData.sponsors) {
     const partners = await Promise.all(eventData.sponsors.map(async (sponsor, index) => {
