@@ -152,8 +152,8 @@ export class Profile extends LitElement {
   renderNameFieldWithSearchIntegrated() {
     const { firstNameData, quietTextfieldConfig, lastNameData } = this.getRequiredProps();
     return html`
-    <custom-search data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom2=${(event) => this.updateProfile({ firstName: event.detail.value })} @profile-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)}></custom-search>
-    <custom-search data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom2=${(event) => this.updateProfile({ lastName: event.detail.value })} @profile-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)}></custom-search>
+    <custom-search searchKeys=['firstName'] data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom2=${(event) => this.updateProfile({ firstName: event.detail.value })} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)} identifier='speakerId'></custom-search>
+    <custom-search searchKeys=['lastName'] data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom2=${(event) => this.updateProfile({ lastName: event.detail.value })} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)} identifier='speakerId'></custom-search>
     `;
   }
 

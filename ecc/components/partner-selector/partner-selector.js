@@ -125,6 +125,15 @@ export default class PartnerSelector extends LitElement {
     saveButton.pending = false;
   }
 
+  handleAutocomplete(e) {
+    const partner = { ...e.detail };
+    this.updateValue('name', partner.name);
+    this.updateValue('link', partner.link);
+    this.updateValue('sponsorId', partner.sponsorId);
+    this.updateValue('modificationTime', partner.modificationTime);
+    if (partner.image) this.updateValue('photo', { ...partner.image, url: partner.image.imageUrl });
+  }
+
   render() {
     return html`
       <fieldset class="partner-field-wrapper">
@@ -136,21 +145,9 @@ export default class PartnerSelector extends LitElement {
           <div>
             <div class="partner-input">
               <label>${this.fieldLabels.nameLabelText}</label>
-              <sp-textfield id="partner-name-input" value=${this.partner.name} @change=${(event) => {
+              <custom-search searchKeys=['name'] data=${{ value: this.partner.name }} @change-custom2=${(event) => {
   this.updateValue('name', event.target.value);
-  this.filterSeriesPartners(event.target.value);
-}}></sp-textfield>
-              <sp-overlay .trigger="partner-name-input@input" .placement="bottom">
-                ${repeat(this.seriesPartners, (partner) => html`
-                  <sp-menu-item @click=${() => {
-    this.updateValue('name', partner.name);
-    this.updateValue('link', partner.link);
-    this.updateValue('sponsorId', partner.sponsorId);
-    this.updateValue('modificationTime', partner.modificationTime);
-    if (partner.image) this.updateValue('photo', { ...partner.image, url: partner.image.imageUrl });
-  }}>${partner.name}</sp-menu-item>
-                `)}
-              </sp-overlay>
+}} @entry-selected=${this.handleAutocomplete} searchdata=${JSON.stringify(this.seriesPartners)} identifier='sponsorId'></custom-search>
             </div>
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>

@@ -8,6 +8,8 @@ const SEARCH_TIMEOUT_MS = 500;
 // eslint-disable-next-line import/prefer-default-export
 export class CustomSearch extends LitElement {
   static properties = {
+    identifier: { type: String },
+    searchKeys: { type: Array },
     searchInput: { type: String },
     isPopoverOpen: { type: Boolean },
     config: { type: Object, reflect: true },
@@ -21,6 +23,8 @@ export class CustomSearch extends LitElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    this.identifier = '';
+    this.searchKeys = [];
     this.searchInput = '';
     this.isPopoverOpen = false;
     this.closeOverlay = () => {};
@@ -38,11 +42,11 @@ export class CustomSearch extends LitElement {
       return;
     }
 
-    const searchKey = this.searchInput.toLowerCase();
+    const searchVal = this.searchInput.toLowerCase();
 
     this.searchResults = this.searchInput?.trim().length !== 0 && this.searchdata.length > 0
       // eslint-disable-next-line max-len
-      ? this.searchdata.filter((profile) => (profile.firstName.toLowerCase().includes(searchKey) || profile.lastName.toLowerCase().includes(searchKey))) : [];
+      ? this.searchdata.filter((item) => (this.searchKeys.some((k) => item[k].toLowerCase().includes(searchVal)))) : [];
 
     if (this.searchResults.length === 0) {
       return;
@@ -94,18 +98,18 @@ export class CustomSearch extends LitElement {
     }
   }
 
-  selectProfile(profile) {
+  selectEntry(entryData) {
     this.dispatchEvent(
       new CustomEvent(
-        'profile-selected',
-        { detail: { profile: { ...profile, isPlaceholder: false } } },
+        'entry-selected',
+        { detail: { entryData: { ...entryData, isPlaceholder: false } } },
       ),
     );
   }
 
   renderMenuItems() {
     return html` 
-        ${repeat(this.searchResults, (profile) => profile.speakerId, (profile) => html`
+        ${repeat(this.searchResults, (item) => item.speakerId, (profile) => html`
         <sp-menu-item @click=${() => {
     this.selectProfile(profile);
   }}>${profile.firstName} ${profile.lastName}</sp-menu-item>`)}`;
@@ -155,7 +159,7 @@ export class CustomSearch extends LitElement {
           @keydown=${this.handleKeydown}
       ></custom-textfield>
       <sp-popover dialog>
-          <sp-menu> ${this.renderMenuItems()}</sp-menu>
+          <sp-menu>${this.renderMenuItems()}</sp-menu>
       </sp-popover>
   `;
   }
