@@ -100,7 +100,7 @@ export function buildErrorMessage(props, resp) {
     });
   } else if (resp.message) {
     if (resp.message.endsWith('modified since last fetch')) {
-      const message = createTag('div', {}, createTag('p', {}, resp.message));
+      const message = createTag('div', {}, createTag('div', {}, resp.message));
       const url = new URL(window.location.href);
       url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
       createTag('a', { href: `${url.toString()}`, class: 'con-button outline' }, 'CLick see the latest version.', { parent: message });
