@@ -277,8 +277,8 @@
 
 .ecc-dashboard sp-theme.toast-area {
   position: fixed;
-  right: 40px;
-  bottom: 40px;
+  right: calc((100% - var(--grid-container-width)) / 2);
+  bottom: 80px;
   display: flex;
   flex-direction: column;
   gap: 16px;
