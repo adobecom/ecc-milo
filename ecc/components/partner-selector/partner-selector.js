@@ -49,7 +49,6 @@ export default class PartnerSelector extends LitElement {
 
   updateValue(key, value) {
     this.partner.hasUnsavedChanges = true;
-    this.partner.
     const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     if (saveButton) saveButton.textContent = 'Save Partner';
 
