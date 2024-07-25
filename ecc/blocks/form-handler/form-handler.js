@@ -119,7 +119,6 @@ export function buildErrorMessage(props, resp) {
 
 function replaceAnchorWithButton(anchor) {
   if (!anchor || anchor.tagName !== 'A') {
-    console.error('The provided element is not an anchor tag.');
     return null;
   }
 
