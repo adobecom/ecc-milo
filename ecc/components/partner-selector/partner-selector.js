@@ -42,11 +42,7 @@ export default class PartnerSelector extends LitElement {
 
     this.partner = { ...this.partner, ...newData };
 
-    this.dispatchEvent(new CustomEvent('update-partner', {
-      detail: { partner: this.partner },
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(new CustomEvent('update-partner', { detail: { partner: this.partner } }));
   }
 
   selectSeriesPartner(partner) {
@@ -56,11 +52,7 @@ export default class PartnerSelector extends LitElement {
 
     if (partner.image) this.partner.photo = { ...partner.image, url: partner.image.imageUrl };
 
-    this.dispatchEvent(new CustomEvent('update-partner', {
-      detail: { partner: this.partner },
-      bubbles: true,
-      composed: true,
-    }));
+    this.dispatchEvent(new CustomEvent('update-partner', { detail: { partner: this.partner } }));
   }
 
   isSaved() {
