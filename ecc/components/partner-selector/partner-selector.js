@@ -141,10 +141,8 @@ export default class PartnerSelector extends LitElement {
     this.updateValue('link', partner.link);
     this.updateValue('sponsorId', partner.sponsorId);
     this.updateValue('modificationTime', partner.modificationTime);
-    this.updateValue('hasUnsavedChanges', false);
     if (partner.image) this.updateValue('photo', { ...partner.image, url: partner.image.imageUrl });
-
-    this.requestUpdate();
+    this.partner.hasUnsavedChanges = false;
   }
 
   render() {
@@ -174,7 +172,7 @@ export default class PartnerSelector extends LitElement {
       </div>
       <div class="action-area">
         <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>
-        ${this.partner.hasUnsavedChanges ? html`Save Partner` : html`Saved`}</sp-button>
+        ${!this.checkValidity() && !this.partner.hasUnsavedChanges ? html`Saved` : html`Save Partner`}</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
