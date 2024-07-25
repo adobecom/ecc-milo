@@ -19,7 +19,7 @@ export default class PartnerSelector extends LitElement {
       name: '',
       link: '',
       photo: null,
-      hasUnsavedChange: false,
+      hasUnsavedChanges: false,
     };
   }
 
@@ -48,7 +48,7 @@ export default class PartnerSelector extends LitElement {
   }
 
   updateValue(key, value) {
-    this.partner.hasUnsavedChanges = true;
+    if (key !== 'hasUnsavedChanges') this.partner.hasUnsavedChanges = true;
     const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     if (saveButton) saveButton.textContent = 'Save Partner';
 
