@@ -113,7 +113,7 @@ export class Profile extends LitElement {
 
       if (respJson.speakerId) {
         profile.speakerId = respJson.speakerId;
-        const lastPhoto = profile.photo;
+        const lastPhoto = respJson.photo;
         profile.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
         const file = imageDropzone?.getFile();
         profile.modificationTime = respJson.modificationTime;
