@@ -31,7 +31,7 @@ export default class PartnerSelector extends LitElement {
       placeholder: 'Enter partner name',
     };
 
-    const searchMap = [{ searchKey: 'name', renderKey: 'name' }];
+    const searchMap = { searchKeys: ['name'], renderKeys: ['name'] };
     return { searchMap, nameFieldData };
   }
 
@@ -41,18 +41,33 @@ export default class PartnerSelector extends LitElement {
     this.imageDropzone.addEventListener('image-change', (e) => {
       this.partner.hasUnsavedChanges = true;
       this.partner.photo = e.detail.file;
-      if (saveButton) saveButton.textContent = 'Save Partner';
+      if (saveButton) saveButton.textContent = 'Save partner';
       this.requestUpdate();
     });
     this.checkValidity();
   }
 
-  updateValue(key, value) {
+  updatePartner(newData) {
     this.partner.hasUnsavedChanges = true;
     const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     if (saveButton) saveButton.textContent = 'Save Partner';
 
-    this.partner = { ...this.partner, [key]: value };
+    this.partner = { ...this.partner, ...newData };
+
+    this.dispatchEvent(new CustomEvent('update-partner', {
+      detail: { partner: this.partner },
+      bubbles: true,
+      composed: true,
+    }));
+  }
+
+  selectSeriesPartner(partner) {
+    this.partner.hasUnsavedChanges = false;
+    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
+    if (saveButton) saveButton.textContent = 'Saved';
+
+    this.partner = partner;
+    if (partner.image) this.partner.photo = { ...partner.image, url: partner.image.imageUrl };
 
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
@@ -110,9 +125,6 @@ export default class PartnerSelector extends LitElement {
 
         if (sponsorData) {
           this.partner.modificationTime = sponsorData.modificationTime;
-          if (saveButton) {
-            this.partner.hasUnsavedChanges = false;
-          }
         }
       } else if (!file && respJson.image?.imageId) {
         try {
@@ -125,24 +137,24 @@ export default class PartnerSelector extends LitElement {
         } catch (error) {
           this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
         }
-      } else if (saveButton) {
-        this.partner.hasUnsavedChanges = false;
       }
 
-      this.requestUpdate();
+      this.partner.hasUnsavedChanges = false;
+      this.dispatchEvent(new CustomEvent('update-partner', {
+        detail: { partner: this.partner },
+        bubbles: true,
+        composed: true,
+      }));
     }
-
-    saveButton.pending = false;
+    if (saveButton) {
+      saveButton.textContent = 'Saved';
+      saveButton.pending = false;
+    }
   }
 
   handleAutocomplete(e) {
-    const partner = { ...e.detail.data };
-    this.updateValue('name', partner.name);
-    this.updateValue('link', partner.link);
-    this.updateValue('sponsorId', partner.sponsorId);
-    this.updateValue('modificationTime', partner.modificationTime);
-    if (partner.image) this.updateValue('photo', { ...partner.image, url: partner.image.imageUrl });
-    this.partner.hasUnsavedChanges = false;
+    const partner = { ...e.detail.entryData };
+    this.selectSeriesPartner(partner);
   }
 
   render() {
@@ -158,13 +170,13 @@ export default class PartnerSelector extends LitElement {
             <div class="partner-input">
               <label>${this.fieldLabels.nameLabelText}</label>
               <custom-search searchMap=${JSON.stringify(searchMap)} data=${JSON.stringify(nameFieldData)} config=${JSON.stringify({})} @change-custom-search=${(event) => {
-  this.updateValue('name', event.detail.value);
+  this.updatePartner({ name: event.detail.value });
 }} @entry-selected=${this.handleAutocomplete} searchdata=${JSON.stringify(this.seriesPartners)} identifier='sponsorId'></custom-search>
             </div>
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>
               <sp-textfield pattern=${LINK_REGEX} value=${this.partner.link} placeholder="Enter partner full URL", @change=${(event) => {
-  this.updateValue('link', event.target.value);
+  this.updatePartner({ link: event.target.value });
 }}></sp-textfield>
             </div>
           </div>
@@ -172,7 +184,7 @@ export default class PartnerSelector extends LitElement {
       </div>
       <div class="action-area">
         <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>
-        ${!this.checkValidity() && !this.partner.hasUnsavedChanges ? html`Saved` : html`Save Partner`}</sp-button>
+        ${this.isSaved() ? 'Saved' : 'Save partner'}</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
