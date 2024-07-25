@@ -364,21 +364,11 @@ function initMoreOptions(props, config, eventObj, row) {
   });
 }
 
-function getTimezoneName(offsetHours) {
-  const offsetMinutes = offsetHours * 60;
+function getCountryName(eventObj) {
+  if (!eventObj.venue) return '';
 
-  const d = new Date();
-  const utcDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000 + offsetMinutes * 60000);
-
-  const options = {
-    timeZone: 'UTC',
-    timeZoneName: 'long',
-  };
-  const formatter = new Intl.DateTimeFormat('en-US', options);
-  const parts = formatter.formatToParts(utcDate);
-  const timeZoneName = parts.find((part) => part.type === 'timeZoneName').value;
-
-  return timeZoneName;
+  const { venue } = eventObj;
+  return venue.country || '';
 }
 
 function buildStatusTag(event) {
@@ -434,7 +424,7 @@ async function populateRow(props, config, index) {
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
   const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(config, event)));
-  const timezoneCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getTimezoneName(event.gmtOffset)));
+  const geoCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getCountryName(event)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
@@ -445,7 +435,7 @@ async function populateRow(props, config, index) {
     startDateCell,
     modDateCell,
     venueCell,
-    timezoneCell,
+    geoCell,
     externalEventId,
     moreOptionsCell,
   );
