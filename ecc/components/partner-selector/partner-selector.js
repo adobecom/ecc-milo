@@ -54,7 +54,6 @@ export default class PartnerSelector extends LitElement {
     const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     if (saveButton) saveButton.textContent = 'Saved';
 
-    this.partner = partner;
     if (partner.image) this.partner.photo = { ...partner.image, url: partner.image.imageUrl };
 
     this.dispatchEvent(new CustomEvent('update-partner', {
