@@ -5,12 +5,15 @@
 }
 
 .venue-info-component sp-textfield {
-  font-family: var();
   box-sizing: border-box;
   font-size: var(--type-heading-m-size);
   border: none;
   outline: none;
   width: 100%;
+}
+
+.venue-info-component sp-textfield[readonly] {
+  border-bottom: 1px solid var(--color-black);
 }
 
 .venue-info-component .timezone-picker-wrapper {
