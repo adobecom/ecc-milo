@@ -93,14 +93,13 @@ export function readBlockConfig(block) {
 
 function formatLocaleDate(string) {
   const options = {
-    weekday: 'long',
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   };
 
-  return new Date(string).toLocaleString('en-GB', options);
+  return new Date(string).toLocaleString('en-US', options);
 }
 
 function highlightRow(row) {
