@@ -113,25 +113,43 @@ export class Profile extends LitElement {
 
       if (respJson.speakerId) {
         profile.speakerId = respJson.speakerId;
-        const lastPhoto = profile.photo;
-        profile.photo = imageDropzone?.file ? { imageUrl: imageDropzone?.file?.url } : null;
+        const lastPhoto = respJson.photo;
         const file = imageDropzone?.getFile();
+        profile.photo = file ? { imageUrl: file.url } : null;
+
         profile.modificationTime = respJson.modificationTime;
 
         if (file && (file instanceof File)) {
-          const speakerData = await uploadImage(file, {
-            targetUrl: `/v1/series/${this.seriesId}/speakers/${profile.speakerId}/images`,
-            type: 'speaker-photo',
-            altText: `${this.profile.firstName} ${this.profile.lastName} photo`,
-          });
-          // }, { progress: null }, lastPhoto?.imageId);
+          const speakerData = await uploadImage(
+            file,
+            {
+              targetUrl: `/v1/series/${this.seriesId}/speakers/${profile.speakerId}/images`,
+              type: 'speaker-photo',
+              altText: `${this.profile.firstName} ${this.profile.lastName} photo`,
+            },
+            null,
+            lastPhoto?.imageId,
+          );
 
-          console.log(speakerData);
-          profile.modificationTime = speakerData.modificationTime;
-        } else if (lastPhoto && lastPhoto.imageUrl !== profile.photo?.imageUrl) {
-          // eslint-disable-next-line max-len
-          const resp = await deleteSpeakerImage(profile.speakerId, this.seriesId, lastPhoto.imageId);
-          console.log(resp);
+          if (speakerData.errors || speakerData.message) {
+            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
+          }
+
+          if (speakerData.modificationTime) profile.modificationTime = speakerData.modificationTime;
+        } else if (lastPhoto && !profile.photo) {
+          const resp = await deleteSpeakerImage(
+            profile.speakerId,
+            this.seriesId,
+            lastPhoto.imageId,
+          );
+
+          if (resp.errors || resp.message) {
+            imageDropzone.file = { url: lastPhoto.imageUrl };
+            profile.photo = lastPhoto;
+            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
+          }
+
+          if (resp.modificationTime) profile.modificationTime = resp.modificationTime;
         }
 
         this.updateProfile(profile);
