@@ -59,7 +59,6 @@ export default class PartnerSelectorGroup extends LitElement {
     const hasOnePartner = this.partners.length === 1;
     const isUnsaved = !this.partners[0].sponsorId;
     return hasOnePartner && isUnsaved;
-;
   }
 
   render() {
@@ -84,7 +83,7 @@ export default class PartnerSelectorGroup extends LitElement {
       ${index < this.partners.length - 1 ? html`<sp-divider size='s'></sp-divider>` : nothing}
       `;
   })}
-      <repeater-element text="Add partner" @repeat=${this.addPartner}></repeater-element>
+      ${this.partners.every((partner) => partner.isSaved()) ? html`<sp-button variant="primary" @click=${this.addPartner}>Add Partner</sp-button>` : nothing}
     `;
   }
 }
