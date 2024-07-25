@@ -277,9 +277,9 @@ export async function createSpeaker(profile, seriesId) {
   }
 }
 
-export async function createSponsor(data, seriesId) {
+export async function createSponsor(sponsorData, seriesId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify(data);
+  const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -298,9 +298,9 @@ export async function createSponsor(data, seriesId) {
   }
 }
 
-export async function updateSponsor(data, sponsorId, seriesId) {
+export async function updateSponsor(sponsorData, sponsorId, seriesId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify(data);
+  const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -319,9 +319,9 @@ export async function updateSponsor(data, sponsorId, seriesId) {
   }
 }
 
-export async function addSponsorToEvent(data, eventId) {
+export async function addSponsorToEvent(sponsorData, eventId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify(data);
+  const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -340,9 +340,9 @@ export async function addSponsorToEvent(data, eventId) {
   }
 }
 
-export async function updateSponsorInEvent(data, sponsorId, eventId) {
+export async function updateSponsorInEvent(sponsorData, sponsorId, eventId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify(data);
+  const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -462,9 +462,9 @@ export async function addSpeakerToEvent(speakerData, eventId) {
   }
 }
 
-export async function updateSpeakerInEvent(data, speakerId, eventId) {
+export async function updateSpeakerInEvent(speakerData, speakerId, eventId) {
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify(data);
+  const raw = JSON.stringify(speakerData);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
