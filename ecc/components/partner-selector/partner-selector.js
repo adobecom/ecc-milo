@@ -102,7 +102,13 @@ export default class PartnerSelector extends LitElement {
         }, null, respJson.image?.imageId);
 
         if (sponsorData) {
-          this.partner.modificationTime = sponsorData.modificationTime;
+          if (sponsorData.errors || sponsorData.message) {
+            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to updated the image. Please try again later.' }, bubbles: true, composed: true }));
+          }
+
+          if (sponsorData.modificationTime) {
+            this.partner.modificationTime = sponsorData.modificationTime;
+          }
         }
       } else if (!file && respJson.image?.imageId) {
         try {
@@ -135,17 +141,22 @@ export default class PartnerSelector extends LitElement {
     this.selectSeriesPartner(partner);
   }
 
+  handleImageChange(e) {
+    this.partner.hasUnsavedChanges = true;
+    this.partner.photo = e.detail.file;
+
+    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
+    if (saveButton) saveButton.textContent = 'Save Partner';
+    this.requestUpdate();
+  }
+
   render() {
     const { nameFieldData, searchMap } = this.getRequiredProps();
     return html`
       <fieldset class="partner-field-wrapper">
       <div>
         <div class="partner-input-wrapper">
-          <image-dropzone .file=${this.partner.photo} @image-change=${(e) => {
-  this.partner.hasUnsavedChanges = true;
-  this.partner.photo = e.detail.file;
-  this.requestUpdate();
-}}>
+          <image-dropzone .file=${this.partner.photo} @image-change=${this.handleImageChange}>
         <slot name="img-label" slot="img-label"></slot>
           </image-dropzone>
           <div>
