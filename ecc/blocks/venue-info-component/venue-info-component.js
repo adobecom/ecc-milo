@@ -68,6 +68,7 @@ function buildLocationInputGrid(row) {
           type: 'text',
           quiet: true,
           size: 'l',
+          readonly: true,
         }));
         break;
       case 1:
@@ -79,6 +80,7 @@ function buildLocationInputGrid(row) {
           type: 'text',
           quiet: true,
           size: 'l',
+          readonly: true,
           pattern: '^(?:Alabama|AL|Alaska|AK|Arizona|AZ|Arkansas|AR|California|CA|Colorado|CO|Connecticut|CT|Delaware|DE|Florida|FL|Georgia|GA|Hawaii|HI|Idaho|ID|Illinois|IL|Indiana|IN|Iowa|IA|Kansas|KS|Kentucky|KY|Louisiana|LA|Maine|ME|Maryland|MD|Massachusetts|MA|Michigan|MI|Minnesota|MN|Mississippi|MS|Missouri|MO|Montana|MT|Nevada|NV|New\\s+Hampshire|NH|New\\s+Jersey|NJ|New\\s+Mexico|NM|New\\s+York|NY|North\\s+Carolina|NC|North\\s+Dakota|ND|Ohio|OH|Oklahoma|OK|Oregon|OR|Pennsylvania|PA|Rhode\\s+Island|RI|South\\s+Carolina|SC|South\\s+Dakota|SD|Tennessee|TN|Texas|TX|Utah|UT|Vermont|VT|Virginia|VA|Washington|WA|West\\s+Virginia|WV|Wisconsin|WI|Wyoming|WY|Nebraska|NE)$',
         }));
         break;
@@ -91,6 +93,7 @@ function buildLocationInputGrid(row) {
           type: 'text',
           quiet: true,
           size: 'l',
+          readonly: true,
           pattern: '^[0-9]{5}(?:-[0-9]{4})?$',
         }));
         break;
@@ -103,6 +106,7 @@ function buildLocationInputGrid(row) {
           type: 'text',
           quiet: true,
           size: 'l',
+          readonly: true,
           pattern: '^(AF|AX|AL|DZ|AS|AD|AO|AI|AQ|AG|AR|AM|AW|AU|AT|AZ|BS|BH|BD|BB|BY|BE|BZ|BJ|BM|BT|BO|BQ|BA|BW|BV|BR|IO|BN|BG|BF|BI|KH|CM|CA|CV|KY|CF|TD|CL|CN|CX|CC|CO|KM|CG|CD|CK|CR|CI|HR|CU|CW|CY|CZ|DK|DJ|DM|DO|EC|EG|SV|GQ|ER|EE|ET|EU|FK|FO|FJ|FI|FR|GF|PF|TF|GA|GM|GE|DE|GH|GI|GR|GL|GD|GP|GU|GT|GG|GN|GW|GY|HT|HM|VA|HN|HK|HU|IS|IN|ID|IR|IQ|IE|IM|IL|IT|JM|JP|JE|JO|KZ|KE|KI|KP|KR|KW|KG|LA|LV|LB|LS|LR|LY|LI|LT|LU|MO|MK|MG|MW|MY|MV|ML|MT|MH|MQ|MR|MU|YT|MX|FM|MD|MC|MN|ME|MS|MA|MZ|MM|NA|NR|NP|NL|NC|NZ|NI|NE|NG|NU|NF|MP|NO|OM|PK|PW|PS|PA|PG|PY|PE|PH|PN|PL|PT|PR|QA|RE|RO|RU|RW|BL|SH|KN|LC|MF|PM|VC|WS|SM|ST|SA|SN|RS|SC|SL|SG|SX|SK|SI|SB|SO|ZA|GS|SS|ES|LK|SD|SR|SJ|SZ|SE|CH|SY|TW|TJ|TZ|TH|TL|TG|TK|TO|TT|TN|TR|TM|TC|TV|UG|UA|AE|GB|US|UM|UY|UZ|VU|VE|VN|VG|VI|WF|EH|YE|ZM|ZW)$',
         }));
         break;
@@ -151,6 +155,7 @@ export default function init(el) {
           id: 'venue-info-venue-address',
           quiet: true,
           size: 'xl',
+          readonly: true,
         });
         break;
       case 3:
