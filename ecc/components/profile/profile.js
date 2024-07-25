@@ -140,8 +140,13 @@ export class Profile extends LitElement {
   }
 
   handleProfileSelection(e) {
-    const profile = { ...e.detail.data, type: this.profile.type, isPlaceholder: false };
-    this.dispatchEvent(new CustomEvent('update-profile', { detail: profile }));
+    const profile = { ...e.detail.data, isPlaceholder: false };
+    this.dispatchEvent(new CustomEvent('update-profile', {
+      detail: {
+        profile,
+        type: this.profile.type,
+      },
+    }));
   }
 
   saveDisabled() {
