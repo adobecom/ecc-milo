@@ -119,19 +119,26 @@ export class Profile extends LitElement {
         profile.modificationTime = respJson.modificationTime;
 
         if (file && (file instanceof File)) {
-          const speakerData = await uploadImage(file, {
-            targetUrl: `/v1/series/${this.seriesId}/speakers/${profile.speakerId}/images`,
-            type: 'speaker-photo',
-            altText: `${this.profile.firstName} ${this.profile.lastName} photo`,
-          });
-          // }, { progress: null }, lastPhoto?.imageId);
+          const speakerData = await uploadImage(
+            file,
+            {
+              targetUrl: `/v1/series/${this.seriesId}/speakers/${profile.speakerId}/images`,
+              type: 'speaker-photo',
+              altText: `${this.profile.firstName} ${this.profile.lastName} photo`,
+            },
+            null,
+            lastPhoto?.imageId,
+          );
 
-          console.log(speakerData);
           profile.modificationTime = speakerData.modificationTime;
-        } else if (lastPhoto && lastPhoto.imageUrl !== profile.photo?.imageUrl) {
-          // eslint-disable-next-line max-len
-          const resp = await deleteSpeakerImage(profile.speakerId, this.seriesId, lastPhoto.imageId);
-          console.log(resp);
+        } else if (lastPhoto && !profile.photo) {
+          const resp = await deleteSpeakerImage(
+            profile.speakerId,
+            this.seriesId,
+            lastPhoto.imageId,
+          );
+
+          if (resp.modificationTime) profile.modificationTime = resp.modificationTime;
         }
 
         this.updateProfile(profile);
