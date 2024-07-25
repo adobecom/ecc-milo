@@ -121,6 +121,7 @@ export default class PartnerSelector extends LitElement {
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
           } else {
             this.partner.hasUnsavedChanges = false;
+            this.partner.modificationTime = resp.modificationTime;
           }
         } catch (error) {
           this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
