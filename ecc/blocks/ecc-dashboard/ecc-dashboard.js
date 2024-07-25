@@ -390,20 +390,34 @@ function buildStatusTag(event) {
   return statusTag;
 }
 
-function buildEventTitleTag(config, event) {
+function buildEventTitleTag(config, eventObj) {
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
-  url.searchParams.set('eventId', event.eventId);
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, event.title);
+  url.searchParams.set('eventId', eventObj.eventId);
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventObj.title);
   return eventTitleTag;
 }
 
 // TODO: to retire
-function buildVenueTag(eventObj) {
+function buildVenueTag(config, eventObj) {
   const { venue } = eventObj;
   if (!venue) return null;
 
-  const venueTag = createTag('div', { class: 'vanue-name' }, venue.venueName);
+  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+  url.searchParams.set('eventId', eventObj.eventId);
+
+  const venueTag = createTag('a', { class: 'vanue-name', href: url.toString() }, venue.venueName);
   return venueTag;
+}
+
+function buildRSVPTag(config, eventObj) {
+  let text = 'RSVP';
+  if (eventObj.externalEventId.startsWith('st')) text = 'SplashThat';
+
+  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+  url.searchParams.set('eventId', eventObj.eventId);
+
+  const rsvpTag = createTag('a', { class: 'rsvp-tag', href: `${url.toString()}#form-step-rsvp` }, text);
+  return rsvpTag;
 }
 
 async function populateRow(props, config, index) {
@@ -419,9 +433,9 @@ async function populateRow(props, config, index) {
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(event)));
+  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(config, event)));
   const timezoneCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getTimezoneName(event.gmtOffset)));
-  const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.externalEventId));
+  const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
   row.append(
