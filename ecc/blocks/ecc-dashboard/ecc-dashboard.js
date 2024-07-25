@@ -390,13 +390,10 @@ function buildStatusTag(event) {
   return statusTag;
 }
 
-function buildEventTitleTag(event) {
-  if (event.detailPagePath) {
-    const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${getEventPageHost(event.published)}${event.detailPagePath}` }, event.title);
-    return eventTitleTag;
-  }
-
-  const eventTitleTag = createTag('a', { class: 'event-title-link disabled' }, event.title);
+function buildEventTitleTag(config, event) {
+  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+  url.searchParams.set('eventId', event.eventId);
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, event.title);
   return eventTitleTag;
 }
 
@@ -418,7 +415,7 @@ async function populateRow(props, config, index) {
   // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'event-row', 'data-event-id': event.eventId }, '', { parent: tBody });
   const thumbnailCell = buildThumbnail(event);
-  const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(event)));
+  const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(config, event)));
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
