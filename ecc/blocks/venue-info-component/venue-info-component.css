@@ -13,7 +13,8 @@
 }
 
 .venue-info-component sp-textfield[readonly] {
-  border-bottom: 1px solid var(--color-black);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-gray-500);
 }
 
 .venue-info-component .timezone-picker-wrapper {
@@ -45,7 +46,6 @@
 .venue-info-component .venue-info-field-location .location-input {
   font-size: var(--type-body-m-size);
   box-sizing: border-box;
-  border: 1px solid transparent;
   outline: none;
   width: 40%;
   color: var(--color-gray-900);
