@@ -140,7 +140,11 @@ export default class PartnerSelector extends LitElement {
       }
 
       this.partner.hasUnsavedChanges = false;
-      this.updatePartner(this.partner);
+      this.dispatchEvent(new CustomEvent('update-partner', {
+        detail: { partner: this.partner },
+        bubbles: true,
+        composed: true,
+      }));
     }
 
     saveButton.pending = false;
