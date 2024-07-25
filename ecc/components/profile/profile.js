@@ -131,7 +131,7 @@ export class Profile extends LitElement {
             lastPhoto?.imageId,
           );
 
-          if (speakerData.errors || speakerData.message) {
+          if (speakerData.error) {
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
           }
 
@@ -143,7 +143,7 @@ export class Profile extends LitElement {
             lastPhoto.imageId,
           );
 
-          if (resp.errors || resp.message) {
+          if (resp.error) {
             imageDropzone.file = { url: lastPhoto.imageUrl };
             profile.photo = lastPhoto;
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));

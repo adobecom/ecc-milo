@@ -102,7 +102,7 @@ export default class PartnerSelector extends LitElement {
         }, null, respJson.image?.imageId);
 
         if (sponsorData) {
-          if (sponsorData.errors || sponsorData.message) {
+          if (sponsorData.error) {
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to updated the image. Please try again later.' }, bubbles: true, composed: true }));
           }
 

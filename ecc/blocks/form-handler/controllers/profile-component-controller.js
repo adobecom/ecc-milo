@@ -61,7 +61,7 @@ export async function onSubmit(component, props) {
             const resp = await addSpeakerToEvent(speaker, eventId);
 
             if (resp.error) {
-              const { errors, message } = resp;
+              const { errors, message } = resp.error;
               profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { errors, message } }));
             }
 
