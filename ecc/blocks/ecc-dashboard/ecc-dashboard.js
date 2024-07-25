@@ -411,7 +411,7 @@ function buildVenueTag(config, eventObj) {
 
 function buildRSVPTag(config, eventObj) {
   let text = 'RSVP';
-  if (eventObj.externalEventId.startsWith('st')) text = 'SplashThat';
+  if (eventObj.externalEventId?.startsWith('st')) text = 'SplashThat';
 
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
   url.searchParams.set('eventId', eventObj.eventId);
