@@ -62,7 +62,7 @@ export default class PartnerSelectorGroup extends LitElement {
   }
 
   getAllSelectors() {
-    return this.shadowRoot.querySelectorAll('partner-selector');
+    return Array.from(this.shadowRoot.querySelectorAll('partner-selector'));
   }
 
   render() {
