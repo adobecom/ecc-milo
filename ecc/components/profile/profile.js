@@ -186,15 +186,15 @@ export class Profile extends LitElement {
   })} file=${JSON.stringify(imagefile)}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
-    <custom-textfield data=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ title: event.detail.value })}></custom-textfield>
-    <custom-textfield data=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @change-custom=${(event) => this.updateProfile({ bio: event.detail.value })}></custom-textfield>
+    <custom-textfield fielddata=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ title: event.detail.value })}></custom-textfield>
+    <custom-textfield fielddata=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @change-custom=${(event) => this.updateProfile({ bio: event.detail.value })}></custom-textfield>
     <div class="social-media">
     <h3>${fieldLabelsJSON.socialMedia}</h3>
     ${this.profile?.socialMedia ? repeat(
     this.profile?.socialMedia,
     (socialMedia, index) => html`
     <div class="social-media-row">
-    <custom-textfield class="social-media-input" data=${JSON.stringify({ ...socialMediaData, value: socialMedia.link ?? undefined })} config=${JSON.stringify(socialMediaConfig)} @change-custom=${(event) => this.updateSocialMedia(index, event.detail.value)}></custom-textfield>
+    <custom-textfield class="social-media-input" fielddata=${JSON.stringify({ ...socialMediaData, value: socialMedia.link ?? undefined })} config=${JSON.stringify(socialMediaConfig)} @change-custom=${(event) => this.updateSocialMedia(index, event.detail.value)}></custom-textfield>
         ${this.profile?.socialMedia?.length > 1 ? html`<img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => {
     this.profile.socialMedia.splice(index, 1);
     this.requestUpdate();
@@ -217,8 +217,8 @@ export class Profile extends LitElement {
     const { firstNameData, quietTextfieldConfig, lastNameData } = this.getRequiredProps();
 
     return html`    
-    <custom-textfield data=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ firstName: event.detail.value })}></custom-textfield>
-    <custom-textfield data=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ lastName: event.detail.value })}></custom-textfield>
+    <custom-textfield fielddata=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ firstName: event.detail.value })}></custom-textfield>
+    <custom-textfield fielddata=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ lastName: event.detail.value })}></custom-textfield>
     `;
   }
 
