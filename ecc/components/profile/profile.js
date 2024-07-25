@@ -268,13 +268,13 @@ export class Profile extends LitElement {
     const quietTextfieldConfig = { size: 'xl', quiet: true };
 
     const firstNameSearchMap = {
-      renderKeys: ['firstName'],
-      searchKeys: ['firstName', 'lastName'],
+      searchKeys: ['firstName'],
+      renderKeys: ['firstName', 'lastName'],
     };
 
     const lastNameSearchMap = {
-      renderKeys: ['lastName'],
-      searchKeys: ['firstName', 'lastName'],
+      searchKeys: ['lastName'],
+      renderKeys: ['firstName', 'lastName'],
     };
 
     return {
