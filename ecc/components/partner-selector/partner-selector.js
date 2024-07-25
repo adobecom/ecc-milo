@@ -182,7 +182,7 @@ export default class PartnerSelector extends LitElement {
       </div>
       <div class="action-area">
         <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>
-        Save partner</sp-button>
+        ${this.isSaved() ? 'Saved' : 'Save partner'}
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
