@@ -451,7 +451,7 @@ async function populateRow(props, config, index) {
       props.el.classList.add('toast-shown');
     }
 
-    if (props.el.querySelector('.new-event-confirmation-toast')) highlightRow(row);
+    if (props.el.querySelector('.new-event-confirmation-toast')?.open === true) highlightRow(row);
   }
 }
 
