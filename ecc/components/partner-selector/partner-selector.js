@@ -35,18 +35,6 @@ export default class PartnerSelector extends LitElement {
     return { searchMap, nameFieldData };
   }
 
-  firstUpdated() {
-    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
-    this.imageDropzone = this.shadowRoot.querySelector('image-dropzone');
-    this.imageDropzone.addEventListener('image-change', (e) => {
-      this.partner.hasUnsavedChanges = true;
-      this.partner.photo = e.detail.file;
-      if (saveButton) saveButton.textContent = 'Save partner';
-      this.requestUpdate();
-    });
-    this.checkValidity();
-  }
-
   updatePartner(newData) {
     this.partner.hasUnsavedChanges = true;
     const saveButton = this.shadowRoot.querySelector('.save-partner-button');
@@ -162,7 +150,11 @@ export default class PartnerSelector extends LitElement {
       <fieldset class="partner-field-wrapper">
       <div>
         <div class="partner-input-wrapper">
-          <image-dropzone .file=${this.partner.photo}>
+          <image-dropzone .file=${this.partner.photo}> @image-change=${(e) => {
+  this.partner.hasUnsavedChanges = true;
+  this.partner.photo = e.detail.file;
+  this.requestUpdate();
+}}
         <slot name="img-label" slot="img-label"></slot>
           </image-dropzone>
           <div>
