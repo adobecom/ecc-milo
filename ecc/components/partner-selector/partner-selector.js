@@ -31,7 +31,7 @@ export default class PartnerSelector extends LitElement {
       placeholder: 'Enter partner name',
     };
 
-    const searchMap = { searchKey: ['name'], renderKey: ['name'] };
+    const searchMap = { searchKeys: ['name'], renderKeys: ['name'] };
     return { searchMap, nameFieldData };
   }
 
