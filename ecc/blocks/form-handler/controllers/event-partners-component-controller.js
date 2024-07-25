@@ -30,7 +30,7 @@ export async function onSubmit(component, props) {
           sponsorType,
         }, eventId);
 
-        if (!resp || resp.errors) {
+        if (resp.error) {
           return;
         }
 
@@ -48,7 +48,7 @@ export async function onSubmit(component, props) {
             sponsorType,
           }, eventId);
 
-          if (!resp || resp.errors) {
+          if (resp.error) {
             return;
           }
 
@@ -62,7 +62,7 @@ export async function onSubmit(component, props) {
           };
           const resp = await updateSponsorInEvent(updatableData, partner.sponsorId, eventId);
 
-          if (!resp || resp.errors) {
+          if (resp.error) {
             return;
           }
 
@@ -80,7 +80,7 @@ export async function onSubmit(component, props) {
 
         if (!stillNeeded) {
           const resp = await removeSponsorFromEvent(sponsorId, eventId);
-          if (!resp || resp.errors) {
+          if (resp.error) {
             return;
           }
 

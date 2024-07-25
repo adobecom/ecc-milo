@@ -83,36 +83,40 @@ export function buildErrorMessage(props, resp) {
 
   const toastArea = props.el.querySelector('.toast-area');
 
-  if (resp.errors) {
+  if (resp.error) {
     const messages = [];
+    const errorBag = resp.error.errors;
+    const errorMessage = resp.error.message;
 
-    resp.errors.forEach((error) => {
-      const errorPathSegments = error.path.split('/');
-      const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${error.message}`;
-      messages.push(text);
-    });
+    if (errorBag) {
+      errorBag.forEach((error) => {
+        const errorPathSegments = error.path.split('/');
+        const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${error.message}`;
+        messages.push(text);
+      });
 
-    messages.forEach((msg, i) => {
-      const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 + (i * 3000) }, msg, { parent: toastArea });
-      toast.addEventListener('close', () => {
-        toast.remove();
+      messages.forEach((msg, i) => {
+        const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 + (i * 3000) }, msg, { parent: toastArea });
+        toast.addEventListener('close', () => {
+          toast.remove();
+        });
       });
-    });
-  } else if (resp.message) {
-    if (resp.message.endsWith('modified since last fetch')) {
-      const message = createTag('div', { class: 'dark' }, createTag('div', {}, resp.message));
-      const url = new URL(window.location.href);
-      url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
-      createTag('a', { href: `${url.toString()}`, class: 'con-button outline' }, 'See the latest version.', { parent: message });
-      const toast = createTag('sp-toast', { open: true, variant: 'negative' }, message, { parent: toastArea });
-      toast.addEventListener('close', () => {
-        toast.remove();
-      });
-    } else {
-      const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, resp.message, { parent: toastArea });
-      toast.addEventListener('close', () => {
-        toast.remove();
-      });
+    } else if (errorMessage) {
+      if (resp.error.status === 409) {
+        const message = createTag('div', { class: 'dark' }, createTag('div', {}, errorMessage));
+        const url = new URL(window.location.href);
+        url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
+        createTag('a', { href: `${url.toString()}`, class: 'con-button outline' }, 'See the latest version.', { parent: message });
+        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, message, { parent: toastArea });
+        toast.addEventListener('close', () => {
+          toast.remove();
+        });
+      } else {
+        const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, errorMessage, { parent: toastArea });
+        toast.addEventListener('close', () => {
+          toast.remove();
+        });
+      }
     }
   }
 }
@@ -378,7 +382,7 @@ async function saveEvent(props, options = { toPublish: false }) {
   let resp;
 
   const onEventSave = () => {
-    if (!resp.errors && !resp.message) {
+    if (!resp.error) {
       showSaveSuccessMessage(props);
     }
 
@@ -491,7 +495,7 @@ function initFormCtas(props) {
           if (cta.classList.contains('preview-not-ready')) return;
           const resp = await saveEvent(props);
 
-          if (resp?.errors || resp?.message) {
+          if (resp?.error) {
             buildErrorMessage(props, resp);
           } else {
             window.open(cta.href);
@@ -535,7 +539,7 @@ function initFormCtas(props) {
               resp = await saveEvent(props);
             }
 
-            if (resp?.errors || resp?.message) {
+            if (resp?.error) {
               buildErrorMessage(props, resp);
             } else if (props.currentStep === props.maxStep) {
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
@@ -556,7 +560,7 @@ function initFormCtas(props) {
             }
           } else {
             const resp = await saveEvent(props);
-            if (resp?.errors || resp?.message) {
+            if (resp?.error) {
               buildErrorMessage(props, resp);
             }
           }
@@ -569,7 +573,7 @@ function initFormCtas(props) {
 
   backBtn.addEventListener('click', async () => {
     const resp = await saveEvent(props);
-    if (resp?.errors || resp?.message) {
+    if (resp?.error) {
       buildErrorMessage(props, resp);
     } else {
       props.currentStep -= 1;
@@ -621,7 +625,7 @@ function initNavigation(props) {
         sideMenu.classList.add('disabled');
 
         const resp = await saveEvent(props);
-        if (resp?.errors || resp?.message) {
+        if (resp?.error) {
           buildErrorMessage(props, resp);
         } else {
           navigateForm(props, i);
@@ -706,7 +710,7 @@ async function buildECCForm(el) {
           setResponseCache(value);
           updateCtas(target);
           updateDashboardLink(target);
-          if (value.message || value.errors) {
+          if (value.error) {
             props.el.classList.add('show-error');
           } else {
             props.el.classList.remove('show-error');

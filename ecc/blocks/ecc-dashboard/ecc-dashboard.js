@@ -606,13 +606,13 @@ function buildDashboardTable(props, config) {
 }
 
 async function getEventsArray() {
-  const json = await getEvents();
+  const resp = await getEvents();
 
-  if (!json || json.errors?.length > 0) {
+  if (resp.error) {
     return [];
   }
 
-  return json.events;
+  return resp.events;
 }
 
 function buildNoEventScreen(el, config) {

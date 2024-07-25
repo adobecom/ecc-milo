@@ -120,7 +120,7 @@ export default async function init(component, props) {
           dialogDeleteBtn.disabled = true;
           dialogCancelBtn.disabled = true;
           const resp = await deleteImage(configs, imageId);
-          if (resp?.errors || resp?.message) {
+          if (resp?.error) {
             dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
           } else {
             dz.file = null;
