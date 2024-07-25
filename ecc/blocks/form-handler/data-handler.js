@@ -62,7 +62,7 @@ export function getFilteredCachedPayload() {
 }
 
 export function setResponseCache(response) {
-  if (response.error) return;
+  if (!response) return;
   const output = quickFilter(response);
   responseCache = { ...responseCache, ...output };
 }
