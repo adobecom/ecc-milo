@@ -151,11 +151,11 @@ export default class PartnerSelector extends LitElement {
       <fieldset class="partner-field-wrapper">
       <div>
         <div class="partner-input-wrapper">
-          <image-dropzone .file=${this.partner.photo}> @image-change=${(e) => {
+          <image-dropzone .file=${this.partner.photo} @image-change=${(e) => {
   this.partner.hasUnsavedChanges = true;
   this.partner.photo = e.detail.file;
   this.requestUpdate();
-}}
+}}>
         <slot name="img-label" slot="img-label"></slot>
           </image-dropzone>
           <div>
