@@ -571,3 +571,15 @@ export async function getEventImages(eventId) {
     .catch((error) => window.lana?.log(`Failed to get event images for event ${eventId}. Error: ${error}`));
   return resp;
 }
+
+export async function deleteSpeakerImage(speakerId, seriesId, imageId) {
+  if (!speakerId || !seriesId) return false;
+
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const options = await constructRequestOptions('DELETE');
+
+  const resp = await fetch(`${host}/v1/series/${seriesId}/speakers/${speakerId}/images/${imageId}`, options)
+    .then((res) => res.json())
+    .catch((error) => window.lana?.log(`Failed to delete speaker images for speaker ${speakerId}. Error: ${error}`));
+  return resp;
+}
