@@ -54,6 +54,7 @@ export default class PartnerSelector extends LitElement {
 
     this.partner = { ...this.partner, ...newData };
 
+    this.partner.hasUnsavedChanges = false;
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
       bubbles: true,
