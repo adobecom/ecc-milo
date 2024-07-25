@@ -61,6 +61,10 @@ export default class PartnerSelectorGroup extends LitElement {
     return hasOnePartner && isUnsaved;
   }
 
+  getAllSelectors() {
+    return this.shadowRoot.querySelectorAll('partner-selector');
+  }
+
   render() {
     const imageTag = this.fieldlabels.image;
     imageTag.setAttribute('slot', 'img-label');
@@ -83,7 +87,7 @@ export default class PartnerSelectorGroup extends LitElement {
       ${index < this.partners.length - 1 ? html`<sp-divider size='s'></sp-divider>` : nothing}
       `;
   })}
-      ${this.partners.every((partner) => partner.sponsorId && !partner.hasUnsavedChanges) ? html`<sp-button variant="primary" @click=${this.addPartner}>Add Partner</sp-button>` : nothing}
+      ${this.getAllSelectors().every((partner) => partner.isSaved()) ? html`<sp-button variant="primary" @click=${this.addPartner}>Add Partner</sp-button>` : nothing}
     `;
   }
 }
