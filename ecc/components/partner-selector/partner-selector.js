@@ -140,7 +140,7 @@ export default class PartnerSelector extends LitElement {
       }
 
       this.partner.hasUnsavedChanges = false;
-      this.requestUpdate();
+      this.updatePartner(this.partner);
     }
 
     saveButton.pending = false;
