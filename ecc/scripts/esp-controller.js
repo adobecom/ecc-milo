@@ -372,6 +372,7 @@ export async function publishEvent(eventId, payload) {
   const resp = await fetch(`${host}/v1/events/${eventId}`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to publish event ${eventId}. Error: ${error}`));
+
   return resp;
 }
 
@@ -383,6 +384,7 @@ export async function unpublishEvent(eventId, payload) {
   const resp = await fetch(`${host}/v1/events/${eventId}`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to unpublish event ${eventId}. Error: ${error}`));
+
   return resp;
 }
 
@@ -393,6 +395,7 @@ export async function deleteEvent(eventId) {
   const resp = await fetch(`${host}/v1/events/${eventId}`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to delete event ${eventId}. Error: ${error}`));
+
   return resp;
 }
 
@@ -403,6 +406,7 @@ export async function getEvents() {
   const resp = await fetch(`${host}/v1/events`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get list of events. Error: ${error}`));
+
   return resp;
 }
 
@@ -413,6 +417,7 @@ export async function getEvent(eventId) {
   const resp = await fetch(`${host}/v1/events/${eventId}`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get details for event ${eventId}. Error: ${error}`));
+
   return resp;
 }
 
@@ -495,6 +500,7 @@ export async function createAttendee(eventId, attendeeData) {
   const resp = await fetch(`${host}/v1/events/${eventId}/attendees`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to create attendee for event ${eventId}. Error: ${error}`));
+
   return resp;
 }
 
@@ -508,6 +514,7 @@ export async function updateAttendee(eventId, attendeeId, attendeeData) {
   const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to update attendee ${attendeeId} for event ${eventId}. Error: ${error}`));
+
   return resp;
 }
 
@@ -520,6 +527,7 @@ export async function deleteAttendee(eventId, attendeeId) {
   const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to delete attendee ${attendeeId} for event ${eventId}. Error: ${error}`));
+
   return resp;
 }
 
@@ -532,6 +540,7 @@ export async function getAttendees(eventId) {
   const resp = await fetch(`${host}/v1/events/${eventId}/attendees`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to fetch attendees for event ${eventId}. Error: ${error}`));
+
   return resp;
 }
 
@@ -544,6 +553,7 @@ export async function getAttendee(eventId, attendeeId) {
   const resp = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get details of attendee ${attendeeId} for event ${eventId}. Error: ${error}`));
+
   return resp;
 }
 
@@ -569,11 +579,12 @@ export async function getEventImages(eventId) {
   const resp = await fetch(`${host}/v1/events/${eventId}/images`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to get event images for event ${eventId}. Error: ${error}`));
+
   return resp;
 }
 
 export async function deleteSpeakerImage(speakerId, seriesId, imageId) {
-  if (!speakerId || !seriesId) return false;
+  if (!speakerId || !seriesId || imageId) return false;
 
   const { host } = getAPIConfig().esp[ECC_ENV];
   const options = await constructRequestOptions('DELETE');
@@ -581,5 +592,6 @@ export async function deleteSpeakerImage(speakerId, seriesId, imageId) {
   const resp = await fetch(`${host}/v1/series/${seriesId}/speakers/${speakerId}/images/${imageId}`, options)
     .then((res) => res.json())
     .catch((error) => window.lana?.log(`Failed to delete speaker images for speaker ${speakerId}. Error: ${error}`));
+
   return resp;
 }

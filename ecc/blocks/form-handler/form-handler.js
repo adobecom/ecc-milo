@@ -103,7 +103,7 @@ export function buildErrorMessage(props, resp) {
       const message = createTag('div', {}, createTag('p', {}, resp.message));
       const url = new URL(window.location.href);
       url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
-      createTag('a', { href: `${url.href}` }, 'Refresh the page to see the latest version.', { parent: message });
+      createTag('a', { href: `${url.toString()}`, class: 'con-button outline' }, 'CLick see the latest version.', { parent: message });
       const toast = createTag('sp-toast', { open: true, variant: 'negative' }, message, { parent: toastArea });
       toast.addEventListener('close', () => {
         toast.remove();
