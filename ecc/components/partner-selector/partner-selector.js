@@ -164,7 +164,7 @@ export default class PartnerSelector extends LitElement {
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>
               <sp-textfield pattern=${LINK_REGEX} value=${this.partner.link} placeholder="Enter partner full URL", @change=${(event) => {
-  this.updateValue('link', event.detail.value);
+  this.updateValue('link', event.target.value);
 }}></sp-textfield>
             </div>
           </div>
