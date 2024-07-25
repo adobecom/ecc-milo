@@ -49,6 +49,7 @@ export default class PartnerSelector extends LitElement {
 
   updateValue(key, value) {
     this.partner.hasUnsavedChanges = true;
+    this.partner.
     const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     if (saveButton) saveButton.textContent = 'Save Partner';
 
@@ -174,7 +175,7 @@ export default class PartnerSelector extends LitElement {
       </div>
       <div class="action-area">
         <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>
-        ${this.hasUnsavedChanges ? html`Save Partner` : html`Saved`}</sp-button>
+        ${this.partner.hasUnsavedChanges ? html`Save Partner` : html`Saved`}</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
