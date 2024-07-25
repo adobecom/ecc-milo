@@ -584,7 +584,7 @@ export async function getEventImages(eventId) {
 }
 
 export async function deleteSpeakerImage(speakerId, seriesId, imageId) {
-  if (!speakerId || !seriesId || imageId) return false;
+  if (!speakerId || !seriesId || !imageId) return false;
 
   const { host } = getAPIConfig().esp[ECC_ENV];
   const options = await constructRequestOptions('DELETE');
