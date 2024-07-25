@@ -17,6 +17,10 @@
   border-bottom: 1px solid var(--color-gray-500);
 }
 
+.venue-info-component .venue-info-field-location .location-input[readonly] {
+  padding-bottom: 0;
+}
+
 .venue-info-component .timezone-picker-wrapper {
   display: flex;
   flex-direction: column;
