@@ -3,10 +3,11 @@ import { style } from './partner-selector-group.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
-const defaultPartner = { name: '', link: '', hasUnsavedChanges: false };
+const defaultPartner = {};
 
 export default class PartnerSelectorGroup extends LitElement {
   static properties = {
+    seriesSponsors: { type: Array },
     partners: { type: Array },
     fieldlabels: { type: Object },
     seriesId: { type: String },
@@ -14,6 +15,7 @@ export default class PartnerSelectorGroup extends LitElement {
 
   constructor() {
     super();
+    this.seriesSponsors = this.seriesSponsors || [];
     this.partners = this.partners || [defaultPartner];
   }
 
@@ -35,6 +37,8 @@ export default class PartnerSelectorGroup extends LitElement {
     const updatedPartner = event.detail.partner;
     this.partners = this.partners
       .map((partner, i) => (i === index ? updatedPartner : partner));
+
+    this.requestUpdate();
   }
 
   getSavedPartners() {
@@ -53,8 +57,10 @@ export default class PartnerSelectorGroup extends LitElement {
     });
   }
 
-  hasOnlyEmptyPartnerLeft() {
-    return !this.partners[0].name && !this.partners[0].link && !this.partners[0].file;
+  hasOnlyOneUnsavedPartnerLeft() {
+    const hasOnePartner = this.partners.length === 1;
+    const isUnsaved = !this.partners[0].sponsorId;
+    return hasOnePartner && isUnsaved;
   }
 
   render() {
@@ -66,10 +72,10 @@ export default class PartnerSelectorGroup extends LitElement {
       ${repeat(this.partners, (partner, index) => {
     const imgTag = imageTag.cloneNode(true);
     return html`
-        <partner-selector .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
+        <partner-selector .seriesPartners=${this.seriesSponsors} .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
           @update-partner=${(event) => this.handlePartnerUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
-            ${this.partners.length === 1 && this.hasOnlyEmptyPartnerLeft() ? nothing : html`
+            ${this.hasOnlyOneUnsavedPartnerLeft() ? nothing : html`
               <img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => this.deletePartner(index)}></img>
             `}
           </div>
@@ -79,7 +85,7 @@ export default class PartnerSelectorGroup extends LitElement {
       ${index < this.partners.length - 1 ? html`<sp-divider size='s'></sp-divider>` : nothing}
       `;
   })}
-      <repeater-element text="Add partner" @repeat=${this.addPartner}></repeater-element>
+      ${this.partners.every((partner) => !partner.hasUnsavedChanges && partner.sponsorId) ? html`<repeater-element text="Add partner" @repeat=${this.addPartner}></repeater-element>` : nothing}
     `;
   }
 }

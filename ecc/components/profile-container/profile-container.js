@@ -71,6 +71,7 @@ export class ProfileContainer extends LitElement {
       }
       return true;
     });
+
     return html`${
       repeat(this.profiles, (profile, index) => {
         const fieldlabels = { ...this.fieldlabels };

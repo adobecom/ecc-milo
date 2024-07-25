@@ -7,6 +7,7 @@ const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 export default class PartnerSelector extends LitElement {
   static properties = {
+    seriesPartners: { type: Array },
     partner: { type: Object },
     fieldLabels: { type: Object },
     seriesId: { type: String },
@@ -17,41 +18,55 @@ export default class PartnerSelector extends LitElement {
     this.partner = this.partner || {
       name: '',
       link: '',
-      hasUnsavedChange: false,
+      photo: null,
+      hasUnsavedChanges: false,
     };
   }
 
   static styles = style;
 
-  firstUpdated() {
-    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
-    this.imageDropzone = this.shadowRoot.querySelector('image-dropzone');
-    this.imageDropzone.addEventListener('image-change', (e) => {
-      this.partner.hasUnsavedChanges = true;
-      this.partner.photo = e.detail.file;
-      if (saveButton) saveButton.textContent = 'Save Partner';
-      this.requestUpdate();
-    });
-    this.checkValidity();
+  getRequiredProps() {
+    const nameFieldData = {
+      value: this.partner.name,
+      placeholder: 'Enter partner name',
+    };
+
+    const searchMap = { searchKeys: ['name'], renderKeys: ['name'] };
+    return { searchMap, nameFieldData };
   }
 
-  updateValue(key, value) {
+  updatePartner(newData) {
     this.partner.hasUnsavedChanges = true;
     const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     if (saveButton) saveButton.textContent = 'Save Partner';
 
-    this.partner = { ...this.partner, [key]: value };
-    this.partner.photo = this.imageDropzone?.file || null;
+    this.dispatchEvent(new CustomEvent('update-partner', { detail: { partner: { ...this.partner, ...newData } } }));
+  }
 
-    this.dispatchEvent(new CustomEvent('update-partner', {
-      detail: { partner: this.partner },
-      bubbles: true,
-      composed: true,
-    }));
+  selectSeriesPartner(partner) {
+    this.partner.hasUnsavedChanges = false;
+    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
+    if (saveButton) saveButton.textContent = 'Saved';
+
+    if (partner.image) partner.photo = { ...partner.image, url: partner.image.imageUrl };
+
+    this.dispatchEvent(new CustomEvent('update-partner', { detail: { partner } }));
+  }
+
+  isSaved() {
+    return this.partner.sponsorId && !this.partner.hasUnsavedChanges;
   }
 
   checkValidity() {
     return this.partner.name?.length >= 3 && this.partner.link?.match(LINK_REGEX);
+  }
+
+  filterSeriesPartners(name) {
+    const lcn = name.toLowerCase();
+    this.seriesPartners = this.seriesPartners.filter((partner) => {
+      const lcp = partner.name.toLowerCase();
+      return lcp.includes(lcn) && lcp !== lcn;
+    });
   }
 
   async savePartner(e) {
@@ -74,9 +89,10 @@ export default class PartnerSelector extends LitElement {
     }
 
     if (respJson.sponsorId) {
+      const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
       this.partner.sponsorId = respJson.sponsorId;
       this.partner.modificationTime = respJson.modificationTime;
-      const file = this.imageDropzone?.getFile();
+      const file = imageDropzone?.getFile();
 
       if (file && (file instanceof File)) {
         const sponsorData = await uploadImage(file, {
@@ -87,10 +103,6 @@ export default class PartnerSelector extends LitElement {
 
         if (sponsorData) {
           this.partner.modificationTime = sponsorData.modificationTime;
-          if (saveButton) {
-            this.partner.hasUnsavedChanges = false;
-            saveButton.textContent = 'Saved';
-          }
         }
       } else if (!file && respJson.image?.imageId) {
         try {
@@ -99,48 +111,62 @@ export default class PartnerSelector extends LitElement {
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
           } else {
             this.partner.hasUnsavedChanges = false;
-            saveButton.textContent = 'Saved';
+            this.partner.modificationTime = resp.modificationTime;
           }
         } catch (error) {
           this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
         }
-      } else if (saveButton) {
-        this.partner.hasUnsavedChanges = false;
-        saveButton.textContent = 'Saved';
       }
+
+      this.partner.hasUnsavedChanges = false;
+      this.dispatchEvent(new CustomEvent('update-partner', { detail: { partner: this.partner } }));
 
       this.requestUpdate();
     }
 
-    saveButton.pending = false;
+    if (saveButton) {
+      saveButton.textContent = 'Saved';
+      saveButton.pending = false;
+    }
+  }
+
+  handleAutocomplete(e) {
+    const partner = { ...e.detail.entryData };
+    this.selectSeriesPartner(partner);
   }
 
   render() {
+    const { nameFieldData, searchMap } = this.getRequiredProps();
     return html`
       <fieldset class="partner-field-wrapper">
       <div>
         <div class="partner-input-wrapper">
-          <image-dropzone .file=${this.partner.photo}>
+          <image-dropzone .file=${this.partner.photo} @image-change=${(e) => {
+  this.partner.hasUnsavedChanges = true;
+  this.partner.photo = e.detail.file;
+  this.requestUpdate();
+}}>
         <slot name="img-label" slot="img-label"></slot>
           </image-dropzone>
           <div>
             <div class="partner-input">
               <label>${this.fieldLabels.nameLabelText}</label>
-              <sp-textfield value=${this.partner.name} @change=${(event) => {
-  this.updateValue('name', event.target.value);
-}}></sp-textfield>
+              <custom-search searchmap=${JSON.stringify(searchMap)} fielddata=${JSON.stringify(nameFieldData)} config=${JSON.stringify({})} @change-custom-search=${(event) => {
+  this.updatePartner({ name: event.detail.value });
+}} @entry-selected=${this.handleAutocomplete} searchdata=${JSON.stringify(this.seriesPartners)} identifier='sponsorId'></custom-search>
             </div>
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>
-              <sp-textfield pattern=${LINK_REGEX} value=${this.partner.link} @change=${(event) => {
-  this.updateValue('link', event.target.value);
+              <sp-textfield pattern=${LINK_REGEX} value=${this.partner.link} placeholder="Enter partner full URL", @change=${(event) => {
+  this.updatePartner({ link: event.target.value });
 }}></sp-textfield>
             </div>
           </div>
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
+        <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>
+        ${this.isSaved() ? 'Saved' : 'Save partner'}</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>

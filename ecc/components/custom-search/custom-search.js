@@ -8,10 +8,12 @@ const SEARCH_TIMEOUT_MS = 500;
 // eslint-disable-next-line import/prefer-default-export
 export class CustomSearch extends LitElement {
   static properties = {
+    identifier: { type: String },
+    searchMap: { type: Object },
     searchInput: { type: String },
     isPopoverOpen: { type: Boolean },
     config: { type: Object, reflect: true },
-    data: { type: Object, reflect: true },
+    fielddata: { type: Object, reflect: true },
     searchdata: { type: Array },
     searchResults: { type: Array },
   };
@@ -21,6 +23,8 @@ export class CustomSearch extends LitElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    this.identifier = '';
+    this.searchMap = { searchKeys: [], renderKeys: [] };
     this.searchInput = '';
     this.isPopoverOpen = false;
     this.closeOverlay = () => {};
@@ -38,11 +42,11 @@ export class CustomSearch extends LitElement {
       return;
     }
 
-    const searchKey = this.searchInput.toLowerCase();
+    const searchVal = this.searchInput.toLowerCase();
 
     this.searchResults = this.searchInput?.trim().length !== 0 && this.searchdata.length > 0
       // eslint-disable-next-line max-len
-      ? this.searchdata.filter((profile) => (profile.firstName.toLowerCase().includes(searchKey) || profile.lastName.toLowerCase().includes(searchKey))) : [];
+      ? this.searchdata.filter((item) => (this.searchMap.searchKeys.some((k) => item[k].toLowerCase().includes(searchVal)))) : [];
 
     if (this.searchResults.length === 0) {
       return;
@@ -94,35 +98,27 @@ export class CustomSearch extends LitElement {
     }
   }
 
-  selectProfile(profile) {
+  selectEntry(entryData) {
     this.dispatchEvent(
       new CustomEvent(
-        'profile-selected',
-        { detail: { profile: { ...profile, isPlaceholder: false } } },
+        'entry-selected',
+        { detail: { entryData: { ...entryData } } },
       ),
     );
   }
 
   renderMenuItems() {
     return html` 
-        ${repeat(this.searchResults, (profile) => profile.speakerId, (profile) => html`
+        ${repeat(this.searchResults, (item) => item[this.identifier], (entry) => html`
         <sp-menu-item @click=${() => {
-    this.selectProfile(profile);
-  }}>${profile.firstName} ${profile.lastName}</sp-menu-item>`)}`;
+    this.selectEntry(entry);
+  }}>${this.searchMap.renderKeys.map((rk) => entry[rk]).join(' ')}</sp-menu-item>`)}`;
   }
 
   onSubmitSearch(e) {
     e.stopPropagation();
     e.preventDefault();
     this.closePopover();
-  }
-
-  handleSearchChange(event) {
-    const { value } = event.target.data;
-    console.log('event target', event.target);
-    if (value.length === 0) {
-      this.closePopover();
-    }
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -141,11 +137,11 @@ export class CustomSearch extends LitElement {
   render() {
     return html`
       <custom-textfield 
-          data=${JSON.stringify(this.data)}
+          fielddata=${JSON.stringify(this.fielddata)}
           config=${JSON.stringify(this.config)}
           @input-custom=${this.onSearchInput}
           @submit=${this.onSubmitSearch}
-          @change-custom=${(e) => { e.stopPropagation(); this.dispatchEvent(new CustomEvent('change-custom2', { detail: { value: this.searchInput } })); }}
+          @change-custom=${(e) => { e.stopPropagation(); this.dispatchEvent(new CustomEvent('change-custom-search', { detail: { value: this.searchInput } })); }}
           @sp-opened=${() => {
     this.isPopoverOpen = true;
   }}
@@ -155,7 +151,7 @@ export class CustomSearch extends LitElement {
           @keydown=${this.handleKeydown}
       ></custom-textfield>
       <sp-popover dialog>
-          <sp-menu> ${this.renderMenuItems()}</sp-menu>
+          <sp-menu>${this.renderMenuItems()}</sp-menu>
       </sp-popover>
   `;
   }
