@@ -100,9 +100,10 @@ export default class PartnerSelector extends LitElement {
     }
 
     if (respJson.sponsorId) {
+      const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
       this.partner.sponsorId = respJson.sponsorId;
       this.partner.modificationTime = respJson.modificationTime;
-      const file = this.imageDropzone?.getFile();
+      const file = imageDropzone?.getFile();
 
       if (file && (file instanceof File)) {
         const sponsorData = await uploadImage(file, {
