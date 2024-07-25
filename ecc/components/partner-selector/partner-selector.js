@@ -41,18 +41,33 @@ export default class PartnerSelector extends LitElement {
     this.imageDropzone.addEventListener('image-change', (e) => {
       this.partner.hasUnsavedChanges = true;
       this.partner.photo = e.detail.file;
-      if (saveButton) saveButton.textContent = 'Save Partner';
+      if (saveButton) saveButton.textContent = 'Save partner';
       this.requestUpdate();
     });
     this.checkValidity();
   }
 
-  updateValue(key, value) {
+  updatePartner(newData) {
     this.partner.hasUnsavedChanges = true;
     const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     if (saveButton) saveButton.textContent = 'Save Partner';
 
-    this.partner = { ...this.partner, [key]: value };
+    this.partner = { ...this.partner, ...newData };
+
+    this.dispatchEvent(new CustomEvent('update-partner', {
+      detail: { partner: this.partner },
+      bubbles: true,
+      composed: true,
+    }));
+  }
+
+  selectSeriesPartner(partner) {
+    this.partner.hasUnsavedChanges = false;
+    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
+    if (saveButton) saveButton.textContent = 'Saved';
+
+    this.partner = partner;
+    if (partner.image) this.partner.photo = { ...partner.image, url: partner.image.imageUrl };
 
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
@@ -137,12 +152,7 @@ export default class PartnerSelector extends LitElement {
 
   handleAutocomplete(e) {
     const partner = { ...e.detail.data };
-    this.updateValue('name', partner.name);
-    this.updateValue('link', partner.link);
-    this.updateValue('sponsorId', partner.sponsorId);
-    this.updateValue('modificationTime', partner.modificationTime);
-    if (partner.image) this.updateValue('photo', { ...partner.image, url: partner.image.imageUrl });
-    this.partner.hasUnsavedChanges = false;
+    this.selectSeriesPartner(partner);
   }
 
   render() {
@@ -172,7 +182,7 @@ export default class PartnerSelector extends LitElement {
       </div>
       <div class="action-area">
         <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>
-        ${!this.checkValidity() && !this.partner.hasUnsavedChanges ? html`Saved` : html`Save Partner`}</sp-button>
+        Save partner</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
