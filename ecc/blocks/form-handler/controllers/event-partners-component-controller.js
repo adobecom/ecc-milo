@@ -9,6 +9,8 @@ import {
 } from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
+let PARTNERS_SERIES_ID;
+
 /* eslint-disable no-unused-vars */
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -93,16 +95,22 @@ export async function onSubmit(component, props) {
   props.payload = { ...props.payload, showSponsors };
 }
 
-export async function onUpdate(_component, _props) {
-  // Do nothing
+export async function onUpdate(component, props) {
+  if (!PARTNERS_SERIES_ID || PARTNERS_SERIES_ID !== props.eventDataResp.seriesId) {
+    const partnersGroup = component.querySelector('partner-selector-group');
+
+    PARTNERS_SERIES_ID = props.eventDataResp.seriesId;
+
+    if (PARTNERS_SERIES_ID) {
+      const spResp = await getSponsors(PARTNERS_SERIES_ID);
+      if (spResp) partnersGroup.seriesSponsors = spResp.sponsors;
+    }
+  }
 }
 
 export default async function init(component, props) {
   const eventData = props.eventDataResp;
   const partnersGroup = component.querySelector('partner-selector-group');
-
-  const spResp = await getSponsors(eventData.seriesId);
-  if (spResp) partnersGroup.seriesSponsors = spResp.sponsors;
 
   if (eventData.sponsors) {
     const partners = await Promise.all(eventData.sponsors.map(async (sponsor, index) => {
