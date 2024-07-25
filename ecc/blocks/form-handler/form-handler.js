@@ -191,7 +191,7 @@ function initRequiredFieldsValidation(props) {
 function enableSideNavForEditFlow(props) {
   const frags = props.el.querySelectorAll('.fragment');
   frags.forEach((frag, i) => {
-    const completeFirstStep = i === 0 && frag.querySelectorAll('.form-component:not(.event-agenda-component)')
+    const completeFirstStep = i === 0 && Array.from(frag.querySelectorAll('.form-component:not(.event-agenda-component)'))
       .every((fc) => fc.classList.contains('prefilled'));
     const prefilledOtherSteps = i !== 0 && frag.querySelector('.form-component.prefilled');
 
