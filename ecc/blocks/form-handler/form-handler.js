@@ -141,6 +141,53 @@ function getCurrentFragment(props) {
   return currentFrag;
 }
 
+function validateRequiredFields(fields) {
+  const { search } = window.location;
+  const urlParams = new URLSearchParams(search);
+  const skipValidation = urlParams.get('skipValidation');
+
+  if (skipValidation === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
+    return true;
+  }
+
+  return fields.length === 0 || Array.from(fields).every((f) => f.value);
+}
+
+function onStepValidate(props) {
+  return function updateCtaStatus() {
+    const currentFrag = getCurrentFragment(props);
+    const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
+    const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
+    const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
+
+    ctas.forEach((cta) => {
+      if (cta.classList.contains('back-btn')) {
+        cta.classList.toggle('disabled', props.currentStep === 0);
+      } else {
+        cta.classList.toggle('disabled', !stepValid);
+      }
+    });
+
+    sideNavs.forEach((nav, i) => {
+      if (i !== props.currentStep) {
+        nav.disabled = !stepValid;
+      }
+    });
+  };
+}
+
+function initRequiredFieldsValidation(props) {
+  const currentFrag = getCurrentFragment(props);
+
+  const inputValidationCB = onStepValidate(props);
+  props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
+    field.removeEventListener('change', inputValidationCB);
+    field.addEventListener('change', inputValidationCB, { bubbles: true });
+  });
+
+  inputValidationCB();
+}
+
 function enableSideNavForEditFlow(props) {
   const frags = props.el.querySelectorAll('.fragment');
   frags.forEach((frag, i) => {
@@ -148,6 +195,8 @@ function enableSideNavForEditFlow(props) {
       props.farthestStep = Math.max(props.farthestStep, i);
     }
   });
+
+  initRequiredFieldsValidation(props);
 }
 
 function initCustomLitComponents() {
@@ -359,56 +408,9 @@ function updateSideNav(props) {
   });
 }
 
-function validateRequiredFields(fields) {
-  const { search } = window.location;
-  const urlParams = new URLSearchParams(search);
-  const skipValidation = urlParams.get('skipValidation');
-
-  if (skipValidation === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
-    return true;
-  }
-
-  return fields.length === 0 || Array.from(fields).every((f) => f.value);
-}
-
-function onStepValidate(props) {
-  return function updateCtaStatus() {
-    const currentFrag = getCurrentFragment(props);
-    const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
-    const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
-    const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
-
-    ctas.forEach((cta) => {
-      if (cta.classList.contains('back-btn')) {
-        cta.classList.toggle('disabled', props.currentStep === 0);
-      } else {
-        cta.classList.toggle('disabled', !stepValid);
-      }
-    });
-
-    sideNavs.forEach((nav, i) => {
-      if (i !== props.currentStep) {
-        nav.disabled = !stepValid;
-      }
-    });
-  };
-}
-
 function updateRequiredFields(props) {
   const currentFrag = getCurrentFragment(props);
   props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(INPUT_TYPES.join());
-}
-
-function initRequiredFieldsValidation(props) {
-  const currentFrag = getCurrentFragment(props);
-
-  const inputValidationCB = onStepValidate(props);
-  props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
-    field.removeEventListener('change', inputValidationCB);
-    field.addEventListener('change', inputValidationCB, { bubbles: true });
-  });
-
-  inputValidationCB();
 }
 
 function renderFormNavigation(props, prevStep, currentStep) {
