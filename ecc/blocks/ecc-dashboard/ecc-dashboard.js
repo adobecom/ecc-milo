@@ -306,7 +306,7 @@ function initMoreOptions(props, config, eventObj, row) {
       }
       const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
       const toastMsg = buildToastMsg(newEventJSON.title, msgTemplate);
-      createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: spTheme });
+      createTag('sp-toast', { open: true, variant: 'info' }, toastMsg, { parent: spTheme });
       const newRow = props.el.querySelector(`tr[data-event-id="${newEventJSON.eventId}"]`);
       highlightRow(newRow);
     });
