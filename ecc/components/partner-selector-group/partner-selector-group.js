@@ -89,7 +89,7 @@ export default class PartnerSelectorGroup extends LitElement {
       ${index < this.partners.length - 1 ? html`<sp-divider size='s'></sp-divider>` : nothing}
       `;
   })}
-      ${this.getAllSelectors().every((partner) => partner.isSaved()) ? html`<sp-button variant="primary" @click=${this.addPartner}>Add Partner</sp-button>` : nothing}
+      ${this.getAllSelectors().every((partner) => partner.isSaved()) ? html`<repeater-element text="Add partner" @repeat=${this.addPartner}></repeater-element>` : nothing}
     `;
   }
 }
