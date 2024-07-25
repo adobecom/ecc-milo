@@ -191,7 +191,10 @@ function initRequiredFieldsValidation(props) {
 function enableSideNavForEditFlow(props) {
   const frags = props.el.querySelectorAll('.fragment');
   frags.forEach((frag, i) => {
-    if (frag.querySelector('.form-component.prefilled')) {
+    const completeFirstStep = i === 0 && frag.querySelectorAll('.form-component').every((fc) => fc.classList.contains('prefilled'));
+    const prefilledOtherSteps = i !== 0 && frag.querySelector('.form-component.prefilled');
+
+    if (completeFirstStep || prefilledOtherSteps) {
       props.farthestStep = Math.max(props.farthestStep, i);
     }
   });
