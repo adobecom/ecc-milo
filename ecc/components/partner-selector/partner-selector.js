@@ -61,10 +61,6 @@ export default class PartnerSelector extends LitElement {
     }));
   }
 
-  isSaved() {
-    return this.partner.sponsorId && !this.partner.hasUnsavedChanges;
-  }
-
   checkValidity() {
     return this.partner.name?.length >= 3 && this.partner.link?.match(LINK_REGEX);
   }
