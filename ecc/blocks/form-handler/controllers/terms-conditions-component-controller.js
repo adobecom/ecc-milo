@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { LIBS } from '../../../scripts/scripts.js';
+import { ECC_ENV, LIBS } from '../../../scripts/scripts.js';
 import HtmlSanitizer from '../../../scripts/deps/html-sanitizer.js';
 import { fetchThrottledMemoizedText, getEventPageHost } from '../../../scripts/utils.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
@@ -31,18 +31,29 @@ function buildTerms(terms) {
 }
 
 async function loadPreview(component, templateId) {
-  const rsvpFormLocation = `${getEventPageHost(getFilteredCachedResponse().published)}${templateId.substring(0, templateId.lastIndexOf('/'))}/rsvp-form`;
-  const resp = await fetchThrottledMemoizedText(`${rsvpFormLocation}.plain.html`, { headers: { authorization: 'token MM/NpTtq0gAnckOSl96C4SGB67kFjbO6a4N9vYwb0gd5' } }).catch(() => ({}))
+  let host;
+  if (window.location.href.includes('.hlx.')) {
+    host = window.location.origin.replace(window.location.hostname, `${ECC_ENV}--events-milo--adobecom.hlx.page`);
+  } else {
+    host = window.location.origin;
+  }
+
+  const rsvpFormLocation = `${host}${templateId.substring(0, templateId.lastIndexOf('/'))}/rsvp-form`;
+  const text = await fetchThrottledMemoizedText(`${rsvpFormLocation}.plain.html`).catch(() => ({}))
     .catch(() => ({}));
 
-  if (!resp?.ok) {
+  if (!text) {
     component.remove();
     return;
   }
 
-  const html = await resp.text();
-  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const doc = new DOMParser().parseFromString(text, 'text/html');
   const termsConditionsRow = doc.querySelector('.events-form > div:nth-of-type(3)');
+
+  if (!termsConditionsRow) {
+    component.remove();
+    return;
+  }
 
   component.append(buildTerms(termsConditionsRow));
 }

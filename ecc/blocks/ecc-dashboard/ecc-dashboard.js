@@ -93,14 +93,13 @@ export function readBlockConfig(block) {
 
 function formatLocaleDate(string) {
   const options = {
-    weekday: 'long',
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   };
 
-  return new Date(string).toLocaleString('en-GB', options);
+  return new Date(string).toLocaleString('en-US', options);
 }
 
 function highlightRow(row) {
@@ -364,21 +363,11 @@ function initMoreOptions(props, config, eventObj, row) {
   });
 }
 
-function getTimezoneName(offsetHours) {
-  const offsetMinutes = offsetHours * 60;
+function getCountryName(eventObj) {
+  if (!eventObj.venue) return '';
 
-  const d = new Date();
-  const utcDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000 + offsetMinutes * 60000);
-
-  const options = {
-    timeZone: 'UTC',
-    timeZoneName: 'long',
-  };
-  const formatter = new Intl.DateTimeFormat('en-US', options);
-  const parts = formatter.formatToParts(utcDate);
-  const timeZoneName = parts.find((part) => part.type === 'timeZoneName').value;
-
-  return timeZoneName;
+  const { venue } = eventObj;
+  return venue.country || '';
 }
 
 function buildStatusTag(event) {
@@ -390,23 +379,34 @@ function buildStatusTag(event) {
   return statusTag;
 }
 
-function buildEventTitleTag(event) {
-  if (event.detailPagePath) {
-    const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${getEventPageHost(event.published)}${event.detailPagePath}` }, event.title);
-    return eventTitleTag;
-  }
-
-  const eventTitleTag = createTag('a', { class: 'event-title-link disabled' }, event.title);
+function buildEventTitleTag(config, eventObj) {
+  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+  url.searchParams.set('eventId', eventObj.eventId);
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventObj.title);
   return eventTitleTag;
 }
 
 // TODO: to retire
-function buildVenueTag(eventObj) {
+function buildVenueTag(config, eventObj) {
   const { venue } = eventObj;
   if (!venue) return null;
 
-  const venueTag = createTag('div', { class: 'vanue-name' }, venue.venueName);
+  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+  url.searchParams.set('eventId', eventObj.eventId);
+
+  const venueTag = createTag('a', { class: 'vanue-name', href: url.toString() }, venue.venueName);
   return venueTag;
+}
+
+function buildRSVPTag(config, eventObj) {
+  let text = 'RSVP';
+  if (eventObj.externalEventId?.startsWith('st')) text = 'SplashThat';
+
+  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+  url.searchParams.set('eventId', eventObj.eventId);
+
+  const rsvpTag = createTag('a', { class: 'rsvp-tag', href: `${url.toString()}#form-step-rsvp` }, text);
+  return rsvpTag;
 }
 
 async function populateRow(props, config, index) {
@@ -418,13 +418,13 @@ async function populateRow(props, config, index) {
   // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'event-row', 'data-event-id': event.eventId }, '', { parent: tBody });
   const thumbnailCell = buildThumbnail(event);
-  const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(event)));
+  const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(config, event)));
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(event)));
-  const timezoneCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getTimezoneName(event.gmtOffset)));
-  const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.externalEventId));
+  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(config, event)));
+  const geoCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getCountryName(event)));
+  const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
   row.append(
@@ -434,19 +434,23 @@ async function populateRow(props, config, index) {
     startDateCell,
     modDateCell,
     venueCell,
-    timezoneCell,
+    geoCell,
     externalEventId,
     moreOptionsCell,
   );
 
   initMoreOptions(props, config, event, row);
 
-  if (event.eventId === sp.get('newEventId') && !props.el.classList.contains('toast-shown')) {
-    const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
-    const toastMsg = buildToastMsg(event.title, msgTemplate);
-    createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
-    highlightRow(row);
-    props.el.classList.add('toast-shown');
+  if (event.eventId === sp.get('newEventId')) {
+    if (!props.el.classList.contains('toast-shown')) {
+      const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
+      const toastMsg = buildToastMsg(event.title, msgTemplate);
+      createTag('sp-toast', { class: 'new-event-confirmation-toast', open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
+
+      props.el.classList.add('toast-shown');
+    }
+
+    if (props.el.querySelector('.new-event-confirmation-toast')?.open === true) highlightRow(row);
   }
 }
 

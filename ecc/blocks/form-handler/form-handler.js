@@ -99,16 +99,26 @@ export function buildErrorMessage(props, resp) {
       });
     });
   } else if (resp.message) {
-    const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, resp.message, { parent: toastArea });
-    toast.addEventListener('close', () => {
-      toast.remove();
-    });
+    if (resp.message.endsWith('modified since last fetch')) {
+      const message = createTag('div', { class: 'dark' }, createTag('div', {}, resp.message));
+      const url = new URL(window.location.href);
+      url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
+      createTag('a', { href: `${url.toString()}`, class: 'con-button outline' }, 'See the latest version.', { parent: message });
+      const toast = createTag('sp-toast', { open: true, variant: 'negative' }, message, { parent: toastArea });
+      toast.addEventListener('close', () => {
+        toast.remove();
+      });
+    } else {
+      const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, resp.message, { parent: toastArea });
+      toast.addEventListener('close', () => {
+        toast.remove();
+      });
+    }
   }
 }
 
 function replaceAnchorWithButton(anchor) {
   if (!anchor || anchor.tagName !== 'A') {
-    console.error('The provided element is not an anchor tag.');
     return null;
   }
 
@@ -130,13 +140,69 @@ function getCurrentFragment(props) {
   return currentFrag;
 }
 
+function validateRequiredFields(fields) {
+  const { search } = window.location;
+  const urlParams = new URLSearchParams(search);
+  const skipValidation = urlParams.get('skipValidation');
+
+  if (skipValidation === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
+    return true;
+  }
+
+  return fields.length === 0 || Array.from(fields).every((f) => f.value);
+}
+
+function onStepValidate(props) {
+  return function updateCtaStatus() {
+    const currentFrag = getCurrentFragment(props);
+    const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
+    const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
+    const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
+
+    ctas.forEach((cta) => {
+      if (cta.classList.contains('back-btn')) {
+        cta.classList.toggle('disabled', props.currentStep === 0);
+      } else {
+        cta.classList.toggle('disabled', !stepValid);
+      }
+    });
+
+    sideNavs.forEach((nav, i) => {
+      if (i !== props.currentStep) {
+        nav.disabled = !stepValid;
+      }
+    });
+  };
+}
+
+function initRequiredFieldsValidation(props) {
+  const currentFrag = getCurrentFragment(props);
+
+  const inputValidationCB = onStepValidate(props);
+  props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
+    field.removeEventListener('change', inputValidationCB);
+    field.addEventListener('change', inputValidationCB, { bubbles: true });
+  });
+
+  inputValidationCB();
+}
+
 function enableSideNavForEditFlow(props) {
   const frags = props.el.querySelectorAll('.fragment');
+  const completeFirstStep = Array.from(frags[0].querySelectorAll('.form-component:not(.event-agenda-component)'))
+    .every((fc) => fc.classList.contains('prefilled'));
+
+  if (!completeFirstStep) return;
+
   frags.forEach((frag, i) => {
-    if (frag.querySelector('.form-component.prefilled')) {
+    const prefilledOtherSteps = i !== 0 && frag.querySelector('.form-component.prefilled');
+
+    if (completeFirstStep || prefilledOtherSteps) {
       props.farthestStep = Math.max(props.farthestStep, i);
     }
   });
+
+  initRequiredFieldsValidation(props);
 }
 
 function initCustomLitComponents() {
@@ -201,7 +267,7 @@ async function gatherValues(props) {
 
     const promises = Array.from(mappedComponents).map(async (component) => {
       const { onSubmit } = await import(`./controllers/${comp}-component-controller.js`);
-      await onSubmit(component, props);
+      return onSubmit(component, props);
     });
 
     return Promise.all(promises);
@@ -303,7 +369,11 @@ function showSaveSuccessMessage(props) {
 }
 
 async function saveEvent(props, options = { toPublish: false }) {
-  await gatherValues(props);
+  try {
+    await gatherValues(props);
+  } catch (e) {
+    return { message: e.message };
+  }
 
   let resp;
 
@@ -348,56 +418,9 @@ function updateSideNav(props) {
   });
 }
 
-function validateRequiredFields(fields) {
-  const { search } = window.location;
-  const urlParams = new URLSearchParams(search);
-  const skipValidation = urlParams.get('skipValidation');
-
-  if (skipValidation === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
-    return true;
-  }
-
-  return fields.length === 0 || Array.from(fields).every((f) => f.value);
-}
-
-function onStepValidate(props) {
-  return function updateCtaStatus() {
-    const currentFrag = getCurrentFragment(props);
-    const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
-    const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
-    const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
-
-    ctas.forEach((cta) => {
-      if (cta.classList.contains('back-btn')) {
-        cta.classList.toggle('disabled', props.currentStep === 0);
-      } else {
-        cta.classList.toggle('disabled', !stepValid);
-      }
-    });
-
-    sideNavs.forEach((nav, i) => {
-      if (i !== props.currentStep) {
-        nav.disabled = !stepValid;
-      }
-    });
-  };
-}
-
 function updateRequiredFields(props) {
   const currentFrag = getCurrentFragment(props);
   props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(INPUT_TYPES.join());
-}
-
-function initRequiredFieldsValidation(props) {
-  const currentFrag = getCurrentFragment(props);
-
-  const inputValidationCB = onStepValidate(props);
-  props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
-    field.removeEventListener('change', inputValidationCB);
-    field.addEventListener('change', inputValidationCB, { bubbles: true });
-  });
-
-  inputValidationCB();
 }
 
 function renderFormNavigation(props, prevStep, currentStep) {

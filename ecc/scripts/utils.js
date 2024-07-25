@@ -161,10 +161,10 @@ export async function decorateTextfield(cell, extraOptions) {
   cell.append(wrapper);
 }
 
-export function changeInputValue(input, attr, value, toDisable = false) {
+export function changeInputValue(input, attr, value, toggleReadOnly = false) {
   if (!input || !value) return;
   input[attr] = value;
-  if (toDisable) input.disabled = true;
+  if (toggleReadOnly) input.readonly = true;
   input.dispatchEvent(new Event('change'));
 }
 
@@ -207,7 +207,7 @@ export async function decorateTextarea(cell, extraOptions) {
 
 export async function getSecret(key) {
   if (secretCache.length === 0) {
-    const resp = await fetch('/ecc/system/secrets.json', { headers: { authorization: 'token milo-events-ecc' } })
+    const resp = await fetch('/ecc/system/secrets.json')
       .then((r) => r)
       .catch((e) => window.lana?.log(`Failed to fetch Google Places API key: ${e}`));
 
@@ -247,7 +247,7 @@ export const fetchThrottledMemoizedText = (() => {
 
     try {
       const response = await fetchPromise;
-      const text = await response.text();
+      const text = response.ok ? await response.text() : null;
       cache.set(key, text);
       setTimeout(() => cache.delete(key), ttl);
       return text;

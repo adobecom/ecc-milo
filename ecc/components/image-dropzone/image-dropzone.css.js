@@ -38,7 +38,7 @@ export const style = css`
 .img-file-input-wrapper .preview-img-placeholder {
   height: 100%;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .img-file-input-wrapper .preview-img-placeholder img {

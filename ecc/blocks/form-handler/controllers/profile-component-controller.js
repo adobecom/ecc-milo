@@ -5,7 +5,6 @@ import {
   getSpeakers,
   updateSpeakerInEvent,
   removeSpeakerFromEvent,
-  getEvent,
 } from '../../../scripts/esp-controller.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
@@ -16,6 +15,10 @@ export async function onSubmit(component, props) {
   if (profileContainer) {
     const speakers = profileContainer.getProfiles();
     if (speakers.length === 0) return;
+
+    if (speakers.filter((speaker) => !speaker.speakerType).length > 0) {
+      throw new Error('Please select a speaker type for the speakers');
+    }
 
     const { eventId } = getFilteredCachedResponse();
 
@@ -48,16 +51,18 @@ export async function onSubmit(component, props) {
           if (updateSpeaker) {
             const resp = await updateSpeakerInEvent(speaker, speakerId, eventId);
 
-            if (!resp || resp.errors) {
-              return;
+            if (!resp || resp.errors || resp.message) {
+              const { errors, message } = resp;
+              profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { errors, message } }));
             }
 
             props.eventDataResp = { ...props.eventDataResp, ...resp };
           } else {
             const resp = await addSpeakerToEvent(speaker, eventId);
 
-            if (!resp || resp.errors) {
-              return;
+            if (!resp || resp.errors || resp.message) {
+              const { errors, message } = resp;
+              profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { errors, message } }));
             }
 
             props.eventDataResp = { ...props.eventDataResp, ...resp };
@@ -79,8 +84,7 @@ export async function onSubmit(component, props) {
             return;
           }
 
-          const latestEventResp = await getEvent(eventId);
-          props.eventDataResp = { ...props.eventDataResp, ...latestEventResp };
+          props.eventDataResp = { ...props.eventDataResp, ...resp };
         }
       }, Promise.resolve());
     }
