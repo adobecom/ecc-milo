@@ -112,7 +112,6 @@ export default class PartnerSelector extends LitElement {
           this.partner.modificationTime = sponsorData.modificationTime;
           if (saveButton) {
             this.partner.hasUnsavedChanges = false;
-            saveButton.textContent = 'Saved';
           }
         }
       } else if (!file && respJson.image?.imageId) {
@@ -122,14 +121,12 @@ export default class PartnerSelector extends LitElement {
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
           } else {
             this.partner.hasUnsavedChanges = false;
-            saveButton.textContent = 'Saved';
           }
         } catch (error) {
           this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
         }
       } else if (saveButton) {
         this.partner.hasUnsavedChanges = false;
-        saveButton.textContent = 'Saved';
       }
 
       this.requestUpdate();
@@ -139,7 +136,6 @@ export default class PartnerSelector extends LitElement {
   }
 
   handleAutocomplete(e) {
-    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
     const partner = { ...e.detail.data };
     this.updateValue('name', partner.name);
     this.updateValue('link', partner.link);
@@ -147,7 +143,6 @@ export default class PartnerSelector extends LitElement {
     this.updateValue('modificationTime', partner.modificationTime);
     this.updateValue('hasUnsavedChanges', false);
     if (partner.image) this.updateValue('photo', { ...partner.image, url: partner.image.imageUrl });
-    if (saveButton) saveButton.textContent = 'Saved';
 
     this.requestUpdate();
   }
@@ -178,7 +173,8 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>Save Partner</sp-button>
+        <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>
+        ${this.hasUnsavedChanges ? html`Save Partner` : html`Saved`}</sp-button>
         <slot name="delete-btn"></slot>
         </div>
       </fieldset>
