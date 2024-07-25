@@ -146,8 +146,10 @@ export default class PartnerSelector extends LitElement {
         composed: true,
       }));
     }
-
-    saveButton.pending = false;
+    if (saveButton) {
+      saveButton.textContent = 'Saved';
+      saveButton.pending = false;
+    }
   }
 
   handleAutocomplete(e) {
