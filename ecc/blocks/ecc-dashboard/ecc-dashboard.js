@@ -443,12 +443,12 @@ async function populateRow(props, config, index) {
   initMoreOptions(props, config, event, row);
 
   if (event.eventId === sp.get('newEventId')) {
-    highlightRow(row);
+    if (props.el.querySelector('.new-event-confirmation-toast')) highlightRow(row);
 
     if (!props.el.classList.contains('toast-shown')) {
       const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
       const toastMsg = buildToastMsg(event.title, msgTemplate);
-      createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
+      createTag('sp-toast', { class: 'new-event-confirmation-toast', open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
 
       props.el.classList.add('toast-shown');
     }
