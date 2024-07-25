@@ -102,7 +102,7 @@ export class CustomSearch extends LitElement {
     this.dispatchEvent(
       new CustomEvent(
         'entry-selected',
-        { detail: { data: { ...entryData } } },
+        { detail: { entryData: { ...entryData } } },
       ),
     );
   }
