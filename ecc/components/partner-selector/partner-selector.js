@@ -148,6 +148,8 @@ export default class PartnerSelector extends LitElement {
     this.updateValue('hasUnsavedChanges', false);
     if (partner.image) this.updateValue('photo', { ...partner.image, url: partner.image.imageUrl });
     if (saveButton) saveButton.textContent = 'Saved';
+
+    this.requestUpdate();
   }
 
   render() {
