@@ -54,7 +54,6 @@ export default class PartnerSelector extends LitElement {
 
     this.partner = { ...this.partner, ...newData };
 
-    this.partner.hasUnsavedChanges = false;
     this.dispatchEvent(new CustomEvent('update-partner', {
       detail: { partner: this.partner },
       bubbles: true,
@@ -126,9 +125,6 @@ export default class PartnerSelector extends LitElement {
 
         if (sponsorData) {
           this.partner.modificationTime = sponsorData.modificationTime;
-          if (saveButton) {
-            this.partner.hasUnsavedChanges = false;
-          }
         }
       } else if (!file && respJson.image?.imageId) {
         try {
@@ -141,10 +137,9 @@ export default class PartnerSelector extends LitElement {
         } catch (error) {
           this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
         }
-      } else if (saveButton) {
-        this.partner.hasUnsavedChanges = false;
       }
 
+      this.partner.hasUnsavedChanges = false;
       this.requestUpdate();
     }
 
