@@ -13,7 +13,7 @@ export class CustomSearch extends LitElement {
     searchInput: { type: String },
     isPopoverOpen: { type: Boolean },
     config: { type: Object, reflect: true },
-    data: { type: Object, reflect: true },
+    fielddata: { type: Object, reflect: true },
     searchdata: { type: Array },
     searchResults: { type: Array },
   };
@@ -137,7 +137,7 @@ export class CustomSearch extends LitElement {
   render() {
     return html`
       <custom-textfield 
-          data=${JSON.stringify(this.data)}
+          fielddata=${JSON.stringify(this.fielddata)}
           config=${JSON.stringify(this.config)}
           @input-custom=${this.onSearchInput}
           @submit=${this.onSubmitSearch}

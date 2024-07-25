@@ -140,12 +140,11 @@ export default class PartnerSelector extends LitElement {
       }
 
       this.partner.hasUnsavedChanges = false;
-      this.dispatchEvent(new CustomEvent('update-partner', {
-        detail: { partner: this.partner },
-        bubbles: true,
-        composed: true,
-      }));
+      this.dispatchEvent(new CustomEvent('update-partner', { detail: { partner: this.partner } }));
+
+      this.requestUpdate();
     }
+
     if (saveButton) {
       saveButton.textContent = 'Saved';
       saveButton.pending = false;
@@ -169,7 +168,7 @@ export default class PartnerSelector extends LitElement {
           <div>
             <div class="partner-input">
               <label>${this.fieldLabels.nameLabelText}</label>
-              <custom-search searchMap=${JSON.stringify(searchMap)} data=${JSON.stringify(nameFieldData)} config=${JSON.stringify({})} @change-custom-search=${(event) => {
+              <custom-search searchmap=${JSON.stringify(searchMap)} fielddata=${JSON.stringify(nameFieldData)} config=${JSON.stringify({})} @change-custom-search=${(event) => {
   this.updatePartner({ name: event.detail.value });
 }} @entry-selected=${this.handleAutocomplete} searchdata=${JSON.stringify(this.seriesPartners)} identifier='sponsorId'></custom-search>
             </div>
