@@ -153,7 +153,7 @@ export default class PartnerSelector extends LitElement {
   }
 
   handleAutocomplete(e) {
-    const partner = { ...e.detail.data };
+    const partner = { ...e.detail.entryData };
     this.selectSeriesPartner(partner);
   }
 
