@@ -847,7 +847,7 @@ export async function getSpeakers(seriesId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return { speakers: data.speakers.map(convertToSpeaker) };
+    return { speakers: data.speakers?.map(convertToSpeaker) ?? [] };
   } catch (error) {
     window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };

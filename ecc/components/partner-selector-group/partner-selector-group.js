@@ -33,8 +33,7 @@ export default class PartnerSelectorGroup extends LitElement {
     this.requestUpdate();
   }
 
-  handlePartnerUpdate(event, index) {
-    const updatedPartner = event.detail.partner;
+  handlePartnerUpdate(updatedPartner, index) {
     this.partners = this.partners
       .map((partner, i) => (i === index ? updatedPartner : partner));
 
@@ -63,17 +62,35 @@ export default class PartnerSelectorGroup extends LitElement {
     return hasOnePartner && isUnsaved;
   }
 
+  handlePartnerSelect(partner, index) {
+    const selectedParner = this.seriesSponsors.find((sponsor) => sponsor.sponsorId === partner.id);
+
+    if (selectedParner.image) {
+      selectedParner.photo = { ...selectedParner.image, url: selectedParner.image.imageUrl };
+    }
+
+    const updatedPartner = { ...selectedParner, hasUnsavedChanges: partner.hasUnsavedChanges };
+    this.handlePartnerUpdate(updatedPartner, index);
+  }
+
   render() {
     const imageTag = this.fieldlabels.image;
     imageTag.setAttribute('slot', 'img-label');
     imageTag.classList.add('img-upload-text');
 
+    const seriesPartners = this.seriesSponsors.map((sponsor) => ({
+      id: sponsor.sponsorId,
+      value: sponsor.name,
+      image: sponsor?.image?.imageUrl,
+      displayValue: sponsor.name,
+    }));
+
     return html`
       ${repeat(this.partners, (partner, index) => {
     const imgTag = imageTag.cloneNode(true);
     return html`
-        <partner-selector .seriesPartners=${this.seriesSponsors} .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
-          @update-partner=${(event) => this.handlePartnerUpdate(event, index)}>
+        <partner-selector .seriesPartners=${seriesPartners} .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
+          @update-partner=${(event) => this.handlePartnerUpdate(event.detail.partner, index)} @select-partner=${(event) => this.handlePartnerSelect(event.detail.partner, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.hasOnlyOneUnsavedPartnerLeft() ? nothing : html`
               <img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => this.deletePartner(index)}></img>
