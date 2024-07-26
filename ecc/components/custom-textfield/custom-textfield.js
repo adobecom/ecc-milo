@@ -33,11 +33,11 @@ export class CustomTextfield extends LitElement {
   }
 
   getMaxLength() {
-    if (!this.fielddata.helperText) return '';
+    if (!this.fielddata.helperText) return -1;
 
     const match = this.fielddata.helperText.match(/\d+/);
 
-    return match ? match[0] : '';
+    return match ? match[0] : -1;
   }
 
   render() {

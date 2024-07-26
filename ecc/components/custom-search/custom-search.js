@@ -117,7 +117,6 @@ export class CustomSearch extends LitElement {
   }
   //${profile?.photo?.imageUrl ? html`<img src=${profile?.photo?.imageUrl} style="width: 20px;"></img>` : nothing} 
 
-
   onSubmitSearch(e) {
     e.stopPropagation();
     e.preventDefault();
