@@ -104,10 +104,10 @@ export class Profile extends LitElement {
         respJson = await createSpeaker(profile, this.seriesId);
       }
 
-      if (respJson.errors || respJson.message) {
-        window.lana?.log(`error occured while saving profile ${respJson.errors ?? respJson.message}`);
+      if (respJson.error) {
+        const { errors, message } = respJson.error;
+        window.lana?.log(`error occured while saving profile ${errors ?? message}`);
         saveButton.pending = false;
-        const { errors, message } = respJson;
         this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { errors, message }, bubbles: true, composed: true }));
         return;
       }
@@ -132,7 +132,7 @@ export class Profile extends LitElement {
             lastPhoto?.imageId,
           );
 
-          if (speakerData.errors || speakerData.message) {
+          if (speakerData.error) {
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
           }
 
@@ -144,7 +144,7 @@ export class Profile extends LitElement {
             lastPhoto.imageId,
           );
 
-          if (resp.errors || resp.message) {
+          if (resp.error) {
             imageDropzone.file = { url: lastPhoto.imageUrl };
             profile.photo = lastPhoto;
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));

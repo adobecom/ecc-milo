@@ -94,7 +94,7 @@ export default class PartnerSelector extends LitElement {
         }, null, respJson.image?.imageId);
 
         if (sponsorData) {
-          if (sponsorData.errors || sponsorData.message) {
+          if (sponsorData.error) {
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to updated the image. Please try again later.' }, bubbles: true, composed: true }));
           }
 
@@ -105,7 +105,7 @@ export default class PartnerSelector extends LitElement {
       } else if (!file && respJson.image?.imageId) {
         try {
           const resp = await deleteImage({ targetUrl: `/v1/series/${this.seriesId}/sponsors/${this.partner.sponsorId}/images` }, respJson.image?.imageId);
-          if (resp.errors || resp.message) {
+          if (resp.error) {
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
           } else {
             this.partner.hasUnsavedChanges = false;

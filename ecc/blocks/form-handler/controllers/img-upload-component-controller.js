@@ -120,7 +120,7 @@ export default async function init(component, props) {
           dialogDeleteBtn.disabled = true;
           dialogCancelBtn.disabled = true;
           const resp = await deleteImage(configs, imageId);
-          if (resp?.errors || resp?.message) {
+          if (resp.error) {
             dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
           } else {
             dz.file = null;
@@ -145,6 +145,14 @@ export default async function init(component, props) {
 
   const eventData = props.eventDataResp;
   if (eventData.eventId) {
+    // TODO: would prefer to prioritize eventData.photos, but it is not reliable.
+    // let images;
+
+    // if (eventData.photos) {
+    //   images = eventData.photos;
+    // } else {
+    //   images = await getEventImages(eventData.eventId).images;
+    // }
     const { images } = await getEventImages(eventData.eventId);
 
     if (images) {

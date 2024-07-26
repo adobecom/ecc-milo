@@ -73,23 +73,32 @@ export default class PartnerSelectorGroup extends LitElement {
     this.handlePartnerUpdate(updatedPartner, index);
   }
 
-  render() {
-    const imageTag = this.fieldlabels.image;
-    imageTag.setAttribute('slot', 'img-label');
-    imageTag.classList.add('img-upload-text');
-
-    const seriesPartners = this.seriesSponsors.map((sponsor) => ({
+  getSeriesPartners() {
+    const seriesPartners = this.seriesSponsors.filter((sponsor) => {
+      if (this.partners.find((p) => p.sponsorId === sponsor.sponsorId) !== undefined) {
+        return false;
+      }
+      return true;
+    }).map((sponsor) => ({
       id: sponsor.sponsorId,
       value: sponsor.name,
       image: sponsor?.image?.imageUrl,
       displayValue: sponsor.name,
     }));
 
+    return seriesPartners;
+  }
+
+  render() {
+    const imageTag = this.fieldlabels.image;
+    imageTag.setAttribute('slot', 'img-label');
+    imageTag.classList.add('img-upload-text');
+
     return html`
       ${repeat(this.partners, (partner, index) => {
     const imgTag = imageTag.cloneNode(true);
     return html`
-        <partner-selector .seriesPartners=${seriesPartners} .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
+        <partner-selector .seriesPartners=${this.getSeriesPartners()} .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
           @update-partner=${(event) => this.handlePartnerUpdate(event.detail.partner, index)} @select-partner=${(event) => this.handlePartnerSelect(event.detail.partner, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.hasOnlyOneUnsavedPartnerLeft() ? nothing : html`
