@@ -155,7 +155,7 @@ export default class PartnerSelector extends LitElement {
           <div>
             <div class="partner-input">
               <label>${this.fieldLabels.nameLabelText}</label>
-              <custom-search fielddata=${JSON.stringify(nameFieldData)} config=${JSON.stringify({})} @change-custom-search=${(event) => {
+              <custom-search fielddata=${JSON.stringify(nameFieldData)} config=${JSON.stringify({ showImage: true })} @change-custom-search=${(event) => {
   this.updatePartner({ name: event.detail.value });
 }} @entry-selected=${this.handleAutocomplete} searchdata=${JSON.stringify(this.seriesPartners)} identifier='sponsorId'></custom-search>
             </div>

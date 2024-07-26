@@ -1,7 +1,7 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './custom-search.css.js';
 
-const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 const SEARCH_TIMEOUT_MS = 500;
 
@@ -112,10 +112,19 @@ export class CustomSearch extends LitElement {
         ${repeat(this.searchResults, (item) => item[this.identifier], (entry) => html`
         <sp-menu-item @click=${() => {
     this.selectEntry(entry);
-  }}>${entry.displayValue}</sp-menu-item>`)}`;
+  }}>
+    <div class="search-row" style="
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;">
+      ${entry.displayValue}
+      ${this.config.showImage && entry.image ? html`<img src=${entry.image} class="search-row-image" style="
+    width: 25px;
+"></img>` : nothing} 
+    </div>
+  </sp-menu-item>`)}`;
   }
-  //${profile?.photo?.imageUrl ? html`<img src=${profile?.photo?.imageUrl} style="width: 20px;"></img>` : nothing} 
-
 
   onSubmitSearch(e) {
     e.stopPropagation();

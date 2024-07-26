@@ -8,4 +8,12 @@ export const style = css`
       padding: 0;
       max-height: 200px;
     }
+
+    search-row {
+      display: flex;
+    }
+
+    search-row-image {
+      width: 20px;
+    }
 `;
