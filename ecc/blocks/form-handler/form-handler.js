@@ -103,17 +103,19 @@ export function buildErrorMessage(props, resp) {
       });
     } else if (errorMessage) {
       if (resp.status === 409) {
-        const message = createTag('div', {}, createTag('div', {}, errorMessage));
+        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, '', { parent: toastArea });
         const url = new URL(window.location.href);
         url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
+
+        createTag('div', { class: 'content' }, createTag('div', {}, errorMessage, { parent: toast }));
         createTag('sp-button', {
           slot: 'action',
           static: 'white',
           variant: 'secondary',
           treatment: 'outline',
           href: `${url.toString()}`,
-        }, 'See the latest version.', { parent: message });
-        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, message, { parent: toastArea });
+        }, 'See the latest version.', { parent: toast });
+
         toast.addEventListener('close', () => {
           toast.remove();
         });
@@ -548,26 +550,27 @@ function initFormCtas(props) {
             if (resp?.error) {
               buildErrorMessage(props, resp);
             } else if (props.currentStep === props.maxStep) {
-              const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-              const msg = createTag('div', { class: 'toast-message' }, 'Success! This event has been published.', { parent: cta });
-              createTag(
-                'sp-button',
-                {
-                  slot: 'action',
-                  static: 'white',
-                  variant: 'secondary',
-                  treatment: 'outline',
-                  href: dashboardLink.href,
-                },
-                'Go to dashboard',
-                { parent: msg },
-              );
               const toastArea = props.el.querySelector('.toast-area');
               cta.textContent = cta.dataset.doneStateText;
               cta.classList.add('disabled');
 
               if (toastArea) {
-                const toast = createTag('sp-toast', { open: true, variant: 'positive' }, msg, { parent: toastArea });
+                const toast = createTag('sp-toast', { open: true, variant: 'positive' }, '', { parent: toastArea });
+                const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+
+                createTag('div', { class: 'toast-message' }, 'Success! This event has been published.', { parent: toast });
+                createTag(
+                  'sp-button',
+                  {
+                    slot: 'action',
+                    variant: 'overBackground',
+                    treatment: 'outline',
+                    href: dashboardLink.href,
+                  },
+                  'Go to dashboard',
+                  { parent: toast },
+                );
+
                 toast.addEventListener('close', () => {
                   toast.remove();
                 });
