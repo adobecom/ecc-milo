@@ -372,7 +372,6 @@ export class Profile extends LitElement {
       ...(this.fieldlabels ?? {}),
     };
 
-    // FIXME: update last updated date to actual date.
     return html`
     <div class="profile-view">
     <div class="profile-header">
@@ -410,7 +409,7 @@ export class Profile extends LitElement {
     ` : nothing} 
     <sp-divider></sp-divider>
     <div class="profile-footer">
-    <p class="last-updated">Last update: ${new Date().toLocaleDateString()}</p>
+    <p class="last-updated">Last update: ${new Date(this.profile.modificationTime).toLocaleDateString()}</p>
     <overlay-trigger type="modal" class="edit-profile">
     <sp-dialog-wrapper class="edit-profile-dialog"
         size="l"
