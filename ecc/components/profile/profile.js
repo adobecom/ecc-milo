@@ -30,7 +30,8 @@ export class Profile extends LitElement {
     fieldlabels: { type: Object, reflect: true },
     profile: { type: Object, reflect: true },
     profileCopy: { type: Object, reflect: true },
-    searchdata: { type: Array },
+    firstnamesearch: { type: Array },
+    lastnamesearch: { type: Array },
   };
 
   static styles = style;
@@ -103,10 +104,10 @@ export class Profile extends LitElement {
         respJson = await createSpeaker(profile, this.seriesId);
       }
 
-      if (respJson.errors || respJson.message) {
-        window.lana?.log(`error occured while saving profile ${respJson.errors ?? respJson.message}`);
+      if (respJson.error) {
+        const { errors, message } = respJson.error;
+        window.lana?.log(`error occured while saving profile ${errors ?? message}`);
         saveButton.pending = false;
-        const { errors, message } = respJson;
         this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { errors, message }, bubbles: true, composed: true }));
         return;
       }
@@ -131,7 +132,7 @@ export class Profile extends LitElement {
             lastPhoto?.imageId,
           );
 
-          if (speakerData.errors || speakerData.message) {
+          if (speakerData.error) {
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
           }
 
@@ -143,7 +144,7 @@ export class Profile extends LitElement {
             lastPhoto.imageId,
           );
 
-          if (resp.errors || resp.message) {
+          if (resp.error) {
             imageDropzone.file = { url: lastPhoto.imageUrl };
             profile.photo = lastPhoto;
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
@@ -164,7 +165,7 @@ export class Profile extends LitElement {
 
   handleProfileSelection(e) {
     const profile = { ...e.detail.entryData, isPlaceholder: false, type: this.profile.type };
-    this.dispatchEvent(new CustomEvent('update-profile', { detail: { profile } }));
+    this.dispatchEvent(new CustomEvent('select-profile', { detail: { profile } }));
   }
 
   saveDisabled() {
@@ -182,8 +183,8 @@ export class Profile extends LitElement {
     } = this.getRequiredProps();
 
     return html`
-    <custom-search searchMap=${JSON.stringify(firstNameSearchMap)} fielddata=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom-search=${(event) => this.updateProfile({ firstName: event.detail.value })} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)} identifier='speakerId'></custom-search>
-    <custom-search searchMap=${JSON.stringify(lastNameSearchMap)} fielddata=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom-search=${(event) => this.updateProfile({ lastName: event.detail.value })} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.searchdata)} identifier='speakerId'></custom-search>
+    <custom-search searchMap=${JSON.stringify(firstNameSearchMap)} fielddata=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom-search=${(event) => this.updateProfile({ firstName: event.detail.value })} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.firstnamesearch)} identifier='speakerId'></custom-search>
+    <custom-search searchMap=${JSON.stringify(lastNameSearchMap)} fielddata=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom-search=${(event) => this.updateProfile({ lastName: event.detail.value })} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.lastnamesearch)} identifier='speakerId'></custom-search>
     `;
   }
 
@@ -371,7 +372,6 @@ export class Profile extends LitElement {
       ...(this.fieldlabels ?? {}),
     };
 
-    // FIXME: update last updated date to actual date.
     return html`
     <div class="profile-view">
     <div class="profile-header">
@@ -409,7 +409,7 @@ export class Profile extends LitElement {
     ` : nothing} 
     <sp-divider></sp-divider>
     <div class="profile-footer">
-    <p class="last-updated">Last update: ${new Date().toLocaleDateString()}</p>
+    <p class="last-updated">Last update: ${new Date(this.profile.modificationTime).toLocaleDateString()}</p>
     <overlay-trigger type="modal" class="edit-profile">
     <sp-dialog-wrapper class="edit-profile-dialog"
         size="l"
