@@ -106,7 +106,13 @@ export function buildErrorMessage(props, resp) {
         const message = createTag('div', {}, createTag('div', {}, errorMessage));
         const url = new URL(window.location.href);
         url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
-        createTag('sp-button', { href: `${url.toString()}` }, 'See the latest version.', { parent: message });
+        createTag('sp-button', {
+          slot: 'action',
+          static: 'white',
+          variant: 'secondary',
+          treatment: 'outline',
+          href: `${url.toString()}`,
+        }, 'See the latest version.', { parent: message });
         const toast = createTag('sp-toast', { open: true, variant: 'negative' }, message, { parent: toastArea });
         toast.addEventListener('close', () => {
           toast.remove();
@@ -544,7 +550,18 @@ function initFormCtas(props) {
             } else if (props.currentStep === props.maxStep) {
               const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
               const msg = createTag('div', { class: 'toast-message' }, 'Success! This event has been published.', { parent: cta });
-              createTag('sp-button', { href: dashboardLink.href }, 'Go to dashboard', { parent: msg });
+              createTag(
+                'sp-button',
+                {
+                  slot: 'action',
+                  static: 'white',
+                  variant: 'secondary',
+                  treatment: 'outline',
+                  href: dashboardLink.href,
+                },
+                'Go to dashboard',
+                { parent: msg },
+              );
               const toastArea = props.el.querySelector('.toast-area');
               cta.textContent = cta.dataset.doneStateText;
               cta.classList.add('disabled');
