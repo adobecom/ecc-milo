@@ -188,7 +188,7 @@ export default async function init(component, props) {
         ...venueData,
       });
 
-      if (resp.error) {
+      if (resp?.error) {
         buildErrorMessage(props, resp);
       }
     }
