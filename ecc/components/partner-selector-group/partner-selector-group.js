@@ -98,7 +98,7 @@ export default class PartnerSelectorGroup extends LitElement {
       ${repeat(this.partners, (partner, index) => {
     const imgTag = imageTag.cloneNode(true);
     return html`
-        <partner-selector .seriesPartners=${this.getSeriesPartners} .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
+        <partner-selector .seriesPartners=${this.getSeriesPartners()} .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
           @update-partner=${(event) => this.handlePartnerUpdate(event.detail.partner, index)} @select-partner=${(event) => this.handlePartnerSelect(event.detail.partner, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.hasOnlyOneUnsavedPartnerLeft() ? nothing : html`
