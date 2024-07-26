@@ -145,13 +145,15 @@ export default async function init(component, props) {
 
   const eventData = props.eventDataResp;
   if (eventData.eventId) {
-    let images;
+    // TODO: would prefer to prioritize eventData.photos, but it is not reliable.
+    // let images;
 
-    if (eventData.photos) {
-      images = eventData.photos;
-    } else {
-      images = await getEventImages(eventData.eventId).images;
-    }
+    // if (eventData.photos) {
+    //   images = eventData.photos;
+    // } else {
+    //   images = await getEventImages(eventData.eventId).images;
+    // }
+    const { images } = await getEventImages(eventData.eventId);
 
     if (images) {
       const photoObj = images.find((p) => p.imageKind === type);
