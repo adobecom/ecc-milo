@@ -495,7 +495,7 @@ function initFormCtas(props) {
           if (cta.classList.contains('preview-not-ready')) return;
           const resp = await saveEvent(props);
 
-          if (resp?.error) {
+          if (resp.error) {
             buildErrorMessage(props, resp);
           } else {
             window.open(cta.href);
