@@ -595,14 +595,15 @@ export async function deleteEvent(eventId) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
+      const data = await response.json();
       window.lana?.log(`Failed to delete event ${eventId}. Status:`, response.status, 'Error:', data);
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    // 204 no content. Return true if no error.
+    return true;
   } catch (error) {
     window.lana?.log(`Failed to delete event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
