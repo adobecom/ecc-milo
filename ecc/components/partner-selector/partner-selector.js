@@ -11,6 +11,7 @@ export default class PartnerSelector extends LitElement {
     partner: { type: Object },
     fieldLabels: { type: Object },
     seriesId: { type: String },
+    buttonStatePending: { type: Boolean },
   };
 
   constructor() {
@@ -21,6 +22,7 @@ export default class PartnerSelector extends LitElement {
       photo: null,
       hasUnsavedChanges: false,
     };
+    this.buttonStatePending = false;
   }
 
   static styles = style;
@@ -62,12 +64,9 @@ export default class PartnerSelector extends LitElement {
     });
   }
 
-  async savePartner(e) {
-    const saveButton = e.target;
+  async savePartner() {
     let respJson;
-
-    saveButton.pending = true;
-
+    this.buttonStatePending = true;
     const payload = {
       name: this.partner.name,
       link: this.partner.link,
@@ -119,13 +118,8 @@ export default class PartnerSelector extends LitElement {
 
       this.partner.hasUnsavedChanges = false;
       this.dispatchEvent(new CustomEvent('update-partner', { detail: { partner: this.partner } }));
-
+      this.buttonStatePending = false;
       this.requestUpdate();
-    }
-
-    if (saveButton) {
-      saveButton.textContent = 'Saved';
-      saveButton.pending = false;
     }
   }
 
@@ -138,8 +132,6 @@ export default class PartnerSelector extends LitElement {
     this.partner.hasUnsavedChanges = true;
     this.partner.photo = e.detail.file;
 
-    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
-    if (saveButton) saveButton.textContent = 'Save Partner';
     this.requestUpdate();
   }
 
@@ -169,7 +161,7 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>
+        <sp-button variant="primary" ?pending=${this.buttonStatePending} ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>
         ${this.isSaved() ? 'Saved' : 'Save partner'}</sp-button>
         <slot name="delete-btn"></slot>
         </div>
