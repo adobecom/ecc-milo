@@ -133,7 +133,7 @@ export class Profile extends LitElement {
           );
 
           if (speakerData.error) {
-            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
+            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
           }
 
           if (speakerData.modificationTime) profile.modificationTime = speakerData.modificationTime;
@@ -147,7 +147,7 @@ export class Profile extends LitElement {
           if (resp.error) {
             imageDropzone.file = { url: lastPhoto.imageUrl };
             profile.photo = lastPhoto;
-            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
+            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
           }
 
           if (resp.modificationTime) profile.modificationTime = resp.modificationTime;
