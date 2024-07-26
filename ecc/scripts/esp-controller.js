@@ -177,14 +177,15 @@ export async function deleteImage(configs, imageId) {
 
   try {
     const response = await fetch(`${host}${configs.targetUrl}/${imageId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
+      const data = await response.json();
       window.lana?.log('Failed to delete image. Status:', response.status, 'Error:', data);
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    // 204 no content. Return true if no error.
+    return true;
   } catch (error) {
     window.lana?.log('Failed to delete image. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -847,7 +848,7 @@ export async function getSpeakers(seriesId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return { speakers: data.speakers?.map(convertToSpeaker) ?? [] };
+    return { speakers: data.speakers.map(convertToSpeaker) };
   } catch (error) {
     window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
