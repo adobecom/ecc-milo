@@ -36,21 +36,14 @@ export default class PartnerSelector extends LitElement {
   }
 
   updatePartner(newData) {
-    this.partner.hasUnsavedChanges = true;
-    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
-    if (saveButton) saveButton.textContent = 'Save Partner';
+    const partner = { ...this.partner, ...newData, hasUnsavedChanges: true };
 
-    this.dispatchEvent(new CustomEvent('update-partner', { detail: { partner: { ...this.partner, ...newData } } }));
+    this.dispatchEvent(new CustomEvent('update-partner', { detail: { partner } }));
   }
 
   selectSeriesPartner(partner) {
-    this.partner.hasUnsavedChanges = false;
-    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
-    if (saveButton) saveButton.textContent = 'Saved';
-
-    if (partner.image) partner.photo = { ...partner.image, url: partner.image.imageUrl };
-
-    this.dispatchEvent(new CustomEvent('update-partner', { detail: { partner } }));
+    partner.hasUnsavedChanges = false;
+    this.dispatchEvent(new CustomEvent('select-partner', { detail: { partner } }));
   }
 
   isSaved() {
@@ -151,7 +144,7 @@ export default class PartnerSelector extends LitElement {
   }
 
   render() {
-    const { nameFieldData, searchMap } = this.getRequiredProps();
+    const { nameFieldData } = this.getRequiredProps();
     return html`
       <fieldset class="partner-field-wrapper">
       <div>
@@ -162,7 +155,7 @@ export default class PartnerSelector extends LitElement {
           <div>
             <div class="partner-input">
               <label>${this.fieldLabels.nameLabelText}</label>
-              <custom-search searchmap=${JSON.stringify(searchMap)} fielddata=${JSON.stringify(nameFieldData)} config=${JSON.stringify({})} @change-custom-search=${(event) => {
+              <custom-search fielddata=${JSON.stringify(nameFieldData)} config=${JSON.stringify({})} @change-custom-search=${(event) => {
   this.updatePartner({ name: event.detail.value });
 }} @entry-selected=${this.handleAutocomplete} searchdata=${JSON.stringify(this.seriesPartners)} identifier='sponsorId'></custom-search>
             </div>
