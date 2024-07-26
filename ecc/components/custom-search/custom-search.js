@@ -46,7 +46,7 @@ export class CustomSearch extends LitElement {
 
     this.searchResults = this.searchInput?.trim().length !== 0 && this.searchdata.length > 0
       // eslint-disable-next-line max-len
-      ? this.searchdata.filter((item) => (this.searchMap.searchKeys.some((k) => item[k].toLowerCase().includes(searchVal)))) : [];
+      ? this.searchdata.filter((item) => (item.value.toLowerCase().includes(searchVal))) : [];
 
     if (this.searchResults.length === 0) {
       return;
@@ -112,8 +112,11 @@ export class CustomSearch extends LitElement {
         ${repeat(this.searchResults, (item) => item[this.identifier], (entry) => html`
         <sp-menu-item @click=${() => {
     this.selectEntry(entry);
-  }}>${this.searchMap.renderKeys.map((rk) => entry[rk]).join(' ')}</sp-menu-item>`)}`;
+    this.handleCommonActionsOnCLick();
+  }}>${entry.displayValue}</sp-menu-item>`)}`;
   }
+  //${profile?.photo?.imageUrl ? html`<img src=${profile?.photo?.imageUrl} style="width: 20px;"></img>` : nothing} 
+
 
   onSubmitSearch(e) {
     e.stopPropagation();

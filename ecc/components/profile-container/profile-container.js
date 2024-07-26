@@ -60,6 +60,12 @@ export class ProfileContainer extends LitElement {
     return this.profiles.every((profile) => !profile.isPlaceholder && profile.type);
   }
 
+  setProfile(index, profile) {
+    const selectedProfile = this.searchdata.find((speaker) => speaker.speakerId === profile.id);
+    const updatedProfile = { ...selectedProfile, type: profile.type, isPlaceholder: false };
+    this.updateProfile(index, updatedProfile);
+  }
+
   render() {
     const imageTag = this.fieldlabels.image;
     imageTag.setAttribute('slot', 'img-label');
@@ -71,6 +77,18 @@ export class ProfileContainer extends LitElement {
       }
       return true;
     });
+    const firstNameSearch = searchDataReduced.map((speaker) => ({
+      id: speaker.speakerId,
+      displayValue: `${speaker.firstName} ${speaker.lastName}`,
+      image: speaker?.photo?.imageUrl,
+      value: speaker.firstName,
+    }));
+    const lastNameSearch = searchDataReduced.map((speaker) => ({
+      id: speaker.speakerId,
+      displayValue: `${speaker.firstName} ${speaker.lastName}`,
+      image: speaker?.photo?.imageUrl,
+      value: speaker.lastName,
+    }));
 
     return html`${
       repeat(this.profiles, (profile, index) => {
@@ -78,7 +96,7 @@ export class ProfileContainer extends LitElement {
         const imgTag = imageTag.cloneNode(true);
         return html`
         <div class="profile-container">
-        <profile-ui seriesId=${this.seriesId} profile=${JSON.stringify(profile)} fieldlabels=${JSON.stringify(fieldlabels)} class="form-component" searchdata=${JSON.stringify(searchDataReduced)} @update-profile=${(event) => this.updateProfile(index, event.detail.profile)}>${imgTag}</profile-ui>
+        <profile-ui seriesId=${this.seriesId} profile=${JSON.stringify(profile)} fieldlabels=${JSON.stringify(fieldlabels)} class="form-component" firstnamesearch=${JSON.stringify(firstNameSearch)} lastnamesearch=${JSON.stringify(lastNameSearch)} @update-profile=${(event) => this.updateProfile(index, event.detail.profile)} @select-profile=${(event) => this.setProfile(index, event.detail.profile)}>${imgTag}</profile-ui>
         ${this.profiles?.length > 1 || !this.profiles[0].isPlaceholder ? html`<img class="icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => {
     if (this.profiles.length === 1) {
       this.profiles = [defaultProfile];
