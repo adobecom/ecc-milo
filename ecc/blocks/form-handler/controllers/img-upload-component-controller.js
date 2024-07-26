@@ -62,10 +62,7 @@ export default async function init(component, props) {
 
       progressWrapper.classList.remove('hidden');
 
-      if (props.eventDataResp.photos) {
-        const photoObj = props.eventDataResp.photos.find((p) => p.imageKind === type);
-        if (photoObj) imageId = photoObj.imageId;
-      } else if (props.eventDataResp.eventId) {
+      if (props.eventDataResp.eventId) {
         const eventImagesResp = await getEventImages(props.eventDataResp.eventId);
 
         if (eventImagesResp?.images) {
@@ -148,7 +145,13 @@ export default async function init(component, props) {
 
   const eventData = props.eventDataResp;
   if (eventData.eventId) {
-    const { images } = await getEventImages(eventData.eventId);
+    let images;
+
+    if (eventData.photos) {
+      images = eventData.photos;
+    } else {
+      images = await getEventImages(eventData.eventId).images;
+    }
 
     if (images) {
       const photoObj = images.find((p) => p.imageKind === type);
