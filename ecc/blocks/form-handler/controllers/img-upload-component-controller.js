@@ -81,7 +81,7 @@ export default async function init(component, props) {
 
         if (resp?.imageId) imageId = resp.imageId;
       } catch (error) {
-        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
+        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
         dz.deleteImage();
       } finally {
         progressWrapper.classList.add('hidden');
@@ -121,7 +121,7 @@ export default async function init(component, props) {
           dialogCancelBtn.disabled = true;
           const resp = await deleteImage(configs, imageId);
           if (resp.error) {
-            dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
+            dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
           } else {
             dz.file = null;
             imageId = null;
@@ -129,7 +129,7 @@ export default async function init(component, props) {
           }
         } catch (error) {
           window.lana?.log('Failed to perform image DELETE operation. Error:', error);
-          dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
+          dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
         }
 
         underlay.open = false;
