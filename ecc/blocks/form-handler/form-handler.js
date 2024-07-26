@@ -103,16 +103,13 @@ export function buildErrorMessage(props, resp) {
       });
     } else if (errorMessage) {
       if (resp.status === 409) {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, '', { parent: toastArea });
+        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, errorMessage, { parent: toastArea });
         const url = new URL(window.location.href);
         url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
 
-        createTag('div', { class: 'content' }, createTag('div', {}, errorMessage, { parent: toast }));
         createTag('sp-button', {
           slot: 'action',
-          static: 'white',
-          variant: 'secondary',
-          treatment: 'outline',
+          variant: 'overBackground',
           href: `${url.toString()}`,
         }, 'See the latest version.', { parent: toast });
 
@@ -555,10 +552,9 @@ function initFormCtas(props) {
               cta.classList.add('disabled');
 
               if (toastArea) {
-                const toast = createTag('sp-toast', { open: true, variant: 'positive' }, '', { parent: toastArea });
+                const toast = createTag('sp-toast', { open: true, variant: 'positive' }, 'Success! This event has been published.', { parent: toastArea });
                 const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
-                createTag('div', { class: 'toast-message' }, 'Success! This event has been published.', { parent: toast });
                 createTag(
                   'sp-button',
                   {
