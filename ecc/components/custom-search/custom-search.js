@@ -121,6 +121,7 @@ export class CustomSearch extends LitElement {
       ${entry.displayValue}
       ${this.config.showImage && entry.image ? html`<img src=${entry.image} class="search-row-image" style="
     width: 25px;
+    border-radius: 5px;
 "></img>` : nothing} 
     </div>
   </sp-menu-item>`)}`;
