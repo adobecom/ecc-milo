@@ -399,13 +399,6 @@
   gap: 16px;
 }
 
-.form-handler .toast-area .toast-message.dark.success-message {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-}
-
 @media screen and (min-width: 900px) {
   .form-handler > div:first-child {
     flex-direction: row;
