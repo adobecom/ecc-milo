@@ -112,6 +112,7 @@ export class CustomSearch extends LitElement {
         ${repeat(this.searchResults, (item) => item[this.identifier], (entry) => html`
         <sp-menu-item @click=${() => {
     this.selectEntry(entry);
+    this.handleCommonActionsOnCLick();
   }}>${entry.displayValue}</sp-menu-item>`)}`;
   }
   //${profile?.photo?.imageUrl ? html`<img src=${profile?.photo?.imageUrl} style="width: 20px;"></img>` : nothing} 
