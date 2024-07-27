@@ -381,7 +381,7 @@ async function saveEvent(props, options = { toPublish: false }) {
   try {
     await gatherValues(props);
   } catch (e) {
-    return { message: e.message };
+    return { error: { message: e.message } };
   }
 
   let resp;
