@@ -53,7 +53,7 @@ export async function onSubmit(component, props) {
 
             if (resp.error) {
               const { errors, message } = resp.error;
-              profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { errors, message } }));
+              profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message } } }));
             }
 
             props.eventDataResp = { ...props.eventDataResp, ...resp };
@@ -62,7 +62,7 @@ export async function onSubmit(component, props) {
 
             if (resp.error) {
               const { errors, message } = resp.error;
-              profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { errors, message } }));
+              profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message } } }));
             }
 
             props.eventDataResp = { ...props.eventDataResp, ...resp };
