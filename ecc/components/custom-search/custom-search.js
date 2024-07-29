@@ -121,7 +121,8 @@ export class CustomSearch extends LitElement {
     align-items: center;">
       ${entry.displayValue}
       ${this.config.showImage && entry.image ? html`<img src=${entry.image} class="search-row-image" style="
-    width: 25px;
+    max-width: 25px;
+    max-height: 25px;
     border-radius: 5px;
 "></img>` : nothing} 
     </div>
