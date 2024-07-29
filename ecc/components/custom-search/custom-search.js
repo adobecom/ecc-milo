@@ -110,7 +110,7 @@ export class CustomSearch extends LitElement {
   renderMenuItems() {
     return html` 
         ${repeat(this.searchResults, (item) => item[this.identifier], (entry) => html`
-        <sp-menu-item style="height: 40px; display: flex; width: 100%;" @click=${() => {
+        <sp-menu-item @click=${() => {
     this.selectEntry(entry);
     this.handleCommonActionsOnCLick();
   }}>
@@ -119,12 +119,12 @@ export class CustomSearch extends LitElement {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;">
+    ${this.config.showImage ? html`<img src=${entry.image || 'ecc/icons/icon-placeholder.svg'} class="search-row-image" style="
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+"></img>` : nothing}
       ${entry.displayValue}
-      ${this.config.showImage && entry.image ? html`<img src=${entry.image} class="search-row-image" style="
-    max-width: 24px;
-    max-height: 24px;
-    border-radius: 5px;
-"></img>` : nothing} 
     </div>
   </sp-menu-item>`)}`;
   }
