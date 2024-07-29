@@ -119,7 +119,7 @@ export class CustomSearch extends LitElement {
     flex-direction: row;
     gap: 8px;
     align-items: center;">
-    ${this.config.showImage ? html`<img src=${entry.image || 'ecc/icons/icon-placeholder.svg'} class="search-row-image" style="
+    ${this.config.showImage ? html`<img src=${entry.image || '/ecc/icons/icon-placeholder.svg'} class="search-row-image" style="
     width: 24px;
     height: 24px;
     border-radius: 4px;
