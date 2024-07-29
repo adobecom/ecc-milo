@@ -2,7 +2,7 @@
 import { changeInputValue } from '../../../scripts/utils.js';
 
 export function onSubmit(component, props) {
-  if (component.closest('.fragment')?.classList.contains('hidden')) return null;
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const checkbox = component.querySelector('#checkbox-community');
 
@@ -10,9 +10,6 @@ export function onSubmit(component, props) {
     const communityTopicUrl = component.querySelector('#community-url-details').value;
     props.payload = { ...props.payload, communityTopicUrl };
   }
-
-  delete props.payload.communityTopicUrl;
-  return {};
 }
 
 export async function onUpdate(_component, _props) {
