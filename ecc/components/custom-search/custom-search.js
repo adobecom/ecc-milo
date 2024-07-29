@@ -112,6 +112,7 @@ export class CustomSearch extends LitElement {
         ${repeat(this.searchResults, (item) => item[this.identifier], (entry) => html`
         <sp-menu-item @click=${() => {
     this.selectEntry(entry);
+    this.handleCommonActionsOnCLick();
   }}>
     <div class="search-row" style="
     display: flex;
