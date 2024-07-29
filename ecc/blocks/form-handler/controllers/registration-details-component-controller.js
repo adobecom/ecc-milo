@@ -41,11 +41,13 @@ export default function init(component, props) {
       rsvpDescription,
     } = eventData;
 
-    if (attendeeLimitEl) attendeeLimitEl.value = attendeeLimit;
-    if (allowWaitlistEl) allowWaitlistEl.checked = allowWaitlisting;
-    if (hostEmailEl) hostEmailEl.value = hostEmail;
-    if (descriptionEl) descriptionEl.value = rsvpDescription;
-    if (hostEmail) contactHostEl.checked = true;
+    if (attendeeLimitEl && attendeeLimit) attendeeLimitEl.value = attendeeLimit;
+    if (allowWaitlistEl && allowWaitlisting) allowWaitlistEl.checked = allowWaitlisting;
+    if (descriptionEl && rsvpDescription) descriptionEl.value = rsvpDescription;
+    if (hostEmail) {
+      if (contactHostEl) contactHostEl.checked = true;
+      if (hostEmailEl) hostEmailEl.value = hostEmail;
+    }
 
     if (attendeeLimit || allowWaitlisting || hostEmail || rsvpDescription) {
       component.classList.add('prefilled');

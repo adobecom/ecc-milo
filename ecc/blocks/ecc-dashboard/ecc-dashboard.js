@@ -114,9 +114,8 @@ function highlightRow(row) {
 
 function buildThumbnail(data) {
   const container = createTag('td', { class: 'thumbnail-container' });
-  getEventImages(data.eventId).then(({ images }) => {
-    if (!images) return;
 
+  const buildThumbnailContainer = (images) => {
     const cardImage = images.find((photo) => photo.imageKind === 'event-card-image');
     const heroImage = images.find((photo) => photo.imageKind === 'event-hero-image');
     const venueImage = images.find((photo) => photo.imageKind === 'venue-image');
@@ -133,7 +132,16 @@ function buildThumbnail(data) {
       || '/ecc/icons/icon-placeholder.svg',
     });
     container.append(img);
-  });
+  };
+
+  if (data.photos) {
+    buildThumbnailContainer(data.photos);
+  } else {
+    getEventImages(data.eventId).then(({ images }) => {
+      if (!images) return;
+      buildThumbnailContainer(images);
+    });
+  }
 
   return container;
 }
@@ -606,13 +614,13 @@ function buildDashboardTable(props, config) {
 }
 
 async function getEventsArray() {
-  const json = await getEvents();
+  const resp = await getEvents();
 
-  if (!json || json.errors?.length > 0) {
+  if (resp.error) {
     return [];
   }
 
-  return json.events;
+  return resp.events;
 }
 
 function buildNoEventScreen(el, config) {

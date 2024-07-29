@@ -32,9 +32,17 @@ export class CustomTextfield extends LitElement {
     this.fielddata = { ...defaultData, ...(this.fielddata ? this.fielddata : {}) };
   }
 
+  getMaxLength() {
+    if (!this.fielddata.helperText) return -1;
+
+    const match = this.fielddata.helperText.match(/\d+/);
+
+    return match ? match[0] : -1;
+  }
+
   render() {
     return html`
-    <sp-textfield placeholder=${this.fielddata.placeholder} pattern=${this.config.pattern} ?quiet=${this.config.quiet} size=${this.config.size} ?grows=${this.config.grows} ?multiline=${this.config.multiline} class='text-input' value=${this.fielddata.value} @change=${(event) => { event.stopPropagation(); this.dispatchEvent(new CustomEvent('change-custom', { detail: { value: event.target.value } })); }} @input=${(event) => { event.stopPropagation(); this.dispatchEvent(new CustomEvent('input-custom', { detail: { value: event.target.value } })); }}></sp-textfield>
+    <sp-textfield placeholder=${this.fielddata.placeholder} pattern=${this.config.pattern} ?quiet=${this.config.quiet} size=${this.config.size} ?grows=${this.config.grows} ?multiline=${this.config.multiline} maxlength=${this.getMaxLength()} class='text-input' value=${this.fielddata.value} @change=${(event) => { event.stopPropagation(); this.dispatchEvent(new CustomEvent('change-custom', { detail: { value: event.target.value } })); }} @input=${(event) => { event.stopPropagation(); this.dispatchEvent(new CustomEvent('input-custom', { detail: { value: event.target.value } })); }}></sp-textfield>
     ${this.fielddata.helperText ? html`<sp-helptext class="helper-text">${this.fielddata.helperText}</sp-helptext>` : nothing}`;
   }
 }

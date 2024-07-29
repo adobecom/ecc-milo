@@ -81,7 +81,7 @@ export default async function init(component, props) {
 
         if (resp?.imageId) imageId = resp.imageId;
       } catch (error) {
-        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to upload the image. Please try again later.' }, bubbles: true, composed: true }));
+        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
         dz.deleteImage();
       } finally {
         progressWrapper.classList.add('hidden');
@@ -120,8 +120,8 @@ export default async function init(component, props) {
           dialogDeleteBtn.disabled = true;
           dialogCancelBtn.disabled = true;
           const resp = await deleteImage(configs, imageId);
-          if (resp?.errors || resp?.message) {
-            dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
+          if (resp.error) {
+            dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
           } else {
             dz.file = null;
             imageId = null;
@@ -129,7 +129,7 @@ export default async function init(component, props) {
           }
         } catch (error) {
           window.lana?.log('Failed to perform image DELETE operation. Error:', error);
-          dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
+          dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
         }
 
         underlay.open = false;
@@ -145,6 +145,14 @@ export default async function init(component, props) {
 
   const eventData = props.eventDataResp;
   if (eventData.eventId) {
+    // TODO: would prefer to prioritize eventData.photos, but it is not reliable.
+    // let images;
+
+    // if (eventData.photos) {
+    //   images = eventData.photos;
+    // } else {
+    //   images = await getEventImages(eventData.eventId).images;
+    // }
     const { images } = await getEventImages(eventData.eventId);
 
     if (images) {

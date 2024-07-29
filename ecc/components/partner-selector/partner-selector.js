@@ -11,6 +11,7 @@ export default class PartnerSelector extends LitElement {
     partner: { type: Object },
     fieldLabels: { type: Object },
     seriesId: { type: String },
+    buttonStatePending: { type: Boolean },
   };
 
   constructor() {
@@ -21,6 +22,7 @@ export default class PartnerSelector extends LitElement {
       photo: null,
       hasUnsavedChanges: false,
     };
+    this.buttonStatePending = false;
   }
 
   static styles = style;
@@ -62,12 +64,9 @@ export default class PartnerSelector extends LitElement {
     });
   }
 
-  async savePartner(e) {
-    const saveButton = e.target;
+  async savePartner() {
     let respJson;
-
-    saveButton.pending = true;
-
+    this.buttonStatePending = true;
     const payload = {
       name: this.partner.name,
       link: this.partner.link,
@@ -95,8 +94,8 @@ export default class PartnerSelector extends LitElement {
         }, null, respJson.image?.imageId);
 
         if (sponsorData) {
-          if (sponsorData.errors || sponsorData.message) {
-            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to updated the image. Please try again later.' }, bubbles: true, composed: true }));
+          if (sponsorData.error) {
+            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to updated the image. Please try again later.' } }, bubbles: true, composed: true }));
           }
 
           if (sponsorData.modificationTime) {
@@ -106,26 +105,21 @@ export default class PartnerSelector extends LitElement {
       } else if (!file && respJson.image?.imageId) {
         try {
           const resp = await deleteImage({ targetUrl: `/v1/series/${this.seriesId}/sponsors/${this.partner.sponsorId}/images` }, respJson.image?.imageId);
-          if (resp.errors || resp.message) {
-            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
+          if (resp.error) {
+            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
           } else {
             this.partner.hasUnsavedChanges = false;
             this.partner.modificationTime = resp.modificationTime;
           }
         } catch (error) {
-          this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Failed to delete the image. Please try again later.' }, bubbles: true, composed: true }));
+          this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
         }
       }
 
       this.partner.hasUnsavedChanges = false;
       this.dispatchEvent(new CustomEvent('update-partner', { detail: { partner: this.partner } }));
-
+      this.buttonStatePending = false;
       this.requestUpdate();
-    }
-
-    if (saveButton) {
-      saveButton.textContent = 'Saved';
-      saveButton.pending = false;
     }
   }
 
@@ -138,8 +132,6 @@ export default class PartnerSelector extends LitElement {
     this.partner.hasUnsavedChanges = true;
     this.partner.photo = e.detail.file;
 
-    const saveButton = this.shadowRoot.querySelector('.save-partner-button');
-    if (saveButton) saveButton.textContent = 'Save Partner';
     this.requestUpdate();
   }
 
@@ -169,7 +161,7 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>
+        <sp-button variant="primary" ?pending=${this.buttonStatePending} ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>
         ${this.isSaved() ? 'Saved' : 'Save partner'}</sp-button>
         <slot name="delete-btn"></slot>
         </div>

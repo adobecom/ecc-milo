@@ -30,7 +30,7 @@ export async function onSubmit(component, props) {
       if (!props.eventDataResp.speakers) {
         const resp = await addSpeakerToEvent(speaker, eventId);
 
-        if (!resp || resp.errors) {
+        if (resp.error) {
           return;
         }
 
@@ -51,18 +51,18 @@ export async function onSubmit(component, props) {
           if (updateSpeaker) {
             const resp = await updateSpeakerInEvent(speaker, speakerId, eventId);
 
-            if (!resp || resp.errors || resp.message) {
-              const { errors, message } = resp;
-              profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { errors, message } }));
+            if (resp.error) {
+              const { errors, message } = resp.error;
+              profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message } } }));
             }
 
             props.eventDataResp = { ...props.eventDataResp, ...resp };
           } else {
             const resp = await addSpeakerToEvent(speaker, eventId);
 
-            if (!resp || resp.errors || resp.message) {
-              const { errors, message } = resp;
-              profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { errors, message } }));
+            if (resp.error) {
+              const { errors, message } = resp.error;
+              profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message } } }));
             }
 
             props.eventDataResp = { ...props.eventDataResp, ...resp };
@@ -80,7 +80,7 @@ export async function onSubmit(component, props) {
 
         if (!stillNeeded) {
           const resp = await removeSpeakerFromEvent(speakerId, eventId);
-          if (!resp || resp.errors) {
+          if (resp.error) {
             return;
           }
 

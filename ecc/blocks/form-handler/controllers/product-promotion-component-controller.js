@@ -21,6 +21,42 @@ export function onSubmit(component, props) {
 }
 
 async function updateProductSelector(component, props) {
+  const supportedProducts = [
+    'Acrobat Pro',
+    'Acrobat Reader',
+    'Adobe Express',
+    'Adobe Firefly',
+    'Adobe Fonts',
+    'Adobe Stock',
+    'Aero',
+    'After Effects',
+    'Animate',
+    'Audition',
+    'Behance',
+    'Bridge',
+    'Capture',
+    'Character Animator',
+    'Color',
+    'Creative Cloud Libraries',
+    'Dimension',
+    'Dreamweaver',
+    'Fill & Sign',
+    'Frame.io',
+    'Fresco',
+    'Illustrator',
+    'InCopy',
+    'InDesign',
+    'Lightroom',
+    'Lightroom Classic',
+    'Media Encoder',
+    'Photoshop',
+    'Photoshop Express',
+    'Portfolio',
+    'Premiere Pro',
+    'Premiere Rush',
+    'Scan',
+    'Substance 3D Collection',
+  ];
   const caasTags = await getCaasTags();
   const topicsVal = props.payload.fullTopicsValue?.map((x) => JSON.parse(x));
   if (!caasTags || !topicsVal) return;
@@ -28,7 +64,9 @@ async function updateProductSelector(component, props) {
   const productGroups = component.querySelectorAll('product-selector-group');
   let products = Object.values(caasTags.namespaces.caas.tags['product-categories'].tags).map((x) => [...Object.values(x.tags).map((y) => y)]).flat();
 
-  products = products.filter((p) => topicsVal.find((t) => p.tagID.includes(t.tagID)));
+  products = products.filter(
+    (p) => topicsVal.find((t) => p.tagID.includes(t.tagID)) && supportedProducts.includes(p.title),
+  );
 
   productGroups.forEach((p) => {
     p.setAttribute('data-products', JSON.stringify(products));
