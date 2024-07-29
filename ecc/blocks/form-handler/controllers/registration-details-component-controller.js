@@ -44,7 +44,7 @@ export default function init(component, props) {
     if (attendeeLimitEl) attendeeLimitEl.value = attendeeLimit;
     if (allowWaitlistEl) allowWaitlistEl.checked = allowWaitlisting;
     if (hostEmailEl) hostEmailEl.value = hostEmail;
-    if (descriptionEl) descriptionEl.value = rsvpDescription;
+    if (descriptionEl && rsvpDescription) descriptionEl.value = rsvpDescription;
     if (hostEmail) contactHostEl.checked = true;
 
     if (attendeeLimit || allowWaitlisting || hostEmail || rsvpDescription) {
