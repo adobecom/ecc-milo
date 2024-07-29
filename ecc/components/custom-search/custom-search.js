@@ -117,7 +117,7 @@ export class CustomSearch extends LitElement {
     <div class="search-row" style="
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    gap: 8px;
     align-items: center;">
     ${this.config.showImage ? html`<img src=${entry.image || 'ecc/icons/icon-placeholder.svg'} class="search-row-image" style="
     width: 24px;
