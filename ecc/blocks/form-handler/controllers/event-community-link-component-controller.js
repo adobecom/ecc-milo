@@ -1,7 +1,8 @@
-import { changeInputValue } from '../../../utils/utils.js';
+/* eslint-disable no-unused-vars */
+import { changeInputValue } from '../../../scripts/utils.js';
 
 export function onSubmit(component, props) {
-  if (component.closest('.fragment')?.classList.contains('hidden')) return null;
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const checkbox = component.querySelector('#checkbox-community');
 
@@ -9,9 +10,6 @@ export function onSubmit(component, props) {
     const communityTopicUrl = component.querySelector('#community-url-details').value;
     props.payload = { ...props.payload, communityTopicUrl };
   }
-
-  delete props.payload.communityTopicUrl;
-  return {};
 }
 
 export async function onUpdate(_component, _props) {
@@ -23,8 +21,11 @@ export default function init(component, props) {
   const checkbox = component.querySelector('#checkbox-community');
   const input = component.querySelector('#community-url-details');
 
-  changeInputValue(checkbox, 'checked', !!eventData.communityTopicUrl);
-  changeInputValue(input, 'value', eventData.communityTopicUrl || '');
+  if (eventData.communityTopicUrl) {
+    changeInputValue(checkbox, 'checked', !!eventData.communityTopicUrl);
+    changeInputValue(input, 'value', eventData.communityTopicUrl || '');
+    component.classList.add('prefilled');
+  }
 
   const updateInputState = () => {
     input.disabled = !checkbox.checked;

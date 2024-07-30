@@ -1,6 +1,6 @@
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 
-const { css } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { css } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
@@ -28,7 +28,7 @@ export const style = css`
 .time-picker > p::before {
   content: '';
   display: inline-block;
-  background-image: url('../../icons/clock.svg');
+  background-image: url('/ecc/icons/clock.svg');
   background-repeat: no-repeat;
   background-position: center;
   width: 32px;

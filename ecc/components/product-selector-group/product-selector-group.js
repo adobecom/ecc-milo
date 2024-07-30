@@ -1,9 +1,8 @@
 /* eslint-disable max-len */
-import { getLibs } from '../../scripts/utils.js';
-import { isEmptyObject } from '../../utils/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { style } from './product-selector-group.css.js';
 
-const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 const defaultProductValue = {
   name: '',
@@ -19,7 +18,8 @@ export default class ProductSelectorGroup extends LitElement {
 
   constructor() {
     super();
-    this.selectedProducts = this.selectedProducts || [defaultProductValue];
+    this.selectedProducts = this.selectedProducts?.length || [defaultProductValue];
+
     try {
       this.products = JSON.parse(this.dataset.products);
     } catch {
@@ -41,6 +41,9 @@ export default class ProductSelectorGroup extends LitElement {
 
   deleteProduct(index) {
     this.selectedProducts = this.selectedProducts.filter((_, i) => i !== index);
+    if (this.selectedProducts.length === 0) {
+      this.selectedProducts = [defaultProductValue];
+    }
     this.requestUpdate();
   }
 
@@ -58,7 +61,7 @@ export default class ProductSelectorGroup extends LitElement {
   }
 
   getSelectedProducts() {
-    return this.selectedProducts.filter((p) => p.name && p.showProductBlade !== undefined);
+    return this.selectedProducts.filter((p) => p.name);
   }
 
   countBlades() {
@@ -78,6 +81,10 @@ export default class ProductSelectorGroup extends LitElement {
     return uniqueProduts;
   }
 
+  hasOnlyEmptyProductLeft() {
+    return !this.selectedProducts[0].name && (this.selectedProducts[0].title === defaultProductValue.title || !this.selectedProducts[0].title);
+  }
+
   render() {
     this.products = this.dataset.products ? JSON.parse(this.dataset.products) : [];
     this.selectedTopics = this.dataset.selectedTopics ? JSON.parse(this.dataset.selectedTopics) : [];
@@ -87,12 +94,12 @@ export default class ProductSelectorGroup extends LitElement {
 
     return html`
       ${repeat(this.selectedProducts, (product, index) => html`
-        <product-selector .selectedProduct=${product} .products=${uniqueProducts}
+        <product-selector .selectedProduct=${product} .products=${uniqueProducts} .existingProducts=${this.getSelectedProducts()}
           @update-product=${(event) => this.handleProductUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
-            ${this.selectedProducts.length > 1 ? html`
+            ${this.selectedProducts.length === 1 && this.hasOnlyEmptyProductLeft() ? nothing : html`
               <img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => this.deleteProduct(index)}></img>
-            ` : nothing}
+            `}
           </div>
         </product-selector>
       `)}

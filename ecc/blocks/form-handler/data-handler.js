@@ -1,7 +1,8 @@
+// FIXME: this whole data handler thing can be done better
 let responseCache = {};
 let payloadCache = {};
 
-const wl = [
+const submissionFilter = [
   // from payload and response
   'agenda',
   'topics',
@@ -17,25 +18,21 @@ const wl = [
   'localEndDate',
   'localStartTime',
   'localEndTime',
-  'localStartTimeMillis',
-  'localEndTimeMillis',
   'timezone',
-  'partners',
-  'rsvpData',
   'showAgendaPostEvent',
   'showVenuePostEvent',
+  'showVenueImage',
+  'showSponsors',
   'rsvpFormFields',
   'relatedProducts',
-  // only in response
+  'rsvpDescription',
+  'attendeeLimit',
+  'allowWaitlisting',
+  'hostEmail',
   'eventId',
-  'url',
   'published',
-  'startDate',
-  'endDate',
-  'duration',
   'creationTime',
   'modificationTime',
-  'detailPagePath',
 ];
 
 function isValidAttribute(attr) {
@@ -45,7 +42,7 @@ function isValidAttribute(attr) {
 export function quickFilter(obj) {
   const output = {};
 
-  wl.forEach((attr) => {
+  submissionFilter.forEach((attr) => {
     if (isValidAttribute(obj[attr])) {
       output[attr] = obj[attr];
     }
@@ -65,7 +62,7 @@ export function getFilteredCachedPayload() {
 }
 
 export function setResponseCache(response) {
-  if (!response || response?.errors) return;
+  if (!response) return;
   const output = quickFilter(response);
   responseCache = { ...responseCache, ...output };
 }
@@ -78,5 +75,9 @@ export default function getJoinedData() {
   const filteredResponse = getFilteredCachedResponse();
   const filteredPayload = getFilteredCachedPayload();
 
-  return { ...filteredResponse, ...filteredPayload };
+  return {
+    ...filteredResponse,
+    ...filteredPayload,
+    modificationTime: filteredResponse.modificationTime,
+  };
 }

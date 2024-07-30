@@ -1,5 +1,9 @@
 /* eslint-disable no-unused-vars */
-import { changeInputValue } from '../../../utils/utils.js';
+import { getSeries } from '../../../scripts/esp-controller.js';
+import { MILO_CONFIG, LIBS } from '../../../scripts/scripts.js';
+import { changeInputValue } from '../../../scripts/utils.js';
+
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -24,7 +28,7 @@ function initStepLock(component) {
   const urlParams = new URLSearchParams(search);
   const skipValidation = urlParams.get('skipValidation');
 
-  if (skipValidation === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
+  if (skipValidation === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     return;
   }
 
@@ -56,14 +60,59 @@ function initStepLock(component) {
   onFormatChange();
 }
 
-export async function onUpdate(_component, _props) {
-  // Do nothing
+export async function onUpdate(component, props) {
+  const { seriesId } = props.payload;
+  if (seriesId) {
+    const partnerSelectorGroups = document.querySelectorAll('partner-selector-group');
+    if (partnerSelectorGroups.length) {
+      partnerSelectorGroups.forEach((group) => {
+        if (group.seriesId !== seriesId) {
+          group.seriesId = seriesId;
+          group.requestUpdate();
+        }
+      });
+    }
+  }
 }
 
-export default function init(component, props) {
+async function populateSeriesOptions(component) {
+  const seriesSelect = component.querySelector('#series-select-input');
+  if (!seriesSelect) return;
+
+  const series = await getSeries();
+  if (!series) {
+    seriesSelect.pending = false;
+    seriesSelect.disabled = true;
+    return;
+  }
+
+  Object.values(series).forEach((val) => {
+    const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
+    seriesSelect.append(opt);
+  });
+
+  seriesSelect.pending = false;
+}
+
+export default async function init(component, props) {
+  setTimeout(() => {
+    const seriesSelect = component.querySelector('#series-select-input');
+
+    if (seriesSelect.pending || seriesSelect.disabled) {
+      const toastArea = props.el.querySelector('.toast-area');
+      if (!toastArea) return;
+
+      const toast = createTag('sp-toast', { open: true, timeout: 8000 }, 'Series ID is taking longer than usual to load. Please check if the Adobe corp. VPN is connected.', { parent: toastArea });
+      toast.addEventListener('close', () => {
+        toast.remove();
+      });
+    }
+  }, 5000);
+
   const eventData = props.eventDataResp;
   prepopulateTimeZone(component);
   initStepLock(component);
+  await populateSeriesOptions(component);
 
   const {
     cloudType,
@@ -71,18 +120,21 @@ export default function init(component, props) {
     rsvpRequired,
   } = eventData;
 
-  changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType || '');
-  changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId || '');
-  changeInputValue(component.querySelector('#rsvp-required-check'), 'checked', rsvpRequired || 0);
+  if (cloudType && seriesId) {
+    changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType);
+    changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId);
+    changeInputValue(component.querySelector('#rsvp-required-check'), 'checked', rsvpRequired || 0);
+    component.classList.add('prefilled');
+  }
 }
 
 function getTemplateId(bu) {
   switch (bu) {
     case 'DX':
-      return '/fragments/event-templates/dx/simple';
+      return '/events/fragments/event-templates/dx/simple';
     case 'CreativeCloud':
     default:
-      return '/fragments/event-templates/dme/simple';
+      return '/events/fragments/event-templates/dme/simple';
   }
 }
 

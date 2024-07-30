@@ -1,3 +1,5 @@
+import BlockMediator from './deps/block-mediator.min.js';
+
 export async function getProfile() {
   const { feds, adobeProfile, fedsConfig, adobeIMS } = window;
 
@@ -16,10 +18,7 @@ export async function getProfile() {
 
   const profile = await getUserProfile();
 
-  if (profile) {
-    console.log('Fetched user profile:', profile);
-    return profile;
-  }
+  if (profile) return profile;
 
   window.lana?.log('Failed to get user profile data.');
   return {};
@@ -28,10 +27,10 @@ export async function getProfile() {
 export async function captureProfile() {
   try {
     const profile = await getProfile();
-    window.bm8r.set('imsProfile', profile);
+    BlockMediator.set('imsProfile', profile);
   } catch {
     if (window.adobeIMS) {
-      window.bm8r.set('imsProfile', { noProfile: true });
+      BlockMediator.set('imsProfile', { noProfile: true });
     }
   }
 }
@@ -50,12 +49,12 @@ export function lazyCaptureProfile() {
 
     try {
       const profile = await getProfile();
-      window.bm8r.set('imsProfile', profile);
+      BlockMediator.set('imsProfile', profile);
       clearInterval(profileRetryer);
     } catch {
       if (window.adobeIMS) {
         clearInterval(profileRetryer);
-        window.bm8r.set('imsProfile', { noProfile: true });
+        BlockMediator.set('imsProfile', { noProfile: true });
       }
 
       attempCounter += 1;

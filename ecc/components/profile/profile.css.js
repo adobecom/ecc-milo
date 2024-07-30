@@ -1,7 +1,7 @@
 /* stylelint-disable selector-class-pattern */
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 
-const { css } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { css } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
@@ -11,7 +11,7 @@ image-dropzone {
 }
 
 .img-file-input-wrapper {
-  border: 2px dashed var(--color-gray-400);
+  border: 2px solid var(--color-gray-400);
   border-radius: 8px;
   height: 200px;
   display: flex;
@@ -101,9 +101,16 @@ modal{
   margin: 0;
 }
 
+.preview-wrapper {
+  height: 200px;
+}
+
+.preview-img-placeholder {
+  height: 100%;
+}
+
 .speaker-image {
   width: 300px;
-  max-width: 100%;
   height: 100%;
   display: block;
   object-fit: cover;

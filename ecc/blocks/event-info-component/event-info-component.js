@@ -1,16 +1,15 @@
-import { getLibs } from '../../scripts/utils.js';
-import { getIcon, generateToolTip, decorateTextfield, decorateTextarea, convertTo24HourFormat } from '../../utils/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
+import { getIcon, generateToolTip, decorateTextfield, decorateTextarea, convertTo24HourFormat } from '../../scripts/utils.js';
 
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function buildDatePicker(column) {
   column.classList.add('date-picker');
-  const dateLabel = createTag('label', { for: 'event-info-date-picker' }, column.textContent.trim());
-  const datePicker = createTag('input', { id: 'event-info-date-picker', name: 'event-date', class: 'date-input', required: true });
+  const datePicker = createTag('input', { id: 'event-info-date-picker', name: 'event-date', class: 'date-input', required: true, placeholder: column.textContent.trim() });
   const calendarIcon = getIcon('calendar-add');
 
   column.innerHTML = '';
-  column.append(dateLabel, datePicker, calendarIcon);
+  column.append(datePicker, calendarIcon);
 }
 
 function buildTimePicker(column, wrapper) {
@@ -54,18 +53,6 @@ function buildTimePicker(column, wrapper) {
   timePickerWrappers.forEach((w) => { column.append(w); });
 
   wrapper.append(column);
-}
-
-function getGMTOffset(timeZone) {
-  const match = timeZone.match(/UTC([+-])(\d{2}):(\d{2})/);
-  if (match) {
-    const sign = match[1] === '+' ? 1 : -1;
-    const hours = parseInt(match[2], 10);
-
-    return sign * hours;
-  }
-
-  return 0;
 }
 
 function decorateTimeZoneSelect(cell, wrapper) {

@@ -1,7 +1,7 @@
 /* stylelint-disable selector-class-pattern */
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 
-const { css } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { css } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
@@ -25,5 +25,8 @@ export const style = css`
 
   .delete-btn {
     height: 24px;
+    position: absolute;
+    top: 32px;
+    right: 0;
   }
 `;

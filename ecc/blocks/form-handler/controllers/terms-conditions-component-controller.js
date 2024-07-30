@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
-import { getLibs } from '../../../scripts/utils.js';
-import HtmlSanitizer from '../../../deps/html-sanitizer.js';
-import { fetchThrottledMemoized } from '../../../utils/utils.js';
+import { ECC_ENV, LIBS } from '../../../scripts/scripts.js';
+import HtmlSanitizer from '../../../scripts/deps/html-sanitizer.js';
+import { fetchThrottledMemoizedText, getEventPageHost } from '../../../scripts/utils.js';
+import { getFilteredCachedResponse } from '../data-handler.js';
 
-const { customFetch } = await import(`${getLibs()}/utils/helpers.js`);
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+const { customFetch } = await import(`${LIBS}/utils/helpers.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function buildTerms(terms) {
   const termsWrapper = createTag('div', { class: 'terms-conditions-preview' });
@@ -30,19 +31,29 @@ function buildTerms(terms) {
 }
 
 async function loadPreview(component, templateId) {
-  const rsvpFormLocation = `https://main--events-milo--adobecom.hlx.page${templateId.substring(0, templateId.lastIndexOf('/'))}/rsvp-form`;
-  const resp = await fetchThrottledMemoized(`${rsvpFormLocation}.plain.html`, { headers: { authorization: 'token MM/NpTtq0gAnckOSl96C4SGB67kFjbO6a4N9vYwb0gd5' } })
+  let host;
+  if (window.location.href.includes('.hlx.')) {
+    host = window.location.origin.replace(window.location.hostname, `${ECC_ENV}--events-milo--adobecom.hlx.page`);
+  } else {
+    host = window.location.origin;
+  }
+
+  const rsvpFormLocation = `${host}${templateId.substring(0, templateId.lastIndexOf('/'))}/rsvp-form`;
+  const text = await fetchThrottledMemoizedText(`${rsvpFormLocation}.plain.html`).catch(() => ({}))
     .catch(() => ({}));
 
-  if (!resp?.ok) {
-    window.lana?.log(`Could not get fragment: ${rsvpFormLocation}.plain.html`);
-    component.append(createTag('p', {}, 'Could not load terms and conditions. Please try again later.'));
+  if (!text) {
+    component.remove();
     return;
   }
 
-  const html = await resp.text();
-  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const doc = new DOMParser().parseFromString(text, 'text/html');
   const termsConditionsRow = doc.querySelector('.events-form > div:nth-of-type(3)');
+
+  if (!termsConditionsRow) {
+    component.remove();
+    return;
+  }
 
   component.append(buildTerms(termsConditionsRow));
 }

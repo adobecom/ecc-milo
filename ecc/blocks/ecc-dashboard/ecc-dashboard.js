@@ -1,16 +1,24 @@
 import {
-  createEvent, deleteEvent, getEvents, getVenue, publishEvent, unpublishEvent,
-} from '../../utils/esp-controller.js';
-import { getLibs } from '../../scripts/utils.js';
-import { getIcon, buildNoAccessScreen } from '../../utils/utils.js';
+  createEvent,
+  deleteEvent,
+  getEventImages,
+  getEvents,
+  publishEvent,
+  unpublishEvent,
+} from '../../scripts/esp-controller.js';
+import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
+import { getIcon, buildNoAccessScreen, getEventPageHost } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
+import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 export function cloneFilter(obj) {
   const wl = [
     'agenda',
     'topics',
+    'speakers',
+    'sponsors',
     'eventType',
     'cloudType',
     'seriesId',
@@ -26,9 +34,9 @@ export function cloneFilter(obj) {
     'localStartTimeMillis',
     'localEndTimeMillis',
     'timezone',
-    'partners',
     'showAgendaPostEvent',
     'showVenuePostEvent',
+    'showVenueImage',
     'attendeeLimit',
     'rsvpDescription',
     'allowWaitlisting',
@@ -85,20 +93,56 @@ export function readBlockConfig(block) {
 
 function formatLocaleDate(string) {
   const options = {
-    weekday: 'long',
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   };
 
-  return new Date(string).toLocaleString('en-GB', options);
+  return new Date(string).toLocaleString('en-US', options);
+}
+
+function highlightRow(row) {
+  if (!row) return;
+
+  row.classList.add('highlight');
+
+  setTimeout(() => {
+    row.classList.remove('highlight');
+  }, 1000);
 }
 
 function buildThumbnail(data) {
-  // TODO: use thumbnail instead of just first image or mock image
-  const img = createTag('img', { class: 'event-thumbnail-img', src: data.photos?.[0]?.imageUrl || '/ecc/icons/icon-placeholder.svg' });
-  const container = createTag('td', { class: 'thumbnail-container' }, img);
+  const container = createTag('td', { class: 'thumbnail-container' });
+
+  const buildThumbnailContainer = (images) => {
+    const cardImage = images.find((photo) => photo.imageKind === 'event-card-image');
+    const heroImage = images.find((photo) => photo.imageKind === 'event-hero-image');
+    const venueImage = images.find((photo) => photo.imageKind === 'venue-image');
+
+    const img = createTag('img', {
+      class: 'event-thumbnail-img',
+      src: (cardImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
+      || cardImage?.imageUrl
+      || (heroImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
+      || heroImage?.imageUrl
+      || (venueImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
+      || venueImage?.imageUrl
+      || images[0]?.imageUrl
+      || '/ecc/icons/icon-placeholder.svg',
+    });
+    container.append(img);
+  };
+
+  if (data.photos) {
+    buildThumbnailContainer(data.photos);
+  } else {
+    getEventImages(data.eventId).then(({ images }) => {
+      if (!images) return;
+      buildThumbnailContainer(images);
+    });
+  }
+
   return container;
 }
 
@@ -116,7 +160,77 @@ function updateDashboardData(newPayload, props) {
   props.paginatedData = props.data;
 }
 
-function initMoreOptions(props, config, eventObj, moreOptionsCell) {
+function paginateData(props, config, page) {
+  const ps = +config['page-size'];
+  if (Number.isNaN(ps) || ps <= 0) {
+    window.lana?.log('error', 'Invalid page size');
+  }
+  const start = (page - 1) * ps;
+  const end = Math.min(page * ps, props.filteredData.length);
+
+  props.paginatedData = props.filteredData.slice(start, end);
+}
+
+function sortData(props, config, options = {}) {
+  const { field, el } = props.currentSort;
+
+  let sortAscending = true;
+
+  if (el?.classList.contains('active')) {
+    if (options.resort) {
+      sortAscending = !el.classList.contains('desc-sort');
+    } else {
+      sortAscending = el.classList.contains('desc-sort');
+    }
+    el.classList.toggle('desc-sort', !sortAscending);
+  } else {
+    el?.classList.remove('desc-sort');
+  }
+
+  if (options.direction) {
+    sortAscending = options.direction === 'asc';
+    el?.classList.toggle('desc-sort', !sortAscending);
+  }
+
+  props.filteredData = props.filteredData.sort((a, b) => {
+    let valA;
+    let valB;
+
+    if ((field === 'title' || field === 'venueId')) {
+      valA = a[field]?.toLowerCase() || '';
+      valB = b[field]?.toLowerCase() || '';
+      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    }
+
+    if (field === 'startDate' || field === 'modificationTime') {
+      valA = new Date(a[field]);
+      valB = new Date(b[field]);
+      return sortAscending ? valA - valB : valB - valA;
+    }
+
+    valA = a[field]?.toString().toLowerCase() || '';
+    valB = b[field]?.toString().toLowerCase() || '';
+    return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+  });
+
+  el?.parentNode.querySelectorAll('th').forEach((header) => {
+    if (header !== el) {
+      header.classList.remove('active');
+      header.classList.remove('desc-sort');
+    }
+  });
+
+  props.currentPage = 1;
+  paginateData(props, config, 1);
+  el?.classList.add('active');
+}
+
+function buildToastMsg(eventTitle, msgTemplate) {
+  return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
+}
+
+function initMoreOptions(props, config, eventObj, row) {
+  const moreOptionsCell = row.querySelector('.option-col');
   const moreOptionIcon = moreOptionsCell.querySelector('.icon-more-small-list');
 
   const buildTool = (parent, text, icon) => {
@@ -132,15 +246,24 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
       const unpub = buildTool(toolBox, 'Unpublish', 'publish-remove');
       unpub.addEventListener('click', async (e) => {
         e.preventDefault();
+        toolBox.remove();
+        row.classList.add('pending');
         const resp = await unpublishEvent(eventObj.eventId, quickFilter(eventObj));
         updateDashboardData(resp, props);
+
+        sortData(props, config, { resort: true });
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
+      if (!eventObj.detailPagePath) pub.classList.add('disabled');
       pub.addEventListener('click', async (e) => {
         e.preventDefault();
+        toolBox.remove();
+        row.classList.add('pending');
         const resp = await publishEvent(eventObj.eventId, quickFilter(eventObj));
         updateDashboardData(resp, props);
+
+        sortData(props, config, { resort: true });
       });
     }
 
@@ -150,17 +273,21 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
     const clone = buildTool(toolBox, 'Clone', 'clone');
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
-    previewPre.href = (() => {
-      const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
-      url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
-      return url.toString();
-    })();
-
-    previewPost.href = (() => {
-      const url = new URL(`${window.location.origin}${eventObj.detailPagePath}`);
-      url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
-      return url.toString();
-    })();
+    if (eventObj.detailPagePath) {
+      previewPre.href = (() => {
+        const url = new URL(`${getEventPageHost(eventObj.published)}${eventObj.detailPagePath}`);
+        url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
+        return url.toString();
+      })();
+      previewPost.href = (() => {
+        const url = new URL(`${getEventPageHost(eventObj.published)}${eventObj.detailPagePath}`);
+        url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
+        return url.toString();
+      })();
+    } else {
+      previewPre.classList.add('disabled');
+      previewPost.classList.add('disabled');
+    }
 
     // edit
     const url = new URL(`${window.location.origin}${config['create-form-url']}`);
@@ -168,22 +295,67 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
     edit.href = url.toString();
 
     // clone
-    clone.addEventListener('click', async () => {
+    clone.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const spTheme = props.el.querySelector('sp-theme');
       const payload = { ...eventObj };
       payload.title = `${eventObj.title} - copy`;
-
+      toolBox.remove();
+      row.classList.add('pending');
       const newEventJSON = await createEvent(cloneFilter(payload));
-      const reloadUrl = new URL(window.location.href);
-      reloadUrl.searchParams.set('clonedEventId', newEventJSON.eventId);
-      window.location.assign(reloadUrl.href);
-    });
-
-    deleteBtn.addEventListener('click', async () => {
-      await deleteEvent(eventObj.eventId);
       const newJson = await getEvents();
       props.data = newJson.events;
       props.filteredData = newJson.events;
       props.paginatedData = newJson.events;
+      const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
+      if (modTimeHeader) {
+        props.currentSort = { field: 'modificationTime', el: modTimeHeader };
+        sortData(props, config, { direction: 'desc' });
+      }
+      const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
+      const toastMsg = buildToastMsg(newEventJSON.title, msgTemplate);
+      createTag('sp-toast', { open: true, variant: 'info' }, toastMsg, { parent: spTheme });
+      const newRow = props.el.querySelector(`tr[data-event-id="${newEventJSON.eventId}"]`);
+      highlightRow(newRow);
+    });
+
+    // delete
+    deleteBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const spTheme = props.el.querySelector('sp-theme');
+      if (!spTheme) return;
+
+      const underlay = spTheme.querySelector('sp-underlay');
+      const dialog = spTheme.querySelector('sp-dialog');
+      createTag('h1', { slot: 'heading' }, 'You are deleting this event.', { parent: dialog });
+      createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
+      const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+      const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to delete this event', { parent: buttonContainer });
+      const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not delete', { parent: buttonContainer });
+
+      underlay.open = true;
+
+      dialogDeleteBtn.addEventListener('click', async () => {
+        toolBox.remove();
+        underlay.open = false;
+        dialog.innerHTML = '';
+        row.classList.add('pending');
+        await deleteEvent(eventObj.eventId);
+        const newJson = await getEvents();
+        props.data = newJson.events;
+        props.filteredData = newJson.events;
+        props.paginatedData = newJson.events;
+
+        sortData(props, config, { resort: true });
+        createTag('sp-toast', { open: true }, config['delete-event-toast-msg'], { parent: spTheme });
+      });
+
+      dialogCancelBtn.addEventListener('click', () => {
+        toolBox.remove();
+        underlay.open = false;
+        dialog.innerHTML = '';
+      });
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
@@ -199,21 +371,11 @@ function initMoreOptions(props, config, eventObj, moreOptionsCell) {
   });
 }
 
-function getTimezoneName(offsetHours) {
-  const offsetMinutes = offsetHours * 60;
+function getCountryName(eventObj) {
+  if (!eventObj.venue) return '';
 
-  const d = new Date();
-  const utcDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000 + offsetMinutes * 60000);
-
-  const options = {
-    timeZone: 'UTC',
-    timeZoneName: 'long',
-  };
-  const formatter = new Intl.DateTimeFormat('en-US', options);
-  const parts = formatter.formatToParts(utcDate);
-  const timeZoneName = parts.find((part) => part.type === 'timeZoneName').value;
-
-  return timeZoneName;
+  const { venue } = eventObj;
+  return venue.country || '';
 }
 
 function buildStatusTag(event) {
@@ -225,31 +387,34 @@ function buildStatusTag(event) {
   return statusTag;
 }
 
-function buildEventTitleTag(event) {
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: `${window.location.origin}${event.detailPagePath}` }, event.title);
+function buildEventTitleTag(config, eventObj) {
+  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+  url.searchParams.set('eventId', eventObj.eventId);
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventObj.title);
   return eventTitleTag;
 }
 
 // TODO: to retire
-async function buildVenueTag(eventObj) {
-  let { venue } = eventObj;
-  if (!venue) venue = await getVenue(eventObj.eventId);
+function buildVenueTag(config, eventObj) {
+  const { venue } = eventObj;
   if (!venue) return null;
 
-  const venueTag = createTag('div', { class: 'vanue-name' }, venue.venueName);
+  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+  url.searchParams.set('eventId', eventObj.eventId);
+
+  const venueTag = createTag('a', { class: 'vanue-name', href: url.toString() }, venue.venueName);
   return venueTag;
 }
 
-function highlightRow(row) {
-  row.classList.add('highlight');
+function buildRSVPTag(config, eventObj) {
+  let text = 'RSVP';
+  if (eventObj.externalEventId?.startsWith('st')) text = 'SplashThat';
 
-  setTimeout(() => {
-    row.classList.remove('highlight');
-  }, 1000);
-}
+  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+  url.searchParams.set('eventId', eventObj.eventId);
 
-function buildToastMsg(eventTitle, msgTemplate) {
-  return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
+  const rsvpTag = createTag('a', { class: 'rsvp-tag', href: `${url.toString()}#form-step-rsvp` }, text);
+  return rsvpTag;
 }
 
 async function populateRow(props, config, index) {
@@ -259,15 +424,15 @@ async function populateRow(props, config, index) {
   const sp = new URLSearchParams(window.location.search);
 
   // TODO: build each column's element specifically rather than just text
-  const row = createTag('tr', { class: 'event-row' }, '', { parent: tBody });
+  const row = createTag('tr', { class: 'event-row', 'data-event-id': event.eventId }, '', { parent: tBody });
   const thumbnailCell = buildThumbnail(event);
-  const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(event)));
+  const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(config, event)));
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, await buildVenueTag(event)));
-  const timezoneCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getTimezoneName(event.gmtOffset)));
-  const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, event.externalEventId));
+  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(config, event)));
+  const geoCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getCountryName(event)));
+  const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
   row.append(
@@ -277,37 +442,24 @@ async function populateRow(props, config, index) {
     startDateCell,
     modDateCell,
     venueCell,
-    timezoneCell,
+    geoCell,
     externalEventId,
     moreOptionsCell,
   );
 
-  initMoreOptions(props, config, event, moreOptionsCell);
+  initMoreOptions(props, config, event, row);
 
   if (event.eventId === sp.get('newEventId')) {
-    const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
-    const toastMsg = buildToastMsg(event.title, msgTemplate);
-    createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
-    highlightRow(row);
-  }
+    if (!props.el.classList.contains('toast-shown')) {
+      const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
+      const toastMsg = buildToastMsg(event.title, msgTemplate);
+      createTag('sp-toast', { class: 'new-event-confirmation-toast', open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
 
-  if (event.eventId === sp.get('clonedEventId')) {
-    const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
-    const toastMsg = buildToastMsg(event.title, msgTemplate);
-    createTag('sp-toast', { open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
-    highlightRow(row);
-  }
-}
+      props.el.classList.add('toast-shown');
+    }
 
-function paginateData(props, config, page) {
-  const ps = +config['page-size'];
-  if (Number.isNaN(ps) || ps <= 0) {
-    window.lana?.log('error', 'Invalid page size');
+    if (props.el.querySelector('.new-event-confirmation-toast')?.open === true) highlightRow(row);
   }
-  const start = (page - 1) * ps === 0 ? (page - 1) * ps : (page - 1) * ps - page + 1;
-  const end = page * ps + 1;
-
-  props.paginatedData = props.filteredData.slice(start, end);
 }
 
 function updatePaginationControl(pagination, currentPage, totalPages) {
@@ -362,87 +514,9 @@ function decoratePagination(props, config) {
   updatePaginationControl(paginationContainer, props.currentPage, totalPages);
 }
 
-function populateTable(props, config) {
-  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' });
-  const tBody = props.el.querySelector('table.dashboard-table tbody');
-  props.el.append(spTheme);
-  tBody.innerHTML = '';
-
-  const endOfPages = Math.min(+config['page-size'], props.paginatedData.length);
-
-  for (let i = props.currentPage - 1; i < endOfPages; i += 1) {
-    populateRow(props, config, i);
-  }
-
-  props.el.querySelector('.pagination-container')?.remove();
-  decoratePagination(props, config);
-}
-
-function filterData(props, config, query) {
-  const q = query.toLowerCase();
-  props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
-  props.currentPage = 1;
-  paginateData(props, config, 1);
-}
-
-function sortData(props, th, field) {
-  let sortAscending = true;
-
-  if (th.classList.contains('active') && !th.classList.contains('desc-sort')) {
-    sortAscending = false;
-    th.classList.add('desc-sort');
-  } else {
-    th.classList.remove('desc-sort');
-  }
-
-  props.filteredData = props.data.sort((a, b) => {
-    let valA;
-    let valB;
-
-    if (field === 'title') {
-      valA = a[field].toLowerCase();
-      valB = b[field].toLowerCase();
-      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    } if (field === 'startDate' || field === 'modificationTime') {
-      valA = new Date(a[field]);
-      valB = new Date(b[field]);
-      return sortAscending ? valA - valB : valB - valA;
-    }
-    valA = a[field].toString().toLowerCase();
-    valB = b[field].toString().toLowerCase();
-    return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-  });
-
-  th.parentNode.querySelectorAll('th').forEach((header) => {
-    if (header !== th) {
-      header.classList.remove('active');
-      header.classList.remove('desc-sort');
-    }
-  });
-  th.classList.add('active');
-}
-
-function buildDashboardHeader(props, config) {
-  const dashboardHeader = createTag('div', { class: 'dashboard-header' });
-  const textContainer = createTag('div', { class: 'dashboard-header-text' });
-  const actionsContainer = createTag('div', { class: 'dashboard-actions-container' });
-
-  createTag('h1', { class: 'dashboard-header-heading' }, 'All Events', { parent: textContainer });
-  createTag('p', { class: 'dashboard-header-events-count' }, `(${props.data.length} events)`, { parent: textContainer });
-
-  const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: actionsContainer });
-  createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
-  searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
-
-  dashboardHeader.append(textContainer, actionsContainer);
-  props.el.prepend(dashboardHeader);
-}
-
-function buildDashboardTable(props, config) {
-  const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
-  const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
-  const thead = createTag('thead', {}, '', { parent: table });
-  createTag('tbody', {}, '', { parent: table });
+function initSorting(props, config) {
+  const thead = props.el.querySelector('thead');
+  const thRow = thead.querySelector('tr');
 
   const headers = {
     thumbnail: '',
@@ -456,16 +530,14 @@ function buildDashboardTable(props, config) {
     manage: 'MANAGE',
   };
 
-  const tr = createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
-
   Object.entries(headers).forEach(([key, val]) => {
     const thText = createTag('span', {}, val);
-    const th = createTag('th', {}, thText, { parent: tr });
+    const th = createTag('th', {}, thText, { parent: thRow });
 
     if (['thumbnail', 'manage'].includes(key)) return;
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
-    th.classList.add('sortable');
+    th.classList.add('sortable', key);
     th.addEventListener('click', () => {
       thead.querySelectorAll('th').forEach((h) => {
         if (th !== h) {
@@ -473,21 +545,82 @@ function buildDashboardTable(props, config) {
         }
       });
       th.classList.add('active');
-      sortData(props, th, key);
+      props.currentSort = {
+        el: th,
+        field: key,
+      };
+      sortData(props, config);
     });
   });
+}
 
+function populateTable(props, config) {
+  const tBody = props.el.querySelector('table.dashboard-table tbody');
+  tBody.innerHTML = '';
+
+  const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
+
+  for (let i = 0; i < endOfPage; i += 1) {
+    populateRow(props, config, i);
+  }
+
+  props.el.querySelector('.pagination-container')?.remove();
+  decoratePagination(props, config);
+}
+
+function filterData(props, config, query) {
+  const q = query.toLowerCase();
+  props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
+  props.currentPage = 1;
+  paginateData(props, config, 1);
+  sortData(props, config, { resort: true });
+}
+
+function buildDashboardHeader(props, config) {
+  const dashboardHeader = createTag('div', { class: 'dashboard-header' });
+  const textContainer = createTag('div', { class: 'dashboard-header-text' });
+  const actionsContainer = createTag('div', { class: 'dashboard-actions-container' });
+
+  createTag('h1', { class: 'dashboard-header-heading' }, 'All Events', { parent: textContainer });
+  createTag('p', { class: 'dashboard-header-events-count' }, `(${props.data.length} events)`, { parent: textContainer });
+
+  const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
+  const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
+  searchInputWrapper.append(getIcon('search'));
+  createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
+  searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
+
+  dashboardHeader.append(textContainer, actionsContainer);
+  props.el.prepend(dashboardHeader);
+}
+
+function buildDashboardTable(props, config) {
+  const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
+  const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
+  const thead = createTag('thead', {}, '', { parent: table });
+  createTag('tbody', {}, '', { parent: table });
+  createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
+  initSorting(props, config);
   populateTable(props, config);
+
+  const usp = new URLSearchParams(window.location.search);
+  if (usp.get('newEventId')) {
+    const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
+    if (modTimeHeader) {
+      props.currentSort = { field: 'modificationTime', el: modTimeHeader };
+      sortData(props, config, { direction: 'desc' });
+    }
+  }
 }
 
 async function getEventsArray() {
-  const json = await getEvents();
+  const resp = await getEvents();
 
-  if (!json || json.errors?.length > 0) {
+  if (resp.error) {
     return [];
   }
 
-  return json.events;
+  return resp.events;
 }
 
 function buildNoEventScreen(el, config) {
@@ -504,16 +637,24 @@ function buildNoEventScreen(el, config) {
 }
 
 async function buildDashboard(el, config) {
-  const miloLibs = getLibs();
+  const miloLibs = LIBS;
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/toast.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/button.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/dialog.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/underlay.js`),
   ]);
+
+  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
+  createTag('sp-underlay', {}, '', { parent: spTheme });
+  createTag('sp-dialog', { size: 's' }, '', { parent: spTheme });
 
   const props = {
     el,
     currentPage: 1,
+    currentSort: {},
   };
 
   const data = await getEventsArray();
@@ -528,9 +669,7 @@ async function buildDashboard(el, config) {
     const dataHandler = {
       set(target, prop, value, receiver) {
         target[prop] = value;
-
         populateTable(receiver, config);
-
         return true;
       },
     };
@@ -547,9 +686,9 @@ export default async function init(el) {
 
   const config = readBlockConfig(el);
   el.innerHTML = '';
-  const profile = window.bm8r.get('imsProfile');
+  const profile = BlockMediator.get('imsProfile');
 
-  if (devMode === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
+  if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     buildDashboard(el, config);
     return;
   }
@@ -565,7 +704,7 @@ export default async function init(el) {
   }
 
   if (!profile) {
-    const unsubscribe = window.bm8r.subscribe('imsProfile', ({ newValue }) => {
+    const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
       if (newValue?.noProfile || newValue.account_type !== 'type3') {
         buildNoAccessScreen(el);
       } else {

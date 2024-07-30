@@ -1,7 +1,7 @@
 /* stylelint-disable selector-class-pattern */
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 
-const { css } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { css } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
@@ -10,7 +10,7 @@ export const style = css`
     border: none;
     padding: 32px 0;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
     width: 100%;
   }

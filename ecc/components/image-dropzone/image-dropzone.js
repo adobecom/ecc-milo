@@ -1,14 +1,15 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { style } from './image-dropzone.css.js';
 
-const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 export class ImageDropzone extends LitElement {
   static properties = {
     file: { type: Object, reflect: true },
     handleImage: { type: Function },
+    handleDelete: { type: Function },
   };
 
   static styles = style;
@@ -18,12 +19,18 @@ export class ImageDropzone extends LitElement {
     this.attachShadow({ mode: 'open' });
     this.file = null;
     this.handleImage = () => {};
+    this.handleDelete = this.handleDelete || null;
   }
 
   setFile(files) {
-    [this.file] = files;
-    if (this.file.type.startsWith('image/')) {
-      this.file.url = URL.createObjectURL(this.file);
+    const [file] = files;
+    if (file.size > 26214400) {
+      this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'File size should be less than 25MB' } }, bubbles: true, composed: true }));
+      return;
+    }
+    if (file.type.startsWith('image/')) {
+      this.file = file;
+      this.file.url = URL.createObjectURL(file);
       this.requestUpdate();
     }
   }
@@ -34,6 +41,7 @@ export class ImageDropzone extends LitElement {
 
   handleImageDrop(e) {
     e.preventDefault();
+    e.stopPropagation();
     const { files } = e.dataTransfer;
 
     if (files.length > 0) {
@@ -49,36 +57,47 @@ export class ImageDropzone extends LitElement {
       this.setFile(files);
       this.handleImage();
     }
+
+    this.dispatchEvent(new CustomEvent('image-change', { detail: { file: this.file } }));
   }
 
   handleDragover(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
     e.currentTarget.classList.add('dragover');
   }
 
   handleDragleave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
     e.currentTarget.classList.remove('dragover');
   }
 
   deleteImage() {
     this.file = null;
+
+    this.dispatchEvent(new CustomEvent('image-change', { detail: { file: this.file } }));
   }
 
   render() {
-    return html`
+    return this.file?.url ? html`
+      <div class="img-file-input-wrapper solid-border">
+        <div class="preview-wrapper">
+          <div class="preview-img-placeholder">
+            <img src="${this.file.url}" alt="preview image">
+          </div>
+          <img src="/ecc/icons/delete.svg" alt="delete icon" class="icon icon-delete" @click=${this.handleDelete ? this.handleDelete : this.deleteImage}>
+        </div>
+      </div>`
+      : html`
     <div class="img-file-input-wrapper">
-    ${this.file?.url ? html`
-    <div class="preview-wrapper">
-      <div class="preview-img-placeholder">
-      <img src="${this.file.url}" alt="preview image">
-      </div>
-      <img src="/ecc/icons/delete.svg" alt="delete icon" class="icon icon-delete" @click=${this.deleteImage}>
-    </div>`
-    : html`<label class="img-file-input-label">
-      <input type="file" class="img-file-input" @change=${this.onImageChange} @dragover=${this.handleDragover} @dragleave=${this.handleDragleave} @drop=${this.handleImageDrop}>
-      <img src="/ecc/icons/image-add.svg" alt="add image icon" class="icon icon-image-add"}>
-      <slot name="img-label"></slot>
-    </label>`}
-    </div>
-    `;
+      <label class="img-file-input-label" @dragover=${this.handleDragover} @dragleave=${this.handleDragleave} @drop=${this.handleImageDrop}>
+        <input type="file" class="img-file-input" accept="image/png, image/jpeg" @change=${this.onImageChange}>
+        <img src="/ecc/icons/image-add.svg" alt="add image icon" class="icon icon-image-add"}>
+        <slot name="img-label"></slot>
+      </label>
+    </div>`;
   }
 }

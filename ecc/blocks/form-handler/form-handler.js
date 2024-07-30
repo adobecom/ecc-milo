@@ -1,13 +1,17 @@
-import { getLibs } from '../../scripts/utils.js';
-import { getIcon, buildNoAccessScreen, yieldToMain, generateToolTip } from '../../utils/utils.js';
+import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
+import {
+  getIcon,
+  buildNoAccessScreen,
+  generateToolTip,
+  camelToSentenceCase,
+  getEventPageHost,
+} from '../../scripts/utils.js';
 import {
   createEvent,
   updateEvent,
   publishEvent,
   getEvent,
-  getSpeaker,
-  getCaasTags,
-} from '../../utils/esp-controller.js';
+} from '../../scripts/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
 import { Repeater } from '../../components/repeater/repeater.js';
@@ -20,9 +24,11 @@ import ProductSelectorGroup from '../../components/product-selector-group/produc
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
+import BlockMediator from '../../scripts/deps/block-mediator.min.js';
+import { CustomSearch } from '../../components/custom-search/custom-search.js';
 
-const { createTag } = await import(`${getLibs()}/utils/utils.js`);
-const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
 
 // list of controllers for the handler to load
 const VANILLA_COMPONENTS = [
@@ -47,6 +53,7 @@ const INPUT_TYPES = [
   'textarea[required]',
   'sp-textfield[required]',
   'sp-checkbox[required]',
+  'sp-picker[required]',
 ];
 
 const SPECTRUM_COMPONENTS = [
@@ -63,11 +70,64 @@ const SPECTRUM_COMPONENTS = [
   'dialog',
   'button-group',
   'tooltip',
+  'popover',
+  'search',
+  'toast',
+  'icon',
+  'action-button',
+  'progress-circle',
 ];
+
+export function buildErrorMessage(props, resp) {
+  if (!resp) return;
+
+  const toastArea = props.el.querySelector('.toast-area');
+
+  if (resp.error) {
+    const messages = [];
+    const errorBag = resp.error.errors;
+    const errorMessage = resp.error.message;
+
+    if (errorBag) {
+      errorBag.forEach((error) => {
+        const errorPathSegments = error.path.split('/');
+        const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${error.message}`;
+        messages.push(text);
+      });
+
+      messages.forEach((msg, i) => {
+        const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 + (i * 3000) }, msg, { parent: toastArea });
+        toast.addEventListener('close', () => {
+          toast.remove();
+        });
+      });
+    } else if (errorMessage) {
+      if (resp.status === 409) {
+        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, errorMessage, { parent: toastArea });
+        const url = new URL(window.location.href);
+        url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
+
+        createTag('sp-button', {
+          slot: 'action',
+          variant: 'overBackground',
+          href: `${url.toString()}`,
+        }, 'See the latest version.', { parent: toast });
+
+        toast.addEventListener('close', () => {
+          toast.remove();
+        });
+      } else {
+        const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, errorMessage, { parent: toastArea });
+        toast.addEventListener('close', () => {
+          toast.remove();
+        });
+      }
+    }
+  }
+}
 
 function replaceAnchorWithButton(anchor) {
   if (!anchor || anchor.tagName !== 'A') {
-    console.error('The provided element is not an anchor tag.');
     return null;
   }
 
@@ -89,37 +149,72 @@ function getCurrentFragment(props) {
   return currentFrag;
 }
 
-async function initComponents(props) {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const eventId = urlParams.get('eventId');
+function validateRequiredFields(fields) {
+  const { search } = window.location;
+  const urlParams = new URLSearchParams(search);
+  const skipValidation = urlParams.get('skipValidation');
 
-  if (eventId) {
-    try {
-      const eventData = await getEvent(eventId);
-      const { seriesId } = eventData;
-      // eslint-disable-next-line max-len
-      const speakers = await Promise.all(eventData.speakers.map(async (sp) => getSpeaker(seriesId, sp.speakerId)));
-      for (let idx = 0; idx < eventData.speakers.length; idx += 1) {
-        eventData.speakers[idx] = { ...eventData.speakers[idx], ...speakers[idx] };
-      }
-      eventData.speakers = speakers;
-      props.eventDataResp = { ...props.eventDataResp, ...eventData };
-    } catch (e) {
-      console.error('Error fetching speaker data: ', e);
-    }
+  if (skipValidation === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
+    return true;
   }
 
-  VANILLA_COMPONENTS.forEach((comp) => {
-    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
-    if (!mappedComponents?.length) return;
+  return fields.length === 0 || Array.from(fields).every((f) => f.value);
+}
 
-    mappedComponents.forEach(async (component) => {
-      const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
-      await initComponent(component, props);
+function onStepValidate(props) {
+  return function updateCtaStatus() {
+    const currentFrag = getCurrentFragment(props);
+    const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
+    const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
+    const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
+
+    ctas.forEach((cta) => {
+      if (cta.classList.contains('back-btn')) {
+        cta.classList.toggle('disabled', props.currentStep === 0);
+      } else {
+        cta.classList.toggle('disabled', !stepValid);
+      }
     });
+
+    sideNavs.forEach((nav, i) => {
+      if (i !== props.currentStep) {
+        nav.disabled = !stepValid;
+      }
+    });
+  };
+}
+
+function initRequiredFieldsValidation(props) {
+  const currentFrag = getCurrentFragment(props);
+
+  const inputValidationCB = onStepValidate(props);
+  props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
+    field.removeEventListener('change', inputValidationCB);
+    field.addEventListener('change', inputValidationCB, { bubbles: true });
   });
 
+  inputValidationCB();
+}
+
+function enableSideNavForEditFlow(props) {
+  const frags = props.el.querySelectorAll('.fragment');
+  const completeFirstStep = Array.from(frags[0].querySelectorAll('.form-component:not(.event-agenda-component)'))
+    .every((fc) => fc.classList.contains('prefilled'));
+
+  if (!completeFirstStep) return;
+
+  frags.forEach((frag, i) => {
+    const prefilledOtherSteps = i !== 0 && frag.querySelector('.form-component.prefilled');
+
+    if (completeFirstStep || prefilledOtherSteps) {
+      props.farthestStep = Math.max(props.farthestStep, i);
+    }
+  });
+
+  initRequiredFieldsValidation(props);
+}
+
+function initCustomLitComponents() {
   customElements.define('image-dropzone', ImageDropzone);
   customElements.define('profile-ui', Profile);
   customElements.define('repeater-element', Repeater);
@@ -131,6 +226,47 @@ async function initComponents(props) {
   customElements.define('product-selector-group', ProductSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
+  customElements.define('custom-search', CustomSearch);
+}
+
+async function initComponents(props) {
+  initCustomLitComponents();
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const eventId = urlParams.get('eventId');
+
+  if (eventId) {
+    setTimeout(() => {
+      if (!props.eventDataResp.eventId) {
+        const toastArea = props.el.querySelector('.toast-area');
+        if (!toastArea) return;
+
+        const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
+        toast.addEventListener('close', () => {
+          toast.remove();
+        });
+      }
+    }, 5000);
+
+    props.el.classList.add('disabled');
+    const eventData = await getEvent(eventId);
+    props.eventDataResp = { ...props.eventDataResp, ...eventData };
+    props.el.classList.remove('disabled');
+  }
+
+  const componentPromises = VANILLA_COMPONENTS.map(async (comp) => {
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
+    if (!mappedComponents?.length) return;
+
+    const componentInitPromises = Array.from(mappedComponents).map(async (component) => {
+      const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
+      await initComponent(component, props);
+    });
+
+    await Promise.all(componentInitPromises);
+  });
+
+  await Promise.all(componentPromises);
 }
 
 async function gatherValues(props) {
@@ -140,7 +276,7 @@ async function gatherValues(props) {
 
     const promises = Array.from(mappedComponents).map(async (component) => {
       const { onSubmit } = await import(`./controllers/${comp}-component-controller.js`);
-      await onSubmit(component, props);
+      return onSubmit(component, props);
     });
 
     return Promise.all(promises);
@@ -167,7 +303,16 @@ async function updateComponents(props) {
 }
 
 function decorateForm(el) {
+  const ctaRow = el.querySelector(':scope > div:last-of-type');
+
+  if (ctaRow) {
+    const toastParent = createTag('sp-theme', { class: 'toast-parent', color: 'light', scale: 'medium' }, '', { parent: ctaRow });
+    createTag('div', { class: 'toast-area' }, '', { parent: toastParent });
+  }
+
   const app = createTag('sp-theme', { color: 'light', scale: 'medium' });
+  createTag('sp-underlay', {}, '', { parent: app });
+  createTag('sp-dialog', { size: 's' }, '', { parent: app });
   const form = createTag('form', {}, '', { parent: app });
   const formDivs = el.querySelectorAll('.fragment');
 
@@ -177,8 +322,8 @@ function decorateForm(el) {
   }
 
   formDivs.forEach((formDiv) => {
-    formDiv.parentElement.replaceChild(app, formDiv);
-    form.append(formDiv);
+    formDiv.parentElement.parentElement.replaceChild(app, formDiv.parentElement);
+    form.append(formDiv.parentElement);
   });
 
   const cols = el.querySelectorAll(':scope > div:first-of-type > div');
@@ -216,26 +361,60 @@ function decorateForm(el) {
   });
 }
 
+function showSaveSuccessMessage(props) {
+  const toastArea = props.el.querySelector('.toast-area');
+  if (!toastArea) return;
+
+  const previousMsgs = toastArea.querySelectorAll('.save-success-msg');
+
+  previousMsgs.forEach((msg) => {
+    msg.remove();
+  });
+
+  const toast = createTag('sp-toast', { class: 'save-success-msg', open: true, variant: 'positive', timeout: 6000 }, 'Edits saved successfully', { parent: toastArea });
+  toast.addEventListener('close', () => {
+    toast.remove();
+  });
+}
+
 async function saveEvent(props, options = { toPublish: false }) {
-  await gatherValues(props);
+  try {
+    await gatherValues(props);
+  } catch (e) {
+    return { error: { message: e.message } };
+  }
+
+  let resp;
+
+  const onEventSave = () => {
+    if (!resp.error) {
+      showSaveSuccessMessage(props);
+    }
+
+    if (resp?.eventId) props.el.dispatchEvent(new CustomEvent('eventUpdated', { detail: { eventId: resp.eventId } }));
+  };
 
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    const resp = await createEvent(quickFilter(props.payload));
+    resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventcreated'));
+    onEventSave();
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
-    const resp = await updateEvent(
+    resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
+    onEventSave();
   } else if (options.toPublish) {
-    const resp = await publishEvent(
+    resp = await publishEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
+    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventUpdated', { detail: { eventId: resp.eventId } }));
   }
+
+  return resp;
 }
 
 function updateSideNav(props) {
@@ -248,92 +427,9 @@ function updateSideNav(props) {
   });
 }
 
-function validateRequiredFields(fields) {
-  const { search } = window.location;
-  const urlParams = new URLSearchParams(search);
-  const skipValidation = urlParams.get('skipValidation');
-
-  if (skipValidation === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
-    return true;
-  }
-
-  return fields.length === 0 || Array.from(fields).every((f) => f.value);
-}
-
-function onStepValidate(props) {
-  return function updateCtaStatus() {
-    const currentFrag = getCurrentFragment(props);
-    const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
-    const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
-
-    ctas.forEach((cta) => {
-      if (cta.classList.contains('back-btn')) {
-        cta.classList.toggle('disabled', props.currentStep === 0);
-      } else {
-        cta.classList.toggle('disabled', !stepValid);
-      }
-    });
-  };
-}
-
-function updateProfileContainer(props) {
-  const containers = document.querySelectorAll('profile-container');
-  containers.forEach((c) => {
-    c.setAttribute('seriesId', props.payload.seriesId);
-    c.requestUpdate();
-  });
-}
-
 function updateRequiredFields(props) {
   const currentFrag = getCurrentFragment(props);
   props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(INPUT_TYPES.join());
-}
-
-function initRequiredFieldsValidation(props) {
-  const currentFrag = getCurrentFragment(props);
-
-  const inputValidationCB = onStepValidate(props);
-  props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
-    field.removeEventListener('change', inputValidationCB);
-    field.addEventListener('change', inputValidationCB, { bubbles: true });
-  });
-
-  inputValidationCB();
-}
-
-function setRemoveEventListener(removeElement) {
-  removeElement.addEventListener('click', (event) => {
-    // FIXME : Use a generic approach to call remove of the handler.
-    // event.currentTarget.getAttribute('deleteHandler')();
-    event.currentTarget.parentNode.parentNode.parentNode.remove();
-  });
-}
-
-function initRepeaters(props) {
-  const repeaters = props.el.querySelectorAll('.repeater-element');
-  repeaters.forEach((element) => {
-    const vanillaNode = element.previousElementSibling.cloneNode(true);
-    element.addEventListener('click', (event) => {
-      const clonedNode = vanillaNode.cloneNode(true);
-      const prevNode = event.currentTarget.previousElementSibling;
-      clonedNode.setAttribute('repeatIdx', parseInt(prevNode.getAttribute('repeatIdx'), 10) + 1);
-
-      // Reset delete icon state and add listener.
-      const deleteIcon = clonedNode.querySelector('.repeater-delete-button');
-
-      if (deleteIcon) {
-        deleteIcon.classList.remove('hidden');
-        setRemoveEventListener(deleteIcon);
-      }
-
-      prevNode.after(clonedNode);
-      const tempProps = { el: clonedNode };
-      yieldToMain().then(() => {
-        updateRequiredFields(props);
-        initRepeaters(tempProps);
-      });
-    });
-  });
 }
 
 function renderFormNavigation(props, prevStep, currentStep) {
@@ -368,10 +464,8 @@ function navigateForm(props, stepIndex) {
 
 function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
-  const frags = props.el.querySelectorAll('.fragment');
   decorateButtons(ctaRow, 'button-l');
   const ctas = ctaRow.querySelectorAll('a');
-
   ctaRow.classList.add('form-handler-ctas-panel');
 
   const forwardActionsWrappers = ctaRow.querySelectorAll(':scope > div');
@@ -389,7 +483,7 @@ function initFormCtas(props) {
   backwardWrapper.append(backBtn);
 
   const toggleBtnsSubmittingState = (submitting) => {
-    ctas.forEach((c) => {
+    [...ctas, backBtn].forEach((c) => {
       c.classList.toggle('submitting', submitting);
     });
   };
@@ -404,8 +498,14 @@ function initFormCtas(props) {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
           if (cta.classList.contains('preview-not-ready')) return;
-          await saveEvent(props);
-          window.open(cta.href);
+          const resp = await saveEvent(props);
+
+          if (resp.error) {
+            buildErrorMessage(props, resp);
+          } else {
+            window.open(cta.href);
+          }
+
           toggleBtnsSubmittingState(false);
         });
       }
@@ -413,14 +513,19 @@ function initFormCtas(props) {
       if (['#save', '#next'].includes(ctaUrl.hash)) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
-          const [nextStateText, finalStateText, republishStateText] = cta.textContent.split('||');
+          const [nextStateText, finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
           cta.textContent = nextStateText;
           cta.dataset.nextStateText = nextStateText;
           cta.dataset.finalStateText = finalStateText;
+          cta.dataset.doneStateText = doneStateText;
           cta.dataset.republishStateText = republishStateText;
 
-          if (props.currentStep === frags.length - 1) {
-            cta.textContent = finalStateText;
+          if (props.currentStep === props.maxStep) {
+            if (props.eventDataResp.published) {
+              cta.textContent = republishStateText;
+            } else {
+              cta.textContent = finalStateText;
+            }
             cta.prepend(getIcon('golden-rocket'));
           } else {
             cta.textContent = nextStateText;
@@ -432,15 +537,48 @@ function initFormCtas(props) {
           toggleBtnsSubmittingState(true);
 
           if (ctaUrl.hash === '#next') {
-            await saveEvent(props, { toPublish: true });
+            let resp;
             if (props.currentStep === props.maxStep) {
-              const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-              if (dashboardLink) window.location.assign(dashboardLink.href);
+              resp = await saveEvent(props, { toPublish: true });
+            } else {
+              resp = await saveEvent(props);
+            }
+
+            if (resp?.error) {
+              buildErrorMessage(props, resp);
+            } else if (props.currentStep === props.maxStep) {
+              const toastArea = props.el.querySelector('.toast-area');
+              cta.textContent = cta.dataset.doneStateText;
+              cta.classList.add('disabled');
+
+              if (toastArea) {
+                const toast = createTag('sp-toast', { open: true, variant: 'positive' }, 'Success! This event has been published.', { parent: toastArea });
+                const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+
+                createTag(
+                  'sp-button',
+                  {
+                    slot: 'action',
+                    variant: 'overBackground',
+                    treatment: 'outline',
+                    href: dashboardLink.href,
+                  },
+                  'Go to dashboard',
+                  { parent: toast },
+                );
+
+                toast.addEventListener('close', () => {
+                  toast.remove();
+                });
+              }
             } else {
               navigateForm(props);
             }
           } else {
-            await saveEvent(props);
+            const resp = await saveEvent(props);
+            if (resp?.error) {
+              buildErrorMessage(props, resp);
+            }
           }
 
           toggleBtnsSubmittingState(false);
@@ -450,26 +588,46 @@ function initFormCtas(props) {
   });
 
   backBtn.addEventListener('click', async () => {
-    props.currentStep -= 1;
+    const resp = await saveEvent(props);
+    if (resp?.error) {
+      buildErrorMessage(props, resp);
+    } else {
+      props.currentStep -= 1;
+    }
   });
 }
 
-function updatePreviewCtas(props) {
-  const previewBtns = props.el.querySelectorAll('.preview-btns');
-  const filteredResponse = getFilteredCachedResponse();
+function updateCtas(props) {
+  const formCtas = props.el.querySelectorAll('.form-handler-ctas-panel a');
+  const { eventDataResp } = props;
 
-  previewBtns.forEach((a) => {
-    const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
-    if (filteredResponse.detailPagePath) {
-      a.href = `https://stage--events-milo--adobecom.hlx.page${filteredResponse.detailPagePath}?previewMode=true&timing=${testTime}`;
-      a.classList.remove('preview-not-ready');
+  formCtas.forEach((a) => {
+    if (a.classList.contains('preview-btns')) {
+      const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
+      if (eventDataResp.detailPagePath) {
+        a.href = `${getEventPageHost(eventDataResp.published)}${eventDataResp.detailPagePath}?previewMode=true&timing=${testTime}`;
+        a.classList.remove('preview-not-ready');
+      }
+    }
+
+    if (a.classList.contains('next-button')) {
+      if (props.currentStep === props.maxStep) {
+        if (eventDataResp.published) {
+          a.textContent = a.dataset.republishStateText;
+        } else {
+          a.textContent = a.dataset.finalStateText;
+        }
+      } else {
+        a.textContent = a.dataset.nextStateText;
+      }
     }
   });
 }
 
 function initNavigation(props) {
   const frags = props.el.querySelectorAll('.fragment');
-  const navItems = props.el.querySelectorAll('.side-menu .nav-item');
+  const sideMenu = props.el.querySelector('.side-menu');
+  const navItems = sideMenu.querySelectorAll('.nav-item');
 
   frags.forEach((frag, i) => {
     if (i !== 0) {
@@ -478,9 +636,18 @@ function initNavigation(props) {
   });
 
   navItems.forEach((nav, i) => {
-    nav.addEventListener('click', () => {
-      if (!nav.disabled) {
-        navigateForm(props, i);
+    nav.addEventListener('click', async () => {
+      if (!nav.disabled && !sideMenu.classList.contains('disabled')) {
+        sideMenu.classList.add('disabled');
+
+        const resp = await saveEvent(props);
+        if (resp?.error) {
+          buildErrorMessage(props, resp);
+        } else {
+          navigateForm(props, i);
+        }
+
+        sideMenu.classList.remove('disabled');
       }
     });
   });
@@ -494,6 +661,9 @@ function updateDashboardLink(props) {
   if (!dashboardLink) return;
 
   const url = new URL(dashboardLink.href);
+
+  if (url.searchParams.has('eventId')) return;
+
   url.searchParams.set('newEventId', getFilteredCachedResponse().eventId);
   dashboardLink.href = url.toString();
 }
@@ -531,28 +701,41 @@ async function buildECCForm(el) {
         initRequiredFieldsValidation(target);
       }
 
-      if (prop === 'currentStep') {
-        renderFormNavigation(target, oldValue, value);
-        updateSideNav(target);
-        initRequiredFieldsValidation(target);
-      }
+      switch (prop) {
+        case 'currentStep':
+        {
+          renderFormNavigation(target, oldValue, value);
+          updateSideNav(target);
+          initRequiredFieldsValidation(target);
+          break;
+        }
 
-      if (prop === 'farthestStep') {
-        updateSideNav(target);
-      }
+        case 'farthestStep': {
+          updateSideNav(target);
+          break;
+        }
 
-      if (prop === 'payload') {
-        console.log('payload updated with: ', value);
-        setPayloadCache(value);
-        updateComponents(target);
-        updateProfileContainer(target);
-        initRequiredFieldsValidation(target);
-      }
-      if (prop === 'eventDataResp') {
-        console.log('response updated with: ', value);
-        setResponseCache(value);
-        updatePreviewCtas(target);
-        updateDashboardLink(target);
+        case 'payload': {
+          setPayloadCache(value);
+          updateComponents(target);
+          initRequiredFieldsValidation(target);
+          break;
+        }
+
+        case 'eventDataResp': {
+          setResponseCache(value);
+          updateCtas(target);
+          updateDashboardLink(target);
+          if (value.error) {
+            props.el.classList.add('show-error');
+          } else {
+            props.el.classList.remove('show-error');
+          }
+          break;
+        }
+
+        default:
+          break;
       }
 
       return true;
@@ -574,16 +757,21 @@ async function buildECCForm(el) {
   });
 
   initFormCtas(proxyProps);
-  await initComponents(proxyProps);
-  initRepeaters(proxyProps);
   initNavigation(proxyProps);
+  await initComponents(proxyProps);
   updateRequiredFields(proxyProps);
+  enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
+  el.addEventListener('show-error-toast', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    buildErrorMessage(proxyProps, e.detail);
+  });
 }
 
 export default async function init(el) {
   el.style.display = 'none';
-  const miloLibs = getLibs();
+  const miloLibs = LIBS;
   const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
     await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
   });
@@ -592,12 +780,12 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const profile = window.bm8r.get('imsProfile');
+  const profile = BlockMediator.get('imsProfile');
   const { search } = window.location;
   const urlParams = new URLSearchParams(search);
   const devMode = urlParams.get('devMode');
 
-  if (devMode === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
+  if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     buildECCForm(el);
     el.removeAttribute('style');
     return;
@@ -615,7 +803,7 @@ export default async function init(el) {
   }
 
   if (!profile) {
-    const unsubscribe = window.bm8r.subscribe('imsProfile', ({ newValue }) => {
+    const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
       if (newValue?.noProfile || newValue.account_type !== 'type3') {
         buildNoAccessScreen(el);
       } else {

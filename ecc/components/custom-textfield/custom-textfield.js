@@ -1,9 +1,9 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { style } from './custom-textfield.css.js';
 
-const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { LitElement, html, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 const defaultConfig = {
   grows: false,
@@ -20,7 +20,7 @@ const defaultData = {
 export class CustomTextfield extends LitElement {
   static properties = {
     config: { type: Object, reflect: true },
-    data: { type: Object, reflect: true },
+    fielddata: { type: Object, reflect: true },
   };
 
   static styles = style;
@@ -29,12 +29,20 @@ export class CustomTextfield extends LitElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.config = { ...defaultConfig, ...this.config };
-    this.data = { ...defaultData, ...(this.data ? this.data : {}) };
+    this.fielddata = { ...defaultData, ...(this.fielddata ? this.fielddata : {}) };
+  }
+
+  getMaxLength() {
+    if (!this.fielddata.helperText) return -1;
+
+    const match = this.fielddata.helperText.match(/\d+/);
+
+    return match ? match[0] : -1;
   }
 
   render() {
     return html`
-    <sp-textfield placeholder=${this.data.placeholder} ?quiet=${this.config.quiet} size=${this.config.size} ?grows=${this.config.grows} ?multiline=${this.config.multiline} class='text-input' value=${this.data.value} @change=${(event) => this.dispatchEvent(new CustomEvent('input-change', { detail: { value: event.target.value } }))}></sp-textfield>
-    <sp-helptext class="helper-text">${this.data.helperText}</sp-helptext>`;
+    <sp-textfield placeholder=${this.fielddata.placeholder} pattern=${this.config.pattern} ?quiet=${this.config.quiet} size=${this.config.size} ?grows=${this.config.grows} ?multiline=${this.config.multiline} maxlength=${this.getMaxLength()} class='text-input' value=${this.fielddata.value} @change=${(event) => { event.stopPropagation(); this.dispatchEvent(new CustomEvent('change-custom', { detail: { value: event.target.value } })); }} @input=${(event) => { event.stopPropagation(); this.dispatchEvent(new CustomEvent('input-custom', { detail: { value: event.target.value } })); }}></sp-textfield>
+    ${this.fielddata.helperText ? html`<sp-helptext class="helper-text">${this.fielddata.helperText}</sp-helptext>` : nothing}`;
   }
 }

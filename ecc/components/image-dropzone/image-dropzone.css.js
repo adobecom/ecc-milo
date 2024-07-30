@@ -1,7 +1,7 @@
 /* stylelint-disable selector-class-pattern */
-import { getLibs } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 
-const { css } = await import(`${getLibs()}/deps/lit-all.min.js`);
+const { css } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
@@ -16,6 +16,10 @@ export const style = css`
   align-items: center;
 }
 
+.solid-border {
+  border: 2px solid var(--color-gray-400);
+}
+
 .img-file-input-wrapper .preview-wrapper {
   width: 100%;
   height: 100%;
@@ -28,12 +32,13 @@ export const style = css`
   top: 8px;
   right: 8px;
   cursor: pointer;
+  filter: drop-shadow(1px 1px 1px white);
 }
 
 .img-file-input-wrapper .preview-img-placeholder {
   height: 100%;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .img-file-input-wrapper .preview-img-placeholder img {
@@ -52,7 +57,7 @@ export const style = css`
   width: 100%;
 }
 
-.img-file-input-wrapper div:hover {
+.img-file-input-wrapper label:hover {
   background-color: var(--color-gray-100);
 }
 
