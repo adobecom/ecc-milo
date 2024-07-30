@@ -123,7 +123,7 @@ export class CustomSearch extends LitElement {
     width: 24px;
     height: 24px;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 24px;
 "></img>` : nothing}
       ${entry.displayValue}
     </div>
