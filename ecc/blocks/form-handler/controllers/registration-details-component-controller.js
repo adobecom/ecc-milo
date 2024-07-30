@@ -24,7 +24,7 @@ export async function onUpdate(component, props) {
   if (!props.eventDataResp) return;
 
   if (props.eventDataResp.cloudType !== 'CreativeCloud') {
-    component.querySelector('#registration-allow-waitlist')?.classList.add('hidden');
+    component.querySelector('.attendee-count-wrapper')?.classList.add('hidden');
     component.querySelector('#attendee-count-input')?.classList.add('hidden');
   }
 }
