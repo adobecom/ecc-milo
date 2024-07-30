@@ -80,13 +80,13 @@ export class ProfileContainer extends LitElement {
     const firstNameSearch = searchDataReduced.map((speaker) => ({
       id: speaker.speakerId,
       displayValue: `${speaker.firstName} ${speaker.lastName}`,
-      image: speaker?.photo?.imageUrl,
+      image: speaker?.photo?.imageUrl || '/ecc/icons/profile.svg',
       value: speaker.firstName,
     }));
     const lastNameSearch = searchDataReduced.map((speaker) => ({
       id: speaker.speakerId,
       displayValue: `${speaker.firstName} ${speaker.lastName}`,
-      image: speaker?.photo?.imageUrl,
+      image: speaker?.photo?.imageUrl || '/ecc/icons/profile.svg',
       value: speaker.lastName,
     }));
 

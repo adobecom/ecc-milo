@@ -10,19 +10,23 @@ export function onSubmit(component, props) {
 
   const attendeeLimit = Number.isNaN(+attendeeLimitVal) ? null : +attendeeLimitVal;
 
-  const rsvpData = {
-    attendeeLimit,
-    allowWaitlisting,
-    rsvpDescription,
-  };
+  const rsvpData = {};
 
-  if (contactHost) rsvpData.hostEmail = hostEmail;
+  if (rsvpDescription) rsvpData.rsvpDescription = rsvpDescription;
+  if (contactHost && hostEmail) rsvpData.hostEmail = hostEmail;
+  if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
+  if (allowWaitlisting) rsvpData.allowWaitlisting = allowWaitlisting;
 
   props.payload = { ...props.payload, ...rsvpData };
 }
 
-export async function onUpdate(_component, _props) {
-  // Do nothing
+export async function onUpdate(component, props) {
+  if (!props.eventDataResp) return;
+
+  if (props.eventDataResp.cloudType === 'CreativeCloud') {
+    component.querySelector('.attendee-count-wrapper')?.classList.add('hidden');
+    component.querySelector('#registration-allow-waitlist')?.classList.add('hidden');
+  }
 }
 
 export default function init(component, props) {
