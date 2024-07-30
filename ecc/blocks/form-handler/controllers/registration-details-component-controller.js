@@ -23,7 +23,7 @@ export function onSubmit(component, props) {
 export async function onUpdate(component, props) {
   if (!props.eventDataResp) return;
 
-  if (props.eventDataResp.cloudType !== 'CreativeCloud') {
+  if (props.eventDataResp.cloudType === 'CreativeCloud') {
     component.querySelector('.attendee-count-wrapper')?.classList.add('hidden');
     component.querySelector('#attendee-count-input')?.classList.add('hidden');
   }
