@@ -20,8 +20,13 @@ export function onSubmit(component, props) {
   props.payload = { ...props.payload, ...rsvpData };
 }
 
-export async function onUpdate(_component, _props) {
-  // Do nothing
+export async function onUpdate(component, props) {
+  if (!props.eventDataResp) return;
+
+  if (props.eventDataResp.cloudType !== 'CreativeCloud') {
+    component.querySelector('#registration-allow-waitlist')?.classList.add('hidden');
+    component.querySelector('#attendee-count-input')?.classList.add('hidden');
+  }
 }
 
 export default function init(component, props) {
