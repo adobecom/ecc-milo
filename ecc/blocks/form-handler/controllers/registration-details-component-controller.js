@@ -10,13 +10,11 @@ export function onSubmit(component, props) {
 
   const attendeeLimit = Number.isNaN(+attendeeLimitVal) ? null : +attendeeLimitVal;
 
-  const rsvpData = {
-    attendeeLimit,
-    allowWaitlisting,
-    rsvpDescription,
-  };
+  const rsvpData = { rsvpDescription };
 
   if (contactHost) rsvpData.hostEmail = hostEmail;
+  if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
+  if (allowWaitlisting) rsvpData.allowWaitlisting = allowWaitlisting;
 
   props.payload = { ...props.payload, ...rsvpData };
 }
