@@ -182,7 +182,7 @@ export class Profile extends LitElement {
       lastNameSearchMap,
     } = this.getRequiredProps();
 
-    const searchFieldConfig = { ...quietTextfieldConfig, showImage: true };
+    const searchFieldConfig = { ...quietTextfieldConfig, showImage: true, thumbnailType: 'circle' };
 
     return html`
     <custom-search searchMap=${JSON.stringify(firstNameSearchMap)} fielddata=${JSON.stringify(firstNameData)} config=${JSON.stringify(searchFieldConfig)} @change-custom-search=${(event) => this.updateProfile({ firstName: event.detail.value })} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.firstnamesearch)} identifier='speakerId'></custom-search>
