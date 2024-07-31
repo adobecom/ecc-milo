@@ -123,7 +123,7 @@ export class CustomSearch extends LitElement {
     width: 24px;
     height: 24px;
     object-fit: cover;
-${this.config.thumbnailType === 'circle' ? html`border-radius: 24px;` : nothing}
+${this.config.thumbnailType === 'circle' ? 'border-radius: 24px;' : ''}
 "></img>` : nothing}
       ${entry.displayValue}
     </div>
