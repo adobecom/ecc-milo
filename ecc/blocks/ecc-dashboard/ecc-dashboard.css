@@ -17,6 +17,9 @@
   left: 0;
   z-index: 20;
   background: var(--color-white);
+}
+
+.ecc-dashboard .loading-screen sp-field-label {
   font-size: var(--type-body-s-size);
 }
 
