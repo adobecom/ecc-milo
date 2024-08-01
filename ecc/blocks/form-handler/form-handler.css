@@ -413,6 +413,12 @@
   display: none;
 }
 
+.form-handler.loading .loading-screen {
+  z-index: 1;
+  background-color: var(--color-white);
+  opacity: 1;
+}
+
 .form-handler:not(.loading) .loading-screen {
   opacity: 0;
 }
