@@ -779,7 +779,7 @@ function buildLoadingScreen(el) {
   el.classList.add('loading');
   const loadingScreen = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'loading-screen' });
   createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: loadingScreen });
-  createTag('sp-field-label', {}, 'Loading Adobe Event Creation Console Form...', { parent: loadingScreen });
+  createTag('sp-field-label', {}, 'Loading Adobe Event Creation Console form...', { parent: loadingScreen });
 
   el.prepend(loadingScreen);
 }
