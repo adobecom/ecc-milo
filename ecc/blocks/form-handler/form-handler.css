@@ -27,6 +27,7 @@
   width: 100%;
   top: 0;
   left: 0;
+  z-index: -1;
 }
 
 .form-handler .img-upload-text p {
@@ -104,6 +105,13 @@
 
 .form-handler .side-menu {
   transition: opacity 0.2s;
+}
+
+.form-handler.loading div:first-of-type,
+.form-handler.loading .side-menu,
+.form-handler.loading .main-frame,
+.form-handler.loading .form-handler-ctas-panel {
+  opacity: 0;
 }
 
 .form-handler .side-menu button {
@@ -403,12 +411,6 @@
 .form-handler.hidden,
 .form-handler .hidden {
   display: none;
-}
-
-.form-handler.loading .side-menu,
-.form-handler.loading .main-frame,
-.form-handler.loading .form-handler-ctas-panel {
-  opacity: 0;
 }
 
 .form-handler:not(.loading) .loading-screen {
