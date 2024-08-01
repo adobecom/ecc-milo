@@ -785,6 +785,7 @@ function buildLoadingScreen(el) {
 }
 
 export default async function init(el) {
+  buildLoadingScreen(el);
   const miloLibs = LIBS;
   const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
     await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
@@ -793,8 +794,6 @@ export default async function init(el) {
     import(`${miloLibs}/deps/lit-all.min.js`),
     ...promises,
   ]);
-
-  buildLoadingScreen(el);
 
   const profile = BlockMediator.get('imsProfile');
   const { search } = window.location;
