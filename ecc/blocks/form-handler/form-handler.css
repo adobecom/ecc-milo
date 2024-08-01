@@ -29,8 +29,11 @@
   left: 0;
   z-index: 20;
   background-color: var(--color-white);
-  font-size: var(--type-body-s-size);
   opacity: 1;
+}
+
+.form-handler .loading-screen sp-field-label {
+  font-size: var(--type-body-s-size);
 }
 
 .form-handler .img-upload-text p {
