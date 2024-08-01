@@ -17,6 +17,7 @@
   left: 0;
   z-index: 20;
   background: var(--color-white);
+  font-size: var(--type-body-s-size);
 }
 
 .ecc-dashboard .dashboard-header {

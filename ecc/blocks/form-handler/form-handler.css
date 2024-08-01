@@ -29,6 +29,7 @@
   left: 0;
   z-index: 20;
   background-color: var(--color-white);
+  font-size: var(--type-body-s-size);
   opacity: 1;
 }
 
