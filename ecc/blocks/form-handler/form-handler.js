@@ -305,11 +305,16 @@ async function updateComponents(props) {
 
 function decorateForm(el) {
   const ctaRow = el.querySelector(':scope > div:last-of-type');
+  const formBodyRow = el.querySelector(':scope > div:first-of-type');
 
   if (ctaRow) {
     const toastParent = createTag('sp-theme', { class: 'toast-parent', color: 'light', scale: 'medium' }, '', { parent: ctaRow });
     createTag('div', { class: 'toast-area' }, '', { parent: toastParent });
   }
+
+  if (!formBodyRow) return;
+
+  formBodyRow.classList.add('form-body');
 
   const app = createTag('sp-theme', { color: 'light', scale: 'medium' });
   createTag('sp-underlay', {}, '', { parent: app });
@@ -327,7 +332,7 @@ function decorateForm(el) {
     form.append(formDiv.parentElement);
   });
 
-  const cols = el.querySelectorAll(':scope > div:first-of-type > div');
+  const cols = formBodyRow.querySelectorAll(':scope > div');
 
   cols.forEach((col, i) => {
     if (i === 0) {
@@ -771,14 +776,15 @@ async function buildECCForm(el) {
 }
 
 function buildLoadingScreen(el) {
-  el.classList.add('transparent');
-  const loadingScreen = createTag('div', { class: 'loading-screen' }, '', { parent: el });
-  const spinner = createTag('sp-progress-circle', { size: 'large', indeterminate: true }, '', { parent: loadingScreen });
-  const loadingText = createTag('sp-field-label', {}, 'Loading Adobe Event Creation Console...', { parent: loadingScreen });
+  el.classList.add('loading');
+  const loadingScreen = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'loading-screen' });
+  createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: loadingScreen });
+  createTag('sp-field-label', {}, 'Loading Adobe Event Creation Console...', { parent: loadingScreen });
+
+  el.prepend(loadingScreen);
 }
 
 export default async function init(el) {
-  buildLoadingScreen(el);
   const miloLibs = LIBS;
   const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
     await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
@@ -788,6 +794,8 @@ export default async function init(el) {
     ...promises,
   ]);
 
+  buildLoadingScreen(el);
+
   const profile = BlockMediator.get('imsProfile');
   const { search } = window.location;
   const urlParams = new URLSearchParams(search);
@@ -795,7 +803,7 @@ export default async function init(el) {
 
   if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     buildECCForm(el).then(() => {
-      el.removeAttribute('style');
+      el.classList.remove('loading');
     });
     return;
   }
@@ -803,13 +811,13 @@ export default async function init(el) {
   if (profile) {
     if (profile.noProfile || profile.account_type !== 'type3') {
       buildNoAccessScreen(el);
+      el.classList.remove('loading');
     } else {
       buildECCForm(el).then(() => {
-        el.removeAttribute('style');
+        el.classList.remove('loading');
       });
     }
 
-    el.removeAttribute('style');
     return;
   }
 
@@ -817,11 +825,11 @@ export default async function init(el) {
     const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
       if (newValue?.noProfile || newValue.account_type !== 'type3') {
         buildNoAccessScreen(el);
-        el.removeAttribute('style');
+        el.classList.remove('loading');
         unsubscribe();
       } else {
         buildECCForm(el).then(() => {
-          el.removeAttribute('style');
+          el.classList.remove('loading');
           unsubscribe();
         });
       }
