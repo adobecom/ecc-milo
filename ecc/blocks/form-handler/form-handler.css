@@ -414,7 +414,7 @@
 }
 
 .form-handler.loading .loading-screen {
-  z-index: 1;
+  z-index: 20;
   background-color: var(--color-white);
   opacity: 1;
 }
