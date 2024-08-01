@@ -380,8 +380,14 @@
   color: var(--color-red);
 }
 
+.form-handler.hidden,
 .form-handler .hidden {
   display: none;
+}
+
+.form-handler.transparent,
+.form-handler .transparent {
+  opacity: 0;
 }
 
 .form-handler .toast-parent {

@@ -79,6 +79,7 @@ const SPECTRUM_COMPONENTS = [
 ];
 
 export function buildErrorMessage(props, resp) {
+  console.log(resp);
   if (!resp) return;
 
   const toastArea = props.el.querySelector('.toast-area');
@@ -381,7 +382,7 @@ async function saveEvent(props, options = { toPublish: false }) {
   try {
     await gatherValues(props);
   } catch (e) {
-    return { error: { message: e.message } };
+    return { message: e.message };
   }
 
   let resp;
@@ -769,8 +770,15 @@ async function buildECCForm(el) {
   });
 }
 
+function buildLoadingScreen(el) {
+  el.classList.add('transparent');
+  const loadingScreen = createTag('div', { class: 'loading-screen' }, '', { parent: el });
+  const spinner = createTag('sp-progress-circle', { size: 'large', indeterminate: true }, '', { parent: loadingScreen });
+  const loadingText = createTag('sp-field-label', {}, 'Loading Adobe Event Creation Console...', { parent: loadingScreen });
+}
+
 export default async function init(el) {
-  el.style.display = 'none';
+  buildLoadingScreen(el);
   const miloLibs = LIBS;
   const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
     await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
@@ -786,8 +794,9 @@ export default async function init(el) {
   const devMode = urlParams.get('devMode');
 
   if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
-    buildECCForm(el);
-    el.removeAttribute('style');
+    buildECCForm(el).then(() => {
+      el.removeAttribute('style');
+    });
     return;
   }
 
@@ -795,7 +804,9 @@ export default async function init(el) {
     if (profile.noProfile || profile.account_type !== 'type3') {
       buildNoAccessScreen(el);
     } else {
-      buildECCForm(el);
+      buildECCForm(el).then(() => {
+        el.removeAttribute('style');
+      });
     }
 
     el.removeAttribute('style');
@@ -806,11 +817,14 @@ export default async function init(el) {
     const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
       if (newValue?.noProfile || newValue.account_type !== 'type3') {
         buildNoAccessScreen(el);
+        el.removeAttribute('style');
+        unsubscribe();
       } else {
-        buildECCForm(el);
+        buildECCForm(el).then(() => {
+          el.removeAttribute('style');
+          unsubscribe();
+        });
       }
-      el.removeAttribute('style');
-      unsubscribe();
     });
   }
 }
