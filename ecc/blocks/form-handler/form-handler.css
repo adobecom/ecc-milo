@@ -27,7 +27,9 @@
   width: 100%;
   top: 0;
   left: 0;
-  z-index: -1;
+  z-index: 20;
+  background-color: var(--color-white);
+  opacity: 1;
 }
 
 .form-handler .img-upload-text p {
@@ -413,14 +415,9 @@
   display: none;
 }
 
-.form-handler.loading .loading-screen {
-  z-index: 20;
-  background-color: var(--color-white);
-  opacity: 1;
-}
-
 .form-handler:not(.loading) .loading-screen {
   opacity: 0;
+  z-index: -1;
 }
 
 .form-handler .toast-parent {
