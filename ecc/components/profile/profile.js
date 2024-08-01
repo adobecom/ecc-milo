@@ -108,7 +108,7 @@ export class Profile extends LitElement {
         const { errors, message } = respJson.error;
         window.lana?.log(`error occured while saving profile ${errors ?? message}`);
         saveButton.pending = false;
-        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { errors, message }, bubbles: true, composed: true }));
+        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message } }, bubbles: true, composed: true }));
         return;
       }
 
