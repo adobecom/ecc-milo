@@ -296,7 +296,7 @@ function initMoreOptions(props, config, eventObj, row) {
     // clone
     clone.addEventListener('click', async (e) => {
       e.preventDefault();
-      const spTheme = props.el.querySelector('sp-theme');
+      const spTheme = props.el.querySelector('sp-theme.toast-area');
       const payload = { ...eventObj };
       payload.title = `${eventObj.title} - copy`;
       toolBox.remove();
