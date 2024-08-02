@@ -9,7 +9,6 @@ const submissionFilter = [
   'eventType',
   'cloudType',
   'seriesId',
-  'rsvpRequired',
   'templateId',
   'communityTopicUrl',
   'title',
