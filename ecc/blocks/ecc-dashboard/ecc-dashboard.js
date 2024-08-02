@@ -22,7 +22,6 @@ export function cloneFilter(obj) {
     'eventType',
     'cloudType',
     'seriesId',
-    'rsvpRequired',
     'templateId',
     'communityTopicUrl',
     'title',
