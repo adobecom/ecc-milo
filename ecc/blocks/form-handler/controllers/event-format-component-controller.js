@@ -117,13 +117,11 @@ export default async function init(component, props) {
   const {
     cloudType,
     seriesId,
-    rsvpRequired,
   } = eventData;
 
   if (cloudType && seriesId) {
     changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType);
     changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId);
-    changeInputValue(component.querySelector('#rsvp-required-check'), 'checked', rsvpRequired || 0);
     component.classList.add('prefilled');
   }
 }
@@ -144,15 +142,12 @@ export function onSubmit(component, props) {
   const eventType = 'InPerson';
   const cloudType = component.querySelector('#bu-select-input').value;
   const seriesId = component.querySelector('#series-select-input')?.value;
-  const rsvpRequired = component.querySelector('#rsvp-required-check').checked;
   const templateId = getTemplateId(cloudType);
 
   const eventFormat = {
-    // TODO: add the other text field values
     eventType,
     cloudType,
     seriesId,
-    rsvpRequired,
     templateId,
   };
 
