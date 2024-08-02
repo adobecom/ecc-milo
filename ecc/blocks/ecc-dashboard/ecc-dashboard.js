@@ -322,7 +322,7 @@ function initMoreOptions(props, config, eventObj, row) {
     deleteBtn.addEventListener('click', async (e) => {
       e.preventDefault();
 
-      const spTheme = props.el.querySelector('sp-theme');
+      const spTheme = props.el.querySelector('sp-theme.toast-area');
       if (!spTheme) return;
 
       const underlay = spTheme.querySelector('sp-underlay');
