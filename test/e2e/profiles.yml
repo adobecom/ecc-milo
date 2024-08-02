@@ -1,0 +1,17 @@
+---
+default: -p prod -b chromium --headless false --logConsole
+
+prod:
+  baseUrl: https://www.adobe.com
+
+stage:
+  baseUrl: https://www.stage.adobe.com
+
+live:
+  baseUrl: https://${branch}--events-milo--adobecom.hlx.live
+
+preview:
+  baseUrl: https://${branch}--events-milo--adobecom.hlx.page
+
+local:
+  baseUrl: http://localhost:3000

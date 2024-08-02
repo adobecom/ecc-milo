@@ -1,7 +1,6 @@
 {
   "name": "@adobecom/college",
   "private": true,
-  "type": "module",
   "version": "1.0.0",
   "description": "Website foundation technology.",
   "scripts": {
@@ -22,8 +21,12 @@
   },
   "homepage": "https://github.com/adobecom/college#readme",
   "devDependencies": {
+    "@amwp/platform-ui-automation": "^0.0.6",
+    "@amwp/platform-ui-lib-adobe": "^0.0.7",
     "@babel/core": "7.17.7",
     "@babel/eslint-parser": "7.17.0",
+    "@babel/preset-env": "^7.25.2",
+    "@babel/register": "7.22.15",
     "@esm-bundle/chai": "4.3.4-fix.0",
     "@web/dev-server-import-maps": "^0.0.6",
     "@web/test-runner": "0.13.27",
@@ -35,6 +38,7 @@
     "eslint-plugin-compat": "^4.0.2",
     "eslint-plugin-ecmalist": "^1.0.8",
     "eslint-plugin-import": "2.25.4",
+    "jsdom": "^24.1.1",
     "sinon": "13.0.1",
     "stylelint": "14.6.0",
     "stylelint-config-prettier": "9.0.3",

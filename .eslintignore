@@ -2,3 +2,4 @@ node_modules/*
 ecc/scripts/deps/*
 ecc/scripts/fallback.js
 web-test-runner.config.js
+test/e2e
