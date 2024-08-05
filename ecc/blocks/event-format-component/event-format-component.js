@@ -55,11 +55,12 @@ function decorateTimeZoneSelect(column) {
   column.append(tzWrapper);
 }
 
-function decorateCheckbox(column) {
-  const checkbox = createTag('sp-checkbox', { id: 'rsvp-required-check' }, column.textContent.trim());
-  column.innerHTML = '';
-  column.append(checkbox);
-}
+// FIXME: comment out for now. Might support other checkboxes later.
+// function decorateCheckbox(column) {
+//   const checkbox = createTag('sp-checkbox', { id: 'rsvp-required-check' }, column.textContent.trim());
+//   column.innerHTML = '';
+//   column.append(checkbox);
+// }
 
 export default function init(el) {
   el.classList.add('form-component');
@@ -76,7 +77,7 @@ export default function init(el) {
         if (ci === 0) decorateCloudTagSelect(c);
         if (ci === 1) decorateSeriesSelect(c);
         // if (ci === 2) decorateNewSeriesBtnAndModal(c);
-        if (ci === 2) decorateCheckbox(c);
+        // if (ci === 2) decorateCheckbox(c);
       });
     }
 

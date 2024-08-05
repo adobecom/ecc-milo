@@ -22,7 +22,6 @@ export function cloneFilter(obj) {
     'eventType',
     'cloudType',
     'seriesId',
-    'rsvpRequired',
     'templateId',
     'communityTopicUrl',
     'title',
@@ -297,7 +296,7 @@ function initMoreOptions(props, config, eventObj, row) {
     // clone
     clone.addEventListener('click', async (e) => {
       e.preventDefault();
-      const spTheme = props.el.querySelector('sp-theme');
+      const spTheme = props.el.querySelector('sp-theme.toast-area');
       const payload = { ...eventObj };
       payload.title = `${eventObj.title} - copy`;
       toolBox.remove();
@@ -323,7 +322,7 @@ function initMoreOptions(props, config, eventObj, row) {
     deleteBtn.addEventListener('click', async (e) => {
       e.preventDefault();
 
-      const spTheme = props.el.querySelector('sp-theme');
+      const spTheme = props.el.querySelector('sp-theme.toast-area');
       if (!spTheme) return;
 
       const underlay = spTheme.querySelector('sp-underlay');
@@ -637,16 +636,6 @@ function buildNoEventScreen(el, config) {
 }
 
 async function buildDashboard(el, config) {
-  const miloLibs = LIBS;
-  await Promise.all([
-    import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/toast.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/button.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/dialog.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/underlay.js`),
-  ]);
-
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
   createTag('sp-underlay', {}, '', { parent: spTheme });
   createTag('sp-dialog', { size: 's' }, '', { parent: spTheme });
@@ -658,7 +647,6 @@ async function buildDashboard(el, config) {
   };
 
   const data = await getEventsArray();
-
   if (!data?.length) {
     buildNoEventScreen(el, config);
   } else {
@@ -677,15 +665,40 @@ async function buildDashboard(el, config) {
     buildDashboardHeader(proxyProps, config);
     buildDashboardTable(proxyProps, config);
   }
+
+  setTimeout(() => {
+    el.classList.remove('loading');
+  }, 10);
+}
+
+function buildLoadingScreen(el) {
+  el.classList.add('loading');
+  const loadingScreen = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'loading-screen' });
+  createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: loadingScreen });
+  createTag('sp-field-label', {}, 'Loading Adobe Event Creation Console dashboard...', { parent: loadingScreen });
+
+  el.prepend(loadingScreen);
 }
 
 export default async function init(el) {
+  const miloLibs = LIBS;
+  await Promise.all([
+    import(`${miloLibs}/deps/lit-all.min.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/toast.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/button.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/dialog.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/underlay.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/progress-circle.js`),
+  ]);
+
   const { search } = window.location;
   const urlParams = new URLSearchParams(search);
   const devMode = urlParams.get('devMode');
 
   const config = readBlockConfig(el);
   el.innerHTML = '';
+  buildLoadingScreen(el);
   const profile = BlockMediator.get('imsProfile');
 
   if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
