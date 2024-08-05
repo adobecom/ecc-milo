@@ -7,6 +7,18 @@
  *
  */
 
+ :root {
+  --spectrum-color-gray-100: #E8E8E8;
+  --spectrum-color-gray-200: #D4D4D4;
+  --spectrum-color-gray-300: #B6B6B6;
+  --spectrum-color-gray-400: #A1A1A1;
+  --spectrum-color-gray-500: #909090;
+  --spectrum-color-gray-600: #686868;
+  --spectrum-color-gray-700: #444444;
+  --spectrum-color-gray-800: #242424;
+  --spectrum-color-text: #2C2C2C;
+ }
+
 main a.con-button.no-event {
   user-select: none;
   pointer-events: none;
