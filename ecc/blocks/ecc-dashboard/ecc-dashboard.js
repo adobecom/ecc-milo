@@ -6,6 +6,7 @@ import {
   publishEvent,
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
+import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import { getIcon, buildNoAccessScreen, getEventPageHost } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
@@ -707,7 +708,7 @@ export default async function init(el) {
   }
 
   if (profile) {
-    if (profile.noProfile || profile.account_type !== 'type3') {
+    if (profile.noProfile || ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
       buildNoAccessScreen(el);
     } else {
       buildDashboard(el, config);
@@ -718,7 +719,7 @@ export default async function init(el) {
 
   if (!profile) {
     const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
-      if (newValue?.noProfile || newValue.account_type !== 'type3') {
+      if (newValue?.noProfile || ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
         buildNoAccessScreen(el);
       } else {
         buildDashboard(el, config);
