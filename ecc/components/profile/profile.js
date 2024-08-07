@@ -108,7 +108,7 @@ export class Profile extends LitElement {
         const { errors, message } = respJson.error;
         window.lana?.log(`error occured while saving profile ${errors ?? message}`);
         saveButton.pending = false;
-        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { errors, message }, bubbles: true, composed: true }));
+        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message } }, bubbles: true, composed: true }));
         return;
       }
 
@@ -182,7 +182,7 @@ export class Profile extends LitElement {
       lastNameSearchMap,
     } = this.getRequiredProps();
 
-    const searchFieldConfig = { ...quietTextfieldConfig, showImage: true };
+    const searchFieldConfig = { ...quietTextfieldConfig, showImage: true, thumbnailType: 'circle' };
 
     return html`
     <custom-search searchMap=${JSON.stringify(firstNameSearchMap)} fielddata=${JSON.stringify(firstNameData)} config=${JSON.stringify(searchFieldConfig)} @change-custom-search=${(event) => this.updateProfile({ firstName: event.detail.value })} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.firstnamesearch)} identifier='speakerId'></custom-search>

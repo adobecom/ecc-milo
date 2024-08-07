@@ -10,7 +10,6 @@ describe('Decorating LCP', () => {
   it('with marquee', () => {
     document.body.innerHTML = marqueeMain;
     decorateArea(document.querySelector('main'));
-    console.log(document.body.querySelector('img')?.loading);
     expect(document.body.querySelector('img').getAttribute('loading')).to.equal(null);
   });
 

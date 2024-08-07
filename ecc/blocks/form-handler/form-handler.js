@@ -1,3 +1,4 @@
+import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -304,11 +305,16 @@ async function updateComponents(props) {
 
 function decorateForm(el) {
   const ctaRow = el.querySelector(':scope > div:last-of-type');
+  const formBodyRow = el.querySelector(':scope > div:first-of-type');
 
   if (ctaRow) {
     const toastParent = createTag('sp-theme', { class: 'toast-parent', color: 'light', scale: 'medium' }, '', { parent: ctaRow });
     createTag('div', { class: 'toast-area' }, '', { parent: toastParent });
   }
+
+  if (!formBodyRow) return;
+
+  formBodyRow.classList.add('form-body');
 
   const app = createTag('sp-theme', { color: 'light', scale: 'medium' });
   createTag('sp-underlay', {}, '', { parent: app });
@@ -326,7 +332,7 @@ function decorateForm(el) {
     form.append(formDiv.parentElement);
   });
 
-  const cols = el.querySelectorAll(':scope > div:first-of-type > div');
+  const cols = formBodyRow.querySelectorAll(':scope > div');
 
   cols.forEach((col, i) => {
     if (i === 0) {
@@ -381,7 +387,7 @@ async function saveEvent(props, options = { toPublish: false }) {
   try {
     await gatherValues(props);
   } catch (e) {
-    return { error: { message: e.message } };
+    return { message: e.message };
   }
 
   let resp;
@@ -769,8 +775,17 @@ async function buildECCForm(el) {
   });
 }
 
+function buildLoadingScreen(el) {
+  el.classList.add('loading');
+  const loadingScreen = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'loading-screen' });
+  createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: loadingScreen });
+  createTag('sp-field-label', {}, 'Loading Adobe Event Creation Console form...', { parent: loadingScreen });
+
+  el.prepend(loadingScreen);
+}
+
 export default async function init(el) {
-  el.style.display = 'none';
+  buildLoadingScreen(el);
   const miloLibs = LIBS;
   const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
     await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
@@ -786,31 +801,37 @@ export default async function init(el) {
   const devMode = urlParams.get('devMode');
 
   if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
-    buildECCForm(el);
-    el.removeAttribute('style');
+    buildECCForm(el).then(() => {
+      el.classList.remove('loading');
+    });
     return;
   }
 
   if (profile) {
-    if (profile.noProfile || profile.account_type !== 'type3') {
+    if (profile.noProfile || ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
       buildNoAccessScreen(el);
+      el.classList.remove('loading');
     } else {
-      buildECCForm(el);
+      buildECCForm(el).then(() => {
+        el.classList.remove('loading');
+      });
     }
 
-    el.removeAttribute('style');
     return;
   }
 
   if (!profile) {
     const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
-      if (newValue?.noProfile || newValue.account_type !== 'type3') {
+      if (newValue?.noProfile || ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
         buildNoAccessScreen(el);
+        el.classList.remove('loading');
+        unsubscribe();
       } else {
-        buildECCForm(el);
+        buildECCForm(el).then(() => {
+          el.classList.remove('loading');
+          unsubscribe();
+        });
       }
-      el.removeAttribute('style');
-      unsubscribe();
     });
   }
 }
