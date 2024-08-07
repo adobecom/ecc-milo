@@ -1,3 +1,4 @@
+import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -807,7 +808,7 @@ export default async function init(el) {
   }
 
   if (profile) {
-    if (profile.noProfile || profile.account_type !== 'type3') {
+    if (profile.noProfile || ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
       buildNoAccessScreen(el);
       el.classList.remove('loading');
     } else {
@@ -821,7 +822,7 @@ export default async function init(el) {
 
   if (!profile) {
     const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
-      if (newValue?.noProfile || newValue.account_type !== 'type3') {
+      if (newValue?.noProfile || ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
         buildNoAccessScreen(el);
         el.classList.remove('loading');
         unsubscribe();
