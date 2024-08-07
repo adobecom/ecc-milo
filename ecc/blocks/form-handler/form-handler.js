@@ -808,7 +808,7 @@ export default async function init(el) {
   }
 
   if (profile) {
-    if (profile.noProfile || ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
+    if (profile.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
       buildNoAccessScreen(el);
       el.classList.remove('loading');
     } else {
@@ -822,7 +822,7 @@ export default async function init(el) {
 
   if (!profile) {
     const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
-      if (newValue?.noProfile || ALLOWED_ACCOUNT_TYPES.includes(newValue.account_type)) {
+      if (newValue?.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(newValue.account_type)) {
         buildNoAccessScreen(el);
         el.classList.remove('loading');
         unsubscribe();
