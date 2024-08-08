@@ -314,9 +314,13 @@ function initMoreOptions(props, config, eventObj, row) {
       }
       const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
       const toastMsg = buildToastMsg(newEventJSON.title, msgTemplate);
-      createTag('sp-toast', { open: true, variant: 'info' }, toastMsg, { parent: spTheme });
+      const toast = createTag('sp-toast', { open: true, variant: 'info' }, toastMsg, { parent: spTheme });
       const newRow = props.el.querySelector(`tr[data-event-id="${newEventJSON.eventId}"]`);
       highlightRow(newRow);
+
+      toast.addEventListener('close', () => {
+        toast.remove();
+      });
     });
 
     // delete
@@ -348,7 +352,11 @@ function initMoreOptions(props, config, eventObj, row) {
         props.paginatedData = newJson.events;
 
         sortData(props, config, { resort: true });
-        createTag('sp-toast', { open: true }, config['delete-event-toast-msg'], { parent: spTheme });
+        const toast = createTag('sp-toast', { open: true }, config['delete-event-toast-msg'], { parent: spTheme });
+
+        toast.addEventListener('close', () => {
+          toast.remove();
+        });
       });
 
       dialogCancelBtn.addEventListener('click', () => {
@@ -453,7 +461,11 @@ async function populateRow(props, config, index) {
     if (!props.el.classList.contains('toast-shown')) {
       const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
       const toastMsg = buildToastMsg(event.title, msgTemplate);
-      createTag('sp-toast', { class: 'new-event-confirmation-toast', open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
+      const toast = createTag('sp-toast', { class: 'new-event-confirmation-toast', open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
+
+      toast.addEventListener('close', () => {
+        toast.remove();
+      });
 
       props.el.classList.add('toast-shown');
     }
