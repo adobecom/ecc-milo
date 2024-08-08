@@ -399,19 +399,17 @@ function buildVenueTag(eventObj) {
   const { venue } = eventObj;
   if (!venue) return null;
 
-  const venueTag = createTag('p', { class: 'vanue-name' }, venue.venueName);
+  const venueTag = createTag('span', { class: 'vanue-name' }, venue.venueName);
   return venueTag;
 }
 
 function buildRSVPTag(config, eventObj) {
-  let text = 'No RSVP count';
-  console.log(eventObj);
-  if (eventObj.externalEventId?.startsWith('st')) text = 'SplashThat';
+  const text = `${eventObj.attendeeCount} / ${eventObj.attendeeLimit}`;
 
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
   url.searchParams.set('eventId', eventObj.eventId);
 
-  const rsvpTag = createTag('a', { class: 'rsvp-tag', href: `${url.toString()}#form-step-rsvp` }, text);
+  const rsvpTag = createTag('span', { class: 'rsvp-tag' }, text);
   return rsvpTag;
 }
 
