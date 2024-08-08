@@ -395,14 +395,11 @@ function buildEventTitleTag(config, eventObj) {
 }
 
 // TODO: to retire
-function buildVenueTag(config, eventObj) {
+function buildVenueTag(eventObj) {
   const { venue } = eventObj;
   if (!venue) return null;
 
-  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
-  url.searchParams.set('eventId', eventObj.eventId);
-
-  const venueTag = createTag('a', { class: 'vanue-name', href: url.toString() }, venue.venueName);
+  const venueTag = createTag('p', { class: 'vanue-name' }, venue.venueName);
   return venueTag;
 }
 
@@ -430,7 +427,7 @@ async function populateRow(props, config, index) {
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(config, event)));
+  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(event)));
   const geoCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getCountryName(event)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
