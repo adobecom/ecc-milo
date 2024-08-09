@@ -156,7 +156,7 @@
   font-weight: 700;
   text-align: left;
   font-size: var(--type-body-xxs-size);
-  color: var(--color-gray-500);
+  color: var(--spectrum-color-gray-500);
   user-select: none;
   width: 100px;
   white-space: nowrap;
