@@ -409,25 +409,21 @@ function buildEventTitleTag(config, eventObj) {
 }
 
 // TODO: to retire
-function buildVenueTag(config, eventObj) {
+function buildVenueTag(eventObj) {
   const { venue } = eventObj;
   if (!venue) return null;
 
-  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
-  url.searchParams.set('eventId', eventObj.eventId);
-
-  const venueTag = createTag('a', { class: 'vanue-name', href: url.toString() }, venue.venueName);
+  const venueTag = createTag('span', { class: 'vanue-name' }, venue.venueName);
   return venueTag;
 }
 
 function buildRSVPTag(config, eventObj) {
-  let text = 'RSVP';
-  if (eventObj.externalEventId?.startsWith('st')) text = 'SplashThat';
+  const text = `${eventObj.attendeeCount} / ${eventObj.attendeeLimit}`;
 
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
   url.searchParams.set('eventId', eventObj.eventId);
 
-  const rsvpTag = createTag('a', { class: 'rsvp-tag', href: `${url.toString()}#form-step-rsvp` }, text);
+  const rsvpTag = createTag('span', { class: 'rsvp-tag' }, text);
   return rsvpTag;
 }
 
@@ -443,7 +439,7 @@ async function populateRow(props, config, index) {
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(config, event)));
+  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(event)));
   const geoCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getCountryName(event)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
