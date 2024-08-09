@@ -43,6 +43,7 @@ export function cloneFilter(obj) {
     'hostEmail',
     'rsvpFormFields',
     'relatedProducts',
+    'venue',
   ];
 
   const output = {};
