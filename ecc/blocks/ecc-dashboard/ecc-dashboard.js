@@ -288,11 +288,15 @@ function initMoreOptions(props, config, eventObj, row) {
     if (eventObj.detailPagePath) {
       previewPre.href = (() => {
         const url = new URL(`${getEventPageHost(eventObj.published)}${eventObj.detailPagePath}`);
+        url.searchParams.set('previewMode', 'true');
+        url.searchParams.set('cachebuster', Date.now());
         url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
         return url.toString();
       })();
       previewPost.href = (() => {
         const url = new URL(`${getEventPageHost(eventObj.published)}${eventObj.detailPagePath}`);
+        url.searchParams.set('previewMode', 'true');
+        url.searchParams.set('cachebuster', Date.now());
         url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
         return url.toString();
       })();
