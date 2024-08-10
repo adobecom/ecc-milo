@@ -56,6 +56,14 @@ export function cloneFilter(obj) {
   return output;
 }
 
+function showToast(props, msg, options = {}) {
+  const toastArea = props.el.querySelector('sp-theme.toast-area');
+  const toast = createTag('sp-toast', { open: true, ...options }, msg, { parent: toastArea });
+  toast.addEventListener('close', () => {
+    toast.remove();
+  });
+}
+
 function toClassName(name) {
   return name && typeof name === 'string'
     ? name.toLowerCase().replace(/[^0-9a-z]/gi, '-')
@@ -225,7 +233,8 @@ function sortData(props, config, options = {}) {
   el?.classList.add('active');
 }
 
-function buildToastMsg(eventTitle, msgTemplate) {
+function buildToastMsgWithEventTitle(eventTitle, configValue) {
+  const msgTemplate = configValue instanceof Array ? configValue.join('<br/>') : configValue;
   return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
 }
 
@@ -252,6 +261,7 @@ function initMoreOptions(props, config, eventObj, row) {
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
+        showToast(props, buildToastMsgWithEventTitle(eventObj.title, config['event-unpublished-msg']), { variant: 'positive' });
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
@@ -264,6 +274,8 @@ function initMoreOptions(props, config, eventObj, row) {
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
+
+        showToast(props, buildToastMsgWithEventTitle(eventObj.title, config['event-published-msg']), { variant: 'positive' });
       });
     }
 
@@ -276,11 +288,15 @@ function initMoreOptions(props, config, eventObj, row) {
     if (eventObj.detailPagePath) {
       previewPre.href = (() => {
         const url = new URL(`${getEventPageHost(eventObj.published)}${eventObj.detailPagePath}`);
+        url.searchParams.set('previewMode', 'true');
+        url.searchParams.set('cachebuster', Date.now());
         url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
         return url.toString();
       })();
       previewPost.href = (() => {
         const url = new URL(`${getEventPageHost(eventObj.published)}${eventObj.detailPagePath}`);
+        url.searchParams.set('previewMode', 'true');
+        url.searchParams.set('cachebuster', Date.now());
         url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
         return url.toString();
       })();
@@ -297,7 +313,6 @@ function initMoreOptions(props, config, eventObj, row) {
     // clone
     clone.addEventListener('click', async (e) => {
       e.preventDefault();
-      const spTheme = props.el.querySelector('sp-theme.toast-area');
       const payload = { ...eventObj };
       payload.title = `${eventObj.title} - copy`;
       toolBox.remove();
@@ -312,11 +327,10 @@ function initMoreOptions(props, config, eventObj, row) {
         props.currentSort = { field: 'modificationTime', el: modTimeHeader };
         sortData(props, config, { direction: 'desc' });
       }
-      const msgTemplate = config['clone-event-toast-msg'] instanceof Array ? config['clone-event-toast-msg'].join('<br/>') : config['clone-event-toast-msg'];
-      const toastMsg = buildToastMsg(newEventJSON.title, msgTemplate);
-      createTag('sp-toast', { open: true, variant: 'info' }, toastMsg, { parent: spTheme });
+
       const newRow = props.el.querySelector(`tr[data-event-id="${newEventJSON.eventId}"]`);
       highlightRow(newRow);
+      showToast(props, buildToastMsgWithEventTitle(newEventJSON.title, config['clone-event-toast-msg']), { variant: 'info' });
     });
 
     // delete
@@ -348,7 +362,7 @@ function initMoreOptions(props, config, eventObj, row) {
         props.paginatedData = newJson.events;
 
         sortData(props, config, { resort: true });
-        createTag('sp-toast', { open: true }, config['delete-event-toast-msg'], { parent: spTheme });
+        showToast(props, config['delete-event-toast-msg']);
       });
 
       dialogCancelBtn.addEventListener('click', () => {
@@ -395,32 +409,27 @@ function buildEventTitleTag(config, eventObj) {
 }
 
 // TODO: to retire
-function buildVenueTag(config, eventObj) {
+function buildVenueTag(eventObj) {
   const { venue } = eventObj;
   if (!venue) return null;
 
-  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
-  url.searchParams.set('eventId', eventObj.eventId);
-
-  const venueTag = createTag('a', { class: 'vanue-name', href: url.toString() }, venue.venueName);
+  const venueTag = createTag('span', { class: 'vanue-name' }, venue.venueName);
   return venueTag;
 }
 
 function buildRSVPTag(config, eventObj) {
-  let text = 'RSVP';
-  if (eventObj.externalEventId?.startsWith('st')) text = 'SplashThat';
+  const text = `${eventObj.attendeeCount} / ${eventObj.attendeeLimit}`;
 
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
   url.searchParams.set('eventId', eventObj.eventId);
 
-  const rsvpTag = createTag('a', { class: 'rsvp-tag', href: `${url.toString()}#form-step-rsvp` }, text);
+  const rsvpTag = createTag('span', { class: 'rsvp-tag' }, text);
   return rsvpTag;
 }
 
 async function populateRow(props, config, index) {
   const event = props.paginatedData[index];
   const tBody = props.el.querySelector('table.dashboard-table tbody');
-  const toastArea = props.el.querySelector('.toast-area');
   const sp = new URLSearchParams(window.location.search);
 
   // TODO: build each column's element specifically rather than just text
@@ -430,7 +439,7 @@ async function populateRow(props, config, index) {
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(config, event)));
+  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(event)));
   const geoCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getCountryName(event)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
@@ -451,9 +460,7 @@ async function populateRow(props, config, index) {
 
   if (event.eventId === sp.get('newEventId')) {
     if (!props.el.classList.contains('toast-shown')) {
-      const msgTemplate = config['new-event-toast-msg'] instanceof Array ? config['new-event-toast-msg'].join('<br/>') : config['new-event-toast-msg'];
-      const toastMsg = buildToastMsg(event.title, msgTemplate);
-      createTag('sp-toast', { class: 'new-event-confirmation-toast', open: true, variant: 'positive' }, toastMsg, { parent: toastArea });
+      showToast(props, buildToastMsgWithEventTitle(event.title, config['new-event-toast-msg']), { variant: 'positive' });
 
       props.el.classList.add('toast-shown');
     }

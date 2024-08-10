@@ -16,7 +16,6 @@
   width: 100%;
   outline: none;
   resize: vertical;
-  min-height: 40px;
 }
 
 .event-info-component label {
