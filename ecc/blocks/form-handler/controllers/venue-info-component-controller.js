@@ -17,6 +17,11 @@ async function loadGoogleMapsAPI(callback) {
   document.head.appendChild(script);
 }
 
+function changeAndToggleInput(el, attr, val) {
+  changeInputValue(el, attr, val);
+  el.classList.toggle('hidden', !val);
+}
+
 function initAutocomplete(el) {
   const venueName = el.querySelector('#venue-info-venue-name');
   // eslint-disable-next-line no-undef
@@ -75,12 +80,12 @@ function initAutocomplete(el) {
       });
 
       if (place.name) changeInputValue(venueName, 'value', place.name);
-      changeInputValue(address, 'value', addressInfo.address);
-      changeInputValue(city, 'value', addressInfo.city);
-      changeInputValue(state, 'value', addressInfo.state);
-      changeInputValue(stateCode, 'value', addressInfo.stateCode);
-      changeInputValue(zip, 'value', addressInfo.zip);
-      changeInputValue(country, 'value', addressInfo.country);
+      changeAndToggleInput(address, 'value', addressInfo.address);
+      changeAndToggleInput(city, 'value', addressInfo.city);
+      changeAndToggleInput(state, 'value', addressInfo.state);
+      changeAndToggleInput(stateCode, 'value', addressInfo.stateCode);
+      changeAndToggleInput(zip, 'value', addressInfo.zip);
+      changeAndToggleInput(country, 'value', addressInfo.country);
       changeInputValue(placeId, 'value', place.place_id);
       changeInputValue(mapUrl, 'value', place.url);
     }
@@ -123,12 +128,12 @@ export default async function init(component, props) {
 
   venueNameInput.addEventListener('change', () => {
     if (!venueNameInput.value) {
-      changeInputValue(addressInput, 'value', '');
-      changeInputValue(cityInput, 'value', '');
-      changeInputValue(stateInput, 'value', '');
-      changeInputValue(stateCodeInput, 'value', '');
-      changeInputValue(postalCodeInput, 'value', '');
-      changeInputValue(countryInput, 'value', '');
+      changeAndToggleInput(addressInput, 'value', '');
+      changeAndToggleInput(cityInput, 'value', '');
+      changeAndToggleInput(stateInput, 'value', '');
+      changeAndToggleInput(stateCodeInput, 'value', '');
+      changeAndToggleInput(postalCodeInput, 'value', '');
+      changeAndToggleInput(countryInput, 'value', '');
       changeInputValue(placeLatInput, 'value', '');
       changeInputValue(placeLngInput, 'value', '');
       changeInputValue(placeIdInput, 'value', '');
@@ -150,13 +155,13 @@ export default async function init(component, props) {
       mapUrl,
     } = venue;
 
-    changeInputValue(venueNameInput, 'value', venueName);
-    changeInputValue(addressInput, 'value', address);
-    changeInputValue(cityInput, 'value', city);
-    changeInputValue(stateInput, 'value', state);
-    changeInputValue(stateCodeInput, 'value', statecode);
-    changeInputValue(postalCodeInput, 'value', postalCode);
-    changeInputValue(countryInput, 'value', country);
+    changeAndToggleInput(venueNameInput, 'value', venueName);
+    changeAndToggleInput(addressInput, 'value', address);
+    changeAndToggleInput(cityInput, 'value', city);
+    changeAndToggleInput(stateInput, 'value', state);
+    changeAndToggleInput(stateCodeInput, 'value', statecode);
+    changeAndToggleInput(postalCodeInput, 'value', postalCode);
+    changeAndToggleInput(countryInput, 'value', country);
     changeInputValue(placeLatInput, 'value', venue.coordinates?.lat);
     changeInputValue(placeLngInput, 'value', venue.coordinates?.lon);
     changeInputValue(placeIdInput, 'value', placeId);
