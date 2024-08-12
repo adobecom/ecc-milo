@@ -10,7 +10,9 @@ export function onSubmit(component, props) {
     const communityTopicUrl = component.querySelector('#community-url-details').value;
     props.payload = { ...props.payload, communityTopicUrl };
   } else {
-    props.payload.delete('communityTopicUrl');
+    const tempPayload = { ...props.payload };
+    delete tempPayload.communityTopicUrl;
+    props.payload = tempPayload;
   }
 }
 
