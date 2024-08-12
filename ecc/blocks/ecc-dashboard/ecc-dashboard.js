@@ -294,6 +294,7 @@ function initMoreOptions(props, config, eventObj, row) {
         url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
         return url.toString();
       })();
+      previewPre.target = '_blank';
       previewPost.href = (() => {
         const url = new URL(`${getEventPageHost(eventObj.published)}${eventObj.detailPagePath}`);
         url.searchParams.set('previewMode', 'true');
@@ -301,6 +302,7 @@ function initMoreOptions(props, config, eventObj, row) {
         url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
         return url.toString();
       })();
+      previewPost.target = '_blank';
     } else {
       previewPre.classList.add('disabled');
       previewPost.classList.add('disabled');
