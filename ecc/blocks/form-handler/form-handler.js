@@ -367,7 +367,7 @@ function decorateForm(el) {
   });
 }
 
-function showSaveSuccessMessage(props) {
+function showSaveSuccessMessage(props, detail = { message: 'Edits saved successfully' }) {
   const toastArea = props.el.querySelector('.toast-area');
   if (!toastArea) return;
 
@@ -377,7 +377,7 @@ function showSaveSuccessMessage(props) {
     msg.remove();
   });
 
-  const toast = createTag('sp-toast', { class: 'save-success-msg', open: true, variant: 'positive', timeout: 6000 }, 'Edits saved successfully', { parent: toastArea });
+  const toast = createTag('sp-toast', { class: 'save-success-msg', open: true, variant: 'positive', timeout: 6000 }, detail.message || 'Edits saved successfully', { parent: toastArea });
   toast.addEventListener('close', () => {
     toast.remove();
   });
@@ -772,6 +772,12 @@ async function buildECCForm(el) {
     e.stopPropagation();
     e.preventDefault();
     buildErrorMessage(proxyProps, e.detail);
+  });
+
+  el.addEventListener('show-success-toast', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    showSaveSuccessMessage(proxyProps, e.detail);
   });
 }
 
