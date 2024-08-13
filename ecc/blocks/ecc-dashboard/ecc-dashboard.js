@@ -137,9 +137,7 @@ function buildThumbnail(data) {
     || venueImage?.imageUrl
     || images[0]?.imageUrl;
 
-    const img = createTag('img', {
-      class: 'event-thumbnail-img',
-    });
+    const img = createTag('img', { class: 'event-thumbnail-img' });
 
     if (imgSrc) img.src = imgSrc;
     container.append(img);
