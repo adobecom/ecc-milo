@@ -129,17 +129,17 @@ function buildThumbnail(data) {
     const heroImage = images.find((photo) => photo.imageKind === 'event-hero-image');
     const venueImage = images.find((photo) => photo.imageKind === 'venue-image');
 
-    const img = createTag('img', {
-      class: 'event-thumbnail-img',
-      src: (cardImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
-      || cardImage?.imageUrl
-      || (heroImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
-      || heroImage?.imageUrl
-      || (venueImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
-      || venueImage?.imageUrl
-      || images[0]?.imageUrl
-      || '/ecc/icons/icon-placeholder.svg',
-    });
+    const imgSrc = (cardImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
+    || cardImage?.imageUrl
+    || (heroImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
+    || heroImage?.imageUrl
+    || (venueImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
+    || venueImage?.imageUrl
+    || images[0]?.imageUrl;
+
+    const img = createTag('img', { class: 'event-thumbnail-img' });
+
+    if (imgSrc) img.src = imgSrc;
     container.append(img);
   };
 

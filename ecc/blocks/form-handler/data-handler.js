@@ -52,8 +52,7 @@ export function quickFilter(obj) {
 
 export function setPayloadCache(payload) {
   if (!payload) return;
-  const output = quickFilter(payload);
-  payloadCache = { ...payloadCache, ...output };
+  payloadCache = quickFilter(payload);
 }
 
 export function getFilteredCachedPayload() {
@@ -62,8 +61,7 @@ export function getFilteredCachedPayload() {
 
 export function setResponseCache(response) {
   if (!response) return;
-  const output = quickFilter(response);
-  responseCache = { ...responseCache, ...output };
+  responseCache = quickFilter(response);
 }
 
 export function getFilteredCachedResponse() {
