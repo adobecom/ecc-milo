@@ -1,3 +1,4 @@
+import { getSponsors } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './partner-selector-group.css.js';
 
@@ -21,6 +22,11 @@ export default class PartnerSelectorGroup extends LitElement {
 
   static styles = style;
 
+  reloadSeriesSponsors = async () => {
+    const spResp = await getSponsors(this.seriesId);
+    if (spResp) this.seriesSponsors = spResp.sponsors;
+  };
+
   addPartner() {
     this.partners = [...this.partners, {}];
   }
@@ -36,7 +42,7 @@ export default class PartnerSelectorGroup extends LitElement {
   handlePartnerUpdate(updatedPartner, index) {
     this.partners = this.partners
       .map((partner, i) => (i === index ? updatedPartner : partner));
-
+    this.reloadSeriesSponsors();
     this.requestUpdate();
   }
 
