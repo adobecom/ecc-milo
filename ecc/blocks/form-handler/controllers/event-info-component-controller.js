@@ -174,9 +174,9 @@ function updateInput(component, state) {
     if (dateInput.dataset.startDate && dateInput.dataset.endDate) {
       const options = { year: 'numeric', month: 'long', day: 'numeric' };
       const dateLocale = getConfig().locale?.ietf || 'en-US';
-      const startDateTime = new Date(dateInput.dataset.startDate)
+      const startDateTime = state.selectedStartDate
         .toLocaleDateString(dateLocale, options);
-      const endDateTime = new Date(dateInput.dataset.endDate)
+      const endDateTime = state.selectedEndDate
         .toLocaleDateString(dateLocale, options);
       const dateValue = dateInput.dataset.startDate === dateInput.dataset.endDate
         ? startDateTime : `${startDateTime} - ${endDateTime}`;

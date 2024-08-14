@@ -77,7 +77,7 @@ export default class ProductSelector extends LitElement {
     const imageSource = this.getImageSource();
 
     return html`
-      <fieldset class="rsvp-field-wrapper">
+      <fieldset class="product-field-wrapper">
         <img class="product-img" src="${imageSource}" alt="${title || nothing}">
         <sp-picker class="product-select-input" label="Select a product" value=${name || nothing} @change="${this.handleSelectChange}">
           ${availableProducts}

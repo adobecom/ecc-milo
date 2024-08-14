@@ -17,7 +17,6 @@ export const style = css`
 
   fieldset image-dropzone {
     display: block;
-    width: 280px;
     height: 164px;
   }
 
