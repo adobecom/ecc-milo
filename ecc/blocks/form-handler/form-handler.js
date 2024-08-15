@@ -473,6 +473,7 @@ function initFormCtas(props) {
   const forwardWrapper = createTag('div', { class: 'form-handler-forward-wrapper' }, '', { parent: panelWrapper });
 
   forwardActionsWrappers.forEach((w) => {
+    w.classList.add('action-area');
     forwardWrapper.append(w);
   });
 
