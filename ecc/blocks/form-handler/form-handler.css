@@ -170,6 +170,9 @@
 
 .form-handler .form-handler-ctas-panel a {
   font-size: var(--type-body-s-size);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .form-handler .side-menu ul li a {
@@ -350,7 +353,6 @@
 .form-handler .form-handler-ctas-panel .form-handler-panel-wrapper > div {
   display: flex;
   align-items: center;
-  gap: 14px;
 }
 
 .form-handler .form-handler-ctas-panel .form-handler-backward-wrapper .back-btn {
@@ -367,8 +369,21 @@
 }
 
 .form-handler .form-handler-ctas-panel .form-handler-forward-wrapper > div:first-of-type {
-  padding-right: 16px;
-  border-right: 2px solid var(--color-black);
+  padding-right: 64px;
+  border-right: 1px solid var(--color-black);
+  margin-right: 104px;
+}
+
+.form-handler .form-handler-ctas-panel .form-handler-forward-wrapper .action-area:first-child {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.form-handler .form-handler-ctas-panel .form-handler-forward-wrapper .action-area:last-child {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .form-handler .form-handler-ctas-panel a.disabled,
@@ -385,7 +400,7 @@
 
 .form-handler .form-handler-ctas-panel a.next-button:hover {
   filter: invert();
-}
+} 
 
 .form-handler .form-handler-ctas-panel a.fill {
   background-color: var(--color-gray-200);
@@ -396,12 +411,16 @@
   min-height: 21px;
   padding: 7px 18px 8px;
   border: 2px solid var(--color-white);
-  display: inline-block;
 }
 
 .form-handler .form-handler-ctas-panel a.fill:hover {
   text-decoration: none;
   filter: invert();
+}
+
+.form-handler .form-handler-ctas-panel a.preview-btns svg {
+  height: 20px;
+  width: 28px;
 }
 
 .form-handler .form-handler-ctas-panel .form-handler-panel-wrapper .con-button.outline {

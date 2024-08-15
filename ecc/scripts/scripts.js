@@ -31,6 +31,7 @@ function convertEccIcon(n) {
   const eccIcons = [
     'ecc-content',
     'ecc-star-wire',
+    'ecc-webpage',
   ];
 
   const iconRegex = /@@(.*?)@@/g;
