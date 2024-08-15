@@ -512,7 +512,9 @@ function initFormCtas(props) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
           const [nextStateText, finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
+
           cta.textContent = nextStateText;
+          cta.append(getIcon('chev-right-white'));
           cta.dataset.nextStateText = nextStateText;
           cta.dataset.finalStateText = finalStateText;
           cta.dataset.doneStateText = doneStateText;
@@ -527,6 +529,7 @@ function initFormCtas(props) {
             cta.prepend(getIcon('golden-rocket'));
           } else {
             cta.textContent = nextStateText;
+            cta.append(getIcon('chev-right-white'));
           }
         }
 
