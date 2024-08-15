@@ -438,10 +438,16 @@ function renderFormNavigation(props, prevStep, currentStep) {
   frags[prevStep].classList.add('hidden');
   frags[currentStep].classList.remove('hidden');
 
-  if (currentStep === props.maxStep) {
-    nextBtn.textContent = nextBtn.dataset.finalStateText;
+  if (props.currentStep === props.maxStep) {
+    if (props.eventDataResp.published) {
+      nextBtn.textContent = nextBtn.dataset.republishStateText;
+    } else {
+      nextBtn.textContent = nextBtn.dataset.finalStateText;
+    }
+    nextBtn.prepend(getIcon('golden-rocket'));
   } else {
     nextBtn.textContent = nextBtn.dataset.nextStateText;
+    nextBtn.append(getIcon('chev-right-white'));
   }
 
   backBtn.classList.toggle('disabled', currentStep === 0);
@@ -520,18 +526,6 @@ function initFormCtas(props) {
           cta.dataset.finalStateText = finalStateText;
           cta.dataset.doneStateText = doneStateText;
           cta.dataset.republishStateText = republishStateText;
-
-          if (props.currentStep === props.maxStep) {
-            if (props.eventDataResp.published) {
-              cta.textContent = republishStateText;
-            } else {
-              cta.textContent = finalStateText;
-            }
-            cta.prepend(getIcon('golden-rocket'));
-          } else {
-            cta.textContent = nextStateText;
-            cta.append(getIcon('chev-right-white'));
-          }
         }
 
         cta.addEventListener('click', async (e) => {
@@ -613,12 +607,15 @@ function updateCtas(props) {
     }
 
     if (a.classList.contains('next-button')) {
+      a.innerHTML = '';
+      console.log(props, a)
       if (props.currentStep === props.maxStep) {
-        if (eventDataResp.published) {
+        if (props.eventDataResp.published) {
           a.textContent = a.dataset.republishStateText;
         } else {
           a.textContent = a.dataset.finalStateText;
         }
+        a.prepend(getIcon('golden-rocket'));
       } else {
         a.textContent = a.dataset.nextStateText;
         a.append(getIcon('chev-right-white'));
