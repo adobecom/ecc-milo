@@ -621,6 +621,7 @@ function updateCtas(props) {
         }
       } else {
         a.textContent = a.dataset.nextStateText;
+        a.append(getIcon('chev-right-white'));
       }
     }
   });
