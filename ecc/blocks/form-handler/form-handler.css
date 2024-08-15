@@ -407,9 +407,8 @@
 }
 
 .form-handler .form-handler-ctas-panel a.preview-btns svg {
-  width: 24px;
-  height: 24px;
-  vertical-align: middle;
+  height: 20px;
+  width: 28px;
 }
 
 .form-handler .form-handler-ctas-panel .form-handler-panel-wrapper .con-button.outline {
