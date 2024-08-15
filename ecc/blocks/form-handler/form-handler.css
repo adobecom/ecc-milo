@@ -375,13 +375,7 @@
   margin-right: 104px;
 }
 
-.form-handler .form-handler-ctas-panel .form-handler-forward-wrapper .action-area:first-child {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.form-handler .form-handler-ctas-panel .form-handler-forward-wrapper .action-area:last-child {
+.form-handler .form-handler-ctas-panel .form-handler-forward-wrapper .action-area {
   display: flex;
   align-items: center;
   gap: 16px;
