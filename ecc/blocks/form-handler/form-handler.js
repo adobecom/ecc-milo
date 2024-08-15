@@ -151,14 +151,6 @@ function getCurrentFragment(props) {
 }
 
 function validateRequiredFields(fields) {
-  const { search } = window.location;
-  const urlParams = new URLSearchParams(search);
-  const skipValidation = urlParams.get('skipValidation');
-
-  if (skipValidation === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
-    return true;
-  }
-
   return fields.length === 0 || Array.from(fields).every((f) => f.value);
 }
 
