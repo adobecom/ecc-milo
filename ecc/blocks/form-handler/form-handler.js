@@ -605,22 +605,6 @@ function updateCtas(props) {
         a.classList.remove('preview-not-ready');
       }
     }
-
-    if (a.classList.contains('next-button')) {
-      a.innerHTML = '';
-      console.log(props, a)
-      if (props.currentStep === props.maxStep) {
-        if (props.eventDataResp.published) {
-          a.textContent = a.dataset.republishStateText;
-        } else {
-          a.textContent = a.dataset.finalStateText;
-        }
-        a.prepend(getIcon('golden-rocket'));
-      } else {
-        a.textContent = a.dataset.nextStateText;
-        a.append(getIcon('chev-right-white'));
-      }
-    }
   });
 }
 
