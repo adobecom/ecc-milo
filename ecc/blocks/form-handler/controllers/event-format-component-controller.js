@@ -24,14 +24,6 @@ function prepopulateTimeZone(component) {
 }
 
 function initStepLock(component) {
-  const { search } = window.location;
-  const urlParams = new URLSearchParams(search);
-  const skipValidation = urlParams.get('skipValidation');
-
-  if (skipValidation === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
-    return;
-  }
-
   const step = component.closest('.fragment');
   const inputs = component.querySelectorAll('#bu-select-input, #series-select-input');
 
