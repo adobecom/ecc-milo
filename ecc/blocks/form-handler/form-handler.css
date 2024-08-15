@@ -173,6 +173,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  transition: background-color 0.2s, filter 0.2s;
 }
 
 .form-handler .side-menu ul li a {
@@ -374,13 +375,7 @@
   margin-right: 104px;
 }
 
-.form-handler .form-handler-ctas-panel .form-handler-forward-wrapper .action-area:first-child {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.form-handler .form-handler-ctas-panel .form-handler-forward-wrapper .action-area:last-child {
+.form-handler .form-handler-ctas-panel .form-handler-forward-wrapper .action-area {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -399,7 +394,7 @@
 }
 
 .form-handler .form-handler-ctas-panel a.next-button:hover {
-  filter: invert();
+  background-color: var(--color-black)
 } 
 
 .form-handler .form-handler-ctas-panel a.fill {
