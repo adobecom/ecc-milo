@@ -367,8 +367,9 @@
 }
 
 .form-handler .form-handler-ctas-panel .form-handler-forward-wrapper > div:first-of-type {
-  padding-right: 16px;
-  border-right: 2px solid var(--color-black);
+  padding-right: 64px;
+  border-right: 1px solid var(--color-black);
+  margin-right: 120px;
 }
 
 .form-handler .form-handler-ctas-panel a.disabled,
@@ -402,6 +403,13 @@
 .form-handler .form-handler-ctas-panel a.fill:hover {
   text-decoration: none;
   filter: invert();
+}
+
+.form-handler .form-handler-ctas-panel a.preview-btns svg {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  margin-right: 4px;
 }
 
 .form-handler .form-handler-ctas-panel .form-handler-panel-wrapper .con-button.outline {
