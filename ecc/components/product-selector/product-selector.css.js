@@ -11,13 +11,13 @@ fieldset {
   padding: 0;
 }
 
-.rsvp-field-wrapper {
+.product-field-wrapper {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.rsvp-field-wrapper img.product-img {
+.product-field-wrapper img.product-img {
   display: block;
   width: 40px;
   height: 40px;

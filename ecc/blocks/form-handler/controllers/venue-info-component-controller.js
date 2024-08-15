@@ -108,6 +108,35 @@ export default async function init(component, props) {
 
   const { venue, showVenuePostEvent } = eventData;
 
+  const venueNameInput = component.querySelector('#venue-info-venue-name');
+  const addressInput = component.querySelector('#venue-info-venue-address');
+  const cityInput = component.querySelector('#location-city');
+  const stateInput = component.querySelector('#location-state');
+  const stateCodeInput = component.querySelector('#location-state-code');
+  const postalCodeInput = component.querySelector('#location-zip-code');
+  const countryInput = component.querySelector('#location-country');
+  const placeLatInput = component.querySelector('#google-place-lat');
+  const placeLngInput = component.querySelector('#google-place-lng');
+  const placeIdInput = component.querySelector('#google-place-id');
+  const mapUrlInput = component.querySelector('#google-map-url');
+  const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
+
+  venueNameInput.addEventListener('change', () => {
+    if (!venueNameInput.value) {
+      changeInputValue(addressInput, 'value', '');
+      changeInputValue(cityInput, 'value', '');
+      changeInputValue(stateInput, 'value', '');
+      changeInputValue(stateCodeInput, 'value', '');
+      changeInputValue(postalCodeInput, 'value', '');
+      changeInputValue(countryInput, 'value', '');
+      changeInputValue(placeLatInput, 'value', '');
+      changeInputValue(placeLngInput, 'value', '');
+      changeInputValue(placeIdInput, 'value', '');
+      changeInputValue(mapUrlInput, 'value', '');
+      changeInputValue(gmtoffsetInput, 'value', '');
+    }
+  });
+
   if (venue) {
     const {
       venueName,
@@ -121,17 +150,18 @@ export default async function init(component, props) {
       mapUrl,
     } = venue;
 
-    changeInputValue(component.querySelector('#venue-info-venue-name'), 'value', venueName);
-    changeInputValue(component.querySelector('#venue-info-venue-address'), 'value', address);
-    changeInputValue(component.querySelector('#location-city'), 'value', city);
-    changeInputValue(component.querySelector('#location-state'), 'value', state);
-    changeInputValue(component.querySelector('#location-state-code'), 'value', statecode);
-    changeInputValue(component.querySelector('#location-zip-code'), 'value', postalCode);
-    changeInputValue(component.querySelector('#location-country'), 'value', country);
-    changeInputValue(component.querySelector('#google-place-lat'), 'value', venue.coordinates?.lat);
-    changeInputValue(component.querySelector('#google-place-lng'), 'value', venue.coordinates?.lon);
-    changeInputValue(component.querySelector('#google-place-id'), 'value', placeId);
-    changeInputValue(component.querySelector('#google-map-url'), 'value', mapUrl);
+    changeInputValue(venueNameInput, 'value', venueName);
+    changeInputValue(addressInput, 'value', address);
+    changeInputValue(cityInput, 'value', city);
+    changeInputValue(stateInput, 'value', state);
+    changeInputValue(stateCodeInput, 'value', statecode);
+    changeInputValue(postalCodeInput, 'value', postalCode);
+    changeInputValue(countryInput, 'value', country);
+    changeInputValue(placeLatInput, 'value', venue.coordinates?.lat);
+    changeInputValue(placeLngInput, 'value', venue.coordinates?.lon);
+    changeInputValue(placeIdInput, 'value', placeId);
+    changeInputValue(mapUrlInput, 'value', mapUrl);
+    changeInputValue(gmtoffsetInput, 'value', venue.gmtOffset);
 
     if (venueName) component.classList.add('prefilled');
   }
@@ -141,18 +171,18 @@ export default async function init(component, props) {
   }
 
   const getVenueDataInForm = () => {
-    const venueName = component.querySelector('#venue-info-venue-name').value;
-    const address = component.querySelector('#venue-info-venue-address').value;
-    const city = component.querySelector('#location-city').value;
-    const state = component.querySelector('#location-state').value;
-    const stateCode = component.querySelector('#location-state-code').value;
-    const postalCode = component.querySelector('#location-zip-code').value;
-    const country = component.querySelector('#location-country').value;
-    const placeId = component.querySelector('#google-place-id').value;
-    const mapUrl = component.querySelector('#google-map-url').value;
-    const lat = +component.querySelector('#google-place-lat').value;
-    const lon = +component.querySelector('#google-place-lng').value;
-    const gmtOffset = +component.querySelector('#google-place-gmt-offset').value;
+    const venueName = venueNameInput.value;
+    const address = addressInput.value;
+    const city = cityInput.value;
+    const state = stateInput.value;
+    const stateCode = stateCodeInput.value;
+    const postalCode = postalCodeInput.value;
+    const country = countryInput.value;
+    const placeId = placeIdInput.value;
+    const mapUrl = mapUrlInput.value;
+    const lat = +placeLatInput.value;
+    const lon = +placeLngInput.value;
+    const gmtOffset = +gmtoffsetInput.value;
 
     const venueData = {
       venueName,

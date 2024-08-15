@@ -56,8 +56,8 @@ export function convertTo24HourFormat(timeStr) {
   return `${formattedHours}:${formattedMinutes}:00`;
 }
 
-export function getEventPageHost(published = false) {
-  if (window.location.href.includes('.hlx.') || !published) {
+export function getEventPageHost() {
+  if (window.location.href.includes('.hlx.')) {
     return window.location.origin.replace(window.location.hostname, `${ECC_ENV}--events-milo--adobecom.hlx.page`);
   }
 
@@ -162,8 +162,8 @@ export async function decorateTextfield(cell, extraOptions) {
 }
 
 export function changeInputValue(input, attr, value) {
-  if (!input || !value) return;
-  input[attr] = value;
+  if (!input) return;
+  input[attr] = value || '';
   input.dispatchEvent(new Event('change'));
 }
 

@@ -43,6 +43,7 @@ export function cloneFilter(obj) {
     'hostEmail',
     'rsvpFormFields',
     'relatedProducts',
+    'venue',
   ];
 
   const output = {};
@@ -128,17 +129,21 @@ function buildThumbnail(data) {
     const heroImage = images.find((photo) => photo.imageKind === 'event-hero-image');
     const venueImage = images.find((photo) => photo.imageKind === 'venue-image');
 
-    const img = createTag('img', {
-      class: 'event-thumbnail-img',
-      src: (cardImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
-      || cardImage?.imageUrl
-      || (heroImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
-      || heroImage?.imageUrl
-      || (venueImage?.sharepointUrl && cardImage?.sharepointUrl.replace('https://www.adobe.com', getEventPageHost(data.published)))
-      || venueImage?.imageUrl
-      || images[0]?.imageUrl
-      || '/ecc/icons/icon-placeholder.svg',
-    });
+    // TODO: remove after no more adobe.com images
+    const imgSrc = (cardImage?.sharepointUrl
+      && `${getEventPageHost()}${cardImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+    || cardImage?.imageUrl
+    || (heroImage?.sharepointUrl
+      && `${getEventPageHost()}${heroImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+    || heroImage?.imageUrl
+    || (venueImage?.sharepointUrl
+      && `${getEventPageHost()}${venueImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+    || venueImage?.imageUrl
+    || images[0]?.imageUrl;
+
+    const img = createTag('img', { class: 'event-thumbnail-img' });
+
+    if (imgSrc) img.src = imgSrc;
     container.append(img);
   };
 
@@ -287,19 +292,21 @@ function initMoreOptions(props, config, eventObj, row) {
 
     if (eventObj.detailPagePath) {
       previewPre.href = (() => {
-        const url = new URL(`${getEventPageHost(eventObj.published)}${eventObj.detailPagePath}`);
+        const url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
         url.searchParams.set('previewMode', 'true');
         url.searchParams.set('cachebuster', Date.now());
         url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
         return url.toString();
       })();
+      previewPre.target = '_blank';
       previewPost.href = (() => {
-        const url = new URL(`${getEventPageHost(eventObj.published)}${eventObj.detailPagePath}`);
+        const url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
         url.searchParams.set('previewMode', 'true');
         url.searchParams.set('cachebuster', Date.now());
         url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
         return url.toString();
       })();
+      previewPost.target = '_blank';
     } else {
       previewPre.classList.add('disabled');
       previewPost.classList.add('disabled');
