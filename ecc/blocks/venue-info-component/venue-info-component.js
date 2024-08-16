@@ -155,6 +155,7 @@ export default function init(el) {
           id: 'venue-info-venue-address',
           quiet: true,
           size: 'xl',
+          readonly: true,
         });
         break;
       case 3:
