@@ -4,7 +4,7 @@ import { ECC_ENV } from '../../../scripts/scripts.js';
 import { changeInputValue, getSecret } from '../../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler.js';
 
-function togglePrefillableFields(component, showPrefilledFields) {
+function togglePrefillableFieldsHiddenState(component, showPrefilledFields) {
   const addressInput = component.querySelector('#venue-info-venue-address');
   const cityInput = component.querySelector('#location-city');
   const stateInput = component.querySelector('#location-state');
@@ -96,7 +96,7 @@ function initAutocomplete(el) {
       changeInputValue(placeId, 'value', place.place_id);
       changeInputValue(mapUrl, 'value', place.url);
 
-      togglePrefillableFields(el, true);
+      togglePrefillableFieldsHiddenState(el, false);
     }
 
     if (place.geometry) {
@@ -135,7 +135,7 @@ export default async function init(component, props) {
   const mapUrlInput = component.querySelector('#google-map-url');
   const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
 
-  togglePrefillableFields(component, false);
+  togglePrefillableFieldsHiddenState(component, true);
 
   venueNameInput.addEventListener('change', () => {
     if (!venueNameInput.value) {
@@ -181,7 +181,7 @@ export default async function init(component, props) {
 
     if (venueName) {
       component.classList.add('prefilled');
-      togglePrefillableFields(component, true);
+      togglePrefillableFieldsHiddenState(component, false);
     }
   }
 
