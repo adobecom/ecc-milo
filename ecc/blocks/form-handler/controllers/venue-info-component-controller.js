@@ -4,6 +4,18 @@ import { ECC_ENV } from '../../../scripts/scripts.js';
 import { changeInputValue, getSecret } from '../../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler.js';
 
+function togglePrefillableFields(component, showPrefilledFields) {
+  const addressInput = component.querySelector('#venue-info-venue-address');
+  const cityInput = component.querySelector('#location-city');
+  const stateInput = component.querySelector('#location-state');
+  const postalCodeInput = component.querySelector('#location-zip-code');
+  const countryInput = component.querySelector('#location-country');
+
+  [addressInput, cityInput, stateInput, postalCodeInput, countryInput].forEach((input) => {
+    input.classList.toggle('hidden', showPrefilledFields);
+  });
+}
+
 async function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');
   const apiKey = await getSecret(`${ECC_ENV}-google-places-api`);
@@ -83,6 +95,8 @@ function initAutocomplete(el) {
       changeInputValue(country, 'value', addressInfo.country);
       changeInputValue(placeId, 'value', place.place_id);
       changeInputValue(mapUrl, 'value', place.url);
+
+      togglePrefillableFields(el, true);
     }
 
     if (place.geometry) {
@@ -120,6 +134,8 @@ export default async function init(component, props) {
   const placeIdInput = component.querySelector('#google-place-id');
   const mapUrlInput = component.querySelector('#google-map-url');
   const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
+
+  togglePrefillableFields(component, false);
 
   venueNameInput.addEventListener('change', () => {
     if (!venueNameInput.value) {
@@ -163,7 +179,10 @@ export default async function init(component, props) {
     changeInputValue(mapUrlInput, 'value', mapUrl);
     changeInputValue(gmtoffsetInput, 'value', venue.gmtOffset);
 
-    if (venueName) component.classList.add('prefilled');
+    if (venueName) {
+      component.classList.add('prefilled');
+      togglePrefillableFields(component, true);
+    }
   }
 
   if (showVenuePostEvent) {
