@@ -47,7 +47,7 @@ export function convertTo24HourFormat(timeStr) {
   if (period === 'PM' && hours !== 12) {
     hours += 12;
   } else if (period === 'AM' && hours === 12) {
-    hours = 0;
+    hours = 24;
   }
 
   const formattedHours = hours.toString().padStart(2, '0');
