@@ -584,12 +584,15 @@ function initFormCtas(props) {
   });
 
   backBtn.addEventListener('click', async () => {
+    toggleBtnsSubmittingState(true);
     const resp = await saveEvent(props);
     if (resp?.error) {
       buildErrorMessage(props, resp);
     } else {
       props.currentStep -= 1;
     }
+
+    toggleBtnsSubmittingState(false);
   });
 }
 
@@ -666,6 +669,29 @@ function initDeepLink(props) {
   }
 }
 
+function updateStatusTag(props) {
+  const { eventDataResp } = props;
+
+  if (eventDataResp?.published === undefined) return;
+
+  const currentFragment = getCurrentFragment(props);
+
+  const headingSection = currentFragment.querySelector(':scope > .section:first-child');
+
+  const eixstingStatusTag = headingSection.querySelector('.event-status-tag');
+  if (eixstingStatusTag) eixstingStatusTag.remove();
+
+  const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
+  const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
+  const dot = eventDataResp.published ? getIcon('dot-purple') : getIcon('dot-green');
+  const text = eventDataResp.published ? 'Published' : 'Draft';
+  const statusTag = createTag('span', { class: 'event-status-tag' });
+
+  statusTag.append(dot, text);
+  heading.parentElement?.replaceChild(headingWrapper, heading);
+  headingWrapper.append(heading, statusTag);
+}
+
 async function buildECCForm(el) {
   const props = {
     el,
@@ -691,6 +717,7 @@ async function buildECCForm(el) {
           renderFormNavigation(target, oldValue, value);
           updateSideNav(target);
           initRequiredFieldsValidation(target);
+          updateStatusTag(target);
           break;
         }
 
@@ -746,6 +773,8 @@ async function buildECCForm(el) {
   updateRequiredFields(proxyProps);
   enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
+  updateStatusTag(proxyProps);
+
   el.addEventListener('show-error-toast', (e) => {
     e.stopPropagation();
     e.preventDefault();
