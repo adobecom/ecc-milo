@@ -234,8 +234,14 @@
   cursor: pointer;
 }
 
+.form-handler .side-menu .nav-item:disabled {
+  pointer-events: none;
+  cursor: unset;
+}
+
 .form-handler .side-menu .nav-item.disabled {
   pointer-events: none;
+  cursor: unset;
   opacity: 0.5;
 }
 
