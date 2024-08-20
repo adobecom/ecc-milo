@@ -17,6 +17,7 @@ export const style = css`
     margin: 24px;
     box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
     display: flex;
+    background-color: var(--color-white);
 }
 
 profile-ui {
