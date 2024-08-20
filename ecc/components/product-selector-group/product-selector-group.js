@@ -103,7 +103,8 @@ export default class ProductSelectorGroup extends LitElement {
           </div>
         </product-selector>
       `)}
-      <repeater-element text="Add product promotion" @repeat=${this.addProduct}></repeater-element>
+      ${this.selectedProducts.length < uniqueProducts.length ? html`<repeater-element text="Add product promotion" @repeat=${this.addProduct}></repeater-element>` : nothing}
+      
     `;
   }
 }
