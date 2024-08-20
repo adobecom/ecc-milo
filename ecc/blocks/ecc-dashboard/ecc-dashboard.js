@@ -209,7 +209,7 @@ function sortData(props, config, options = {}) {
     let valA;
     let valB;
 
-    if ((field === 'title' || field === 'venueId')) {
+    if ((field === 'title')) {
       valA = a[field]?.toLowerCase() || '';
       valB = b[field]?.toLowerCase() || '';
       return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
@@ -218,6 +218,18 @@ function sortData(props, config, options = {}) {
     if (field === 'startDate' || field === 'modificationTime') {
       valA = new Date(a[field]);
       valB = new Date(b[field]);
+      return sortAscending ? valA - valB : valB - valA;
+    }
+
+    if (field === 'venueName') {
+      valA = a.venue?.venueName?.toLowerCase() || '';
+      valB = b.venue?.venueName?.toLowerCase() || '';
+      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    }
+
+    if (typeof a[field] === typeof b[field] && typeof a[field] === 'number') {
+      valA = a[field] || 0;
+      valB = b[field] || 0;
       return sortAscending ? valA - valB : valB - valA;
     }
 
@@ -538,9 +550,9 @@ function initSorting(props, config) {
     published: 'PUBLISH STATUS',
     startDate: 'DATE RUN',
     modificationTime: 'LAST MODIFIED',
-    venueId: 'VENUE NAME',
+    venueName: 'VENUE NAME',
     timezone: 'GEO',
-    externalEventId: 'RSVP DATA',
+    attendeeCount: 'RSVP DATA',
     manage: 'MANAGE',
   };
 
