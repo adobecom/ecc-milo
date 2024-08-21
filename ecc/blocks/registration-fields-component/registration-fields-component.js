@@ -10,7 +10,11 @@ function convertString(input) {
   return result;
 }
 
-async function decorateRSVPFields(row) {
+async function decorateRSVPFields(el) {
+  const row = el.querySelector(':scope > div:last-of-type');
+
+  if (!row) return;
+
   row.classList.add('rsvp-checkboxes');
   const configSheetLocation = row.querySelector('a')?.href;
   const config = await fetch(configSheetLocation)
@@ -30,6 +34,8 @@ async function decorateRSVPFields(row) {
   row.innerHTML = '';
   row.append(fieldConfigTable);
 
+  el.dataset.mandatedfields = config.data.filter((f) => f.Required === 'x').map((f) => f.Field);
+
   config.data.filter((f) => f.Required !== 'x' && f.Type !== 'submit').forEach((field) => {
     const fieldRow = createTag('tr', { class: 'field-row' }, '', { parent: tbody });
     const tds = [];
@@ -46,5 +52,5 @@ async function decorateRSVPFields(row) {
 export default async function init(el) {
   el.classList.add('form-component');
   generateToolTip(el.querySelector(':scope > div:first-of-type'));
-  await decorateRSVPFields(el.querySelector(':scope > div:last-of-type'));
+  await decorateRSVPFields(el);
 }

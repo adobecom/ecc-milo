@@ -549,7 +549,7 @@ export async function updateEvent(eventId, payload) {
 
 export async function publishEvent(eventId, payload) {
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify({ ...payload, published: true });
+  const raw = JSON.stringify({ ...payload, published: true, liveUpdate: true });
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -570,7 +570,7 @@ export async function publishEvent(eventId, payload) {
 
 export async function unpublishEvent(eventId, payload) {
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify({ ...payload, published: false });
+  const raw = JSON.stringify({ ...payload, published: false, liveUpdate: true });
   const options = await constructRequestOptions('PUT', raw);
 
   try {

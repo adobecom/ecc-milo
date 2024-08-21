@@ -2,7 +2,7 @@
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const defaultFields = ['firstName', 'lastName', 'email', 'jobTitle'];
+  const defaultFields = component.dataset.mandatedfields?.split(',');
 
   const rsvpFormFields = {
     visible: [...defaultFields, ...Array.from(component.querySelectorAll('sp-checkbox.check-appear[checked]')).map((f) => f.name)],

@@ -10,11 +10,14 @@ export function onSubmit(component, props) {
   const selectedProducts = productGroup?.getSelectedProducts();
 
   if (selectedProducts) {
-    const relatedProducts = selectedProducts.map((p) => ({
-      name: p.title,
-      showProductBlade: !!p.showProductBlade,
-      tags: p.tags.map((t) => t.tagID).join(','),
-    }));
+    const topicsVal = props.payload.fullTopicsValue?.map((x) => JSON.parse(x));
+    const relatedProducts = selectedProducts
+      .filter((p) => topicsVal.find((t) => p.tagID.includes(t.tagID)))
+      .map((p) => ({
+        name: p.title,
+        showProductBlade: !!p.showProductBlade,
+        tags: p.tags.map((t) => t.tagID).join(','),
+      }));
 
     props.payload = { ...props.payload, relatedProducts };
   }
@@ -68,12 +71,22 @@ async function updateProductSelector(component, props) {
     (p) => topicsVal.find((t) => p.tagID.includes(t.tagID)) && supportedProducts.includes(p.title),
   );
 
-  productGroups.forEach((p) => {
-    p.setAttribute('data-products', JSON.stringify(products));
-    p.setAttribute('data-selected-topics', JSON.stringify(topicsVal));
-    p.requestUpdate();
+  productGroups.forEach((pg) => {
+    pg.setAttribute('data-products', JSON.stringify(products));
+    pg.setAttribute('data-selected-topics', JSON.stringify(topicsVal));
+    pg.requestUpdate();
 
-    p.shadowRoot.querySelectorAll('product-selector').forEach((ps) => {
+    const selectedProducts = pg.getSelectedProducts();
+
+    selectedProducts.forEach((sp, i) => {
+      const isProductAvailable = products.find((p) => p.name === sp.name);
+
+      if (!isProductAvailable) {
+        pg.deleteProduct(i);
+      }
+    });
+
+    pg.shadowRoot.querySelectorAll('product-selector').forEach((ps) => {
       ps.dispatchEvent(new CustomEvent('update-product', {
         detail: { product: ps.selectedProduct },
         bubbles: true,
