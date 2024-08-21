@@ -20,7 +20,7 @@ const DEFAULT_FIELD_LABELS = {
   addSocialMediaRepeater: 'Add Social Media',
 };
 
-const SPEAKER_TYPE = ['Host', 'Speaker'];
+const SPEAKER_TYPE = ['Host', 'Speaker', 'Judge'];
 // eslint-disable-next-line max-len
 const SUPPORTED_SOCIAL = ['YouTube', 'LinkedIn', 'Web', 'X', 'TikTok', 'Instagram', 'Facebook', 'Pinterest'];
 
