@@ -236,7 +236,7 @@ export async function replaceVenue(eventId, venueId, venueData) {
 
 export async function createEvent(payload) {
   const { host } = getAPIConfig().esl[ECC_ENV];
-  const raw = JSON.stringify(payload);
+  const raw = JSON.stringify({ ...payload, liveUpdate: false });
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -528,7 +528,7 @@ export async function updateSpeaker(profile, seriesId) {
 
 export async function updateEvent(eventId, payload) {
   const { host } = getAPIConfig().esp[ECC_ENV];
-  const raw = JSON.stringify(payload);
+  const raw = JSON.stringify({ ...payload, liveUpdate: false });
   const options = await constructRequestOptions('PUT', raw);
 
   try {
