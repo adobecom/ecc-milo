@@ -193,7 +193,7 @@ export async function deleteImage(configs, imageId) {
 }
 
 export async function createVenue(eventId, venueData) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esl[ECC_ENV];
   const raw = JSON.stringify(venueData);
   const options = await constructRequestOptions('POST', raw);
 
@@ -214,7 +214,7 @@ export async function createVenue(eventId, venueData) {
 }
 
 export async function replaceVenue(eventId, venueId, venueData) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esl[ECC_ENV];
   const raw = JSON.stringify(venueData);
   const options = await constructRequestOptions('PUT', raw);
 
