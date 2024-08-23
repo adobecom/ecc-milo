@@ -108,7 +108,7 @@ export default class PartnerSelectorGroup extends LitElement {
           @update-partner=${(event) => this.handlePartnerUpdate(event.detail.partner, index)} @select-partner=${(event) => this.handlePartnerSelect(event.detail.partner, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.hasOnlyOneUnsavedPartnerLeft() ? nothing : html`
-              <img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => this.deletePartner(index)}></img>
+              <img class="icon icon-remove-circle" src="${this.partners.length === 1 ? '/ecc/icons/delete.svg' : '/ecc/icons/remove-circle.svg'}" alt="remove-repeater" @click=${() => this.deletePartner(index)}></img>
             `}
           </div>
           ${imgTag}

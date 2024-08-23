@@ -128,7 +128,7 @@
   outline: none;
 }
 
-.form-handler sp-textfield[quiet]:focus {
+.form-handler sp-textfield[quiet]:not(:read-only):focus {
   outline: 1px var(--color-gray-500) solid;
   border-radius: 4px;
 }
@@ -169,6 +169,10 @@
 
 .form-handler .form-handler-ctas-panel a {
   font-size: var(--type-body-s-size);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 0.2s, filter 0.2s;
 }
 
 .form-handler .side-menu ul li a {
@@ -230,8 +234,14 @@
   cursor: pointer;
 }
 
+.form-handler .side-menu .nav-item:disabled {
+  pointer-events: none;
+  cursor: unset;
+}
+
 .form-handler .side-menu .nav-item.disabled {
   pointer-events: none;
+  cursor: unset;
   opacity: 0.5;
 }
 
@@ -285,11 +295,24 @@
   color: var(--color-red);
 }
 
+.form-handler .main-frame .section:first-of-type .step-heading-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.form-handler .main-frame .section:first-of-type .step-heading-wrapper .event-status-tag {
+  padding: 0 8px;
+  background-color: var(--color-white);
+  border-radius: 4px;
+}
+
 .form-handler .main-frame .section:not(:first-of-type) {
   padding: 24px 56px;
   border-radius: 10px;
   margin: 24px;
   box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
+  background-color: var(--color-white);
 }
 
 .form-handler .fragment.hidden {
@@ -349,7 +372,6 @@
 .form-handler .form-handler-ctas-panel .form-handler-panel-wrapper > div {
   display: flex;
   align-items: center;
-  gap: 14px;
 }
 
 .form-handler .form-handler-ctas-panel .form-handler-backward-wrapper .back-btn {
@@ -365,9 +387,20 @@
   width: 20px;
 }
 
+.form-handler .main-frame .section:first-of-type .step-heading-wrapper .event-status-tag .icon {
+  margin-right: 4px;
+}
+
 .form-handler .form-handler-ctas-panel .form-handler-forward-wrapper > div:first-of-type {
-  padding-right: 16px;
-  border-right: 2px solid var(--color-black);
+  padding-right: 64px;
+  border-right: 1px solid var(--color-black);
+  margin-right: 104px;
+}
+
+.form-handler .form-handler-ctas-panel .form-handler-forward-wrapper .action-area {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .form-handler .form-handler-ctas-panel a.disabled,
@@ -383,8 +416,8 @@
 }
 
 .form-handler .form-handler-ctas-panel a.next-button:hover {
-  filter: invert();
-}
+  background-color: var(--color-black)
+} 
 
 .form-handler .form-handler-ctas-panel a.fill {
   background-color: var(--color-gray-200);
@@ -395,12 +428,16 @@
   min-height: 21px;
   padding: 7px 18px 8px;
   border: 2px solid var(--color-white);
-  display: inline-block;
 }
 
 .form-handler .form-handler-ctas-panel a.fill:hover {
   text-decoration: none;
   filter: invert();
+}
+
+.form-handler .form-handler-ctas-panel a.preview-btns svg {
+  height: 20px;
+  width: 28px;
 }
 
 .form-handler .form-handler-ctas-panel .form-handler-panel-wrapper .con-button.outline {

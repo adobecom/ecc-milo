@@ -151,14 +151,6 @@ function getCurrentFragment(props) {
 }
 
 function validateRequiredFields(fields) {
-  const { search } = window.location;
-  const urlParams = new URLSearchParams(search);
-  const skipValidation = urlParams.get('skipValidation');
-
-  if (skipValidation === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
-    return true;
-  }
-
   return fields.length === 0 || Array.from(fields).every((f) => f.value);
 }
 
@@ -446,10 +438,16 @@ function renderFormNavigation(props, prevStep, currentStep) {
   frags[prevStep].classList.add('hidden');
   frags[currentStep].classList.remove('hidden');
 
-  if (currentStep === props.maxStep) {
-    nextBtn.textContent = nextBtn.dataset.finalStateText;
+  if (props.currentStep === props.maxStep) {
+    if (props.eventDataResp.published) {
+      nextBtn.textContent = nextBtn.dataset.republishStateText;
+    } else {
+      nextBtn.textContent = nextBtn.dataset.finalStateText;
+    }
+    nextBtn.prepend(getIcon('golden-rocket'));
   } else {
     nextBtn.textContent = nextBtn.dataset.nextStateText;
+    nextBtn.append(getIcon('chev-right-white'));
   }
 
   backBtn.classList.toggle('disabled', currentStep === 0);
@@ -481,6 +479,7 @@ function initFormCtas(props) {
   const forwardWrapper = createTag('div', { class: 'form-handler-forward-wrapper' }, '', { parent: panelWrapper });
 
   forwardActionsWrappers.forEach((w) => {
+    w.classList.add('action-area');
     forwardWrapper.append(w);
   });
 
@@ -520,22 +519,13 @@ function initFormCtas(props) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
           const [nextStateText, finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
+
           cta.textContent = nextStateText;
+          cta.append(getIcon('chev-right-white'));
           cta.dataset.nextStateText = nextStateText;
           cta.dataset.finalStateText = finalStateText;
           cta.dataset.doneStateText = doneStateText;
           cta.dataset.republishStateText = republishStateText;
-
-          if (props.currentStep === props.maxStep) {
-            if (props.eventDataResp.published) {
-              cta.textContent = republishStateText;
-            } else {
-              cta.textContent = finalStateText;
-            }
-            cta.prepend(getIcon('golden-rocket'));
-          } else {
-            cta.textContent = nextStateText;
-          }
         }
 
         cta.addEventListener('click', async (e) => {
@@ -594,12 +584,15 @@ function initFormCtas(props) {
   });
 
   backBtn.addEventListener('click', async () => {
+    toggleBtnsSubmittingState(true);
     const resp = await saveEvent(props);
     if (resp?.error) {
       buildErrorMessage(props, resp);
     } else {
       props.currentStep -= 1;
     }
+
+    toggleBtnsSubmittingState(false);
   });
 }
 
@@ -618,13 +611,15 @@ function updateCtas(props) {
 
     if (a.classList.contains('next-button')) {
       if (props.currentStep === props.maxStep) {
-        if (eventDataResp.published) {
+        if (props.eventDataResp.published) {
           a.textContent = a.dataset.republishStateText;
         } else {
           a.textContent = a.dataset.finalStateText;
         }
+        a.prepend(getIcon('golden-rocket'));
       } else {
         a.textContent = a.dataset.nextStateText;
+        a.append(getIcon('chev-right-white'));
       }
     }
   });
@@ -688,6 +683,29 @@ function initDeepLink(props) {
   }
 }
 
+function updateStatusTag(props) {
+  const { eventDataResp } = props;
+
+  if (eventDataResp?.published === undefined) return;
+
+  const currentFragment = getCurrentFragment(props);
+
+  const headingSection = currentFragment.querySelector(':scope > .section:first-child');
+
+  const eixstingStatusTag = headingSection.querySelector('.event-status-tag');
+  if (eixstingStatusTag) eixstingStatusTag.remove();
+
+  const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
+  const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
+  const dot = eventDataResp.published ? getIcon('dot-purple') : getIcon('dot-green');
+  const text = eventDataResp.published ? 'Published' : 'Draft';
+  const statusTag = createTag('span', { class: 'event-status-tag' });
+
+  statusTag.append(dot, text);
+  heading.parentElement?.replaceChild(headingWrapper, heading);
+  headingWrapper.append(heading, statusTag);
+}
+
 async function buildECCForm(el) {
   const props = {
     el,
@@ -713,6 +731,7 @@ async function buildECCForm(el) {
           renderFormNavigation(target, oldValue, value);
           updateSideNav(target);
           initRequiredFieldsValidation(target);
+          updateStatusTag(target);
           break;
         }
 
@@ -768,6 +787,8 @@ async function buildECCForm(el) {
   updateRequiredFields(proxyProps);
   enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
+  updateStatusTag(proxyProps);
+
   el.addEventListener('show-error-toast', (e) => {
     e.stopPropagation();
     e.preventDefault();

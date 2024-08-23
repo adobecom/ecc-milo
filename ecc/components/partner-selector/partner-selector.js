@@ -154,9 +154,10 @@ export default class PartnerSelector extends LitElement {
             </div>
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>
-              <sp-textfield pattern=${LINK_REGEX} value=${this.partner.link} placeholder="Enter partner full URL", @change=${(event) => {
+              <sp-textfield pattern=${LINK_REGEX} value=${this.partner.link} placeholder="Enter partner full URL" @change=${(event) => {
   this.updatePartner({ link: event.target.value });
-}}></sp-textfield>
+  // FIXME: I really shouldn't need to do this, but the pattern attribute doesn't reset properly.
+}} ?valid=${this.partner.link?.match(LINK_REGEX)}></sp-textfield>
             </div>
           </div>
         </div>

@@ -31,6 +31,10 @@ function buildTerms(terms) {
 }
 
 async function loadPreview(component, templateId) {
+  const existingPreview = component.querySelector('.terms-conditions-preview');
+
+  if (existingPreview) return;
+
   let host;
   if (window.location.href.includes('.hlx.')) {
     host = window.location.origin.replace(window.location.hostname, `${ECC_ENV}--events-milo--adobecom.hlx.page`);
@@ -39,23 +43,24 @@ async function loadPreview(component, templateId) {
   }
 
   const rsvpFormLocation = `${host}${templateId.substring(0, templateId.lastIndexOf('/'))}/rsvp-form`;
-  const text = await fetchThrottledMemoizedText(`${rsvpFormLocation}.plain.html`).catch(() => ({}))
-    .catch(() => ({}));
+  const resp = await fetchThrottledMemoizedText(`${rsvpFormLocation}.plain.html`);
 
-  if (!text) {
+  if (!resp) {
     component.remove();
     return;
   }
 
-  const doc = new DOMParser().parseFromString(text, 'text/html');
-  const termsConditionsRow = doc.querySelector('.events-form > div:nth-of-type(3)');
+  if (typeof resp === 'string') {
+    const doc = new DOMParser().parseFromString(resp, 'text/html');
+    const termsConditionsRow = doc.querySelector('.events-form > div:nth-of-type(3)');
 
-  if (!termsConditionsRow) {
-    component.remove();
-    return;
+    if (!termsConditionsRow) {
+      component.remove();
+      return;
+    }
+
+    component.append(buildTerms(termsConditionsRow));
   }
-
-  component.append(buildTerms(termsConditionsRow));
 }
 
 export async function onUpdate(component, props) {
