@@ -187,7 +187,7 @@
 }
 
 .attendee-management-table table .table-header-row th {
-  padding-right: 16px;
+  padding: 0 16px;
   font-weight: 700;
   text-align: left;
   font-size: var(--type-body-xxs-size);
@@ -253,10 +253,11 @@
 }
 
 .attendee-management-table table .attendee-row td {
-  padding-right: 16px;
+  padding: 4px 16px;
   position: relative;
   font-size: var(--type-body-xs-size);
-  min-width: 180px;
+  line-height: var(--type-body-xs-lh);
+  min-width: 120px;
 }
 
 .attendee-management-table .attendee-row .dashboard-attendee-tool-box {
