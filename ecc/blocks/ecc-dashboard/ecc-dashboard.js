@@ -498,6 +498,8 @@ function updatePaginationControl(pagination, currentPage, totalPages) {
 }
 
 function decoratePagination(props, config) {
+  if (!props.filteredData.length) return;
+
   const totalPages = Math.ceil(props.filteredData.length / +config['page-size']);
   const paginationContainer = createTag('div', { class: 'pagination-container' });
   const chevLeft = getIcon('chev-left');
@@ -565,6 +567,8 @@ function initSorting(props, config) {
     th.append(getIcon('chev-down'), getIcon('chev-up'));
     th.classList.add('sortable', key);
     th.addEventListener('click', () => {
+      if (!props.filteredData.length) return;
+
       thead.querySelectorAll('th').forEach((h) => {
         if (th !== h) {
           h.classList.remove('active');
@@ -580,18 +584,31 @@ function initSorting(props, config) {
   });
 }
 
+function buildNoSearchResultsScreen(el, config) {
+  const noSearchResultsRow = createTag('tr', { class: 'no-search-results-row' });
+  const noSearchResultsCol = createTag('td', { colspan: '100%' }, getIcon('empty-dashboard'), { parent: noSearchResultsRow });
+  createTag('h2', {}, config['no-search-results-heading'], { parent: noSearchResultsCol });
+  createTag('p', {}, config['no-search-results-text'], { parent: noSearchResultsCol });
+
+  el.append(noSearchResultsRow);
+}
+
 function populateTable(props, config) {
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   tBody.innerHTML = '';
 
-  const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
+  if (!props.paginatedData.length) {
+    buildNoSearchResultsScreen(tBody, config);
+  } else {
+    const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
 
-  for (let i = 0; i < endOfPage; i += 1) {
-    populateRow(props, config, i);
+    for (let i = 0; i < endOfPage; i += 1) {
+      populateRow(props, config, i);
+    }
+
+    props.el.querySelector('.pagination-container')?.remove();
+    decoratePagination(props, config);
   }
-
-  props.el.querySelector('.pagination-container')?.remove();
-  decoratePagination(props, config);
 }
 
 function filterData(props, config, query) {
@@ -685,6 +702,7 @@ async function buildDashboard(el, config) {
       set(target, prop, value, receiver) {
         target[prop] = value;
         populateTable(receiver, config);
+
         return true;
       },
     };
