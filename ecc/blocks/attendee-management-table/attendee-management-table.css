@@ -2,6 +2,7 @@
   font-family: var(--body-font-family);
   padding: 40px;
   margin: auto;
+  min-height: calc(100vh - 211);
 }
 
 .attendee-management-table .loading-screen {

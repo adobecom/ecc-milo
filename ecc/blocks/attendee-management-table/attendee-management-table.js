@@ -399,8 +399,8 @@ function buildEventPicker(props) {
 
   const sidePanel = props.el.querySelector('.dashboard-side-panel');
   const eventsPickerWrapper = createTag('div', { class: 'events-picker-wrapper' }, '', { parent: sidePanel });
-  createTag('sp-field-label', {}, 'Select an Event', { parent: eventsPickerWrapper });
-  const eventsPicker = createTag('sp-picker', { class: 'events-picker' }, '', { parent: eventsPickerWrapper });
+  createTag('sp-field-label', {}, 'Current event', { parent: eventsPickerWrapper });
+  const eventsPicker = createTag('sp-picker', { class: 'events-picker', label: 'Choose an event' }, '', { parent: eventsPickerWrapper });
 
   if (props.currentEventId) eventsPicker.value = props.currentEventId;
 
@@ -432,6 +432,14 @@ function clearActionArea(props) {
   const actionArea = props.el.querySelector('.dashboard-actions-container');
   const searchInput = actionArea.querySelector('input');
   searchInput.value = '';
+}
+
+function resetSort(props) {
+  const thRow = props.el.querySelector('thead tr');
+  thRow.querySelectorAll('th').forEach((th) => {
+    th.classList.remove('active');
+    th.classList.remove('desc-sort');
+  });
 }
 
 async function buildDashboard(el, config) {
@@ -471,10 +479,11 @@ async function buildDashboard(el, config) {
       }
 
       if (prop === 'currentEventId') {
-        updateDashboardHeader(props);
         clearActionArea(props);
+        resetSort(props);
       }
 
+      updateDashboardHeader(props);
       populateTable(receiver, config);
 
       return true;
