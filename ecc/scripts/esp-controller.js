@@ -790,7 +790,7 @@ export async function deleteAttendee(eventId, attendeeId) {
   }
 }
 
-export async function getAttendees(eventId) {
+export async function getEventAttendees(eventId) {
   if (!eventId) return false;
 
   const { host } = getAPIConfig().esp[ECC_ENV];
@@ -810,6 +810,37 @@ export async function getAttendees(eventId) {
     window.lana?.log(`Failed to fetch attendees for event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
   }
+}
+
+export async function getAllEventAttendees(eventId) {
+  const recurGetAttendees = async (fullAttendeeArr = [], nextPageToken = null) => {
+    const { host } = getAPIConfig().esp[ECC_ENV];
+    const options = await constructRequestOptions('GET');
+    const fetchUrl = nextPageToken ? `${host}/v1/events/${eventId}/attendees?nextPageToken=${nextPageToken}` : `${host}/v1/events/${eventId}/attendees`;
+
+    return fetch(fetchUrl, options)
+      .then((response) => {
+        if (!response.ok) {
+          window.lana?.log(`Failed to fetch attendees for event ${eventId}. Status:`, response.status);
+          return { ok: response.ok, status: response.status, error: response.statusText };
+        }
+
+        return response.json();
+      })
+      .then((data) => {
+        if (data.nextPageToken) {
+          return recurGetAttendees(fullAttendeeArr.concat(data.attendees), data.nextPageToken);
+        }
+
+        return fullAttendeeArr.concat(data.attendees);
+      })
+      .catch((error) => {
+        window.lana?.log(`Failed to fetch attendees for event ${eventId}. Error:`, error);
+        return { ok: false, status: 'Network Error', error: error.message };
+      });
+  };
+
+  return recurGetAttendees();
 }
 
 export async function getAttendee(eventId, attendeeId) {

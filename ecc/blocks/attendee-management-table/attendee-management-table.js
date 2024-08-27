@@ -1,8 +1,9 @@
-import { getAttendees, getEvents } from '../../scripts/esp-controller.js';
+import { getAllEventAttendees, getEvents } from '../../scripts/esp-controller.js';
 import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import { getIcon, buildNoAccessScreen, camelToSentenceCase } from '../../scripts/utils.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
+import { SearchablePicker } from '../../components/searchable-picker/searchable-picker.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -135,24 +136,6 @@ function sortData(props, config, options = {}) {
   props.filteredData = props.filteredData.sort((a, b) => {
     let valA;
     let valB;
-
-    if ((field === 'title')) {
-      valA = a[field]?.toLowerCase() || '';
-      valB = b[field]?.toLowerCase() || '';
-      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    }
-
-    if (field === 'startDate' || field === 'modificationTime') {
-      valA = new Date(a[field]);
-      valB = new Date(b[field]);
-      return sortAscending ? valA - valB : valB - valA;
-    }
-
-    if (field === 'venueName') {
-      valA = a.venue?.venueName?.toLowerCase() || '';
-      valB = b.venue?.venueName?.toLowerCase() || '';
-      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
-    }
 
     if (typeof a[field] === typeof b[field] && typeof a[field] === 'number') {
       valA = a[field] || 0;
@@ -347,15 +330,6 @@ function buildDashboardTable(props, config) {
   createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
   initSorting(props, config);
   populateTable(props, config);
-
-  const usp = new URLSearchParams(window.location.search);
-  if (usp.get('newAttendeeId')) {
-    const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
-    if (modTimeHeader) {
-      props.currentSort = { field: 'modificationTime', el: modTimeHeader };
-      sortData(props, config, { direction: 'desc' });
-    }
-  }
 }
 
 async function getEventsArray() {
@@ -368,22 +342,10 @@ async function getEventsArray() {
   return resp.events;
 }
 
-async function getAttendeesArray(props) {
-  const eventId = props.currentEventId;
-  const resp = await getAttendees(eventId);
-
-  if (resp.error) {
-    return [];
-  }
-
-  return resp.attendees;
-}
-
 function renderTableLoadingOverlay(props) {
   const tableContainer = props.el.querySelector('.dashboard-table-container');
   const loadingOverlay = createTag('div', { class: 'loading-overlay' });
   createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: loadingOverlay });
-  createTag('sp-field-label', {}, 'Loading Attendees...', { parent: loadingOverlay });
   tableContainer.append(loadingOverlay);
 }
 
@@ -400,20 +362,27 @@ function buildEventPicker(props) {
   const sidePanel = props.el.querySelector('.dashboard-side-panel');
   const eventsPickerWrapper = createTag('div', { class: 'events-picker-wrapper' }, '', { parent: sidePanel });
   createTag('sp-field-label', {}, 'Current event', { parent: eventsPickerWrapper });
-  const eventsPicker = createTag('sp-picker', { class: 'events-picker', label: 'Choose an event' }, '', { parent: eventsPickerWrapper });
+  const eventsPicker = createTag('searchable-picker', {
+    class: 'events-picker',
+    label: 'Choose an event',
+    'data-items': JSON.stringify(events.map((event) => ({ label: event.title, value: event.eventId }))),
+  }, '', { parent: eventsPickerWrapper });
 
-  if (props.currentEventId) eventsPicker.value = props.currentEventId;
+  if (props.currentEventId) {
+    eventsPicker.value = props.currentEventId;
+    const event = props.events.find((e) => e.eventId === props.currentEventId);
 
-  events.forEach((event) => {
-    createTag('sp-menu-item', { value: event.eventId }, event.title, { parent: eventsPicker });
-  });
+    if (event) eventsPicker.dataset.displayValue = event.title;
+  }
 
-  eventsPicker.addEventListener('change', (e) => {
-    const { value } = e.target;
-    props.currentEventId = value;
+  eventsPicker.addEventListener('picker-change', (e) => {
+    const { detail } = e;
+    props.currentEventId = detail.value;
     renderTableLoadingOverlay(props);
-    getAttendeesArray(props).then((data) => {
-      props.data = data;
+    getAllEventAttendees(props.currentEventId).then((attendees) => {
+      if (!attendees.error) {
+        props.data = attendees;
+      }
       removeTableLoadingOverlay(props);
     });
   });
@@ -442,6 +411,10 @@ function resetSort(props) {
   });
 }
 
+function initCustomLitComponents() {
+  customElements.define('searchable-picker', SearchablePicker);
+}
+
 async function buildDashboard(el, config) {
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
   createTag('sp-underlay', {}, '', { parent: spTheme });
@@ -462,7 +435,8 @@ async function buildDashboard(el, config) {
   let data = [];
 
   if (props.currentEventId) {
-    data = await getAttendeesArray(props);
+    const resp = await getAllEventAttendees(props.currentEventId);
+    if (!resp.error) data = resp;
   }
 
   props.data = data;
@@ -494,7 +468,7 @@ async function buildDashboard(el, config) {
   buildDashboardSidePanel(proxyProps);
   buildDashboardHeader(proxyProps, config);
   buildDashboardTable(proxyProps, config);
-
+  initCustomLitComponents();
   setTimeout(() => {
     el.classList.remove('loading');
   }, 10);
@@ -519,6 +493,7 @@ export default async function init(el) {
     import(`${miloLibs}/features/spectrum-web-components/dist/dialog.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/underlay.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/progress-circle.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/picker.js`),
   ]);
 
