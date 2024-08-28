@@ -832,7 +832,7 @@ export async function getAllEventAttendees(eventId) {
           return recurGetAttendees(fullAttendeeArr.concat(data.attendees), data.nextPageToken);
         }
 
-        return fullAttendeeArr.concat(data.attendees);
+        return fullAttendeeArr.concat(data.attendees || []);
       })
       .catch((error) => {
         window.lana?.log(`Failed to fetch attendees for event ${eventId}. Error:`, error);

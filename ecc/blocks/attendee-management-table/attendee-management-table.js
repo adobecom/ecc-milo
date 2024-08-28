@@ -41,10 +41,40 @@ const FILTER_MAP = {
   contactMethod: [],
 };
 
-function updateFilterMap(data) {
-  Object.keys(FILTER_MAP).forEach((key) => {
-    FILTER_MAP[key] = [...new Set(data.map((e) => e[key]))].filter((e) => e);
+function buildFilterMenues(props) {
+  const sidePanel = props.el.querySelector('.dashboard-side-panel');
+
+  if (!sidePanel) return;
+
+  const existingFilterMenus = sidePanel.querySelectorAll('.filter-menu-wrapper');
+  existingFilterMenus.forEach((menu) => menu.remove());
+  const { currentFilters } = props;
+
+  Object.entries(FILTER_MAP).forEach(([key, val]) => {
+    if (!val.length) return;
+
+    const filterMenuWrapper = createTag('div', { class: 'filter-menu-wrapper' }, '', { parent: sidePanel });
+    createTag('sp-field-label', {}, camelToSentenceCase(key), { parent: filterMenuWrapper });
+    const filterMenu = createTag('filter-menu', {}, '', { parent: filterMenuWrapper });
+    filterMenu.items = val;
+    filterMenu.type = key;
+
+    filterMenu.addEventListener('filter-change', (e) => {
+      const { detail } = e;
+      const { type, value } = detail;
+      props.currentFilters[type] = value;
+
+      props.currentFilters = currentFilters;
+    });
   });
+}
+
+function updateFilterMap(props) {
+  Object.keys(FILTER_MAP).forEach((key) => {
+    FILTER_MAP[key] = [...new Set(props.data.map((e) => e[key]))].filter((e) => e);
+  });
+
+  buildFilterMenues(props);
 }
 
 function paginateData(props, config, page) {
@@ -345,28 +375,6 @@ function buildEventPicker(props) {
   });
 }
 
-function buildFilterMenues(props, sidePanel) {
-  const { currentFilters } = props;
-
-  Object.entries(FILTER_MAP).forEach(([key, val]) => {
-    if (!val.length) return;
-
-    const filterMenuWrapper = createTag('div', { class: 'filter-menu-wrapper' }, '', { parent: sidePanel });
-    createTag('sp-field-label', {}, camelToSentenceCase(key), { parent: filterMenuWrapper });
-    const filterMenu = createTag('filter-menu', {}, '', { parent: filterMenuWrapper });
-    filterMenu.items = val;
-    filterMenu.type = key;
-
-    filterMenu.addEventListener('filter-change', (e) => {
-      const { detail } = e;
-      const { type, value } = detail;
-      props.currentFilters[type] = value;
-
-      props.currentFilters = currentFilters;
-    });
-  });
-}
-
 function buildDashboardSidePanel(props) {
   const mainContainer = props.el.querySelector('.dashboard-main-container');
 
@@ -375,7 +383,7 @@ function buildDashboardSidePanel(props) {
   const sidePanel = createTag('div', { class: 'dashboard-side-panel' }, '', { parent: mainContainer });
   buildEventPicker(props);
   createTag('sp-divider', {}, '', { parent: sidePanel });
-  buildFilterMenues(props, sidePanel);
+  buildFilterMenues(props);
 }
 
 function clearActionArea(props) {
@@ -420,13 +428,13 @@ async function buildDashboard(el, config) {
 
   if (props.currentEventId) {
     const resp = await getAllEventAttendees(props.currentEventId);
-    if (!resp.error) data = resp;
+    if (resp && !resp.error) data = resp;
   }
 
   props.data = data;
   props.filteredData = [...data];
   props.paginatedData = [...data];
-  updateFilterMap(data);
+  updateFilterMap(props);
 
   const dataHandler = {
     set(target, prop, value, receiver) {
@@ -435,7 +443,7 @@ async function buildDashboard(el, config) {
       if (prop === 'data') {
         target.filteredData = [...value];
         target.paginatedData = [...value];
-        updateFilterMap(value);
+        updateFilterMap(target);
       }
 
       if (prop === 'currentEventId') {

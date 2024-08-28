@@ -29,6 +29,10 @@ export const style = css`
     display: block;
   }
 
+  sp-menu {
+    width: 100%;
+  }
+
   sp-menu-item.focused {
     background-color: var(--highcontrast-menu-item-background-color-focus, var(--mod-menu-item-background-color-down, var(--spectrum-menu-item-background-color-down)));
   }
