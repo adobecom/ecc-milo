@@ -1,5 +1,5 @@
 import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
-import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
+import { LIBS, MILO_CONFIG, DEV_MODE } from '../../scripts/scripts.js';
 import {
   getIcon,
   buildNoAccessScreen,
@@ -823,11 +823,8 @@ export default async function init(el) {
   ]);
 
   const profile = BlockMediator.get('imsProfile');
-  const { search } = window.location;
-  const urlParams = new URLSearchParams(search);
-  const devMode = urlParams.get('devMode');
 
-  if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
+  if (DEV_MODE === true && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
     });
