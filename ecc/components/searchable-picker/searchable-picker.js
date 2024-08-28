@@ -15,21 +15,17 @@ export class SearchablePicker extends LitElement {
     value: { type: String },
     menuOpen: { type: Boolean },
     focusedIndex: { type: Number },
+    label: { type: String },
   };
 
   constructor() {
     super();
-    this.items = this.dataset.items ? JSON.parse(this.dataset.items) : [];
-    this.filteredItems = [...this.items];
-    this.displayValue = this.dataset.displayValue || '';
+    this.displayValue = this.displayValue || '';
     this.value = '';
     this.menuOpen = false;
     this.focusedIndex = -1;
     this.isClickInsideMenu = false;
-  }
-
-  firstUpdated() {
-    this.shadow = this.shadowRoot;
+    this.label = this.label || '';
   }
 
   handleInput(event) {
@@ -120,7 +116,7 @@ export class SearchablePicker extends LitElement {
         @focus=${this.handleFocus}
         @blur=${this.handleUnfocus}
         @keydown=${this.handleKeyDown}
-        placeholder="Type to search"
+        placeholder=${this.label}
       ></sp-textfield>
       <div class="menu-overlay ${this.menuOpen ? 'open' : ''}">
         <sp-menu>

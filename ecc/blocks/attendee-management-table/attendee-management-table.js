@@ -365,15 +365,17 @@ function buildEventPicker(props) {
   const eventsPicker = createTag('searchable-picker', {
     class: 'events-picker',
     label: 'Choose an event',
-    'data-items': JSON.stringify(events.map((event) => ({ label: event.title, value: event.eventId }))),
   }, '', { parent: eventsPickerWrapper });
 
   if (props.currentEventId) {
     eventsPicker.value = props.currentEventId;
     const event = props.events.find((e) => e.eventId === props.currentEventId);
 
-    if (event) eventsPicker.dataset.displayValue = event.title;
+    if (event) eventsPicker.displayValue = event.title;
   }
+
+  eventsPicker.items = events.map((e) => ({ label: e.title, value: e.eventId }));
+  eventsPicker.filteredItems = eventsPicker.items;
 
   eventsPicker.addEventListener('picker-change', (e) => {
     const { detail } = e;
@@ -393,8 +395,9 @@ function buildDashboardSidePanel(props) {
 
   if (!mainContainer) return;
 
-  createTag('div', { class: 'dashboard-side-panel' }, '', { parent: mainContainer });
+  const sidePanel = createTag('div', { class: 'dashboard-side-panel' }, '', { parent: mainContainer });
   buildEventPicker(props);
+  createTag('sp-divider', {}, '', { parent: sidePanel });
 }
 
 function clearActionArea(props) {
@@ -465,10 +468,10 @@ async function buildDashboard(el, config) {
   };
 
   const proxyProps = new Proxy(props, dataHandler);
+  initCustomLitComponents();
   buildDashboardSidePanel(proxyProps);
   buildDashboardHeader(proxyProps, config);
   buildDashboardTable(proxyProps, config);
-  initCustomLitComponents();
   setTimeout(() => {
     el.classList.remove('loading');
   }, 10);
@@ -495,6 +498,7 @@ export default async function init(el) {
     import(`${miloLibs}/features/spectrum-web-components/dist/progress-circle.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/picker.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/divider.js`),
   ]);
 
   const { search } = window.location;

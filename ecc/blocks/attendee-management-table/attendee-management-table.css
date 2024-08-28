@@ -41,6 +41,10 @@
   flex-direction: column;
 }
 
+.attendee-management-table sp-divider {
+  margin: 16px 0;
+}
+
 .attendee-management-table .dashboard-header {
   display: flex;
   flex-direction: column;
