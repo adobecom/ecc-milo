@@ -21,6 +21,11 @@ export class FilterMenu extends LitElement {
     this.selectedItems = [];
   }
 
+  clearFilter() {
+    this.selectedItems = [];
+    this.displayValue = 'Select filters';
+  }
+
   selectItem(e) {
     const selectedItems = e.target.value;
     this.selectedItems = selectedItems ? selectedItems.split(',') : [];
@@ -55,9 +60,14 @@ export class FilterMenu extends LitElement {
         <sp-popover>
           <sp-menu
             selects="multiple"
-            @change="${this.selectItem}">
+            @change="${this.selectItem}"
+            value=${this.selectedItems.join(',')}
+          >
             ${repeat(this.items, (item) => html`
-              <sp-menu-item value=${item}>
+              <sp-menu-item
+                value=${item}
+                ?selected=${this.selectedItems.includes(item)}
+              >
                 ${item}
               </sp-menu-item>
             `)}

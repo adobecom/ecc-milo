@@ -41,6 +41,21 @@ const FILTER_MAP = {
   contactMethod: [],
 };
 
+function resetFilters(props) {
+  const { currentFilters } = props;
+
+  Object.keys(FILTER_MAP).forEach((key) => {
+    currentFilters[key] = [];
+  });
+
+  const filterMenus = props.el.querySelectorAll('filter-menu');
+  filterMenus.forEach((menu) => {
+    menu.clearFilter();
+  });
+
+  props.currentFilters = currentFilters;
+}
+
 function buildFilterMenues(props) {
   const sidePanel = props.el.querySelector('.dashboard-side-panel');
 
@@ -49,6 +64,12 @@ function buildFilterMenues(props) {
   const existingFilterMenus = sidePanel.querySelectorAll('.filter-menu-wrapper');
   existingFilterMenus.forEach((menu) => menu.remove());
   const { currentFilters } = props;
+
+  const clearAllWrapper = createTag('div', { class: 'filter-menu-wrapper clear-all-wrapper' }, '', { parent: sidePanel });
+  const clearAllButton = createTag('sp-button', { variant: 'primary', size: 's' }, 'Clear all filters', { parent: clearAllWrapper });
+  clearAllButton.addEventListener('click', () => {
+    resetFilters(props);
+  });
 
   Object.entries(FILTER_MAP).forEach(([key, val]) => {
     if (!val.length) return;
@@ -422,6 +443,7 @@ async function buildDashboard(el, config) {
     currentFilters: { ...FILTER_MAP },
     currentQuery: '',
     currentEventId: uspEventId || '',
+    showAllAttendees: false,
   };
 
   let data = [];
