@@ -1,9 +1,16 @@
+/* eslint-disable max-len */
 import { getAllEventAttendees, getEvents } from '../../scripts/esp-controller.js';
 import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
 import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, camelToSentenceCase } from '../../scripts/utils.js';
+import {
+  getIcon,
+  buildNoAccessScreen,
+  camelToSentenceCase,
+  readBlockConfig,
+} from '../../scripts/utils.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { SearchablePicker } from '../../components/searchable-picker/searchable-picker.js';
+import { FilterMenu } from '../../components/filter-menu/filter-menu.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -23,82 +30,21 @@ const ATTENDEE_ATTR_KEYS = [
   'contactMethod',
 ];
 
-export function cloneFilter(obj) {
-  const wl = [
-    'agenda',
-    'topics',
-    'speakers',
-    'sponsors',
-    'attendeeType',
-    'cloudType',
-    'seriesId',
-    'templateId',
-    'communityTopicUrl',
-    'title',
-    'description',
-    'localStartDate',
-    'localEndDate',
-    'localStartTime',
-    'localEndTime',
-    'localStartTimeMillis',
-    'localEndTimeMillis',
-    'timezone',
-    'showAgendaPostAttendee',
-    'showVenuePostAttendee',
-    'showVenueImage',
-    'attendeeLimit',
-    'rsvpDescription',
-    'allowWaitlisting',
-    'hostEmail',
-    'rsvpFormFields',
-    'relatedProducts',
-    'venue',
-  ];
+const FILTER_MAP = {
+  companyName: [],
+  jobTitle: [],
+  industry: [],
+  productsOfInterest: [],
+  companySize: [],
+  age: [],
+  jobLevel: [],
+  contactMethod: [],
+};
 
-  const output = {};
-
-  wl.forEach((attr) => {
-    if (attr !== undefined && attr !== null) {
-      output[attr] = obj[attr];
-    }
+function updateFilterMap(data) {
+  Object.keys(FILTER_MAP).forEach((key) => {
+    FILTER_MAP[key] = [...new Set(data.map((e) => e[key]))].filter((e) => e);
   });
-
-  return output;
-}
-
-function toClassName(name) {
-  return name && typeof name === 'string'
-    ? name.toLowerCase().replace(/[^0-9a-z]/gi, '-')
-    : '';
-}
-
-export function readBlockConfig(block) {
-  return [...block.querySelectorAll(':scope>div')].reduce((config, row) => {
-    if (row.children) {
-      const cols = [...row.children];
-      if (cols[1]) {
-        const valueEl = cols[1];
-        const name = toClassName(cols[0].textContent);
-        if (valueEl.querySelector('a')) {
-          const aArr = [...valueEl.querySelectorAll('a')];
-          if (aArr.length === 1) {
-            config[name] = aArr[0].href;
-          } else {
-            config[name] = aArr.map((a) => a.href);
-          }
-        } else if (valueEl.querySelector('p')) {
-          const pArr = [...valueEl.querySelectorAll('p')];
-          if (pArr.length === 1) {
-            config[name] = pArr[0].innerHTML;
-          } else {
-            config[name] = pArr.map((p) => p.innerHTML);
-          }
-        } else config[name] = row.children[1].innerHTML;
-      }
-    }
-
-    return config;
-  }, {});
 }
 
 function paginateData(props, config, page) {
@@ -285,10 +231,16 @@ function populateTable(props, config) {
   }
 }
 
-function filterData(props, config, query) {
-  const q = query.toLowerCase();
-  // eslint-disable-next-line max-len
-  props.filteredData = props.data.filter((e) => ATTENDEE_ATTR_KEYS.some((key) => e[key]?.toString().toLowerCase().includes(q)));
+function filterData(props, config) {
+  const q = props.currentQuery.toLowerCase();
+  props.filteredData = props.data.filter((e) => {
+    const searchMatch = ATTENDEE_ATTR_KEYS.some((key) => e[key]?.toString().toLowerCase().includes(q));
+    const appliedFilters = Object.entries(props.currentFilters).filter(([, val]) => val.length);
+    const filterMatch = appliedFilters.every(([key, val]) => val.includes(e[key]));
+
+    return searchMatch && filterMatch;
+  });
+
   props.currentPage = 1;
   paginateData(props, config, 1);
   sortData(props, config, { resort: true });
@@ -305,7 +257,10 @@ function buildDashboardHeader(props, config) {
   const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
   searchInputWrapper.append(getIcon('search'));
-  searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
+  searchInput.addEventListener('input', () => {
+    props.currentQuery = searchInput.value;
+    filterData(props, config);
+  });
 
   dashboardHeader.append(textContainer, actionsContainer);
   props.el.prepend(dashboardHeader);
@@ -390,6 +345,28 @@ function buildEventPicker(props) {
   });
 }
 
+function buildFilterMenues(props, sidePanel) {
+  const { currentFilters } = props;
+
+  Object.entries(FILTER_MAP).forEach(([key, val]) => {
+    if (!val.length) return;
+
+    const filterMenuWrapper = createTag('div', { class: 'filter-menu-wrapper' }, '', { parent: sidePanel });
+    createTag('sp-field-label', {}, camelToSentenceCase(key), { parent: filterMenuWrapper });
+    const filterMenu = createTag('filter-menu', {}, '', { parent: filterMenuWrapper });
+    filterMenu.items = val;
+    filterMenu.type = key;
+
+    filterMenu.addEventListener('filter-change', (e) => {
+      const { detail } = e;
+      const { type, value } = detail;
+      props.currentFilters[type] = value;
+
+      props.currentFilters = currentFilters;
+    });
+  });
+}
+
 function buildDashboardSidePanel(props) {
   const mainContainer = props.el.querySelector('.dashboard-main-container');
 
@@ -398,6 +375,7 @@ function buildDashboardSidePanel(props) {
   const sidePanel = createTag('div', { class: 'dashboard-side-panel' }, '', { parent: mainContainer });
   buildEventPicker(props);
   createTag('sp-divider', {}, '', { parent: sidePanel });
+  buildFilterMenues(props, sidePanel);
 }
 
 function clearActionArea(props) {
@@ -416,6 +394,7 @@ function resetSort(props) {
 
 function initCustomLitComponents() {
   customElements.define('searchable-picker', SearchablePicker);
+  customElements.define('filter-menu', FilterMenu);
 }
 
 async function buildDashboard(el, config) {
@@ -432,6 +411,8 @@ async function buildDashboard(el, config) {
     events,
     currentPage: 1,
     currentSort: {},
+    currentFilters: { ...FILTER_MAP },
+    currentQuery: '',
     currentEventId: uspEventId || '',
   };
 
@@ -445,6 +426,7 @@ async function buildDashboard(el, config) {
   props.data = data;
   props.filteredData = [...data];
   props.paginatedData = [...data];
+  updateFilterMap(data);
 
   const dataHandler = {
     set(target, prop, value, receiver) {
@@ -453,11 +435,16 @@ async function buildDashboard(el, config) {
       if (prop === 'data') {
         target.filteredData = [...value];
         target.paginatedData = [...value];
+        updateFilterMap(value);
       }
 
       if (prop === 'currentEventId') {
         clearActionArea(props);
         resetSort(props);
+      }
+
+      if (prop === 'currentFilters') {
+        filterData(props, config);
       }
 
       updateDashboardHeader(props);
@@ -468,10 +455,11 @@ async function buildDashboard(el, config) {
   };
 
   const proxyProps = new Proxy(props, dataHandler);
-  initCustomLitComponents();
+
   buildDashboardSidePanel(proxyProps);
   buildDashboardHeader(proxyProps, config);
   buildDashboardTable(proxyProps, config);
+  initCustomLitComponents();
   setTimeout(() => {
     el.classList.remove('loading');
   }, 10);
@@ -499,6 +487,8 @@ export default async function init(el) {
     import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/picker.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/divider.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/overlay.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/popover.js`),
   ]);
 
   const { search } = window.location;

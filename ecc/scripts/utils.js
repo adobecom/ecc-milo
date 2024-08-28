@@ -226,6 +226,41 @@ export function getServiceName(link) {
   return url.hostname.replace('.com', '').replace('www.', '');
 }
 
+export function toClassName(name) {
+  return name && typeof name === 'string'
+    ? name.toLowerCase().replace(/[^0-9a-z]/gi, '-')
+    : '';
+}
+
+export function readBlockConfig(block) {
+  return [...block.querySelectorAll(':scope>div')].reduce((config, row) => {
+    if (row.children) {
+      const cols = [...row.children];
+      if (cols[1]) {
+        const valueEl = cols[1];
+        const name = toClassName(cols[0].textContent);
+        if (valueEl.querySelector('a')) {
+          const aArr = [...valueEl.querySelectorAll('a')];
+          if (aArr.length === 1) {
+            config[name] = aArr[0].href;
+          } else {
+            config[name] = aArr.map((a) => a.href);
+          }
+        } else if (valueEl.querySelector('p')) {
+          const pArr = [...valueEl.querySelectorAll('p')];
+          if (pArr.length === 1) {
+            config[name] = pArr[0].innerHTML;
+          } else {
+            config[name] = pArr.map((p) => p.innerHTML);
+          }
+        } else config[name] = row.children[1].innerHTML;
+      }
+    }
+
+    return config;
+  }, {});
+}
+
 export const fetchThrottledMemoizedText = (() => {
   const cache = new Map();
   const pending = new Map();
