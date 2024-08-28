@@ -36,6 +36,10 @@
   min-width: 192px;
 }
 
+.attendee-management-table .dashboard-main-container .dashboard-side-panel sp-field-label {
+  font-weight: 700;
+}
+
 .attendee-management-table .events-picker-wrapper {
   display: flex;
   flex-direction: column;
