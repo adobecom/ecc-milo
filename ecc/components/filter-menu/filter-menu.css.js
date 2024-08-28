@@ -13,4 +13,8 @@ export const style = css`
   sp-textfield {
     width: 100%;
   }
+
+  sp-menu {
+    width: 190px;
+  }
 `;
