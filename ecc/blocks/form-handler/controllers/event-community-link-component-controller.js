@@ -33,6 +33,7 @@ export default function init(component, props) {
 
   const updateInputState = () => {
     input.required = checkbox.checked;
+    if (!checkbox.checked) input.value = '';
   };
 
   if (checkbox && input) {
