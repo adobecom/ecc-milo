@@ -63,6 +63,7 @@ export class FilterMenu extends LitElement {
             @change="${this.selectItem}"
             value=${this.selectedItems.join(',')}
           >
+            ${console.log(this.items, this.selectedItems, this.shadowRoot.querySelector('sp-menu')?.value)}
             ${repeat(this.items, (item) => html`
               <sp-menu-item
                 value=${item}
