@@ -33,6 +33,7 @@ function prefillFields(component, props) {
 
     contactHostEl.addEventListener('change', () => {
       hostEmailEl.disabled = !contactHostEl.checked;
+      if (!contactHostEl.checked) hostEmailEl.value = '';
     });
   }
 }
