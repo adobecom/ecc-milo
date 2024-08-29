@@ -126,7 +126,6 @@ export class Profile extends LitElement {
             {
               targetUrl: `/v1/series/${this.seriesId}/speakers/${profile.speakerId}/images`,
               type: 'speaker-photo',
-              altText: `${this.profile.firstName} ${this.profile.lastName} photo`,
             },
             null,
             lastPhoto?.imageId,

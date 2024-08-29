@@ -90,7 +90,7 @@ export default class PartnerSelector extends LitElement {
         const sponsorData = await uploadImage(file, {
           targetUrl: `/v1/series/${this.seriesId}/sponsors/${this.partner.sponsorId}/images`,
           type: 'sponsor-image',
-          altText: `${this.partner.name} image`,
+          altText: `${this.partner.name}`,
         }, null, respJson.image?.imageId);
 
         if (sponsorData) {
