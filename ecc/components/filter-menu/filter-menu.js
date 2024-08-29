@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export */
 /* eslint-disable max-len */
 import { LIBS } from '../../scripts/scripts.js';
 import { camelToSentenceCase } from '../../scripts/utils.js';
@@ -5,7 +6,6 @@ import { style } from './filter-menu.css.js';
 
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
 
-// eslint-disable-next-line import/prefer-default-export
 export class FilterMenu extends LitElement {
   static styles = style;
 
@@ -19,11 +19,6 @@ export class FilterMenu extends LitElement {
     super();
     this.displayValue = 'Select filters';
     this.selectedItems = [];
-  }
-
-  clearFilter() {
-    this.selectedItems = [];
-    this.displayValue = 'Select filters';
   }
 
   selectItem(e) {
@@ -61,9 +56,8 @@ export class FilterMenu extends LitElement {
           <sp-menu
             selects="multiple"
             @change="${this.selectItem}"
-            value=${this.selectedItems.join(',')}
+            .value="${this.selectedItems?.join(',') || ''}"
           >
-            ${console.log(this.items, this.selectedItems, this.shadowRoot.querySelector('sp-menu')?.value)}
             ${repeat(this.items, (item) => html`
               <sp-menu-item
                 value=${item}

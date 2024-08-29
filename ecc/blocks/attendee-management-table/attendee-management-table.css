@@ -40,6 +40,10 @@
   font-weight: 700;
 }
 
+.attendee-management-table .dashboard-main-container .dashboard-side-panel .clear-all-wrapper.hidden {
+  display: none;
+}
+
 .attendee-management-table .events-picker-wrapper {
   display: flex;
   flex-direction: column;

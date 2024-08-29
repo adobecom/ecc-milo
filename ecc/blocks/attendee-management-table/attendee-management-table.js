@@ -41,38 +41,18 @@ const FILTER_MAP = {
   contactMethod: [],
 };
 
-function resetFilters(props) {
-  const { currentFilters } = props;
-
-  Object.keys(FILTER_MAP).forEach((key) => {
-    currentFilters[key] = [];
-  });
-
-  const filterMenus = props.el.querySelectorAll('filter-menu');
-  filterMenus.forEach((menu) => {
-    menu.clearFilter();
-  });
-
-  props.currentFilters = currentFilters;
-}
-
-function buildFilterMenues(props) {
+function buildAllFilterMenues(props) {
   const sidePanel = props.el.querySelector('.dashboard-side-panel');
 
-  if (!sidePanel) return;
+  if (!sidePanel) return null;
 
-  const existingFilterMenus = sidePanel.querySelectorAll('.filter-menu-wrapper');
-  existingFilterMenus.forEach((menu) => menu.remove());
+  const filterMenus = props.el.querySelectorAll('.filter-menu-wrapper:not(.clear-all-wrapper)');
+  filterMenus.forEach((menu) => menu.remove());
+
   const { currentFilters } = props;
 
-  const clearAllWrapper = createTag('div', { class: 'filter-menu-wrapper clear-all-wrapper' }, '', { parent: sidePanel });
-  const clearAllButton = createTag('sp-button', { variant: 'primary', size: 's' }, 'Clear all filters', { parent: clearAllWrapper });
-  clearAllButton.addEventListener('click', () => {
-    resetFilters(props);
-  });
-
-  Object.entries(FILTER_MAP).forEach(([key, val]) => {
-    if (!val.length) return;
+  const menues = Object.entries(FILTER_MAP).filter(([key, val]) => {
+    if (!val.length) return null;
 
     const filterMenuWrapper = createTag('div', { class: 'filter-menu-wrapper' }, '', { parent: sidePanel });
     createTag('sp-field-label', {}, camelToSentenceCase(key), { parent: filterMenuWrapper });
@@ -87,15 +67,43 @@ function buildFilterMenues(props) {
 
       props.currentFilters = currentFilters;
     });
+
+    return filterMenu;
   });
+
+  return menues;
+}
+
+function buildFilters(props) {
+  const sidePanel = props.el.querySelector('.dashboard-side-panel');
+
+  if (!sidePanel) return;
+
+  const existingFilterMenus = sidePanel.querySelectorAll('.filter-menu-wrapper');
+  existingFilterMenus.forEach((menu) => menu.remove());
+
+  const clearAllWrapper = createTag('div', { class: 'filter-menu-wrapper clear-all-wrapper' }, '', { parent: sidePanel });
+  const clearAllButton = createTag('sp-button', { variant: 'primary', size: 's' }, 'Clear all filters', { parent: clearAllWrapper });
+  clearAllButton.addEventListener('click', () => {
+    const { currentFilters } = props;
+
+    Object.keys(FILTER_MAP).forEach((key) => {
+      currentFilters[key] = [];
+    });
+
+    props.currentFilters = currentFilters;
+    const menues = buildAllFilterMenues(props);
+    clearAllWrapper.classList.toggle('hidden', !menues.length);
+  });
+
+  const menues = buildAllFilterMenues(props);
+  clearAllWrapper.classList.toggle('hidden', !menues.length);
 }
 
 function updateFilterMap(props) {
   Object.keys(FILTER_MAP).forEach((key) => {
     FILTER_MAP[key] = [...new Set(props.data.map((e) => e[key]))].filter((e) => e);
   });
-
-  buildFilterMenues(props);
 }
 
 function paginateData(props, config, page) {
@@ -396,6 +404,14 @@ function buildEventPicker(props) {
   });
 }
 
+function updateResetFilterBtnState(props) {
+  const clearAllWrapper = props.el.querySelector('.clear-all-wrapper');
+  const btn = clearAllWrapper.querySelector('sp-button');
+  const { currentFilters } = props;
+  const hasFilters = Object.values(currentFilters).some((val) => val.length);
+  btn.disabled = !hasFilters;
+}
+
 function buildDashboardSidePanel(props) {
   const mainContainer = props.el.querySelector('.dashboard-main-container');
 
@@ -404,7 +420,8 @@ function buildDashboardSidePanel(props) {
   const sidePanel = createTag('div', { class: 'dashboard-side-panel' }, '', { parent: mainContainer });
   buildEventPicker(props);
   createTag('sp-divider', {}, '', { parent: sidePanel });
-  buildFilterMenues(props);
+  buildFilters(props);
+  updateResetFilterBtnState(props);
 }
 
 function clearActionArea(props) {
@@ -465,19 +482,21 @@ async function buildDashboard(el, config) {
       if (prop === 'data') {
         target.filteredData = [...value];
         target.paginatedData = [...value];
-        updateFilterMap(target);
+        updateFilterMap(receiver);
+        buildFilters(receiver);
       }
 
       if (prop === 'currentEventId') {
-        clearActionArea(props);
-        resetSort(props);
+        clearActionArea(target);
+        resetSort(target);
       }
 
       if (prop === 'currentFilters') {
-        filterData(props, config);
+        filterData(target, config);
+        updateResetFilterBtnState(target);
       }
 
-      updateDashboardHeader(props);
+      updateDashboardHeader(target);
       populateTable(receiver, config);
 
       return true;
