@@ -457,7 +457,7 @@ async function buildDashboard(el, config) {
     events,
     currentPage: 1,
     currentSort: {},
-    currentFilters: { ...FILTER_MAP },
+    currentFilters: {},
     currentQuery: '',
     currentEventId: uspEventId || '',
     showAllAttendees: false,
@@ -482,6 +482,7 @@ async function buildDashboard(el, config) {
       if (prop === 'data') {
         target.filteredData = [...value];
         target.paginatedData = [...value];
+        target.currentFilters = {};
         updateFilterMap(receiver);
         buildFilters(receiver);
       }
@@ -493,11 +494,11 @@ async function buildDashboard(el, config) {
 
       if (prop === 'currentFilters') {
         filterData(target, config);
-        updateResetFilterBtnState(target);
       }
 
       updateDashboardHeader(target);
-      populateTable(receiver, config);
+      populateTable(target, config);
+      updateResetFilterBtnState(target);
 
       return true;
     },
