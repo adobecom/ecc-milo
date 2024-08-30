@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { getAllEventAttendees, getEvents } from '../../scripts/esp-controller.js';
 import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
-import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
+import { DEV_MODE, LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
 import {
   getIcon,
   buildNoAccessScreen,
@@ -412,12 +412,24 @@ function updateResetFilterBtnState(props) {
   btn.disabled = !hasFilters;
 }
 
-function buildDashboardSidePanel(props) {
+function buildBackToDashboardBtn(props, config) {
+  const sidePanel = props.el.querySelector('.dashboard-side-panel');
+
+  if (!sidePanel) return;
+
+  const url = new URL(`${window.location.origin}${config['event-dashboard-url']}`);
+  if (DEV_MODE) url.searchParams.set('devMode', true);
+  const backBtn = createTag('a', { class: 'back-btn', href: url.toString() }, 'Back', { parent: sidePanel });
+  backBtn.prepend(getIcon('chev-left'));
+}
+
+function buildDashboardSidePanel(props, config) {
   const mainContainer = props.el.querySelector('.dashboard-main-container');
 
   if (!mainContainer) return;
 
   const sidePanel = createTag('div', { class: 'dashboard-side-panel' }, '', { parent: mainContainer });
+  buildBackToDashboardBtn(props, config);
   buildEventPicker(props);
   createTag('sp-divider', {}, '', { parent: sidePanel });
   buildFilters(props);
@@ -506,7 +518,7 @@ async function buildDashboard(el, config) {
 
   const proxyProps = new Proxy(props, dataHandler);
 
-  buildDashboardSidePanel(proxyProps);
+  buildDashboardSidePanel(proxyProps, config);
   buildDashboardHeader(proxyProps, config);
   buildDashboardTable(proxyProps, config);
   initCustomLitComponents();
@@ -539,6 +551,7 @@ export default async function init(el) {
     import(`${miloLibs}/features/spectrum-web-components/dist/divider.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/overlay.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/popover.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/link.js`),
   ]);
 
   const { search } = window.location;
