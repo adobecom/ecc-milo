@@ -33,6 +33,7 @@ function prefillFields(component, props) {
 
     contactHostEl.addEventListener('change', () => {
       hostEmailEl.disabled = !contactHostEl.checked;
+      if (!contactHostEl.checked) hostEmailEl.value = '';
     });
   }
 }
@@ -62,7 +63,6 @@ export async function onUpdate(component, props) {
   if (!props.eventDataResp) return;
 
   if (props.eventDataResp.cloudType === 'CreativeCloud') {
-    component.querySelector('.attendee-count-wrapper')?.classList.add('hidden');
     component.querySelector('#registration-allow-waitlist')?.classList.add('hidden');
   }
 

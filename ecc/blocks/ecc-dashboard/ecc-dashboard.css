@@ -196,6 +196,11 @@
   transition: background-color 1s;
 }
 
+.ecc-dashboard table .no-search-results-row td {
+  padding: 40px 0;
+  text-align: center;
+}
+
 .ecc-dashboard table .event-row.highlight {
   background-color: #EAEAEA;
 }
