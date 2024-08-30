@@ -509,7 +509,7 @@ async function buildDashboard(el, config) {
       }
 
       updateDashboardHeader(target);
-      populateTable(target, config);
+      populateTable(receiver, config);
       updateResetFilterBtnState(target);
 
       return true;
