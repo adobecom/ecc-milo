@@ -67,7 +67,7 @@ export async function onUpdate(component, props) {
   }
 }
 
-async function populateSeriesOptions(component) {
+async function populateSeriesOptions(props, component) {
   const seriesSelect = component.querySelector('#series-select-input');
   if (!seriesSelect) return;
 
@@ -84,6 +84,11 @@ async function populateSeriesOptions(component) {
   });
 
   seriesSelect.pending = false;
+
+  seriesSelect.addEventListener('change', () => {
+    const seriesId = seriesSelect.value;
+    props.payload = { ...props.payload, ...{ seriesId } };
+  });
 }
 
 export default async function init(component, props) {
@@ -104,7 +109,7 @@ export default async function init(component, props) {
   const eventData = props.eventDataResp;
   prepopulateTimeZone(component);
   initStepLock(component);
-  await populateSeriesOptions(component);
+  await populateSeriesOptions(props, component);
 
   const {
     cloudType,

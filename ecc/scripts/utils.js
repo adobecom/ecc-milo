@@ -125,7 +125,7 @@ function mergeOptions(defaultOptions, overrideOptions) {
   return combinedOptions;
 }
 
-export async function decorateTextfield(cell, extraOptions) {
+export async function decorateTextfield(cell, extraOptions, negativeHelperText = '') {
   cell.classList.add('text-field-row');
   const cols = cell.querySelectorAll(':scope > div');
   if (!cols.length) return;
@@ -152,6 +152,10 @@ export async function decorateTextfield(cell, extraOptions) {
     },
     extraOptions,
   ));
+
+  if (negativeHelperText) {
+    createTag('sp-help-text', { variant: 'negative', slot: 'negative-help-text', icon: true }, negativeHelperText, { parent: input });
+  }
 
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
 

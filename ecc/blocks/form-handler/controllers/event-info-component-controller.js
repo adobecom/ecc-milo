@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
+import { getEvents } from '../../../scripts/esp-controller.js';
 import { LIBS } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../scripts/utils.js';
 
@@ -345,13 +346,33 @@ export async function onUpdate(component, props) {
   // do nothing
 }
 
-export default function init(component, props) {
+export default async function init(component, props) {
+  const allEventsResp = await getEvents();
+  const allEvents = allEventsResp?.events;
   const eventData = props.eventDataResp;
+
+  const eventTitleInput = component.querySelector('#info-field-event-title');
   const startTimeInput = component.querySelector('#time-picker-start-time');
   const endTimeInput = component.querySelector('#time-picker-end-time');
   const datePicker = component.querySelector('#event-info-date-picker');
 
   initCalendar(component);
+
+  eventTitleInput.addEventListener('change', () => {
+    const sameSeriesEvents = allEvents?.filter((e) => {
+      const matchInPayload = e.seriesId === props.payload.seriesId;
+      const matchInResp = e.seriesId === eventData.seriesId;
+      return matchInPayload || matchInResp;
+    }) || [];
+
+    if (sameSeriesEvents.some((event) => event.title === eventTitleInput.value)) {
+      eventTitleInput.classList.add('show-negative-help-text');
+      eventTitleInput.invalid = true;
+    } else {
+      eventTitleInput.classList.remove('show-negative-help-text');
+      eventTitleInput.invalid = false;
+    }
+  });
 
   endTimeInput.addEventListener('change', () => {
     if (datePicker.dataset.startDate !== datePicker.dataset.endDate) return;

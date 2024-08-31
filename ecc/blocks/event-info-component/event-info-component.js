@@ -94,7 +94,7 @@ export default function init(el) {
         generateToolTip(r);
         break;
       case 1:
-        await decorateTextfield(r, { id: 'info-field-event-title' });
+        await decorateTextfield(r, { id: 'info-field-event-title' }, 'This event title is already taken');
         break;
       case 2:
         await decorateTextarea(r, { id: 'info-field-event-description', grows: true, quiet: true });

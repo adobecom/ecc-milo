@@ -11,6 +11,15 @@
   width: 100%;
 }
 
+.event-info-component sp-textfield#info-field-event-title sp-help-text {
+  position: absolute;
+  display: none;
+}
+
+.event-info-component sp-textfield#info-field-event-title.show-negative-help-text sp-help-text {
+  display: flex;
+}
+
 .event-info-component sp-textfield.textarea-input {
   font-size: var(--type-body-m-size);;
   width: 100%;
