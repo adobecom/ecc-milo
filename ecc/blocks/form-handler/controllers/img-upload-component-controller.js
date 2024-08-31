@@ -32,7 +32,6 @@ function updateImgUploadComponentConfigs(component) {
 
   const configs = {
     type,
-    altText: `Event ${component.classList[1]} image`,
     targetUrl: `/v1/events/${getFilteredCachedResponse().eventId}/images`,
   };
 
@@ -107,7 +106,7 @@ export default async function init(component, props) {
 
       dialog.innerHTML = '';
 
-      createTag('h1', { slot: 'heading' }, `You are deleting the ${configs.altText.toLowerCase()}.`, { parent: dialog });
+      createTag('h1', { slot: 'heading' }, 'You are deleting this image.', { parent: dialog });
       createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
       const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
       const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to delete this image', { parent: buttonContainer });
