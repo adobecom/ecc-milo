@@ -230,6 +230,24 @@ export function getServiceName(link) {
   return url.hostname.replace('.com', '').replace('www.', '');
 }
 
+export async function miloReplaceKey(key) {
+  try {
+    const [utils, placeholders] = await Promise.all([
+      import(`${LIBS}/utils/utils.js`),
+      import(`${LIBS}/features/placeholders.js`),
+    ]);
+
+    const { getConfig } = utils;
+    const { replaceKey } = placeholders;
+    const config = getConfig();
+
+    return await replaceKey(key, config);
+  } catch (error) {
+    window.lana?.log('Error trying to replace placeholder:', error);
+    return 'RSVP';
+  }
+}
+
 export const fetchThrottledMemoizedText = (() => {
   const cache = new Map();
   const pending = new Map();
