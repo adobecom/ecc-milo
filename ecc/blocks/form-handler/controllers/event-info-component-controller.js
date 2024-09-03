@@ -346,6 +346,15 @@ export async function onUpdate(component, props) {
   // do nothing
 }
 
+function checkEventDuplication(event, currentEvent) {
+  const titleMatch = event.title === currentEvent.title;
+  const startDateMatch = event.localStartDate === currentEvent.localStartDate;
+  const venueIdMatch = event.venue?.placeId === currentEvent.venuePlaceId;
+  const eventIdNoMatch = event.eventId !== currentEvent.eventId;
+
+  return titleMatch && startDateMatch && venueIdMatch && eventIdNoMatch;
+}
+
 export default async function init(component, props) {
   const allEventsResp = await getEvents();
   const allEvents = allEventsResp?.events;
@@ -365,7 +374,12 @@ export default async function init(component, props) {
       return matchInPayload || matchInResp;
     }) || [];
 
-    if (sameSeriesEvents.some((event) => event.title === eventTitleInput.value)) {
+    if (sameSeriesEvents.some((event) => checkEventDuplication(event, {
+      title: eventTitleInput.value,
+      localStartDate: datePicker.dataset.startDate,
+      venuePlaceId: props.payload.venuePlaceId || eventData.venue?.placeId,
+      eventId: eventData.eventId,
+    }))) {
       eventTitleInput.classList.add('show-negative-help-text');
       eventTitleInput.invalid = true;
     } else {
@@ -407,6 +421,12 @@ export default async function init(component, props) {
         option.disabled = false;
       });
     }
+
+    props.payload = {
+      ...props.payload,
+      localStartDate: datePicker.dataset.startDate,
+      localEndDate: datePicker.dataset.endDate,
+    };
   });
 
   const {

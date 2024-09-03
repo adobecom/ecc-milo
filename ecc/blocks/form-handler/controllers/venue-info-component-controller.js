@@ -29,7 +29,7 @@ async function loadGoogleMapsAPI(callback) {
   document.head.appendChild(script);
 }
 
-function initAutocomplete(el) {
+function initAutocomplete(el, props) {
   const venueName = el.querySelector('#venue-info-venue-name');
   // eslint-disable-next-line no-undef
   if (!google) return;
@@ -97,6 +97,7 @@ function initAutocomplete(el) {
       changeInputValue(mapUrl, 'value', place.url);
 
       togglePrefillableFieldsHiddenState(el, false);
+      props.payload = { ...props.payload, venuePlaceId: place.place_id };
     }
 
     if (place.geometry) {
@@ -118,7 +119,7 @@ export async function onUpdate(component, props) {
 export default async function init(component, props) {
   const eventData = props.eventDataResp;
 
-  await loadGoogleMapsAPI(() => initAutocomplete(component));
+  await loadGoogleMapsAPI(() => initAutocomplete(component, props));
 
   const { venue, showVenuePostEvent } = eventData;
 
