@@ -151,7 +151,7 @@ function getCurrentFragment(props) {
 }
 
 function validateRequiredFields(fields) {
-  return fields.length === 0 || Array.from(fields).every((f) => f.value);
+  return fields.length === 0 || Array.from(fields).every((f) => f.value && !f.invalid);
 }
 
 function onStepValidate(props) {
