@@ -2,7 +2,7 @@
 /* eslint-disable no-use-before-define */
 import { getEvents } from '../../../scripts/esp-controller.js';
 import { LIBS } from '../../../scripts/scripts.js';
-import { changeInputValue } from '../../../scripts/utils.js';
+import { changeInputValue, miloReplaceKey } from '../../../scripts/utils.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
@@ -357,6 +357,7 @@ function checkEventDuplication(event, currentEvent) {
 
 export default async function init(component, props) {
   const allEventsResp = await getEvents();
+  const dupEventError = await miloReplaceKey('duplicate-event-title-error');
   const allEvents = allEventsResp?.events;
   const eventData = props.eventDataResp;
 
@@ -382,6 +383,12 @@ export default async function init(component, props) {
     }))) {
       eventTitleInput.classList.add('show-negative-help-text');
       eventTitleInput.invalid = true;
+
+      const toastArea = props.el.querySelector('.toast-area');
+      const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, dupEventError, { parent: toastArea });
+      toast.addEventListener('close', () => {
+        toast.remove();
+      });
     } else {
       eventTitleInput.classList.remove('show-negative-help-text');
       eventTitleInput.invalid = false;
