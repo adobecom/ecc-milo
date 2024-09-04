@@ -154,7 +154,7 @@ export async function decorateTextfield(cell, extraOptions, negativeHelperText =
   ));
 
   if (negativeHelperText) {
-    createTag('sp-help-text', { variant: 'negative', slot: 'negative-help-text', icon: true }, negativeHelperText, { parent: input });
+    createTag('sp-help-text', { variant: 'negative', slot: 'negative-help-text' }, negativeHelperText, { parent: input });
   }
 
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);

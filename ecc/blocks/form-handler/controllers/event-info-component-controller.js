@@ -2,7 +2,7 @@
 /* eslint-disable no-use-before-define */
 import { getEvents } from '../../../scripts/esp-controller.js';
 import { BlockMediator, LIBS } from '../../../scripts/scripts.js';
-import { changeInputValue, miloReplaceKey } from '../../../scripts/utils.js';
+import { changeInputValue } from '../../../scripts/utils.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
@@ -415,6 +415,11 @@ export default async function init(component, props) {
 
   BlockMediator.subscribe('eventDupMetrics', (store) => {
     const metrics = store.newValue;
+    const helpText = component.querySelector('sp-textfield#info-field-event-title sp-help-text');
+
+    helpText.textContent = helpText.textContent
+      .replace('[[seriesName]]', metrics.seriesName)
+      .replace('[[eventName]]', metrics.title);
 
     const isDup = sameSeriesEvents?.some((e) => checkEventDuplication(e, metrics));
     if (isDup) {
