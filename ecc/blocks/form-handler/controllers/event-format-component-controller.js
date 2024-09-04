@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { getSeries } from '../../../scripts/esp-controller.js';
-import { MILO_CONFIG, LIBS } from '../../../scripts/scripts.js';
+import { MILO_CONFIG, LIBS, BlockMediator } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -87,7 +87,7 @@ async function populateSeriesOptions(props, component) {
 
   seriesSelect.addEventListener('change', () => {
     const seriesId = seriesSelect.value;
-    props.payload = { ...props.payload, ...{ seriesId } };
+    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), seriesId });
   });
 }
 

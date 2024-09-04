@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { createVenue, replaceVenue } from '../../../scripts/esp-controller.js';
-import { ECC_ENV } from '../../../scripts/scripts.js';
+import { BlockMediator, ECC_ENV } from '../../../scripts/scripts.js';
 import { changeInputValue, getSecret } from '../../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler.js';
 
@@ -97,7 +97,7 @@ function initAutocomplete(el, props) {
       changeInputValue(mapUrl, 'value', place.url);
 
       togglePrefillableFieldsHiddenState(el, false);
-      props.payload = { ...props.payload, venuePlaceId: place.place_id };
+      BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city: addressInfo.city });
     }
 
     if (place.geometry) {
@@ -179,6 +179,7 @@ export default async function init(component, props) {
     changeInputValue(placeIdInput, 'value', placeId);
     changeInputValue(mapUrlInput, 'value', mapUrl);
     changeInputValue(gmtoffsetInput, 'value', venue.gmtOffset);
+    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), placeId });
 
     if (venueName) {
       component.classList.add('prefilled');

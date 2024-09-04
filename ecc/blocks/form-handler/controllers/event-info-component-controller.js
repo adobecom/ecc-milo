@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
 import { getEvents } from '../../../scripts/esp-controller.js';
-import { LIBS } from '../../../scripts/scripts.js';
+import { BlockMediator, LIBS } from '../../../scripts/scripts.js';
 import { changeInputValue, miloReplaceKey } from '../../../scripts/utils.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
@@ -346,11 +346,11 @@ export async function onUpdate(component, props) {
   // do nothing
 }
 
-function checkEventDuplication(event, currentEvent) {
-  const titleMatch = event.title === currentEvent.title;
-  const startDateMatch = event.localStartDate === currentEvent.localStartDate;
-  const venueIdMatch = event.venue?.placeId === currentEvent.venuePlaceId;
-  const eventIdNoMatch = event.eventId !== currentEvent.eventId;
+function checkEventDuplication(event, compareMetrics) {
+  const titleMatch = event.title === compareMetrics.title;
+  const startDateMatch = event.localStartDate === compareMetrics.startDate;
+  const venueIdMatch = event.venue?.city === compareMetrics.city;
+  const eventIdNoMatch = event.eventId !== compareMetrics.eventId;
 
   return titleMatch && startDateMatch && venueIdMatch && eventIdNoMatch;
 }
@@ -375,24 +375,7 @@ export default async function init(component, props) {
       return matchInPayload || matchInResp;
     }) || [];
 
-    if (sameSeriesEvents.some((event) => checkEventDuplication(event, {
-      title: eventTitleInput.value,
-      localStartDate: datePicker.dataset.startDate,
-      venuePlaceId: props.payload.venuePlaceId || eventData.venue?.placeId,
-      eventId: eventData.eventId,
-    }))) {
-      eventTitleInput.classList.add('show-negative-help-text');
-      eventTitleInput.invalid = true;
-
-      const toastArea = props.el.querySelector('.toast-area');
-      const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, dupEventError, { parent: toastArea });
-      toast.addEventListener('close', () => {
-        toast.remove();
-      });
-    } else {
-      eventTitleInput.classList.remove('show-negative-help-text');
-      eventTitleInput.invalid = false;
-    }
+    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: eventTitleInput.value });
   });
 
   endTimeInput.addEventListener('change', () => {
@@ -429,11 +412,20 @@ export default async function init(component, props) {
       });
     }
 
-    props.payload = {
-      ...props.payload,
-      localStartDate: datePicker.dataset.startDate,
-      localEndDate: datePicker.dataset.endDate,
-    };
+    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), startDate: datePicker.dataset.startDate });
+  });
+
+  BlockMediator.subscribe('eventDupMetrics', (store) => {
+    const metrics = store.newValue;
+
+    const isDup = allEvents?.some((e) => checkEventDuplication(e, metrics));
+    if (isDup) {
+      props.el.classList.add('show-dup-event-error');
+      eventTitleInput.invalid = true;
+    } else {
+      props.el.classList.remove('show-dup-event-error');
+      eventTitleInput.invalid = false;
+    }
   });
 
   const {

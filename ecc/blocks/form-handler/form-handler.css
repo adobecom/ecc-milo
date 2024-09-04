@@ -76,6 +76,13 @@
 
 .form-handler.show-error {
   --mod-textfield-icon-size-invalid: 16px;
+  --mod-textfield-border-color-invalid-default: unset;
+}
+
+.form-handler.show-dup-event-error #info-field-event-title  {
+  --mod-textfield-icon-size-invalid: 16px;
+  --mod-textfield-border-color-invalid-default: unset;
+  
 }
 
 .form-handler .main-frame {
