@@ -357,9 +357,13 @@ function checkEventDuplication(event, compareMetrics) {
 
 export default async function init(component, props) {
   const allEventsResp = await getEvents();
-  const dupEventError = await miloReplaceKey('duplicate-event-title-error');
   const allEvents = allEventsResp?.events;
   const eventData = props.eventDataResp;
+  const sameSeriesEvents = allEvents?.filter((e) => {
+    const matchInPayload = e.seriesId === props.payload.seriesId;
+    const matchInResp = e.seriesId === eventData.seriesId;
+    return matchInPayload || matchInResp;
+  }) || [];
 
   const eventTitleInput = component.querySelector('#info-field-event-title');
   const startTimeInput = component.querySelector('#time-picker-start-time');
@@ -368,13 +372,7 @@ export default async function init(component, props) {
 
   initCalendar(component);
 
-  eventTitleInput.addEventListener('change', () => {
-    const sameSeriesEvents = allEvents?.filter((e) => {
-      const matchInPayload = e.seriesId === props.payload.seriesId;
-      const matchInResp = e.seriesId === eventData.seriesId;
-      return matchInPayload || matchInResp;
-    }) || [];
-
+  eventTitleInput.addEventListener('input', () => {
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: eventTitleInput.value });
   });
 
@@ -418,7 +416,7 @@ export default async function init(component, props) {
   BlockMediator.subscribe('eventDupMetrics', (store) => {
     const metrics = store.newValue;
 
-    const isDup = allEvents?.some((e) => checkEventDuplication(e, metrics));
+    const isDup = sameSeriesEvents?.some((e) => checkEventDuplication(e, metrics));
     if (isDup) {
       props.el.classList.add('show-dup-event-error');
       eventTitleInput.invalid = true;
@@ -426,6 +424,8 @@ export default async function init(component, props) {
       props.el.classList.remove('show-dup-event-error');
       eventTitleInput.invalid = false;
     }
+
+    eventTitleInput.dispatchEvent(new Event('change'));
   });
 
   const {
@@ -450,6 +450,15 @@ export default async function init(component, props) {
     changeInputValue(startTimeInput, 'value', localStartTime || '');
     changeInputValue(endTimeInput, 'value', localEndTime || '');
     changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
+
+    BlockMediator.set('eventDupMetrics', {
+      ...BlockMediator.get('eventDupMetrics'),
+      ...{
+        title,
+        startDate: localStartDate,
+        eventId: eventData.eventId,
+      },
+    });
 
     datePicker.dataset.startDate = localStartDate || '';
     datePicker.dataset.endDate = localEndDate || '';

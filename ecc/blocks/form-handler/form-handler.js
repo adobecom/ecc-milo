@@ -638,6 +638,7 @@ function initNavigation(props) {
 
   navItems.forEach((nav, i) => {
     nav.addEventListener('click', async () => {
+      if (nav.closest('li').classList.contains('active')) return;
       if (!nav.disabled && !sideMenu.classList.contains('disabled')) {
         sideMenu.classList.add('disabled');
 

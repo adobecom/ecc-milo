@@ -82,7 +82,10 @@
 .form-handler.show-dup-event-error #info-field-event-title  {
   --mod-textfield-icon-size-invalid: 16px;
   --mod-textfield-border-color-invalid-default: unset;
-  
+}
+
+.form-handler.show-dup-event-error #info-field-event-title sp-help-text {
+  display: flex;
 }
 
 .form-handler .main-frame {
@@ -102,7 +105,6 @@
   display: flex;
   justify-content: center;
 }
-
 
 .form-handler .side-menu,
 .form-handler .main-frame,

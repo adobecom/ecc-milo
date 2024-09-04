@@ -179,7 +179,7 @@ export default async function init(component, props) {
     changeInputValue(placeIdInput, 'value', placeId);
     changeInputValue(mapUrlInput, 'value', mapUrl);
     changeInputValue(gmtoffsetInput, 'value', venue.gmtOffset);
-    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), placeId });
+    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city });
 
     if (venueName) {
       component.classList.add('prefilled');
