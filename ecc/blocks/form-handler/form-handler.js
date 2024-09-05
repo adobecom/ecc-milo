@@ -375,6 +375,21 @@ function showSaveSuccessMessage(props, detail = { message: 'Edits saved successf
   });
 }
 
+function updateDashboardLink(props) {
+  // FIXME: presuming first link is dashboard link is not good.
+  if (!getFilteredCachedResponse().eventId) return;
+  const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+
+  if (!dashboardLink) return;
+
+  const url = new URL(dashboardLink.href);
+
+  if (url.searchParams.has('eventId')) return;
+
+  url.searchParams.set('newEventId', getFilteredCachedResponse().eventId);
+  dashboardLink.href = url.toString();
+}
+
 async function saveEvent(props, options = { toPublish: false }) {
   try {
     await gatherValues(props);
@@ -395,6 +410,7 @@ async function saveEvent(props, options = { toPublish: false }) {
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
     resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
+    updateDashboardLink(props);
     onEventSave();
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     resp = await updateEvent(
@@ -655,21 +671,6 @@ function initNavigation(props) {
   });
 }
 
-function updateDashboardLink(props) {
-  // FIXME: presuming first link is dashboard link is not good.
-  if (!getFilteredCachedResponse().eventId) return;
-  const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-
-  if (!dashboardLink) return;
-
-  const url = new URL(dashboardLink.href);
-
-  if (url.searchParams.has('eventId')) return;
-
-  url.searchParams.set('newEventId', getFilteredCachedResponse().eventId);
-  dashboardLink.href = url.toString();
-}
-
 function initDeepLink(props) {
   const { hash } = window.location;
 
@@ -751,7 +752,6 @@ async function buildECCForm(el) {
         case 'eventDataResp': {
           setResponseCache(value);
           updateCtas(target);
-          updateDashboardLink(target);
           if (value.error) {
             props.el.classList.add('show-error');
           } else {
