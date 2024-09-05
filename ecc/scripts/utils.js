@@ -125,7 +125,7 @@ function mergeOptions(defaultOptions, overrideOptions) {
   return combinedOptions;
 }
 
-export async function decorateTextfield(cell, extraOptions) {
+export async function decorateTextfield(cell, extraOptions, negativeHelperText = '') {
   cell.classList.add('text-field-row');
   const cols = cell.querySelectorAll(':scope > div');
   if (!cols.length) return;
@@ -152,6 +152,10 @@ export async function decorateTextfield(cell, extraOptions) {
     },
     extraOptions,
   ));
+
+  if (negativeHelperText) {
+    createTag('sp-help-text', { variant: 'negative', slot: 'negative-help-text' }, negativeHelperText, { parent: input });
+  }
 
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
 
@@ -224,6 +228,24 @@ export function getServiceName(link) {
   const url = new URL(link);
 
   return url.hostname.replace('.com', '').replace('www.', '');
+}
+
+export async function miloReplaceKey(key) {
+  try {
+    const [utils, placeholders] = await Promise.all([
+      import(`${LIBS}/utils/utils.js`),
+      import(`${LIBS}/features/placeholders.js`),
+    ]);
+
+    const { getConfig } = utils;
+    const { replaceKey } = placeholders;
+    const config = getConfig();
+
+    return await replaceKey(key, config);
+  } catch (error) {
+    window.lana?.log('Error trying to replace placeholder:', error);
+    return 'RSVP';
+  }
 }
 
 export function toClassName(name) {
