@@ -167,6 +167,7 @@ export const BlockMediator = await import('./deps/block-mediator.min.js').then((
 const { loadArea, setConfig, loadLana } = await import(`${LIBS}/utils/utils.js`);
 export const MILO_CONFIG = setConfig({ ...CONFIG, miloLibs: LIBS });
 export const ECC_ENV = getECCEnv(MILO_CONFIG);
+export const DEV_MODE = new URLSearchParams(window.location.search).has('devMode');
 
 (async function loadPage() {
   await loadLana({ clientId: 'ecc-milo' });
