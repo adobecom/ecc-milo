@@ -7,8 +7,8 @@ import {
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
 import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
-import { LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, getEventPageHost } from '../../scripts/utils.js';
+import { LIBS, MILO_CONFIG, DEV_MODE } from '../../scripts/scripts.js';
+import { getIcon, buildNoAccessScreen, getEventPageHost, readBlockConfig } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 
@@ -63,41 +63,6 @@ function showToast(props, msg, options = {}) {
   toast.addEventListener('close', () => {
     toast.remove();
   });
-}
-
-function toClassName(name) {
-  return name && typeof name === 'string'
-    ? name.toLowerCase().replace(/[^0-9a-z]/gi, '-')
-    : '';
-}
-
-export function readBlockConfig(block) {
-  return [...block.querySelectorAll(':scope>div')].reduce((config, row) => {
-    if (row.children) {
-      const cols = [...row.children];
-      if (cols[1]) {
-        const valueEl = cols[1];
-        const name = toClassName(cols[0].textContent);
-        if (valueEl.querySelector('a')) {
-          const aArr = [...valueEl.querySelectorAll('a')];
-          if (aArr.length === 1) {
-            config[name] = aArr[0].href;
-          } else {
-            config[name] = aArr.map((a) => a.href);
-          }
-        } else if (valueEl.querySelector('p')) {
-          const pArr = [...valueEl.querySelectorAll('p')];
-          if (pArr.length === 1) {
-            config[name] = pArr[0].innerHTML;
-          } else {
-            config[name] = pArr.map((p) => p.innerHTML);
-          }
-        } else config[name] = row.children[1].innerHTML;
-      }
-    }
-
-    return config;
-  }, {});
 }
 
 function formatLocaleDate(string) {
@@ -423,6 +388,7 @@ function buildStatusTag(event) {
 function buildEventTitleTag(config, eventObj) {
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
   url.searchParams.set('eventId', eventObj.eventId);
+  if (DEV_MODE) url.searchParams.set('devMode', true);
   const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventObj.title);
   return eventTitleTag;
 }
@@ -439,10 +405,11 @@ function buildVenueTag(eventObj) {
 function buildRSVPTag(config, eventObj) {
   const text = `${eventObj.attendeeCount} / ${eventObj.attendeeLimit}`;
 
-  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+  const url = new URL(`${window.location.origin}${config['attendee-dashboard-url']}`);
   url.searchParams.set('eventId', eventObj.eventId);
+  if (DEV_MODE) url.searchParams.set('devMode', true);
 
-  const rsvpTag = createTag('span', { class: 'rsvp-tag' }, text);
+  const rsvpTag = createTag('a', { class: 'rsvp-tag', href: url }, text);
   return rsvpTag;
 }
 
@@ -737,16 +704,12 @@ export default async function init(el) {
     import(`${miloLibs}/features/spectrum-web-components/dist/progress-circle.js`),
   ]);
 
-  const { search } = window.location;
-  const urlParams = new URLSearchParams(search);
-  const devMode = urlParams.get('devMode');
-
   const config = readBlockConfig(el);
   el.innerHTML = '';
   buildLoadingScreen(el);
   const profile = BlockMediator.get('imsProfile');
 
-  if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
+  if (DEV_MODE === true && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
     buildDashboard(el, config);
     return;
   }
