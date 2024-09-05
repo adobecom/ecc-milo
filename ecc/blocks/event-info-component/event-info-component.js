@@ -1,5 +1,12 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { getIcon, generateToolTip, decorateTextfield, decorateTextarea, convertTo24HourFormat } from '../../scripts/utils.js';
+import {
+  getIcon,
+  generateToolTip,
+  decorateTextfield,
+  decorateTextarea,
+  convertTo24HourFormat,
+  miloReplaceKey,
+} from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -94,7 +101,7 @@ export default function init(el) {
         generateToolTip(r);
         break;
       case 1:
-        await decorateTextfield(r, { id: 'info-field-event-title' });
+        await decorateTextfield(r, { id: 'info-field-event-title' }, await miloReplaceKey('duplicate-event-title-error'));
         break;
       case 2:
         await decorateTextarea(r, { id: 'info-field-event-description', grows: true, quiet: true });

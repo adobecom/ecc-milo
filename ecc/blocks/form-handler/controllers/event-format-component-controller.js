@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { getSeries } from '../../../scripts/esp-controller.js';
-import { MILO_CONFIG, LIBS } from '../../../scripts/scripts.js';
+import { LIBS, BlockMediator } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -67,7 +67,7 @@ export async function onUpdate(component, props) {
   }
 }
 
-async function populateSeriesOptions(component) {
+async function populateSeriesOptions(props, component) {
   const seriesSelect = component.querySelector('#series-select-input');
   if (!seriesSelect) return;
 
@@ -84,6 +84,19 @@ async function populateSeriesOptions(component) {
   });
 
   seriesSelect.pending = false;
+
+  seriesSelect.addEventListener('change', () => {
+    const seriesId = seriesSelect.value;
+    const seriesName = seriesSelect.querySelector(`[value="${seriesId}"]`).textContent;
+
+    BlockMediator.set('eventDupMetrics', {
+      ...BlockMediator.get('eventDupMetrics'),
+      ...{
+        seriesId,
+        seriesName,
+      },
+    });
+  });
 }
 
 export default async function init(component, props) {
@@ -104,7 +117,7 @@ export default async function init(component, props) {
   const eventData = props.eventDataResp;
   prepopulateTimeZone(component);
   initStepLock(component);
-  await populateSeriesOptions(component);
+  await populateSeriesOptions(props, component);
 
   const {
     cloudType,
