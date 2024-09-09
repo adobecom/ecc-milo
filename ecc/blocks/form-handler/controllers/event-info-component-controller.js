@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
-import { LIBS } from '../../../scripts/scripts.js';
+import { getEvents } from '../../../scripts/esp-controller.js';
+import { BlockMediator, LIBS } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../scripts/utils.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
@@ -345,13 +346,35 @@ export async function onUpdate(component, props) {
   // do nothing
 }
 
-export default function init(component, props) {
+function checkEventDuplication(event, compareMetrics) {
+  const titleMatch = event.title === compareMetrics.title;
+  const startDateMatch = event.localStartDate === compareMetrics.startDate;
+  const venueIdMatch = event.venue?.city === compareMetrics.city;
+  const eventIdNoMatch = event.eventId !== compareMetrics.eventId;
+
+  return titleMatch && startDateMatch && venueIdMatch && eventIdNoMatch;
+}
+
+export default async function init(component, props) {
+  const allEventsResp = await getEvents();
+  const allEvents = allEventsResp?.events;
   const eventData = props.eventDataResp;
+  const sameSeriesEvents = allEvents?.filter((e) => {
+    const matchInPayload = e.seriesId === props.payload.seriesId;
+    const matchInResp = e.seriesId === eventData.seriesId;
+    return matchInPayload || matchInResp;
+  }) || [];
+
+  const eventTitleInput = component.querySelector('#info-field-event-title');
   const startTimeInput = component.querySelector('#time-picker-start-time');
   const endTimeInput = component.querySelector('#time-picker-end-time');
   const datePicker = component.querySelector('#event-info-date-picker');
 
   initCalendar(component);
+
+  eventTitleInput.addEventListener('input', () => {
+    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: eventTitleInput.value });
+  });
 
   endTimeInput.addEventListener('change', () => {
     if (datePicker.dataset.startDate !== datePicker.dataset.endDate) return;
@@ -386,6 +409,28 @@ export default function init(component, props) {
         option.disabled = false;
       });
     }
+
+    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), startDate: datePicker.dataset.startDate });
+  });
+
+  BlockMediator.subscribe('eventDupMetrics', (store) => {
+    const metrics = store.newValue;
+    const helpText = component.querySelector('sp-textfield#info-field-event-title sp-help-text');
+
+    helpText.textContent = helpText.textContent
+      .replace('[[seriesName]]', metrics.seriesName)
+      .replace('[[eventName]]', metrics.title);
+
+    const isDup = sameSeriesEvents?.some((e) => checkEventDuplication(e, metrics));
+    if (isDup) {
+      props.el.classList.add('show-dup-event-error');
+      eventTitleInput.invalid = true;
+    } else {
+      props.el.classList.remove('show-dup-event-error');
+      eventTitleInput.invalid = false;
+    }
+
+    eventTitleInput.dispatchEvent(new Event('change'));
   });
 
   const {
@@ -410,6 +455,15 @@ export default function init(component, props) {
     changeInputValue(startTimeInput, 'value', localStartTime || '');
     changeInputValue(endTimeInput, 'value', localEndTime || '');
     changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
+
+    BlockMediator.set('eventDupMetrics', {
+      ...BlockMediator.get('eventDupMetrics'),
+      ...{
+        title,
+        startDate: localStartDate,
+        eventId: eventData.eventId,
+      },
+    });
 
     datePicker.dataset.startDate = localStartDate || '';
     datePicker.dataset.endDate = localEndDate || '';

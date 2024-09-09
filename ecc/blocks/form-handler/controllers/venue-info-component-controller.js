@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { createVenue, replaceVenue } from '../../../scripts/esp-controller.js';
-import { ECC_ENV } from '../../../scripts/scripts.js';
+import { BlockMediator, ECC_ENV } from '../../../scripts/scripts.js';
 import { changeInputValue, getSecret } from '../../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler.js';
 
@@ -29,7 +29,7 @@ async function loadGoogleMapsAPI(callback) {
   document.head.appendChild(script);
 }
 
-function initAutocomplete(el) {
+function initAutocomplete(el, props) {
   const venueName = el.querySelector('#venue-info-venue-name');
   // eslint-disable-next-line no-undef
   if (!google) return;
@@ -97,6 +97,7 @@ function initAutocomplete(el) {
       changeInputValue(mapUrl, 'value', place.url);
 
       togglePrefillableFieldsHiddenState(el, false);
+      BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city: addressInfo.city });
     }
 
     if (place.geometry) {
@@ -118,7 +119,7 @@ export async function onUpdate(component, props) {
 export default async function init(component, props) {
   const eventData = props.eventDataResp;
 
-  await loadGoogleMapsAPI(() => initAutocomplete(component));
+  await loadGoogleMapsAPI(() => initAutocomplete(component, props));
 
   const { venue, showVenuePostEvent } = eventData;
 
@@ -178,6 +179,7 @@ export default async function init(component, props) {
     changeInputValue(placeIdInput, 'value', placeId);
     changeInputValue(mapUrlInput, 'value', mapUrl);
     changeInputValue(gmtoffsetInput, 'value', venue.gmtOffset);
+    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city });
 
     if (venueName) {
       component.classList.add('prefilled');
