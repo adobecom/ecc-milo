@@ -203,10 +203,14 @@ export async function createVenue(eventId, venueData) {
 
     if (!response.ok) {
       window.lana?.log('Failed to create venue. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      return {
+        ok: response.ok,
+        status: response.status,
+        error: data.espProvider ? data.espProvider : data
+      };
     }
 
-    return data;
+    return data.espProvider ? data.espProvider : data;
   } catch (error) {
     window.lana?.log('Failed to create venue. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
