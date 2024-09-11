@@ -62,8 +62,20 @@ export function onSubmit(component, props) {
 export async function onUpdate(component, props) {
   if (!props.eventDataResp) return;
 
-  if (props.eventDataResp.cloudType === 'CreativeCloud') {
-    component.querySelector('#registration-allow-waitlist')?.classList.add('hidden');
+  const { cloudType } = props.eventDataResp;
+  const allowWaitlistEl = component.querySelector('#registration-allow-waitlist');
+  allowWaitlistEl?.classList.toggle('hidden', cloudType === 'DX');
+
+  const attendeeLimitLabelEl = component.querySelector('label[for=attendee-count-input]');
+  if (attendeeLimitLabelEl) {
+    switch (cloudType) {
+      case 'DX':
+        attendeeLimitLabelEl.textContent = 'Set waitlist limit';
+        break;
+      case 'CreativeCloud':
+      default:
+        attendeeLimitLabelEl.textContent = 'Set attendee Limit';
+    }
   }
 
   prefillFields(component, props);
