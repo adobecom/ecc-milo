@@ -42,6 +42,7 @@ export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const attendeeLimitVal = component.querySelector('#attendee-count-input')?.value;
+  const wlAttendeeLimitVal = component.querySelector('#waitlist-attendee-count-input')?.value;
   const allowWaitlisting = component.querySelector('#registration-allow-waitlist')?.checked;
   const contactHost = component.querySelector('#registration-contact-host')?.checked;
   const hostEmail = component.querySelector('#event-host-email-input')?.value;
@@ -54,6 +55,7 @@ export function onSubmit(component, props) {
   if (rsvpDescription) rsvpData.rsvpDescription = rsvpDescription;
   if (contactHost && hostEmail) rsvpData.hostEmail = hostEmail;
   if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
+  if (wlAttendeeLimitVal) rsvpData.waitlistAttendeeLimit = wlAttendeeLimitVal;
   if (allowWaitlisting) rsvpData.allowWaitlisting = allowWaitlisting;
 
   props.payload = { ...props.payload, ...rsvpData };
@@ -64,19 +66,12 @@ export async function onUpdate(component, props) {
 
   const { cloudType } = props.eventDataResp;
   const allowWaitlistEl = component.querySelector('#registration-allow-waitlist');
-  allowWaitlistEl?.classList.toggle('hidden', cloudType === 'DX');
+  const attendeeLimitEl = component.querySelector('#attendee-count-input');
+  const wlAttendeeLimitEl = component.querySelector('#waitlist-attendee-count-input');
 
-  const attendeeLimitLabelEl = component.querySelector('label[for=attendee-count-input]');
-  if (attendeeLimitLabelEl) {
-    switch (cloudType) {
-      case 'DX':
-        attendeeLimitLabelEl.textContent = 'Set waitlist limit';
-        break;
-      case 'CreativeCloud':
-      default:
-        attendeeLimitLabelEl.textContent = 'Set attendee Limit';
-    }
-  }
+  allowWaitlistEl?.classList.toggle('hidden', cloudType === 'DX');
+  wlAttendeeLimitEl?.classList.toggle('hidden', cloudType === 'CreativeCloud');
+  attendeeLimitEl?.classList.toggle('hidden', cloudType === 'DX');
 
   prefillFields(component, props);
 }
