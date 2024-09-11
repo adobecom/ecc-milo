@@ -9,11 +9,32 @@ function decorateAttendeeFields(row) {
 
   cols.forEach((c, i) => {
     if (i === 0) {
-      c.classList.add('attendee-count-wrapper');
-      const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number', min: 0 });
-      const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, c.textContent.trim());
-      c.innerHTML = '';
-      c.append(input, label);
+      const paragraphs = c.querySelectorAll(':scope > p');
+
+      if (paragraphs.length) {
+        paragraphs.forEach((p, pi) => {
+          const inputWrapper = createTag('div', { class: 'attendee-count-wrapper' });
+          if (pi === 0) {
+            const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number', min: 0 });
+            const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, p.textContent.trim());
+            c.innerHTML = '';
+            c.append(inputWrapper);
+            inputWrapper.append(input, label);
+          } else if (pi === 1) {
+            const input = createTag('input', { id: 'waitlist-attendee-count-input', name: 'waitlist-attendee-count-input', class: 'number-input', type: 'number', min: 0 });
+            const label = createTag('label', { for: 'waitlist-attendee-count-input', class: 'number-input-label' }, p.textContent.trim());
+            c.innerHTML = '';
+            c.append(inputWrapper);
+            inputWrapper.append(input, label);
+          }
+        });
+      } else {
+        c.classList.add('attendee-count-wrapper');
+        const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number', min: 0 });
+        const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, c.textContent.trim());
+        c.innerHTML = '';
+        c.append(input, label);
+      }
     }
   });
 }
