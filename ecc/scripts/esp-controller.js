@@ -245,10 +245,14 @@ export async function createEvent(payload) {
 
     if (!response.ok) {
       window.lana?.log('Failed to create event. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      return {
+        ok: response.ok,
+        status: response.status,
+        error: data.espProvider ? data.espProvider : data,
+      };
     }
 
-    return data;
+    return data.espProvider ? data.espProvider : data;
   } catch (error) {
     window.lana?.log('Failed to create event. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
