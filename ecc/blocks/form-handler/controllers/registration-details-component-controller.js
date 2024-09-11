@@ -10,20 +10,20 @@ function prefillFields(component, props) {
   if (eventData) {
     const {
       attendeeLimit,
-      allowWaitlisting,
+      allowWaitListing,
       hostEmail,
       rsvpDescription,
     } = eventData;
 
     if (attendeeLimitEl && attendeeLimit) attendeeLimitEl.value = attendeeLimit;
-    if (allowWaitlistEl && allowWaitlisting) allowWaitlistEl.checked = allowWaitlisting;
+    if (allowWaitlistEl && allowWaitListing) allowWaitlistEl.checked = allowWaitListing;
     if (descriptionEl && rsvpDescription) descriptionEl.value = rsvpDescription;
     if (hostEmail) {
       if (contactHostEl) contactHostEl.checked = true;
       if (hostEmailEl) hostEmailEl.value = hostEmail;
     }
 
-    if (attendeeLimit || allowWaitlisting || hostEmail || rsvpDescription) {
+    if (attendeeLimit || allowWaitListing || hostEmail || rsvpDescription) {
       component.classList.add('prefilled');
     }
   }
@@ -42,7 +42,7 @@ export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const attendeeLimitVal = component.querySelector('#attendee-count-input')?.value;
-  const allowWaitlisting = component.querySelector('#registration-allow-waitlist')?.checked;
+  const allowWaitListing = component.querySelector('#registration-allow-waitlist')?.checked;
   const contactHost = component.querySelector('#registration-contact-host')?.checked;
   const hostEmail = component.querySelector('#event-host-email-input')?.value;
   const rsvpDescription = component.querySelector('#rsvp-form-detail-description')?.value;
@@ -54,7 +54,7 @@ export function onSubmit(component, props) {
   if (rsvpDescription) rsvpData.rsvpDescription = rsvpDescription;
   if (contactHost && hostEmail) rsvpData.hostEmail = hostEmail;
   if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
-  if (allowWaitlisting) rsvpData.allowWaitlisting = allowWaitlisting;
+  if (allowWaitListing) rsvpData.allowWaitListing = allowWaitListing;
 
   props.payload = { ...props.payload, ...rsvpData };
 }

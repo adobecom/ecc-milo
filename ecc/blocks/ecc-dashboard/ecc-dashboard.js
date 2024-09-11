@@ -39,7 +39,7 @@ export function cloneFilter(obj) {
     'showVenueImage',
     'attendeeLimit',
     'rsvpDescription',
-    'allowWaitlisting',
+    'allowWaitListing',
     'hostEmail',
     'rsvpFormFields',
     'relatedProducts',
