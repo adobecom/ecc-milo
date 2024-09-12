@@ -190,68 +190,79 @@ export default async function init(component, props) {
   if (showVenuePostEvent) {
     changeInputValue(component.querySelector('#checkbox-venue-info-visible'), 'checked', showVenuePostEvent);
   }
+}
 
-  const getVenueDataInForm = () => {
-    const venueName = venueNameInput.value;
-    const address = addressInput.value;
-    const city = cityInput.value;
-    const state = stateInput.value;
-    const stateCode = stateCodeInput.value;
-    const postalCode = postalCodeInput.value;
-    const country = countryInput.value;
-    const placeId = placeIdInput.value;
-    const mapUrl = mapUrlInput.value;
-    const lat = +placeLatInput.value;
-    const lon = +placeLngInput.value;
-    const gmtOffset = +gmtoffsetInput.value;
+const getVenueDataInForm = (component) => {
+  const venueNameInput = component.querySelector('#venue-info-venue-name');
+  const addressInput = component.querySelector('#venue-info-venue-address');
+  const cityInput = component.querySelector('#location-city');
+  const stateInput = component.querySelector('#location-state');
+  const stateCodeInput = component.querySelector('#location-state-code');
+  const postalCodeInput = component.querySelector('#location-zip-code');
+  const countryInput = component.querySelector('#location-country');
+  const placeLatInput = component.querySelector('#google-place-lat');
+  const placeLngInput = component.querySelector('#google-place-lng');
+  const placeIdInput = component.querySelector('#google-place-id');
+  const mapUrlInput = component.querySelector('#google-map-url');
+  const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
 
-    const venueData = {
-      venueName,
-      address,
-      city,
-      state,
-      stateCode,
-      postalCode,
-      country,
-      placeId,
-      mapUrl,
-      coordinates: {
-        lat,
-        lon,
-      },
-      gmtOffset,
+  const venueName = venueNameInput.value;
+  const address = addressInput.value;
+  const city = cityInput.value;
+  const state = stateInput.value;
+  const stateCode = stateCodeInput.value;
+  const postalCode = postalCodeInput.value;
+  const country = countryInput.value;
+  const placeId = placeIdInput.value;
+  const mapUrl = mapUrlInput.value;
+  const lat = +placeLatInput.value;
+  const lon = +placeLngInput.value;
+  const gmtOffset = +gmtoffsetInput.value;
+
+  const venueData = {
+    venueName,
+    address,
+    city,
+    state,
+    stateCode,
+    postalCode,
+    country,
+    placeId,
+    mapUrl,
+    coordinates: {
+      lat,
+      lon,
+    },
+    gmtOffset,
+  };
+
+  return venueData;
+};
+
+export async function onEventUpdate(component, props) {
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+
+  const venueData = getVenueDataInForm(component);
+
+  let resp;
+  if (!props.eventDataResp.venue) {
+    resp = await createVenue(props.eventDataResp.eventId, venueData);
+  } else if (props.eventDataResp.venue.placeId !== venueData.placeId) {
+    resp = await replaceVenue(props.eventDataResp.eventId, props.eventDataResp.venue.venueId, {
+      ...props.eventDataResp.venue,
+      ...venueData,
+    });
+
+    if (resp.error) {
+      buildErrorMessage(props, resp);
+    }
+  }
+
+  if (resp) {
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    props.payload = {
+      ...props.payload,
+      showVenuePostEvent: venueData.showVenuePostEvent,
     };
-
-    return venueData;
-  };
-
-  const onEventUpdate = async () => {
-    if (component.closest('.fragment')?.classList.contains('hidden')) return;
-
-    const venueData = getVenueDataInForm();
-
-    let resp;
-    if (!props.eventDataResp.venue) {
-      resp = await createVenue(props.eventDataResp.eventId, venueData);
-    } else if (props.eventDataResp.venue.placeId !== venueData.placeId) {
-      resp = await replaceVenue(props.eventDataResp.eventId, props.eventDataResp.venue.venueId, {
-        ...props.eventDataResp.venue,
-        ...venueData,
-      });
-
-      if (resp.error) {
-        buildErrorMessage(props, resp);
-      }
-    }
-
-    if (resp) {
-      props.eventDataResp = { ...props.eventDataResp, ...resp };
-      props.payload = {
-        ...props.payload,
-        showVenuePostEvent: venueData.showVenuePostEvent,
-      };
-    }
-  };
-
-  props.el.addEventListener('eventUpdated', onEventUpdate);
+  }
 }

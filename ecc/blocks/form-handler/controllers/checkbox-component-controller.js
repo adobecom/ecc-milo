@@ -47,3 +47,7 @@ export async function onUpdate(_component, _props) {
 export function onSubmit(component, props) {
   // Do nothing
 }
+
+export function onEventUpdate(component, props) {
+  // Do nothing
+}
