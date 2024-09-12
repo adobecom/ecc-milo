@@ -416,11 +416,11 @@ async function saveEvent(props, options = { toPublish: false }) {
   let resp;
 
   const onEventSave = async () => {
+    if (resp?.eventId) await handleEventUpdate(props);
+
     if (!resp.error) {
       showSaveSuccessMessage(props);
     }
-
-    if (resp?.eventId) await handleEventUpdate(props);
   };
 
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
