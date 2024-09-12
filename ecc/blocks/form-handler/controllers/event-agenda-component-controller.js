@@ -33,3 +33,7 @@ export default function init(component, props) {
 
   showAgendaPostEvent.checked = eventData.showAgendaPostEvent;
 }
+
+export function onEventUpdate(component, props) {
+  // Do nothing
+}

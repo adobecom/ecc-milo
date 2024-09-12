@@ -278,6 +278,22 @@ async function gatherValues(props) {
   await Promise.all(allComponentPromises);
 }
 
+async function handleEventUpdate(props) {
+  const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
+    if (!mappedComponents.length) return {};
+
+    const promises = Array.from(mappedComponents).map(async (component) => {
+      const { onEventUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      return onEventUpdate(component, props);
+    });
+
+    return Promise.all(promises);
+  });
+
+  await Promise.all(allComponentPromises);
+}
+
 async function updateComponents(props) {
   const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
@@ -399,33 +415,33 @@ async function saveEvent(props, options = { toPublish: false }) {
 
   let resp;
 
-  const onEventSave = () => {
+  const onEventSave = async () => {
     if (!resp.error) {
       showSaveSuccessMessage(props);
     }
 
-    if (resp?.eventId) props.el.dispatchEvent(new CustomEvent('eventUpdated', { detail: { eventId: resp.eventId } }));
+    if (resp?.eventId) await handleEventUpdate(props);
   };
 
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
     resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
-    onEventSave();
+    await onEventSave();
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    onEventSave();
+    await onEventSave();
   } else if (options.toPublish) {
     resp = await publishEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventUpdated', { detail: { eventId: resp.eventId } }));
+    if (resp?.eventId) await handleEventUpdate(props);
   }
 
   return resp;

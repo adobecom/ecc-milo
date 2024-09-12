@@ -158,3 +158,7 @@ export function onSubmit(component, props) {
 
   props.payload = { ...props.payload, ...eventFormat };
 }
+
+export function onEventUpdate(component, props) {
+  // Do nothing
+}

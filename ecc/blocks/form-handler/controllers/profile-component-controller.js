@@ -131,3 +131,7 @@ export default async function init(component, props) {
   profileContainer.requestUpdate();
   component.classList.add('prefilled');
 }
+
+export function onEventUpdate(component, props) {
+  // Do nothing
+}

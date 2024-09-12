@@ -51,3 +51,7 @@ export default function init(component, props) {
     if (eventData.rsvpFormFields?.required?.includes(cb.name)) cb.checked = true;
   });
 }
+
+export function onEventUpdate(component, props) {
+  // Do nothing
+}

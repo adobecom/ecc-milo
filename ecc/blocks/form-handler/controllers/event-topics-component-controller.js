@@ -32,3 +32,7 @@ export default function init(component, props) {
     if (topics.length) component.classList.add('prefilled');
   }
 }
+
+export function onEventUpdate(component, props) {
+  // Do nothing
+}

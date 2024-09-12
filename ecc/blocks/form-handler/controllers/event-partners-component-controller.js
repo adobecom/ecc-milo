@@ -173,3 +173,7 @@ export default async function init(component, props) {
   const partnerVisible = component.querySelector('#partners-visible');
   partnerVisible.checked = eventData.showSponsors;
 }
+
+export function onEventUpdate(component, props) {
+  // Do nothing
+}
