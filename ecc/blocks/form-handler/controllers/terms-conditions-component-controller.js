@@ -78,3 +78,7 @@ export default async function init(component, props) {
 export function onSubmit(_component, _props) {
   // Do nothing
 }
+
+export function onEventUpdate(component, props) {
+  // Do nothing
+}

@@ -121,3 +121,7 @@ export default async function init(component, props) {
     component.classList.add('prefilled');
   }
 }
+
+export function onEventUpdate(component, props) {
+  // Do nothing
+}
