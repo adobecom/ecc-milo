@@ -14,7 +14,6 @@ export async function onSubmit(component, props) {
   const profileContainer = component.querySelector('profile-container');
   if (profileContainer) {
     const speakers = profileContainer.getProfiles();
-    if (speakers.length === 0) return;
 
     if (speakers.filter((speaker) => !speaker.speakerType).length > 0) {
       throw new Error('Please select a speaker type for the speakers');
