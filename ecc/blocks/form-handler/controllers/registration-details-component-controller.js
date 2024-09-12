@@ -72,3 +72,7 @@ export async function onUpdate(component, props) {
 export default function init(component, props) {
   prefillFields(component, props);
 }
+
+export function onEventUpdate(component, props) {
+  // Do nothing
+}
