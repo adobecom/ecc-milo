@@ -13,14 +13,27 @@ export async function onSubmit(component, props) {
 
   const profileContainer = component.querySelector('profile-container');
   if (profileContainer) {
+    const { eventId } = getFilteredCachedResponse();
     const speakers = profileContainer.getProfiles();
-    if (speakers.length === 0) return;
+
+    if (speakers.length === 0) {
+      if (props.eventDataResp.speakers) {
+        const savedSpeakers = props.eventDataResp.speakers;
+        await savedSpeakers.reduce(async (promise, speaker) => {
+          await promise;
+          const { speakerId } = speaker;
+          const resp = await removeSpeakerFromEvent(speakerId, eventId);
+          if (resp.error) return;
+          props.eventDataResp = { ...props.eventDataResp, ...resp };
+        }, Promise.resolve());
+      }
+
+      return;
+    }
 
     if (speakers.filter((speaker) => !speaker.speakerType).length > 0) {
       throw new Error('Please select a speaker type for the speakers');
     }
-
-    const { eventId } = getFilteredCachedResponse();
 
     await speakers.reduce(async (promise, speaker) => {
       await promise;
@@ -80,10 +93,7 @@ export async function onSubmit(component, props) {
 
         if (!stillNeeded) {
           const resp = await removeSpeakerFromEvent(speakerId, eventId);
-          if (resp.error) {
-            return;
-          }
-
+          if (resp.error) return;
           props.eventDataResp = { ...props.eventDataResp, ...resp };
         }
       }, Promise.resolve());
