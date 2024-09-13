@@ -41,7 +41,7 @@ export class Profile extends LitElement {
     this.attachShadow({ mode: 'open' });
     this.fieldlabels = this.fieldlabels ?? DEFAULT_FIELD_LABELS;
 
-    this.profile = this.profile ?? { socialMedia: [{ link: '' }] };
+    this.profile = this.profile ?? { socialMedia: [{ link: '' }], isPlaceholder: true };
     this.profileCopy = {};
   }
 
