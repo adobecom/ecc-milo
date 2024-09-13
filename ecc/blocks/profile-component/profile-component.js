@@ -36,7 +36,7 @@ async function decorateProfile(element) {
 
   const profileContainer = createTag('profile-container', { class: 'profile-component' });
   profileContainer.fieldlabels = fieldlabels;
-  profileContainer.profiles = [{ socialMedia: [{ link: '' }] }];
+  profileContainer.profiles = [{ socialMedia: [{ link: '' }], isPlaceholder: true }];
   element.append(profileContainer);
 }
 
