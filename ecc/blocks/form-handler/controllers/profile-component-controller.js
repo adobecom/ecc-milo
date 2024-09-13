@@ -31,7 +31,6 @@ export async function onSubmit(component, props) {
       return;
     }
 
-    console.log('speakers', speakers);
     if (speakers.filter((speaker) => !speaker.speakerType).length > 0) {
       throw new Error('Please select a speaker type for the speakers');
     }
