@@ -342,8 +342,12 @@ export function onSubmit(component, props) {
   props.payload = { ...props.payload, ...eventInfo };
 }
 
-export async function onUpdate(component, props) {
+export async function onPayloadUpdate(component, props) {
   // do nothing
+}
+
+export async function onRespUpdate(_component, _props) {
+  // Do nothing
 }
 
 function checkEventDuplication(event, compareMetrics) {

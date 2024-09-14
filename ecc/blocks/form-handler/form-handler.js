@@ -294,14 +294,31 @@ async function handleEventUpdate(props) {
   await Promise.all(allComponentPromises);
 }
 
-async function updateComponents(props) {
+async function updateComponentsOnPayloadChange(props) {
   const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onUpdate } = await import(`./controllers/${comp}-component-controller.js`);
-      const componentPayload = await onUpdate(component, props);
+      const { onPayloadUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      const componentPayload = await onPayloadUpdate(component, props);
+      return componentPayload;
+    });
+
+    return Promise.all(promises);
+  });
+
+  await Promise.all(allComponentPromises);
+}
+
+async function updateComponentsOnRespChange(props) {
+  const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
+    if (!mappedComponents.length) return {};
+
+    const promises = Array.from(mappedComponents).map(async (component) => {
+      const { onRespUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      const componentPayload = await onRespUpdate(component, props);
       return componentPayload;
     });
 
@@ -760,13 +777,14 @@ async function buildECCForm(el) {
 
         case 'payload': {
           setPayloadCache(value);
-          updateComponents(target);
+          updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);
           break;
         }
 
         case 'eventDataResp': {
           setResponseCache(value);
+          updateComponentsOnRespChange(target);
           updateCtas(target);
           if (value.error) {
             props.el.classList.add('show-error');

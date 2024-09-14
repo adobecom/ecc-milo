@@ -100,8 +100,12 @@ async function updateProductSelector(component, props) {
   });
 }
 
-export async function onUpdate(component, props) {
+export async function onPayloadUpdate(component, props) {
   await updateProductSelector(component, props);
+}
+
+export async function onRespUpdate(_component, _props) {
+  // Do nothing
 }
 
 export default async function init(component, props) {
