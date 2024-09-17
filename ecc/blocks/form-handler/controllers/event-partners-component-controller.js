@@ -95,7 +95,7 @@ export async function onSubmit(component, props) {
   props.payload = { ...props.payload, showSponsors };
 }
 
-export async function onUpdate(component, props) {
+export async function onPayloadUpdate(component, props) {
   if (!PARTNERS_SERIES_ID || PARTNERS_SERIES_ID !== props.eventDataResp.seriesId) {
     const partnersGroup = component.querySelector('partner-selector-group');
 
@@ -106,6 +106,10 @@ export async function onUpdate(component, props) {
       if (spResp) partnersGroup.seriesSponsors = spResp.sponsors;
     }
   }
+}
+
+export async function onRespUpdate(_component, _props) {
+  // Do nothing
 }
 
 export default async function init(component, props) {
@@ -172,4 +176,8 @@ export default async function init(component, props) {
 
   const partnerVisible = component.querySelector('#partners-visible');
   partnerVisible.checked = eventData.showSponsors;
+}
+
+export function onEventUpdate(component, props) {
+  // Do nothing
 }

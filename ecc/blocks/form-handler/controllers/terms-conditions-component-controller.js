@@ -63,10 +63,14 @@ async function loadPreview(component, templateId) {
   }
 }
 
-export async function onUpdate(component, props) {
+export async function onPayloadUpdate(component, props) {
   const { templateId } = props.payload;
   if (!templateId) return;
   await loadPreview(component, templateId);
+}
+
+export async function onRespUpdate(_component, _props) {
+  // Do nothing
 }
 
 export default async function init(component, props) {
@@ -76,5 +80,9 @@ export default async function init(component, props) {
 }
 
 export function onSubmit(_component, _props) {
+  // Do nothing
+}
+
+export function onEventUpdate(component, props) {
   // Do nothing
 }

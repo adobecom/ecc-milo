@@ -278,14 +278,47 @@ async function gatherValues(props) {
   await Promise.all(allComponentPromises);
 }
 
-async function updateComponents(props) {
+async function handleEventUpdate(props) {
   const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onUpdate } = await import(`./controllers/${comp}-component-controller.js`);
-      const componentPayload = await onUpdate(component, props);
+      const { onEventUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      return onEventUpdate(component, props);
+    });
+
+    return Promise.all(promises);
+  });
+
+  await Promise.all(allComponentPromises);
+}
+
+async function updateComponentsOnPayloadChange(props) {
+  const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
+    if (!mappedComponents.length) return {};
+
+    const promises = Array.from(mappedComponents).map(async (component) => {
+      const { onPayloadUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      const componentPayload = await onPayloadUpdate(component, props);
+      return componentPayload;
+    });
+
+    return Promise.all(promises);
+  });
+
+  await Promise.all(allComponentPromises);
+}
+
+async function updateComponentsOnRespChange(props) {
+  const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
+    if (!mappedComponents.length) return {};
+
+    const promises = Array.from(mappedComponents).map(async (component) => {
+      const { onRespUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      const componentPayload = await onRespUpdate(component, props);
       return componentPayload;
     });
 
@@ -394,38 +427,38 @@ async function saveEvent(props, options = { toPublish: false }) {
   try {
     await gatherValues(props);
   } catch (e) {
-    return { message: e.message };
+    return { error: { message: e.message } };
   }
 
   let resp;
 
-  const onEventSave = () => {
+  const onEventSave = async () => {
+    if (resp?.eventId) await handleEventUpdate(props);
+
     if (!resp.error) {
       showSaveSuccessMessage(props);
     }
-
-    if (resp?.eventId) props.el.dispatchEvent(new CustomEvent('eventUpdated', { detail: { eventId: resp.eventId } }));
   };
 
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
     resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
-    onEventSave();
+    await onEventSave();
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    onEventSave();
+    await onEventSave();
   } else if (options.toPublish) {
     resp = await publishEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (resp?.eventId) document.dispatchEvent(new CustomEvent('eventUpdated', { detail: { eventId: resp.eventId } }));
+    if (resp?.eventId) await handleEventUpdate(props);
   }
 
   return resp;
@@ -744,13 +777,14 @@ async function buildECCForm(el) {
 
         case 'payload': {
           setPayloadCache(value);
-          updateComponents(target);
+          updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);
           break;
         }
 
         case 'eventDataResp': {
           setResponseCache(value);
+          updateComponentsOnRespChange(target);
           updateCtas(target);
           if (value.error) {
             props.el.classList.add('show-error');

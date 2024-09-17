@@ -12,7 +12,11 @@ export function onSubmit(component, props) {
   props.payload = { ...props.payload, rsvpFormFields };
 }
 
-export async function onUpdate(_component, _props) {
+export async function onPayloadUpdate(_component, _props) {
+  // Do nothing
+}
+
+export async function onRespUpdate(_component, _props) {
   // Do nothing
 }
 
@@ -50,4 +54,8 @@ export default function init(component, props) {
   requireChecks.forEach((cb) => {
     if (eventData.rsvpFormFields?.required?.includes(cb.name)) cb.checked = true;
   });
+}
+
+export function onEventUpdate(component, props) {
+  // Do nothing
 }

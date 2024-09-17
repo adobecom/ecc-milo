@@ -52,7 +52,7 @@ function initStepLock(component) {
   onFormatChange();
 }
 
-export async function onUpdate(component, props) {
+export async function onPayloadUpdate(component, props) {
   const { seriesId } = props.payload;
   if (seriesId) {
     const partnerSelectorGroups = document.querySelectorAll('partner-selector-group');
@@ -65,6 +65,10 @@ export async function onUpdate(component, props) {
       });
     }
   }
+}
+
+export async function onRespUpdate(_component, _props) {
+  // Do nothing
 }
 
 async function populateSeriesOptions(props, component) {
@@ -157,4 +161,8 @@ export function onSubmit(component, props) {
   };
 
   props.payload = { ...props.payload, ...eventFormat };
+}
+
+export function onEventUpdate(component, props) {
+  // Do nothing
 }

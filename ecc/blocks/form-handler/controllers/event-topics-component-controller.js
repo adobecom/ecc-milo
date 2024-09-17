@@ -9,7 +9,11 @@ export function onSubmit(component, props) {
   props.payload = { ...props.payload, topics, fullTopicsValue };
 }
 
-export async function onUpdate(_component, _props) {
+export async function onPayloadUpdate(_component, _props) {
+  // Do nothing
+}
+
+export async function onRespUpdate(_component, _props) {
   // Do nothing
 }
 
@@ -31,4 +35,8 @@ export default function init(component, props) {
 
     if (topics.length) component.classList.add('prefilled');
   }
+}
+
+export function onEventUpdate(component, props) {
+  // Do nothing
 }

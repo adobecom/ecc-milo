@@ -13,14 +13,27 @@ export async function onSubmit(component, props) {
 
   const profileContainer = component.querySelector('profile-container');
   if (profileContainer) {
+    const { eventId } = getFilteredCachedResponse();
     const speakers = profileContainer.getProfiles();
-    if (speakers.length === 0) return;
+
+    if (speakers.length === 0) {
+      if (props.eventDataResp.speakers) {
+        const savedSpeakers = props.eventDataResp.speakers;
+        await savedSpeakers.reduce(async (promise, speaker) => {
+          await promise;
+          const { speakerId } = speaker;
+          const resp = await removeSpeakerFromEvent(speakerId, eventId);
+          if (resp.error) return;
+          props.eventDataResp = { ...props.eventDataResp, ...resp };
+        }, Promise.resolve());
+      }
+
+      return;
+    }
 
     if (speakers.filter((speaker) => !speaker.speakerType).length > 0) {
       throw new Error('Please select a speaker type for the speakers');
     }
-
-    const { eventId } = getFilteredCachedResponse();
 
     await speakers.reduce(async (promise, speaker) => {
       await promise;
@@ -80,10 +93,7 @@ export async function onSubmit(component, props) {
 
         if (!stillNeeded) {
           const resp = await removeSpeakerFromEvent(speakerId, eventId);
-          if (resp.error) {
-            return;
-          }
-
+          if (resp.error) return;
           props.eventDataResp = { ...props.eventDataResp, ...resp };
         }
       }, Promise.resolve());
@@ -91,7 +101,7 @@ export async function onSubmit(component, props) {
   }
 }
 
-export async function onUpdate(component, props) {
+export async function onPayloadUpdate(component, props) {
   const containers = component.querySelectorAll('profile-container');
   containers.forEach(async (container) => {
     if (props.payload.seriesId && props.payload.seriesId !== container.seriesId) {
@@ -101,6 +111,10 @@ export async function onUpdate(component, props) {
     }
     container.requestUpdate();
   });
+}
+
+export async function onRespUpdate(_component, _props) {
+  // Do nothing
 }
 
 async function prefillProfiles(props) {
@@ -130,4 +144,8 @@ export default async function init(component, props) {
   profileContainer.profiles = speakers;
   profileContainer.requestUpdate();
   component.classList.add('prefilled');
+}
+
+export function onEventUpdate(component, props) {
+  // Do nothing
 }

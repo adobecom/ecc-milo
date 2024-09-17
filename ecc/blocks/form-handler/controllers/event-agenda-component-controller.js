@@ -17,7 +17,11 @@ export function onSubmit(component, props) {
   props.payload = { ...props.payload, ...agendaInfo };
 }
 
-export async function onUpdate(_component, _props) {
+export async function onPayloadUpdate(_component, _props) {
+  // Do nothing
+}
+
+export async function onRespUpdate(_component, _props) {
   // Do nothing
 }
 
@@ -32,4 +36,8 @@ export default function init(component, props) {
   }
 
   showAgendaPostEvent.checked = eventData.showAgendaPostEvent;
+}
+
+export function onEventUpdate(component, props) {
+  // Do nothing
 }

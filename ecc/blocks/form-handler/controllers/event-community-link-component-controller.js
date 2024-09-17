@@ -16,7 +16,11 @@ export function onSubmit(component, props) {
   }
 }
 
-export async function onUpdate(_component, _props) {
+export async function onPayloadUpdate(_component, _props) {
+  // Do nothing
+}
+
+export async function onRespUpdate(_component, _props) {
   // Do nothing
 }
 
@@ -41,4 +45,8 @@ export default function init(component, props) {
   }
 
   updateInputState();
+}
+
+export function onEventUpdate(component, props) {
+  // Do nothing
 }

@@ -38,8 +38,12 @@ function updateImgUploadComponentConfigs(component) {
   component.dataset.configs = JSON.stringify(configs);
 }
 
-export async function onUpdate(component, props) {
+export async function onPayloadUpdate(component, props) {
   updateImgUploadComponentConfigs(component);
+}
+
+export async function onRespUpdate(_component, _props) {
+  // Do nothing
 }
 
 export default async function init(component, props) {
@@ -173,4 +177,8 @@ export default async function init(component, props) {
       venueImgVisibleCheck.checked = eventData.showVenueImage;
     }
   }
+}
+
+export function onEventUpdate(component, props) {
+  // Do nothing
 }
