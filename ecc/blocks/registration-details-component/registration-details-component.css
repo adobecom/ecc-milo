@@ -1,18 +1,19 @@
-.registration-details-component {
-  padding-bottom: 40px;
+.form-handler .form-component.registration-details-component {
+  padding: 32px 0;
 }
 
-.registration-details-component .text-field-row {
-  margin-bottom: 36px;
+.form-handler .form-component.registration-details-component > div {
+  padding: 0 12px;
 }
 
-.registration-details-component .attendee-fields-wrapper {
+.form-handler .form-component.registration-details-component .attendee-fields-wrapper {
   margin-bottom: 32px;
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
   align-items: flex-end;
   gap: 24px;
+  padding-bottom: 24px;
+  border-bottom: 3px solid var(--stroke-color-divider);
 }
 
 .registration-details-component .attendee-count-wrapper input {
