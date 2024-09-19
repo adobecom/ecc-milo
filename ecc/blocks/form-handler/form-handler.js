@@ -79,14 +79,14 @@ const SPECTRUM_COMPONENTS = [
   'progress-circle',
 ];
 
-export function buildErrorMessage(props, resp) {
+export async function buildErrorMessage(props, resp) {
   if (!resp) return;
 
   const toastArea = props.el.querySelector('.toast-area');
 
   if (resp.status === 409) {
     try {
-      const errorText = resp.error.text();
+      const errorText = await resp.error.text();
       const toast = createTag('sp-toast', { open: true, variant: 'negative' }, errorText, { parent: toastArea });
       const url = new URL(window.location.href);
       url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
@@ -105,7 +105,7 @@ export function buildErrorMessage(props, resp) {
     }
   } else {
     try {
-      const errorJson = resp.error.json();
+      const errorJson = await resp.error.json();
       if (errorJson) {
         const messages = [];
         const errorBag = resp.error.errors || [];
