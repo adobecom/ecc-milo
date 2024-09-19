@@ -102,7 +102,7 @@ export function buildErrorMessage(props, resp) {
 
     if (errorJson) {
       const messages = [];
-      const errorBag = resp.error.errors;
+      const errorBag = resp.error.errors || [];
       errorBag.forEach((error) => {
         const errorPathSegments = error.path.split('/');
         const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${error.message}`;
