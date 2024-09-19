@@ -84,42 +84,46 @@ export function buildErrorMessage(props, resp) {
 
   const toastArea = props.el.querySelector('.toast-area');
 
-  if (resp.error) {
-    const errorJson = resp.error.json();
-    if (errorJson) {
-      const messages = [];
-      const errorBag = resp.error.errors || [];
-      errorBag.forEach((error) => {
-        const errorPathSegments = error.path.split('/');
-        const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${error.message}`;
-        messages.push(text);
+  if (resp.status === 409) {
+    try {
+      const errorText = resp.error.text();
+      const toast = createTag('sp-toast', { open: true, variant: 'negative' }, errorText, { parent: toastArea });
+      const url = new URL(window.location.href);
+      url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
+
+      createTag('sp-button', {
+        slot: 'action',
+        variant: 'overBackground',
+        href: `${url.toString()}`,
+      }, 'See the latest version.', { parent: toast });
+
+      toast.addEventListener('close', () => {
+        toast.remove();
       });
-
-      messages.forEach((msg, i) => {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 + (i * 3000) }, msg, { parent: toastArea });
-        toast.addEventListener('close', () => {
-          toast.remove();
+    } catch (e) {
+      window.lana?.log('error', 'Invalid 409 error response');
+    }
+  } else {
+    try {
+      const errorJson = resp.error.json();
+      if (errorJson) {
+        const messages = [];
+        const errorBag = resp.error.errors || [];
+        errorBag.forEach((error) => {
+          const errorPathSegments = error.path.split('/');
+          const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${error.message}`;
+          messages.push(text);
         });
-      });
-    } else if (resp.status === 409) {
-      try {
-        const errorText = resp.error.text();
-        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, errorText, { parent: toastArea });
-        const url = new URL(window.location.href);
-        url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
 
-        createTag('sp-button', {
-          slot: 'action',
-          variant: 'overBackground',
-          href: `${url.toString()}`,
-        }, 'See the latest version.', { parent: toast });
-
-        toast.addEventListener('close', () => {
-          toast.remove();
+        messages.forEach((msg, i) => {
+          const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 + (i * 3000) }, msg, { parent: toastArea });
+          toast.addEventListener('close', () => {
+            toast.remove();
+          });
         });
-      } catch (e) {
-        window.lana?.log('error', 'Invalid 409 error response');
       }
+    } catch (e) {
+      window.lana?.log('error', 'Invalid error response');
     }
   }
 }
