@@ -85,21 +85,7 @@ export function buildErrorMessage(props, resp) {
   const toastArea = props.el.querySelector('.toast-area');
 
   if (resp.error) {
-    let errorText;
-    let errorJson;
-
-    try {
-      errorText = resp.error.text();
-    } catch (e) {
-      errorText = null;
-    }
-
-    try {
-      errorJson = resp.error.json();
-    } catch (e) {
-      errorJson = null;
-    }
-
+    const errorJson = resp.error.json();
     if (errorJson) {
       const messages = [];
       const errorBag = resp.error.errors || [];
@@ -115,8 +101,9 @@ export function buildErrorMessage(props, resp) {
           toast.remove();
         });
       });
-    } else if (errorText) {
-      if (resp.status === 409) {
+    } else if (resp.status === 409) {
+      try {
+        const errorText = resp.error.text();
         const toast = createTag('sp-toast', { open: true, variant: 'negative' }, errorText, { parent: toastArea });
         const url = new URL(window.location.href);
         url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
@@ -130,11 +117,8 @@ export function buildErrorMessage(props, resp) {
         toast.addEventListener('close', () => {
           toast.remove();
         });
-      } else {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, errorText, { parent: toastArea });
-        toast.addEventListener('close', () => {
-          toast.remove();
-        });
+      } catch (e) {
+        window.lana?.log('error', 'Invalid 409 error response');
       }
     }
   }
