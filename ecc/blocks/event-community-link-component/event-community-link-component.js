@@ -1,3 +1,4 @@
+import { LINK_REGEX } from '../../constants/constants.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { generateToolTip } from '../../scripts/utils.js';
 
@@ -14,7 +15,7 @@ async function decorateFields(row) {
     id: 'community-url-details',
     class: 'text-input',
     placeholder: text,
-    pattern: '^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$',
+    pattern: LINK_REGEX,
     size: 'xl',
   });
 
