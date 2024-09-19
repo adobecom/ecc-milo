@@ -199,13 +199,13 @@ export async function createVenue(eventId, venueData) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/venues`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to create venue. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to create venue. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to create venue. Error:', error);
@@ -220,13 +220,13 @@ export async function replaceVenue(eventId, venueId, venueData) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/venues/${venueId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to replace venue. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to replace venue. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to replace venue. Error:', error);
@@ -241,13 +241,13 @@ export async function createEvent(payload) {
 
   try {
     const response = await fetch(`${host}/v1/events`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to create event. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to create event. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to create event. Error:', error);
@@ -264,13 +264,13 @@ export async function createSpeaker(profile, seriesId) {
 
   try {
     const response = await fetch(`${host}/v1/series/${seriesId}/speakers`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to create speaker. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to create speaker. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to create speaker. Error:', error);
@@ -285,13 +285,13 @@ export async function createSponsor(sponsorData, seriesId) {
 
   try {
     const response = await fetch(`${host}/v1/series/${seriesId}/sponsors`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to create sponsor. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to create sponsor. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to create sponsor. Error:', error);
@@ -306,13 +306,13 @@ export async function updateSponsor(sponsorData, sponsorId, seriesId) {
 
   try {
     const response = await fetch(`${host}/v1/series/${seriesId}/sponsors/${sponsorId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to update sponsor. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to update sponsor. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to update sponsor. Error:', error);
@@ -327,13 +327,13 @@ export async function addSponsorToEvent(sponsorData, eventId) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/sponsors`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to add sponsor to event. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to add sponsor to event. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to add sponsor to event. Error:', error);
@@ -348,13 +348,13 @@ export async function updateSponsorInEvent(sponsorData, sponsorId, eventId) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/sponsors/${sponsorId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to update sponsor in event. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to update sponsor in event. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to update sponsor in event. Error:', error);
@@ -368,13 +368,13 @@ export async function removeSponsorFromEvent(sponsorId, eventId) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/sponsors/${sponsorId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to delete sponsor from event. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to delete sponsor from event. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to delete sponsor from event. Error:', error);
@@ -388,13 +388,13 @@ export async function getSponsor(seriesId, sponsorId) {
 
   try {
     const response = await fetch(`${host}/v1/series/${seriesId}/sponsors/${sponsorId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to get sponsor. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to get sponsor. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to get sponsor. Error:', error);
@@ -408,13 +408,13 @@ export async function getSponsors(seriesId) {
 
   try {
     const response = await fetch(`${host}/v1/series/${seriesId}/sponsors`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to get sponsors. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to get sponsors. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to get sponsors. Error:', error);
@@ -428,13 +428,13 @@ export async function getSponsorImages(seriesId, sponsorId) {
 
   try {
     const response = await fetch(`${host}/v1/series/${seriesId}/sponsors/${sponsorId}/images`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to get sponsor images. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to get sponsor images. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to get sponsor images. Error:', error);
@@ -449,13 +449,13 @@ export async function addSpeakerToEvent(speakerData, eventId) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/speakers`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to add speaker to event. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to add speaker to event. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to add speaker to event. Error:', error);
@@ -470,13 +470,13 @@ export async function updateSpeakerInEvent(speakerData, speakerId, eventId) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to update speaker in event. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to update speaker in event. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to update speaker in event. Error:', error);
@@ -490,13 +490,13 @@ export async function removeSpeakerFromEvent(speakerId, eventId) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to delete speaker from event. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to delete speaker from event. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to delete speaker from event. Error:', error);
@@ -512,13 +512,13 @@ export async function updateSpeaker(profile, seriesId) {
 
   try {
     const response = await fetch(`${host}/v1/series/${seriesId}/speakers/${profile.speakerId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to update speaker. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to update speaker. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to update speaker. Error:', error);
@@ -533,13 +533,13 @@ export async function updateEvent(eventId, payload) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log(`Failed to update event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log(`Failed to update event ${eventId}. Status:`, response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log(`Failed to update event ${eventId}. Error:`, error);
@@ -554,13 +554,13 @@ export async function publishEvent(eventId, payload) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log(`Failed to publish event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log(`Failed to publish event ${eventId}. Status:`, response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log(`Failed to publish event ${eventId}. Error:`, error);
@@ -575,13 +575,13 @@ export async function unpublishEvent(eventId, payload) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log(`Failed to unpublish event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log(`Failed to unpublish event ${eventId}. Status:`, response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log(`Failed to unpublish event ${eventId}. Error:`, error);
@@ -616,13 +616,13 @@ export async function getEvents() {
 
   try {
     const response = await fetch(`${host}/v1/events`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to get list of events. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to get list of events. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to get list of events. Error:', error);
@@ -636,13 +636,13 @@ export async function getEvent(eventId) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log(`Failed to get details for event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log(`Failed to get details for event ${eventId}. Status:`, response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log(`Failed to get details for event ${eventId}. Error:`, error);
@@ -656,13 +656,13 @@ export async function getVenue(eventId) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/venues`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to get venue details. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to get venue details. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log('Failed to get venue details. Error:', error);
@@ -676,13 +676,13 @@ export async function getSpeaker(seriesId, speakerId) {
 
   try {
     const response = await fetch(`${host}/v1/series/${seriesId}/speakers/${speakerId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to get speaker details. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to get speaker details. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return convertToSpeaker(data);
   } catch (error) {
     window.lana?.log('Failed to get speaker details. Error:', error);
@@ -708,13 +708,13 @@ export async function getSeries() {
 
   try {
     const response = await fetch(`${host}/v1/series`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to fetch series. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log('Failed to fetch series. Status:', response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data.series;
   } catch (error) {
     window.lana?.log('Failed to fetch series. Error:', error);
@@ -731,13 +731,13 @@ export async function createAttendee(eventId, attendeeData) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/attendees`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log(`Failed to create attendee for event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log(`Failed to create attendee for event ${eventId}. Status:`, response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log(`Failed to create attendee for event ${eventId}. Error:`, error);
@@ -754,13 +754,13 @@ export async function updateAttendee(eventId, attendeeId, attendeeData) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log(`Failed to update attendee ${attendeeId} for event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log(`Failed to update attendee ${attendeeId} for event ${eventId}. Status:`, response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log(`Failed to update attendee ${attendeeId} for event ${eventId}. Error:`, error);
@@ -776,13 +776,13 @@ export async function deleteAttendee(eventId, attendeeId) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log(`Failed to delete attendee ${attendeeId} for event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log(`Failed to delete attendee ${attendeeId} for event ${eventId}. Status:`, response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log(`Failed to delete attendee ${attendeeId} for event ${eventId}. Error:`, error);
@@ -798,13 +798,13 @@ export async function getEventAttendees(eventId) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/attendees`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log(`Failed to fetch attendees for event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log(`Failed to fetch attendees for event ${eventId}. Status:`, response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log(`Failed to fetch attendees for event ${eventId}. Error:`, error);
@@ -851,13 +851,13 @@ export async function getAttendee(eventId, attendeeId) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log(`Failed to get details of attendee ${attendeeId} for event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log(`Failed to get details of attendee ${attendeeId} for event ${eventId}. Status:`, response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log(`Failed to get details of attendee ${attendeeId} for event ${eventId}. Error:`, error);
@@ -873,13 +873,13 @@ export async function getSpeakers(seriesId) {
 
   try {
     const response = await fetch(`${host}/v1/series/${seriesId}/speakers`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Status:`, response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Status:`, response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return { speakers: data.speakers.map(convertToSpeaker) };
   } catch (error) {
     window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error:`, error);
@@ -895,13 +895,13 @@ export async function getEventImages(eventId) {
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/images`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log(`Failed to get event images for event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log(`Failed to get event images for event ${eventId}. Status:`, response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log(`Failed to get event images for event ${eventId}. Error:`, error);
@@ -917,13 +917,13 @@ export async function deleteSpeakerImage(speakerId, seriesId, imageId) {
 
   try {
     const response = await fetch(`${host}/v1/series/${seriesId}/speakers/${speakerId}/images/${imageId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log(`Failed to delete speaker images for speaker ${speakerId}. Status:`, response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log(`Failed to delete speaker images for speaker ${speakerId}. Status:`, response.status, 'Error:', response);
+      return { ok: response.ok, status: response.status, error: response };
     }
 
+    const data = await response.json();
     return data;
   } catch (error) {
     window.lana?.log(`Failed to delete speaker images for speaker ${speakerId}. Error:`, error);
