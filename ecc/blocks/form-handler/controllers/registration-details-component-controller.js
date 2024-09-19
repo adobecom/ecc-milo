@@ -52,7 +52,18 @@ export function onSubmit(component, props) {
 
   const rsvpData = {};
 
-  const { cloudType } = props.eventDataResp;
+  let { cloudType } = props.eventDataResp;
+
+  // TODO: remove mocking once the ESP is updated
+  const usp = new URLSearchParams(window.location.search);
+  const registerMode = usp.get('registerMode') || 'rsvp';
+
+  if (registerMode === 'dx') {
+    cloudType = 'DX';
+  } else if (registerMode === 'dme') {
+    cloudType = 'CreativeCloud';
+  }
+
   if (rsvpDescription) rsvpData.rsvpDescription = rsvpDescription;
   if (contactHost && hostEmail) rsvpData.hostEmail = hostEmail;
   if (attendeeLimit) {
@@ -76,8 +87,18 @@ export async function onPayloadUpdate(component, props) {
 export async function onRespUpdate(component, props) {
   if (!props.eventDataResp) return;
 
-  const { cloudType } = props.eventDataResp;
+  let { cloudType } = props.eventDataResp;
   const registrationConfigWrapper = component.querySelector('.registration-config-wrapper');
+
+  // TODO: remove mocking once the ESP is updated
+  const usp = new URLSearchParams(window.location.search);
+  const registerMode = usp.get('registerMode') || 'rsvp';
+
+  if (registerMode === 'dx') {
+    cloudType = 'DX';
+  } else if (registerMode === 'dme') {
+    cloudType = 'CreativeCloud';
+  }
 
   registrationConfigWrapper?.classList.toggle('hidden', cloudType === 'DX');
 
