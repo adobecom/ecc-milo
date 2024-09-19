@@ -85,11 +85,24 @@ export function buildErrorMessage(props, resp) {
   const toastArea = props.el.querySelector('.toast-area');
 
   if (resp.error) {
-    const messages = [];
-    const errorBag = resp.error.errors;
-    const errorMessage = resp.error.message;
+    let errorText;
+    let errorJson;
 
-    if (errorBag) {
+    try {
+      errorText = resp.error.text();
+    } catch (e) {
+      errorText = null;
+    }
+
+    try {
+      errorJson = resp.error.json();
+    } catch (e) {
+      errorJson = null;
+    }
+
+    if (errorJson) {
+      const messages = [];
+      const errorBag = resp.error.errors;
       errorBag.forEach((error) => {
         const errorPathSegments = error.path.split('/');
         const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${error.message}`;
@@ -102,9 +115,9 @@ export function buildErrorMessage(props, resp) {
           toast.remove();
         });
       });
-    } else if (errorMessage) {
+    } else if (errorText) {
       if (resp.status === 409) {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, errorMessage, { parent: toastArea });
+        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, errorText, { parent: toastArea });
         const url = new URL(window.location.href);
         url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
 
@@ -118,7 +131,7 @@ export function buildErrorMessage(props, resp) {
           toast.remove();
         });
       } else {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, errorMessage, { parent: toastArea });
+        const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, errorText, { parent: toastArea });
         toast.addEventListener('close', () => {
           toast.remove();
         });
