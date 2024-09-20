@@ -1,5 +1,5 @@
 import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
-import { LIBS, MILO_CONFIG, DEV_MODE } from '../../scripts/scripts.js';
+import { LIBS, MILO_CONFIG, DEV_MODE, ECC_ENV } from '../../scripts/scripts.js';
 import {
   getIcon,
   buildNoAccessScreen,
@@ -324,7 +324,7 @@ function decorateForm(el) {
 
   formBodyRow.classList.add('form-body');
 
-  const app = createTag('sp-theme', { color: 'light', scale: 'medium' });
+  const app = createTag('sp-theme', { color: 'light', scale: 'medium', id: 'form-app' });
   createTag('sp-underlay', {}, '', { parent: app });
   createTag('sp-dialog', { size: 's' }, '', { parent: app });
   const form = createTag('form', {}, '', { parent: app });
@@ -498,6 +498,125 @@ function navigateForm(props, stepIndex) {
   updateRequiredFields(props);
 }
 
+function closeDialog(props) {
+  const spTheme = props.el.querySelector('#form-app');
+  if (!spTheme) return;
+
+  const underlay = spTheme.querySelector('sp-underlay');
+  const dialog = spTheme.querySelector('sp-dialog');
+
+  if (underlay) underlay.open = false;
+  if (dialog) dialog.innerHTML = '';
+}
+
+function buildPreviewLoadingDialog(props, interval) {
+  const spTheme = props.el.querySelector('#form-app');
+  if (!spTheme) return;
+
+  const underlay = spTheme.querySelector('sp-underlay');
+  const dialog = spTheme.querySelector('sp-dialog');
+
+  if (!underlay || !dialog) return;
+
+  underlay.open = false;
+  dialog.innerHTML = '';
+
+  createTag('h1', { slot: 'heading' }, 'Generating your preview...', { parent: dialog });
+  createTag('p', {}, 'This process usually takes 10 - 30 seconds. In rare cases, it can take up to 10 minutes for the preview to propagate. Please wait patiently and the preview will be loaded in a new tab automatically when it is ready.', { parent: dialog });
+  createTag('p', {}, '<strong>Note: Please make sure pop-up is allowed for ECC in your browser settings.</strong>', { parent: dialog });
+  createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: dialog });
+  const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+  const cancelButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'Cancel', { parent: buttonContainer });
+
+  underlay.open = true;
+
+  cancelButton.addEventListener('click', () => {
+    closeDialog(props);
+    if (interval) clearInterval(interval);
+  });
+}
+
+function buildPreviewLoadingFailedDialog(props) {
+  const spTheme = props.el.querySelector('#form-app');
+  if (!spTheme) return;
+
+  const underlay = spTheme.querySelector('sp-underlay');
+  const dialog = spTheme.querySelector('sp-dialog');
+
+  if (!underlay || !dialog) return;
+
+  underlay.open = false;
+  dialog.innerHTML = '';
+
+  createTag('h1', { slot: 'heading' }, 'Preview generation failed.', { parent: dialog });
+  createTag('p', {}, "Don't worry. Your changes have been saved. Our system is working in the background to update the page to reflect the changes.", { parent: dialog });
+  createTag('p', {}, 'Please try again later or contact the ECC team if you need immediate assistance.', { parent: dialog });
+  const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+  const cancelButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'OK', { parent: buttonContainer });
+
+  underlay.open = true;
+
+  cancelButton.addEventListener('click', () => {
+    closeDialog(props);
+    dialog.innerHTML = '';
+  });
+}
+
+async function getNonProdPreviewDataById(props) {
+  if (!props.eventDataResp) return null;
+
+  const { eventId } = props.eventDataResp;
+
+  if (!eventId) return null;
+
+  const resp = await fetch(`${getEventPageHost()}/events/default/${ECC_ENV === 'prod' ? '' : `${ECC_ENV}/`}metadata-preview.json`);
+  if (resp.ok) {
+    const json = await resp.json();
+    const pageData = json.data.find((d) => d['event-id'] === eventId);
+
+    if (pageData) return pageData;
+
+    window.lana?.log('Failed to find non-prod metadata for current page');
+    return null;
+  }
+
+  window.lana?.log('Failed to fetch non-prod metadata:', resp);
+  return null;
+}
+
+async function compareAndFetchUntilMatch(props, targetUrl) {
+  let retryCount = 0;
+
+  const modificationTimeMatch = (metadataObj) => {
+    const metadataModTimestamp = new Date(metadataObj['modification-time']).getTime();
+    return metadataModTimestamp === props.eventDataResp.modificationTime;
+  };
+
+  const interval = setInterval(async () => {
+    try {
+      retryCount += 1;
+      const metadataJson = await getNonProdPreviewDataById(props);
+      console.log('Retrying:', retryCount);
+      console.log('Metadata mod time:', new Date(metadataJson['modification-time']).getTime());
+      console.log('New object mod time:', props.eventDataResp.modificationTime);
+      if (metadataJson && modificationTimeMatch(metadataJson)) {
+        clearInterval(interval);
+        closeDialog(props);
+        window.open(targetUrl);
+      } else if (retryCount >= 30) {
+        clearInterval(interval);
+        buildPreviewLoadingFailedDialog(props);
+        window.lana?.log('Error: Failed to match metadata after 30 retries');
+      }
+    } catch (error) {
+      window.lana?.log('Error in interval fetch:', error);
+      clearInterval(interval);
+    }
+  }, Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000);
+
+  buildPreviewLoadingDialog(props, interval);
+}
+
 function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
   decorateButtons(ctaRow, 'button-l');
@@ -540,7 +659,7 @@ function initFormCtas(props) {
           if (resp.error) {
             buildErrorMessage(props, resp);
           } else {
-            window.open(cta.href);
+            compareAndFetchUntilMatch(props, cta.href);
           }
 
           toggleBtnsSubmittingState(false);

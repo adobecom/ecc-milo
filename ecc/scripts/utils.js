@@ -57,6 +57,10 @@ export function convertTo24HourFormat(timeStr) {
 }
 
 export function getEventPageHost() {
+  if (window.location.href.includes('localhost')) {
+    return 'https://dev--events-milo--adobecom.hlx.page';
+  }
+
   if (window.location.href.includes('.hlx.')) {
     return window.location.origin.replace(window.location.hostname, `${ECC_ENV}--events-milo--adobecom.hlx.page`);
   }
