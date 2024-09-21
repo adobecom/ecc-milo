@@ -24,7 +24,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, { getFilteredCachedResponse, hasContentChanged, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { CustomSearch } from '../../components/custom-search/custom-search.js';
 
@@ -222,8 +222,7 @@ function initCustomLitComponents() {
   customElements.define('custom-search', CustomSearch);
 }
 
-async function initComponents(props) {
-  initCustomLitComponents();
+async function loadEventData(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
@@ -246,6 +245,10 @@ async function initComponents(props) {
     props.eventDataResp = { ...props.eventDataResp, ...eventData };
     props.el.classList.remove('disabled');
   }
+}
+
+async function initComponents(props) {
+  initCustomLitComponents();
 
   const componentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
@@ -509,14 +512,14 @@ function closeDialog(props) {
   if (dialog) dialog.innerHTML = '';
 }
 
-function buildPreviewLoadingDialog(props, interval) {
+function buildPreviewLoadingDialog(props) {
   const spTheme = props.el.querySelector('#form-app');
-  if (!spTheme) return;
+  if (!spTheme) return null;
 
   const underlay = spTheme.querySelector('sp-underlay');
   const dialog = spTheme.querySelector('sp-dialog');
 
-  if (!underlay || !dialog) return;
+  if (!underlay || !dialog) return null;
 
   underlay.open = false;
   dialog.innerHTML = '';
@@ -526,14 +529,11 @@ function buildPreviewLoadingDialog(props, interval) {
   createTag('p', {}, '<strong>Note: Please make sure pop-up is allowed for ECC in your browser settings.</strong>', { parent: dialog });
   createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: dialog });
   const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
-  const cancelButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'Cancel', { parent: buttonContainer });
+  createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'Cancel', { parent: buttonContainer });
 
   underlay.open = true;
 
-  cancelButton.addEventListener('click', () => {
-    closeDialog(props);
-    if (interval) clearInterval(interval);
-  });
+  return dialog;
 }
 
 function buildPreviewLoadingFailedDialog(props) {
@@ -584,37 +584,62 @@ async function getNonProdPreviewDataById(props) {
   return null;
 }
 
-async function compareAndFetchUntilMatch(props, targetUrl) {
+async function validatePreview(props, oldResp, cta) {
   let retryCount = 0;
+
+  const currentData = { ...props.eventDataResp };
+  const oldData = { ...oldResp };
+
+  console.log('Current data:', currentData);
+  console.log('Old data:', oldData);
+  console.log('hasContentChanged:', hasContentChanged(currentData, oldData));
+  if (!hasContentChanged(currentData, oldData) || !Object.keys(oldData).length) {
+    window.open(cta.href);
+    return Promise.resolve();
+  }
 
   const modificationTimeMatch = (metadataObj) => {
     const metadataModTimestamp = new Date(metadataObj['modification-time']).getTime();
     return metadataModTimestamp === props.eventDataResp.modificationTime;
   };
 
-  const interval = setInterval(async () => {
-    try {
-      retryCount += 1;
-      const metadataJson = await getNonProdPreviewDataById(props);
-      console.log('Retrying:', retryCount);
-      console.log('Metadata mod time:', new Date(metadataJson['modification-time']).getTime());
-      console.log('New object mod time:', props.eventDataResp.modificationTime);
-      if (metadataJson && modificationTimeMatch(metadataJson)) {
+  return new Promise((resolve) => {
+    const interval = setInterval(async () => {
+      try {
+        retryCount += 1;
+        const metadataJson = await getNonProdPreviewDataById(props);
+        console.log('Retrying:', retryCount);
+        console.log('Metadata mod time:', new Date(metadataJson['modification-time']).getTime());
+        console.log('New object mod time:', props.eventDataResp.modificationTime);
+        if (metadataJson && modificationTimeMatch(metadataJson)) {
+          clearInterval(interval);
+          closeDialog(props);
+          window.open(cta.href);
+          resolve();
+        } else if (retryCount >= 30) {
+          clearInterval(interval);
+          buildPreviewLoadingFailedDialog(props);
+          window.lana?.log('Error: Failed to match metadata after 30 retries');
+          resolve();
+        }
+      } catch (error) {
+        window.lana?.log('Error in interval fetch:', error);
         clearInterval(interval);
-        closeDialog(props);
-        window.open(targetUrl);
-      } else if (retryCount >= 30) {
-        clearInterval(interval);
-        buildPreviewLoadingFailedDialog(props);
-        window.lana?.log('Error: Failed to match metadata after 30 retries');
+        resolve();
       }
-    } catch (error) {
-      window.lana?.log('Error in interval fetch:', error);
-      clearInterval(interval);
-    }
-  }, Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000);
+    }, Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000);
 
-  buildPreviewLoadingDialog(props, interval);
+    const dialog = buildPreviewLoadingDialog(props, interval);
+
+    if (dialog) {
+      const cancelButton = dialog.querySelector('#cancel-preview');
+      cancelButton.addEventListener('click', () => {
+        closeDialog(props);
+        if (interval) clearInterval(interval);
+        resolve();
+      });
+    }
+  });
 }
 
 function initFormCtas(props) {
@@ -644,6 +669,7 @@ function initFormCtas(props) {
     });
   };
 
+  let oldResp = { ...props.eventDataResp };
   ctas.forEach((cta) => {
     if (cta.href) {
       const ctaUrl = new URL(cta.href);
@@ -654,15 +680,9 @@ function initFormCtas(props) {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
           if (cta.classList.contains('preview-not-ready')) return;
-          const resp = await saveEvent(props);
-
-          if (resp.error) {
-            buildErrorMessage(props, resp);
-          } else {
-            compareAndFetchUntilMatch(props, cta.href);
-          }
-
-          toggleBtnsSubmittingState(false);
+          validatePreview(props, oldResp, cta).then(() => {
+            toggleBtnsSubmittingState(false);
+          });
         });
       }
 
@@ -686,8 +706,10 @@ function initFormCtas(props) {
           if (ctaUrl.hash === '#next') {
             let resp;
             if (props.currentStep === props.maxStep) {
+              oldResp = { ...props.eventDataResp };
               resp = await saveEvent(props, { toPublish: true });
             } else {
+              oldResp = { ...props.eventDataResp };
               resp = await saveEvent(props);
             }
 
@@ -722,6 +744,7 @@ function initFormCtas(props) {
               navigateForm(props);
             }
           } else {
+            oldResp = { ...props.eventDataResp };
             const resp = await saveEvent(props);
             if (resp?.error) {
               buildErrorMessage(props, resp);
@@ -736,6 +759,7 @@ function initFormCtas(props) {
 
   backBtn.addEventListener('click', async () => {
     toggleBtnsSubmittingState(true);
+    oldResp = { ...props.eventDataResp };
     const resp = await saveEvent(props);
     if (resp?.error) {
       buildErrorMessage(props, resp);
@@ -917,6 +941,7 @@ async function buildECCForm(el) {
     });
   });
 
+  await loadEventData(proxyProps);
   initFormCtas(proxyProps);
   initNavigation(proxyProps);
   await initComponents(proxyProps);

@@ -504,6 +504,26 @@ export async function removeSpeakerFromEvent(speakerId, eventId) {
   }
 }
 
+export async function getSpeaker(seriesId, speakerId) {
+  const { host } = getAPIConfig().esp[ECC_ENV];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await fetch(`${host}/v1/series/${seriesId}/speakers/${speakerId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log('Failed to get speaker details. Status:', response.status, 'Error:', data);
+      return { ok: response.ok, status: response.status, error: data };
+    }
+
+    return convertToSpeaker(data);
+  } catch (error) {
+    window.lana?.log('Failed to get speaker details. Error:', error);
+    return { ok: false, status: 'Network Error', error: error.message };
+  }
+}
+
 export async function updateSpeaker(profile, seriesId) {
   const nSpeaker = convertToNSpeaker(profile);
   const { host } = getAPIConfig().esp[ECC_ENV];
@@ -540,6 +560,11 @@ export async function updateEvent(eventId, payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
+    if (data.speakers) {
+      const promises = data.speakers.map((spkr) => getSpeaker(data.seriesId, spkr.speakerId));
+      const speakers = await Promise.all(promises);
+      data.speakers = speakers;
+    }
     return data;
   } catch (error) {
     window.lana?.log(`Failed to update event ${eventId}. Error:`, error);
@@ -561,6 +586,11 @@ export async function publishEvent(eventId, payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
+    if (data.speakers) {
+      const promises = data.speakers.map((spkr) => getSpeaker(data.seriesId, spkr.speakerId));
+      const speakers = await Promise.all(promises);
+      data.speakers = speakers;
+    }
     return data;
   } catch (error) {
     window.lana?.log(`Failed to publish event ${eventId}. Error:`, error);
@@ -582,6 +612,11 @@ export async function unpublishEvent(eventId, payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
+    if (data.speakers) {
+      const promises = data.speakers.map((spkr) => getSpeaker(data.seriesId, spkr.speakerId));
+      const speakers = await Promise.all(promises);
+      data.speakers = speakers;
+    }
     return data;
   } catch (error) {
     window.lana?.log(`Failed to unpublish event ${eventId}. Error:`, error);
@@ -643,6 +678,11 @@ export async function getEvent(eventId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
+    if (data.speakers) {
+      const promises = data.speakers.map((spkr) => getSpeaker(data.seriesId, spkr.speakerId));
+      const speakers = await Promise.all(promises);
+      data.speakers = speakers;
+    }
     return data;
   } catch (error) {
     window.lana?.log(`Failed to get details for event ${eventId}. Error:`, error);
@@ -666,26 +706,6 @@ export async function getVenue(eventId) {
     return data;
   } catch (error) {
     window.lana?.log('Failed to get venue details. Error:', error);
-    return { ok: false, status: 'Network Error', error: error.message };
-  }
-}
-
-export async function getSpeaker(seriesId, speakerId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
-  const options = await constructRequestOptions('GET');
-
-  try {
-    const response = await fetch(`${host}/v1/series/${seriesId}/speakers/${speakerId}`, options);
-    const data = await response.json();
-
-    if (!response.ok) {
-      window.lana?.log('Failed to get speaker details. Status:', response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
-    }
-
-    return convertToSpeaker(data);
-  } catch (error) {
-    window.lana?.log('Failed to get speaker details. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
   }
 }
