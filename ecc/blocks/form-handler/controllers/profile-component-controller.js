@@ -101,7 +101,7 @@ export async function onSubmit(component, props) {
   }
 }
 
-export async function onUpdate(component, props) {
+export async function onPayloadUpdate(component, props) {
   const containers = component.querySelectorAll('profile-container');
   containers.forEach(async (container) => {
     if (props.payload.seriesId && props.payload.seriesId !== container.seriesId) {
@@ -111,6 +111,10 @@ export async function onUpdate(component, props) {
     }
     container.requestUpdate();
   });
+}
+
+export async function onRespUpdate(_component, _props) {
+  // Do nothing
 }
 
 async function prefillProfiles(props) {

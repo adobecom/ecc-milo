@@ -112,8 +112,12 @@ export async function onSubmit(component, props) {
   // do nothing. Depend on eventUpdated event.
 }
 
-export async function onUpdate(component, props) {
+export async function onPayloadUpdate(component, props) {
   // do nothing
+}
+
+export async function onRespUpdate(_component, _props) {
+  // Do nothing
 }
 
 export default async function init(component, props) {
