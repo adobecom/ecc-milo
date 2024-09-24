@@ -45,7 +45,7 @@ export class ProfileContainer extends LitElement {
   }
 
   isValidSpeaker(profile) {
-    return profile.firstName && profile.lastName && profile.title && profile.bio;
+    return profile.firstName && profile.lastName && profile.title;
   }
 
   getProfiles() {
