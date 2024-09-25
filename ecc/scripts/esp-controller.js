@@ -100,6 +100,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
     xhr.open(method, url);
     xhr.setRequestHeader('x-image-alt-text', configs.altText || '');
     xhr.setRequestHeader('x-image-kind', configs.type);
+    xhr.setRequestHeader('x-api-key', 'acom_event_service');
     xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
 
     if (tracker) {
