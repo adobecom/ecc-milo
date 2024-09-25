@@ -531,7 +531,7 @@ export async function updateSpeaker(profile, seriesId) {
 }
 
 export async function updateEvent(eventId, payload) {
-  const { host } = getAPIConfig().esl[ECC_ENV];
+  const { host } = getAPIConfig().esp[ECC_ENV];
   const raw = JSON.stringify({ ...payload, liveUpdate: false });
   const options = await constructRequestOptions('PUT', raw);
 
@@ -544,7 +544,7 @@ export async function updateEvent(eventId, payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data.espProvider || data;
+    return data;
   } catch (error) {
     window.lana?.log(`Failed to update event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -552,7 +552,7 @@ export async function updateEvent(eventId, payload) {
 }
 
 export async function publishEvent(eventId, payload) {
-  const { host } = getAPIConfig().esl[ECC_ENV];
+  const { host } = getAPIConfig().esp[ECC_ENV];
   const raw = JSON.stringify({ ...payload, published: true, liveUpdate: true });
   const options = await constructRequestOptions('PUT', raw);
 
@@ -565,7 +565,7 @@ export async function publishEvent(eventId, payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data.espProvider || data;
+    return data;
   } catch (error) {
     window.lana?.log(`Failed to publish event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -573,7 +573,7 @@ export async function publishEvent(eventId, payload) {
 }
 
 export async function unpublishEvent(eventId, payload) {
-  const { host } = getAPIConfig().esl[ECC_ENV];
+  const { host } = getAPIConfig().esp[ECC_ENV];
   const raw = JSON.stringify({ ...payload, published: false, liveUpdate: true });
   const options = await constructRequestOptions('PUT', raw);
 
@@ -586,7 +586,7 @@ export async function unpublishEvent(eventId, payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data.espProvider || data;
+    return data;
   } catch (error) {
     window.lana?.log(`Failed to unpublish event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
