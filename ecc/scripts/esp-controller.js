@@ -544,7 +544,7 @@ export async function updateEvent(eventId, payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return data.espProvider || data;
   } catch (error) {
     window.lana?.log(`Failed to update event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -565,7 +565,7 @@ export async function publishEvent(eventId, payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return data.espProvider || data;
   } catch (error) {
     window.lana?.log(`Failed to publish event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -586,7 +586,7 @@ export async function unpublishEvent(eventId, payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return data.espProvider || data;
   } catch (error) {
     window.lana?.log(`Failed to unpublish event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
