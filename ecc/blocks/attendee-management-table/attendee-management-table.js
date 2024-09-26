@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { getAllEventAttendees, getEvents } from '../../scripts/esp-controller.js';
-import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
-import { DEV_MODE, LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
+import { ALLOWED_ACCOUNT_TYPES, DEV_MODE } from '../../constants/constants.js';
+import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
   buildNoAccessScreen,
@@ -563,7 +563,7 @@ export default async function init(el) {
   buildLoadingScreen(el);
   const profile = BlockMediator.get('imsProfile');
 
-  if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
+  if (devMode === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
     buildDashboard(el, config);
     return;
   }

@@ -1,4 +1,4 @@
-import { MILO_CONFIG, LIBS, ECC_ENV } from './scripts.js';
+import { LIBS } from './scripts.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -7,7 +7,7 @@ let secretCache = [];
 export function getIcon(tag) {
   const img = document.createElement('img');
   img.className = `icon icon-${tag}`;
-  img.src = `${MILO_CONFIG.codeRoot}/icons/${tag}.svg`;
+  img.src = `${window.miloConfig.codeRoot}/icons/${tag}.svg`;
   img.alt = tag;
 
   return img;
@@ -58,7 +58,7 @@ export function convertTo24HourFormat(timeStr) {
 
 export function getEventPageHost() {
   if (window.location.href.includes('.hlx.')) {
-    return window.location.origin.replace(window.location.hostname, `${ECC_ENV}--events-milo--adobecom.hlx.page`);
+    return window.location.origin.replace(window.location.hostname, `${window.miloConfig.eccEnv}--events-milo--adobecom.hlx.page`);
   }
 
   return window.location.origin;

@@ -162,12 +162,11 @@ export const LIBS = (() => {
   });
 }());
 
-const { loadArea, setConfig, loadLana } = await import(`${LIBS}/utils/utils.js`);
-export const MILO_CONFIG = setConfig({ ...CONFIG, miloLibs: LIBS });
-export const ECC_ENV = getECCEnv(MILO_CONFIG);
-export const DEV_MODE = new URLSearchParams(window.location.search).has('devMode');
-
 (async function loadPage() {
+  const { loadArea, setConfig, getConfig, updateConfig, loadLana } = await import(`${LIBS}/utils/utils.js`);
+  window.miloConfig = setConfig({ ...CONFIG, miloLibs: LIBS });
+  const eccEnv = getECCEnv(getConfig());
+  window.miloConfig = updateConfig({ ...getConfig(), eccEnv });
   await loadLana({ clientId: 'ecc-milo' });
   await loadArea().then(() => {
     lazyCaptureProfile();
