@@ -24,7 +24,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedData, { quickFilter } from './data-handler.js';
+import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { CustomSearch } from '../../components/custom-search/custom-search.js';
 
@@ -106,16 +106,13 @@ export function buildErrorMessage(props, resp) {
       if (resp.status === 409) {
         const toast = createTag('sp-toast', { open: true, variant: 'negative' }, errorMessage, { parent: toastArea });
         const url = new URL(window.location.href);
+        url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
 
-        if (props.eventDataResp.eventId) {
-          url.searchParams.set('eventId', props.eventDataResp.eventId);
-
-          createTag('sp-button', {
-            slot: 'action',
-            variant: 'overBackground',
-            href: `${url.toString()}`,
-          }, 'See the latest version.', { parent: toast });
-        }
+        createTag('sp-button', {
+          slot: 'action',
+          variant: 'overBackground',
+          href: `${url.toString()}`,
+        }, 'See the latest version.', { parent: toast });
 
         toast.addEventListener('close', () => {
           toast.remove();
@@ -413,7 +410,7 @@ function showSaveSuccessMessage(props, detail = { message: 'Edits saved successf
 
 function updateDashboardLink(props) {
   // FIXME: presuming first link is dashboard link is not good.
-  if (!props.eventDataResp?.eventId) return;
+  if (!getFilteredCachedResponse().eventId) return;
   const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
   if (!dashboardLink) return;
@@ -422,7 +419,7 @@ function updateDashboardLink(props) {
 
   if (url.searchParams.has('eventId')) return;
 
-  url.searchParams.set('newEventId', props.eventDataResp?.eventId);
+  url.searchParams.set('newEventId', getFilteredCachedResponse().eventId);
   dashboardLink.href = url.toString();
 }
 
@@ -443,21 +440,21 @@ async function saveEvent(props, options = { toPublish: false }) {
     }
   };
 
-  if (props.currentStep === 0 && !props.eventDataResp?.eventId) {
+  if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
     resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
     await onEventSave();
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     resp = await updateEvent(
-      props.eventDataResp.eventId,
-      getJoinedData(props),
+      getFilteredCachedResponse().eventId,
+      getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     await onEventSave();
   } else if (options.toPublish) {
     resp = await publishEvent(
-      props.eventDataResp.eventId,
+      getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
@@ -779,12 +776,14 @@ async function buildECCForm(el) {
         }
 
         case 'payload': {
+          setPayloadCache(value);
           updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);
           break;
         }
 
         case 'eventDataResp': {
+          setResponseCache(value);
           updateComponentsOnRespChange(target);
           updateCtas(target);
           if (value.error) {

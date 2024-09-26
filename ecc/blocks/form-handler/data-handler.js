@@ -1,4 +1,7 @@
 // FIXME: this whole data handler thing can be done better
+let responseCache = {};
+let payloadCache = {};
+
 const submissionFilter = [
   // from payload and response
   'agenda',
@@ -47,9 +50,27 @@ export function quickFilter(obj) {
   return output;
 }
 
-export default function getJoinedData(props) {
-  const filteredResponse = quickFilter(props.payload);
-  const filteredPayload = quickFilter(props.eventDataResp);
+export function setPayloadCache(payload) {
+  if (!payload) return;
+  payloadCache = quickFilter(payload);
+}
+
+export function getFilteredCachedPayload() {
+  return payloadCache;
+}
+
+export function setResponseCache(response) {
+  if (!response) return;
+  responseCache = quickFilter(response);
+}
+
+export function getFilteredCachedResponse() {
+  return responseCache;
+}
+
+export default function getJoinedData() {
+  const filteredResponse = getFilteredCachedResponse();
+  const filteredPayload = getFilteredCachedPayload();
 
   return {
     ...filteredResponse,
