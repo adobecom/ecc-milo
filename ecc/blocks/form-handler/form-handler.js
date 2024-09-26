@@ -1,4 +1,4 @@
-import { ALLOWED_ACCOUNT_TYPES, DEV_MODE } from '../../constants/constants.js';
+import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -858,13 +858,6 @@ export default async function init(el) {
   ]);
 
   const profile = BlockMediator.get('imsProfile');
-
-  if (DEV_MODE === true && ['stage', 'local'].includes(window.miloConfig.env.name)) {
-    buildECCForm(el).then(() => {
-      el.classList.remove('loading');
-    });
-    return;
-  }
 
   if (profile) {
     if (profile.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {

@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { getAllEventAttendees, getEvents } from '../../scripts/esp-controller.js';
-import { ALLOWED_ACCOUNT_TYPES, DEV_MODE } from '../../constants/constants.js';
+import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -418,7 +418,6 @@ function buildBackToDashboardBtn(props, config) {
   if (!sidePanel) return;
 
   const url = new URL(`${window.location.origin}${config['event-dashboard-url']}`);
-  if (DEV_MODE) url.searchParams.set('devMode', true);
   const backBtn = createTag('a', { class: 'back-btn', href: url.toString() }, 'Back', { parent: sidePanel });
   backBtn.prepend(getIcon('chev-left'));
 }
