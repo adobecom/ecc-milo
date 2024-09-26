@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { createVenue, replaceVenue } from '../../../scripts/esp-controller.js';
-import { BlockMediator, ECC_ENV } from '../../../scripts/scripts.js';
+import BlockMediator from '../../../scripts/deps/block-mediator.min.js';
+import { ECC_ENV } from '../../../scripts/scripts.js';
 import { changeInputValue, getSecret } from '../../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler.js';
 
