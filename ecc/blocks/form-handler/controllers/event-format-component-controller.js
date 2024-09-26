@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 import { getSeries } from '../../../scripts/esp-controller.js';
-import { LIBS, BlockMediator } from '../../../scripts/scripts.js';
-import { changeInputValue } from '../../../scripts/utils.js';
+import BlockMediator from '../../../scripts/deps/block-mediator.min.js';
+import { changeInputValue, getLibs } from '../../../scripts/utils.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;

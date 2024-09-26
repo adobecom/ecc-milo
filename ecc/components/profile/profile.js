@@ -1,13 +1,13 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
-import { LIBS } from '../../scripts/scripts.js';
+
 import { style } from './profile.css.js';
 import { createSpeaker, deleteSpeakerImage, updateSpeaker, uploadImage } from '../../scripts/esp-controller.js';
-import { getServiceName } from '../../scripts/utils.js';
+import { getLibs, getServiceName } from '../../scripts/utils.js';
 import { icons } from '../../icons/icons.svg.js';
 import { LINK_REGEX } from '../../constants/constants.js';
 
-const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 const DEFAULT_FIELD_LABELS = {
   heading: 'Profile',

@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 import { deleteImage, getEventImages, uploadImage } from '../../../scripts/esp-controller.js';
-import { LIBS } from '../../../scripts/scripts.js';
+import { getLibs } from '../../../scripts/utils.js';
 import { getFilteredCachedResponse } from '../data-handler.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 function getComponentImageType(component) {
   const typeMap = {

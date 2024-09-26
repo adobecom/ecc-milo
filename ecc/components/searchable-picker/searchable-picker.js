@@ -1,8 +1,9 @@
 /* eslint-disable max-len */
-import { LIBS } from '../../scripts/scripts.js';
+
+import { getLibs } from '../../scripts/utils.js';
 import { style } from './searchable-picker.css.js';
 
-const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, repeat } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 // eslint-disable-next-line import/prefer-default-export
 export class SearchablePicker extends LitElement {

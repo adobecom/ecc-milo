@@ -1,7 +1,7 @@
-import { LIBS } from '../../scripts/scripts.js';
+import { getLibs } from '../../scripts/utils.js';
 import { style } from './custom-search.css.js';
 
-const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 const SEARCH_TIMEOUT_MS = 500;
 

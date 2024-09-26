@@ -1,8 +1,8 @@
 import { getSponsors } from '../../scripts/esp-controller.js';
-import { LIBS } from '../../scripts/scripts.js';
+import { getLibs } from '../../scripts/utils.js';
 import { style } from './partner-selector-group.css.js';
 
-const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 const defaultPartner = {};
 

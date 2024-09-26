@@ -1,7 +1,7 @@
-import { LIBS } from '../../scripts/scripts.js';
 import '../../components/image-dropzone/image-dropzone.js';
+import { getLibs } from '../../scripts/utils.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 function extractFieldLabels(element) {
   const rows = Array.from(element.children);

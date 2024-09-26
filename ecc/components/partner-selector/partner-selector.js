@@ -1,9 +1,9 @@
-import { LIBS } from '../../scripts/scripts.js';
 import { style } from './partner-selector.css.js';
 import { createSponsor, deleteImage, updateSponsor, uploadImage } from '../../scripts/esp-controller.js';
 import { LINK_REGEX } from '../../constants/constants.js';
+import { getLibs } from '../../scripts/utils.js';
 
-const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 export default class PartnerSelector extends LitElement {
   static properties = {

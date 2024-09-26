@@ -1,8 +1,7 @@
 /* eslint-disable max-len */
-import { LIBS } from '../../scripts/scripts.js';
-import { generateToolTip } from '../../scripts/utils.js';
+import { generateToolTip, getLibs } from '../../scripts/utils.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 async function decorateCloudTagSelect(column) {
   const phText = column.textContent.trim();

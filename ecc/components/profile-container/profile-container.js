@@ -1,11 +1,10 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
 import { getSpeakers } from '../../scripts/esp-controller.js';
-import { LIBS } from '../../scripts/scripts.js';
-import { isEmptyObject } from '../../scripts/utils.js';
+import { getLibs, isEmptyObject } from '../../scripts/utils.js';
 import { style } from './profile-container.css.js';
 
-const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 const defaultProfile = { socialMedia: [{ link: '' }], isPlaceholder: true };
 

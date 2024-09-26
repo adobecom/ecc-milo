@@ -1,9 +1,10 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
-import { LIBS } from '../../scripts/scripts.js';
+
+import { getLibs } from '../../scripts/utils.js';
 import { style } from './custom-textfield.css.js';
 
-const { LitElement, html, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, nothing } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 const defaultConfig = {
   grows: false,

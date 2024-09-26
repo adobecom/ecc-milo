@@ -1,11 +1,8 @@
 /* eslint-disable no-unused-vars */
-import { ECC_ENV, LIBS } from '../../../scripts/scripts.js';
 import HtmlSanitizer from '../../../scripts/deps/html-sanitizer.js';
-import { fetchThrottledMemoizedText, getEventPageHost } from '../../../scripts/utils.js';
-import { getFilteredCachedResponse } from '../data-handler.js';
+import { fetchThrottledMemoizedText, getLibs } from '../../../scripts/utils.js';
 
-const { customFetch } = await import(`${LIBS}/utils/helpers.js`);
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 function buildTerms(terms) {
   const termsWrapper = createTag('div', { class: 'terms-conditions-preview' });
@@ -37,7 +34,7 @@ async function loadPreview(component, templateId) {
 
   let host;
   if (window.location.href.includes('.hlx.')) {
-    host = window.location.origin.replace(window.location.hostname, `${ECC_ENV}--events-milo--adobecom.hlx.page`);
+    host = window.location.origin.replace(window.location.hostname, `${window.eccEnv}--events-milo--adobecom.hlx.page`);
   } else {
     host = window.location.origin;
   }

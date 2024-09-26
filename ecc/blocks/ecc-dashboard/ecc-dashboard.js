@@ -6,13 +6,12 @@ import {
   publishEvent,
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
-import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
-import { LIBS, MILO_CONFIG, DEV_MODE } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, getEventPageHost, readBlockConfig } from '../../scripts/utils.js';
+import { ALLOWED_ACCOUNT_TYPES, DEV_MODE } from '../../constants/constants.js';
+import { getIcon, buildNoAccessScreen, getEventPageHost, readBlockConfig, getLibs } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 export function cloneFilter(obj) {
   const wl = [
@@ -693,7 +692,7 @@ function buildLoadingScreen(el) {
 }
 
 export default async function init(el) {
-  const miloLibs = LIBS;
+  const miloLibs = getLibs();
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
@@ -709,7 +708,7 @@ export default async function init(el) {
   buildLoadingScreen(el);
   const profile = BlockMediator.get('imsProfile');
 
-  if (DEV_MODE === true && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
+  if (DEV_MODE === true && ['stage', 'local'].includes(window.miloConfig.env.name)) {
     buildDashboard(el, config);
     return;
   }

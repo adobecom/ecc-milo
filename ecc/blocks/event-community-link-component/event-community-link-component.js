@@ -1,8 +1,7 @@
 import { LINK_REGEX } from '../../constants/constants.js';
-import { LIBS } from '../../scripts/scripts.js';
-import { generateToolTip } from '../../scripts/utils.js';
+import { generateToolTip, getLibs } from '../../scripts/utils.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 async function decorateFields(row) {
   row.classList.add('text-field-row');

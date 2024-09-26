@@ -1,4 +1,3 @@
-import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
   generateToolTip,
@@ -6,9 +5,10 @@ import {
   decorateTextarea,
   convertTo24HourFormat,
   miloReplaceKey,
+  getLibs,
 } from '../../scripts/utils.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 function buildDatePicker(column) {
   column.classList.add('date-picker');

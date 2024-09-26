@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
 import { getEvents } from '../../../scripts/esp-controller.js';
-import { BlockMediator, LIBS } from '../../../scripts/scripts.js';
-import { changeInputValue } from '../../../scripts/utils.js';
+import BlockMediator from '../../../scripts/deps/block-mediator.min.js';
+import { changeInputValue, getLibs } from '../../../scripts/utils.js';
 
-const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
+const { createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`);
 
 function formatDate(date) {
   let month = `${date.getMonth() + 1}`;

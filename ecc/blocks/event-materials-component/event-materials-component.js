@@ -1,7 +1,6 @@
-import { LIBS } from '../../scripts/scripts.js';
-import { getIcon, generateToolTip } from '../../scripts/utils.js';
+import { getIcon, generateToolTip, getLibs } from '../../scripts/utils.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 async function decorateSWCTextField(row, extraOptions) {
   row.classList.add('text-field-row');

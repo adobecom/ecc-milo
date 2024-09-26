@@ -1,11 +1,11 @@
-import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
-import { LIBS, MILO_CONFIG, DEV_MODE } from '../../scripts/scripts.js';
+import { ALLOWED_ACCOUNT_TYPES, DEV_MODE } from '../../constants/constants.js';
 import {
   getIcon,
   buildNoAccessScreen,
   generateToolTip,
   camelToSentenceCase,
   getEventPageHost,
+  getLibs,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -28,8 +28,8 @@ import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache,
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { CustomSearch } from '../../components/custom-search/custom-search.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
-const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
+const { createTag } = await import(`${getLibs()}/utils/utils.js`);
+const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
 
 // list of controllers for the handler to load
 const VANILLA_COMPONENTS = [
@@ -848,7 +848,7 @@ function buildLoadingScreen(el) {
 
 export default async function init(el) {
   buildLoadingScreen(el);
-  const miloLibs = LIBS;
+  const miloLibs = getLibs();
   const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
     await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
   });
@@ -859,7 +859,7 @@ export default async function init(el) {
 
   const profile = BlockMediator.get('imsProfile');
 
-  if (DEV_MODE === true && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
+  if (DEV_MODE === true && ['stage', 'local'].includes(window.miloConfig.env.name)) {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
     });

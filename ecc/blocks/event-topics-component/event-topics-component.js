@@ -1,8 +1,7 @@
-import { LIBS } from '../../scripts/scripts.js';
 import { getCaasTags } from '../../scripts/esp-controller.js';
-import { generateToolTip, isEmptyObject } from '../../scripts/utils.js';
+import { generateToolTip, getLibs, isEmptyObject } from '../../scripts/utils.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 async function buildTopicsCheckboxes(el) {
   const cw = createTag('div', { class: 'checkbox-wrapper' });

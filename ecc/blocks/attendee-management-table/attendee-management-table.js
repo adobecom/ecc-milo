@@ -1,18 +1,18 @@
 /* eslint-disable max-len */
 import { getAllEventAttendees, getEvents } from '../../scripts/esp-controller.js';
-import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
-import { DEV_MODE, LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
+import { ALLOWED_ACCOUNT_TYPES, DEV_MODE } from '../../constants/constants.js';
 import {
   getIcon,
   buildNoAccessScreen,
   camelToSentenceCase,
   readBlockConfig,
+  getLibs,
 } from '../../scripts/utils.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { SearchablePicker } from '../../components/searchable-picker/searchable-picker.js';
 import { FilterMenu } from '../../components/filter-menu/filter-menu.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag } = await import(`${getLibs()}/utils/utils.js`);
 
 const ATTENDEE_ATTR_KEYS = [
   'attendeeId',
@@ -537,7 +537,7 @@ function buildLoadingScreen(el) {
 }
 
 export default async function init(el) {
-  const miloLibs = LIBS;
+  const miloLibs = getLibs();
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
@@ -563,7 +563,7 @@ export default async function init(el) {
   buildLoadingScreen(el);
   const profile = BlockMediator.get('imsProfile');
 
-  if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
+  if (devMode === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
     buildDashboard(el, config);
     return;
   }

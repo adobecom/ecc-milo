@@ -1,13 +1,114 @@
-import { MILO_CONFIG, LIBS, ECC_ENV } from './scripts.js';
-
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
-
 let secretCache = [];
+
+export const [setLibs, getLibs] = (() => {
+  let libs;
+  return [
+    (prodLibs, location) => {
+      libs = (() => {
+        const { hostname, search } = location || window.location;
+        if (!(hostname.includes('.hlx.') || hostname.includes('local'))) return prodLibs;
+        const branch = new URLSearchParams(search).get('milolibs') || 'ecc';
+        if (branch === 'local') return 'http://localhost:6456/libs';
+        return branch.includes('--') ? `https://${branch}.hlx.live/libs` : `https://${branch}--milo--adobecom.hlx.live/libs`;
+      })();
+      return libs;
+    }, () => libs,
+  ];
+})();
+
+export async function importMiloUtils() {
+  return import(`${getLibs()}/utils/utils.js`);
+}
+
+function createTag(tag, attributes, html, options = {}) {
+  const el = document.createElement(tag);
+  if (html) {
+    if (html instanceof HTMLElement
+      || html instanceof SVGElement
+      || html instanceof DocumentFragment) {
+      el.append(html);
+    } else if (Array.isArray(html)) {
+      el.append(...html);
+    } else {
+      el.insertAdjacentHTML('beforeend', html);
+    }
+  }
+  if (attributes) {
+    Object.entries(attributes).forEach(([key, val]) => {
+      el.setAttribute(key, val);
+    });
+  }
+  options.parent?.append(el);
+  return el;
+}
+
+function convertEccIcon(n) {
+  const createSVGIcon = (iconName) => {
+    const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgElement.setAttribute('width', '20');
+    svgElement.setAttribute('height', '20');
+    svgElement.setAttribute('class', 'ecc-icon');
+
+    const useElement = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    useElement.setAttributeNS('http://www.w3.org/1999/xlink', 'href', `/ecc/icons/ecc-icons.svg#${iconName}`);
+
+    svgElement.appendChild(useElement);
+
+    return svgElement;
+  };
+
+  const text = n.innerHTML;
+  const eccIcons = [
+    'ecc-content',
+    'ecc-star-wire',
+    'ecc-webpage',
+  ];
+
+  const iconRegex = /@@(.*?)@@/g;
+  return text.replace(iconRegex, (match, iconName) => {
+    if (eccIcons.includes(iconName)) {
+      return createSVGIcon(iconName).outerHTML;
+    }
+
+    return '';
+  });
+}
+
+export function decorateArea(area = document) {
+  const eagerLoad = (parent, selector) => {
+    const img = parent.querySelector(selector);
+    img?.removeAttribute('loading');
+  };
+
+  (async function loadLCPImage() {
+    const marquee = area.querySelector('.marquee');
+    if (!marquee) {
+      eagerLoad(area, 'img');
+      return;
+    }
+
+    // First image of first row
+    eagerLoad(marquee, 'div:first-child img');
+    // Last image of last column of last row
+    eagerLoad(marquee, 'div:last-child > div:last-child img');
+  }());
+
+  const allElements = area.querySelectorAll('*');
+  allElements.forEach((element) => {
+    if (element.childNodes.length) {
+      element.childNodes.forEach((n) => {
+        if (n.tagName === 'P' || n.tagName === 'A' || n.tagName === 'LI') {
+          n.innerHTML = convertEccIcon(n);
+        }
+      });
+    }
+  });
+}
 
 export function getIcon(tag) {
   const img = document.createElement('img');
   img.className = `icon icon-${tag}`;
-  img.src = `${MILO_CONFIG.codeRoot}/icons/${tag}.svg`;
+  img.src = `${window.miloConfig.codeRoot}/icons/${tag}.svg`;
   img.alt = tag;
 
   return img;
@@ -58,7 +159,7 @@ export function convertTo24HourFormat(timeStr) {
 
 export function getEventPageHost() {
   if (window.location.href.includes('.hlx.')) {
-    return window.location.origin.replace(window.location.hostname, `${ECC_ENV}--events-milo--adobecom.hlx.page`);
+    return window.location.origin.replace(window.location.hostname, `${window.eccEnv}--events-milo--adobecom.hlx.page`);
   }
 
   return window.location.origin;
@@ -233,8 +334,8 @@ export function getServiceName(link) {
 export async function miloReplaceKey(key) {
   try {
     const [utils, placeholders] = await Promise.all([
-      import(`${LIBS}/utils/utils.js`),
-      import(`${LIBS}/features/placeholders.js`),
+      import(`${getLibs()}/utils/utils.js`),
+      import(`${getLibs()}/features/placeholders.js`),
     ]);
 
     const { getConfig } = utils;

@@ -1,10 +1,10 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable max-len */
-import { LIBS } from '../../scripts/scripts.js';
-import { camelToSentenceCase } from '../../scripts/utils.js';
+
+import { camelToSentenceCase, getLibs } from '../../scripts/utils.js';
 import { style } from './filter-menu.css.js';
 
-const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, repeat } = await import(`${getLibs()}/deps/lit-all.min.js`);
 
 export class FilterMenu extends LitElement {
   static styles = style;
