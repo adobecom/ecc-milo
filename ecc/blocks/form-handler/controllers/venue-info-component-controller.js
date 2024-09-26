@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { createVenue, replaceVenue } from '../../../scripts/esp-controller.js';
 import BlockMediator from '../../../scripts/deps/block-mediator.min.js';
-import { changeInputValue, getSecret } from '../../../scripts/utils.js';
+import { changeInputValue, getECCEnv, getSecret } from '../../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler.js';
 
 function togglePrefillableFieldsHiddenState(component, showPrefilledFields) {
@@ -18,7 +18,7 @@ function togglePrefillableFieldsHiddenState(component, showPrefilledFields) {
 
 async function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');
-  const apiKey = await getSecret(`${window.miloConfig.eccEnv}-google-places-api`);
+  const apiKey = await getSecret(`${getECCEnv()}-google-places-api`);
   script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=onGoogleMapsApiLoaded`;
   script.async = true;
   script.defer = true;

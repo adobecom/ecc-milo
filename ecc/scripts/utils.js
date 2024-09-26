@@ -5,14 +5,23 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 let secretCache = [];
 
 export function getECCEnv() {
+  const validEnvs = ['dev', 'stage', 'prod'];
   const { host, search } = window.location;
+  const SLD = host.includes('.aem.') ? 'aem' : 'hlx';
   const usp = new URLSearchParams(search);
   const eccEnv = usp.get('eccEnv');
 
-  if (eccEnv) return eccEnv;
-  if (host.startsWith('dev--') || host.startsWith('www.dev')) return 'dev';
-  if (host.startsWith('stage--') || host.startsWith('www.stage')) return 'stage';
-  if (host.startsWith('main--') || host.endsWith === 'adobe.com') return 'prod';
+  if (validEnvs.includes(eccEnv)) return eccEnv;
+
+  if (((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`)) && host.startsWith('dev--'))
+    || host.includes('localhost')) return 'dev';
+
+  if (((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`)) && host.startsWith('stage--'))
+    || host.includes('stage.adobe')
+    || host.includes('corp.adobe')
+    || host.includes('graybox.adobe')) return 'stage';
+
+  if (((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`)) && host.startsWith('main--')) || host.endsWith === 'adobe.com') return 'prod';
 
   // fallback to dev
   return 'dev';
@@ -72,7 +81,7 @@ export function convertTo24HourFormat(timeStr) {
 
 export function getEventPageHost() {
   if (window.location.href.includes('.hlx.')) {
-    return window.location.origin.replace(window.location.hostname, `${window.miloConfig.eccEnv}--events-milo--adobecom.hlx.page`);
+    return window.location.origin.replace(window.location.hostname, `${getECCEnv()}--events-milo--adobecom.hlx.page`);
   }
 
   return window.location.origin;
