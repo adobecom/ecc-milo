@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { getAllEventAttendees, getEvents } from '../../scripts/esp-controller.js';
 import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
-import { DEV_MODE, LIBS, MILO_CONFIG } from '../../scripts/scripts.js';
+import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
   buildNoAccessScreen,
@@ -418,7 +418,6 @@ function buildBackToDashboardBtn(props, config) {
   if (!sidePanel) return;
 
   const url = new URL(`${window.location.origin}${config['event-dashboard-url']}`);
-  if (DEV_MODE) url.searchParams.set('devMode', true);
   const backBtn = createTag('a', { class: 'back-btn', href: url.toString() }, 'Back', { parent: sidePanel });
   backBtn.prepend(getIcon('chev-left'));
 }
@@ -554,19 +553,10 @@ export default async function init(el) {
     import(`${miloLibs}/features/spectrum-web-components/dist/link.js`),
   ]);
 
-  const { search } = window.location;
-  const urlParams = new URLSearchParams(search);
-  const devMode = urlParams.get('devMode');
-
   const config = readBlockConfig(el);
   el.innerHTML = '';
   buildLoadingScreen(el);
   const profile = BlockMediator.get('imsProfile');
-
-  if (devMode === 'true' && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
-    buildDashboard(el, config);
-    return;
-  }
 
   if (profile) {
     if (profile.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
