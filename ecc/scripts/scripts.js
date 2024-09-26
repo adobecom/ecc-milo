@@ -164,7 +164,7 @@ export const LIBS = (() => {
 
 (async function loadPage() {
   const { loadArea, setConfig, getConfig, updateConfig, loadLana } = await import(`${LIBS}/utils/utils.js`);
-  window.miloConfig = setConfig({ ...CONFIG, miloLibs: LIBS });
+  setConfig({ ...CONFIG, miloLibs: LIBS });
   const eccEnv = getECCEnv(getConfig());
   window.miloConfig = updateConfig({ ...getConfig(), eccEnv });
   await loadLana({ clientId: 'ecc-milo' });
