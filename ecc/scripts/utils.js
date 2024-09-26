@@ -4,6 +4,20 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 let secretCache = [];
 
+export function getECCEnv() {
+  const { host, search } = window.location;
+  const usp = new URLSearchParams(search);
+  const eccEnv = usp.get('eccEnv');
+
+  if (eccEnv) return eccEnv;
+  if (host.startsWith('dev--') || host.startsWith('www.dev')) return 'dev';
+  if (host.startsWith('stage--') || host.startsWith('www.stage')) return 'stage';
+  if (host.startsWith('main--') || host.endsWith === 'adobe.com') return 'prod';
+
+  // fallback to dev
+  return 'dev';
+}
+
 export function getIcon(tag) {
   const img = document.createElement('img');
   img.className = `icon icon-${tag}`;

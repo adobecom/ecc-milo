@@ -75,27 +75,6 @@ export function decorateArea(area = document) {
   });
 }
 
-function getECCEnv(miloConfig) {
-  const { env } = miloConfig;
-
-  if (env.name === 'prod') return 'prod';
-
-  if (env.name === 'stage') {
-    const { host, search } = window.location;
-    const usp = new URLSearchParams(search);
-    const eccEnv = usp.get('eccEnv');
-
-    if (eccEnv) return eccEnv;
-
-    if (host.startsWith('main--')) return 'prod';
-    if (host.startsWith('stage--') || host.startsWith('www.stage')) return 'stage';
-    if (host.startsWith('dev--') || host.startsWith('www.dev')) return 'dev';
-  }
-
-  // fallback to dev
-  return 'dev';
-}
-
 const locales = {
   '': { ietf: 'en-US', tk: 'jdq5hay.css' },
   br: { ietf: 'pt-BR', tk: 'inq1xob.css' },
