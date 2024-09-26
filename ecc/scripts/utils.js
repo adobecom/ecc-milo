@@ -1,6 +1,6 @@
 import { LIBS } from './scripts.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 let secretCache = [];
 
@@ -30,7 +30,7 @@ export function getECCEnv() {
 export function getIcon(tag) {
   const img = document.createElement('img');
   img.className = `icon icon-${tag}`;
-  img.src = `${window.miloConfig.codeRoot}/icons/${tag}.svg`;
+  img.src = `${getConfig().codeRoot}/icons/${tag}.svg`;
   img.alt = tag;
 
   return img;
@@ -255,12 +255,8 @@ export function getServiceName(link) {
 
 export async function miloReplaceKey(key) {
   try {
-    const [utils, placeholders] = await Promise.all([
-      import(`${LIBS}/utils/utils.js`),
-      import(`${LIBS}/features/placeholders.js`),
-    ]);
+    const placeholders = await import(`${LIBS}/features/placeholders.js`);
 
-    const { getConfig } = utils;
     const { replaceKey } = placeholders;
     const config = getConfig();
 

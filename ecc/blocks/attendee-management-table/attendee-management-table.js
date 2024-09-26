@@ -553,19 +553,10 @@ export default async function init(el) {
     import(`${miloLibs}/features/spectrum-web-components/dist/link.js`),
   ]);
 
-  const { search } = window.location;
-  const urlParams = new URLSearchParams(search);
-  const devMode = urlParams.get('devMode');
-
   const config = readBlockConfig(el);
   el.innerHTML = '';
   buildLoadingScreen(el);
   const profile = BlockMediator.get('imsProfile');
-
-  if (devMode === 'true' && ['stage', 'local'].includes(window.miloConfig.env.name)) {
-    buildDashboard(el, config);
-    return;
-  }
 
   if (profile) {
     if (profile.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {

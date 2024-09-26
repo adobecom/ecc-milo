@@ -143,7 +143,7 @@ export const LIBS = (() => {
 
 (async function loadPage() {
   const { loadArea, setConfig, loadLana } = await import(`${LIBS}/utils/utils.js`);
-  window.miloConfig = setConfig({ ...CONFIG, miloLibs: LIBS });
+  setConfig({ ...CONFIG, miloLibs: LIBS });
   await loadLana({ clientId: 'ecc-milo' });
   await loadArea().then(() => {
     lazyCaptureProfile();
