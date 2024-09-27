@@ -59,7 +59,11 @@ export function onSubmit(component, props) {
   props.payload = { ...props.payload, ...rsvpData };
 }
 
-export async function onUpdate(component, props) {
+export async function onPayloadUpdate(component, props) {
+  // Do nothing
+}
+
+export async function onRespUpdate(component, props) {
   if (!props.eventDataResp) return;
 
   if (props.eventDataResp.cloudType === 'CreativeCloud') {

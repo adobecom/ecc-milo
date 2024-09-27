@@ -97,6 +97,10 @@
   top: 0;
 }
 
+.img-upload-component .progress-wrapper.hidden {
+  display: none;
+}
+
 @media (min-width: 900px) {
   .img-upload-component .image-dropzones {
     grid-template-columns: 1fr 1fr 1fr;
