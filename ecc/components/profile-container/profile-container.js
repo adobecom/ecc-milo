@@ -1,5 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
+import { getSpeakers } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { isEmptyObject } from '../../scripts/utils.js';
 import { style } from './profile-container.css.js';
@@ -32,13 +33,19 @@ export class ProfileContainer extends LitElement {
     this.requestUpdate();
   }
 
+  reloadSearchData = async () => {
+    const spResp = await getSpeakers(this.seriesId);
+    if (spResp) this.searchdata = spResp.speakers;
+  };
+
   updateProfile(index, profile) {
     this.profiles[index] = profile;
+    this.reloadSearchData();
     this.requestUpdate();
   }
 
   isValidSpeaker(profile) {
-    return profile.firstName && profile.lastName && profile.title && profile.bio;
+    return profile.firstName && profile.lastName && profile.title;
   }
 
   getProfiles() {
@@ -56,7 +63,6 @@ export class ProfileContainer extends LitElement {
   }
 
   enableRepeater() {
-    // eslint-disable-next-line max-len
     return this.profiles.every((profile) => !profile.isPlaceholder && profile.type);
   }
 

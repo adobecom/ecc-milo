@@ -12,7 +12,7 @@ export function onSubmit(component, props) {
   if (selectedProducts) {
     const topicsVal = props.payload.fullTopicsValue?.map((x) => JSON.parse(x));
     const relatedProducts = selectedProducts
-      .filter((p) => topicsVal.find((t) => p.tagID.includes(t.tagID)))
+      .filter((p) => topicsVal.find((t) => p.tagID?.includes(t.tagID)))
       .map((p) => ({
         name: p.title,
         showProductBlade: !!p.showProductBlade,
@@ -65,19 +65,19 @@ async function updateProductSelector(component, props) {
     'Substance 3D Collection',
   ];
   const caasTags = await getCaasTags();
-  const topicsVal = props.payload.fullTopicsValue?.map((x) => JSON.parse(x));
-  if (!caasTags || !topicsVal) return;
+  const topics = props.payload.fullTopicsValue?.map((x) => JSON.parse(x));
+  if (!caasTags || !topics) return;
 
   const productGroups = component.querySelectorAll('product-selector-group');
   let products = Object.values(caasTags.namespaces.caas.tags['product-categories'].tags).map((x) => [...Object.values(x.tags).map((y) => y)]).flat();
 
   products = products.filter(
-    (p) => topicsVal.find((t) => p.tagID.includes(t.tagID)) && supportedProducts.includes(p.title),
+    (p) => topics.find((t) => p.tagID?.includes(t.tagID)) && supportedProducts?.includes(p.title),
   );
 
   productGroups.forEach((pg) => {
     pg.setAttribute('data-products', JSON.stringify(products));
-    pg.setAttribute('data-selected-topics', JSON.stringify(topicsVal));
+    pg.setAttribute('data-selected-topics', JSON.stringify(topics));
     pg.requestUpdate();
 
     const selectedProducts = pg.getSelectedProducts();
@@ -100,8 +100,12 @@ async function updateProductSelector(component, props) {
   });
 }
 
-export async function onUpdate(component, props) {
+export async function onPayloadUpdate(component, props) {
   await updateProductSelector(component, props);
+}
+
+export async function onRespUpdate(_component, _props) {
+  // Do nothing
 }
 
 export default async function init(component, props) {

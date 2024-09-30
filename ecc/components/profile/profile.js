@@ -41,7 +41,7 @@ export class Profile extends LitElement {
     this.attachShadow({ mode: 'open' });
     this.fieldlabels = this.fieldlabels ?? DEFAULT_FIELD_LABELS;
 
-    this.profile = this.profile ?? { socialMedia: [{ link: '' }] };
+    this.profile = this.profile ?? { socialMedia: [{ link: '' }], isPlaceholder: true };
     this.profileCopy = {};
   }
 
@@ -169,7 +169,7 @@ export class Profile extends LitElement {
 
   saveDisabled() {
     // eslint-disable-next-line max-len
-    return !this.profile.firstName || !this.profile.lastName || !this.profile.title || !this.profile.bio;
+    return !this.profile.firstName || !this.profile.lastName || !this.profile.title;
   }
 
   renderNameFieldWithSearchIntegrated() {
@@ -269,7 +269,7 @@ export class Profile extends LitElement {
     };
 
     const bioData = {
-      value: this.profile?.bio,
+      value: this.profile?.bio ?? '',
       placeholder: fieldLabelsJSON.bio,
       helperText: fieldLabelsJSON.bioSubText,
     };
@@ -397,7 +397,7 @@ export class Profile extends LitElement {
     : nothing}
     <div>
         <h5>${this.profile.title}</h5>
-        <p>${this.profile.bio}</p>
+        ${this.profile.bio ? html`<p>${this.profile.bio}</p>` : nothing}
     </div>
     ${this.profile?.socialMedia?.length ? html`
     <div class="social-media">

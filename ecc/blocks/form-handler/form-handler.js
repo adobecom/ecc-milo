@@ -1,5 +1,5 @@
 import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
-import { LIBS, MILO_CONFIG, DEV_MODE } from '../../scripts/scripts.js';
+import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
   buildNoAccessScreen,
@@ -294,14 +294,31 @@ async function handleEventUpdate(props) {
   await Promise.all(allComponentPromises);
 }
 
-async function updateComponents(props) {
+async function updateComponentsOnPayloadChange(props) {
   const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onUpdate } = await import(`./controllers/${comp}-component-controller.js`);
-      const componentPayload = await onUpdate(component, props);
+      const { onPayloadUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      const componentPayload = await onPayloadUpdate(component, props);
+      return componentPayload;
+    });
+
+    return Promise.all(promises);
+  });
+
+  await Promise.all(allComponentPromises);
+}
+
+async function updateComponentsOnRespChange(props) {
+  const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
+    if (!mappedComponents.length) return {};
+
+    const promises = Array.from(mappedComponents).map(async (component) => {
+      const { onRespUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      const componentPayload = await onRespUpdate(component, props);
       return componentPayload;
     });
 
@@ -410,7 +427,7 @@ async function saveEvent(props, options = { toPublish: false }) {
   try {
     await gatherValues(props);
   } catch (e) {
-    return { message: e.message };
+    return { error: { message: e.message } };
   }
 
   let resp;
@@ -760,13 +777,14 @@ async function buildECCForm(el) {
 
         case 'payload': {
           setPayloadCache(value);
-          updateComponents(target);
+          updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);
           break;
         }
 
         case 'eventDataResp': {
           setResponseCache(value);
+          updateComponentsOnRespChange(target);
           updateCtas(target);
           if (value.error) {
             props.el.classList.add('show-error');
@@ -840,13 +858,6 @@ export default async function init(el) {
   ]);
 
   const profile = BlockMediator.get('imsProfile');
-
-  if (DEV_MODE === true && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
-    buildECCForm(el).then(() => {
-      el.classList.remove('loading');
-    });
-    return;
-  }
 
   if (profile) {
     if (profile.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
