@@ -231,6 +231,15 @@ export async function decorateTextarea(cell, extraOptions) {
   cell.append(wrapper);
 }
 
+export function signIn() {
+  if (typeof window.adobeIMS?.signIn !== 'function') {
+    window?.lana.log({ message: 'IMS signIn method not available', tags: 'errorType=warn,module=gnav' });
+    return;
+  }
+
+  window.adobeIMS?.signIn();
+}
+
 export async function getSecret(key) {
   if (secretCache.length === 0) {
     const resp = await fetch('/ecc/system/secrets.json')
