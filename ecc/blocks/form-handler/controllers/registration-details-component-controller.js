@@ -63,18 +63,11 @@ export function onSubmit(component, props) {
   } else if (registerMode === 'dme') {
     cloudType = 'CreativeCloud';
   }
+  // remove tag end
 
   if (rsvpDescription) rsvpData.rsvpDescription = rsvpDescription;
   if (contactHost && hostEmail) rsvpData.hostEmail = hostEmail;
-  if (attendeeLimit) {
-    if (cloudType === 'DX') {
-      rsvpData.waitlistAttendeeLimit = attendeeLimit;
-    }
-
-    if (cloudType === 'CreativeCloud') {
-      rsvpData.attendeeLimit = attendeeLimit;
-    }
-  }
+  if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
   if (allowWaitlisting) rsvpData.allowWaitlisting = allowWaitlisting;
 
   props.payload = { ...props.payload, ...rsvpData };
