@@ -79,6 +79,25 @@ export function convertTo24HourFormat(timeStr) {
   return `${formattedHours}:${formattedMinutes}:00`;
 }
 
+export function convertFrom24HourFormat(timeStr) {
+  const timeFormat = /^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
+
+  if (!timeStr.match(timeFormat)) {
+    throw new Error("Invalid time format. Expected format: 'HH:mm:ss'");
+  }
+
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  const period = hours < 12 ? 'AM' : 'PM';
+  const formattedHours = hours % 12 || 12;
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+
+  return {
+    hours: formattedHours,
+    minutes: formattedMinutes,
+    period,
+  };
+}
+
 export function getEventPageHost() {
   if (window.location.href.includes('.hlx.')) {
     return window.location.origin.replace(window.location.hostname, `${getECCEnv()}--events-milo--adobecom.hlx.page`);

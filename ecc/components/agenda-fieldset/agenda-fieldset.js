@@ -1,6 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './agenda-fieldset.css.js';
-import { convertTo24HourFormat } from '../../scripts/utils.js';
 
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -32,7 +31,7 @@ export default class AgendaFieldset extends LitElement {
             <sp-picker class="time-picker-input select-input" label="Pick agenda time" value=${this.agenda.startTime} @change=${(event) => {
   this.updateValue('startTime', event.target.value);
 }}>
-              ${repeat(this.timeslots, (timeslot) => html`<sp-menu-item value=${convertTo24HourFormat(timeslot)}>${timeslot}</sp-menu-item>`)}
+              ${repeat(this.timeslots, (timeslot) => html`<sp-menu-item value=${timeslot}>${timeslot}</sp-menu-item>`)}
             </sp-picker>
           </div>
         </div>
