@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { getSeries } from '../../../scripts/esp-controller.js';
-import { LIBS, BlockMediator } from '../../../scripts/scripts.js';
+import BlockMediator from '../../../scripts/deps/block-mediator.min.js';
+import { LIBS } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);

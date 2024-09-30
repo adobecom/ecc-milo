@@ -7,7 +7,7 @@ import {
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
 import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
-import { LIBS, MILO_CONFIG, DEV_MODE } from '../../scripts/scripts.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { getIcon, buildNoAccessScreen, getEventPageHost, readBlockConfig } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
@@ -388,7 +388,6 @@ function buildStatusTag(event) {
 function buildEventTitleTag(config, eventObj) {
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
   url.searchParams.set('eventId', eventObj.eventId);
-  if (DEV_MODE) url.searchParams.set('devMode', true);
   const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventObj.title);
   return eventTitleTag;
 }
@@ -407,7 +406,6 @@ function buildRSVPTag(config, eventObj) {
 
   const url = new URL(`${window.location.origin}${config['attendee-dashboard-url']}`);
   url.searchParams.set('eventId', eventObj.eventId);
-  if (DEV_MODE) url.searchParams.set('devMode', true);
 
   const rsvpTag = createTag('a', { class: 'rsvp-tag', href: url }, text);
   return rsvpTag;
@@ -708,11 +706,6 @@ export default async function init(el) {
   el.innerHTML = '';
   buildLoadingScreen(el);
   const profile = BlockMediator.get('imsProfile');
-
-  if (DEV_MODE === true && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
-    buildDashboard(el, config);
-    return;
-  }
 
   if (profile) {
     if (profile.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
