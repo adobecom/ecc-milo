@@ -1,4 +1,4 @@
-import { ECC_ENV } from './scripts.js';
+import { getECCEnv } from './utils.js';
 
 export const getCaasTags = (() => {
   let cache;
@@ -87,7 +87,7 @@ export async function constructRequestOptions(method, body = null) {
 export async function uploadImage(file, configs, tracker, imageId = null) {
   await waitForAdobeIMS();
 
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const authToken = window.adobeIMS?.getAccessToken()?.token;
 
   let respJson = null;
@@ -100,6 +100,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
     xhr.open(method, url);
     xhr.setRequestHeader('x-image-alt-text', configs.altText || '');
     xhr.setRequestHeader('x-image-kind', configs.type);
+    xhr.setRequestHeader('x-api-key', 'acom_event_service');
     xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
 
     if (tracker) {
@@ -176,7 +177,7 @@ function convertToSpeaker(speaker) {
 
 export async function deleteImage(configs, imageId) {
   await waitForAdobeIMS();
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('DELETE');
 
   try {
@@ -197,7 +198,7 @@ export async function deleteImage(configs, imageId) {
 }
 
 export async function createVenue(eventId, venueData) {
-  const { host } = getAPIConfig().esl[ECC_ENV];
+  const { host } = getAPIConfig().esl[getECCEnv()];
   const raw = JSON.stringify(venueData);
   const options = await constructRequestOptions('POST', raw);
 
@@ -218,7 +219,7 @@ export async function createVenue(eventId, venueData) {
 }
 
 export async function replaceVenue(eventId, venueId, venueData) {
-  const { host } = getAPIConfig().esl[ECC_ENV];
+  const { host } = getAPIConfig().esl[getECCEnv()];
   const raw = JSON.stringify(venueData);
   const options = await constructRequestOptions('PUT', raw);
 
@@ -239,7 +240,7 @@ export async function replaceVenue(eventId, venueId, venueData) {
 }
 
 export async function createEvent(payload) {
-  const { host } = getAPIConfig().esl[ECC_ENV];
+  const { host } = getAPIConfig().esl[getECCEnv()];
   const raw = JSON.stringify({ ...payload, liveUpdate: false });
   const options = await constructRequestOptions('POST', raw);
 
@@ -262,7 +263,7 @@ export async function createEvent(payload) {
 export async function createSpeaker(profile, seriesId) {
   const nSpeaker = convertToNSpeaker(profile);
 
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const raw = JSON.stringify({ ...nSpeaker, seriesId });
   const options = await constructRequestOptions('POST', raw);
 
@@ -283,7 +284,7 @@ export async function createSpeaker(profile, seriesId) {
 }
 
 export async function createSponsor(sponsorData, seriesId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('POST', raw);
 
@@ -304,7 +305,7 @@ export async function createSponsor(sponsorData, seriesId) {
 }
 
 export async function updateSponsor(sponsorData, sponsorId, seriesId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('PUT', raw);
 
@@ -325,7 +326,7 @@ export async function updateSponsor(sponsorData, sponsorId, seriesId) {
 }
 
 export async function addSponsorToEvent(sponsorData, eventId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('POST', raw);
 
@@ -346,7 +347,7 @@ export async function addSponsorToEvent(sponsorData, eventId) {
 }
 
 export async function updateSponsorInEvent(sponsorData, sponsorId, eventId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('PUT', raw);
 
@@ -367,7 +368,7 @@ export async function updateSponsorInEvent(sponsorData, sponsorId, eventId) {
 }
 
 export async function removeSponsorFromEvent(sponsorId, eventId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('DELETE');
 
   try {
@@ -387,7 +388,7 @@ export async function removeSponsorFromEvent(sponsorId, eventId) {
 }
 
 export async function getSponsor(seriesId, sponsorId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -407,7 +408,7 @@ export async function getSponsor(seriesId, sponsorId) {
 }
 
 export async function getSponsors(seriesId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -427,7 +428,7 @@ export async function getSponsors(seriesId) {
 }
 
 export async function getSponsorImages(seriesId, sponsorId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -447,7 +448,7 @@ export async function getSponsorImages(seriesId, sponsorId) {
 }
 
 export async function addSpeakerToEvent(speakerData, eventId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const raw = JSON.stringify(speakerData);
   const options = await constructRequestOptions('POST', raw);
 
@@ -468,7 +469,7 @@ export async function addSpeakerToEvent(speakerData, eventId) {
 }
 
 export async function updateSpeakerInEvent(speakerData, speakerId, eventId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const raw = JSON.stringify(speakerData);
   const options = await constructRequestOptions('PUT', raw);
 
@@ -489,7 +490,7 @@ export async function updateSpeakerInEvent(speakerData, speakerId, eventId) {
 }
 
 export async function removeSpeakerFromEvent(speakerId, eventId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('DELETE');
 
   try {
@@ -510,7 +511,7 @@ export async function removeSpeakerFromEvent(speakerId, eventId) {
 
 export async function updateSpeaker(profile, seriesId) {
   const nSpeaker = convertToNSpeaker(profile);
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const raw = JSON.stringify({ ...nSpeaker, seriesId });
   const options = await constructRequestOptions('PUT', raw);
 
@@ -594,7 +595,7 @@ export async function unpublishEvent(eventId, payload) {
 }
 
 export async function deleteEvent(eventId) {
-  const { host } = getAPIConfig().esl[ECC_ENV];
+  const { host } = getAPIConfig().esl[getECCEnv()];
   const options = await constructRequestOptions('DELETE');
 
   try {
@@ -615,7 +616,7 @@ export async function deleteEvent(eventId) {
 }
 
 export async function getEvents() {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -635,7 +636,7 @@ export async function getEvents() {
 }
 
 export async function getEvent(eventId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -655,7 +656,7 @@ export async function getEvent(eventId) {
 }
 
 export async function getVenue(eventId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -675,7 +676,7 @@ export async function getVenue(eventId) {
 }
 
 export async function getSpeaker(seriesId, speakerId) {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -707,7 +708,7 @@ export async function getClouds() {
 }
 
 export async function getSeries() {
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -729,7 +730,7 @@ export async function getSeries() {
 export async function createAttendee(eventId, attendeeData) {
   if (!eventId || !attendeeData) return false;
 
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const raw = JSON.stringify(attendeeData);
   const options = await constructRequestOptions('POST', raw);
 
@@ -752,7 +753,7 @@ export async function createAttendee(eventId, attendeeData) {
 export async function updateAttendee(eventId, attendeeId, attendeeData) {
   if (!eventId || !attendeeData) return false;
 
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const raw = JSON.stringify(attendeeData);
   const options = await constructRequestOptions('PUT', raw);
 
@@ -775,7 +776,7 @@ export async function updateAttendee(eventId, attendeeId, attendeeData) {
 export async function deleteAttendee(eventId, attendeeId) {
   if (!eventId || !attendeeId) return false;
 
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('DELETE');
 
   try {
@@ -797,7 +798,7 @@ export async function deleteAttendee(eventId, attendeeId) {
 export async function getEventAttendees(eventId) {
   if (!eventId) return false;
 
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -818,7 +819,7 @@ export async function getEventAttendees(eventId) {
 
 export async function getAllEventAttendees(eventId) {
   const recurGetAttendees = async (fullAttendeeArr = [], nextPageToken = null) => {
-    const { host } = getAPIConfig().esp[ECC_ENV];
+    const { host } = getAPIConfig().esp[getECCEnv()];
     const options = await constructRequestOptions('GET');
     const fetchUrl = nextPageToken ? `${host}/v1/events/${eventId}/attendees?nextPageToken=${nextPageToken}` : `${host}/v1/events/${eventId}/attendees`;
 
@@ -850,7 +851,7 @@ export async function getAllEventAttendees(eventId) {
 export async function getAttendee(eventId, attendeeId) {
   if (!eventId || !attendeeId) return false;
 
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -872,7 +873,7 @@ export async function getAttendee(eventId, attendeeId) {
 export async function getSpeakers(seriesId) {
   if (!seriesId) return false;
 
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -894,7 +895,7 @@ export async function getSpeakers(seriesId) {
 export async function getEventImages(eventId) {
   if (!eventId) return false;
 
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -916,7 +917,7 @@ export async function getEventImages(eventId) {
 export async function deleteSpeakerImage(speakerId, seriesId, imageId) {
   if (!speakerId || !seriesId || !imageId) return false;
 
-  const { host } = getAPIConfig().esp[ECC_ENV];
+  const { host } = getAPIConfig().esp[getECCEnv()];
   const options = await constructRequestOptions('DELETE');
 
   try {
