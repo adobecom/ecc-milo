@@ -80,6 +80,8 @@ export function convertTo24HourFormat(timeStr) {
 }
 
 export function convertFrom24HourFormat(timeStr) {
+  if (!timeStr) return null;
+
   const timeFormat = /^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
 
   if (!timeStr.match(timeFormat)) {
