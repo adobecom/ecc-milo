@@ -1,5 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { convertFrom24HourFormat } from '../../scripts/utils.js';
+import { convertFrom24HourFormat, convertTo24HourFormat } from '../../scripts/utils.js';
 import { style } from './agenda-fieldset.css.js';
 
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
@@ -16,6 +16,12 @@ export default class AgendaFieldset extends LitElement {
 
   updateValue(key, value) {
     this.agenda = { ...this.agenda, [key]: value };
+
+    console.log(this.agenda);
+    if (this.agenda.startTimeValue && this.agenda.startTimePeriod) {
+      this.agenda.startTime = convertTo24HourFormat(`${this.agenda.startTimeValue} ${this.agenda.startTimePeriod}`);
+    }
+
     this.dispatchEvent(new CustomEvent('update-agenda', {
       detail: { agenda: this.agenda },
       bubbles: true,

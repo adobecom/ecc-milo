@@ -320,8 +320,8 @@ export function onSubmit(component, props) {
   const localStartDate = datePicker.dataset.startDate;
   const localEndDate = datePicker.dataset.endDate;
 
-  const localStartTime = component.querySelector('#time-picker-start-time').value;
-  const localEndTime = component.querySelector('#time-picker-end-time').value;
+  const localStartTime = component.querySelector('#time-picker-start-time-value').value;
+  const localEndTime = component.querySelector('#time-picker-end-time-value').value;
 
   const timezone = component.querySelector('#time-zone-select-input').value;
 
@@ -361,9 +361,6 @@ function checkEventDuplication(event, compareMetrics) {
 }
 
 export default async function init(component, props) {
-  let startTime;
-  let endTime;
-
   const allEventsResp = await getEvents();
   const allEvents = allEventsResp?.events;
   const eventData = props.eventDataResp;
@@ -378,6 +375,8 @@ export default async function init(component, props) {
   const startAmpmInput = component.querySelector('#ampm-picker-start-time');
   const endTimeInput = component.querySelector('#time-picker-end-time');
   const endAmpmInput = component.querySelector('#ampm-picker-end-time');
+  const startTime = component.querySelector('#time-picker-start-time-value');
+  const endTime = component.querySelector('#time-picker-end-time-value');
   const datePicker = component.querySelector('#event-info-date-picker');
 
   initCalendar(component);
@@ -388,7 +387,7 @@ export default async function init(component, props) {
 
   const onEndTimeUpdate = () => {
     if (endAmpmInput.value && endTimeInput.value) {
-      endTime = convertTo24HourFormat(`${endTimeInput.value} ${endAmpmInput.value}`);
+      endTime.value = convertTo24HourFormat(`${endTimeInput.value} ${endAmpmInput.value}`);
     } else {
       return;
     }
@@ -400,7 +399,7 @@ export default async function init(component, props) {
       const allOptions = startTimeInput.querySelectorAll('sp-menu-item');
       allOptions.forEach((option) => {
         const optionTime = convertTo24HourFormat(`${option.value} ${startAmpmInput.value}`);
-        if (optionTime >= endTime) {
+        if (optionTime >= endTime.value) {
           option.disabled = true;
           if (option.selected) {
             toReset = true;
@@ -413,7 +412,7 @@ export default async function init(component, props) {
       if (toReset) {
         startTimeInput.value = '';
         startAmpmInput.value = '';
-        startTime = null;
+        startTime.value = null;
         allOptions.forEach((option) => {
           option.disabled = false;
         });
@@ -423,7 +422,7 @@ export default async function init(component, props) {
 
   const onStartTimeUpdate = () => {
     if (startAmpmInput.value && startTimeInput.value) {
-      startTime = convertTo24HourFormat(`${startTimeInput.value} ${startAmpmInput.value}`);
+      startTime.value = convertTo24HourFormat(`${startTimeInput.value} ${startAmpmInput.value}`);
     } else {
       return;
     }
@@ -435,7 +434,7 @@ export default async function init(component, props) {
       const allOptions = endTimeInput.querySelectorAll('sp-menu-item');
       allOptions.forEach((option) => {
         const optionTime = convertTo24HourFormat(`${option.value} ${endAmpmInput.value}`);
-        if (optionTime <= startTime) {
+        if (optionTime <= startTime.value) {
           option.disabled = true;
           if (option.selected) {
             toReset = true;
@@ -448,7 +447,7 @@ export default async function init(component, props) {
       if (toReset) {
         endTimeInput.value = '';
         endAmpmInput.value = '';
-        endTime = null;
+        endTime.value = null;
         allOptions.forEach((option) => {
           option.disabled = false;
         });

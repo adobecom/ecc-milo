@@ -42,6 +42,7 @@ function buildTimePicker(column, wrapper) {
       if (j === 1) {
         const timeSlots = c.querySelectorAll('li');
         const selectWrapper = createTag('div', { class: 'select-wrapper' });
+        const submitValueHolder = createTag('input', { type: 'hidden', name: `time-picker-${pickerHandle}`, id: `time-picker-${pickerHandle}-value`, value: '' });
         const timeSelect = createTag('sp-picker', { id: `time-picker-${pickerHandle}`, class: 'select-input', required: true, label: '-' });
         const ampmSelect = createTag('sp-picker', { id: `ampm-picker-${pickerHandle}`, class: 'select-input', required: true, label: '-' });
 
@@ -57,7 +58,7 @@ function buildTimePicker(column, wrapper) {
           ampmSelect.append(opt);
         });
 
-        selectWrapper.append(timeSelect, ampmSelect);
+        selectWrapper.append(timeSelect, ampmSelect, submitValueHolder);
         timePickerWrapper.append(selectWrapper);
       }
     });

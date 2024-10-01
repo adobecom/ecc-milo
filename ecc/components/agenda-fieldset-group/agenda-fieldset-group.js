@@ -37,16 +37,14 @@ export default class AgendaFieldsetGroup extends LitElement {
 
   handleAgendaUpdate(event, index) {
     const updatedAgenda = event.detail.agenda;
-
-    const { startTimeValue, startTimePeriod } = updatedAgenda;
-    if (startTimeValue && startTimePeriod) updatedAgenda.startTime = `${startTimeValue} ${startTimePeriod}`;
-
-    const submittableAgenda = { startTime: updatedAgenda.startTime?.trim(), description: updatedAgenda.description?.trim() || '' };
-    this.agendaItems = this.agendaItems.map((agenda, i) => (i === index ? submittableAgenda : agenda));
+    this.agendaItems = this.agendaItems.map((agenda, i) => (i === index ? updatedAgenda : agenda));
   }
 
   getAgendas() {
-    return this.agendaItems.filter((o) => !(Object.keys(o).length === 0 && o.constructor === Object));
+    return this.agendaItems.filter((agenda) => agenda.startTime || agenda.description).map((agenda) => ({
+      startTime: agenda.startTime,
+      description: agenda.description,
+    }));
   }
 
   hasOnlyEmptyAgendaLeft() {
