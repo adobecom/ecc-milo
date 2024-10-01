@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 
-import { lazyCaptureProfile } from './event-apis.js';
+import { lazyCaptureProfile } from './helpers.js';
 
 function convertEccIcon(n) {
   const createSVGIcon = (iconName) => {
