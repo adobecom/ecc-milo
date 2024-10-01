@@ -21,8 +21,7 @@ const DEFAULT_FIELD_LABELS = {
 };
 
 const SPEAKER_TYPE = ['Host', 'Speaker', 'Judge'];
-// eslint-disable-next-line max-len
-const SUPPORTED_SOCIAL = ['YouTube', 'LinkedIn', 'Web', 'X', 'TikTok', 'Instagram', 'Facebook', 'Pinterest'];
+const SUPPORTED_SOCIAL = ['YouTube', 'LinkedIn', 'Web', 'Twitter', 'X', 'TikTok', 'Instagram', 'Facebook', 'Pinterest'];
 
 export class Profile extends LitElement {
   static properties = {
@@ -43,6 +42,7 @@ export class Profile extends LitElement {
 
     this.profile = this.profile ?? { socialMedia: [{ link: '' }], isPlaceholder: true };
     this.profileCopy = {};
+    this.pendingSocialIndexes = [];
   }
 
   addSocialMedia() {
@@ -69,6 +69,7 @@ export class Profile extends LitElement {
     }
     // eslint-disable-next-line max-len
     this.profile.socialMedia[index] = { link: value, serviceName };
+    this.pendingSocialIndexes.push(index);
     this.requestUpdate();
   }
 
@@ -96,7 +97,7 @@ export class Profile extends LitElement {
       const profile = { ...this.profile };
       profile.isPlaceholder = false;
       profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
-      this.profileCopy = { };
+      this.profileCopy = {};
       let respJson;
       if (this.profile.speakerId) {
         respJson = await updateSpeaker(profile, this.seriesId);
@@ -333,7 +334,16 @@ export class Profile extends LitElement {
   }
 
   revertProfile() {
+    this.profileCopy.socialMedia = this.profileCopy.socialMedia.filter(
+      (_, index) => !this.pendingSocialIndexes.includes(index),
+    );
+    this.pendingSocialIndexes = [];
     this.profile = { ...this.profileCopy };
+    this.requestUpdate();
+  }
+
+  initializeProfileCopy() {
+    this.profileCopy = { ...this.profile };
     this.requestUpdate();
   }
 
@@ -420,7 +430,7 @@ export class Profile extends LitElement {
     >
         ${this.renderProfileEditFormWrapper('Edit Profile')}
     </sp-dialog-wrapper>
-    <sp-button slot="trigger" variant="primary" class="profile-action-button" @click=${() => { this.profileCopy = { ...this.profile }; }}>
+    <sp-button slot="trigger" variant="primary" class="profile-action-button" @click=${this.initializeProfileCopy()}>
     <img src="/ecc/icons/user-edit.svg" slot="icon"></img>Edit</sp-button>
     </overlay-trigger>
     </div>
