@@ -556,6 +556,14 @@ export default async function init(el) {
   const config = readBlockConfig(el);
   el.innerHTML = '';
   buildLoadingScreen(el);
+
+  const sp = new URLSearchParams(window.location.search);
+  const devToken = sp.get('devToken');
+  if (devToken) {
+    buildDashboard(el, config);
+    return;
+  }
+
   const profile = BlockMediator.get('imsProfile');
 
   if (profile) {
