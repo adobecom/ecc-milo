@@ -3,7 +3,7 @@
 import { getEvents } from '../../../scripts/esp-controller.js';
 import BlockMediator from '../../../scripts/deps/block-mediator.min.js';
 import { LIBS } from '../../../scripts/scripts.js';
-import { changeInputValue, convertFrom24HourFormat, convertTo24HourFormat } from '../../../scripts/utils.js';
+import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../../../scripts/utils.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
@@ -519,8 +519,8 @@ export default async function init(component, props) {
     && localStartTime
     && localEndTime
     && timezone) {
-    const startTimePieces = convertFrom24HourFormat(localStartTime);
-    const endTimePieces = convertFrom24HourFormat(localEndTime);
+    const startTimePieces = parse24HourFormat(localStartTime);
+    const endTimePieces = parse24HourFormat(localEndTime);
 
     component.querySelector('#info-field-event-title').value = title || '';
     component.querySelector('#info-field-event-description').value = description || '';

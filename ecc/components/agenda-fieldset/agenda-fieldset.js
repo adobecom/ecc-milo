@@ -1,5 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { convertFrom24HourFormat, convertTo24HourFormat } from '../../scripts/utils.js';
+import { parse24HourFormat, convertTo24HourFormat } from '../../scripts/utils.js';
 import { style } from './agenda-fieldset.css.js';
 
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
@@ -32,14 +32,14 @@ export default class AgendaFieldset extends LitElement {
   parseAgendaTime() {
     if (!this.agenda.startTime) return '';
 
-    const { hours, minutes } = convertFrom24HourFormat(this.agenda.startTime);
+    const { hours, minutes } = parse24HourFormat(this.agenda.startTime);
     return `${hours}:${minutes}`;
   }
 
   parseAgendaPeriod() {
     if (!this.agenda.startTime) return '';
 
-    const { period } = convertFrom24HourFormat(this.agenda.startTime);
+    const { period } = parse24HourFormat(this.agenda.startTime);
     return period;
   }
 
