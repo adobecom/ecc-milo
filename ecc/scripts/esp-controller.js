@@ -532,7 +532,7 @@ export async function updateSpeaker(profile, seriesId) {
 }
 
 export async function updateEvent(eventId, payload) {
-  const { host } = getAPIConfig().esl[ECC_ENV];
+  const { host } = getAPIConfig().esl[getECCEnv()];
   const raw = JSON.stringify({ ...payload, liveUpdate: false });
   const options = await constructRequestOptions('PUT', raw);
 
@@ -553,7 +553,7 @@ export async function updateEvent(eventId, payload) {
 }
 
 export async function publishEvent(eventId, payload) {
-  const { host } = getAPIConfig().esl[ECC_ENV];
+  const { host } = getAPIConfig().esl[getECCEnv()];
   const raw = JSON.stringify({ ...payload, published: true, liveUpdate: true });
   const options = await constructRequestOptions('PUT', raw);
 
@@ -574,7 +574,7 @@ export async function publishEvent(eventId, payload) {
 }
 
 export async function unpublishEvent(eventId, payload) {
-  const { host } = getAPIConfig().esl[ECC_ENV];
+  const { host } = getAPIConfig().esl[getECCEnv()];
   const raw = JSON.stringify({ ...payload, published: false, liveUpdate: true });
   const options = await constructRequestOptions('PUT', raw);
 
