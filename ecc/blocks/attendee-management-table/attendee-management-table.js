@@ -7,6 +7,7 @@ import {
   camelToSentenceCase,
   readBlockConfig,
   signIn,
+  getECCEnv,
 } from '../../scripts/utils.js';
 import { SearchablePicker } from '../../components/searchable-picker/searchable-picker.js';
 import { FilterMenu } from '../../components/filter-menu/filter-menu.js';
@@ -556,6 +557,14 @@ export default async function init(el) {
   const config = readBlockConfig(el);
   el.innerHTML = '';
   buildLoadingScreen(el);
+
+  const sp = new URLSearchParams(window.location.search);
+  const devToken = sp.get('devToken');
+  if (devToken && getECCEnv() === 'dev') {
+    buildDashboard(el, config);
+    return;
+  }
+
   initProfileLogicTree({
     noProfile: () => {
       signIn();

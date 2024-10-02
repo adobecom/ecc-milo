@@ -7,7 +7,14 @@ import {
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, getEventPageHost, readBlockConfig, signIn } from '../../scripts/utils.js';
+import {
+  getIcon,
+  buildNoAccessScreen,
+  getEventPageHost,
+  readBlockConfig,
+  signIn,
+  getECCEnv,
+} from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
@@ -704,6 +711,14 @@ export default async function init(el) {
   const config = readBlockConfig(el);
   el.innerHTML = '';
   buildLoadingScreen(el);
+
+  const sp = new URLSearchParams(window.location.search);
+  const devToken = sp.get('devToken');
+  if (devToken && getECCEnv() === 'dev') {
+    buildDashboard(el, config);
+    return;
+  }
+
   initProfileLogicTree({
     noProfile: () => {
       signIn();

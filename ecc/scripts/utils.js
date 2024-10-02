@@ -21,7 +21,7 @@ export function getECCEnv() {
     || host.includes('corp.adobe')
     || host.includes('graybox.adobe')) return 'stage';
 
-  if (((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`)) && host.startsWith('main--')) || host.endsWith === 'adobe.com') return 'prod';
+  if (((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`)) && host.startsWith('main--')) || host.endsWith('adobe.com')) return 'prod';
 
   // fallback to dev
   return 'dev';

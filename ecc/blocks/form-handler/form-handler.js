@@ -6,6 +6,7 @@ import {
   camelToSentenceCase,
   getEventPageHost,
   signIn,
+  getECCEnv,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -856,6 +857,15 @@ export default async function init(el) {
     import(`${miloLibs}/deps/lit-all.min.js`),
     ...promises,
   ]);
+
+  const sp = new URLSearchParams(window.location.search);
+  const devToken = sp.get('devToken');
+  if (devToken && getECCEnv() === 'dev') {
+    buildECCForm(el).then(() => {
+      el.classList.remove('loading');
+    });
+    return;
+  }
 
   initProfileLogicTree({
     noProfile: () => {
