@@ -344,7 +344,8 @@ export class Profile extends LitElement {
   initializeProfileCopy() {
     this.profileCopy = structuredClone(this.profile);
     this.requestUpdate();
-    // =_=
+
+    // FIXME: shouldn't need to sync state downstream like this
     const allcustomTextfields = this.shadowRoot.querySelectorAll('custom-textfield');
     allcustomTextfields.forEach((customTextfield) => {
       const textfield = customTextfield.shadowRoot.querySelector('sp-textfield');
