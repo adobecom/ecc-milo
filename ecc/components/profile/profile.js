@@ -98,6 +98,7 @@ export class Profile extends LitElement {
       profile.isPlaceholder = false;
       profile.socialMedia = this.profile.socialMedia.filter((sm) => sm.link !== '');
       this.profileCopy = {};
+      this.pendingSocialIndexes = [];
       let respJson;
       if (this.profile.speakerId) {
         respJson = await updateSpeaker(profile, this.seriesId);
