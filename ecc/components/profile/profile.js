@@ -28,6 +28,7 @@ export class Profile extends LitElement {
     seriesId: { type: String },
     fieldlabels: { type: Object, reflect: true },
     profile: { type: Object, reflect: true },
+    profileCopy: { type: Object },
     firstnamesearch: { type: Array },
     lastnamesearch: { type: Array },
   };
