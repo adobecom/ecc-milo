@@ -344,6 +344,14 @@ export class Profile extends LitElement {
   initializeProfileCopy() {
     this.profileCopy = structuredClone(this.profile);
     this.requestUpdate();
+    // =_=
+    const allcustomTextfields = this.shadowRoot.querySelectorAll('custom-textfield');
+    allcustomTextfields.forEach((customTextfield) => {
+      const textfield = customTextfield.shadowRoot.querySelector('sp-textfield');
+      if (textfield && customTextfield.fielddata.value) {
+        textfield.value = customTextfield.fielddata.value;
+      }
+    });
   }
 
   renderProfileEditFormWrapper() {
