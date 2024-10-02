@@ -43,7 +43,7 @@ async function loadPreview(component, templateId) {
   const rsvpFormLocation = `${host}${templateId.substring(0, templateId.lastIndexOf('/'))}/rsvp-form`;
   const resp = await fetchThrottledMemoizedText(
     `${rsvpFormLocation}.plain.html`,
-    { headers: { authorization: 'token jX2dkddbxUMzi/00JkbqJpUluciE8RTAbrIAjtKzx7Ah' } },
+    { headers: { authorization: 'token gM2cgLEyLEqBn8EIyuH0vd/GRbOamtmxF//YHhAwAEBl' } },
   ).catch(() => ({}));
 
   if (!resp) {
