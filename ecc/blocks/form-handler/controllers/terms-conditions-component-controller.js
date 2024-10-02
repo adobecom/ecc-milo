@@ -41,10 +41,7 @@ async function loadPreview(component, templateId) {
   }
 
   const rsvpFormLocation = `${host}${templateId.substring(0, templateId.lastIndexOf('/'))}/rsvp-form`;
-  const resp = await fetchThrottledMemoizedText(
-    `${rsvpFormLocation}.plain.html`,
-    { headers: { authorization: 'token gM2cgLEyLEqBn8EIyuH0vd/GRbOamtmxF//YHhAwAEBl' } },
-  ).catch(() => ({}));
+  const resp = await fetchThrottledMemoizedText(`${rsvpFormLocation}.plain.html`);
 
   if (!resp) {
     component.remove();
