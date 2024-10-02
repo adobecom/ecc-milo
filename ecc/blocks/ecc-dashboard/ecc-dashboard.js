@@ -8,7 +8,7 @@ import {
 } from '../../scripts/esp-controller.js';
 import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
 import { LIBS } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, getEventPageHost, readBlockConfig } from '../../scripts/utils.js';
+import { getIcon, buildNoAccessScreen, getEventPageHost, readBlockConfig, getECCEnv } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 
@@ -705,6 +705,14 @@ export default async function init(el) {
   const config = readBlockConfig(el);
   el.innerHTML = '';
   buildLoadingScreen(el);
+
+  const sp = new URLSearchParams(window.location.search);
+  const devToken = sp.get('devToken');
+  if (devToken && getECCEnv() === 'dev') {
+    buildDashboard(el, config);
+    return;
+  }
+
   const profile = BlockMediator.get('imsProfile');
 
   if (profile) {

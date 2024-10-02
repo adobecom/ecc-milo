@@ -66,7 +66,9 @@ export async function constructRequestOptions(method, body = null) {
   await waitForAdobeIMS();
 
   const headers = new Headers();
-  const authToken = window.adobeIMS?.getAccessToken()?.token;
+  const sp = new URLSearchParams(window.location.search);
+  const devToken = sp.get('devToken');
+  const authToken = devToken && getECCEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   if (!authToken) window.lana?.log('Error: Failed to get Adobe IMS auth token');
 
@@ -88,7 +90,9 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
   await waitForAdobeIMS();
 
   const { host } = getAPIConfig().esp[getECCEnv()];
-  const authToken = window.adobeIMS?.getAccessToken()?.token;
+  const sp = new URLSearchParams(window.location.search);
+  const devToken = sp.get('devToken');
+  const authToken = devToken && getECCEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   let respJson = null;
 
