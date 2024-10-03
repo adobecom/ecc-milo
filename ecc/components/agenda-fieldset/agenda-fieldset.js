@@ -17,7 +17,6 @@ export default class AgendaFieldset extends LitElement {
   updateValue(key, value) {
     this.agenda = { ...this.agenda, [key]: value };
 
-    console.log(this.agenda);
     if (this.agenda.startTimeValue && this.agenda.startTimePeriod) {
       this.agenda.startTime = convertTo24HourFormat(`${this.agenda.startTimeValue} ${this.agenda.startTimePeriod}`);
     }
