@@ -1,5 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
+import { isImageTypeValid, isImageSizeValid } from '../../scripts/image-validator.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './image-dropzone.css.js';
 
@@ -24,15 +25,18 @@ export class ImageDropzone extends LitElement {
 
   setFile(files) {
     const [file] = files;
-    if (file.size > 26214400) {
+    if (!isImageSizeValid(26214400)) {
       this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'File size should be less than 25MB' } }, bubbles: true, composed: true }));
       return;
     }
-    if (file.type.startsWith('image/')) {
-      this.file = file;
-      this.file.url = URL.createObjectURL(file);
-      this.requestUpdate();
+
+    if (!isImageTypeValid(file)) {
+      this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Invalid file type. The image file should be in one of the following format: .jpeg, .jpg, .png, .svg' } }, bubbles: true, composed: true }));
     }
+
+    this.file = file;
+    this.file.url = URL.createObjectURL(file);
+    this.requestUpdate();
   }
 
   getFile() {
