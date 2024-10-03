@@ -25,7 +25,7 @@ export class ImageDropzone extends LitElement {
 
   setFile(files) {
     const [file] = files;
-    if (!isImageSizeValid(26214400)) {
+    if (!isImageSizeValid(file, 26214400)) {
       this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'File size should be less than 25MB' } }, bubbles: true, composed: true }));
       return;
     }
