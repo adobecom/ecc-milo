@@ -118,7 +118,7 @@
   box-sizing: border-box;
 }
 
-.event-info-component .time-pickers .time-picker-wrapper .select-wrapper sp-picker:last-child {
+.event-info-component .time-pickers .time-picker-wrapper .select-wrapper sp-picker:last-of-type {
   width: max-content;
 }
 
