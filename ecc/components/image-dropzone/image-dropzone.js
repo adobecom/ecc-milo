@@ -23,43 +23,44 @@ export class ImageDropzone extends LitElement {
     this.handleDelete = this.handleDelete || null;
   }
 
-  setFile(files) {
+  async setFile(files) {
     const [file] = files;
+
     if (!isImageSizeValid(file, 26214400)) {
       this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'File size should be less than 25MB' } }, bubbles: true, composed: true }));
       return;
     }
 
-    if (!isImageTypeValid(file)) {
+    const isValid = await isImageTypeValid(file);
+    if (isValid) {
+      this.file = file;
+      this.file.url = URL.createObjectURL(file);
+      this.requestUpdate();
+    } else {
       this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Invalid file type. The image file should be in one of the following format: .jpeg, .jpg, .png, .svg' } }, bubbles: true, composed: true }));
-      return;
     }
-
-    this.file = file;
-    this.file.url = URL.createObjectURL(file);
-    this.requestUpdate();
   }
 
   getFile() {
     return this.file;
   }
 
-  handleImageDrop(e) {
+  async handleImageDrop(e) {
     e.preventDefault();
     e.stopPropagation();
     const { files } = e.dataTransfer;
 
     if (files.length > 0) {
-      this.setFile(files);
+      await this.setFile(files);
       this.handleImage();
     }
   }
 
-  onImageChange(e) {
+  async onImageChange(e) {
     const { files } = e.currentTarget;
 
     if (files.length > 0) {
-      this.setFile(files);
+      await this.setFile(files);
       this.handleImage();
     }
 
