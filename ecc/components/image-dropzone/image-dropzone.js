@@ -32,6 +32,7 @@ export class ImageDropzone extends LitElement {
 
     if (!isImageTypeValid(file)) {
       this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Invalid file type. The image file should be in one of the following format: .jpeg, .jpg, .png, .svg' } }, bubbles: true, composed: true }));
+      return;
     }
 
     this.file = file;
