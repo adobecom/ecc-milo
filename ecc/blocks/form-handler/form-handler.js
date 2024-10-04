@@ -6,6 +6,7 @@ import {
   generateToolTip,
   camelToSentenceCase,
   getEventPageHost,
+  getECCEnv,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -103,8 +104,8 @@ export function buildErrorMessage(props, resp) {
         });
       });
     } else if (errorMessage) {
-      if (resp.status === 409) {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, errorMessage, { parent: toastArea });
+      if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}') {
+        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'The event has been updated by a different session since your last save.', { parent: toastArea });
         const url = new URL(window.location.href);
         url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
 
@@ -112,7 +113,7 @@ export function buildErrorMessage(props, resp) {
           slot: 'action',
           variant: 'overBackground',
           href: `${url.toString()}`,
-        }, 'See the latest version.', { parent: toast });
+        }, 'See the latest version', { parent: toast });
 
         toast.addEventListener('close', () => {
           toast.remove();
@@ -856,6 +857,15 @@ export default async function init(el) {
     import(`${miloLibs}/deps/lit-all.min.js`),
     ...promises,
   ]);
+
+  const sp = new URLSearchParams(window.location.search);
+  const devToken = sp.get('devToken');
+  if (devToken && getECCEnv() === 'dev') {
+    buildECCForm(el).then(() => {
+      el.classList.remove('loading');
+    });
+    return;
+  }
 
   const profile = BlockMediator.get('imsProfile');
 
