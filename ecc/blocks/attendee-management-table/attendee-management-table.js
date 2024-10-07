@@ -16,7 +16,6 @@ import { FilterMenu } from '../../components/filter-menu/filter-menu.js';
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 const ATTENDEE_ATTR_KEYS = [
-  'attendeeId',
   'firstName',
   'lastName',
   'email',
