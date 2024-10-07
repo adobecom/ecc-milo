@@ -7,7 +7,14 @@ import {
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, getEventPageHost, readBlockConfig, signIn, getECCEnv } from '../../scripts/utils.js';
+import {
+  getIcon,
+  buildNoAccessScreen,
+  getEventPageHost,
+  readBlockConfig,
+  signIn,
+  getECCEnv,
+} from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
