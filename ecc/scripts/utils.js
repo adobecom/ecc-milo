@@ -21,7 +21,7 @@ export function getECCEnv() {
     || host.includes('corp.adobe')
     || host.includes('graybox.adobe')) return 'stage';
 
-  if (((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`)) && host.startsWith('main--')) || host.endsWith === 'adobe.com') return 'prod';
+  if (((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`)) && host.startsWith('main--')) || host.endsWith('adobe.com')) return 'prod';
 
   // fallback to dev
   return 'dev';
@@ -77,6 +77,27 @@ export function convertTo24HourFormat(timeStr) {
   const formattedMinutes = minutes.toString().padStart(2, '0');
 
   return `${formattedHours}:${formattedMinutes}:00`;
+}
+
+export function parse24HourFormat(timeStr) {
+  if (!timeStr) return null;
+
+  const timeFormat = /^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
+
+  if (!timeStr.match(timeFormat)) {
+    throw new Error("Invalid time format. Expected format: 'HH:mm:ss'");
+  }
+
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  const period = hours < 12 ? 'AM' : 'PM';
+  const formattedHours = hours % 12 || 12;
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+
+  return {
+    hours: formattedHours,
+    minutes: formattedMinutes,
+    period,
+  };
 }
 
 export function getEventPageHost() {
