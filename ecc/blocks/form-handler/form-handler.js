@@ -791,6 +791,7 @@ async function buildECCForm(el) {
             props.el.classList.add('show-error');
           } else {
             props.el.classList.remove('show-error');
+            initComponents(target);
           }
           break;
         }
