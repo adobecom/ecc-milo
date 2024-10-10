@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
 import { createVenue, replaceVenue } from '../../../scripts/esp-controller.js';
 import BlockMediator from '../../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getECCEnv, getSecret } from '../../../scripts/utils.js';
@@ -135,24 +134,12 @@ function getVenueDataInForm(component) {
   return venueData;
 }
 
-function isUrlFriendlyAfterHandlize(value) {
-  const handlizedValue = value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-
-  const urlFriendlyRegex = /^[a-z0-9-]+$/;
-  return urlFriendlyRegex.test(handlizedValue);
-}
-
 function initAutocomplete(el, props) {
   const venueName = el.querySelector('#venue-info-venue-name');
+  // eslint-disable-next-line no-undef
   if (!google) return;
-  const autocomplete = new google.maps.places.Autocomplete(venueName.shadowRoot.querySelector('input'), {
-    componentRestrictions: { country: [] },
-    language: 'en',
-  });
+  // eslint-disable-next-line no-undef
+  const autocomplete = new google.maps.places.Autocomplete(venueName.shadowRoot.querySelector('input'));
 
   const address = el.querySelector('#venue-info-venue-address');
   const city = el.querySelector('#location-city');
@@ -201,12 +188,10 @@ function initAutocomplete(el, props) {
         }
 
         if (!addressInfo.city
-          && cityCandidates.some((type) => component.types.includes(type))
-        && isUrlFriendlyAfterHandlize(component.long_name)) {
+          && cityCandidates.some((type) => component.types.includes(type))) {
           addressInfo.city = component.long_name;
         }
-        if (component.types.includes('administrative_area_level_1')
-        && isUrlFriendlyAfterHandlize(component.short_name)) {
+        if (component.types.includes('administrative_area_level_1')) {
           addressInfo.state = component.long_name;
           addressInfo.stateCode = component.short_name;
         }
