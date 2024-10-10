@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 import { createVenue, replaceVenue } from '../../../scripts/esp-controller.js';
 import BlockMediator from '../../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getECCEnv, getSecret } from '../../../scripts/utils.js';
@@ -136,10 +137,12 @@ function getVenueDataInForm(component) {
 
 function initAutocomplete(el, props) {
   const venueName = el.querySelector('#venue-info-venue-name');
-  // eslint-disable-next-line no-undef
   if (!google) return;
-  // eslint-disable-next-line no-undef
-  const autocomplete = new google.maps.places.Autocomplete(venueName.shadowRoot.querySelector('input'));
+  const autocomplete = new google.maps.places.Autocomplete(venueName.shadowRoot.querySelector('input'), {
+    types: ['geocode', 'address'],
+    componentRestrictions: { country: [] },
+    language: 'en',
+  });
 
   const address = el.querySelector('#venue-info-venue-address');
   const city = el.querySelector('#location-city');
@@ -170,15 +173,24 @@ function initAutocomplete(el, props) {
         country: '',
       };
 
+      const streetAddressCandidates = [
+        'street_number',
+        'route',
+        'neighborhood',
+        'sublocality_level_1',
+        'sublocality_level_2',
+        'sublocality_level_3',
+        'sublocality_level_4',
+      ];
+
+      const cityCandidates = ['locality', 'postal_town', 'administrative_area_level_1'];
+
       components.forEach((component) => {
-        if (component.types.includes('street_number')) {
+        if (streetAddressCandidates.some((type) => component.types.includes(type))) {
           addressInfo.address += `${component.long_name} `;
         }
-        if (component.types.includes('route')) {
-          addressInfo.address += component.long_name;
-        }
-        if (component.types.includes('locality')
-        || component.types.includes('postal_town')) {
+
+        if (!addressInfo.city && cityCandidates.some((type) => component.types.includes(type))) {
           addressInfo.city = component.long_name;
         }
         if (component.types.includes('administrative_area_level_1')) {
@@ -192,6 +204,8 @@ function initAutocomplete(el, props) {
           addressInfo.country = component.short_name;
         }
       });
+
+      addressInfo.address = addressInfo.address.trim();
 
       if (Object.values(addressInfo).some((v) => !v)) {
         el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'The selection is not a valid venue.' } }, bubbles: true, composed: true }));
