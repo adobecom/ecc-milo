@@ -139,7 +139,6 @@ function initAutocomplete(el, props) {
   const venueName = el.querySelector('#venue-info-venue-name');
   if (!google) return;
   const autocomplete = new google.maps.places.Autocomplete(venueName.shadowRoot.querySelector('input'), {
-    types: ['geocode', 'address'],
     componentRestrictions: { country: [] },
     language: 'en',
   });
