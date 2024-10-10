@@ -135,6 +135,17 @@ function getVenueDataInForm(component) {
   return venueData;
 }
 
+function isUrlFriendlyAfterHandlize(value) {
+  const handlizedValue = value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  const urlFriendlyRegex = /^[a-z0-9-]+$/;
+  return urlFriendlyRegex.test(handlizedValue);
+}
+
 function initAutocomplete(el, props) {
   const venueName = el.querySelector('#venue-info-venue-name');
   if (!google) return;
@@ -189,10 +200,13 @@ function initAutocomplete(el, props) {
           addressInfo.address += `${component.long_name} `;
         }
 
-        if (!addressInfo.city && cityCandidates.some((type) => component.types.includes(type))) {
+        if (!addressInfo.city
+          && cityCandidates.some((type) => component.types.includes(type))
+        && isUrlFriendlyAfterHandlize(component.long_name)) {
           addressInfo.city = component.long_name;
         }
-        if (component.types.includes('administrative_area_level_1')) {
+        if (component.types.includes('administrative_area_level_1')
+        && isUrlFriendlyAfterHandlize(component.short_name)) {
           addressInfo.state = component.long_name;
           addressInfo.stateCode = component.short_name;
         }
