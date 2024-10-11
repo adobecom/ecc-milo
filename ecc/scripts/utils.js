@@ -13,16 +13,21 @@ export function getECCEnv() {
 
   if (validEnvs.includes(eccEnv)) return eccEnv;
 
-  if (((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`)) && host.startsWith('dev--'))
-    || host.includes('localhost')) return 'dev';
+  if ((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`))) {
+    if (host.startsWith('dev--')) return 'dev';
+    if (host.startsWith('dev02--')) return 'dev02';
+    if (host.startsWith('stage--')) return 'stage';
+    if (host.startsWith('stage02--')) return 'stage02';
+    if (host.startsWith('main--')) return 'prod';
+  }
 
-  if (((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`)) && host.startsWith('stage--'))
-    || host.includes('stage.adobe')
+  if (host.includes('localhost')) return 'dev';
+
+  if (host.includes('stage.adobe')
     || host.includes('corp.adobe')
     || host.includes('graybox.adobe')) return 'stage';
 
-  if (((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`)) && host.startsWith('main--')) || host.endsWith('adobe.com')) return 'prod';
-
+  if (host.endsWith('adobe.com')) return 'prod';
   // fallback to dev
   return 'dev';
 }
