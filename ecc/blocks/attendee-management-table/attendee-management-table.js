@@ -28,6 +28,9 @@ const ATTENDEE_ATTR_KEYS = [
   'age',
   'jobLevel',
   'contactMethod',
+  'registrationDate',
+  'registrationStatus',
+  'checkedIn',
 ];
 
 const FILTER_MAP = {
@@ -189,7 +192,10 @@ async function populateRow(props, index) {
   const row = createTag('tr', { class: 'attendee-row', 'data-attendee-id': attendee.attendeeId }, '', { parent: tBody });
 
   ATTENDEE_ATTR_KEYS.forEach((key) => {
-    createTag('td', {}, attendee[key] || '', { parent: row });
+    const td = createTag('td', {}, attendee[key] || '', { parent: row });
+    if (['registrationStatus', 'checkedIn'].includes(key)) {
+      td.classList.add('actions');
+    }
   });
 }
 
@@ -261,7 +267,11 @@ function initSorting(props, config) {
     const th = createTag('th', {}, thText, { parent: thRow });
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
-    th.classList.add('sortable', key);
+
+    if (['registrationStatus', 'checkedIn'].includes(key)) th.classList.add('actions');
+
+    th.classList.add('sortable');
+
     th.addEventListener('click', () => {
       if (!props.filteredData.length) return;
 

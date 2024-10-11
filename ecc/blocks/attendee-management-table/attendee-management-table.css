@@ -41,13 +41,13 @@
 .attendee-management-table .dashboard-main-container .dashboard-body-container {
   margin-top: 24px;
   display: flex;
-  gap: 24px;
+  gap: 2rem;
 }
 
 .attendee-management-table .dashboard-header-event-info {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 2rem;
 }
 
 .attendee-management-table .event-info-container {
@@ -56,6 +56,7 @@
 
 .attendee-management-table .dashboard-main-container .event-image {
   max-height: 167px;
+  max-width: 224px;
 }
 
 .attendee-management-table .dashboard-main-container .event-info-row {
