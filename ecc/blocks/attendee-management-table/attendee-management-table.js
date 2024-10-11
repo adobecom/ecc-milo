@@ -41,6 +41,23 @@ const FILTER_MAP = {
   contactMethod: [],
 };
 
+const SPECTRUM_COMPONENTS = [
+  'theme',
+  'toast',
+  'button',
+  'dialog',
+  'underlay',
+  'progress-circle',
+  'textfield',
+  'picker',
+  'divider',
+  'overlay',
+  'popover',
+  'link',
+  'tooltip',
+  'action-button',
+];
+
 function buildAllFilterMenues(props) {
   const sidePanel = props.el.querySelector('.dashboard-side-panel');
 
@@ -305,13 +322,84 @@ function filterData(props, config) {
   sortData(props, config, { resort: true });
 }
 
+function calculatePercentage(part, total) {
+  if (total === 0) {
+    return '0%';
+  }
+  const percentage = (part / total) * 100;
+  return `${percentage.toFixed(2)}%`;
+}
+
+function buildEventInfo(props) {
+  const eventInfoContainer = props.el.querySelector('.dashboard-header-event-info');
+  if (!eventInfoContainer) return;
+
+  eventInfoContainer.innerHTML = '';
+  const eventInfo = props.events.find((e) => e.eventId === props.currentEventId);
+
+  if (!eventInfo) return;
+  const heroImgObj = eventInfo.photos?.find((p) => p.imageKind === 'event-hero-image');
+
+  // build event image
+  createTag(
+    'div',
+    { class: 'event-image-container' },
+    createTag('img', { class: 'event-image', src: heroImgObj ? heroImgObj.sharepointUrl || heroImgObj.imageUrl : '' }),
+    { parent: eventInfoContainer },
+  );
+
+  const infoContainer = createTag('div', { class: 'event-info-container' }, '', { parent: eventInfoContainer });
+  const infoRow = createTag('div', { class: 'event-info-row' }, '', { parent: infoContainer });
+  const statsRow = createTag('div', { class: 'event-stats-row' }, '', { parent: infoContainer });
+
+  [
+    {
+      label: 'EVENT:',
+      value: eventInfo.title,
+    },
+    {
+      label: 'WHEN:',
+      value: eventInfo.localStartDate,
+    },
+    {
+      label: 'TYPE:',
+      value: eventInfo.eventType,
+    },
+  ].forEach(({ label, value }) => {
+    const infoColWrapper = createTag('div', { class: 'event-stats-col-wrapper' }, '', { parent: infoRow });
+    createTag('span', { class: 'event-info-label' }, label, { parent: infoColWrapper });
+    createTag('span', { class: 'event-info-value' }, value, { parent: infoColWrapper });
+  });
+
+  [
+    {
+      label: 'RSVPs',
+      value: eventInfo.attendeeCount || '0',
+      subText: calculatePercentage(+eventInfo.attendeeCount, +eventInfo.attendeeLimit),
+    },
+  ].forEach(({ label, value, subText }) => {
+    const statsColWrapper = createTag('div', { class: 'event-stats-col-wrapper' }, '', { parent: statsRow });
+    createTag('h2', { class: 'event-stats-label' }, label, { parent: statsColWrapper });
+    const statsValWrapper = createTag('div', { class: 'event-stats-value-wrapper' }, '', { parent: statsColWrapper });
+    createTag('p', { class: 'event-stats-value' }, value, { parent: statsValWrapper });
+    createTag('p', { class: 'event-stats-subtext' }, subText, { parent: statsValWrapper });
+  });
+}
+
 function buildDashboardHeader(props, config) {
+  const mainContainer = props.el.querySelector('.dashboard-main-container');
   const dashboardHeader = createTag('div', { class: 'dashboard-header' });
-  const textContainer = createTag('div', { class: 'dashboard-header-text' });
+  const headingContainer = createTag('div', { class: 'dashboard-header-text' });
+  const eventInfoContainer = createTag('div', { class: 'dashboard-header-event-info' });
   const actionsContainer = createTag('div', { class: 'dashboard-actions-container' });
 
-  createTag('h1', { class: 'dashboard-header-heading' }, 'All event attendees', { parent: textContainer });
-  createTag('p', { class: 'dashboard-header-attendees-count' }, `(${props.data.length} attendees)`, { parent: textContainer });
+  const heading = createTag('h1', { class: 'dashboard-header-heading' }, 'Event report', { parent: headingContainer });
+
+  if (config.tooltipText) {
+    const toolTipTrigger = createTag('sp-action-button', { size: 's' }, getIcon('info'));
+    createTag('sp-tooltip', { 'self-managed': true, variant: 'info' }, config.tooltipText, { parent: toolTipTrigger });
+    heading.append(toolTipTrigger);
+  }
 
   const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
@@ -321,8 +409,9 @@ function buildDashboardHeader(props, config) {
     filterData(props, config);
   });
 
-  dashboardHeader.append(textContainer, actionsContainer);
-  props.el.prepend(dashboardHeader);
+  dashboardHeader.append(headingContainer, eventInfoContainer, actionsContainer);
+  mainContainer.prepend(dashboardHeader);
+  buildEventInfo(props);
 }
 
 function updateDashboardHeader(props) {
@@ -332,11 +421,11 @@ function updateDashboardHeader(props) {
 }
 
 function buildDashboardTable(props, config) {
-  const mainContainer = props.el.querySelector('.dashboard-main-container');
+  const dashboardBody = props.el.querySelector('.dashboard-body-container');
 
-  if (!mainContainer) return;
+  if (!dashboardBody) return;
 
-  const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: mainContainer });
+  const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: dashboardBody });
   const tableWrapper = createTag('div', { class: 'dashboard-table-wrapper' }, '', { parent: tableContainer });
   const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableWrapper });
   const thead = createTag('thead', {}, '', { parent: table });
@@ -423,11 +512,11 @@ function buildBackToDashboardBtn(props, config) {
 }
 
 function buildDashboardSidePanel(props, config) {
-  const mainContainer = props.el.querySelector('.dashboard-main-container');
+  const dashboardBody = props.el.querySelector('.dashboard-body-container');
 
-  if (!mainContainer) return;
+  if (!dashboardBody) return;
 
-  const sidePanel = createTag('div', { class: 'dashboard-side-panel' }, '', { parent: mainContainer });
+  const sidePanel = createTag('div', { class: 'dashboard-side-panel' }, '', { parent: dashboardBody });
   buildBackToDashboardBtn(props, config);
   buildEventPicker(props);
   createTag('sp-divider', {}, '', { parent: sidePanel });
@@ -458,7 +547,8 @@ async function buildDashboard(el, config) {
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
   createTag('sp-underlay', {}, '', { parent: spTheme });
   createTag('sp-dialog', { size: 's' }, '', { parent: spTheme });
-  createTag('sp-theme', { color: 'light', scale: 'medium', class: 'dashboard-main-container' }, '', { parent: el });
+  const mainContainer = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'dashboard-main-container' }, '', { parent: el });
+  createTag('div', { class: 'dashboard-body-container' }, '', { parent: mainContainer });
 
   const uspEventId = new URLSearchParams(window.location.search).get('eventId');
   const events = await getEventsArray();
@@ -508,6 +598,7 @@ async function buildDashboard(el, config) {
       }
 
       updateDashboardHeader(target);
+      buildEventInfo(target);
       populateTable(receiver, config);
       updateResetFilterBtnState(target);
 
@@ -537,20 +628,12 @@ function buildLoadingScreen(el) {
 
 export default async function init(el) {
   const miloLibs = LIBS;
+  const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
+    await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
+  });
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/toast.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/button.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/dialog.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/underlay.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/progress-circle.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/picker.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/divider.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/overlay.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/popover.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/link.js`),
+    ...promises,
   ]);
 
   const config = readBlockConfig(el);
