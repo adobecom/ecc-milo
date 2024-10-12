@@ -52,19 +52,6 @@ export function onSubmit(component, props) {
 
   const rsvpData = {};
 
-  let { cloudType } = props.eventDataResp;
-
-  // TODO: remove mocking once the ESP is updated
-  const usp = new URLSearchParams(window.location.search);
-  const registerMode = usp.get('registerMode') || 'rsvp';
-
-  if (registerMode === 'dx') {
-    cloudType = 'DX';
-  } else if (registerMode === 'dme') {
-    cloudType = 'CreativeCloud';
-  }
-  // remove tag end
-
   if (rsvpDescription) rsvpData.rsvpDescription = rsvpDescription;
   if (contactHost && hostEmail) rsvpData.hostEmail = hostEmail;
   if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
