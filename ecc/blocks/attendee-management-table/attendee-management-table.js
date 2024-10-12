@@ -15,22 +15,82 @@ import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
-const ATTENDEE_ATTR_KEYS = [
-  'firstName',
-  'lastName',
-  'email',
-  'companyName',
-  'jobTitle',
-  'mobilePhone',
-  'industry',
-  'productsOfInterest',
-  'companySize',
-  'age',
-  'jobLevel',
-  'contactMethod',
-  'registrationDate',
-  'registrationStatus',
-  'checkedIn',
+const ATTENDEE_ATTR_MAP = [
+  {
+    key: 'firstName',
+    label: 'First name',
+    fallback: '',
+  },
+  {
+    key: 'lastName',
+    label: 'Last name',
+    fallback: '',
+  },
+  {
+    key: 'email',
+    label: 'Email',
+    fallback: '',
+  },
+  {
+    key: 'companyName',
+    label: 'Company',
+    fallback: '',
+  },
+  {
+    key: 'jobTitle',
+    label: 'Job title',
+    fallback: '',
+  },
+  {
+    key: 'mobilePhone',
+    label: 'Mobile phone',
+    fallback: '',
+  },
+  {
+    key: 'industry',
+    label: 'Industry',
+    fallback: '',
+  },
+  {
+    key: 'productsOfInterest',
+    label: 'Products of interest',
+    fallback: '',
+  },
+  {
+    key: 'companySize',
+    label: 'Company size',
+    fallback: '',
+  },
+  {
+    key: 'age',
+    label: 'Age',
+    fallback: '',
+  },
+  {
+    key: 'jobLevel',
+    label: 'Job level',
+    fallback: '',
+  },
+  {
+    key: 'contactMethod',
+    label: 'Contact method',
+    fallback: '',
+  },
+  {
+    key: 'registrationDate',
+    label: 'Registration date',
+    fallback: '',
+  },
+  {
+    key: 'registrationStatus',
+    label: 'RSVP status',
+    fallback: 'registered',
+  },
+  {
+    key: 'checkedIn',
+    label: 'Checked in',
+    fallback: '-',
+  },
 ];
 
 const FILTER_MAP = {
@@ -191,10 +251,10 @@ async function populateRow(props, index) {
 
   const row = createTag('tr', { class: 'attendee-row', 'data-attendee-id': attendee.attendeeId }, '', { parent: tBody });
 
-  ATTENDEE_ATTR_KEYS.forEach((key) => {
-    const td = createTag('td', {}, attendee[key] || '', { parent: row });
+  ATTENDEE_ATTR_MAP.forEach(({ key, fallback }, i, arr) => {
+    const td = createTag('td', {}, attendee[key] || fallback, { parent: row });
     if (['registrationStatus', 'checkedIn'].includes(key)) {
-      td.classList.add('actions');
+      td.classList.add(`sticky-right-${arr.length - i}`, 'actions');
     }
   });
 }
@@ -261,14 +321,13 @@ function initSorting(props, config) {
   const thead = props.el.querySelector('thead');
   const thRow = thead.querySelector('tr');
 
-  ATTENDEE_ATTR_KEYS.forEach((key) => {
-    const val = camelToSentenceCase(key).toUpperCase();
-    const thText = createTag('span', {}, val);
+  ATTENDEE_ATTR_MAP.forEach(({ key, label }, i, arr) => {
+    const thText = createTag('span', {}, label.toUpperCase());
     const th = createTag('th', {}, thText, { parent: thRow });
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
 
-    if (['registrationStatus', 'checkedIn'].includes(key)) th.classList.add('actions');
+    if (['registrationStatus', 'checkedIn'].includes(key)) th.classList.add('actions', `sticky-right-${arr.length - i}`);
 
     th.classList.add('sortable');
 
@@ -320,7 +379,7 @@ function populateTable(props, config) {
 function filterData(props, config) {
   const q = props.currentQuery.toLowerCase();
   props.filteredData = props.data.filter((e) => {
-    const searchMatch = ATTENDEE_ATTR_KEYS.some((key) => e[key]?.toString().toLowerCase().includes(q));
+    const searchMatch = ATTENDEE_ATTR_MAP.some(({ key }) => e[key]?.toString().toLowerCase().includes(q));
     const appliedFilters = Object.entries(props.currentFilters).filter(([, val]) => val.length);
     const filterMatch = appliedFilters.every(([key, val]) => val.includes(e[key]));
 
@@ -369,7 +428,7 @@ function buildEventInfo(props) {
     },
     {
       label: 'WHEN:',
-      value: eventInfo.localStartDate,
+      value: new Date(eventInfo.localStartTimeMillis).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
     },
     {
       label: 'TYPE:',

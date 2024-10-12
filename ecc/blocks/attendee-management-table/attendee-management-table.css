@@ -5,6 +5,8 @@
   margin: auto;
 
   --color-red: #EB1000;
+  --table-col-width: 120px;
+  --table-col-padding: 16px;
 }
 
 .attendee-management-table .loading-screen {
@@ -269,18 +271,36 @@
 }
 
 .attendee-management-table table .table-header-row {
-  height: 40;
+  height: 56px;
   border-bottom: 2px solid var(--color-gray-600);
 }
 
 .attendee-management-table table .table-header-row th {
-  padding: 0 16px;
+  padding: 0 var(--table-col-padding);
   font-weight: 700;
   text-align: left;
   font-size: var(--type-body-xxs-size);
   color: var(--spectrum-color-gray-500);
-  width: 100px;
+  width: var(--table-col-width);
   white-space: nowrap;
+}
+
+.attendee-management-table table .table-header-row th.sticky-right-1,
+.attendee-management-table table .attendee-row td.sticky-right-1 {
+  position: sticky;
+  right: 0;
+  background-color: var(--color-gray-100);
+  max-width: var(--table-col-width);
+  z-index: 1;
+}
+
+.attendee-management-table table .table-header-row th.sticky-right-2,
+.attendee-management-table table .attendee-row td.sticky-right-2 {
+  position: sticky;
+  right: calc(var(--table-col-width) + (var(--table-col-padding) * 2));
+  background-color: var(--color-gray-100);
+  max-width: var(--table-col-width);
+  z-index: 1;
 }
 
 .attendee-management-table table .table-header-row th span {
@@ -313,15 +333,12 @@
 
 .attendee-management-table table .attendee-row {
   height: 40px;
+  border-bottom: 1px solid var(--color-gray-200);
 }
 
 .attendee-management-table table .no-search-results-row td {
   padding: 40px 0;
   text-align: center;
-}
-
-.attendee-management-table table .attendee-row:nth-of-type(even) {
-  background-color: var(--color-gray-100);
 }
 
 .attendee-management-table table .attendee-row .attendee-title-link {
