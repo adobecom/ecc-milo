@@ -80,18 +80,8 @@ export async function onPayloadUpdate(component, props) {
 export async function onRespUpdate(component, props) {
   if (!props.eventDataResp) return;
 
-  let { cloudType } = props.eventDataResp;
+  const { cloudType } = props.eventDataResp;
   const registrationConfigWrapper = component.querySelector('.registration-config-wrapper');
-
-  // TODO: remove mocking once the ESP is updated
-  const usp = new URLSearchParams(window.location.search);
-  const registerMode = usp.get('registerMode') || 'rsvp';
-
-  if (registerMode === 'dx') {
-    cloudType = 'DX';
-  } else if (registerMode === 'dme') {
-    cloudType = 'CreativeCloud';
-  }
 
   registrationConfigWrapper?.classList.toggle('hidden', cloudType === 'DX');
 
