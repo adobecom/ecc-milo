@@ -389,7 +389,7 @@ function buildEventInfo(props) {
     },
   ].forEach(({ label, value, subText }) => {
     const statsColWrapper = createTag('div', { class: 'event-stats-col-wrapper' }, '', { parent: statsRow });
-    createTag('h2', { class: 'event-stats-label' }, label, { parent: statsColWrapper });
+    createTag('h3', { class: 'event-stats-label' }, label, { parent: statsColWrapper });
     const statsValWrapper = createTag('div', { class: 'event-stats-value-wrapper' }, '', { parent: statsColWrapper });
     createTag('p', { class: 'event-stats-value' }, value, { parent: statsValWrapper });
     createTag('p', { class: 'event-stats-subtext' }, subText, { parent: statsValWrapper });
