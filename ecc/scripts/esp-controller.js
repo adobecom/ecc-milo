@@ -90,6 +90,7 @@ export async function constructRequestOptions(method, body = null) {
 
 export async function uploadImage(file, configs, tracker, imageId = null) {
   await waitForAdobeIMS();
+
   const clientIdentity = await getSecret(`${getECCEnv()}-client-identity`);
   const { host } = getAPIConfig().esp[getECCEnv()];
   const sp = new URLSearchParams(window.location.search);
