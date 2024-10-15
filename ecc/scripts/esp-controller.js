@@ -75,6 +75,7 @@ export async function constructRequestOptions(method, body = null) {
   headers.append('Authorization', `Bearer ${authToken}`);
   headers.append('x-api-key', 'acom_event_service');
   headers.append('content-type', 'application/json');
+  headers.append('x-client-identity', 'a00b1422-8f64-4b23-9255-fe24d180fe92');
 
   const options = {
     method,
