@@ -1,7 +1,7 @@
 .attendee-management-table {
   font-family: var(--body-font-family);
   max-width: 1440px;
-  padding: 40px;
+  padding: 0 40px 40px;
   margin: auto;
 
   --color-red: #EB1000;
