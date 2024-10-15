@@ -1,4 +1,4 @@
-import { getECCEnv } from './utils.js';
+import { getECCEnv, getSecret } from './utils.js';
 
 export const getCaasTags = (() => {
   let cache;
@@ -65,6 +65,7 @@ function waitForAdobeIMS() {
 export async function constructRequestOptions(method, body = null) {
   await waitForAdobeIMS();
 
+  const clientIdentity = await getSecret(`${getECCEnv()}-client-identity`);
   const headers = new Headers();
   const sp = new URLSearchParams(window.location.search);
   const devToken = sp.get('devToken');
@@ -75,7 +76,7 @@ export async function constructRequestOptions(method, body = null) {
   headers.append('Authorization', `Bearer ${authToken}`);
   headers.append('x-api-key', 'acom_event_service');
   headers.append('content-type', 'application/json');
-  headers.append('x-client-identity', 'a00b1422-8f64-4b23-9255-fe24d180fe92');
+  headers.append('x-client-identity', clientIdentity);
 
   const options = {
     method,
@@ -89,7 +90,7 @@ export async function constructRequestOptions(method, body = null) {
 
 export async function uploadImage(file, configs, tracker, imageId = null) {
   await waitForAdobeIMS();
-
+  const clientIdentity = await getSecret(`${getECCEnv()}-client-identity`);
   const { host } = getAPIConfig().esp[getECCEnv()];
   const sp = new URLSearchParams(window.location.search);
   const devToken = sp.get('devToken');
@@ -107,6 +108,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
     xhr.setRequestHeader('x-image-kind', configs.type);
     xhr.setRequestHeader('x-api-key', 'acom_event_service');
     xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+    xhr.setRequestHeader('x-client-identity', clientIdentity);
 
     if (tracker) {
       xhr.upload.onprogress = (event) => {
