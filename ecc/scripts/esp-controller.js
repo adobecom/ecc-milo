@@ -779,10 +779,10 @@ export async function updateAttendee(eventId, attendeeId, attendeeData) {
   }
 }
 
-export async function deleteAttendee(eventId, attendeeId) {
+export async function removeAttendeeFromEvent(eventId, attendeeId) {
   if (!eventId || !attendeeId) return false;
 
-  const { host } = API_CONFIG.esp[getECCEnv()];
+  const { host } = API_CONFIG.esl[getECCEnv()];
   const options = await constructRequestOptions('DELETE');
 
   try {
