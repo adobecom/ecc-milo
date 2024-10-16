@@ -318,6 +318,27 @@ function decoratePagination(props, config) {
 }
 
 function initSorting(props, config) {
+  const sortables = props.el.querySelectorAll('th.sortable');
+  sortables.forEach((th) => {
+    th.addEventListener('click', () => {
+      if (!props.filteredData.length) return;
+
+      sortables.forEach((h) => {
+        if (th !== h) {
+          h.classList.remove('active');
+        }
+      });
+      th.classList.add('active');
+      props.currentSort = {
+        el: th,
+        field: th.dataset.field,
+      };
+      sortData(props, config);
+    });
+  });
+}
+
+function buildTableHeaders(props, config) {
   const thead = props.el.querySelector('thead');
   const thRow = thead.querySelector('tr');
 
@@ -328,25 +349,11 @@ function initSorting(props, config) {
     th.append(getIcon('chev-down'), getIcon('chev-up'));
 
     if (['registrationStatus', 'checkedIn'].includes(key)) th.classList.add('actions', `sticky-right-${arr.length - i}`);
-
     th.classList.add('sortable');
-
-    th.addEventListener('click', () => {
-      if (!props.filteredData.length) return;
-
-      thead.querySelectorAll('th').forEach((h) => {
-        if (th !== h) {
-          h.classList.remove('active');
-        }
-      });
-      th.classList.add('active');
-      props.currentSort = {
-        el: th,
-        field: key,
-      };
-      sortData(props, config);
-    });
+    th.dataset.field = key;
   });
+
+  initSorting(props, config);
 }
 
 function buildNoResultsScreen(el, config) {
@@ -483,12 +490,6 @@ function buildDashboardHeader(props, config) {
   buildEventInfo(props);
 }
 
-function updateDashboardHeader(props) {
-  const attendeesCount = props.el.querySelector('.dashboard-header-attendees-count');
-
-  if (attendeesCount) attendeesCount.textContent = `(${props.data.length} attendees)`;
-}
-
 function buildDashboardTable(props, config) {
   const dashboardBody = props.el.querySelector('.dashboard-body-container');
 
@@ -500,7 +501,7 @@ function buildDashboardTable(props, config) {
   const thead = createTag('thead', {}, '', { parent: table });
   createTag('tbody', {}, '', { parent: table });
   createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
-  initSorting(props, config);
+  buildTableHeaders(props, config);
   populateTable(props, config);
 }
 
@@ -533,10 +534,10 @@ function buildEventPicker(props) {
 
   const sidePanel = props.el.querySelector('.dashboard-side-panel');
   const eventsPickerWrapper = createTag('div', { class: 'events-picker-wrapper' }, '', { parent: sidePanel });
-  createTag('sp-field-label', {}, 'Current event', { parent: eventsPickerWrapper });
+  createTag('sp-field-label', {}, 'Search other events', { parent: eventsPickerWrapper });
   const eventsPicker = createTag('searchable-picker', {
     class: 'events-picker',
-    label: 'Choose an event',
+    label: 'Event name',
   }, '', { parent: eventsPickerWrapper });
 
   if (props.currentEventId) {
@@ -655,6 +656,7 @@ async function buildDashboard(el, config) {
         target.currentFilters = {};
         updateFilterMap(receiver);
         buildFilters(receiver);
+        buildEventInfo(target);
       }
 
       if (prop === 'currentEventId') {
@@ -666,8 +668,6 @@ async function buildDashboard(el, config) {
         filterData(target, config);
       }
 
-      updateDashboardHeader(target);
-      buildEventInfo(target);
       populateTable(receiver, config);
       updateResetFilterBtnState(target);
 
