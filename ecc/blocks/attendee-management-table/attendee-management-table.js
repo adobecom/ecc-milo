@@ -472,11 +472,12 @@ function buildEventInfo(props) {
 
 function buildActionsArea(props, config) {
   const actionsContainer = props.el.querySelector('.dashboard-actions-container');
-  const batchActionsContainer = createTag('div', { class: 'batch-actions-container hidden' }, '', { parent: actionsContainer });
+  const batchActionsContainer = createTag('div', { class: 'batch-actions-container' }, '', { parent: actionsContainer });
 
-  createTag('sp-button', { variant: 'secondary', size: 's', class: 'export-action' }, 'Export', { parent: batchActionsContainer });
-  createTag('sp-button', { variant: 'secondary', size: 's', class: 'check-in-action hidden' }, 'Check in', { parent: batchActionsContainer });
-  createTag('sp-button', { variant: 'secondary', size: 's', class: 'reject-action hidden' }, 'Reject', { parent: batchActionsContainer });
+  createTag('sp-button', { variant: 'secondary', size: 's', class: 'export-all-action' }, 'Export all', { parent: batchActionsContainer });
+  createTag('sp-button', { variant: 'secondary', size: 's', class: 'select-batch-action export-action hidden' }, 'Export selected', { parent: batchActionsContainer });
+  createTag('sp-button', { variant: 'secondary', size: 's', class: 'check-in-action hidden' }, 'Check in selected', { parent: batchActionsContainer });
+  createTag('sp-button', { variant: 'secondary', size: 's', class: 'reject-action hidden' }, 'Reject selected', { parent: batchActionsContainer });
 
   // search input
   const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
@@ -525,7 +526,10 @@ function initBatchOperator(props) {
     selectCheckboxes.forEach((checkbox) => {
       checkbox.checked = selectAllCheckbox.checked;
 
-      batchActionsContainer.classList.toggle('hidden', !checkbox.checked);
+      const selectBatchActions = props.el.querySelectorAll('.select-batch-action');
+      selectBatchActions.forEach((action) => {
+        action.classList.toggle('hidden', !checkbox.checked);
+      });
     });
   });
 
@@ -536,9 +540,41 @@ function initBatchOperator(props) {
       const anyChecked = checkCount > 0;
 
       selectAllCheckbox.checked = allChecked;
-      batchActionsContainer.classList.toggle('hidden', !anyChecked);
+      const selectBatchActions = props.el.querySelectorAll('.select-batch-action');
+      selectBatchActions.forEach((action) => {
+        action.classList.toggle('hidden', !anyChecked);
+      });
     });
   });
+
+  // init export all
+  const exportAllButton = props.el.querySelector('sp-button.export-all-action');
+  if (exportAllButton) {
+    exportAllButton.addEventListener('click', () => {
+      const action = {
+        heading: 'You are about to export the information of all attendees into a .csv file',
+        description: 'Please make sure you have the required legal permissions to export this data.',
+        confirmText: 'Yes, export',
+        cancelText: 'Cancel',
+        confirmCallback: () => {
+          const currentEvent = props.events.find((e) => e.eventId === props.currentEventId);
+          const eventFileName = handlize(currentEvent?.title);
+          const csvContent = 'data:text/csv;charset=utf-8';
+          const csvRows = [ATTENDEE_ATTR_MAP.map(({ label }) => label).join(',')];
+          props.data.forEach((attendee) => {
+            const row = ATTENDEE_ATTR_MAP.map(({ key, fallback }) => attendee[key] || fallback).join(',');
+            csvRows.push(row);
+          });
+
+          const encodedUri = encodeURI(`${csvContent},${csvRows.join('\n')}`);
+          const link = createTag('a', { href: encodedUri, download: `${eventFileName}-attendees.csv` });
+          link.click();
+        },
+      };
+
+      summonConfirmationDialog(props, action);
+    });
+  }
 
   // init export
   const exportButton = props.el.querySelector('sp-button.export-action');
