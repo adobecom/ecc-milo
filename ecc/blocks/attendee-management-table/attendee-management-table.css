@@ -291,6 +291,7 @@
   right: 0;
   background-color: var(--color-gray-100);
   max-width: var(--table-col-width);
+  min-width: var(--table-col-width);
   z-index: 1;
 }
 
@@ -300,6 +301,7 @@
   right: calc(var(--table-col-width) + (var(--table-col-padding) * 2));
   background-color: var(--color-gray-100);
   max-width: var(--table-col-width);
+  min-width: var(--table-col-width);
   z-index: 1;
 }
 
