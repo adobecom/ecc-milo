@@ -476,7 +476,7 @@ function buildActionsArea(props, config) {
 
   createTag('sp-button', { variant: 'secondary', size: 's', class: 'export-action' }, 'Export', { parent: batchActionsContainer });
   createTag('sp-button', { variant: 'secondary', size: 's', class: 'check-in-action hidden' }, 'Check in', { parent: batchActionsContainer });
-  createTag('sp-button', { variant: 'secondary', size: 's', class: 'reject-action' }, 'Reject', { parent: batchActionsContainer });
+  createTag('sp-button', { variant: 'secondary', size: 's', class: 'reject-action hidden' }, 'Reject', { parent: batchActionsContainer });
 
   // search input
   const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
@@ -502,8 +502,8 @@ function summonConfirmationDialog(props, action) {
 
   underlay.open = true;
 
-  dialogConfirmBtn.addEventListener('click', () => {
-    action.confirmCallback();
+  dialogConfirmBtn.addEventListener('click', async () => {
+    await action.confirmCallback();
     underlay.open = false;
     dialog.innerHTML = '';
   });
@@ -587,18 +587,18 @@ function initBatchOperator(props) {
         description: 'This action cannot be undone. Are you sure you want to proceed?',
         confirmText: 'Yes, I want to reject the selected attendees',
         cancelText: 'Cancel',
-        confirmCallback: () => {
+        confirmCallback: async () => {
           const spCheckboxes = props.el.querySelectorAll('.select-checkbox');
           const checkedBoxes = [...spCheckboxes].filter((cb) => cb.checked);
-          checkedBoxes.forEach((checkbox) => {
+          const promises = checkedBoxes.map((checkbox) => {
             const rowEl = checkbox.closest('tr');
             const { attendeeId } = rowEl.dataset;
-            const resp = deleteAttendeeFromEvent(props.currentEventId, attendeeId);
-
-            if (resp.ok) {
-              props.data = props.data.filter((e) => e.attendeeId !== attendeeId);
-            }
+            return deleteAttendeeFromEvent(props.currentEventId, attendeeId);
           });
+
+          await Promise.all(promises);
+          const newJson = await getAllEventAttendees(props.currentEventId);
+          props.data = newJson;
         },
       };
 
