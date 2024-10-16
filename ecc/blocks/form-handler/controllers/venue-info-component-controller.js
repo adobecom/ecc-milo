@@ -285,7 +285,7 @@ export async function onEventUpdate(component, props) {
   }
 
   if (resp) {
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    props.eventDataResp = { ...props.eventDataResp, ...resp.data };
     props.payload = {
       ...props.payload,
       showVenuePostEvent: venueData.showVenuePostEvent,

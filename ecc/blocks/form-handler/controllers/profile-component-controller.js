@@ -6,14 +6,14 @@ import {
   updateSpeakerInEvent,
   removeSpeakerFromEvent,
 } from '../../../scripts/esp-controller.js';
-import { getFilteredCachedResponse } from '../data-handler.js';
+import { getFilteredCachedResponseData } from '../data-handler.js';
 
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const profileContainer = component.querySelector('profile-container');
   if (profileContainer) {
-    const { eventId } = getFilteredCachedResponse();
+    const { eventId } = getFilteredCachedResponseData();
     const speakers = profileContainer.getProfiles();
 
     if (speakers.length === 0) {
@@ -106,8 +106,8 @@ export async function onPayloadUpdate(component, props) {
   containers.forEach(async (container) => {
     if (props.payload.seriesId && props.payload.seriesId !== container.seriesId) {
       container.setAttribute('seriesId', props.payload.seriesId);
-      const { speakers } = await getSpeakers(props.payload.seriesId);
-      container.searchdata = speakers ?? [];
+      const resp = await getSpeakers(props.payload.seriesId);
+      if (resp.ok) container.searchdata = resp.data.speakers || [];
     }
     container.requestUpdate();
   });

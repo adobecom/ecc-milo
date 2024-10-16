@@ -682,11 +682,11 @@ function buildDashboardTable(props, config) {
 async function getEventsArray() {
   const resp = await getEvents();
 
-  if (resp.error) {
+  if (!resp.ok) {
     return [];
   }
 
-  return resp.events;
+  return resp.data.events;
 }
 
 function renderTableLoadingOverlay(props) {

@@ -25,7 +25,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, { getFilteredCachedResponseData, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import { CustomSearch } from '../../components/custom-search/custom-search.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
@@ -107,7 +107,7 @@ export function buildErrorMessage(props, resp) {
       if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}') {
         const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'The event has been updated by a different session since your last save.', { parent: toastArea });
         const url = new URL(window.location.href);
-        url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
+        url.searchParams.set('eventId', getFilteredCachedResponseData().eventId);
 
         createTag('sp-button', {
           slot: 'action',
@@ -231,7 +231,7 @@ async function initComponents(props) {
 
   if (eventId) {
     setTimeout(() => {
-      if (!props.eventDataResp.eventId) {
+      if (!props.eventDataResp.data?.eventId) {
         const toastArea = props.el.querySelector('.toast-area');
         if (!toastArea) return;
 
@@ -411,7 +411,7 @@ function showSaveSuccessMessage(props, detail = { message: 'Edits saved successf
 
 function updateDashboardLink(props) {
   // FIXME: presuming first link is dashboard link is not good.
-  if (!getFilteredCachedResponse().eventId) return;
+  if (!getFilteredCachedResponseData().eventId) return;
   const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
   if (!dashboardLink) return;
@@ -420,7 +420,7 @@ function updateDashboardLink(props) {
 
   if (url.searchParams.has('eventId')) return;
 
-  url.searchParams.set('newEventId', getFilteredCachedResponse().eventId);
+  url.searchParams.set('newEventId', getFilteredCachedResponseData().eventId);
   dashboardLink.href = url.toString();
 }
 
@@ -441,21 +441,21 @@ async function saveEvent(props, options = { toPublish: false }) {
     }
   };
 
-  if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
+  if (props.currentStep === 0 && !getFilteredCachedResponseData().eventId) {
     resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
     await onEventSave();
   } else if (props.currentStep <= props.maxStep && !options.toPublish) {
     resp = await updateEvent(
-      getFilteredCachedResponse().eventId,
+      getFilteredCachedResponseData().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     await onEventSave();
   } else if (options.toPublish) {
     resp = await publishEvent(
-      getFilteredCachedResponse().eventId,
+      getFilteredCachedResponseData().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
@@ -489,7 +489,7 @@ function renderFormNavigation(props, prevStep, currentStep) {
   frags[currentStep].classList.remove('hidden');
 
   if (props.currentStep === props.maxStep) {
-    if (props.eventDataResp.published) {
+    if (props.eventDataResp.data?.published) {
       nextBtn.textContent = nextBtn.dataset.republishStateText;
     } else {
       nextBtn.textContent = nextBtn.dataset.finalStateText;
@@ -653,15 +653,15 @@ function updateCtas(props) {
   formCtas.forEach((a) => {
     if (a.classList.contains('preview-btns')) {
       const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
-      if (eventDataResp.detailPagePath) {
-        a.href = `${getEventPageHost()}${eventDataResp.detailPagePath}?previewMode=true&cachebuster=${Date.now()}&timing=${testTime}`;
+      if (eventDataResp.data?.detailPagePath) {
+        a.href = `${getEventPageHost()}${eventDataResp.data?.detailPagePath}?previewMode=true&cachebuster=${Date.now()}&timing=${testTime}`;
         a.classList.remove('preview-not-ready');
       }
     }
 
     if (a.classList.contains('next-button')) {
       if (props.currentStep === props.maxStep) {
-        if (props.eventDataResp.published) {
+        if (props.eventDataResp.data?.published) {
           a.textContent = a.dataset.republishStateText;
         } else {
           a.textContent = a.dataset.finalStateText;
@@ -722,7 +722,7 @@ function initDeepLink(props) {
 function updateStatusTag(props) {
   const { eventDataResp } = props;
 
-  if (eventDataResp?.published === undefined) return;
+  if (eventDataResp?.data?.published === undefined) return;
 
   const currentFragment = getCurrentFragment(props);
 
@@ -733,8 +733,8 @@ function updateStatusTag(props) {
 
   const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
   const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
-  const dot = eventDataResp.published ? getIcon('dot-purple') : getIcon('dot-green');
-  const text = eventDataResp.published ? 'Published' : 'Draft';
+  const dot = eventDataResp?.data?.published ? getIcon('dot-purple') : getIcon('dot-green');
+  const text = eventDataResp?.data?.published ? 'Published' : 'Draft';
   const statusTag = createTag('span', { class: 'event-status-tag' });
 
   statusTag.append(dot, text);
