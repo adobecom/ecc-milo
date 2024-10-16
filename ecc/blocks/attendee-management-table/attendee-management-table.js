@@ -483,23 +483,9 @@ function buildActionsArea(props, config) {
 
   const batchActionsContainer = createTag('div', { class: 'batch-actions-container hidden' }, '', { parent: actionsContainer });
 
-  // export button
-  const exportButton = createTag('sp-button', { variant: 'cta', size: 's', class: 'export-action' }, 'Export', { parent: batchActionsContainer });
-  // check-in button
-  const checkInButton = createTag('sp-button', { variant: 'cta', size: 's' }, 'Check in', { parent: batchActionsContainer });
-  checkInButton.addEventListener('click', () => {
-    // check in the checked items
-    const checkedBoxes = props.el.querySelectorAll('.select-checkbox:checked');
-    
-  });
-
-  // reject button
-  const rejectButton = createTag('sp-button', { variant: 'cta', size: 's' }, 'Reject', { parent: batchActionsContainer });
-  rejectButton.addEventListener('click', () => {
-    // reject the checked items
-    const checkedBoxes = props.el.querySelectorAll('.select-checkbox:checked');
-    
-  });
+  createTag('sp-button', { variant: 'cta', size: 's', class: 'export-action' }, 'Export', { parent: batchActionsContainer });
+  createTag('sp-button', { variant: 'cta', size: 's', class: 'check-in-action' }, 'Check in', { parent: batchActionsContainer });
+  createTag('sp-button', { variant: 'cta', size: 's', class: 'reject-action' }, 'Reject', { parent: batchActionsContainer });
 }
 
 function initBatchOperator(props) {
