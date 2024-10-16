@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { deleteAttendeeFromEvent, getAllEventAttendees, getEvents } from '../../scripts/esp-controller.js';
+import { removeAttendeeFromEvent, getAllEventAttendees, getEvents } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -629,7 +629,7 @@ function initBatchOperator(props) {
           const promises = checkedBoxes.map((checkbox) => {
             const rowEl = checkbox.closest('tr');
             const { attendeeId } = rowEl.dataset;
-            return deleteAttendeeFromEvent(props.currentEventId, attendeeId);
+            return removeAttendeeFromEvent(props.currentEventId, attendeeId);
           });
 
           await Promise.all(promises);

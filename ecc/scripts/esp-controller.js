@@ -781,8 +781,8 @@ export async function updateAttendee(eventId, attendeeId, attendeeData) {
   }
 }
 
-export async function deleteAttendeeFromEvent(eventId, attendeeId) {
-  if (!eventId) return false;
+export async function removeAttendeeFromEvent(eventId, attendeeId) {
+  if (!eventId || !attendeeId) return false;
 
   const { host } = getAPIConfig().esl[getECCEnv()];
   const options = await constructRequestOptions('DELETE');
