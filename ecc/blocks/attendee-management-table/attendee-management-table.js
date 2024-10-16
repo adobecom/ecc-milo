@@ -474,10 +474,9 @@ function buildActionsArea(props, config) {
   const actionsContainer = props.el.querySelector('.dashboard-actions-container');
   const batchActionsContainer = createTag('div', { class: 'batch-actions-container' }, '', { parent: actionsContainer });
 
-  createTag('sp-button', { variant: 'secondary', size: 's', class: 'select-batch-action export-action hidden' }, 'Export selected', { parent: batchActionsContainer });
   createTag('sp-button', { variant: 'secondary', size: 's', class: 'check-in-action hidden' }, 'Check in selected', { parent: batchActionsContainer });
   createTag('sp-button', { variant: 'secondary', size: 's', class: 'reject-action hidden' }, 'Reject selected', { parent: batchActionsContainer });
-
+  createTag('sp-button', { variant: 'secondary', size: 's', class: 'select-batch-action export-action hidden' }, 'Export selected', { parent: batchActionsContainer });
   createTag('sp-button', { variant: 'secondary', size: 's', class: 'export-all-action' }, 'Export all', { parent: batchActionsContainer });
 
   // search input
