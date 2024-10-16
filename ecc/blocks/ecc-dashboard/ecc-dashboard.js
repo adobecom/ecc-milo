@@ -312,9 +312,9 @@ function initMoreOptions(props, config, eventObj, row) {
       const resp = await getEvents();
       if (resp.ok) {
         const newJson = resp.data;
-        props.data = newJson.data.events;
-        props.filteredData = newJson.data.events;
-        props.paginatedData = newJson.data.events;
+        props.data = newJson.events;
+        props.filteredData = newJson.events;
+        props.paginatedData = newJson.events;
         const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
         if (modTimeHeader) {
           props.currentSort = { field: 'modificationTime', el: modTimeHeader };
