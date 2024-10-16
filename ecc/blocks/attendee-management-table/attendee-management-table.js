@@ -119,6 +119,7 @@ const SPECTRUM_COMPONENTS = [
   'link',
   'tooltip',
   'action-button',
+  'checkbox',
 ];
 
 function buildAllFilterMenues(props) {
@@ -251,6 +252,9 @@ async function populateRow(props, index) {
 
   const row = createTag('tr', { class: 'attendee-row', 'data-attendee-id': attendee.attendeeId }, '', { parent: tBody });
 
+  const checkboxTd = createTag('td', { class: 'checkbox-col sticky-left' }, '', { parent: row });
+  createTag('sp-checkbox', { class: 'select-checkbox' }, '', { parent: checkboxTd });
+
   ATTENDEE_ATTR_MAP.forEach(({ key, fallback }, i, arr) => {
     const td = createTag('td', {}, attendee[key] || fallback, { parent: row });
     if (['registrationStatus', 'checkedIn'].includes(key)) {
@@ -341,6 +345,9 @@ function initSorting(props, config) {
 function buildTableHeaders(props, config) {
   const thead = props.el.querySelector('thead');
   const thRow = thead.querySelector('tr');
+
+  const checkboxTh = createTag('th', { class: 'checkbox-col sticky-left' }, '', { parent: thRow });
+  createTag('sp-checkbox', { class: 'select-all-checkbox' }, '', { parent: checkboxTh });
 
   ATTENDEE_ATTR_MAP.forEach(({ key, label }, i, arr) => {
     const thText = createTag('span', {}, label.toUpperCase());
@@ -462,6 +469,83 @@ function buildEventInfo(props) {
   });
 }
 
+function buildActionsArea(props, config) {
+  const actionsContainer = props.el.querySelector('.dashboard-actions-container');
+
+  // search input
+  const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
+  const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
+  searchInputWrapper.append(getIcon('search'));
+  searchInput.addEventListener('input', () => {
+    props.currentQuery = searchInput.value;
+    filterData(props, config);
+  });
+
+  const batchActionsContainer = createTag('div', { class: 'batch-actions-container hidden' }, '', { parent: actionsContainer });
+
+  // export button
+  const exportButton = createTag('sp-button', { variant: 'cta', size: 's', class: 'export-action' }, 'Export', { parent: batchActionsContainer });
+  // check-in button
+  const checkInButton = createTag('sp-button', { variant: 'cta', size: 's' }, 'Check in', { parent: batchActionsContainer });
+  checkInButton.addEventListener('click', () => {
+    // check in the checked items
+    const checkedBoxes = props.el.querySelectorAll('.select-checkbox:checked');
+    
+  });
+
+  // reject button
+  const rejectButton = createTag('sp-button', { variant: 'cta', size: 's' }, 'Reject', { parent: batchActionsContainer });
+  rejectButton.addEventListener('click', () => {
+    // reject the checked items
+    const checkedBoxes = props.el.querySelectorAll('.select-checkbox:checked');
+    
+  });
+}
+
+function initBatchOperator(props) {
+  const selectAllCheckbox = props.el.querySelector('.select-all-checkbox');
+  const selectCheckboxes = props.el.querySelectorAll('.select-checkbox');
+
+  if (!selectAllCheckbox || !selectCheckboxes.length) return;
+
+  selectAllCheckbox.addEventListener('change', () => {
+    selectCheckboxes.forEach((checkbox) => {
+      checkbox.checked = selectAllCheckbox.checked;
+    });
+  });
+
+  selectCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener('change', () => {
+      const allChecked = [...selectCheckboxes].every((cb) => cb.checked);
+      selectAllCheckbox.checked = allChecked;
+    });
+  });
+
+  // init export
+  const exportButton = props.el.querySelector('sp-button.export-action');
+  if (exportButton) {
+    exportButton.addEventListener('click', () => {
+      const csvContent = 'data:text/csv;charset=utf-8,';
+      const checkedBoxes = props.el.querySelectorAll('.select-checkbox:checked');
+      const headers = ATTENDEE_ATTR_MAP.map(({ label }) => label);
+      const rows = [...checkedBoxes].map((checkbox) => {
+        const row = [];
+        const rowEl = checkbox.closest('tr');
+        const cells = rowEl.querySelectorAll('td');
+        cells.forEach((cell) => {
+          row.push(cell.textContent);
+        });
+        return row;
+      });
+
+      const csvRows = [headers, ...rows].map((row) => row.join(',')).join('\n');
+      const encodedUri = encodeURI(csvContent + csvRows);
+      const link = createTag('a', { href: encodedUri, download: 'attendees.csv' });
+      link.click();
+    });
+  }
+}
+
 function buildDashboardHeader(props, config) {
   const mainContainer = props.el.querySelector('.dashboard-main-container');
   const dashboardHeader = createTag('div', { class: 'dashboard-header' });
@@ -477,17 +561,10 @@ function buildDashboardHeader(props, config) {
     heading.append(toolTipTrigger);
   }
 
-  const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
-  const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
-  searchInputWrapper.append(getIcon('search'));
-  searchInput.addEventListener('input', () => {
-    props.currentQuery = searchInput.value;
-    filterData(props, config);
-  });
-
   dashboardHeader.append(headingContainer, eventInfoContainer, actionsContainer);
   mainContainer.prepend(dashboardHeader);
   buildEventInfo(props);
+  buildActionsArea(props, config);
 }
 
 function buildDashboardTable(props, config) {
@@ -669,6 +746,7 @@ async function buildDashboard(el, config) {
       }
 
       populateTable(receiver, config);
+      initBatchOperator(receiver, config);
       updateResetFilterBtnState(target);
 
       return true;
@@ -680,6 +758,7 @@ async function buildDashboard(el, config) {
   buildDashboardSidePanel(proxyProps, config);
   buildDashboardHeader(proxyProps, config);
   buildDashboardTable(proxyProps, config);
+  initBatchOperator(proxyProps, config);
   initCustomLitComponents();
   setTimeout(() => {
     el.classList.remove('loading');
