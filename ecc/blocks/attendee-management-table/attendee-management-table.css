@@ -138,6 +138,7 @@
 }
 
 .attendee-management-table .dashboard-table-container {
+  width: 100%;
   max-width: calc(100% - 250px);
   position: relative;
 }
@@ -240,6 +241,10 @@
   justify-content: flex-end;
 }
 
+.attendee-management-table.no-results .dashboard-actions-container {
+  visibility: hidden;
+}
+
 .attendee-management-table .dashboard-actions-container .batch-actions-container {
   display: flex;
   align-items: center;
@@ -280,6 +285,10 @@
 .attendee-management-table table .table-header-row {
   height: 56px;
   border-bottom: 2px solid var(--color-gray-600);
+}
+
+.attendee-management-table.no-results table .table-header-row {
+  display: none;
 }
 
 .attendee-management-table table .table-header-row th {
