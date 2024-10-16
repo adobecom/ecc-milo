@@ -356,21 +356,25 @@ function buildTableHeaders(props, config) {
   initSorting(props, config);
 }
 
-function buildNoResultsScreen(el, config) {
+function buildNoResultsScreen(props, config) {
+  const tBody = props.el.querySelector('table.dashboard-table tbody');
+  props.el.classList.add('no-results');
+
   const noSearchResultsRow = createTag('tr', { class: 'no-search-results-row' });
   const noSearchResultsCol = createTag('td', { colspan: '100%' }, getIcon('empty-dashboard'), { parent: noSearchResultsRow });
   createTag('h2', {}, config['no-attendee-results-heading'], { parent: noSearchResultsCol });
   createTag('p', {}, config['no-attendee-results-text'], { parent: noSearchResultsCol });
 
-  el.append(noSearchResultsRow);
+  tBody.append(noSearchResultsRow);
 }
 
 function populateTable(props, config) {
   const tBody = props.el.querySelector('table.dashboard-table tbody');
+  props.el.classList.add('no-results');
   tBody.innerHTML = '';
 
   if (!props.paginatedData.length) {
-    buildNoResultsScreen(tBody, config);
+    buildNoResultsScreen(props, config);
   } else {
     const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
 
