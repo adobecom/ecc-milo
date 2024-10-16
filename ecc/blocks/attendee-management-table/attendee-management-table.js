@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { getAllEventAttendees, getEvents } from '../../scripts/esp-controller.js';
+import { deleteAttendeeFromEvent, getAllEventAttendees, getEvents } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -8,6 +8,7 @@ import {
   readBlockConfig,
   signIn,
   getECCEnv,
+  handlize,
 } from '../../scripts/utils.js';
 import { SearchablePicker } from '../../components/searchable-picker/searchable-picker.js';
 import { FilterMenu } from '../../components/filter-menu/filter-menu.js';
@@ -471,6 +472,11 @@ function buildEventInfo(props) {
 
 function buildActionsArea(props, config) {
   const actionsContainer = props.el.querySelector('.dashboard-actions-container');
+  const batchActionsContainer = createTag('div', { class: 'batch-actions-container hidden' }, '', { parent: actionsContainer });
+
+  createTag('sp-button', { variant: 'secondary', size: 's', class: 'export-action' }, 'Export', { parent: batchActionsContainer });
+  createTag('sp-button', { variant: 'secondary', size: 's', class: 'check-in-action hidden' }, 'Check in', { parent: batchActionsContainer });
+  createTag('sp-button', { variant: 'secondary', size: 's', class: 'reject-action' }, 'Reject', { parent: batchActionsContainer });
 
   // search input
   const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
@@ -480,30 +486,57 @@ function buildActionsArea(props, config) {
     props.currentQuery = searchInput.value;
     filterData(props, config);
   });
+}
 
-  const batchActionsContainer = createTag('div', { class: 'batch-actions-container hidden' }, '', { parent: actionsContainer });
+function summonConfirmationDialog(props, action) {
+  const mainContainer = props.el.querySelector('sp-theme.dashboard-main-container');
+  if (!mainContainer) return;
 
-  createTag('sp-button', { variant: 'cta', size: 's', class: 'export-action' }, 'Export', { parent: batchActionsContainer });
-  createTag('sp-button', { variant: 'cta', size: 's', class: 'check-in-action' }, 'Check in', { parent: batchActionsContainer });
-  createTag('sp-button', { variant: 'cta', size: 's', class: 'reject-action' }, 'Reject', { parent: batchActionsContainer });
+  const underlay = mainContainer.querySelector('sp-underlay');
+  const dialog = mainContainer.querySelector('sp-dialog');
+  createTag('h1', { slot: 'heading' }, action.heading, { parent: dialog });
+  createTag('p', {}, action.description, { parent: dialog });
+  const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+  const dialogConfirmBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, action.confirmText, { parent: buttonContainer });
+  const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, action.cancelText, { parent: buttonContainer });
+
+  underlay.open = true;
+
+  dialogConfirmBtn.addEventListener('click', () => {
+    action.confirmCallback();
+    underlay.open = false;
+    dialog.innerHTML = '';
+  });
+
+  dialogCancelBtn.addEventListener('click', () => {
+    underlay.open = false;
+    dialog.innerHTML = '';
+  });
 }
 
 function initBatchOperator(props) {
+  const batchActionsContainer = props.el.querySelector('.batch-actions-container');
   const selectAllCheckbox = props.el.querySelector('.select-all-checkbox');
   const selectCheckboxes = props.el.querySelectorAll('.select-checkbox');
 
-  if (!selectAllCheckbox || !selectCheckboxes.length) return;
+  if (!batchActionsContainer || !selectAllCheckbox || !selectCheckboxes.length) return;
 
   selectAllCheckbox.addEventListener('change', () => {
     selectCheckboxes.forEach((checkbox) => {
       checkbox.checked = selectAllCheckbox.checked;
+
+      batchActionsContainer.classList.toggle('hidden', !checkbox.checked);
     });
   });
 
   selectCheckboxes.forEach((checkbox) => {
     checkbox.addEventListener('change', () => {
-      const allChecked = [...selectCheckboxes].every((cb) => cb.checked);
+      const checkCount = [...selectCheckboxes].filter((cb) => cb.checked).length;
+      const allChecked = checkCount === selectCheckboxes.length;
+      const anyChecked = checkCount > 0;
+
       selectAllCheckbox.checked = allChecked;
+      batchActionsContainer.classList.toggle('hidden', !anyChecked);
     });
   });
 
@@ -511,23 +544,65 @@ function initBatchOperator(props) {
   const exportButton = props.el.querySelector('sp-button.export-action');
   if (exportButton) {
     exportButton.addEventListener('click', () => {
-      const csvContent = 'data:text/csv;charset=utf-8,';
-      const checkedBoxes = props.el.querySelectorAll('.select-checkbox:checked');
-      const headers = ATTENDEE_ATTR_MAP.map(({ label }) => label);
-      const rows = [...checkedBoxes].map((checkbox) => {
-        const row = [];
-        const rowEl = checkbox.closest('tr');
-        const cells = rowEl.querySelectorAll('td');
-        cells.forEach((cell) => {
-          row.push(cell.textContent);
-        });
-        return row;
-      });
+      const checkCount = [...selectCheckboxes].filter((cb) => cb.checked).length;
+      const action = {
+        heading: `You are about to export the information of ${checkCount} selected attendees into a .csv file`,
+        description: 'Please make sure you have the required legal permissions to export this data.',
+        confirmText: 'Yes, export',
+        cancelText: 'Cancel',
+        confirmCallback: () => {
+          const currentEvent = props.events.find((e) => e.eventId === props.currentEventId);
+          const eventFileName = handlize(currentEvent?.title);
+          const csvContent = 'data:text/csv;charset=utf-8,';
+          const spCheckboxes = props.el.querySelectorAll('.select-checkbox');
+          const checkedBoxes = [...spCheckboxes].filter((cb) => cb.checked);
+          const headers = ATTENDEE_ATTR_MAP.map(({ label }) => label);
+          const rows = [...checkedBoxes].map((checkbox) => {
+            const row = [];
+            const rowEl = checkbox.closest('tr');
+            const cells = rowEl.querySelectorAll('td:not(.checkbox-col)');
+            cells.forEach((cell) => {
+              row.push(cell.textContent);
+            });
+            return row;
+          });
 
-      const csvRows = [headers, ...rows].map((row) => row.join(',')).join('\n');
-      const encodedUri = encodeURI(csvContent + csvRows);
-      const link = createTag('a', { href: encodedUri, download: 'attendees.csv' });
-      link.click();
+          const csvRows = [headers, ...rows].map((row) => row.join(',')).join('\n');
+          const encodedUri = encodeURI(csvContent + csvRows);
+          const link = createTag('a', { href: encodedUri, download: `${eventFileName}-attendees.csv` });
+          link.click();
+        },
+      };
+
+      summonConfirmationDialog(props, action);
+    });
+  }
+
+  const rejectButton = props.el.querySelector('sp-button.reject-action');
+  if (rejectButton) {
+    rejectButton.addEventListener('click', () => {
+      const checkCount = [...selectCheckboxes].filter((cb) => cb.checked).length;
+      const action = {
+        heading: `You are about to reject RSVP ${checkCount} selected attendees`,
+        description: 'This action cannot be undone. Are you sure you want to proceed?',
+        confirmText: 'Yes, I want to reject the selected attendees',
+        cancelText: 'Cancel',
+        confirmCallback: () => {
+          const spCheckboxes = props.el.querySelectorAll('.select-checkbox');
+          const checkedBoxes = [...spCheckboxes].filter((cb) => cb.checked);
+          checkedBoxes.forEach((checkbox) => {
+            const rowEl = checkbox.closest('tr');
+            const { attendeeId } = rowEl.dataset;
+            const resp = deleteAttendeeFromEvent(props.currentEventId, attendeeId);
+
+            if (resp.ok) {
+              props.data = props.data.filter((e) => e.attendeeId !== attendeeId);
+            }
+          });
+        },
+      };
+
+      summonConfirmationDialog(props, action);
     });
   }
 }
@@ -677,10 +752,10 @@ function initCustomLitComponents() {
 }
 
 async function buildDashboard(el, config) {
-  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
-  createTag('sp-underlay', {}, '', { parent: spTheme });
-  createTag('sp-dialog', { size: 's' }, '', { parent: spTheme });
+  createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
   const mainContainer = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'dashboard-main-container' }, '', { parent: el });
+  createTag('sp-underlay', {}, '', { parent: mainContainer });
+  createTag('sp-dialog', { size: 's' }, '', { parent: mainContainer });
   createTag('div', { class: 'dashboard-body-container' }, '', { parent: mainContainer });
 
   const uspEventId = new URLSearchParams(window.location.search).get('eventId');

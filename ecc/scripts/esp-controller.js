@@ -777,24 +777,27 @@ export async function updateAttendee(eventId, attendeeId, attendeeData) {
   }
 }
 
-export async function deleteAttendee(eventId, attendeeId) {
-  if (!eventId || !attendeeId) return false;
+export async function deleteAttendeeFromEvent(eventId, attendeeId) {
+  if (!eventId) return false;
 
-  const { host } = getAPIConfig().esp[getECCEnv()];
+  const { host } = getAPIConfig().esl[getECCEnv()];
   const options = await constructRequestOptions('DELETE');
 
   try {
     const response = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log(`Failed to delete attendee ${attendeeId} for event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { ok: response.ok, status: response.status, error: data };
+      window.lana?.log(`Error: Failed to delete attendee for event ${eventId}. Status:`, response.status);
+      return {
+        ok: response.ok,
+        status: response.status,
+        error: response.text() || response.status,
+      };
     }
 
-    return data;
+    return { ok: true, data: await response.json() };
   } catch (error) {
-    window.lana?.log(`Failed to delete attendee ${attendeeId} for event ${eventId}. Error:`, error);
+    window.lana?.log(`Error: Failed to delete attendee for event ${eventId}:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
   }
 }

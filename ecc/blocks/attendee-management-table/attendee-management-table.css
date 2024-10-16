@@ -128,10 +128,6 @@
   font-weight: 700;
 }
 
-.attendee-management-table .dashboard-main-container .dashboard-side-panel .clear-all-wrapper.hidden {
-  display: none;
-}
-
 .attendee-management-table .events-picker-wrapper {
   display: flex;
   flex-direction: column;
@@ -194,18 +190,23 @@
   align-items: center;
 }
 
+.attendee-management-table sp-theme sp-underlay {
+  z-index: 4;
+}
+
 .attendee-management-table sp-theme sp-underlay + sp-dialog {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1;
+  z-index: 5;
   background: var(--spectrum-gray-100);
   min-width: 480px;
 }
 
 .attendee-management-table sp-theme sp-underlay + sp-dialog h1 {
   font-size: var(--type-heading-s-size);
+  line-height: var(--type-heading-s-lh);
 }
 
 .attendee-management-table sp-theme sp-underlay + sp-dialog p {
@@ -237,6 +238,12 @@
   align-items: center;
   gap: 16px;
   justify-content: flex-end;
+}
+
+.attendee-management-table .dashboard-actions-container .batch-actions-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .attendee-management-table .dashboard-actions-container .search-input-wrapper {
@@ -445,4 +452,8 @@
   flex-direction: column;
   gap: 16px;
   z-index: 9;
+}
+
+.attendee-management-table .hidden {
+  display: none!important;
 }
