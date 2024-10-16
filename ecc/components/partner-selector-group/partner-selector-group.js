@@ -24,7 +24,7 @@ export default class PartnerSelectorGroup extends LitElement {
 
   reloadSeriesSponsors = async () => {
     const spResp = await getSponsors(this.seriesId);
-    if (spResp.ok) this.seriesSponsors = spResp.data.sponsors;
+    if (spResp) this.seriesSponsors = spResp.sponsors;
   };
 
   addPartner() {

@@ -80,10 +80,10 @@ export default class PartnerSelector extends LitElement {
       respJson = await updateSponsor(payload, this.partner.sponsorId, this.seriesId);
     }
 
-    if (respJson.data?.sponsorId) {
+    if (respJson.sponsorId) {
       const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
-      this.partner.sponsorId = respJson.data.sponsorId;
-      this.partner.modificationTime = respJson.data.modificationTime;
+      this.partner.sponsorId = respJson.sponsorId;
+      this.partner.modificationTime = respJson.modificationTime;
       const file = imageDropzone?.getFile();
 
       if (file && (file instanceof File)) {
@@ -91,7 +91,7 @@ export default class PartnerSelector extends LitElement {
           targetUrl: `/v1/series/${this.seriesId}/sponsors/${this.partner.sponsorId}/images`,
           type: 'sponsor-image',
           altText: `${this.partner.name}`,
-        }, null, respJson.data.image?.imageId);
+        }, null, respJson.image?.imageId);
 
         if (sponsorData) {
           if (sponsorData.error) {
@@ -102,7 +102,7 @@ export default class PartnerSelector extends LitElement {
             this.partner.modificationTime = sponsorData.modificationTime;
           }
         }
-      } else if (!file && respJson.data.image?.imageId) {
+      } else if (!file && respJson.image?.imageId) {
         try {
           const resp = await deleteImage({ targetUrl: `/v1/series/${this.seriesId}/sponsors/${this.partner.sponsorId}/images` }, respJson.image?.imageId);
           if (resp.error) {
