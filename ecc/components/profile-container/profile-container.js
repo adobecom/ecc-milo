@@ -35,7 +35,7 @@ export class ProfileContainer extends LitElement {
 
   reloadSearchData = async () => {
     const spResp = await getSpeakers(this.seriesId);
-    if (spResp) this.searchdata = spResp.speakers;
+    if (spResp.ok) this.searchdata = spResp.data.speakers;
   };
 
   updateProfile(index, profile) {

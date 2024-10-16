@@ -92,7 +92,7 @@ function highlightRow(row) {
   }, 1000);
 }
 
-function buildThumbnail(data) {
+function buildThumbnail(eventData) {
   const container = createTag('td', { class: 'thumbnail-container' });
 
   const buildThumbnailContainer = (images) => {
@@ -118,12 +118,12 @@ function buildThumbnail(data) {
     container.append(img);
   };
 
-  if (data.photos) {
-    buildThumbnailContainer(data.photos);
+  if (eventData.photos) {
+    buildThumbnailContainer(eventData.photos);
   } else {
-    getEventImages(data.eventId).then(({ images }) => {
-      if (!images) return;
-      buildThumbnailContainer(images);
+    getEventImages(eventData.eventId).then((resp) => {
+      if (!resp.ok || !resp?.data?.images) return;
+      buildThumbnailContainer(resp.data.images);
     });
   }
 
@@ -246,10 +246,11 @@ function initMoreOptions(props, config, eventObj, row) {
         toolBox.remove();
         row.classList.add('pending');
         const resp = await unpublishEvent(eventObj.eventId, quickFilter(eventObj));
-        updateDashboardData(resp, props);
-
-        sortData(props, config, { resort: true });
-        showToast(props, buildToastMsgWithEventTitle(eventObj.title, config['event-unpublished-msg']), { variant: 'positive' });
+        if (resp.ok) {
+          updateDashboardData(resp.data, props);
+          sortData(props, config, { resort: true });
+          showToast(props, buildToastMsgWithEventTitle(eventObj.title, config['event-unpublished-msg']), { variant: 'positive' });
+        }
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
@@ -259,11 +260,11 @@ function initMoreOptions(props, config, eventObj, row) {
         toolBox.remove();
         row.classList.add('pending');
         const resp = await publishEvent(eventObj.eventId, quickFilter(eventObj));
-        updateDashboardData(resp, props);
-
-        sortData(props, config, { resort: true });
-
-        showToast(props, buildToastMsgWithEventTitle(eventObj.title, config['event-published-msg']), { variant: 'positive' });
+        if (resp.ok) {
+          updateDashboardData(resp.data, props);
+          sortData(props, config, { resort: true });
+          showToast(props, buildToastMsgWithEventTitle(eventObj.title, config['event-published-msg']), { variant: 'positive' });
+        }
       });
     }
 
@@ -308,19 +309,22 @@ function initMoreOptions(props, config, eventObj, row) {
       toolBox.remove();
       row.classList.add('pending');
       const newEventJSON = await createEvent(cloneFilter(payload));
-      const newJson = await getEvents();
-      props.data = newJson.events;
-      props.filteredData = newJson.events;
-      props.paginatedData = newJson.events;
-      const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
-      if (modTimeHeader) {
-        props.currentSort = { field: 'modificationTime', el: modTimeHeader };
-        sortData(props, config, { direction: 'desc' });
-      }
+      const resp = await getEvents();
+      if (resp.ok) {
+        const newJson = resp.data;
+        props.data = newJson.data.events;
+        props.filteredData = newJson.events;
+        props.paginatedData = newJson.events;
+        const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
+        if (modTimeHeader) {
+          props.currentSort = { field: 'modificationTime', el: modTimeHeader };
+          sortData(props, config, { direction: 'desc' });
+        }
 
-      const newRow = props.el.querySelector(`tr[data-event-id="${newEventJSON.eventId}"]`);
-      highlightRow(newRow);
-      showToast(props, buildToastMsgWithEventTitle(newEventJSON.title, config['clone-event-toast-msg']), { variant: 'info' });
+        const newRow = props.el.querySelector(`tr[data-event-id="${newEventJSON.eventId}"]`);
+        highlightRow(newRow);
+        showToast(props, buildToastMsgWithEventTitle(newEventJSON.title, config['clone-event-toast-msg']), { variant: 'info' });
+      }
     });
 
     // delete

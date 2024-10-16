@@ -120,13 +120,13 @@ export class Profile extends LitElement {
         return;
       }
 
-      if (respJson.speakerId) {
-        profile.speakerId = respJson.speakerId;
-        const lastPhoto = respJson.photo;
+      if (respJson.data?.speakerId) {
+        profile.speakerId = respJson.data?.speakerId;
+        const lastPhoto = respJson.data?.photo;
         const file = imageDropzone?.getFile();
         profile.photo = file ? { imageUrl: file.url } : null;
 
-        profile.modificationTime = respJson.modificationTime;
+        profile.modificationTime = respJson.data?.modificationTime;
 
         if (file && (file instanceof File)) {
           const speakerData = await uploadImage(
@@ -151,13 +151,13 @@ export class Profile extends LitElement {
             lastPhoto.imageId,
           );
 
-          if (resp.error) {
+          if (!resp.ok || resp.error) {
             imageDropzone.file = { url: lastPhoto.imageUrl };
             profile.photo = lastPhoto;
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
           }
 
-          if (resp.modificationTime) profile.modificationTime = resp.modificationTime;
+          if (resp.data?.modificationTime) profile.modificationTime = resp.data?.modificationTime;
         }
 
         this.updateProfile(profile);

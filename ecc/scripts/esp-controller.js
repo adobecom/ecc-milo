@@ -198,7 +198,7 @@ export async function deleteImage(configs, imageId) {
     }
 
     // 204 no content. Return true if no error.
-    return true;
+    return { ok: true, status: response.status };
   } catch (error) {
     window.lana?.log('Failed to delete image. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -219,7 +219,7 @@ export async function createVenue(eventId, venueData) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data.espProvider || data;
+    return { ok: true, status: response.status, data: data.espProvider || data };
   } catch (error) {
     window.lana?.log('Failed to create venue. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -240,7 +240,7 @@ export async function replaceVenue(eventId, venueId, venueData) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data.espProvider || data;
+    return { ok: true, status: response.status, data: data.espProvider || data };
   } catch (error) {
     window.lana?.log('Failed to replace venue. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -261,7 +261,7 @@ export async function createEvent(payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data.espProvider || data;
+    return { ok: true, status: response.status, data: data.espProvider || data };
   } catch (error) {
     window.lana?.log('Failed to create event. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -284,7 +284,7 @@ export async function createSpeaker(profile, seriesId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to create speaker. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -305,7 +305,7 @@ export async function createSponsor(sponsorData, seriesId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to create sponsor. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -326,7 +326,7 @@ export async function updateSponsor(sponsorData, sponsorId, seriesId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to update sponsor. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -347,7 +347,7 @@ export async function addSponsorToEvent(sponsorData, eventId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to add sponsor to event. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -368,7 +368,7 @@ export async function updateSponsorInEvent(sponsorData, sponsorId, eventId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to update sponsor in event. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -388,7 +388,7 @@ export async function removeSponsorFromEvent(sponsorId, eventId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to delete sponsor from event. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -408,7 +408,7 @@ export async function getSponsor(seriesId, sponsorId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to get sponsor. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -428,7 +428,7 @@ export async function getSponsors(seriesId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to get sponsors. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -448,7 +448,7 @@ export async function getSponsorImages(seriesId, sponsorId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to get sponsor images. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -469,7 +469,7 @@ export async function addSpeakerToEvent(speakerData, eventId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to add speaker to event. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -490,7 +490,7 @@ export async function updateSpeakerInEvent(speakerData, speakerId, eventId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to update speaker in event. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -510,7 +510,7 @@ export async function removeSpeakerFromEvent(speakerId, eventId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to delete speaker from event. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -532,7 +532,7 @@ export async function updateSpeaker(profile, seriesId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to update speaker. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -553,7 +553,7 @@ export async function updateEvent(eventId, payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data.espProvider || data;
+    return { ok: true, status: response.status, data: data.espProvider || data };
   } catch (error) {
     window.lana?.log(`Failed to update event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -574,7 +574,7 @@ export async function publishEvent(eventId, payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data.espProvider || data;
+    return { ok: true, status: response.status, data: data.espProvider || data };
   } catch (error) {
     window.lana?.log(`Failed to publish event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -595,7 +595,7 @@ export async function unpublishEvent(eventId, payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data.espProvider || data;
+    return { ok: true, status: response.status, data: data.espProvider || data };
   } catch (error) {
     window.lana?.log(`Failed to unpublish event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -616,7 +616,7 @@ export async function deleteEvent(eventId) {
     }
 
     // 204 no content. Return true if no error.
-    return true;
+    return { ok: true, status: response.status };
   } catch (error) {
     window.lana?.log(`Failed to delete event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -636,7 +636,7 @@ export async function getEvents() {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to get list of events. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -656,7 +656,7 @@ export async function getEvent(eventId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log(`Failed to get details for event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -676,7 +676,7 @@ export async function getVenue(eventId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to get venue details. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -728,7 +728,7 @@ export async function getSeries() {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data.series;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log('Failed to fetch series. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -751,7 +751,7 @@ export async function createAttendee(eventId, attendeeData) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log(`Failed to create attendee for event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -774,7 +774,7 @@ export async function updateAttendee(eventId, attendeeId, attendeeData) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log(`Failed to update attendee ${attendeeId} for event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -796,7 +796,7 @@ export async function deleteAttendee(eventId, attendeeId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log(`Failed to delete attendee ${attendeeId} for event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -818,7 +818,7 @@ export async function getEventAttendees(eventId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log(`Failed to fetch attendees for event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -838,9 +838,10 @@ export async function getAllEventAttendees(eventId) {
           return { ok: response.ok, status: response.status, error: response.statusText };
         }
 
-        return response.json();
+        const data = response.json();
+        return { ok: response.ok, status: response.status, data };
       })
-      .then((data) => {
+      .then(({ data }) => {
         if (data.nextPageToken) {
           return recurGetAttendees(fullAttendeeArr.concat(data.attendees), data.nextPageToken);
         }
@@ -871,7 +872,7 @@ export async function getAttendee(eventId, attendeeId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log(`Failed to get details of attendee ${attendeeId} for event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -915,7 +916,7 @@ export async function getEventImages(eventId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log(`Failed to get event images for event ${eventId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -937,7 +938,7 @@ export async function deleteSpeakerImage(speakerId, seriesId, imageId) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return { ok: true, status: response.status, data };
   } catch (error) {
     window.lana?.log(`Failed to delete speaker images for speaker ${speakerId}. Error:`, error);
     return { ok: false, status: 'Network Error', error: error.message };

@@ -7,7 +7,7 @@ import {
   removeSponsorFromEvent,
   updateSponsorInEvent,
 } from '../../../scripts/esp-controller.js';
-import { getFilteredCachedResponse } from '../data-handler.js';
+import { getFilteredCachedResponseData } from '../data-handler.js';
 
 let PARTNERS_SERIES_ID;
 
@@ -17,7 +17,7 @@ export async function onSubmit(component, props) {
 
   const showSponsors = component.querySelector('#partners-visible')?.checked;
   const partnerSelectorGroup = component.querySelector('partner-selector-group');
-  const { eventId } = getFilteredCachedResponse();
+  const { eventId } = getFilteredCachedResponseData();
 
   if (partnerSelectorGroup && eventId) {
     const partners = partnerSelectorGroup.getSavedPartners();
@@ -119,7 +119,8 @@ export default async function init(component, props) {
   if (eventData.sponsors) {
     const partners = await Promise.all(eventData.sponsors.map(async (sponsor, index) => {
       if (sponsor.sponsorType === 'Partner') {
-        const partnerData = await getSponsor(eventData.seriesId, sponsor.sponsorId);
+        const partnerResp = await getSponsor(eventData.seriesId, sponsor.sponsorId);
+        const partnerData = partnerResp.data;
 
         if (partnerData) {
           let photo;
@@ -129,7 +130,7 @@ export default async function init(component, props) {
           } else {
             const resp = await getSponsorImages(eventData.seriesId, sponsorId);
 
-            if (resp?.images) {
+            if (resp?.data?.images) {
               const sponsorImage = resp?.images.find((image) => image.imageKind === 'sponsor-image');
               if (sponsorImage) {
                 photo = { ...sponsorImage, url: sponsorImage.imageUrl };
