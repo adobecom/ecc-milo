@@ -631,16 +631,6 @@ function buildDashboardTable(props, config) {
   }
 }
 
-async function getEventsArray() {
-  const resp = await getEvents();
-
-  if (resp.error) {
-    return [];
-  }
-
-  return resp.events;
-}
-
 function buildNoEventScreen(el, config) {
   el.classList.add('no-events');
 
@@ -665,7 +655,11 @@ async function buildDashboard(el, config) {
     currentSort: {},
   };
 
-  const data = await getEventsArray();
+  let data = [];
+  const resp = await getEvents();
+
+  if (resp.ok) data = resp.data;
+
   if (!data?.length) {
     buildNoEventScreen(el, config);
   } else {
