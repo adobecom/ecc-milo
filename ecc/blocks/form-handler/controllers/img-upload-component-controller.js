@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { deleteImage, getEventImages, uploadImage } from '../../../scripts/esp-controller.js';
 import { LIBS } from '../../../scripts/scripts.js';
-import { getFilteredCachedResponseData } from '../data-handler.js';
+import { getFilteredCachedResponse } from '../data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -32,7 +32,7 @@ function updateImgUploadComponentConfigs(component) {
 
   const configs = {
     type,
-    targetUrl: `/v1/events/${getFilteredCachedResponseData().eventId}/images`,
+    targetUrl: `/v1/events/${getFilteredCachedResponse().eventId}/images`,
   };
 
   component.dataset.configs = JSON.stringify(configs);

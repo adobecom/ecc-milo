@@ -1,5 +1,5 @@
 // FIXME: this whole data handler thing can be done better
-let responseDataCache = {};
+let responseCache = {};
 let payloadCache = {};
 
 const submissionFilter = [
@@ -61,15 +61,15 @@ export function getFilteredCachedPayload() {
 
 export function setResponseCache(response) {
   if (!response) return;
-  responseDataCache = quickFilter(response.data);
+  responseCache = quickFilter(response);
 }
 
-export function getFilteredCachedResponseData() {
-  return responseDataCache;
+export function getFilteredCachedResponse() {
+  return responseCache;
 }
 
 export default function getJoinedData() {
-  const filteredResponse = getFilteredCachedResponseData();
+  const filteredResponse = getFilteredCachedResponse();
   const filteredPayload = getFilteredCachedPayload();
 
   return {
