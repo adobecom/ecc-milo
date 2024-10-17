@@ -659,11 +659,6 @@ function updateEventsCount(props) {
   eventsCount.textContent = `(${props.data.length} events)`;
 }
 
-function updateEventsCount(props) {
-  const eventsCount = props.el.querySelector('.dashboard-header-events-count');
-  eventsCount.textContent = `(${props.data.length} events)`;
-}
-
 function buildDashboardTable(props, config) {
   const mainContainer = props.el.querySelector('sp-theme.sp-main-container');
   const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: mainContainer });
