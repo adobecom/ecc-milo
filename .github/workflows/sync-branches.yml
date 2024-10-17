@@ -1,4 +1,4 @@
-name: Sync dev02 and stage02 with dev and stage
+name: Sync 02 branches
 
 on:
   push:
@@ -18,18 +18,18 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
       - name: Fetch all branches
         run: git fetch --all
 
       - name: Check out dev02 branch
         run: git checkout dev02
 
-      - name: Merge dev into dev02
-        run: git merge origin/dev
+      - name: Merge dev into dev02 with unrelated histories
+        run: git merge origin/dev --allow-unrelated-histories
 
       - name: Push changes to dev02
-        run: |
-          git push origin dev02
+        run: git push origin dev02
   sync-stage02:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/stage'
@@ -41,15 +41,15 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Fetch all branches
         run: git fetch --all
 
       - name: Check out stage02 branch
         run: git checkout stage02
 
-      - name: Merge stage into stage02
-        run: git merge origin/stage
+      - name: Merge stage into stage02 with unrelated histories
+        run: git merge origin/stage --allow-unrelated-histories
 
       - name: Push changes to stage02
-        run: |
-          git push origin stage02
+        run: git push origin stage02
