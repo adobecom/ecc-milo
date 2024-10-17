@@ -226,6 +226,41 @@ function buildToastMsgWithEventTitle(eventTitle, configValue) {
   return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
 }
 
+function summonConfirmationDialog(props, action) {
+  const {
+    heading,
+    description,
+    confirmText,
+    cancelText,
+    confirmCallback = async () => {},
+    cancelCallback = async () => {},
+  } = action;
+  const mainContainer = props.el.querySelector('sp-theme.sp-main-container');
+  if (!mainContainer) return;
+
+  const underlay = mainContainer.querySelector('sp-underlay');
+  const dialog = mainContainer.querySelector('sp-dialog');
+  createTag('h1', { slot: 'heading' }, heading, { parent: dialog });
+  createTag('p', {}, description, { parent: dialog });
+  const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+  const dialogConfirmBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, confirmText, { parent: buttonContainer });
+  const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, cancelText, { parent: buttonContainer });
+
+  underlay.open = true;
+
+  dialogConfirmBtn.addEventListener('click', async () => {
+    await confirmCallback();
+    underlay.open = false;
+    dialog.innerHTML = '';
+  });
+
+  dialogCancelBtn.addEventListener('click', async () => {
+    await cancelCallback();
+    underlay.open = false;
+    dialog.innerHTML = '';
+  });
+}
+
 function initMoreOptions(props, config, eventObj, row) {
   const moreOptionsCell = row.querySelector('.option-col');
   const moreOptionIcon = moreOptionsCell.querySelector('.icon-more-small-list');
@@ -327,39 +362,28 @@ function initMoreOptions(props, config, eventObj, row) {
     deleteBtn.addEventListener('click', async (e) => {
       e.preventDefault();
 
-      const spTheme = props.el.querySelector('sp-theme.toast-area');
-      if (!spTheme) return;
+      const action = {
+        heading: 'You are deleting this event.',
+        description: 'Are you sure you want to do this? This cannot be undone.',
+        confirmText: 'Yes, I want to delete this event',
+        cancelText: 'Do not delete',
+        confirmCallback: async () => {
+          toolBox.remove();
+          row.classList.add('pending');
+          await deleteEvent(eventObj.eventId);
+          const newJson = await getEvents();
+          props.data = newJson.events;
+          props.filteredData = newJson.events;
+          props.paginatedData = newJson.events;
+          sortData(props, config, { resort: true });
+          showToast(props, config['delete-event-toast-msg']);
+        },
+        cancelCallback: async () => {
+          toolBox.remove();
+        },
+      };
 
-      const underlay = spTheme.querySelector('sp-underlay');
-      const dialog = spTheme.querySelector('sp-dialog');
-      createTag('h1', { slot: 'heading' }, 'You are deleting this event.', { parent: dialog });
-      createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
-      const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
-      const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to delete this event', { parent: buttonContainer });
-      const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not delete', { parent: buttonContainer });
-
-      underlay.open = true;
-
-      dialogDeleteBtn.addEventListener('click', async () => {
-        toolBox.remove();
-        underlay.open = false;
-        dialog.innerHTML = '';
-        row.classList.add('pending');
-        await deleteEvent(eventObj.eventId);
-        const newJson = await getEvents();
-        props.data = newJson.events;
-        props.filteredData = newJson.events;
-        props.paginatedData = newJson.events;
-
-        sortData(props, config, { resort: true });
-        showToast(props, config['delete-event-toast-msg']);
-      });
-
-      dialogCancelBtn.addEventListener('click', () => {
-        toolBox.remove();
-        underlay.open = false;
-        dialog.innerHTML = '';
-      });
+      summonConfirmationDialog(props, action);
     });
 
     if (!moreOptionsCell.querySelector('.dashboard-event-tool-box')) {
@@ -433,6 +457,9 @@ async function populateRow(props, config, index) {
   const geoCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getCountryName(event)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
+
+  const checkboxTd = createTag('td', { class: 'checkbox-col sticky-left' }, '', { parent: row });
+  createTag('sp-checkbox', { class: 'select-checkbox' }, '', { parent: checkboxTd });
 
   row.append(
     thumbnailCell,
@@ -529,6 +556,9 @@ function initSorting(props, config) {
     manage: 'MANAGE',
   };
 
+  const checkboxTh = createTag('th', { class: 'checkbox-col sticky-left' }, '', { parent: thRow });
+  createTag('sp-checkbox', { class: 'select-all-checkbox' }, '', { parent: checkboxTh });
+
   Object.entries(headers).forEach(([key, val]) => {
     const thText = createTag('span', {}, val);
     const th = createTag('th', {}, thText, { parent: thRow });
@@ -590,7 +620,25 @@ function filterData(props, config, query) {
   sortData(props, config, { resort: true });
 }
 
+function buildActionsArea(props, config) {
+  const actionsContainer = props.el.querySelector('.dashboard-actions-container');
+  const batchActionsContainer = createTag('div', { class: 'batch-actions-container' }, '', { parent: actionsContainer });
+
+  createTag('button', { class: 'select-batch-action delete-action con-button outline hidden' }, 'Delete selected', { parent: batchActionsContainer });
+  createTag('button', { class: 'select-batch-action publish-action con-button outline hidden' }, 'Publish selected', { parent: batchActionsContainer });
+  createTag('button', { class: 'select-batch-action unpublish-action con-button outline hidden' }, 'Unpublish selected', { parent: batchActionsContainer });
+
+  createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
+  // search input
+  const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
+  const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
+  searchInputWrapper.append(getIcon('search'));
+
+  searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
+}
+
 function buildDashboardHeader(props, config) {
+  const mainContainer = props.el.querySelector('sp-theme.sp-main-container');
   const dashboardHeader = createTag('div', { class: 'dashboard-header' });
   const textContainer = createTag('div', { class: 'dashboard-header-text' });
   const actionsContainer = createTag('div', { class: 'dashboard-actions-container' });
@@ -598,18 +646,14 @@ function buildDashboardHeader(props, config) {
   createTag('h1', { class: 'dashboard-header-heading' }, 'All Events', { parent: textContainer });
   createTag('p', { class: 'dashboard-header-events-count' }, `(${props.data.length} events)`, { parent: textContainer });
 
-  const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
-  const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
-  searchInputWrapper.append(getIcon('search'));
-  createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
-  searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
-
   dashboardHeader.append(textContainer, actionsContainer);
-  props.el.prepend(dashboardHeader);
+  mainContainer.prepend(dashboardHeader);
+  buildActionsArea(props, config);
 }
 
 function buildDashboardTable(props, config) {
-  const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
+  const mainContainer = props.el.querySelector('sp-theme.sp-main-container');
+  const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: mainContainer });
   const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
   const thead = createTag('thead', {}, '', { parent: table });
   createTag('tbody', {}, '', { parent: table });
@@ -650,10 +694,132 @@ function buildNoEventScreen(el, config) {
   area.append(getIcon('empty-dashboard'), noEventHeading, noEventDescription, cta);
 }
 
+function initBatchOperator(props, config) {
+  const batchActionsContainer = props.el.querySelector('.batch-actions-container');
+  const selectAllCheckbox = props.el.querySelector('.select-all-checkbox');
+  const selectCheckboxes = props.el.querySelectorAll('.select-checkbox');
+
+  if (!batchActionsContainer || !selectAllCheckbox || !selectCheckboxes.length) return;
+
+  selectAllCheckbox.addEventListener('change', () => {
+    selectCheckboxes.forEach((checkbox) => {
+      checkbox.checked = selectAllCheckbox.checked;
+      const checkedBoxes = [...selectCheckboxes].filter((cb) => cb.checked);
+      const anyChecked = checkedBoxes.length > 0;
+
+      const allPublished = checkedBoxes.every((c) => {
+        const row = c.closest('tr');
+        const { eventId } = row.dataset;
+        return props.data.find((e) => e.eventId === eventId)?.published === true;
+      }) && anyChecked;
+
+      const allUnpublished = checkedBoxes.every((c) => {
+        const row = c.closest('tr');
+        const { eventId } = row.dataset;
+        return props.data.find((e) => e.eventId === eventId)?.published === false;
+      }) && anyChecked;
+
+      const selectBatchActions = props.el.querySelectorAll('.select-batch-action');
+      selectBatchActions.forEach((action) => {
+        if (action.classList.contains('unpublish-action')) {
+          action.classList.toggle('hidden', !allPublished);
+        } else if (action.classList.contains('publish-action')) {
+          action.classList.toggle('hidden', !allUnpublished);
+        } else {
+          action.classList.toggle('hidden', !anyChecked);
+        }
+      });
+    });
+  });
+
+  selectCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener('change', () => {
+      const checkedBoxes = [...selectCheckboxes].filter((cb) => cb.checked);
+      const allChecked = checkedBoxes.length === selectCheckboxes.length;
+      const anyChecked = checkedBoxes.length > 0;
+
+      const allPublished = checkedBoxes.every((c) => {
+        const row = c.closest('tr');
+        const { eventId } = row.dataset;
+        return props.data.find((e) => e.eventId === eventId)?.published === true;
+      }) && anyChecked;
+
+      const allUnpublished = checkedBoxes.every((c) => {
+        const row = c.closest('tr');
+        const { eventId } = row.dataset;
+        return props.data.find((e) => e.eventId === eventId)?.published === false;
+      }) && anyChecked;
+
+      selectAllCheckbox.checked = allChecked;
+      const selectBatchActions = props.el.querySelectorAll('.select-batch-action');
+      selectBatchActions.forEach((action) => {
+        if (action.classList.contains('unpublish-action')) {
+          action.classList.toggle('hidden', !allPublished);
+        } else if (action.classList.contains('publish-action')) {
+          action.classList.toggle('hidden', !allUnpublished);
+        } else {
+          action.classList.toggle('hidden', !anyChecked);
+        }
+      });
+    });
+  });
+
+  // batch delete
+  const deleteAction = props.el.querySelector('.delete-action');
+  deleteAction.addEventListener('click', async () => {
+    const checkboxes = props.el.querySelectorAll('.select-checkbox:checked');
+    const eventIds = Array.from(checkboxes).map((cb) => cb.closest('tr').dataset.eventId);
+
+    const action = {
+      heading: 'You are deleting these events.',
+      description: 'Are you sure you want to do this? This cannot be undone.',
+      confirmText: 'Yes, I want to delete these events',
+      cancelText: 'Do not delete',
+      confirmCallback: async () => {
+        await Promise.all(eventIds.map((id) => deleteEvent(id)));
+        const newJson = await getEvents();
+        props.data = newJson.events;
+        props.filteredData = newJson.events;
+        props.paginatedData = newJson.events;
+        sortData(props, config, { resort: true });
+        showToast(props, config['delete-event-toast-msg']);
+      },
+    };
+
+    summonConfirmationDialog(props, action);
+  });
+
+  // batch publish
+  const publishAction = props.el.querySelector('.publish-action');
+  publishAction.addEventListener('click', async () => {
+    const checkboxes = props.el.querySelectorAll('.select-checkbox:checked');
+    const eventIds = Array.from(checkboxes).map((cb) => cb.closest('tr').dataset.eventId);
+
+    const action = {
+      heading: 'You are publishing these events.',
+      description: 'Are you sure you want to do this?',
+      confirmText: 'Yes, I want to publish these events',
+      cancelText: 'Do not publish',
+      confirmCallback: async () => {
+        await Promise.all(eventIds.map((id) => publishEvent(id)));
+        const newJson = await getEvents();
+        props.data = newJson.events;
+        props.filteredData = newJson.events;
+        props.paginatedData = newJson.events;
+        sortData(props, config, { resort: true });
+        showToast(props, config['publish-event-toast-msg']);
+      },
+    };
+
+    summonConfirmationDialog(props, action);
+  });
+}
+
 async function buildDashboard(el, config) {
-  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
-  createTag('sp-underlay', {}, '', { parent: spTheme });
-  createTag('sp-dialog', { size: 's' }, '', { parent: spTheme });
+  createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
+  const main = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'sp-main-container' }, '', { parent: el });
+  createTag('sp-underlay', {}, '', { parent: main });
+  createTag('sp-dialog', { size: 's' }, '', { parent: main });
 
   const props = {
     el,
@@ -673,6 +839,7 @@ async function buildDashboard(el, config) {
       set(target, prop, value, receiver) {
         target[prop] = value;
         populateTable(receiver, config);
+        initBatchOperator(receiver, config);
 
         return true;
       },
@@ -680,6 +847,7 @@ async function buildDashboard(el, config) {
     const proxyProps = new Proxy(props, dataHandler);
     buildDashboardHeader(proxyProps, config);
     buildDashboardTable(proxyProps, config);
+    initBatchOperator(proxyProps, config);
   }
 
   setTimeout(() => {
@@ -706,6 +874,7 @@ export default async function init(el) {
     import(`${miloLibs}/features/spectrum-web-components/dist/dialog.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/underlay.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/progress-circle.js`),
+    import(`${miloLibs}/features/spectrum-web-components/dist/checkbox.js`),
   ]);
 
   const config = readBlockConfig(el);
