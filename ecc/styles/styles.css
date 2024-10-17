@@ -59,3 +59,8 @@ fieldset {
 svg.ecc-icon {
   vertical-align: middle;
 }
+
+button {
+  cursor: pointer;
+  font-family: var(--body-font-family);
+}

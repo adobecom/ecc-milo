@@ -115,6 +115,12 @@
   gap: 16px;
 }
 
+.ecc-dashboard .dashboard-actions-container .batch-actions-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .ecc-dashboard .dashboard-actions-container .search-input-wrapper {
   position: relative;
 }
@@ -187,7 +193,12 @@
 
 .ecc-dashboard table .table-header-row th.active.desc-sort .icon-chev-down {
   display: inline-block;
+}
 
+.ecc-dashboard table .table-header-row th.checkbox-col,
+.ecc-dashboard table .event-row td.checkbox-col {
+  min-width: unset;
+  width: 12px;
 }
 
 .ecc-dashboard table .event-row {
@@ -325,6 +336,10 @@
   flex-direction: column;
   gap: 16px;
   z-index: 9;
+}
+
+.ecc-dashboard .hidden {
+  display: none!important;
 }
 
 @media screen and (min-width: 900px) {
