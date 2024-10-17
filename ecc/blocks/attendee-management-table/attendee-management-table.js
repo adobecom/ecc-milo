@@ -574,7 +574,8 @@ function initBatchOperator(props) {
           });
 
           const encodedUri = encodeURI(`${csvContent},${csvRows.join('\n')}`);
-          const link = createTag('a', { href: encodedUri, download: `${eventFileName}-attendees.csv` });
+          const currentDateTimeString = new Date().toLocaleString();
+          const link = createTag('a', { href: encodedUri, download: `${eventFileName}-attendees-${currentDateTimeString}.csv` });
           link.click();
         },
       };
@@ -612,7 +613,8 @@ function initBatchOperator(props) {
 
           const csvRows = [headers, ...rows].map((row) => row.join(',')).join('\n');
           const encodedUri = encodeURI(csvContent + csvRows);
-          const link = createTag('a', { href: encodedUri, download: `${eventFileName}-attendees.csv` });
+          const currentDateTimeString = new Date().toLocaleString();
+          const link = createTag('a', { href: encodedUri, download: `${eventFileName}-attendees-selection-${currentDateTimeString}.csv` });
           link.click();
         },
       };
