@@ -251,6 +251,10 @@
   gap: 1rem;
 }
 
+.attendee-management-table .dashboard-actions-container .batch-actions-container button {
+  cursor: pointer;
+}
+
 .attendee-management-table .dashboard-actions-container .search-input-wrapper {
   position: relative;
 }
