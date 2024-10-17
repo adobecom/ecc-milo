@@ -852,6 +852,15 @@ function initBatchOperator(props, config) {
   });
 }
 
+function resetCheckboxes(props) {
+  const selectAllCheckbox = props.el.querySelector('.select-all-checkbox');
+  selectAllCheckbox.checked = false;
+  const selectCheckboxes = props.el.querySelectorAll('.select-checkbox');
+  selectCheckboxes.forEach((cb) => {
+    cb.checked = false;
+  });
+}
+
 async function buildDashboard(el, config) {
   createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
   const main = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'sp-main-container' }, '', { parent: el });
@@ -878,6 +887,7 @@ async function buildDashboard(el, config) {
         populateTable(receiver, config);
         initBatchOperator(receiver, config);
         updateEventsCount(receiver);
+        resetCheckboxes(receiver);
         return true;
       },
     };
