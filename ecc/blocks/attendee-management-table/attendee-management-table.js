@@ -83,7 +83,7 @@ const ATTENDEE_ATTR_MAP = [
     fallback: '',
   },
   {
-    key: 'registrationStatus',
+    key: 'type',
     label: 'RSVP status',
     fallback: 'registered',
   },
