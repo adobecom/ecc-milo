@@ -1,4 +1,5 @@
 import BlockMediator from './deps/block-mediator.min.js';
+import { ALLOWED_ACCOUNT_TYPES } from '../constants/constants.js';
 
 export async function getProfile() {
   const { feds, adobeProfile, fedsConfig, adobeIMS } = window;
@@ -60,4 +61,38 @@ export function lazyCaptureProfile() {
       attempCounter += 1;
     }
   }, 1000);
+}
+
+export function initProfileLogicTree(callbacks) {
+  const { noProfile, noAccessProfile, validProfile } = callbacks;
+
+  const profile = BlockMediator.get('imsProfile');
+
+  if (profile) {
+    if (profile.noProfile) {
+      noProfile();
+    } else if (!ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
+      noAccessProfile();
+    } else {
+      validProfile(profile);
+    }
+
+    return;
+  }
+
+  if (!profile) {
+    const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
+      if (newValue) {
+        if (newValue.noProfile) {
+          noProfile();
+        } else if (!ALLOWED_ACCOUNT_TYPES.includes(newValue.account_type)) {
+          noAccessProfile();
+        } else {
+          validProfile(newValue);
+        }
+      }
+
+      unsubscribe();
+    });
+  }
 }

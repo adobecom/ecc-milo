@@ -1,4 +1,3 @@
-import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -6,6 +5,7 @@ import {
   generateToolTip,
   camelToSentenceCase,
   getEventPageHost,
+  signIn,
   getECCEnv,
 } from '../../scripts/utils.js';
 import {
@@ -26,8 +26,8 @@ import ProductSelectorGroup from '../../components/product-selector-group/produc
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { CustomSearch } from '../../components/custom-search/custom-search.js';
+import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -104,8 +104,8 @@ export function buildErrorMessage(props, resp) {
         });
       });
     } else if (errorMessage) {
-      if (resp.status === 409) {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, errorMessage, { parent: toastArea });
+      if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}') {
+        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'The event has been updated by a different session since your last save.', { parent: toastArea });
         const url = new URL(window.location.href);
         url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
 
@@ -113,7 +113,7 @@ export function buildErrorMessage(props, resp) {
           slot: 'action',
           variant: 'overBackground',
           href: `${url.toString()}`,
-        }, 'See the latest version.', { parent: toast });
+        }, 'See the latest version', { parent: toast });
 
         toast.addEventListener('close', () => {
           toast.remove();
@@ -867,33 +867,18 @@ export default async function init(el) {
     return;
   }
 
-  const profile = BlockMediator.get('imsProfile');
-
-  if (profile) {
-    if (profile.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
+  initProfileLogicTree({
+    noProfile: () => {
+      signIn();
+    },
+    noAccessProfile: () => {
       buildNoAccessScreen(el);
       el.classList.remove('loading');
-    } else {
+    },
+    validProfile: () => {
       buildECCForm(el).then(() => {
         el.classList.remove('loading');
       });
-    }
-
-    return;
-  }
-
-  if (!profile) {
-    const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
-      if (newValue?.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(newValue.account_type)) {
-        buildNoAccessScreen(el);
-        el.classList.remove('loading');
-        unsubscribe();
-      } else {
-        buildECCForm(el).then(() => {
-          el.classList.remove('loading');
-          unsubscribe();
-        });
-      }
-    });
-  }
+    },
+  });
 }

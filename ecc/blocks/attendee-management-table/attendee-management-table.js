@@ -1,17 +1,17 @@
 /* eslint-disable max-len */
 import { getAllEventAttendees, getEvents } from '../../scripts/esp-controller.js';
-import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
   buildNoAccessScreen,
   camelToSentenceCase,
   readBlockConfig,
+  signIn,
   getECCEnv,
 } from '../../scripts/utils.js';
-import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { SearchablePicker } from '../../components/searchable-picker/searchable-picker.js';
 import { FilterMenu } from '../../components/filter-menu/filter-menu.js';
+import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -565,27 +565,15 @@ export default async function init(el) {
     return;
   }
 
-  const profile = BlockMediator.get('imsProfile');
-
-  if (profile) {
-    if (profile.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
+  initProfileLogicTree({
+    noProfile: () => {
+      signIn();
+    },
+    noAccessProfile: () => {
       buildNoAccessScreen(el);
-    } else {
+    },
+    validProfile: () => {
       buildDashboard(el, config);
-    }
-
-    return;
-  }
-
-  if (!profile) {
-    const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
-      if (newValue?.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(newValue.account_type)) {
-        buildNoAccessScreen(el);
-      } else {
-        buildDashboard(el, config);
-      }
-
-      unsubscribe();
-    });
-  }
+    },
+  });
 }

@@ -215,7 +215,7 @@ export async function createVenue(eventId, venueData) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return data.espProvider || data;
   } catch (error) {
     window.lana?.log('Failed to create venue. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -236,7 +236,7 @@ export async function replaceVenue(eventId, venueId, venueData) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return data.espProvider || data;
   } catch (error) {
     window.lana?.log('Failed to replace venue. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
@@ -257,7 +257,7 @@ export async function createEvent(payload) {
       return { ok: response.ok, status: response.status, error: data };
     }
 
-    return data;
+    return data.espProvider || data;
   } catch (error) {
     window.lana?.log('Failed to create event. Error:', error);
     return { ok: false, status: 'Network Error', error: error.message };
