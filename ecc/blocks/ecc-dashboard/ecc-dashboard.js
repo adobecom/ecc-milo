@@ -300,7 +300,6 @@ function initMoreOptions(props, config, eventObj, row) {
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
-
         showToast(props, buildToastMsgWithEventTitle(eventObj.title, config['event-published-msg']), { variant: 'positive' });
       });
     }
