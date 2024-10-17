@@ -253,6 +253,8 @@
 
 .attendee-management-table .dashboard-actions-container .batch-actions-container button {
   cursor: pointer;
+  font-size: var(--type-body-xxs-size);
+  padding: 4px 12px;
 }
 
 .attendee-management-table .dashboard-actions-container .search-input-wrapper {
