@@ -852,9 +852,16 @@ function initBatchOperator(props, config) {
   });
 }
 
-function resetCheckboxes(props) {
+function resetBatchOperator(props) {
+  const selectBatchActions = props.el.querySelectorAll('.select-batch-action');
+
+  selectBatchActions.forEach((action) => {
+    action.classList.add('hidden');
+  });
+
   const selectAllCheckbox = props.el.querySelector('.select-all-checkbox');
   selectAllCheckbox.checked = false;
+
   const selectCheckboxes = props.el.querySelectorAll('.select-checkbox');
   selectCheckboxes.forEach((cb) => {
     cb.checked = false;
@@ -887,7 +894,7 @@ async function buildDashboard(el, config) {
         populateTable(receiver, config);
         initBatchOperator(receiver, config);
         updateEventsCount(receiver);
-        resetCheckboxes(receiver);
+        resetBatchOperator(receiver);
         return true;
       },
     };
