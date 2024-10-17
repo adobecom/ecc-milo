@@ -240,6 +240,7 @@ function summonConfirmationDialog(props, action) {
 
   const underlay = mainContainer.querySelector('sp-underlay');
   const dialog = mainContainer.querySelector('sp-dialog');
+  dialog.innerHTML = '';
   createTag('h1', { slot: 'heading' }, heading, { parent: dialog });
   createTag('p', {}, description, { parent: dialog });
   const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
@@ -249,12 +250,14 @@ function summonConfirmationDialog(props, action) {
   underlay.open = true;
 
   dialogConfirmBtn.addEventListener('click', async () => {
+    dialogConfirmBtn.pending = true;
     await confirmCallback();
     underlay.open = false;
     dialog.innerHTML = '';
   });
 
   dialogCancelBtn.addEventListener('click', async () => {
+    dialogCancelBtn.pending = true;
     await cancelCallback();
     underlay.open = false;
     dialog.innerHTML = '';
@@ -651,6 +654,11 @@ function buildDashboardHeader(props, config) {
   buildActionsArea(props, config);
 }
 
+function updateEventsCount(props) {
+  const eventsCount = props.el.querySelector('.dashboard-header-events-count');
+  eventsCount.textContent = `(${props.data.length} events)`;
+}
+
 function buildDashboardTable(props, config) {
   const mainContainer = props.el.querySelector('sp-theme.sp-main-container');
   const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: mainContainer });
@@ -767,8 +775,9 @@ function initBatchOperator(props, config) {
   // batch delete
   const deleteAction = props.el.querySelector('.delete-action');
   deleteAction.addEventListener('click', async () => {
-    const checkboxes = props.el.querySelectorAll('.select-checkbox:checked');
-    const eventIds = Array.from(checkboxes).map((cb) => cb.closest('tr').dataset.eventId);
+    const spCheckboxes = props.el.querySelectorAll('.select-checkbox');
+    const checkedBoxes = [...spCheckboxes].filter((cb) => cb.checked);
+    const eventIds = Array.from(checkedBoxes).map((cb) => cb.closest('tr').dataset.eventId);
 
     const action = {
       heading: 'You are deleting these events.',
@@ -792,22 +801,50 @@ function initBatchOperator(props, config) {
   // batch publish
   const publishAction = props.el.querySelector('.publish-action');
   publishAction.addEventListener('click', async () => {
-    const checkboxes = props.el.querySelectorAll('.select-checkbox:checked');
-    const eventIds = Array.from(checkboxes).map((cb) => cb.closest('tr').dataset.eventId);
+    const spCheckboxes = props.el.querySelectorAll('.select-checkbox');
+    const checkedBoxes = [...spCheckboxes].filter((cb) => cb.checked);
+    const eventIds = Array.from(checkedBoxes).map((cb) => cb.closest('tr').dataset.eventId);
 
     const action = {
-      heading: 'You are publishing these events.',
+      heading: `You are publishing ${eventIds.length} events.`,
       description: 'Are you sure you want to do this?',
-      confirmText: 'Yes, I want to publish these events',
+      confirmText: 'Yes, publish these events',
       cancelText: 'Do not publish',
       confirmCallback: async () => {
-        await Promise.all(eventIds.map((id) => publishEvent(id)));
+        const eventObj = props.data.find((e) => e.eventId === eventIds[0]);
+        await Promise.all(eventIds.map((id) => publishEvent(id, quickFilter(eventObj))));
         const newJson = await getEvents();
         props.data = newJson.events;
         props.filteredData = newJson.events;
         props.paginatedData = newJson.events;
         sortData(props, config, { resort: true });
         showToast(props, config['publish-event-toast-msg']);
+      },
+    };
+
+    summonConfirmationDialog(props, action);
+  });
+
+  const unpublishAction = props.el.querySelector('.unpublish-action');
+  unpublishAction.addEventListener('click', async () => {
+    const spCheckboxes = props.el.querySelectorAll('.select-checkbox');
+    const checkedBoxes = [...spCheckboxes].filter((cb) => cb.checked);
+    const eventIds = Array.from(checkedBoxes).map((cb) => cb.closest('tr').dataset.eventId);
+
+    const action = {
+      heading: `You are unpublishing ${eventIds.length} events.`,
+      description: 'Are you sure you want to do this?',
+      confirmText: 'Yes, unpublish these events',
+      cancelText: 'Do not unpublish',
+      confirmCallback: async () => {
+        const eventObj = props.data.find((e) => e.eventId === eventIds[0]);
+        await Promise.all(eventIds.map((id) => unpublishEvent(id, quickFilter(eventObj))));
+        const newJson = await getEvents();
+        props.data = newJson.events;
+        props.filteredData = newJson.events;
+        props.paginatedData = newJson.events;
+        sortData(props, config, { resort: true });
+        showToast(props, config['unpublish-event-toast-msg']);
       },
     };
 
@@ -840,6 +877,7 @@ async function buildDashboard(el, config) {
         target[prop] = value;
         populateTable(receiver, config);
         initBatchOperator(receiver, config);
+        updateEventsCount(receiver);
 
         return true;
       },

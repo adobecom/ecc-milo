@@ -499,6 +499,7 @@ function summonConfirmationDialog(props, action) {
 
   const underlay = mainContainer.querySelector('sp-underlay');
   const dialog = mainContainer.querySelector('sp-dialog');
+  dialog.innerHTML = '';
   createTag('h1', { slot: 'heading' }, action.heading, { parent: dialog });
   createTag('p', {}, action.description, { parent: dialog });
   const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
@@ -508,12 +509,14 @@ function summonConfirmationDialog(props, action) {
   underlay.open = true;
 
   dialogConfirmBtn.addEventListener('click', async () => {
+    dialogConfirmBtn.pending = true;
     await action.confirmCallback();
     underlay.open = false;
     dialog.innerHTML = '';
   });
 
   dialogCancelBtn.addEventListener('click', () => {
+    dialogCancelBtn.pending = true;
     underlay.open = false;
     dialog.innerHTML = '';
   });
