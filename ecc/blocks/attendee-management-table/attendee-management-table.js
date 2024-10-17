@@ -378,7 +378,7 @@ function buildNoResultsScreen(props, config) {
 
 function populateTable(props, config) {
   const tBody = props.el.querySelector('table.dashboard-table tbody');
-  props.el.classList.add('no-results');
+  props.el.classList.remove('no-results');
   tBody.innerHTML = '';
 
   if (!props.paginatedData.length) {
