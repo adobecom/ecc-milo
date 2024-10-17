@@ -478,10 +478,10 @@ function buildActionsArea(props, config) {
   const actionsContainer = props.el.querySelector('.dashboard-actions-container');
   const batchActionsContainer = createTag('div', { class: 'batch-actions-container' }, '', { parent: actionsContainer });
 
-  createTag('button', { class: 'check-in-action hidden' }, 'Check in selected', { parent: batchActionsContainer });
-  createTag('button', { class: 'reject-action hidden' }, 'Reject selected', { parent: batchActionsContainer });
-  createTag('button', { class: 'select-batch-action export-action hidden' }, 'Export selected', { parent: batchActionsContainer });
-  createTag('button', { class: 'export-all-action' }, 'Export all', { parent: batchActionsContainer });
+  createTag('button', { class: 'check-in-action con-button outline hidden' }, 'Check in selected', { parent: batchActionsContainer });
+  createTag('button', { class: 'reject-action con-button outline hidden' }, 'Reject selected', { parent: batchActionsContainer });
+  createTag('button', { class: 'select-batch-action export-action con-button outline hidden' }, 'Export selected', { parent: batchActionsContainer });
+  createTag('button', { class: 'export-all-action con-button outline' }, 'Export all', { parent: batchActionsContainer });
 
   // search input
   const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
@@ -552,7 +552,7 @@ function initBatchOperator(props) {
   });
 
   // init export all
-  const exportAllButton = props.el.querySelector('sp-button.export-all-action');
+  const exportAllButton = props.el.querySelector('button.export-all-action');
   if (exportAllButton) {
     exportAllButton.addEventListener('click', () => {
       const action = {
@@ -581,7 +581,7 @@ function initBatchOperator(props) {
   }
 
   // init export
-  const exportButton = props.el.querySelector('sp-button.export-action');
+  const exportButton = props.el.querySelector('button.export-action');
   if (exportButton) {
     exportButton.addEventListener('click', () => {
       const checkCount = [...selectCheckboxes].filter((cb) => cb.checked).length;
@@ -618,7 +618,7 @@ function initBatchOperator(props) {
     });
   }
 
-  const rejectButton = props.el.querySelector('sp-button.reject-action');
+  const rejectButton = props.el.querySelector('button.reject-action');
   if (rejectButton) {
     rejectButton.addEventListener('click', () => {
       const checkCount = [...selectCheckboxes].filter((cb) => cb.checked).length;
