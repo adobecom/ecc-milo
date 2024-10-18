@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-// TODO: add registration configs fields once the ESP is updated
 function prefillFields(component, props) {
   const contactHostEl = component.querySelector('#registration-contact-host');
   const hostEmailEl = component.querySelector('#event-host-email-input');
@@ -67,10 +66,9 @@ export async function onPayloadUpdate(component, props) {
 export async function onRespUpdate(component, props) {
   if (!props.eventDataResp) return;
 
-  const { cloudType } = props.eventDataResp;
-  const registrationConfigWrapper = component.querySelector('.registration-config-wrapper');
-
-  registrationConfigWrapper?.classList.toggle('hidden', cloudType === 'DX');
+  if (props.eventDataResp.cloudType === 'CreativeCloud') {
+    component.querySelector('#registration-allow-waitlist')?.classList.add('hidden');
+  }
 
   prefillFields(component, props);
 }
