@@ -3,90 +3,17 @@ import { generateToolTip } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
-function decorateAttendeeCountInput(col) {
-  col.classList.add('attendee-count-wrapper');
-  const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number', min: 0 });
-  const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, col.textContent.trim());
-  col.innerHTML = '';
-  col.append(label, input);
-}
-
-function decorateRegistrationConfigInputs(col) {
-  col.classList.add('registration-config-wrapper');
-  const ul = col.querySelector('ul');
-  const fieldset = createTag('fieldset', { class: 'radios-wrapper' });
-  ul.parentElement.replaceChild(fieldset, ul);
-  const lis = ul.querySelectorAll(':scope > li');
-
-  lis.forEach((li, i) => {
-    if (i === 0) {
-      const radioInput = createTag('input', { id: 'disable-rsvp-radio', type: 'radio', name: 'registration-config', class: 'radio-input' });
-      const radioSpan = createTag('span', { class: 'radio-span' });
-      const label = createTag('label', { for: 'disable-rsvp-radio', class: 'radio-label' }, li.textContent.trim());
-      const radioWrapper = createTag('div', { class: 'radio-wrapper' });
-      radioWrapper.append(radioInput, radioSpan, label);
-      fieldset.append(radioWrapper);
-    }
-
-    if (i === 1) {
-      const radioInput = createTag('input', { id: 'allow-waitlisting-radio', type: 'radio', name: 'registration-config', class: 'radio-input' });
-      const radioSpan = createTag('span', { class: 'radio-span' });
-      const label = createTag('label', { for: 'allow-waitlisting-radio', class: 'radio-label' }, li.textContent.trim());
-      const radioWrapper = createTag('div', { class: 'radio-wrapper' });
-      radioWrapper.append(radioInput, radioSpan, label);
-      fieldset.append(radioWrapper);
-    }
-  });
-}
-
-function decorateAllCheckboxes(el) {
-  const ul = el.querySelector('ul');
-  const fieldset = createTag('fieldset', { class: 'checkboxes-wrapper' });
-  ul.parentElement.replaceChild(fieldset, ul);
-  const lis = ul.querySelectorAll(':scope > li');
-
-  lis.forEach((li, i) => {
-    if (i === 0) {
-      const [checkboxText, inputText] = li.textContent.trim().split('|');
-      const checkbox = createTag('sp-checkbox', { id: 'registration-contact-host' }, checkboxText);
-      const input = createTag('sp-textfield', {
-        id: 'event-host-email-input',
-        class: 'text-input',
-        placeholder: inputText,
-        size: 's',
-      });
-
-      const wrapperDiv = createTag('div', { class: 'host-contact-wrapper' });
-      wrapperDiv.append(checkbox, input);
-      fieldset.append(wrapperDiv);
-    }
-  });
-}
-
 function decorateAttendeeFields(row) {
   row.classList.add('attendee-fields-wrapper');
   const cols = row.querySelectorAll(':scope > div');
 
   cols.forEach((c, i) => {
-    switch (i) {
-      case 0: {
-        decorateAttendeeCountInput(c);
-        break;
-      }
-
-      case 1: {
-        decorateRegistrationConfigInputs(c);
-        break;
-      }
-
-      case 2: {
-        decorateAllCheckboxes(c);
-        break;
-      }
-
-      default: {
-        break;
-      }
+    if (i === 0) {
+      c.classList.add('attendee-count-wrapper');
+      const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number', min: 0 });
+      const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, c.textContent.trim());
+      c.innerHTML = '';
+      c.append(input, label);
     }
   });
 }
@@ -121,8 +48,36 @@ function decorateSWCTextField(row, options) {
   row.append(wrapper);
 }
 
+function decorateAllCheckboxes(el) {
+  const ul = el.querySelector(':scope > div > div > ul');
+  const fieldset = createTag('fieldset', { class: 'checkboxes-wrapper' });
+  ul.parentElement.replaceChild(fieldset, ul);
+  const lis = ul.querySelectorAll(':scope > li');
+
+  lis.forEach((li, i) => {
+    if (i === 0) {
+      const checkbox = createTag('sp-checkbox', { id: 'registration-allow-waitlist' }, li.textContent.trim());
+      fieldset.append(checkbox);
+    } else if (i === 1) {
+      const [checkboxText, inputText] = li.textContent.trim().split('|');
+      const checkbox = createTag('sp-checkbox', { id: 'registration-contact-host' }, checkboxText);
+      const input = createTag('sp-textfield', {
+        id: 'event-host-email-input',
+        class: 'text-input',
+        placeholder: inputText,
+        size: 's',
+      });
+
+      const wrapperDiv = createTag('div', { class: 'host-contact-wrapper' });
+      wrapperDiv.append(checkbox, input);
+      fieldset.append(wrapperDiv);
+    }
+  });
+}
+
 export default async function init(el) {
   el.classList.add('form-component');
+  decorateAllCheckboxes(el);
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach((r, i) => {
