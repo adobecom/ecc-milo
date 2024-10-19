@@ -149,13 +149,13 @@ export default class PartnerSelector extends LitElement {
             <div class="partner-input">
               <label>${this.fieldLabels.nameLabelText}</label>
               <custom-search fielddata=${JSON.stringify(nameFieldData)} config=${JSON.stringify({ showImage: true })} @change-custom-search=${(event) => {
-  this.updatePartner({ name: event.detail.value });
+  this.updatePartner({ name: event.detail.value?.trim() });
 }} @entry-selected=${this.handleAutocomplete} searchdata=${JSON.stringify(this.seriesPartners)} identifier='sponsorId'></custom-search>
             </div>
             <div class="partner-input">
               <label>${this.fieldLabels.urlLabelText}</label>
               <sp-textfield pattern=${LINK_REGEX} value=${this.partner.link} placeholder="Enter partner full URL" @change=${(event) => {
-  this.updatePartner({ link: event.target.value });
+  this.updatePartner({ link: event.target.value?.trim() });
   // FIXME: I really shouldn't need to do this, but the pattern attribute doesn't reset properly.
 }} ?valid=${this.partner.link?.match(LINK_REGEX)}></sp-textfield>
             </div>
