@@ -103,14 +103,9 @@
   flex: 1 1 0;
 }
 
-.event-info-component .time-pickers .time-picker-wrapper label {
-  display: block;
-  font-size: var(--type-body-xs-size);
-}
-
-.event-info-component .time-zone-picker {
+.event-info-component .time-pickers .time-picker-wrapper .select-wrapper {
   display: flex;
-  justify-content: flex-end;
+  gap: 8px;
 }
 
 .event-info-component .time-zone-picker sp-picker,
@@ -121,6 +116,20 @@
   height: 32px;
   width: 100%;
   box-sizing: border-box;
+}
+
+.event-info-component .time-pickers .time-picker-wrapper .select-wrapper sp-picker:last-of-type {
+  width: max-content;
+}
+
+.event-info-component .time-pickers .time-picker-wrapper label {
+  display: block;
+  font-size: var(--type-body-xs-size);
+}
+
+.event-info-component .time-zone-picker {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .event-info-component .date-input {

@@ -41,7 +41,10 @@ export default class AgendaFieldsetGroup extends LitElement {
   }
 
   getAgendas() {
-    return this.agendaItems.filter((o) => !(Object.keys(o).length === 0 && o.constructor === Object));
+    return this.agendaItems.filter((agenda) => agenda.startTime || agenda.description).map((agenda) => ({
+      startTime: agenda.startTime,
+      description: agenda.description,
+    }));
   }
 
   hasOnlyEmptyAgendaLeft() {
