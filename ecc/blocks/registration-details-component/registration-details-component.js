@@ -65,6 +65,7 @@ function decorateAllCheckboxes(el) {
         id: 'event-host-email-input',
         class: 'text-input',
         placeholder: inputText,
+        type: 'email',
         size: 's',
       });
 
