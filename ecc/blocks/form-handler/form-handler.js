@@ -6,7 +6,7 @@ import {
   camelToSentenceCase,
   getEventPageHost,
   signIn,
-  getECCEnv,
+  getEventServiceEnv,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -860,7 +860,7 @@ export default async function init(el) {
 
   const sp = new URLSearchParams(window.location.search);
   const devToken = sp.get('devToken');
-  if (devToken && getECCEnv() === 'dev') {
+  if (devToken && getEventServiceEnv() === 'dev') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
     });
