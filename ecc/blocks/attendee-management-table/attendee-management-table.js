@@ -253,7 +253,7 @@ async function populateRow(props, index) {
 
   ATTENDEE_ATTR_MAP.forEach(({ key, fallback }, i, arr) => {
     const td = createTag('td', {}, attendee[key] || fallback, { parent: row });
-    if (['registrationStatus', 'checkedIn'].includes(key)) {
+    if (['type', 'checkedIn'].includes(key)) {
       td.classList.add(`sticky-right-${arr.length - i}`, 'actions');
     }
   });
@@ -348,7 +348,7 @@ function buildTableHeaders(props, config) {
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
 
-    if (['registrationStatus', 'checkedIn'].includes(key)) th.classList.add('actions', `sticky-right-${arr.length - i}`);
+    if (['type', 'checkedIn'].includes(key)) th.classList.add('actions', `sticky-right-${arr.length - i}`);
     th.classList.add('sortable');
     th.dataset.field = key;
   });
