@@ -348,7 +348,7 @@ function buildTableHeaders(props, config) {
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
 
-    if (['registrationStatus', 'checkedIn'].includes(key)) th.classList.add('actions', `sticky-right-${arr.length - i}`);
+    if (['type', 'checkedIn'].includes(key)) th.classList.add('actions', `sticky-right-${arr.length - i}`);
     th.classList.add('sortable');
     th.dataset.field = key;
   });
