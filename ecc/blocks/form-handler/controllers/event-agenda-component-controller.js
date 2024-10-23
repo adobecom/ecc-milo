@@ -7,7 +7,7 @@ export function onSubmit(component, props) {
 
   let agenda = [];
 
-  if (agendaGroup) agenda = agendaGroup.getAgendas();
+  if (agendaGroup) agenda = agendaGroup.getCompleteAgenda();
 
   const agendaInfo = {
     showAgendaPostEvent,
