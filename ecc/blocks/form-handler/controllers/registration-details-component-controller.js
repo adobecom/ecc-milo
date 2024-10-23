@@ -51,10 +51,10 @@ export function onSubmit(component, props) {
 
   const rsvpData = {};
 
-  if (rsvpDescription) rsvpData.rsvpDescription = rsvpDescription;
+  rsvpData.rsvpDescription = rsvpDescription || '';
+  rsvpData.allowWaitlisting = !!allowWaitlisting;
   if (contactHost && hostEmail) rsvpData.hostEmail = hostEmail;
   if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
-  if (allowWaitlisting) rsvpData.allowWaitlisting = allowWaitlisting;
 
   props.payload = { ...props.payload, ...rsvpData };
 }
