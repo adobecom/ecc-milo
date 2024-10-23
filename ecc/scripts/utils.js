@@ -4,7 +4,7 @@ const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 let secretCache = [];
 
-export function getECCEnv() {
+export function getEventServiceEnv() {
   const validEnvs = ['dev', 'stage', 'prod'];
   const { host, search } = window.location;
   const SLD = host.includes('.aem.') ? 'aem' : 'hlx';
@@ -15,7 +15,7 @@ export function getECCEnv() {
 
   if ((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`))) {
     if (host.startsWith('dev--')) return 'dev';
-    if (host.startsWith('dev02--')) return 'dev02';
+    if (host.startsWith('dev02--') || host.startsWith('main02--')) return 'dev02';
     if (host.startsWith('stage--')) return 'stage';
     if (host.startsWith('stage02--')) return 'stage02';
     if (host.startsWith('main--')) return 'prod';
@@ -86,7 +86,7 @@ export function convertTo24HourFormat(timeStr) {
 
 export function getEventPageHost() {
   if (window.location.href.includes('.hlx.')) {
-    return window.location.origin.replace(window.location.hostname, `${getECCEnv()}--events-milo--adobecom.hlx.page`);
+    return window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.hlx.page`);
   }
 
   return window.location.origin;

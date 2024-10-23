@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { LIBS } from '../../../scripts/scripts.js';
 import HtmlSanitizer from '../../../scripts/deps/html-sanitizer.js';
-import { fetchThrottledMemoizedText, getECCEnv } from '../../../scripts/utils.js';
+import { fetchThrottledMemoizedText, getEventServiceEnv } from '../../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -35,7 +35,7 @@ async function loadPreview(component, templateId) {
 
   let host;
   if (window.location.href.includes('.hlx.')) {
-    host = window.location.origin.replace(window.location.hostname, `${getECCEnv()}--events-milo--adobecom.hlx.page`);
+    host = window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.hlx.page`);
   } else {
     host = window.location.origin;
   }

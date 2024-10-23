@@ -13,7 +13,7 @@ import {
   getEventPageHost,
   readBlockConfig,
   signIn,
-  getECCEnv,
+  getEventServiceEnv,
 } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
@@ -719,7 +719,7 @@ export default async function init(el) {
 
   const sp = new URLSearchParams(window.location.search);
   const devToken = sp.get('devToken');
-  if (devToken && getECCEnv() === 'dev') {
+  if (devToken && getEventServiceEnv() === 'dev') {
     buildDashboard(el, config);
     return;
   }
