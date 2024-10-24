@@ -308,6 +308,13 @@ function initMoreOptions(props, config, eventObj, row) {
       toolBox.remove();
       row.classList.add('pending');
       const newEventJSON = await createEvent(cloneFilter(payload));
+
+      if (newEventJSON.error) {
+        row.classList.remove('pending');
+        showToast(props, newEventJSON.error, { variant: 'negative' });
+        return;
+      }
+
       const newJson = await getEvents();
       props.data = newJson.events;
       props.filteredData = newJson.events;
@@ -345,7 +352,14 @@ function initMoreOptions(props, config, eventObj, row) {
         underlay.open = false;
         dialog.innerHTML = '';
         row.classList.add('pending');
-        await deleteEvent(eventObj.eventId);
+        const resp = await deleteEvent(eventObj.eventId);
+
+        if (resp.error) {
+          row.classList.remove('pending');
+          showToast(props, resp.error, { variant: 'negative' });
+          return;
+        }
+
         const newJson = await getEvents();
         props.data = newJson.events;
         props.filteredData = newJson.events;
