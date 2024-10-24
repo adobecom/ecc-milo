@@ -1,3 +1,4 @@
+import { LIBS } from './scripts.js';
 import { getEventServiceEnv, getSecret } from './utils.js';
 
 const API_CONFIG = {
@@ -63,9 +64,15 @@ function waitForAdobeIMS() {
 }
 
 export async function constructRequestOptions(method, body = null) {
-  await waitForAdobeIMS();
+  const [
+    { default: getUuid },
+    clientIdentity,
+  ] = await Promise.all([
+    import(`${LIBS}/utils/getUuid.js`),
+    getSecret(`${getEventServiceEnv()}-client-identity`),
+    waitForAdobeIMS(),
+  ]);
 
-  const clientIdentity = await getSecret(`${getEventServiceEnv()}-client-identity`);
   const headers = new Headers();
   const sp = new URLSearchParams(window.location.search);
   const devToken = sp.get('devToken');
@@ -76,6 +83,7 @@ export async function constructRequestOptions(method, body = null) {
   headers.append('Authorization', `Bearer ${authToken}`);
   headers.append('x-api-key', 'acom_event_service');
   headers.append('content-type', 'application/json');
+  headers.append('x-request-id', await getUuid(new Date().getTime()));
   headers.append('x-client-identity', clientIdentity);
 
   const options = {
@@ -89,9 +97,16 @@ export async function constructRequestOptions(method, body = null) {
 }
 
 export async function uploadImage(file, configs, tracker, imageId = null) {
-  await waitForAdobeIMS();
+  const [
+    { default: getUuid },
+    clientIdentity,
+  ] = await Promise.all([
+    import(`${LIBS}/utils/getUuid.js`),
+    getSecret(`${getEventServiceEnv()}-client-identity`),
+    waitForAdobeIMS(),
+  ]);
 
-  const clientIdentity = await getSecret(`${getEventServiceEnv()}-client-identity`);
+  const requestId = await getUuid(new Date().getTime());
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const sp = new URLSearchParams(window.location.search);
   const devToken = sp.get('devToken');
@@ -109,6 +124,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
     xhr.setRequestHeader('x-image-kind', configs.type);
     xhr.setRequestHeader('x-api-key', 'acom_event_service');
     xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+    xhr.setRequestHeader('x-request-id', requestId);
     xhr.setRequestHeader('x-client-identity', clientIdentity);
 
     if (tracker) {
