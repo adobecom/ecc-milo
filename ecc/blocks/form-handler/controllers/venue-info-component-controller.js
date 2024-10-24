@@ -8,7 +8,7 @@ function togglePrefillableFieldsHiddenState(component) {
   const address = component.querySelector('#venue-info-venue-address');
   const city = component.querySelector('#location-city');
   const state = component.querySelector('#location-state');
-  const postal = component.querySelector('#location-zip-code');
+  const postal = component.querySelector('#location-postal-code');
   const county = component.querySelector('#location-country');
 
   const hasUnfilledFields = [address, city, state, postal, county].some((input) => !input.value);
@@ -37,7 +37,7 @@ function resetAllFields(component) {
   const cityInput = component.querySelector('#location-city');
   const stateInput = component.querySelector('#location-state');
   const stateCodeInput = component.querySelector('#location-state-code');
-  const postalCodeInput = component.querySelector('#location-zip-code');
+  const postalCodeInput = component.querySelector('#location-postal-code');
   const countryInput = component.querySelector('#location-country');
   const placeLatInput = component.querySelector('#google-place-lat');
   const placeLngInput = component.querySelector('#google-place-lng');
@@ -65,7 +65,7 @@ function updateAllFields(venueData, component) {
   const cityInput = component.querySelector('#location-city');
   const stateInput = component.querySelector('#location-state');
   const stateCodeInput = component.querySelector('#location-state-code');
-  const postalCodeInput = component.querySelector('#location-zip-code');
+  const postalCodeInput = component.querySelector('#location-postal-code');
   const countryInput = component.querySelector('#location-country');
   const placeLatInput = component.querySelector('#google-place-lat');
   const placeLngInput = component.querySelector('#google-place-lng');
@@ -93,7 +93,7 @@ function getVenueDataInForm(component) {
   const cityInput = component.querySelector('#location-city');
   const stateInput = component.querySelector('#location-state');
   const stateCodeInput = component.querySelector('#location-state-code');
-  const postalCodeInput = component.querySelector('#location-zip-code');
+  const postalCodeInput = component.querySelector('#location-postal-code');
   const countryInput = component.querySelector('#location-country');
   const placeLatInput = component.querySelector('#google-place-lat');
   const placeLngInput = component.querySelector('#google-place-lng');
@@ -145,7 +145,7 @@ function initAutocomplete(el, props) {
   const city = el.querySelector('#location-city');
   const state = el.querySelector('#location-state');
   const stateCode = el.querySelector('#location-state-code');
-  const zip = el.querySelector('#location-zip-code');
+  const postalCode = el.querySelector('#location-postal-code');
   const country = el.querySelector('#location-country');
   const placeId = el.querySelector('#google-place-id');
   const mapUrl = el.querySelector('#google-map-url');
@@ -165,18 +165,30 @@ function initAutocomplete(el, props) {
         address: '',
         city: '',
         state: '',
-        zip: '',
+        stateCode: '',
+        postalCode: '',
         country: '',
       };
 
+      const streetAddressCandidates = [
+        'street_number',
+        'route',
+        'neighborhood',
+        'sublocality_level_1',
+        'sublocality_level_2',
+        'sublocality_level_3',
+        'sublocality_level_4',
+      ];
+
+      const cityCandidates = ['locality', 'postal_town', 'administrative_area_level_1'];
+
       components.forEach((component) => {
-        if (component.types.includes('street_number')) {
+        if (streetAddressCandidates.some((type) => component.types.includes(type))) {
           addressInfo.address += `${component.long_name} `;
         }
-        if (component.types.includes('route')) {
-          addressInfo.address += component.long_name;
-        }
-        if (component.types.includes('locality')) {
+
+        if (!addressInfo.city
+          && cityCandidates.some((type) => component.types.includes(type))) {
           addressInfo.city = component.long_name;
         }
         if (component.types.includes('administrative_area_level_1')) {
@@ -184,12 +196,14 @@ function initAutocomplete(el, props) {
           addressInfo.stateCode = component.short_name;
         }
         if (component.types.includes('postal_code')) {
-          addressInfo.zip = component.long_name;
+          addressInfo.postalCode = component.long_name;
         }
         if (component.types.includes('country')) {
           addressInfo.country = component.short_name;
         }
       });
+
+      addressInfo.address = addressInfo.address.trim();
 
       if (Object.values(addressInfo).some((v) => !v)) {
         el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'The selection is not a valid venue.' } }, bubbles: true, composed: true }));
@@ -203,7 +217,7 @@ function initAutocomplete(el, props) {
       changeInputValue(city, 'value', addressInfo.city);
       changeInputValue(state, 'value', addressInfo.state);
       changeInputValue(stateCode, 'value', addressInfo.stateCode);
-      changeInputValue(zip, 'value', addressInfo.zip);
+      changeInputValue(postalCode, 'value', addressInfo.postalCode);
       changeInputValue(country, 'value', addressInfo.country);
       changeInputValue(placeId, 'value', place.place_id);
       changeInputValue(mapUrl, 'value', place.url);
