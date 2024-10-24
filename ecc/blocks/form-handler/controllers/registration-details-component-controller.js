@@ -41,20 +41,20 @@ function prefillFields(component, props) {
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const attendeeLimitVal = component.querySelector('#attendee-count-input')?.value;
+  const attendeeLimitVal = component.querySelector('#attendee-count-input')?.value?.trim();
   const allowWaitlisting = component.querySelector('#registration-allow-waitlist')?.checked;
   const contactHost = component.querySelector('#registration-contact-host')?.checked;
-  const hostEmail = component.querySelector('#event-host-email-input')?.value;
+  const hostEmail = component.querySelector('#event-host-email-input')?.value?.trim();
   const rsvpDescription = component.querySelector('#rsvp-form-detail-description')?.value;
 
   const attendeeLimit = Number.isNaN(+attendeeLimitVal) ? null : +attendeeLimitVal;
 
   const rsvpData = {};
 
-  if (rsvpDescription) rsvpData.rsvpDescription = rsvpDescription;
+  rsvpData.rsvpDescription = rsvpDescription || '';
+  rsvpData.allowWaitlisting = !!allowWaitlisting;
   if (contactHost && hostEmail) rsvpData.hostEmail = hostEmail;
   if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
-  if (allowWaitlisting) rsvpData.allowWaitlisting = allowWaitlisting;
 
   props.payload = { ...props.payload, ...rsvpData };
 }
