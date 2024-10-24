@@ -1,4 +1,3 @@
-import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -6,7 +5,8 @@ import {
   generateToolTip,
   camelToSentenceCase,
   getEventPageHost,
-  getECCEnv,
+  signIn,
+  getEventServiceEnv,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -26,8 +26,8 @@ import ProductSelectorGroup from '../../components/product-selector-group/produc
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { CustomSearch } from '../../components/custom-search/custom-search.js';
+import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -860,40 +860,25 @@ export default async function init(el) {
 
   const sp = new URLSearchParams(window.location.search);
   const devToken = sp.get('devToken');
-  if (devToken && getECCEnv() === 'dev') {
+  if (devToken && getEventServiceEnv() === 'dev') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
     });
     return;
   }
 
-  const profile = BlockMediator.get('imsProfile');
-
-  if (profile) {
-    if (profile.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
+  initProfileLogicTree({
+    noProfile: () => {
+      signIn();
+    },
+    noAccessProfile: () => {
       buildNoAccessScreen(el);
       el.classList.remove('loading');
-    } else {
+    },
+    validProfile: () => {
       buildECCForm(el).then(() => {
         el.classList.remove('loading');
       });
-    }
-
-    return;
-  }
-
-  if (!profile) {
-    const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
-      if (newValue?.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(newValue.account_type)) {
-        buildNoAccessScreen(el);
-        el.classList.remove('loading');
-        unsubscribe();
-      } else {
-        buildECCForm(el).then(() => {
-          el.classList.remove('loading');
-          unsubscribe();
-        });
-      }
-    });
-  }
+    },
+  });
 }
