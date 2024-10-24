@@ -7,7 +7,7 @@ import {
   camelToSentenceCase,
   readBlockConfig,
   signIn,
-  getECCEnv,
+  getEventServiceEnv,
 } from '../../scripts/utils.js';
 import { SearchablePicker } from '../../components/searchable-picker/searchable-picker.js';
 import { FilterMenu } from '../../components/filter-menu/filter-menu.js';
@@ -15,20 +15,82 @@ import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
-const ATTENDEE_ATTR_KEYS = [
-  'attendeeId',
-  'firstName',
-  'lastName',
-  'email',
-  'companyName',
-  'jobTitle',
-  'mobilePhone',
-  'industry',
-  'productsOfInterest',
-  'companySize',
-  'age',
-  'jobLevel',
-  'contactMethod',
+const ATTENDEE_ATTR_MAP = [
+  {
+    key: 'firstName',
+    label: 'First name',
+    fallback: '',
+  },
+  {
+    key: 'lastName',
+    label: 'Last name',
+    fallback: '',
+  },
+  {
+    key: 'email',
+    label: 'Email',
+    fallback: '',
+  },
+  {
+    key: 'companyName',
+    label: 'Company',
+    fallback: '',
+  },
+  {
+    key: 'jobTitle',
+    label: 'Job title',
+    fallback: '',
+  },
+  {
+    key: 'mobilePhone',
+    label: 'Mobile phone',
+    fallback: '',
+  },
+  {
+    key: 'industry',
+    label: 'Industry',
+    fallback: '',
+  },
+  {
+    key: 'productsOfInterest',
+    label: 'Products of interest',
+    fallback: '',
+  },
+  {
+    key: 'companySize',
+    label: 'Company size',
+    fallback: '',
+  },
+  {
+    key: 'age',
+    label: 'Age',
+    fallback: '',
+  },
+  {
+    key: 'jobLevel',
+    label: 'Job level',
+    fallback: '',
+  },
+  {
+    key: 'contactMethod',
+    label: 'Contact method',
+    fallback: '',
+  },
+  {
+    key: 'registrationDate',
+    label: 'Registration date',
+    fallback: '',
+  },
+  {
+    key: 'type',
+    label: 'RSVP status',
+    fallback: 'registered',
+  },
+  {
+    key: 'checkedIn',
+    label: 'Checked in',
+    fallback: '-',
+  },
 ];
 
 const FILTER_MAP = {
@@ -41,6 +103,23 @@ const FILTER_MAP = {
   jobLevel: [],
   contactMethod: [],
 };
+
+const SPECTRUM_COMPONENTS = [
+  'theme',
+  'toast',
+  'button',
+  'dialog',
+  'underlay',
+  'progress-circle',
+  'textfield',
+  'picker',
+  'divider',
+  'overlay',
+  'popover',
+  'link',
+  'tooltip',
+  'action-button',
+];
 
 function buildAllFilterMenues(props) {
   const sidePanel = props.el.querySelector('.dashboard-side-panel');
@@ -172,8 +251,11 @@ async function populateRow(props, index) {
 
   const row = createTag('tr', { class: 'attendee-row', 'data-attendee-id': attendee.attendeeId }, '', { parent: tBody });
 
-  ATTENDEE_ATTR_KEYS.forEach((key) => {
-    createTag('td', {}, attendee[key] || '', { parent: row });
+  ATTENDEE_ATTR_MAP.forEach(({ key, fallback }, i, arr) => {
+    const td = createTag('td', {}, attendee[key] || fallback, { parent: row });
+    if (['type', 'checkedIn'].includes(key)) {
+      td.classList.add(`sticky-right-${arr.length - i}`, 'actions');
+    }
   });
 }
 
@@ -236,20 +318,12 @@ function decoratePagination(props, config) {
 }
 
 function initSorting(props, config) {
-  const thead = props.el.querySelector('thead');
-  const thRow = thead.querySelector('tr');
-
-  ATTENDEE_ATTR_KEYS.forEach((key) => {
-    const val = camelToSentenceCase(key).toUpperCase();
-    const thText = createTag('span', {}, val);
-    const th = createTag('th', {}, thText, { parent: thRow });
-
-    th.append(getIcon('chev-down'), getIcon('chev-up'));
-    th.classList.add('sortable', key);
+  const sortables = props.el.querySelectorAll('th.sortable');
+  sortables.forEach((th) => {
     th.addEventListener('click', () => {
       if (!props.filteredData.length) return;
 
-      thead.querySelectorAll('th').forEach((h) => {
+      sortables.forEach((h) => {
         if (th !== h) {
           h.classList.remove('active');
         }
@@ -257,28 +331,50 @@ function initSorting(props, config) {
       th.classList.add('active');
       props.currentSort = {
         el: th,
-        field: key,
+        field: th.dataset.field,
       };
       sortData(props, config);
     });
   });
 }
 
-function buildNoResultsScreen(el, config) {
+function buildTableHeaders(props, config) {
+  const thead = props.el.querySelector('thead');
+  const thRow = thead.querySelector('tr');
+
+  ATTENDEE_ATTR_MAP.forEach(({ key, label }, i, arr) => {
+    const thText = createTag('span', {}, label.toUpperCase());
+    const th = createTag('th', {}, thText, { parent: thRow });
+
+    th.append(getIcon('chev-down'), getIcon('chev-up'));
+
+    if (['type', 'checkedIn'].includes(key)) th.classList.add('actions', `sticky-right-${arr.length - i}`);
+    th.classList.add('sortable');
+    th.dataset.field = key;
+  });
+
+  initSorting(props, config);
+}
+
+function buildNoResultsScreen(props, config) {
+  const tBody = props.el.querySelector('table.dashboard-table tbody');
+  props.el.classList.add('no-results');
+
   const noSearchResultsRow = createTag('tr', { class: 'no-search-results-row' });
   const noSearchResultsCol = createTag('td', { colspan: '100%' }, getIcon('empty-dashboard'), { parent: noSearchResultsRow });
   createTag('h2', {}, config['no-attendee-results-heading'], { parent: noSearchResultsCol });
   createTag('p', {}, config['no-attendee-results-text'], { parent: noSearchResultsCol });
 
-  el.append(noSearchResultsRow);
+  tBody.append(noSearchResultsRow);
 }
 
 function populateTable(props, config) {
   const tBody = props.el.querySelector('table.dashboard-table tbody');
+  props.el.classList.remove('no-results');
   tBody.innerHTML = '';
 
   if (!props.paginatedData.length) {
-    buildNoResultsScreen(tBody, config);
+    buildNoResultsScreen(props, config);
   } else {
     const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
 
@@ -294,7 +390,7 @@ function populateTable(props, config) {
 function filterData(props, config) {
   const q = props.currentQuery.toLowerCase();
   props.filteredData = props.data.filter((e) => {
-    const searchMatch = ATTENDEE_ATTR_KEYS.some((key) => e[key]?.toString().toLowerCase().includes(q));
+    const searchMatch = ATTENDEE_ATTR_MAP.some(({ key }) => e[key]?.toString().toLowerCase().includes(q));
     const appliedFilters = Object.entries(props.currentFilters).filter(([, val]) => val.length);
     const filterMatch = appliedFilters.every(([key, val]) => val.includes(e[key]));
 
@@ -306,13 +402,84 @@ function filterData(props, config) {
   sortData(props, config, { resort: true });
 }
 
+function calculatePercentage(part, total) {
+  if (total === 0) {
+    return '0%';
+  }
+  const percentage = (part / total) * 100;
+  return `${percentage.toFixed(2)}%`;
+}
+
+function buildEventInfo(props) {
+  const eventInfoContainer = props.el.querySelector('.dashboard-header-event-info');
+  if (!eventInfoContainer) return;
+
+  eventInfoContainer.innerHTML = '';
+  const eventInfo = props.events.find((e) => e.eventId === props.currentEventId);
+
+  if (!eventInfo) return;
+  const heroImgObj = eventInfo.photos?.find((p) => p.imageKind === 'event-hero-image');
+
+  // build event image
+  createTag(
+    'div',
+    { class: 'event-image-container' },
+    createTag('img', { class: 'event-image', src: heroImgObj ? heroImgObj.sharepointUrl || heroImgObj.imageUrl : '' }),
+    { parent: eventInfoContainer },
+  );
+
+  const infoContainer = createTag('div', { class: 'event-info-container' }, '', { parent: eventInfoContainer });
+  const infoRow = createTag('div', { class: 'event-info-row' }, '', { parent: infoContainer });
+  const statsRow = createTag('div', { class: 'event-stats-row' }, '', { parent: infoContainer });
+
+  [
+    {
+      label: 'EVENT:',
+      value: eventInfo.title,
+    },
+    {
+      label: 'WHEN:',
+      value: new Date(eventInfo.localStartTimeMillis).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+    },
+    {
+      label: 'TYPE:',
+      value: eventInfo.eventType,
+    },
+  ].forEach(({ label, value }) => {
+    const infoColWrapper = createTag('div', { class: 'event-stats-col-wrapper' }, '', { parent: infoRow });
+    createTag('span', { class: 'event-info-label' }, label, { parent: infoColWrapper });
+    createTag('span', { class: 'event-info-value' }, value, { parent: infoColWrapper });
+  });
+
+  [
+    {
+      label: 'RSVPs',
+      value: eventInfo.attendeeCount || '0',
+      subText: calculatePercentage(+eventInfo.attendeeCount, +eventInfo.attendeeLimit),
+    },
+  ].forEach(({ label, value, subText }) => {
+    const statsColWrapper = createTag('div', { class: 'event-stats-col-wrapper' }, '', { parent: statsRow });
+    createTag('h3', { class: 'event-stats-label' }, label, { parent: statsColWrapper });
+    const statsValWrapper = createTag('div', { class: 'event-stats-value-wrapper' }, '', { parent: statsColWrapper });
+    createTag('p', { class: 'event-stats-value' }, value, { parent: statsValWrapper });
+    createTag('p', { class: 'event-stats-subtext' }, subText, { parent: statsValWrapper });
+  });
+}
+
 function buildDashboardHeader(props, config) {
+  const mainContainer = props.el.querySelector('.dashboard-main-container');
   const dashboardHeader = createTag('div', { class: 'dashboard-header' });
-  const textContainer = createTag('div', { class: 'dashboard-header-text' });
+  const headingContainer = createTag('div', { class: 'dashboard-header-text' });
+  const eventInfoContainer = createTag('div', { class: 'dashboard-header-event-info' });
   const actionsContainer = createTag('div', { class: 'dashboard-actions-container' });
 
-  createTag('h1', { class: 'dashboard-header-heading' }, 'All event attendees', { parent: textContainer });
-  createTag('p', { class: 'dashboard-header-attendees-count' }, `(${props.data.length} attendees)`, { parent: textContainer });
+  const heading = createTag('h1', { class: 'dashboard-header-heading' }, 'Event report', { parent: headingContainer });
+
+  if (config.tooltipText) {
+    const toolTipTrigger = createTag('sp-action-button', { size: 's' }, getIcon('info'));
+    createTag('sp-tooltip', { 'self-managed': true, variant: 'info' }, config.tooltipText, { parent: toolTipTrigger });
+    heading.append(toolTipTrigger);
+  }
 
   const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
@@ -322,28 +489,23 @@ function buildDashboardHeader(props, config) {
     filterData(props, config);
   });
 
-  dashboardHeader.append(textContainer, actionsContainer);
-  props.el.prepend(dashboardHeader);
-}
-
-function updateDashboardHeader(props) {
-  const attendeesCount = props.el.querySelector('.dashboard-header-attendees-count');
-
-  if (attendeesCount) attendeesCount.textContent = `(${props.data.length} attendees)`;
+  dashboardHeader.append(headingContainer, eventInfoContainer, actionsContainer);
+  mainContainer.prepend(dashboardHeader);
+  buildEventInfo(props);
 }
 
 function buildDashboardTable(props, config) {
-  const mainContainer = props.el.querySelector('.dashboard-main-container');
+  const dashboardBody = props.el.querySelector('.dashboard-body-container');
 
-  if (!mainContainer) return;
+  if (!dashboardBody) return;
 
-  const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: mainContainer });
+  const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: dashboardBody });
   const tableWrapper = createTag('div', { class: 'dashboard-table-wrapper' }, '', { parent: tableContainer });
   const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableWrapper });
   const thead = createTag('thead', {}, '', { parent: table });
   createTag('tbody', {}, '', { parent: table });
   createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
-  initSorting(props, config);
+  buildTableHeaders(props, config);
   populateTable(props, config);
 }
 
@@ -376,10 +538,10 @@ function buildEventPicker(props) {
 
   const sidePanel = props.el.querySelector('.dashboard-side-panel');
   const eventsPickerWrapper = createTag('div', { class: 'events-picker-wrapper' }, '', { parent: sidePanel });
-  createTag('sp-field-label', {}, 'Current event', { parent: eventsPickerWrapper });
+  createTag('sp-field-label', {}, 'Search other events', { parent: eventsPickerWrapper });
   const eventsPicker = createTag('searchable-picker', {
     class: 'events-picker',
-    label: 'Choose an event',
+    label: 'Event name',
   }, '', { parent: eventsPickerWrapper });
 
   if (props.currentEventId) {
@@ -424,11 +586,11 @@ function buildBackToDashboardBtn(props, config) {
 }
 
 function buildDashboardSidePanel(props, config) {
-  const mainContainer = props.el.querySelector('.dashboard-main-container');
+  const dashboardBody = props.el.querySelector('.dashboard-body-container');
 
-  if (!mainContainer) return;
+  if (!dashboardBody) return;
 
-  const sidePanel = createTag('div', { class: 'dashboard-side-panel' }, '', { parent: mainContainer });
+  const sidePanel = createTag('div', { class: 'dashboard-side-panel' }, '', { parent: dashboardBody });
   buildBackToDashboardBtn(props, config);
   buildEventPicker(props);
   createTag('sp-divider', {}, '', { parent: sidePanel });
@@ -459,7 +621,8 @@ async function buildDashboard(el, config) {
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
   createTag('sp-underlay', {}, '', { parent: spTheme });
   createTag('sp-dialog', { size: 's' }, '', { parent: spTheme });
-  createTag('sp-theme', { color: 'light', scale: 'medium', class: 'dashboard-main-container' }, '', { parent: el });
+  const mainContainer = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'dashboard-main-container' }, '', { parent: el });
+  createTag('div', { class: 'dashboard-body-container' }, '', { parent: mainContainer });
 
   const uspEventId = new URLSearchParams(window.location.search).get('eventId');
   const events = await getEventsArray();
@@ -497,6 +660,7 @@ async function buildDashboard(el, config) {
         target.currentFilters = {};
         updateFilterMap(receiver);
         buildFilters(receiver);
+        buildEventInfo(target);
       }
 
       if (prop === 'currentEventId') {
@@ -508,7 +672,6 @@ async function buildDashboard(el, config) {
         filterData(target, config);
       }
 
-      updateDashboardHeader(target);
       populateTable(receiver, config);
       updateResetFilterBtnState(target);
 
@@ -538,20 +701,12 @@ function buildLoadingScreen(el) {
 
 export default async function init(el) {
   const miloLibs = LIBS;
+  const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
+    await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
+  });
   await Promise.all([
     import(`${miloLibs}/deps/lit-all.min.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/theme.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/toast.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/button.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/dialog.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/underlay.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/progress-circle.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/textfield.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/picker.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/divider.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/overlay.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/popover.js`),
-    import(`${miloLibs}/features/spectrum-web-components/dist/link.js`),
+    ...promises,
   ]);
 
   const config = readBlockConfig(el);
@@ -560,7 +715,7 @@ export default async function init(el) {
 
   const sp = new URLSearchParams(window.location.search);
   const devToken = sp.get('devToken');
-  if (devToken && getECCEnv() === 'dev') {
+  if (devToken && getEventServiceEnv() === 'dev') {
     buildDashboard(el, config);
     return;
   }

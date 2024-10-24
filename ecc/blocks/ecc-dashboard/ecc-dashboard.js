@@ -13,7 +13,7 @@ import {
   getEventPageHost,
   readBlockConfig,
   signIn,
-  getECCEnv,
+  getEventServiceEnv,
 } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
@@ -608,6 +608,11 @@ function buildDashboardHeader(props, config) {
   props.el.prepend(dashboardHeader);
 }
 
+function updateEventsCount(props) {
+  const eventsCount = props.el.querySelector('.dashboard-header-events-count');
+  eventsCount.textContent = `(${props.data.length} events)`;
+}
+
 function buildDashboardTable(props, config) {
   const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
   const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
@@ -673,7 +678,7 @@ async function buildDashboard(el, config) {
       set(target, prop, value, receiver) {
         target[prop] = value;
         populateTable(receiver, config);
-
+        updateEventsCount(receiver);
         return true;
       },
     };
@@ -714,7 +719,7 @@ export default async function init(el) {
 
   const sp = new URLSearchParams(window.location.search);
   const devToken = sp.get('devToken');
-  if (devToken && getECCEnv() === 'dev') {
+  if (devToken && getEventServiceEnv() === 'dev') {
     buildDashboard(el, config);
     return;
   }
