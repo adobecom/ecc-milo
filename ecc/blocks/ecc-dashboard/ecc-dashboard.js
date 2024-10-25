@@ -2,7 +2,7 @@ import {
   createEvent,
   deleteEvent,
   getEventImages,
-  getEvents,
+  getEventsForUser,
   publishEvent,
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
@@ -16,7 +16,7 @@ import {
   getEventServiceEnv,
 } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
-import { initProfileLogicTree } from '../../scripts/event-apis.js';
+import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -315,7 +315,7 @@ function initMoreOptions(props, config, eventObj, row) {
         return;
       }
 
-      const newJson = await getEvents();
+      const newJson = await getEventsForUser();
       props.data = newJson.events;
       props.filteredData = newJson.events;
       props.paginatedData = newJson.events;
@@ -360,7 +360,7 @@ function initMoreOptions(props, config, eventObj, row) {
           return;
         }
 
-        const newJson = await getEvents();
+        const newJson = await getEventsForUser();
         props.data = newJson.events;
         props.filteredData = newJson.events;
         props.paginatedData = newJson.events;
@@ -647,7 +647,7 @@ function buildDashboardTable(props, config) {
 }
 
 async function getEventsArray() {
-  const resp = await getEvents();
+  const resp = await getEventsForUser();
 
   if (resp.error) {
     return [];
@@ -738,7 +738,7 @@ export default async function init(el) {
     return;
   }
 
-  initProfileLogicTree({
+  await initProfileLogicTree({
     noProfile: () => {
       signIn();
     },

@@ -11,7 +11,7 @@ import {
 } from '../../scripts/utils.js';
 import { SearchablePicker } from '../../components/searchable-picker/searchable-picker.js';
 import { FilterMenu } from '../../components/filter-menu/filter-menu.js';
-import { initProfileLogicTree } from '../../scripts/event-apis.js';
+import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -720,7 +720,7 @@ export default async function init(el) {
     return;
   }
 
-  initProfileLogicTree({
+  await initProfileLogicTree({
     noProfile: () => {
       signIn();
     },
