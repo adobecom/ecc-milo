@@ -316,9 +316,9 @@ function initMoreOptions(props, config, eventObj, row) {
       }
 
       const newJson = await getEventsForUser();
-      props.data = newJson.events;
-      props.filteredData = newJson.events;
-      props.paginatedData = newJson.events;
+      props.data = newJson;
+      props.filteredData = newJson;
+      props.paginatedData = newJson;
       const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
       if (modTimeHeader) {
         props.currentSort = { field: 'modificationTime', el: modTimeHeader };
@@ -646,16 +646,6 @@ function buildDashboardTable(props, config) {
   }
 }
 
-async function getEventsArray() {
-  const resp = await getEventsForUser();
-
-  if (resp.error) {
-    return [];
-  }
-
-  return resp.events;
-}
-
 function buildNoEventScreen(el, config) {
   el.classList.add('no-events');
 
@@ -680,7 +670,7 @@ async function buildDashboard(el, config) {
     currentSort: {},
   };
 
-  const data = await getEventsArray();
+  const data = await getEventsForUser();
   if (!data?.length) {
     buildNoEventScreen(el, config);
   } else {
