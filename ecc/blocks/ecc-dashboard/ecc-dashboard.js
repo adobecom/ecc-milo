@@ -346,9 +346,9 @@ function initMoreOptions(props, config, eventObj, row) {
       row.classList.add('pending');
       const newEventJSON = await createEvent(cloneFilter(payload));
       const newJson = await getEventsForUser();
-      props.data = newJson.events;
-      props.filteredData = newJson.events;
-      props.paginatedData = newJson.events;
+      props.data = newJson;
+      props.filteredData = newJson;
+      props.paginatedData = newJson;
       const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
       if (modTimeHeader) {
         props.currentSort = { field: 'modificationTime', el: modTimeHeader };
@@ -374,9 +374,9 @@ function initMoreOptions(props, config, eventObj, row) {
           row.classList.add('pending');
           await deleteEvent(eventObj.eventId);
           const newJson = await getEventsForUser();
-          props.data = newJson.events;
-          props.filteredData = newJson.events;
-          props.paginatedData = newJson.events;
+          props.data = newJson;
+          props.filteredData = newJson;
+          props.paginatedData = newJson;
           sortData(props, config, { resort: true });
           showToast(props, config['delete-event-toast-msg']);
         },
@@ -678,16 +678,6 @@ function buildDashboardTable(props, config) {
   }
 }
 
-async function getEventsArray() {
-  const resp = await getEventsForUser();
-
-  if (resp.error) {
-    return [];
-  }
-
-  return resp.events;
-}
-
 function buildNoEventScreen(el, config) {
   el.classList.add('no-events');
 
@@ -786,9 +776,9 @@ function initBatchOperator(props, config) {
       confirmCallback: async () => {
         await Promise.all(eventIds.map((id) => deleteEvent(id)));
         const newJson = await getEventsForUser();
-        props.data = newJson.events;
-        props.filteredData = newJson.events;
-        props.paginatedData = newJson.events;
+        props.data = newJson;
+        props.filteredData = newJson;
+        props.paginatedData = newJson;
         sortData(props, config, { resort: true });
         showToast(props, config['delete-event-toast-msg']);
       },
@@ -813,9 +803,9 @@ function initBatchOperator(props, config) {
         const eventObj = props.data.find((e) => e.eventId === eventIds[0]);
         await Promise.all(eventIds.map((id) => publishEvent(id, quickFilter(eventObj))));
         const newJson = await getEventsForUser();
-        props.data = newJson.events;
-        props.filteredData = newJson.events;
-        props.paginatedData = newJson.events;
+        props.data = newJson;
+        props.filteredData = newJson;
+        props.paginatedData = newJson;
         sortData(props, config, { resort: true });
         showToast(props, config['publish-event-toast-msg']);
       },
@@ -839,9 +829,9 @@ function initBatchOperator(props, config) {
         const eventObj = props.data.find((e) => e.eventId === eventIds[0]);
         await Promise.all(eventIds.map((id) => unpublishEvent(id, quickFilter(eventObj))));
         const newJson = await getEventsForUser();
-        props.data = newJson.events;
-        props.filteredData = newJson.events;
-        props.paginatedData = newJson.events;
+        props.data = newJson;
+        props.filteredData = newJson;
+        props.paginatedData = newJson;
         sortData(props, config, { resort: true });
         showToast(props, config['unpublish-event-toast-msg']);
       },
@@ -879,7 +869,7 @@ async function buildDashboard(el, config) {
     currentSort: {},
   };
 
-  const data = await getEventsArray();
+  const data = await getEventsForUser();
   if (!data?.length) {
     buildNoEventScreen(el, config);
   } else {
