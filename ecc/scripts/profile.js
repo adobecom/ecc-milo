@@ -85,19 +85,19 @@ export async function getUser() {
   return user;
 }
 
-export async function userHasAccessToBU(user, bu) {
+export function userHasAccessToBU(user, bu) {
   if (!user) return false;
   const businessUnits = user['business-units'].split(',').map((b) => b.trim());
   return businessUnits.length === 0 || businessUnits.includes(bu);
 }
 
-export async function userHasAccessToSerie(user, serieId) {
+export function userHasAccessToSerie(user, serieId) {
   if (!user) return false;
   const series = user.series.split(',').map((b) => b.trim());
   return series.length === 0 || series.includes(serieId);
 }
 
-export async function userHasAccessToEvent(user, eventId) {
+export function userHasAccessToEvent(user, eventId) {
   if (!user) return false;
   const events = user.events.split(',').map((b) => b.trim());
   return events.length === 0 || events.includes(eventId);
