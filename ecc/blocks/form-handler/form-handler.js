@@ -27,7 +27,7 @@ import PartnerSelector from '../../components/partner-selector/partner-selector.
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import { CustomSearch } from '../../components/custom-search/custom-search.js';
-import { initProfileLogicTree, userHasAccessToEvent } from '../../scripts/profile.js';
+import { getUser, initProfileLogicTree, userHasAccessToEvent } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
