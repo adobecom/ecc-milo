@@ -781,8 +781,8 @@ export async function getSeriesForUser() {
     const { role } = user;
 
     if (role === 'admin') return series;
-    if (role === 'manager') return series.filter((e) => userHasAccessToBU(user, e.cloudType));
-    if (role === 'creator') return series.filter((e) => userHasAccessToSerie(user, e.serieId));
+    if (role === 'manager') return series.filter((s) => userHasAccessToBU(user, s.cloudType));
+    if (role === 'creator') return series.filter((s) => userHasAccessToSerie(user, s.serieId));
   }
 
   return [];
