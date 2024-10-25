@@ -1,6 +1,6 @@
 import { LIBS } from './scripts.js';
 import { getEventServiceEnv, getSecret } from './utils.js';
-import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSerie } from './profile.js';
+import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
 
 const API_CONFIG = {
   esl: {
@@ -671,7 +671,7 @@ export async function getEventsForUser() {
 
     if (role === 'admin') return resp.events;
     if (role === 'manager') return resp.events.filter((e) => userHasAccessToBU(user, e.cloudType));
-    if (role === 'creator') return resp.events.filter((e) => userHasAccessToSerie(user, e.serieId));
+    if (role === 'creator') return resp.events.filter((e) => userHasAccessToSeries(user, e.seriesId));
     if (role === 'editor') return resp.events.filter((e) => userHasAccessToEvent(user, e.eventId));
   }
 
@@ -782,7 +782,7 @@ export async function getSeriesForUser() {
 
     if (role === 'admin') return series;
     if (role === 'manager') return series.filter((s) => userHasAccessToBU(user, s.cloudType));
-    if (role === 'creator' || role === 'editor') return series.filter((s) => userHasAccessToSerie(user, s.serieId));
+    if (role === 'creator' || role === 'editor') return series.filter((s) => userHasAccessToSeries(user, s.seriesId));
   }
 
   return [];

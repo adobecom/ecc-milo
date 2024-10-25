@@ -91,10 +91,10 @@ export function userHasAccessToBU(user, bu) {
   return businessUnits.length === 0 || businessUnits.includes(bu);
 }
 
-export function userHasAccessToSerie(user, serieId) {
+export function userHasAccessToSeries(user, seriesId) {
   if (!user) return false;
   const series = user.series.split(',').map((b) => b.trim());
-  return series.length === 0 || series.includes(serieId);
+  return series.length === 0 || series.includes(seriesId);
 }
 
 export function userHasAccessToEvent(user, eventId) {

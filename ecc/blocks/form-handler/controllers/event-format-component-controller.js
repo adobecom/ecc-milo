@@ -77,6 +77,7 @@ async function populateSeriesOptions(props, component) {
   if (!seriesSelect) return;
 
   const series = await getSeriesForUser();
+  console.log(series);
   if (!series) {
     seriesSelect.pending = false;
     seriesSelect.disabled = true;
