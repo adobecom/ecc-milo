@@ -782,7 +782,7 @@ export async function getSeriesForUser() {
 
     if (role === 'admin') return series;
     if (role === 'manager') return series.filter((s) => userHasAccessToBU(user, s.cloudType));
-    if (role === 'creator') return series.filter((s) => userHasAccessToSerie(user, s.serieId));
+    if (role === 'creator' || role === 'editor') return series.filter((s) => userHasAccessToSerie(user, s.serieId));
   }
 
   return [];

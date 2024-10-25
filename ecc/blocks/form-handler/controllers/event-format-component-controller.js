@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { getSeries, getSeriesForUser } from '../../../scripts/esp-controller.js';
+import { getSeriesForUser } from '../../../scripts/esp-controller.js';
 import BlockMediator from '../../../scripts/deps/block-mediator.min.js';
 import { LIBS } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../scripts/utils.js';
