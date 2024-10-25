@@ -117,10 +117,11 @@ export function buildNoAccessScreen(el) {
 
   const h1 = createTag('h1', {}, 'You do not have sufficient access to view.');
   const area = createTag('div', { class: 'no-access-area' });
-  const noAccessDescription = createTag('p', {}, 'An Adobe corporate account is required to access this feature.');
+  const noAccessDescription = createTag('p', {}, 'If you have another authorized account, please sign in with that account to access this page.');
+  const requestAccessButton = createTag('sp-button', { variant: 'cta', size: 'xl' }, 'Request Access');
 
   el.append(h1, area);
-  area.append(getIcon('browser-access-forbidden-lg'), noAccessDescription);
+  area.append(getIcon('browser-access-forbidden-lg'), noAccessDescription, requestAccessButton);
 }
 
 export function querySelectorAllDeep(selector, root = document) {
