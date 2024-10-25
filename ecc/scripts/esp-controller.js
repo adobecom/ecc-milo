@@ -665,14 +665,14 @@ export async function getEventsForUser() {
 
   if (!user) return [];
 
-  const events = await getEvents();
-  if (!events.error) {
+  const resp = await getEvents();
+  if (!resp.error) {
     const { role } = user;
 
-    if (role === 'admin') return events;
-    if (role === 'manager') return events.filter((e) => userHasAccessToBU(user, e.cloudType));
-    if (role === 'creator') return events.filter((e) => userHasAccessToSerie(user, e.serieId));
-    if (role === 'editor') return events.filter((e) => userHasAccessToEvent(user, e.eventId));
+    if (role === 'admin') return resp.events;
+    if (role === 'manager') return resp.events.filter((e) => userHasAccessToBU(user, e.cloudType));
+    if (role === 'creator') return resp.events.filter((e) => userHasAccessToSerie(user, e.serieId));
+    if (role === 'editor') return resp.events.filter((e) => userHasAccessToEvent(user, e.eventId));
   }
 
   return [];
