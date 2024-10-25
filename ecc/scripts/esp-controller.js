@@ -1,3 +1,4 @@
+import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSerie } from './profile.js';
 import { getECCEnv } from './utils.js';
 
 const API_CONFIG = {
@@ -637,6 +638,24 @@ export async function getEvents() {
   }
 }
 
+export async function getEventsForUser() {
+  const user = await getUser();
+
+  if (!user) return [];
+
+  const events = await getEvents();
+  if (!events.error) {
+    const { role } = user;
+
+    if (role === 'admin') return events;
+    if (role === 'manager') return events.filter((e) => userHasAccessToBU(user, e.cloudType));
+    if (role === 'creator') return events.filter((e) => userHasAccessToSerie(user, e.serieId));
+    if (role === 'editor') return events.filter((e) => userHasAccessToEvent(user, e.eventId));
+  }
+
+  return [];
+}
+
 export async function getEvent(eventId) {
   const { host } = API_CONFIG.esp[getECCEnv()];
   const options = await constructRequestOptions('GET');
@@ -727,6 +746,24 @@ export async function getSeries() {
     window.lana?.log('Failed to fetch series. Error:', error);
     return { status: 'Network Error', error: error.message };
   }
+}
+
+export async function getSeriesForUser() {
+  const user = await getUser();
+
+  if (!user) return [];
+
+  const series = await getSeries();
+
+  if (!series.error) {
+    const { role } = user;
+
+    if (role === 'admin') return series;
+    if (role === 'manager') return series.filter((e) => userHasAccessToBU(user, e.cloudType));
+    if (role === 'creator') return series.filter((e) => userHasAccessToSerie(user, e.serieId));
+  }
+
+  return [];
 }
 
 export async function createAttendee(eventId, attendeeData) {

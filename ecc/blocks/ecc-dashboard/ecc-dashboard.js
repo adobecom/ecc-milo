@@ -2,7 +2,7 @@ import {
   createEvent,
   deleteEvent,
   getEventImages,
-  getEvents,
+  getEventsForUser,
   publishEvent,
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
@@ -16,7 +16,7 @@ import {
   getECCEnv,
 } from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
-import { initProfileLogicTree } from '../../scripts/event-apis.js';
+import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -345,7 +345,7 @@ function initMoreOptions(props, config, eventObj, row) {
       toolBox.remove();
       row.classList.add('pending');
       const newEventJSON = await createEvent(cloneFilter(payload));
-      const newJson = await getEvents();
+      const newJson = await getEventsForUser();
       props.data = newJson.events;
       props.filteredData = newJson.events;
       props.paginatedData = newJson.events;
@@ -373,7 +373,7 @@ function initMoreOptions(props, config, eventObj, row) {
           toolBox.remove();
           row.classList.add('pending');
           await deleteEvent(eventObj.eventId);
-          const newJson = await getEvents();
+          const newJson = await getEventsForUser();
           props.data = newJson.events;
           props.filteredData = newJson.events;
           props.paginatedData = newJson.events;
@@ -679,7 +679,7 @@ function buildDashboardTable(props, config) {
 }
 
 async function getEventsArray() {
-  const resp = await getEvents();
+  const resp = await getEventsForUser();
 
   if (resp.error) {
     return [];
@@ -785,7 +785,7 @@ function initBatchOperator(props, config) {
       cancelText: 'Do not delete',
       confirmCallback: async () => {
         await Promise.all(eventIds.map((id) => deleteEvent(id)));
-        const newJson = await getEvents();
+        const newJson = await getEventsForUser();
         props.data = newJson.events;
         props.filteredData = newJson.events;
         props.paginatedData = newJson.events;
@@ -812,7 +812,7 @@ function initBatchOperator(props, config) {
       confirmCallback: async () => {
         const eventObj = props.data.find((e) => e.eventId === eventIds[0]);
         await Promise.all(eventIds.map((id) => publishEvent(id, quickFilter(eventObj))));
-        const newJson = await getEvents();
+        const newJson = await getEventsForUser();
         props.data = newJson.events;
         props.filteredData = newJson.events;
         props.paginatedData = newJson.events;
@@ -838,7 +838,7 @@ function initBatchOperator(props, config) {
       confirmCallback: async () => {
         const eventObj = props.data.find((e) => e.eventId === eventIds[0]);
         await Promise.all(eventIds.map((id) => unpublishEvent(id, quickFilter(eventObj))));
-        const newJson = await getEvents();
+        const newJson = await getEventsForUser();
         props.data = newJson.events;
         props.filteredData = newJson.events;
         props.paginatedData = newJson.events;
@@ -941,7 +941,7 @@ export default async function init(el) {
     return;
   }
 
-  initProfileLogicTree({
+  await initProfileLogicTree({
     noProfile: () => {
       signIn();
     },
