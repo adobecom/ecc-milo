@@ -107,9 +107,10 @@ export async function initProfileLogicTree(callbacks) {
   const { noProfile, noAccessProfile, validProfile } = callbacks;
 
   const profile = BlockMediator.get('imsProfile');
-  const user = await getUser();
+  let user;
 
   if (profile) {
+    user = await getUser();
     if (profile.noProfile) {
       noProfile();
     } else if (!user) {
@@ -123,17 +124,19 @@ export async function initProfileLogicTree(callbacks) {
 
   if (!profile) {
     const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
-      if (newValue) {
-        if (newValue.noProfile) {
-          noProfile();
-        } else if (!user) {
-          noAccessProfile();
-        } else {
-          validProfile(newValue);
+      getUser().then((u) => {
+        if (newValue) {
+          if (newValue.noProfile) {
+            noProfile();
+          } else if (!u) {
+            noAccessProfile();
+          } else {
+            validProfile(newValue);
+          }
         }
-      }
 
-      unsubscribe();
+        unsubscribe();
+      });
     });
   }
 }
