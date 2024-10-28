@@ -83,7 +83,7 @@ const SPECTRUM_COMPONENTS = [
 export function buildErrorMessage(props, resp) {
   if (!resp) return;
 
-  const toastArea = props.el.querySelector('.toast-area');
+  const toastArea = resp.targetEl ? resp.targetEl.querySelector('.toast-area') : props.el.querySelector('.toast-area');
 
   if (resp.error) {
     const messages = [];
@@ -99,9 +99,10 @@ export function buildErrorMessage(props, resp) {
 
       messages.forEach((msg, i) => {
         const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 + (i * 3000) }, msg, { parent: toastArea });
-        toast.addEventListener('close', () => {
+        toast.addEventListener('close', (e) => {
+          e.stopPropagation();
           toast.remove();
-        });
+        }, { once: true });
       });
     } else if (errorMessage) {
       if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}') {
@@ -115,14 +116,16 @@ export function buildErrorMessage(props, resp) {
           href: `${url.toString()}`,
         }, 'See the latest version', { parent: toast });
 
-        toast.addEventListener('close', () => {
+        toast.addEventListener('close', (e) => {
+          e.stopPropagation();
           toast.remove();
-        });
+        }, { once: true });
       } else {
         const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, errorMessage, { parent: toastArea });
-        toast.addEventListener('close', () => {
+        toast.addEventListener('close', (e) => {
+          e.stopPropagation();
           toast.remove();
-        });
+        }, { once: true });
       }
     }
   }
