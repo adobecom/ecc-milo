@@ -7,7 +7,7 @@ export function onSubmit(component, props) {
   const checkbox = component.querySelector('#checkbox-community');
 
   if (checkbox.checked) {
-    const communityTopicUrl = component.querySelector('#community-url-details').value;
+    const communityTopicUrl = component.querySelector('#community-url-details')?.value?.trim();
     props.payload = { ...props.payload, communityTopicUrl };
   } else {
     const tempPayload = { ...props.payload };
