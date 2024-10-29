@@ -4,7 +4,7 @@ const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 let secretCache = [];
 
-export function getECCEnv() {
+export function getEventServiceEnv() {
   const validEnvs = ['dev', 'stage', 'prod'];
   const { host, search } = window.location;
   const SLD = host.includes('.aem.') ? 'aem' : 'hlx';
@@ -86,7 +86,7 @@ export function convertTo24HourFormat(timeStr) {
 
 export function getEventPageHost() {
   if (window.location.href.includes('.hlx.')) {
-    return window.location.origin.replace(window.location.hostname, `${getECCEnv()}--events-milo--adobecom.hlx.page`);
+    return window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.hlx.page`);
   }
 
   return window.location.origin;
@@ -234,6 +234,15 @@ export async function decorateTextarea(cell, extraOptions) {
   cell.innerHTML = '';
   wrapper.append(input, attrTextEl);
   cell.append(wrapper);
+}
+
+export function signIn() {
+  if (typeof window.adobeIMS?.signIn !== 'function') {
+    window?.lana.log({ message: 'IMS signIn method not available', tags: 'errorType=warn,module=gnav' });
+    return;
+  }
+
+  window.adobeIMS?.signIn();
 }
 
 export async function getSecret(key) {
