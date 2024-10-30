@@ -1,4 +1,3 @@
-
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -14,6 +13,7 @@ import {
   updateEvent,
   publishEvent,
   getEvent,
+  updateAndPreviewEvent,
 } from '../../scripts/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
@@ -431,7 +431,7 @@ function updateDashboardLink(props) {
   dashboardLink.href = url.toString();
 }
 
-async function saveEvent(props, options = { toPublish: false }) {
+async function saveEvent(props, options = { toPublish: false, toPreview: false }) {
   try {
     await gatherValues(props);
   } catch (e) {
@@ -467,6 +467,12 @@ async function saveEvent(props, options = { toPublish: false }) {
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     if (resp?.eventId) await handleEventUpdate(props);
+  } else if (options.toPreview) {
+    resp = await updateAndPreviewEvent(
+      getFilteredCachedResponse().eventId,
+      getJoinedData(),
+    );
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
   }
 
   return resp;
@@ -613,6 +619,7 @@ async function validatePreview(props, oldResp, cta) {
   const currentData = { ...props.eventDataResp };
   const oldData = { ...oldResp };
 
+  // TODO: remove console.log
   console.log('Current data:', currentData);
   console.log('Old data:', oldData);
   console.log('hasContentChanged:', hasContentChanged(currentData, oldData));
@@ -631,6 +638,8 @@ async function validatePreview(props, oldResp, cta) {
       try {
         retryCount += 1;
         const metadataJson = await getNonProdPreviewDataById(props);
+
+        // TODO: remove console.log
         console.log('Retrying:', retryCount);
         console.log('Metadata mod time:', new Date(metadataJson['modification-time']).getTime());
         console.log('New object mod time:', props.eventDataResp.modificationTime);
