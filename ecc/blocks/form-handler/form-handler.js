@@ -1,11 +1,13 @@
-import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
-import { LIBS, MILO_CONFIG, DEV_MODE, ECC_ENV } from '../../scripts/scripts.js';
+
+import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
   buildNoAccessScreen,
   generateToolTip,
   camelToSentenceCase,
   getEventPageHost,
+  signIn,
+  getEventServiceEnv,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -25,8 +27,8 @@ import ProductSelectorGroup from '../../components/product-selector-group/produc
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, hasContentChanged, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { CustomSearch } from '../../components/custom-search/custom-search.js';
+import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -82,7 +84,7 @@ const SPECTRUM_COMPONENTS = [
 export function buildErrorMessage(props, resp) {
   if (!resp) return;
 
-  const toastArea = props.el.querySelector('.toast-area');
+  const toastArea = resp.targetEl ? resp.targetEl.querySelector('.toast-area') : props.el.querySelector('.toast-area');
 
   if (resp.error) {
     const messages = [];
@@ -98,13 +100,14 @@ export function buildErrorMessage(props, resp) {
 
       messages.forEach((msg, i) => {
         const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 + (i * 3000) }, msg, { parent: toastArea });
-        toast.addEventListener('close', () => {
+        toast.addEventListener('close', (e) => {
+          e.stopPropagation();
           toast.remove();
-        });
+        }, { once: true });
       });
     } else if (errorMessage) {
-      if (resp.status === 409) {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, errorMessage, { parent: toastArea });
+      if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}') {
+        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'The event has been updated by a different session since your last save.', { parent: toastArea });
         const url = new URL(window.location.href);
         url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
 
@@ -112,16 +115,18 @@ export function buildErrorMessage(props, resp) {
           slot: 'action',
           variant: 'overBackground',
           href: `${url.toString()}`,
-        }, 'See the latest version.', { parent: toast });
+        }, 'See the latest version', { parent: toast });
 
-        toast.addEventListener('close', () => {
+        toast.addEventListener('close', (e) => {
+          e.stopPropagation();
           toast.remove();
-        });
+        }, { once: true });
       } else {
         const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, errorMessage, { parent: toastArea });
-        toast.addEventListener('close', () => {
+        toast.addEventListener('close', (e) => {
+          e.stopPropagation();
           toast.remove();
-        });
+        }, { once: true });
       }
     }
   }
@@ -297,14 +302,31 @@ async function handleEventUpdate(props) {
   await Promise.all(allComponentPromises);
 }
 
-async function updateComponents(props) {
+async function updateComponentsOnPayloadChange(props) {
   const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onUpdate } = await import(`./controllers/${comp}-component-controller.js`);
-      const componentPayload = await onUpdate(component, props);
+      const { onPayloadUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      const componentPayload = await onPayloadUpdate(component, props);
+      return componentPayload;
+    });
+
+    return Promise.all(promises);
+  });
+
+  await Promise.all(allComponentPromises);
+}
+
+async function updateComponentsOnRespChange(props) {
+  const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
+    const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
+    if (!mappedComponents.length) return {};
+
+    const promises = Array.from(mappedComponents).map(async (component) => {
+      const { onRespUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      const componentPayload = await onRespUpdate(component, props);
       return componentPayload;
     });
 
@@ -569,7 +591,8 @@ async function getNonProdPreviewDataById(props) {
 
   if (!eventId) return null;
 
-  const resp = await fetch(`${getEventPageHost()}/events/default/${ECC_ENV === 'prod' ? '' : `${ECC_ENV}/`}metadata-preview.json`);
+  const esEnv = getEventServiceEnv();
+  const resp = await fetch(`${getEventPageHost()}/events/default/${esEnv === 'prod' ? '' : `${esEnv}/`}metadata-preview.json`);
   if (resp.ok) {
     const json = await resp.json();
     const pageData = json.data.find((d) => d['event-id'] === eventId);
@@ -903,13 +926,14 @@ async function buildECCForm(el) {
 
         case 'payload': {
           setPayloadCache(value);
-          updateComponents(target);
+          updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);
           break;
         }
 
         case 'eventDataResp': {
           setResponseCache(value);
+          updateComponentsOnRespChange(target);
           updateCtas(target);
           if (value.error) {
             props.el.classList.add('show-error');
@@ -983,40 +1007,27 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const profile = BlockMediator.get('imsProfile');
-
-  if (DEV_MODE === true && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
+  const sp = new URLSearchParams(window.location.search);
+  const devToken = sp.get('devToken');
+  if (devToken && getEventServiceEnv() === 'dev') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
     });
     return;
   }
 
-  if (profile) {
-    if (profile.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
+  initProfileLogicTree({
+    noProfile: () => {
+      signIn();
+    },
+    noAccessProfile: () => {
       buildNoAccessScreen(el);
       el.classList.remove('loading');
-    } else {
+    },
+    validProfile: () => {
       buildECCForm(el).then(() => {
         el.classList.remove('loading');
       });
-    }
-
-    return;
-  }
-
-  if (!profile) {
-    const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
-      if (newValue?.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(newValue.account_type)) {
-        buildNoAccessScreen(el);
-        el.classList.remove('loading');
-        unsubscribe();
-      } else {
-        buildECCForm(el).then(() => {
-          el.classList.remove('loading');
-          unsubscribe();
-        });
-      }
-    });
-  }
+    },
+  });
 }

@@ -1,7 +1,8 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
 import { getEvents } from '../../../scripts/esp-controller.js';
-import { BlockMediator, LIBS } from '../../../scripts/scripts.js';
+import BlockMediator from '../../../scripts/deps/block-mediator.min.js';
+import { LIBS } from '../../../scripts/scripts.js';
 import { changeInputValue } from '../../../scripts/utils.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
@@ -342,8 +343,12 @@ export function onSubmit(component, props) {
   props.payload = { ...props.payload, ...eventInfo };
 }
 
-export async function onUpdate(component, props) {
+export async function onPayloadUpdate(component, props) {
   // do nothing
+}
+
+export async function onRespUpdate(_component, _props) {
+  // Do nothing
 }
 
 function checkEventDuplication(event, compareMetrics) {
@@ -376,7 +381,7 @@ export default async function init(component, props) {
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: eventTitleInput.value });
   });
 
-  endTimeInput.addEventListener('change', () => {
+  const updateEndTimeOptions = () => {
     if (datePicker.dataset.startDate !== datePicker.dataset.endDate) return;
     const allOptions = startTimeInput.querySelectorAll('sp-menu-item');
     allOptions.forEach((option) => {
@@ -386,9 +391,9 @@ export default async function init(component, props) {
         option.disabled = false;
       }
     });
-  });
+  };
 
-  startTimeInput.addEventListener('change', () => {
+  const updateStartTimeOptions = () => {
     if (datePicker.dataset.startDate !== datePicker.dataset.endDate) return;
     const allOptions = endTimeInput.querySelectorAll('sp-menu-item');
     allOptions.forEach((option) => {
@@ -398,9 +403,9 @@ export default async function init(component, props) {
         option.disabled = false;
       }
     });
-  });
+  };
 
-  datePicker.addEventListener('change', () => {
+  const updateTimeOptionsBasedOnDate = () => {
     if (datePicker.dataset.startDate !== datePicker.dataset.endDate) {
       startTimeInput?.querySelectorAll('sp-menu-item')?.forEach((option) => {
         option.disabled = false;
@@ -409,7 +414,13 @@ export default async function init(component, props) {
         option.disabled = false;
       });
     }
+  };
 
+  endTimeInput.addEventListener('change', updateEndTimeOptions);
+  startTimeInput.addEventListener('change', updateStartTimeOptions);
+
+  datePicker.addEventListener('change', () => {
+    updateTimeOptionsBasedOnDate();
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), startDate: datePicker.dataset.startDate });
   });
 
@@ -473,6 +484,10 @@ export default async function init(component, props) {
     });
     component.classList.add('prefilled');
   }
+
+  updateEndTimeOptions();
+  updateStartTimeOptions();
+  updateTimeOptionsBasedOnDate();
 }
 
 export function onEventUpdate(component, props) {

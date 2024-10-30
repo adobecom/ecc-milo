@@ -6,11 +6,17 @@ import {
   publishEvent,
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
-import { ALLOWED_ACCOUNT_TYPES } from '../../constants/constants.js';
-import { LIBS, MILO_CONFIG, DEV_MODE } from '../../scripts/scripts.js';
-import { getIcon, buildNoAccessScreen, getEventPageHost, readBlockConfig } from '../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
+import {
+  getIcon,
+  buildNoAccessScreen,
+  getEventPageHost,
+  readBlockConfig,
+  signIn,
+  getEventServiceEnv,
+} from '../../scripts/utils.js';
 import { quickFilter } from '../form-handler/data-handler.js';
-import BlockMediator from '../../scripts/deps/block-mediator.min.js';
+import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -302,6 +308,13 @@ function initMoreOptions(props, config, eventObj, row) {
       toolBox.remove();
       row.classList.add('pending');
       const newEventJSON = await createEvent(cloneFilter(payload));
+
+      if (newEventJSON.error) {
+        row.classList.remove('pending');
+        showToast(props, newEventJSON.error, { variant: 'negative' });
+        return;
+      }
+
       const newJson = await getEvents();
       props.data = newJson.events;
       props.filteredData = newJson.events;
@@ -339,7 +352,14 @@ function initMoreOptions(props, config, eventObj, row) {
         underlay.open = false;
         dialog.innerHTML = '';
         row.classList.add('pending');
-        await deleteEvent(eventObj.eventId);
+        const resp = await deleteEvent(eventObj.eventId);
+
+        if (resp.error) {
+          row.classList.remove('pending');
+          showToast(props, resp.error, { variant: 'negative' });
+          return;
+        }
+
         const newJson = await getEvents();
         props.data = newJson.events;
         props.filteredData = newJson.events;
@@ -388,7 +408,6 @@ function buildStatusTag(event) {
 function buildEventTitleTag(config, eventObj) {
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
   url.searchParams.set('eventId', eventObj.eventId);
-  if (DEV_MODE) url.searchParams.set('devMode', true);
   const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventObj.title);
   return eventTitleTag;
 }
@@ -407,7 +426,6 @@ function buildRSVPTag(config, eventObj) {
 
   const url = new URL(`${window.location.origin}${config['attendee-dashboard-url']}`);
   url.searchParams.set('eventId', eventObj.eventId);
-  if (DEV_MODE) url.searchParams.set('devMode', true);
 
   const rsvpTag = createTag('a', { class: 'rsvp-tag', href: url }, text);
   return rsvpTag;
@@ -604,6 +622,11 @@ function buildDashboardHeader(props, config) {
   props.el.prepend(dashboardHeader);
 }
 
+function updateEventsCount(props) {
+  const eventsCount = props.el.querySelector('.dashboard-header-events-count');
+  eventsCount.textContent = `(${props.data.length} events)`;
+}
+
 function buildDashboardTable(props, config) {
   const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
   const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
@@ -669,7 +692,7 @@ async function buildDashboard(el, config) {
       set(target, prop, value, receiver) {
         target[prop] = value;
         populateTable(receiver, config);
-
+        updateEventsCount(receiver);
         return true;
       },
     };
@@ -707,32 +730,23 @@ export default async function init(el) {
   const config = readBlockConfig(el);
   el.innerHTML = '';
   buildLoadingScreen(el);
-  const profile = BlockMediator.get('imsProfile');
 
-  if (DEV_MODE === true && ['stage', 'local'].includes(MILO_CONFIG.env.name)) {
+  const sp = new URLSearchParams(window.location.search);
+  const devToken = sp.get('devToken');
+  if (devToken && getEventServiceEnv() === 'dev') {
     buildDashboard(el, config);
     return;
   }
 
-  if (profile) {
-    if (profile.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
+  initProfileLogicTree({
+    noProfile: () => {
+      signIn();
+    },
+    noAccessProfile: () => {
       buildNoAccessScreen(el);
-    } else {
+    },
+    validProfile: () => {
       buildDashboard(el, config);
-    }
-
-    return;
-  }
-
-  if (!profile) {
-    const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
-      if (newValue?.noProfile || !ALLOWED_ACCOUNT_TYPES.includes(newValue.account_type)) {
-        buildNoAccessScreen(el);
-      } else {
-        buildDashboard(el, config);
-      }
-
-      unsubscribe();
-    });
-  }
+    },
+  });
 }

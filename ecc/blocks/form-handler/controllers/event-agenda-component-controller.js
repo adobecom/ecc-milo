@@ -7,7 +7,7 @@ export function onSubmit(component, props) {
 
   let agenda = [];
 
-  if (agendaGroup) agenda = agendaGroup.getAgendas();
+  if (agendaGroup) agenda = agendaGroup.getCompleteAgenda();
 
   const agendaInfo = {
     showAgendaPostEvent,
@@ -17,7 +17,11 @@ export function onSubmit(component, props) {
   props.payload = { ...props.payload, ...agendaInfo };
 }
 
-export async function onUpdate(_component, _props) {
+export async function onPayloadUpdate(_component, _props) {
+  // Do nothing
+}
+
+export async function onRespUpdate(_component, _props) {
   // Do nothing
 }
 

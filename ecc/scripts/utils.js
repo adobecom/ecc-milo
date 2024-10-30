@@ -1,13 +1,41 @@
-import { MILO_CONFIG, LIBS, ECC_ENV } from './scripts.js';
+import { LIBS } from './scripts.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 let secretCache = [];
+
+export function getEventServiceEnv() {
+  const validEnvs = ['dev', 'stage', 'prod'];
+  const { host, search } = window.location;
+  const SLD = host.includes('.aem.') ? 'aem' : 'hlx';
+  const usp = new URLSearchParams(search);
+  const eccEnv = usp.get('eccEnv');
+
+  if (validEnvs.includes(eccEnv)) return eccEnv;
+
+  if ((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`))) {
+    if (host.startsWith('dev--')) return 'dev';
+    if (host.startsWith('dev02--') || host.startsWith('main02--')) return 'dev02';
+    if (host.startsWith('stage--')) return 'stage';
+    if (host.startsWith('stage02--')) return 'stage02';
+    if (host.startsWith('main--')) return 'prod';
+  }
+
+  if (host.includes('localhost')) return 'dev';
+
+  if (host.includes('stage.adobe')
+    || host.includes('corp.adobe')
+    || host.includes('graybox.adobe')) return 'stage';
+
+  if (host.endsWith('adobe.com')) return 'prod';
+  // fallback to dev
+  return 'dev';
+}
 
 export function getIcon(tag) {
   const img = document.createElement('img');
   img.className = `icon icon-${tag}`;
-  img.src = `${MILO_CONFIG.codeRoot}/icons/${tag}.svg`;
+  img.src = `${getConfig().codeRoot}/icons/${tag}.svg`;
   img.alt = tag;
 
   return img;
@@ -47,7 +75,7 @@ export function convertTo24HourFormat(timeStr) {
   if (period === 'PM' && hours !== 12) {
     hours += 12;
   } else if (period === 'AM' && hours === 12) {
-    hours = 24;
+    hours = 0;
   }
 
   const formattedHours = hours.toString().padStart(2, '0');
@@ -63,7 +91,7 @@ export function getEventPageHost() {
   }
 
   if (window.location.href.includes('.hlx.')) {
-    return window.location.origin.replace(window.location.hostname, `${ECC_ENV}--events-milo--adobecom.hlx.page`);
+    return window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.hlx.page`);
   }
 
   return window.location.origin;
@@ -213,6 +241,15 @@ export async function decorateTextarea(cell, extraOptions) {
   cell.append(wrapper);
 }
 
+export function signIn() {
+  if (typeof window.adobeIMS?.signIn !== 'function') {
+    window?.lana.log({ message: 'IMS signIn method not available', tags: 'errorType=warn,module=gnav' });
+    return;
+  }
+
+  window.adobeIMS?.signIn();
+}
+
 export async function getSecret(key) {
   if (secretCache.length === 0) {
     const resp = await fetch('/ecc/system/secrets.json')
@@ -237,12 +274,8 @@ export function getServiceName(link) {
 
 export async function miloReplaceKey(key) {
   try {
-    const [utils, placeholders] = await Promise.all([
-      import(`${LIBS}/utils/utils.js`),
-      import(`${LIBS}/features/placeholders.js`),
-    ]);
+    const placeholders = await import(`${LIBS}/features/placeholders.js`);
 
-    const { getConfig } = utils;
     const { replaceKey } = placeholders;
     const config = getConfig();
 
