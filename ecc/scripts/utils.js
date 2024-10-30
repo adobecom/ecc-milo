@@ -85,11 +85,6 @@ export function convertTo24HourFormat(timeStr) {
 }
 
 export function getEventPageHost() {
-  if (window.location.href.includes('localhost')) {
-    // TODO: replace no-cache with dev after #158 is merged
-    return 'https://no-cache--events-milo--adobecom.hlx.page';
-  }
-
   if (window.location.href.includes('.hlx.')) {
     return window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.hlx.page`);
   }
