@@ -546,9 +546,53 @@ function buildPreviewLoadingDialog(props) {
   dialog.innerHTML = '';
 
   createTag('h1', { slot: 'heading' }, 'Generating your preview...', { parent: dialog });
-  createTag('p', {}, 'This process usually takes 10 - 30 seconds. In rare cases, it can take up to 10 minutes for the preview to propagate. Please wait patiently and the preview will be loaded in a new tab automatically when it is ready.', { parent: dialog });
-  createTag('p', {}, '<strong>Note: Please make sure pop-up is allowed for ECC in your browser settings.</strong>', { parent: dialog });
-  createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: dialog });
+  createTag('p', {}, 'This usually takes 10-30 seconds, but it might take up to 10 minutes in rare cases. Please wait, and the preview will open in a new tab when it’s ready.', { parent: dialog });
+  createTag('p', {}, '<strong>Note: Please make sure pop-up is allowed in your browser settings.</strong>', { parent: dialog });
+  const style = createTag('style', {}, `
+    @keyframes progress-bar-indeterminate {
+      0% {
+        transform: translateX(-100%);
+      }
+      50% {
+        transform: translateX(0%);
+      }
+      100% {
+        transform: translateX(200%);
+      }
+    }
+  `);
+
+  // Create the progress bar container
+  const progressBar = createTag('div', {
+    style: `
+    position: relative;
+    width: 100%;
+    height: 8px;
+    background: #e6e6e6;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    `,
+  });
+
+  // Create the progress bar indicator
+  const progressBarIndicator = createTag('div', {
+    style: `
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: #1473e6;
+    transform: translateX(0);
+    animation: progress-bar-indeterminate 1.5s linear infinite;
+    `,
+  });
+
+  // Append the elements to the shadow root
+  progressBar.appendChild(progressBarIndicator);
+  dialog.appendChild(style);
+  dialog.appendChild(progressBar);
   const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
   createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'Cancel', { parent: buttonContainer });
 
@@ -570,10 +614,10 @@ function buildPreviewLoadingFailedDialog(props) {
   dialog.innerHTML = '';
 
   createTag('h1', { slot: 'heading' }, 'Preview generation failed.', { parent: dialog });
-  createTag('p', {}, "Don't worry. Your changes have been saved. Our system is working in the background to update the page to reflect the changes.", { parent: dialog });
+  createTag('p', {}, 'Your changes have been saved. Our system is working in the background to update the page.', { parent: dialog });
   const slackLink = createTag('a', { href: 'https://adobe.enterprise.slack.com/archives/C07KPJYA760' }, 'Slack');
   const emailLink = createTag('a', { href: 'mailto:Grp-acom-milo-events-support@adobe.com' }, 'Grp-acom-milo-events-support@adobe.com');
-  createTag('p', {}, `Please try again later, contact us on ${slackLink} or email ${emailLink}`, { parent: dialog });
+  createTag('p', {}, `Please try again later. If the issue persists, please feel free to contact us on <b>${slackLink.outerHTML}</b> or email <b>${emailLink.outerHTML}</b>`, { parent: dialog });
   const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
   const cancelButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'OK', { parent: buttonContainer });
 
@@ -614,10 +658,6 @@ async function validatePreview(props, oldResp, cta) {
   const currentData = { ...props.eventDataResp };
   const oldData = { ...oldResp };
 
-  // TODO: remove console.log
-  console.log('Current data:', currentData);
-  console.log('Old data:', oldData);
-  console.log('hasContentChanged:', hasContentChanged(currentData, oldData));
   if (!hasContentChanged(currentData, oldData) || !Object.keys(oldData).length) {
     window.open(cta.href);
     return Promise.resolve();
@@ -634,10 +674,6 @@ async function validatePreview(props, oldResp, cta) {
         retryCount += 1;
         const metadataJson = await getNonProdPreviewDataById(props);
 
-        // TODO: remove console.log
-        console.log('Retrying:', retryCount);
-        console.log('Metadata mod time:', new Date(metadataJson['modification-time']).getTime());
-        console.log('New object mod time:', props.eventDataResp.modificationTime);
         if (metadataJson && modificationTimeMatch(metadataJson)) {
           clearInterval(interval);
           closeDialog(props);
