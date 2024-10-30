@@ -124,9 +124,16 @@ export function hasContentChanged(oldData, newData) {
     throw new TypeError('Both oldData and newData must be objects');
   }
 
+  const ignoreList = [
+    'modificationTime',
+    'status',
+    'platform',
+    'platformCode',
+  ];
+
   // Checking keys counts
-  const oldDataKeys = Object.keys(oldData);
-  const newDataKeys = Object.keys(newData);
+  const oldDataKeys = Object.keys(oldData).filter((key) => !ignoreList.includes(key));
+  const newDataKeys = Object.keys(newData).filter((key) => !ignoreList.includes(key));
 
   if (oldDataKeys.length !== newDataKeys.length) {
     // Change detected due to different key counts
