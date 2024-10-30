@@ -638,27 +638,6 @@ export async function unpublishEvent(eventId, payload) {
   }
 }
 
-export async function updateAndPreviewEvent(eventId, payload) {
-  const { host } = API_CONFIG.esl[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...payload, liveUpdate: false, preview: true });
-  const options = await constructRequestOptions('PUT', raw);
-
-  try {
-    const response = await fetch(`${host}/v1/events/${eventId}`, options);
-    const data = await response.json();
-
-    if (!response.ok) {
-      window.lana?.log(`Failed to update event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { status: response.status, error: data };
-    }
-
-    return data.espProvider || data;
-  } catch (error) {
-    window.lana?.log(`Failed to update event ${eventId}. Error:`, error);
-    return { status: 'Network Error', error: error.message };
-  }
-}
-
 export async function deleteEvent(eventId) {
   const { host } = API_CONFIG.esl[getEventServiceEnv()];
   const options = await constructRequestOptions('DELETE');

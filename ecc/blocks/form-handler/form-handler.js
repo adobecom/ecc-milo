@@ -13,7 +13,6 @@ import {
   updateEvent,
   publishEvent,
   getEvent,
-  updateAndPreviewEvent,
 } from '../../scripts/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
@@ -431,7 +430,7 @@ function updateDashboardLink(props) {
   dashboardLink.href = url.toString();
 }
 
-async function saveEvent(props, options = { toPublish: false, toPreview: false }) {
+async function saveEvent(props, toPublish = false) {
   try {
     await gatherValues(props);
   } catch (e) {
@@ -453,26 +452,20 @@ async function saveEvent(props, options = { toPublish: false, toPreview: false }
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
     await onEventSave();
-  } else if (props.currentStep <= props.maxStep && !options.toPublish) {
+  } else if (props.currentStep <= props.maxStep && !toPublish) {
     resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     await onEventSave();
-  } else if (options.toPublish) {
+  } else if (toPublish) {
     resp = await publishEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     if (resp?.eventId) await handleEventUpdate(props);
-  } else if (options.toPreview) {
-    resp = await updateAndPreviewEvent(
-      getFilteredCachedResponse().eventId,
-      getJoinedData(),
-    );
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
   }
 
   return resp;
@@ -578,7 +571,9 @@ function buildPreviewLoadingFailedDialog(props) {
 
   createTag('h1', { slot: 'heading' }, 'Preview generation failed.', { parent: dialog });
   createTag('p', {}, "Don't worry. Your changes have been saved. Our system is working in the background to update the page to reflect the changes.", { parent: dialog });
-  createTag('p', {}, 'Please try again later or contact the ECC team if you need immediate assistance.', { parent: dialog });
+  const slackLink = createTag('a', { href: 'https://adobe.enterprise.slack.com/archives/C07KPJYA760' }, 'Slack');
+  const emailLink = createTag('a', { href: 'mailto:Grp-acom-milo-events-support@adobe.com' }, 'Grp-acom-milo-events-support@adobe.com');
+  createTag('p', {}, `Please try again later, contact us on ${slackLink} or email ${emailLink}`, { parent: dialog });
   const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
   const cancelButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'OK', { parent: buttonContainer });
 
@@ -739,7 +734,7 @@ function initFormCtas(props) {
             let resp;
             if (props.currentStep === props.maxStep) {
               oldResp = { ...props.eventDataResp };
-              resp = await saveEvent(props, { toPublish: true });
+              resp = await saveEvent(props, true);
             } else {
               oldResp = { ...props.eventDataResp };
               resp = await saveEvent(props);
