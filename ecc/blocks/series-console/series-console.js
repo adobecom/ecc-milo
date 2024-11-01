@@ -221,7 +221,7 @@ function listAllSeries(props) {
         props.data = await getAllSeries();
         showToast(props, 'Series updated', { variant: 'positive', timeout: 6000 });
       } else {
-        showToast(props, 'Update failed. Please try again later.', { variant: 'negative', timeout: 6000 });
+        showToast(props, 'Update action failed. Please try again later.', { variant: 'negative', timeout: 6000 });
       }
       props.el.classList.remove('loading');
     });
@@ -236,7 +236,7 @@ function listAllSeries(props) {
         props.data = await getAllSeries();
         showToast(props, 'Series deleted', { variant: 'positive', timeout: 6000 });
       } else {
-        showToast(props, 'Delete failed. Please try again later.', { variant: 'negative', timeout: 6000 });
+        showToast(props, 'Delete action failed. Please try again later.', { variant: 'negative', timeout: 6000 });
       }
       props.el.classList.remove('loading');
     });
