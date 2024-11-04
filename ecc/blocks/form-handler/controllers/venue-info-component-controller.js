@@ -153,7 +153,7 @@ function initAutocomplete(el, props) {
   const placeLNG = el.querySelector('#google-place-lng');
   const placeGmtOffset = el.querySelector('#google-place-gmt-offset');
 
-  autocomplete.setFields(['formatted_address', 'name', 'address_components', 'geometry', 'place_id', 'utc_offset_minutes', 'url']);
+  autocomplete.setFields(['name', 'address_components', 'geometry', 'place_id', 'utc_offset_minutes', 'url']);
 
   autocomplete.addListener('place_changed', () => {
     const place = autocomplete.getPlace();
