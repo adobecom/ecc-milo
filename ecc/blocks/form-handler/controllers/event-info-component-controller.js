@@ -463,7 +463,9 @@ export default async function init(component, props) {
       endTimeInput?.querySelectorAll('sp-menu-item')?.forEach((option) => {
         option.disabled = false;
       });
-    } else if (e?.target === endAmpmInput) {
+    }
+
+    if (e?.target === endAmpmInput) {
       onEndTimeUpdate();
       onStartTimeUpdate();
     } else {
