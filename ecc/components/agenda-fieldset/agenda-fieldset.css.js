@@ -38,6 +38,12 @@ export const style = css`
 .time-picker .time-picker-wrapper {
   flex: 1;
   min-width: 150px;
+  display: flex;
+  gap: 8px;
+}
+
+.time-picker .time-picker-wrapper sp-picker.period-picker-input {
+  width: max-content;
 }
 
 .text-field-wrapper {

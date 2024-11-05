@@ -3,7 +3,7 @@
 import { getEvents } from '../../../scripts/esp-controller.js';
 import BlockMediator from '../../../scripts/deps/block-mediator.min.js';
 import { LIBS } from '../../../scripts/scripts.js';
-import { changeInputValue } from '../../../scripts/utils.js';
+import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../../../scripts/utils.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
@@ -320,8 +320,8 @@ export function onSubmit(component, props) {
   const localStartDate = datePicker.dataset.startDate;
   const localEndDate = datePicker.dataset.endDate;
 
-  const localStartTime = component.querySelector('#time-picker-start-time').value;
-  const localEndTime = component.querySelector('#time-picker-end-time').value;
+  const localStartTime = component.querySelector('#time-picker-start-time-value').value;
+  const localEndTime = component.querySelector('#time-picker-end-time-value').value;
 
   const timezone = component.querySelector('#time-zone-select-input').value;
 
@@ -372,7 +372,11 @@ export default async function init(component, props) {
 
   const eventTitleInput = component.querySelector('#info-field-event-title');
   const startTimeInput = component.querySelector('#time-picker-start-time');
+  const startAmpmInput = component.querySelector('#ampm-picker-start-time');
   const endTimeInput = component.querySelector('#time-picker-end-time');
+  const endAmpmInput = component.querySelector('#ampm-picker-end-time');
+  const startTime = component.querySelector('#time-picker-start-time-value');
+  const endTime = component.querySelector('#time-picker-end-time-value');
   const datePicker = component.querySelector('#event-info-date-picker');
 
   initCalendar(component);
@@ -381,31 +385,77 @@ export default async function init(component, props) {
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: eventTitleInput.value });
   });
 
-  const updateEndTimeOptions = () => {
+  const onEndTimeUpdate = () => {
+    if (endAmpmInput.value && endTimeInput.value) {
+      endTime.value = convertTo24HourFormat(`${endTimeInput.value} ${endAmpmInput.value}`);
+    } else {
+      return;
+    }
+
     if (datePicker.dataset.startDate !== datePicker.dataset.endDate) return;
-    const allOptions = startTimeInput.querySelectorAll('sp-menu-item');
-    allOptions.forEach((option) => {
-      if (option.value >= endTimeInput.value && endTimeInput.value) {
-        option.disabled = true;
-      } else {
-        option.disabled = false;
+
+    if (startAmpmInput.value) {
+      let toReset = false;
+      const allOptions = startTimeInput.querySelectorAll('sp-menu-item');
+      allOptions.forEach((option) => {
+        const optionTime = convertTo24HourFormat(`${option.value} ${startAmpmInput.value}`);
+        if (optionTime >= endTime.value) {
+          option.disabled = true;
+          if (option.selected) {
+            toReset = true;
+          }
+        } else {
+          option.disabled = false;
+        }
+      });
+
+      if (toReset) {
+        startTimeInput.value = '';
+        startAmpmInput.value = '';
+        startTime.value = null;
+        allOptions.forEach((option) => {
+          option.disabled = false;
+        });
       }
-    });
+    }
   };
 
-  const updateStartTimeOptions = () => {
+  const onStartTimeUpdate = () => {
+    if (startAmpmInput.value && startTimeInput.value) {
+      startTime.value = convertTo24HourFormat(`${startTimeInput.value} ${startAmpmInput.value}`);
+    } else {
+      return;
+    }
+
     if (datePicker.dataset.startDate !== datePicker.dataset.endDate) return;
-    const allOptions = endTimeInput.querySelectorAll('sp-menu-item');
-    allOptions.forEach((option) => {
-      if (option.value <= startTimeInput.value && startTimeInput.value) {
-        option.disabled = true;
-      } else {
-        option.disabled = false;
+
+    if (endAmpmInput.value) {
+      let toReset = false;
+      const allOptions = endTimeInput.querySelectorAll('sp-menu-item');
+      allOptions.forEach((option) => {
+        const optionTime = convertTo24HourFormat(`${option.value} ${endAmpmInput.value}`);
+        if (optionTime <= startTime.value) {
+          option.disabled = true;
+          if (option.selected) {
+            toReset = true;
+          }
+        } else {
+          option.disabled = false;
+        }
+      });
+
+      if (toReset) {
+        endTimeInput.value = '';
+        endAmpmInput.value = '';
+        endTime.value = null;
+        allOptions.forEach((option) => {
+          option.disabled = false;
+        });
       }
-    });
+    }
   };
 
-  const updateTimeOptionsBasedOnDate = () => {
+  const updateTimeOptionsBasedOnDate = (e) => {
     if (datePicker.dataset.startDate !== datePicker.dataset.endDate) {
       startTimeInput?.querySelectorAll('sp-menu-item')?.forEach((option) => {
         option.disabled = false;
@@ -413,14 +463,22 @@ export default async function init(component, props) {
       endTimeInput?.querySelectorAll('sp-menu-item')?.forEach((option) => {
         option.disabled = false;
       });
+    } else if (e?.target === endAmpmInput) {
+      onEndTimeUpdate();
+      onStartTimeUpdate();
+    } else {
+      onStartTimeUpdate();
+      onEndTimeUpdate();
     }
   };
 
-  endTimeInput.addEventListener('change', updateEndTimeOptions);
-  startTimeInput.addEventListener('change', updateStartTimeOptions);
+  startTimeInput.addEventListener('change', onStartTimeUpdate);
+  endTimeInput.addEventListener('change', onEndTimeUpdate);
+  startAmpmInput.addEventListener('change', updateTimeOptionsBasedOnDate);
+  endAmpmInput.addEventListener('change', updateTimeOptionsBasedOnDate);
 
-  datePicker.addEventListener('change', () => {
-    updateTimeOptionsBasedOnDate();
+  datePicker.addEventListener('change', (e) => {
+    updateTimeOptionsBasedOnDate(e);
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), startDate: datePicker.dataset.startDate });
   });
 
@@ -461,10 +519,15 @@ export default async function init(component, props) {
     && localStartTime
     && localEndTime
     && timezone) {
+    const startTimePieces = parse24HourFormat(localStartTime);
+    const endTimePieces = parse24HourFormat(localEndTime);
+
     component.querySelector('#info-field-event-title').value = title || '';
     component.querySelector('#info-field-event-description').value = description || '';
-    changeInputValue(startTimeInput, 'value', localStartTime || '');
-    changeInputValue(endTimeInput, 'value', localEndTime || '');
+    changeInputValue(startTimeInput, 'value', `${startTimePieces.hours}:${startTimePieces.minutes}` || '');
+    changeInputValue(startAmpmInput, 'value', startTimePieces.period || '');
+    changeInputValue(endTimeInput, 'value', `${endTimePieces.hours}:${endTimePieces.minutes}` || '');
+    changeInputValue(endAmpmInput, 'value', endTimePieces.period || '');
     changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
 
     BlockMediator.set('eventDupMetrics', {
@@ -485,8 +548,6 @@ export default async function init(component, props) {
     component.classList.add('prefilled');
   }
 
-  updateEndTimeOptions();
-  updateStartTimeOptions();
   updateTimeOptionsBasedOnDate();
 }
 
