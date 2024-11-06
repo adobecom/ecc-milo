@@ -372,9 +372,13 @@ export default async function init(component, props) {
 
   const eventTitleInput = component.querySelector('#info-field-event-title');
   const startTimeInput = component.querySelector('#time-picker-start-time');
+  const allStartTimeOptions = startTimeInput.querySelectorAll('sp-menu-item');
   const startAmpmInput = component.querySelector('#ampm-picker-start-time');
+  const startAmpmOptions = startAmpmInput.querySelectorAll('sp-menu-item');
   const endTimeInput = component.querySelector('#time-picker-end-time');
+  const allEndTimeOptions = endTimeInput.querySelectorAll('sp-menu-item');
   const endAmpmInput = component.querySelector('#ampm-picker-end-time');
+  const endAmpmOptions = endAmpmInput.querySelectorAll('sp-menu-item');
   const startTime = component.querySelector('#time-picker-start-time-value');
   const endTime = component.querySelector('#time-picker-end-time-value');
   const datePicker = component.querySelector('#event-info-date-picker');
@@ -385,38 +389,54 @@ export default async function init(component, props) {
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: eventTitleInput.value });
   });
 
+  const resetAllOptions = () => {
+    [allEndTimeOptions, allStartTimeOptions, endAmpmOptions, startAmpmOptions]
+      .forEach((options) => {
+        options.forEach((option) => {
+          option.disabled = false;
+        });
+      });
+  };
+
+  const sameDayEvent = () => datePicker.dataset.startDate
+    && datePicker.dataset.endDate
+    && datePicker.dataset.startDate === datePicker.dataset.endDate;
+
   const onEndTimeUpdate = () => {
     if (endAmpmInput.value && endTimeInput.value) {
       endTime.value = convertTo24HourFormat(`${endTimeInput.value} ${endAmpmInput.value}`);
     } else {
-      return;
+      endTime.value = null;
     }
 
-    if (datePicker.dataset.startDate !== datePicker.dataset.endDate) return;
+    if (!sameDayEvent()) return;
 
-    if (startAmpmInput.value) {
-      let toReset = false;
-      const allOptions = startTimeInput.querySelectorAll('sp-menu-item');
-      allOptions.forEach((option) => {
-        const optionTime = convertTo24HourFormat(`${option.value} ${startAmpmInput.value}`);
-        if (optionTime >= endTime.value) {
-          option.disabled = true;
-          if (option.selected) {
-            toReset = true;
-          }
-        } else {
-          option.disabled = false;
+    startAmpmOptions[1].disabled = endAmpmInput.value === 'AM';
+    let onlyPossibleStartAmpm = startAmpmInput.value;
+    if (!onlyPossibleStartAmpm && startAmpmOptions[1].disabled) onlyPossibleStartAmpm = 'AM';
+
+    if (startTimeInput.value) {
+      if (onlyPossibleStartAmpm) {
+        const onlyPossibleStartTime = convertTo24HourFormat(`${startTimeInput.value} ${onlyPossibleStartAmpm}`);
+        if (endAmpmInput.value) {
+          allEndTimeOptions.forEach((option) => {
+            const optionTime = convertTo24HourFormat(`${option.value} ${endAmpmInput.value}`);
+            option.disabled = optionTime <= onlyPossibleStartTime;
+          });
         }
-      });
 
-      if (toReset) {
-        startTimeInput.value = '';
-        startAmpmInput.value = '';
-        startTime.value = null;
-        allOptions.forEach((option) => {
-          option.disabled = false;
-        });
+        if (endTimeInput.value) {
+          endAmpmOptions.forEach((option) => {
+            const optionTime = convertTo24HourFormat(`${endTimeInput.value} ${option.value}`);
+            option.disabled = optionTime <= onlyPossibleStartTime;
+          });
+        }
       }
+    } else if (endTime.value) {
+      allStartTimeOptions.forEach((option) => {
+        const optionTime = convertTo24HourFormat(`${option.value} ${onlyPossibleStartAmpm}`);
+        option.disabled = optionTime >= endTime.value;
+      });
     }
   };
 
@@ -424,60 +444,59 @@ export default async function init(component, props) {
     if (startAmpmInput.value && startTimeInput.value) {
       startTime.value = convertTo24HourFormat(`${startTimeInput.value} ${startAmpmInput.value}`);
     } else {
-      return;
+      startTime.value = null;
     }
 
-    if (datePicker.dataset.startDate !== datePicker.dataset.endDate) return;
+    if (!sameDayEvent()) return;
 
-    if (endAmpmInput.value) {
-      let toReset = false;
-      const allOptions = endTimeInput.querySelectorAll('sp-menu-item');
-      allOptions.forEach((option) => {
-        const optionTime = convertTo24HourFormat(`${option.value} ${endAmpmInput.value}`);
-        if (optionTime <= startTime.value) {
-          option.disabled = true;
-          if (option.selected) {
-            toReset = true;
-          }
-        } else {
-          option.disabled = false;
+    endAmpmOptions[0].disabled = startAmpmInput.value === 'PM';
+    let onlyPossibleEndAmpm = endAmpmInput.value;
+    if (!onlyPossibleEndAmpm && endAmpmOptions[0].disabled) onlyPossibleEndAmpm = 'PM';
+
+    if (endTimeInput.value) {
+      if (onlyPossibleEndAmpm) {
+        const onlyPossibleEndTime = convertTo24HourFormat(`${endTimeInput.value} ${onlyPossibleEndAmpm}`);
+        if (startAmpmInput.value) {
+          allStartTimeOptions.forEach((option) => {
+            const optionTime = convertTo24HourFormat(`${option.value} ${startAmpmInput.value}`);
+            option.disabled = optionTime >= onlyPossibleEndTime;
+          });
         }
-      });
 
-      if (toReset) {
-        endTimeInput.value = '';
-        endAmpmInput.value = '';
-        endTime.value = null;
-        allOptions.forEach((option) => {
-          option.disabled = false;
-        });
+        if (startTimeInput.value) {
+          startAmpmOptions.forEach((option) => {
+            const optionTime = convertTo24HourFormat(`${startTimeInput.value} ${option.value}`);
+            option.disabled = optionTime >= onlyPossibleEndTime;
+          });
+        }
       }
+    } else if (startTime.value) {
+      allEndTimeOptions.forEach((option) => {
+        const optionTime = convertTo24HourFormat(`${option.value} ${onlyPossibleEndAmpm}`);
+        option.disabled = optionTime <= startTime.value;
+      });
     }
   };
 
-  const updateTimeOptionsBasedOnDate = (e) => {
-    if (datePicker.dataset.startDate !== datePicker.dataset.endDate) {
-      startTimeInput?.querySelectorAll('sp-menu-item')?.forEach((option) => {
-        option.disabled = false;
-      });
-      endTimeInput?.querySelectorAll('sp-menu-item')?.forEach((option) => {
-        option.disabled = false;
-      });
-    }
-
-    if (e?.target === endAmpmInput) {
-      onEndTimeUpdate();
-      onStartTimeUpdate();
+  const updateTimeOptionsBasedOnDate = () => {
+    if (!sameDayEvent()) {
+      resetAllOptions();
     } else {
-      onStartTimeUpdate();
-      onEndTimeUpdate();
+      startTimeInput.value = '';
+      startAmpmInput.value = '';
+      endTimeInput.value = '';
+      endAmpmInput.value = '';
+      startTime.value = null;
+      endTime.value = null;
+
+      resetAllOptions();
     }
   };
 
   startTimeInput.addEventListener('change', onStartTimeUpdate);
   endTimeInput.addEventListener('change', onEndTimeUpdate);
-  startAmpmInput.addEventListener('change', updateTimeOptionsBasedOnDate);
-  endAmpmInput.addEventListener('change', updateTimeOptionsBasedOnDate);
+  startAmpmInput.addEventListener('change', onStartTimeUpdate);
+  endAmpmInput.addEventListener('change', onEndTimeUpdate);
 
   datePicker.addEventListener('change', (e) => {
     updateTimeOptionsBasedOnDate(e);
