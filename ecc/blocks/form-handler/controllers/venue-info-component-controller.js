@@ -44,6 +44,7 @@ function resetAllFields(component) {
   const placeIdInput = component.querySelector('#google-place-id');
   const mapUrlInput = component.querySelector('#google-map-url');
   const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
+  const formattedAddressInput = component.querySelector('#google-place-formatted-address');
 
   venueNameInput.value = '';
   changeInputValue(addressInput, 'value', '');
@@ -57,6 +58,7 @@ function resetAllFields(component) {
   changeInputValue(placeIdInput, 'value', '');
   changeInputValue(mapUrlInput, 'value', '');
   changeInputValue(gmtoffsetInput, 'value', '');
+  changeInputValue(formattedAddressInput, 'value', '');
 }
 
 function updateAllFields(venueData, component) {
@@ -72,6 +74,7 @@ function updateAllFields(venueData, component) {
   const placeIdInput = component.querySelector('#google-place-id');
   const mapUrlInput = component.querySelector('#google-map-url');
   const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
+  const formattedAddressInput = component.querySelector('#google-place-formatted-address');
 
   changeInputValue(venueNameInput, 'value', venueData.venueName);
   changeInputValue(addressInput, 'value', venueData.address);
@@ -85,6 +88,7 @@ function updateAllFields(venueData, component) {
   changeInputValue(placeIdInput, 'value', venueData.placeId);
   changeInputValue(mapUrlInput, 'value', venueData.mapUrl);
   changeInputValue(gmtoffsetInput, 'value', venueData.gmtOffset);
+  changeInputValue(formattedAddressInput, 'value', venueData.formattedAddress);
 }
 
 function getVenueDataInForm(component) {
@@ -100,6 +104,7 @@ function getVenueDataInForm(component) {
   const placeIdInput = component.querySelector('#google-place-id');
   const mapUrlInput = component.querySelector('#google-map-url');
   const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
+  const formattedAddressInput = component.querySelector('#google-place-formatted-address');
 
   const venueName = venueNameInput.value;
   const address = addressInput.value;
@@ -113,6 +118,7 @@ function getVenueDataInForm(component) {
   const lat = +placeLatInput.value;
   const lon = +placeLngInput.value;
   const gmtOffset = +gmtoffsetInput.value;
+  const formattedAddress = formattedAddressInput.value;
 
   const venueData = {
     venueName,
@@ -129,6 +135,7 @@ function getVenueDataInForm(component) {
       lon,
     },
     gmtOffset,
+    formattedAddress,
   };
 
   return venueData;
@@ -152,6 +159,7 @@ function initAutocomplete(el, props) {
   const placeLAT = el.querySelector('#google-place-lat');
   const placeLNG = el.querySelector('#google-place-lng');
   const placeGmtOffset = el.querySelector('#google-place-gmt-offset');
+  const formattedAddress = el.querySelector('#google-place-formatted-address');
 
   autocomplete.setFields(['formatted_address', 'name', 'address_components', 'geometry', 'place_id', 'utc_offset_minutes', 'url']);
 
@@ -230,6 +238,10 @@ function initAutocomplete(el, props) {
       placeGmtOffset.value = place.utc_offset_minutes / 60;
       placeLAT.value = place.geometry.location.lat();
       placeLNG.value = place.geometry.location.lng();
+    }
+
+    if (place.formatted_address) {
+      formattedAddress.value = place.formatted_address;
     }
   });
 }
