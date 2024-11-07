@@ -35,20 +35,16 @@ function initStepLock(component) {
 
   const onFormatChange = () => {
     const componentSections = step.querySelectorAll('.section:not(:first-of-type)');
+    const topicsComponent = step.querySelector('event-topics-component');
 
-    if (Array.from(inputs).every((input) => !!input.value)) {
-      componentSections.forEach((s) => {
-        if (s !== component.closest('.section')) {
-          s.classList.remove('hidden');
-        }
-      });
-    } else {
-      componentSections.forEach((s) => {
-        if (s !== component.closest('.section')) {
-          s.classList.add('hidden');
-        }
-      });
-    }
+    const inputsFilled = Array.from(inputs).every((input) => !!input.value);
+
+    componentSections.forEach((s) => {
+      if (s !== component.closest('.section')) {
+        s.classList.toggle('hidden', !inputsFilled);
+      }
+      topicsComponent.classList.toggle('hidden', !inputsFilled);
+    });
   };
 
   inputs.forEach((input) => {
