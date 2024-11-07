@@ -6,6 +6,11 @@ import { changeInputValue } from '../../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
+function filterSeriesBasedOnCloudType(series, cloudType = null) {
+  if (!cloudType) return [];
+  return Object.values(series).filter((s) => s.cloudType === cloudType);
+}
+
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   if (!currentTimeZone) return;
@@ -54,7 +59,34 @@ function initStepLock(component) {
 }
 
 export async function onPayloadUpdate(component, props) {
-  const { seriesId } = props.payload;
+  const { seriesId, cloudType } = props.payload;
+  if (cloudType) {
+    const series = await getSeries();
+    const filteredSeries = filterSeriesBasedOnCloudType(series, cloudType);
+    const seriesSelect = component.querySelector('#series-select-input');
+
+    if (seriesSelect) {
+      const seriesOptions = seriesSelect.querySelectorAll('sp-menu-item');
+      seriesOptions.forEach((opt) => {
+        if (!filteredSeries.find((s) => s.seriesId === opt.value)) {
+          opt.remove();
+        }
+      });
+
+      filteredSeries.forEach((s) => {
+        const seriesOption = seriesOptions.find((opt) => opt.value === s.seriesId);
+        if (!seriesOption) {
+          const opt = createTag('sp-menu-item', { value: s.seriesId }, s.seriesName);
+          seriesSelect.append(opt);
+        }
+      });
+    }
+
+    const formatSelect = component.querySelector('.format-picker-wrapper');
+
+    formatSelect.classList.toggle('hidden', cloudType !== 'DX');
+  }
+
   if (seriesId) {
     const partnerSelectorGroups = document.querySelectorAll('partner-selector-group');
     if (partnerSelectorGroups.length) {
@@ -83,8 +115,10 @@ async function populateSeriesOptions(props, component) {
     return;
   }
 
-  Object.values(series).forEach((val) => {
-    const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
+  const filteredSeries = filterSeriesBasedOnCloudType(series, props.payload.cloudType);
+
+  filteredSeries.forEach((s) => {
+    const opt = createTag('sp-menu-item', { value: s.seriesId }, s.seriesName);
     seriesSelect.append(opt);
   });
 
@@ -101,6 +135,15 @@ async function populateSeriesOptions(props, component) {
         seriesName,
       },
     });
+  });
+}
+
+function initCloudTypeSelect(props, component) {
+  const cloudTypeSelect = component.querySelector('#bu-select-input');
+  if (!cloudTypeSelect) return;
+
+  cloudTypeSelect.addEventListener('change', async () => {
+    props.payload = { ...props.payload, cloudType: cloudTypeSelect.value };
   });
 }
 
@@ -123,6 +166,7 @@ export default async function init(component, props) {
   prepopulateTimeZone(component);
   initStepLock(component);
   await populateSeriesOptions(props, component);
+  initCloudTypeSelect(props, component);
 
   const {
     cloudType,
@@ -152,6 +196,7 @@ export function onSubmit(component, props) {
   const eventType = 'InPerson';
   const cloudType = component.querySelector('#bu-select-input').value;
   const seriesId = component.querySelector('#series-select-input')?.value;
+  const format = component.querySelector('#format-select-input')?.value;
   const templateId = getTemplateId(cloudType);
 
   const eventFormat = {
@@ -160,6 +205,12 @@ export function onSubmit(component, props) {
     seriesId,
     templateId,
   };
+
+  if (cloudType === 'DX') {
+    eventFormat.format = format;
+  } else {
+    delete eventFormat.format;
+  }
 
   props.payload = { ...props.payload, ...eventFormat };
 }

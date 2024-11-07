@@ -15,8 +15,7 @@ async function decorateCloudTagSelect(column) {
 
   // FIXME: cloulds shouldn't be hardcoded
   // const clouds = await getClouds();
-  // const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
-  const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }];
+  const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
 
   Object.entries(clouds).forEach(([, val]) => {
     const opt = createTag('sp-menu-item', { value: val.id }, val.name);
@@ -33,6 +32,24 @@ async function decorateSeriesSelect(column) {
 
   column.innerHTML = '';
   column.append(seriesSelectWrapper);
+}
+
+function decorateFormatSelect(row) {
+  const formatSelectWrapper = createTag('div', { class: 'format-picker-wrapper' });
+  const label = createTag('sp-label', { for: 'format-select-input' }, 'Select format');
+  const select = createTag('sp-picker', { id: 'format-select-input', class: 'select-input', size: 'm', label: 'Format' });
+  const options = [
+    { id: 'inPerson', name: 'In-Person' },
+    { id: 'webinar', name: 'Webinar' },
+  ];
+
+  options.forEach((o) => {
+    const opt = createTag('sp-menu-item', { value: o.id }, o.name);
+    select.append(opt);
+  });
+
+  formatSelectWrapper.append(label, select);
+  row.append(formatSelectWrapper);
 }
 
 function decorateTimeZoneSelect(column) {
@@ -55,13 +72,6 @@ function decorateTimeZoneSelect(column) {
   column.append(tzWrapper);
 }
 
-// FIXME: comment out for now. Might support other checkboxes later.
-// function decorateCheckbox(column) {
-//   const checkbox = createTag('sp-checkbox', { id: 'rsvp-required-check' }, column.textContent.trim());
-//   column.innerHTML = '';
-//   column.append(checkbox);
-// }
-
 export default function init(el) {
   el.classList.add('form-component');
 
@@ -76,9 +86,11 @@ export default function init(el) {
       cols.forEach(async (c, ci) => {
         if (ci === 0) decorateCloudTagSelect(c);
         if (ci === 1) decorateSeriesSelect(c);
-        // if (ci === 2) decorateNewSeriesBtnAndModal(c);
-        // if (ci === 2) decorateCheckbox(c);
+        if (ci === 2) decorateFormatSelect(c);
       });
+
+      // FIXME: remove after authored
+      if (!el.querySelector('.format-picker-wrapper')) decorateFormatSelect(r);
     }
 
     if (ri === 2) {
