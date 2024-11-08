@@ -308,6 +308,19 @@ export function toClassName(name) {
     : '';
 }
 
+export function decorateSwitchFieldset(attr, textContent) {
+  const fieldset = createTag('fieldset', { class: 'switch-wrapper' });
+  const checkbox = createTag('input', { ...attr, type: 'checkbox' });
+  const spLabel = createTag('sp-label', {}, textContent);
+  const switchLabel = createTag('label', { class: 'custom-switch' });
+
+  checkbox.classList.add('hidden');
+  switchLabel.append(checkbox);
+  fieldset.append(switchLabel, spLabel);
+
+  return fieldset;
+}
+
 export function readBlockConfig(block) {
   return [...block.querySelectorAll(':scope>div')].reduce((config, row) => {
     if (row.children) {

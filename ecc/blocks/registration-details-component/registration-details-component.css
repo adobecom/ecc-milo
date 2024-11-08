@@ -6,8 +6,12 @@
   margin-bottom: 36px;
 }
 
-.registration-details-component .registration-configs-wrapper > div {
+.registration-details-component .registration-configs-wrapper {
   margin-bottom: 24px;
+}
+
+.registration-details-component .registration-configs-wrapper > div {
+  margin-bottom: 16px;
 }
 
 .registration-details-component .attendee-configs-wrapper {
@@ -16,12 +20,18 @@
 }
 
 .registration-details-component .attendee-count {
-  display: inline-block;
+  display: inline-flex;
+  flex-direction: column;
 }
 
 .registration-details-component .attendee-count input {
   max-width: 64px;
   margin-right: 16px;
+  height: 24px;
+}
+
+.registration-details-component .attendee-count label {
+  font-size: var(--type-body-xxs-size);
 }
 
 .registration-details-component .rsvp-field-wrapper sp-textfield {

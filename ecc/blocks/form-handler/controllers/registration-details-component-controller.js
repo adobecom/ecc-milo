@@ -1,17 +1,7 @@
 import { LIBS } from '../../../scripts/scripts.js';
+import { decorateSwitchFieldset } from '../../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
-
-function decorateSwitchFieldset(attr, textContent) {
-  const fieldset = createTag('fieldset', { class: 'switch-wrapper' });
-  const checkbox = createTag('input', { ...attr, type: 'checkbox', class: 'hidden' });
-  const spLabel = createTag('sp-label', {}, textContent);
-  const switchLabel = createTag('label', { class: 'custom-switch' });
-  switchLabel.append(checkbox);
-  fieldset.append(switchLabel, spLabel);
-
-  return fieldset;
-}
 
 /* eslint-disable no-unused-vars */
 function prefillFields(component, props) {
@@ -76,9 +66,10 @@ function decorateRegConfigsRadios(component) {
   const fieldset = decorateSwitchFieldset({ id: 'registration-disable-waitlist' }, 'When limit is reached, disable registration button');
 
   const attendeeCount = createTag('div', { class: 'attendee-count' });
-  const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number', min: 0 });
   const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, labelText);
-  attendeeCount.append(input, label);
+  const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number', min: 0 });
+
+  attendeeCount.append(label, input);
 
   attendeeConfigsWrapper.append(fieldset, attendeeCount);
   regFieldswrapper.append(attendeeConfigsWrapper);
