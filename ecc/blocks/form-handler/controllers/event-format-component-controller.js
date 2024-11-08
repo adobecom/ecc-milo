@@ -67,6 +67,9 @@ async function populateSeriesOptions(component) {
     return;
   }
 
+  const existingOptions = seriesSelect.querySelectorAll('sp-menu-item');
+  existingOptions.forEach((opt) => opt.remove());
+
   const filteredSeries = filterSeriesBasedOnCloudType(series, component.dataset.cloudType);
 
   filteredSeries.forEach((s) => {

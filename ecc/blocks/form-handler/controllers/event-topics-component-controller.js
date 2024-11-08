@@ -18,13 +18,9 @@ async function buildTopicsCheckboxes(el, cloudType) {
     const productTags = caasTags.namespaces.caas.tags['product-categories'].tags;
     Object.values(productTags).forEach((p) => {
       if (isEmptyObject(p.tags)) return;
-      const button = createTag('sp-action-button', { name: p.title, 'data-value': JSON.stringify(p) }, p.title, { parent: cw });
+      const button = createTag('sp-action-button', { name: p.title, toggles: true, 'data-value': JSON.stringify(p) }, p.title, { parent: cw });
       const checkboxIcon = createTag('sp-icon', { size: 's', slot: 'icon' }, checkboxSvg);
       button.prepend(checkboxIcon);
-
-      button.addEventListener('click', () => {
-        button.toggleAttribute('selected');
-      });
     });
 
     el.append(cw);

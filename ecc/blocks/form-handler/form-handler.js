@@ -916,8 +916,8 @@ function updateStatusTag(props) {
 
   const headingSection = currentFragment.querySelector(':scope > .section:first-child');
 
-  const eixstingStatusTag = headingSection.querySelector('.event-status-tag');
-  if (eixstingStatusTag) eixstingStatusTag.remove();
+  const existingStatusTag = headingSection.querySelector('.event-status-tag');
+  if (existingStatusTag) existingStatusTag.remove();
 
   const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
   const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
