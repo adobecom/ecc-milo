@@ -168,7 +168,7 @@ export async function onPayloadUpdate(component, props) {
 
     if (cloudType === 'DX') {
       switch (format) {
-        case 'inPerson':
+        case 'InPerson':
           buildExperienceCloudInPersonFields(component);
           break;
         case 'webinar':
@@ -180,7 +180,7 @@ export async function onPayloadUpdate(component, props) {
     }
   } else if (format && format !== component.dataset.format) {
     switch (format) {
-      case 'inPerson':
+      case 'InPerson':
         buildExperienceCloudInPersonFields(component);
         break;
       case 'webinar':
@@ -208,7 +208,7 @@ export default function init(component, props) {
       break;
     case 'ExperienceCloud':
       switch (component.dataset.format) {
-        case 'inPerson':
+        case 'InPerson':
           buildExperienceCloudInPersonFields(component);
           break;
         case 'webinar':

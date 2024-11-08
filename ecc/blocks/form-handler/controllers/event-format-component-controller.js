@@ -189,10 +189,9 @@ function getTemplateId(bu) {
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const eventType = 'InPerson';
   const cloudType = component.querySelector('#bu-select-input').value;
   const seriesId = component.querySelector('#series-select-input')?.value;
-  const format = component.querySelector('#format-select-input')?.value;
+  const eventType = component.querySelector('#format-select-input')?.value;
   const templateId = getTemplateId(cloudType);
 
   const eventFormat = {
@@ -202,11 +201,7 @@ export function onSubmit(component, props) {
     templateId,
   };
 
-  if (cloudType === 'DX') {
-    eventFormat.format = format;
-  } else {
-    delete eventFormat.format;
-  }
+  if (cloudType === 'CreativeCloud') eventFormat.eventType = 'InPerson';
 
   props.payload = { ...props.payload, ...eventFormat };
 }

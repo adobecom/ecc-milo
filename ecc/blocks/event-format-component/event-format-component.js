@@ -39,8 +39,8 @@ function decorateFormatSelect(row) {
   const label = createTag('sp-label', { for: 'format-select-input' }, 'Select format');
   const select = createTag('sp-picker', { id: 'format-select-input', class: 'select-input', size: 'm', label: 'Format' });
   const options = [
-    { id: 'inPerson', name: 'In-Person' },
-    { id: 'webinar', name: 'Webinar' },
+    { id: 'InPerson', name: 'In-Person' },
+    { id: 'Webinar', name: 'Webinar' },
   ];
 
   options.forEach((o) => {
