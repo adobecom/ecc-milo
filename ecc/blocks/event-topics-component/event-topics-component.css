@@ -5,5 +5,13 @@
 .event-topics-component .checkbox-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 32px;
+  gap: 12px;
+}
+
+.event-topics-component .checkbox-wrapper sp-action-button > sp-icon {
+  display: none;
+}
+
+.event-topics-component .checkbox-wrapper sp-action-button[selected]> sp-icon {
+  display: block;
 }

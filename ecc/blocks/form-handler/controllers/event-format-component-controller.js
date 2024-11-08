@@ -6,9 +6,11 @@ import { changeInputValue } from '../../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
-function filterSeriesBasedOnCloudType(series, cloudType = null) {
+// FIXME: mocking with complete list
+function filterSeriesBasedOnCloudType(series, cloudType) {
   if (!cloudType) return [];
-  return Object.values(series).filter((s) => s.cloudType === cloudType);
+  // return Object.values(series).filter((s) => s.cloudType === cloudType);
+  return Object.values(series);
 }
 
 function prepopulateTimeZone(component) {
@@ -35,7 +37,7 @@ function initStepLock(component) {
 
   const onFormatChange = () => {
     const componentSections = step.querySelectorAll('.section:not(:first-of-type)');
-    const topicsComponent = step.querySelector('event-topics-component');
+    const topicsComponent = step.querySelector('.event-topics-component');
 
     const inputsFilled = Array.from(inputs).every((input) => !!input.value);
 
@@ -56,21 +58,21 @@ function initStepLock(component) {
 
 export async function onPayloadUpdate(component, props) {
   const { seriesId, cloudType } = props.payload;
-  if (cloudType) {
+  if (cloudType && cloudType !== component.dataset.cloudType) {
     const series = await getSeries();
     const filteredSeries = filterSeriesBasedOnCloudType(series, cloudType);
     const seriesSelect = component.querySelector('#series-select-input');
 
     if (seriesSelect) {
       const seriesOptions = seriesSelect.querySelectorAll('sp-menu-item');
-      seriesOptions.forEach((opt) => {
+      Array.from(seriesOptions).forEach((opt) => {
         if (!filteredSeries.find((s) => s.seriesId === opt.value)) {
           opt.remove();
         }
       });
 
       filteredSeries.forEach((s) => {
-        const seriesOption = seriesOptions.find((opt) => opt.value === s.seriesId);
+        const seriesOption = Array.from(seriesOptions).find((opt) => opt.value === s.seriesId);
         if (!seriesOption) {
           const opt = createTag('sp-menu-item', { value: s.seriesId }, s.seriesName);
           seriesSelect.append(opt);
@@ -144,6 +146,7 @@ function initCloudTypeSelect(props, component) {
 }
 
 export default async function init(component, props) {
+  component.dataset.cloudType = props.payload.cloudType;
   setTimeout(() => {
     const seriesSelect = component.querySelector('#series-select-input');
 
