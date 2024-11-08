@@ -432,11 +432,22 @@ export default async function init(component, props) {
           });
         }
       }
-    } else if (endTime.value) {
-      allStartTimeOptions.forEach((option) => {
-        const optionTime = convertTo24HourFormat(`${option.value} ${onlyPossibleStartAmpm}`);
-        option.disabled = optionTime >= endTime.value;
-      });
+    }
+
+    if (endTime.value) {
+      if (onlyPossibleStartAmpm) {
+        allStartTimeOptions.forEach((option) => {
+          const optionTime = convertTo24HourFormat(`${option.value} ${onlyPossibleStartAmpm}`);
+          option.disabled = optionTime >= endTime.value;
+        });
+      }
+
+      if (startTimeInput.value) {
+        startAmpmOptions.forEach((option) => {
+          const optionTime = convertTo24HourFormat(`${startTimeInput.value} ${option.value}`);
+          option.disabled = optionTime >= endTime.value;
+        });
+      }
     }
   };
 
@@ -470,11 +481,22 @@ export default async function init(component, props) {
           });
         }
       }
-    } else if (startTime.value) {
-      allEndTimeOptions.forEach((option) => {
-        const optionTime = convertTo24HourFormat(`${option.value} ${onlyPossibleEndAmpm}`);
-        option.disabled = optionTime <= startTime.value;
-      });
+    }
+
+    if (startTime.value) {
+      if (onlyPossibleEndAmpm) {
+        allEndTimeOptions.forEach((option) => {
+          const optionTime = convertTo24HourFormat(`${option.value} ${onlyPossibleEndAmpm}`);
+          option.disabled = optionTime <= startTime.value;
+        });
+      }
+
+      if (endTimeInput.value) {
+        endAmpmOptions.forEach((option) => {
+          const optionTime = convertTo24HourFormat(`${endTimeInput.value} ${option.value}`);
+          option.disabled = optionTime <= startTime.value;
+        });
+      }
     }
   };
 
@@ -543,8 +565,17 @@ export default async function init(component, props) {
     const startTimePieces = parse24HourFormat(localStartTime);
     const endTimePieces = parse24HourFormat(localEndTime);
 
+    datePicker.dataset.startDate = localStartDate || '';
+    datePicker.dataset.endDate = localEndDate || '';
+    updateInput(component, {
+      selectedStartDate: parseFormatedDate(localStartDate),
+      selectedEndDate: parseFormatedDate(localEndDate),
+    });
+
     component.querySelector('#info-field-event-title').value = title || '';
     component.querySelector('#info-field-event-description').value = description || '';
+    changeInputValue(startTime, 'value', `${localStartTime}` || '');
+    changeInputValue(endTime, 'value', `${localEndTime}` || '');
     changeInputValue(startTimeInput, 'value', `${startTimePieces.hours}:${startTimePieces.minutes}` || '');
     changeInputValue(startAmpmInput, 'value', startTimePieces.period || '');
     changeInputValue(endTimeInput, 'value', `${endTimePieces.hours}:${endTimePieces.minutes}` || '');
@@ -560,16 +591,8 @@ export default async function init(component, props) {
       },
     });
 
-    datePicker.dataset.startDate = localStartDate || '';
-    datePicker.dataset.endDate = localEndDate || '';
-    updateInput(component, {
-      selectedStartDate: parseFormatedDate(localStartDate),
-      selectedEndDate: parseFormatedDate(localEndDate),
-    });
     component.classList.add('prefilled');
   }
-
-  updateTimeOptionsBasedOnDate();
 }
 
 export function onEventUpdate(component, props) {
