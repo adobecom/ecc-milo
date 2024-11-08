@@ -40,7 +40,7 @@ export default async function init(el) {
   rows.forEach((r, i) => {
     if (i === 0) generateToolTip(r);
     if (i === 1) {
-      r.classList.add('attendee-configs-wrapper');
+      r.classList.add('registration-configs-wrapper');
       r.innerHTML = '';
     }
     if (i === 2) decorateSWCTextField(r, { quiet: true, size: 'xl', id: 'rsvp-form-detail-description' });

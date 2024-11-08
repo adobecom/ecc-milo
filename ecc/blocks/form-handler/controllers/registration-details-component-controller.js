@@ -53,29 +53,42 @@ function prefillFields(component, props) {
   }
 }
 
-function decorateRegFullConfigsRadios(component) {
-  const attendeeFieldswrapper = component.querySelector('.attendee-configs-wrapper');
+function decorateRegConfigsRadios(component) {
+  const regFieldswrapper = component.querySelector('.registration-configs-wrapper');
 
-  if (!attendeeFieldswrapper) return;
+  if (!regFieldswrapper) return;
+
+  const { cloudType } = component.dataset;
+
+  let labelText = '';
+
+  switch (cloudType) {
+    case 'ExperienceCloud':
+      labelText = 'Waitlist limit';
+      break;
+    case 'CreativeCloud':
+    default:
+      labelText = 'Registration limit';
+      break;
+  }
+
+  const attendeeConfigsWrapper = createTag('div', { class: 'attendee-configs-wrapper' });
   const fieldset = decorateSwitchFieldset({ id: 'registration-disable-waitlist' }, 'When limit is reached, disable registration button');
-  attendeeFieldswrapper.append(fieldset);
-}
-
-function decorateAttendeeCountField(component) {
-  const attendeeFieldswrapper = component.querySelector('.attendee-configs-wrapper');
-
-  if (!attendeeFieldswrapper) return;
 
   const attendeeCount = createTag('div', { class: 'attendee-count' });
   const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number', min: 0 });
-  const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, 'Registration limit');
+  const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, labelText);
   attendeeCount.append(input, label);
 
-  attendeeFieldswrapper.append(attendeeCount);
+  attendeeConfigsWrapper.append(fieldset, attendeeCount);
+  regFieldswrapper.append(attendeeConfigsWrapper);
 }
 
 function decorateHostEmailField(component) {
-  const attendeeConfigsWrapper = component.querySelector('.attendee-configs-wrapper');
+  const regFieldswrapper = component.querySelector('.registration-configs-wrapper');
+
+  if (!regFieldswrapper) return;
+
   const fieldset = decorateSwitchFieldset({ id: 'registration-contact-host' }, 'Contact host');
   const input = createTag('sp-textfield', {
     id: 'event-host-email-input',
@@ -83,43 +96,66 @@ function decorateHostEmailField(component) {
     type: 'email',
     size: 's',
   });
-  createTag('sp-help-text', {}, 'Add host email', { parent: input });
+  createTag('sp-help-text', { size: 's', slot: 'help-text' }, 'Add host email', { parent: input });
 
   const wrapperDiv = createTag('div', { class: 'host-contact-wrapper' });
   wrapperDiv.append(fieldset, input);
 
-  attendeeConfigsWrapper.append(wrapperDiv);
+  regFieldswrapper.append(wrapperDiv);
+}
+
+function decorateLoginRequirementToggle(component) {
+  const regFieldswrapper = component.querySelector('.registration-configs-wrapper');
+
+  if (!regFieldswrapper) return;
+
+  const loginRequirementWrapper = createTag('div', { class: 'login-requirement-wrapper' });
+  const fieldset = decorateSwitchFieldset({ id: 'registration-login-required' }, 'Require login to register');
+  loginRequirementWrapper.append(fieldset);
+
+  regFieldswrapper.append(loginRequirementWrapper);
 }
 
 function buildCreativeCloudFields(component) {
-  decorateRegFullConfigsRadios(component);
-  decorateAttendeeCountField(component);
+  decorateRegConfigsRadios(component);
   decorateHostEmailField(component);
 }
 
 function buildExperienceCloudInPersonFields(component) {
-
+  decorateRegConfigsRadios(component);
+  decorateLoginRequirementToggle(component);
+  decorateHostEmailField(component);
 }
 
 function buildExperienceCloudWebinarFields(component) {
-
+  decorateRegConfigsRadios(component);
+  decorateLoginRequirementToggle(component);
 }
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const attendeeLimitVal = component.querySelector('#attendee-count-input')?.value?.trim();
-  const allowWaitlisting = component.querySelector('#registration-disable-waitlist')?.checked === false;
-  const contactHost = component.querySelector('#registration-contact-host')?.checked;
-  const hostEmail = component.querySelector('#event-host-email-input')?.value?.trim();
-  const rsvpDescription = component.querySelector('#rsvp-form-detail-description')?.value;
+  const attendeeCountInput = component.querySelector('#attendee-count-input');
+  const allowWaitlistingInput = component.querySelector('#registration-disable-waitlist');
+  const contactHostInput = component.querySelector('#registration-contact-host');
+  const hostEmailInput = component.querySelector('#event-host-email-input');
+  const rsvpDescriptionInput = component.querySelector('#rsvp-form-detail-description');
+  const signInRequiredInput = component.querySelector('#registration-login-required');
+
+  const attendeeLimitVal = attendeeCountInput ? attendeeCountInput.value?.trim() : null;
+  const allowWaitlisting = allowWaitlistingInput?.checked;
+  const contactHost = contactHostInput?.checked;
+  const hostEmail = hostEmailInput?.value?.trim();
+  const rsvpDescription = rsvpDescriptionInput?.value || '';
+  const signInRequired = signInRequiredInput ? signInRequiredInput.checked : true;
 
   const attendeeLimit = Number.isNaN(+attendeeLimitVal) ? null : +attendeeLimitVal;
 
   const rsvpData = {};
 
-  rsvpData.rsvpDescription = rsvpDescription || '';
+  rsvpData.rsvpDescription = rsvpDescription;
   rsvpData.allowWaitlisting = !!allowWaitlisting;
+  rsvpData.signInRequired = !!signInRequired;
   if (contactHost && hostEmail) rsvpData.hostEmail = hostEmail;
   if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
 
@@ -129,8 +165,11 @@ export function onSubmit(component, props) {
 export async function onPayloadUpdate(component, props) {
   const { cloudType, format } = props.payload;
   if (cloudType && cloudType !== component.dataset.cloudType) {
-    const attendeeConfigsWrapper = component.querySelector('.attendee-configs-wrapper');
-    attendeeConfigsWrapper.innerHTML = '';
+    const registrationConfigsWrapper = component.querySelector('.registration-configs-wrapper');
+
+    if (!registrationConfigsWrapper) return;
+
+    registrationConfigsWrapper.innerHTML = '';
 
     if (cloudType === 'CreativeCloud') {
       buildCreativeCloudFields(component);

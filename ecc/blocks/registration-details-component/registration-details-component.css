@@ -6,9 +6,13 @@
   margin-bottom: 36px;
 }
 
+.registration-details-component .registration-configs-wrapper > div {
+  margin-bottom: 24px;
+}
+
 .registration-details-component .attendee-configs-wrapper {
-  margin-bottom: 32px;
-  display: grid;
+  display: flex;
+  gap: 2rem;
 }
 
 .registration-details-component .attendee-count {
