@@ -9,6 +9,8 @@ function prefillFields(component, props) {
   const hostEmailEl = component.querySelector('#event-host-email-input');
   const attendeeLimitEl = component.querySelector('#attendee-count-input');
   const allowWaitlistEl = component.querySelector('#registration-allow-waitlist');
+  const signInRequiredEl = component.querySelector('#registration-login-required');
+  // TODO: map signInRequired to correct backend attribute
   const descriptionEl = component.querySelector('#rsvp-form-detail-description');
 
   const eventData = props.eventDataResp;
