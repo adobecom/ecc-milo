@@ -6,15 +6,16 @@
   margin-bottom: 36px;
 }
 
-.registration-details-component .attendee-fields-wrapper {
+.registration-details-component .attendee-configs-wrapper {
   margin-bottom: 32px;
+  display: grid;
 }
 
-.registration-details-component .attendee-count-wrapper {
-  margin-bottom: 24px;
+.registration-details-component .attendee-count {
+  display: inline-block;
 }
 
-.registration-details-component .attendee-count-wrapper input {
+.registration-details-component .attendee-count input {
   max-width: 64px;
   margin-right: 16px;
 }
