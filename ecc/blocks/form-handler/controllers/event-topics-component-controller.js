@@ -48,13 +48,13 @@ function prefillTopics(component, eventData) {
 
   if (eventData.topics?.length !== 0) {
     actionButtons.forEach((cb) => {
-      if (eventData.topics?.includes(cb.name)) {
+      if (eventData.topics?.includes(cb.getAttribute('name'))) {
         cb.selected = true;
         selectedButtons.push(cb);
       }
     });
 
-    const topics = selectedButtons.map((cb) => cb.name);
+    const topics = selectedButtons.map((cb) => cb.getAttribute('name'));
     const fullTopicsValue = Array.from(selectedButtons).map((cb) => cb.dataset.value);
 
     return { topics, fullTopicsValue };
@@ -68,7 +68,7 @@ export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const selectedButtons = component.querySelectorAll('sp-action-button[selected]');
-  const topics = Array.from(selectedButtons).map((cb) => cb.name);
+  const topics = Array.from(selectedButtons).map((cb) => cb.getAttribute('name'));
   const fullTopicsValue = Array.from(selectedButtons).map((cb) => cb.dataset.value);
 
   props.payload = { ...props.payload, topics, fullTopicsValue };
