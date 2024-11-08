@@ -56,33 +56,38 @@ function initStepLock(component) {
   onFormatChange();
 }
 
+async function populateSeriesOptions(component) {
+  const seriesSelect = component.querySelector('#series-select-input');
+  if (!seriesSelect) return;
+
+  const series = await getSeries();
+  if (series.error) {
+    seriesSelect.pending = false;
+    seriesSelect.disabled = true;
+    return;
+  }
+
+  const filteredSeries = filterSeriesBasedOnCloudType(series, component.dataset.cloudType);
+
+  filteredSeries.forEach((s) => {
+    const opt = createTag('sp-menu-item', { value: s.seriesId }, s.seriesName);
+    seriesSelect.append(opt);
+  });
+
+  seriesSelect.pending = false;
+}
+
+function toggleFormatSelect(component) {
+  const formatSelect = component.querySelector('.format-picker-wrapper');
+  formatSelect.classList.toggle('hidden', component.dataset.cloudType !== 'DX');
+}
+
 export async function onPayloadUpdate(component, props) {
   const { seriesId, cloudType } = props.payload;
   if (cloudType && cloudType !== component.dataset.cloudType) {
-    const series = await getSeries();
-    const filteredSeries = filterSeriesBasedOnCloudType(series, cloudType);
-    const seriesSelect = component.querySelector('#series-select-input');
-
-    if (seriesSelect) {
-      const seriesOptions = seriesSelect.querySelectorAll('sp-menu-item');
-      Array.from(seriesOptions).forEach((opt) => {
-        if (!filteredSeries.find((s) => s.seriesId === opt.value)) {
-          opt.remove();
-        }
-      });
-
-      filteredSeries.forEach((s) => {
-        const seriesOption = Array.from(seriesOptions).find((opt) => opt.value === s.seriesId);
-        if (!seriesOption) {
-          const opt = createTag('sp-menu-item', { value: s.seriesId }, s.seriesName);
-          seriesSelect.append(opt);
-        }
-      });
-    }
-
-    const formatSelect = component.querySelector('.format-picker-wrapper');
-
-    formatSelect.classList.toggle('hidden', cloudType !== 'DX');
+    component.dataset.cloudType = cloudType;
+    populateSeriesOptions(component);
+    toggleFormatSelect(component);
   }
 
   if (seriesId) {
@@ -102,25 +107,18 @@ export async function onRespUpdate(_component, _props) {
   // Do nothing
 }
 
-async function populateSeriesOptions(props, component) {
+function initCloudTypeSelect(props, component) {
+  const cloudTypeSelect = component.querySelector('#bu-select-input');
+  if (!cloudTypeSelect) return;
+
+  cloudTypeSelect.addEventListener('change', async () => {
+    props.payload = { ...props.payload, cloudType: cloudTypeSelect.value };
+  });
+}
+
+function initDupCheck(component) {
   const seriesSelect = component.querySelector('#series-select-input');
   if (!seriesSelect) return;
-
-  const series = await getSeries();
-  if (!series) {
-    seriesSelect.pending = false;
-    seriesSelect.disabled = true;
-    return;
-  }
-
-  const filteredSeries = filterSeriesBasedOnCloudType(series, props.payload.cloudType);
-
-  filteredSeries.forEach((s) => {
-    const opt = createTag('sp-menu-item', { value: s.seriesId }, s.seriesName);
-    seriesSelect.append(opt);
-  });
-
-  seriesSelect.pending = false;
 
   seriesSelect.addEventListener('change', () => {
     const seriesId = seriesSelect.value;
@@ -136,17 +134,7 @@ async function populateSeriesOptions(props, component) {
   });
 }
 
-function initCloudTypeSelect(props, component) {
-  const cloudTypeSelect = component.querySelector('#bu-select-input');
-  if (!cloudTypeSelect) return;
-
-  cloudTypeSelect.addEventListener('change', async () => {
-    props.payload = { ...props.payload, cloudType: cloudTypeSelect.value };
-  });
-}
-
 export default async function init(component, props) {
-  component.dataset.cloudType = props.payload.cloudType;
   setTimeout(() => {
     const seriesSelect = component.querySelector('#series-select-input');
 
@@ -162,14 +150,18 @@ export default async function init(component, props) {
   }, 5000);
 
   const eventData = props.eventDataResp;
+  component.dataset.cloudType = props.payload.cloudType || eventData.cloudType;
+  initCloudTypeSelect(props, component);
   prepopulateTimeZone(component);
   initStepLock(component);
-  await populateSeriesOptions(props, component);
-  initCloudTypeSelect(props, component);
+  await populateSeriesOptions(component);
+  toggleFormatSelect(component);
+  initDupCheck(component);
 
   const {
     cloudType,
     seriesId,
+    format,
   } = eventData;
 
   if (cloudType && seriesId) {
@@ -177,6 +169,8 @@ export default async function init(component, props) {
     changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId);
     component.classList.add('prefilled');
   }
+
+  if (format) changeInputValue(component.querySelector('#format-select-input'), 'value', format);
 }
 
 function getTemplateId(bu) {

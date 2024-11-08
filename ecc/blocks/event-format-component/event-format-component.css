@@ -1,7 +1,3 @@
-.event-format-component.form-component div:first-of-type > div > h2 {
-  margin-bottom: 0;
-}
-
 .event-format-component .series-fields-wrapper {
   display: flex;
   gap: 32px;
@@ -22,8 +18,14 @@
 }
 
 .event-format-component .format-picker-wrapper {
+  position: relative;
   display: flex;
   flex-direction: column;
+}
+
+.event-format-component .format-picker-wrapper sp-label {
+  top: -100%;
+  position: absolute;
 }
 
 .event-format-component .format-picker-wrapper.hidden {
