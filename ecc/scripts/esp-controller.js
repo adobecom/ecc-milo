@@ -553,6 +553,33 @@ export async function getSpeaker(seriesId, speakerId) {
   }
 }
 
+export async function getEventSpeaker(seriesId, eventId, speakerId) {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const options = await constructRequestOptions('GET');
+
+  const seriesSpeaker = await getSpeaker(seriesId, speakerId);
+
+  if (seriesSpeaker.error) {
+    window.lana?.log('Failed to get event speaker details. Status:', seriesSpeaker.status, 'Error:', seriesSpeaker);
+    return { status: seriesSpeaker.status, error: seriesSpeaker.error.message };
+  }
+
+  try {
+    const response = await fetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log('Failed to get event speaker details. Status:', response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return convertToSpeaker({ ...seriesSpeaker, type: data.speakerType });
+  } catch (error) {
+    window.lana?.log('Failed to get event speaker details. Error:', error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
 export async function updateSpeaker(profile, seriesId) {
   const nSpeaker = convertToNSpeaker(profile);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
