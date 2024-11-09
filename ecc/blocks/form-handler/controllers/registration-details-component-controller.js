@@ -156,7 +156,7 @@ export function onSubmit(component, props) {
 }
 
 export async function onPayloadUpdate(component, props) {
-  const { cloudType, format } = props.payload;
+  const { cloudType, eventType } = props.payload;
   if (cloudType && cloudType !== component.dataset.cloudType) {
     const registrationConfigsWrapper = component.querySelector('.registration-configs-wrapper');
 
@@ -169,7 +169,7 @@ export async function onPayloadUpdate(component, props) {
     }
 
     if (cloudType === 'DX') {
-      switch (format) {
+      switch (eventType) {
         case 'InPerson':
           buildExperienceCloudInPersonFields(component);
           break;
@@ -180,8 +180,8 @@ export async function onPayloadUpdate(component, props) {
           break;
       }
     }
-  } else if (format && format !== component.dataset.format) {
-    switch (format) {
+  } else if (eventType && eventType !== component.dataset.eventType) {
+    switch (eventType) {
       case 'InPerson':
         buildExperienceCloudInPersonFields(component);
         break;
@@ -202,14 +202,14 @@ export async function onRespUpdate(component, props) {
 
 export default function init(component, props) {
   component.dataset.cloudType = props.payload.cloudType || props.eventDataResp.cloudType;
-  component.dataset.format = props.payload.format || props.eventDataResp.format;
+  component.dataset.eventType = props.payload.eventType || props.eventDataResp.eventType;
 
   switch (component.dataset.cloudType) {
     case 'CreativeCloud':
       buildCreativeCloudFields(component);
       break;
     case 'ExperienceCloud':
-      switch (component.dataset.format) {
+      switch (component.dataset.eventType) {
         case 'InPerson':
           buildExperienceCloudInPersonFields(component);
           break;
