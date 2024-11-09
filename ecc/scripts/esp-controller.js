@@ -163,7 +163,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
 function convertToNSpeaker(profile) {
   const {
     // eslint-disable-next-line max-len
-    speakerId, firstName, lastName, title, company, bio, socialMedia, creationTime, modificationTime,
+    speakerId, firstName, lastName, title, type, bio, socialMedia, creationTime, modificationTime,
   } = profile;
 
   return {
@@ -171,7 +171,7 @@ function convertToNSpeaker(profile) {
     firstName,
     lastName,
     title,
-    company,
+    type,
     bio,
     socialLinks: socialMedia,
     creationTime,
@@ -182,7 +182,7 @@ function convertToNSpeaker(profile) {
 function convertToSpeaker(speaker) {
   const {
     // eslint-disable-next-line max-len
-    speakerId, firstName, lastName, title, company, bio, socialLinks, creationTime, modificationTime, photo,
+    speakerId, firstName, lastName, title, type, bio, socialLinks, creationTime, modificationTime, photo,
   } = speaker;
 
   return {
@@ -190,7 +190,7 @@ function convertToSpeaker(speaker) {
     firstName,
     lastName,
     title,
-    company,
+    type,
     bio,
     photo,
     socialMedia: socialLinks || [],
