@@ -9,8 +9,13 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 // FIXME: mocking with complete list
 function filterSeriesBasedOnCloudType(series, cloudType) {
   if (!cloudType) return [];
-  // return Object.values(series).filter((s) => s.cloudType === cloudType);
-  return Object.values(series);
+  let filteredSeries = Object.values(series).filter((s) => s.cloudType === cloudType);
+
+  if (filteredSeries.length === 0 && cloudType === 'CreativeCloud') {
+    filteredSeries = Object.values(series);
+  }
+
+  return filteredSeries;
 }
 
 function prepopulateTimeZone(component) {
@@ -125,7 +130,11 @@ function initDupCheck(component) {
 
   seriesSelect.addEventListener('change', () => {
     const seriesId = seriesSelect.value;
-    const seriesName = seriesSelect.querySelector(`[value="${seriesId}"]`).textContent;
+    const selectedSeries = seriesSelect.querySelector(`[value="${seriesId}"]`);
+
+    if (!selectedSeries) return;
+
+    const seriesName = selectedSeries.textContent;
 
     BlockMediator.set('eventDupMetrics', {
       ...BlockMediator.get('eventDupMetrics'),
