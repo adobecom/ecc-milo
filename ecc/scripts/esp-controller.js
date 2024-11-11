@@ -12,7 +12,7 @@ const API_CONFIG = {
   esp: {
     dev: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
     dev02: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-c81eb6.stage.cloud.adobe.io' },
-    stage: { host: 'https://events-service-platform-stage.adobe.io' },
+    stage: { host: 'https://events-service-platform-stage-or2.adobe.io' },
     stage02: { host: 'https://events-service-platform-stage02.adobe.io' },
     prod: { host: 'https://events-service-platform.adobe.io' },
   },
