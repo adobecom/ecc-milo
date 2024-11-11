@@ -12,7 +12,7 @@ const API_CONFIG = {
   esp: {
     dev: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
     dev02: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-c81eb6.stage.cloud.adobe.io' },
-    stage: { host: 'https://events-service-platform-stage.adobe.io' },
+    stage: { host: 'https://events-service-platform-stage-or2.adobe.io' },
     stage02: { host: 'https://events-service-platform-stage02.adobe.io' },
     prod: { host: 'https://events-service-platform.adobe.io' },
   },
@@ -163,7 +163,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
 function convertToNSpeaker(profile) {
   const {
     // eslint-disable-next-line max-len
-    speakerId, firstName, lastName, title, company, bio, socialMedia, creationTime, modificationTime,
+    speakerId, firstName, lastName, title, type, bio, socialMedia, creationTime, modificationTime,
   } = profile;
 
   return {
@@ -171,7 +171,7 @@ function convertToNSpeaker(profile) {
     firstName,
     lastName,
     title,
-    company,
+    type,
     bio,
     socialLinks: socialMedia,
     creationTime,
@@ -182,7 +182,7 @@ function convertToNSpeaker(profile) {
 function convertToSpeaker(speaker) {
   const {
     // eslint-disable-next-line max-len
-    speakerId, firstName, lastName, title, company, bio, socialLinks, creationTime, modificationTime, photo,
+    speakerId, firstName, lastName, title, type, bio, socialLinks, creationTime, modificationTime, photo,
   } = speaker;
 
   return {
@@ -190,7 +190,7 @@ function convertToSpeaker(speaker) {
     firstName,
     lastName,
     title,
-    company,
+    type,
     bio,
     photo,
     socialMedia: socialLinks || [],
@@ -549,6 +549,33 @@ export async function getSpeaker(seriesId, speakerId) {
     return convertToSpeaker(data);
   } catch (error) {
     window.lana?.log('Failed to get speaker details. Error:', error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function getEventSpeaker(seriesId, eventId, speakerId) {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const options = await constructRequestOptions('GET');
+
+  const seriesSpeaker = await getSpeaker(seriesId, speakerId);
+
+  if (seriesSpeaker.error) {
+    window.lana?.log('Failed to get event speaker details. Status:', seriesSpeaker.status, 'Error:', seriesSpeaker);
+    return { status: seriesSpeaker.status, error: seriesSpeaker.error.message };
+  }
+
+  try {
+    const response = await fetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log('Failed to get event speaker details. Status:', response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return convertToSpeaker({ ...seriesSpeaker, type: data.speakerType });
+  } catch (error) {
+    window.lana?.log('Failed to get event speaker details. Error:', error);
     return { status: 'Network Error', error: error.message };
   }
 }
