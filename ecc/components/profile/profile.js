@@ -114,11 +114,14 @@ export class Profile extends LitElement {
 
       profile.isPlaceholder = false;
       profile.socialMedia = profile.socialMedia.filter((sm) => sm.link !== '');
+
+      const sProfile = { ...profile };
+      delete sProfile.type;
       let respJson;
       if (this.profile.speakerId) {
-        respJson = await updateSpeaker(profile, this.seriesId);
+        respJson = await updateSpeaker(sProfile, this.seriesId);
       } else {
-        respJson = await createSpeaker(profile, this.seriesId);
+        respJson = await createSpeaker(sProfile, this.seriesId);
       }
 
       if (respJson.error) {
