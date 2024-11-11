@@ -65,6 +65,9 @@ async function populateSeriesOptions(component) {
   const seriesSelect = component.querySelector('#series-select-input');
   if (!seriesSelect) return;
 
+  seriesSelect.pending = true;
+  seriesSelect.disabled = false;
+
   const series = await getSeries();
   if (series.error) {
     seriesSelect.pending = false;
@@ -83,6 +86,7 @@ async function populateSeriesOptions(component) {
   });
 
   seriesSelect.pending = false;
+  seriesSelect.disabled = false;
 }
 
 function toggleFormatSelect(component) {
@@ -159,15 +163,15 @@ export default async function init(component, props) {
         toast.remove();
       });
     }
-  }, 5000);
+  }, 6000);
 
   const eventData = props.eventDataResp;
   component.dataset.cloudType = props.payload.cloudType || eventData.cloudType;
   initCloudTypeSelect(props, component);
   prepopulateTimeZone(component);
-  initStepLock(component);
   await populateSeriesOptions(component);
   toggleFormatSelect(component);
+  initStepLock(component);
   initDupCheck(component);
 
   const {
