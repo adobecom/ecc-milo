@@ -83,7 +83,7 @@ function decorateRegConfigs(component) {
 
   const { cloudType } = component.dataset;
 
-  const attendeeConfigTooltipText = contentMap[cloudType].tooltipText;
+  const attendeeConfigTooltipText = contentMap[cloudType].eventLimit.tooltipText;
 
   const attendeeConfigsWrapper = createTag('div', { class: 'attendee-configs-wrapper' });
   const fieldset = decorateSwitchFieldset({ id: 'registration-disable-waitlist' }, contentMap[cloudType].eventLimit.switchLabelText);

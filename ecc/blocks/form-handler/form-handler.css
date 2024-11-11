@@ -332,8 +332,12 @@
   padding: 32px 12px;
 }
 
-.form-handler .form-component:not(:last-of-type):not(.no-divider) {
+.form-handler .form-component.divider-bottom {
   border-bottom: 3px solid var(--stroke-color-divider);
+}
+
+.form-handler .form-component.divider-top {
+  border-top: 3px solid var(--stroke-color-divider);
 }
 
 .form-handler .event-heading-tooltip-wrapper .event-heading-tooltip-icon {

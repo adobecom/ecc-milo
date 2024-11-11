@@ -67,6 +67,7 @@ async function populateSeriesOptions(component) {
 
   seriesSelect.pending = true;
   seriesSelect.disabled = false;
+  seriesSelect.value = null;
 
   const series = await getSeries();
   if (series.error) {
