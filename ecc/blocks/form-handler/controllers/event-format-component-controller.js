@@ -164,7 +164,7 @@ export default async function init(component, props) {
   const {
     cloudType,
     seriesId,
-    format,
+    eventType,
   } = eventData;
 
   if (cloudType && seriesId) {
@@ -173,7 +173,7 @@ export default async function init(component, props) {
     component.classList.add('prefilled');
   }
 
-  if (format) changeInputValue(component.querySelector('#format-select-input'), 'value', format);
+  if (eventType) changeInputValue(component.querySelector('#format-select-input'), 'value', eventType);
 }
 
 function getTemplateId(bu) {

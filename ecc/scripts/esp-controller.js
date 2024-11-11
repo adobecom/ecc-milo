@@ -50,6 +50,27 @@ export const getCaasTags = (() => {
   };
 })();
 
+export async function getMiloTagsData(cloudType) {
+  if (!cloudType) return [];
+
+  const sheetLocation = {
+    DX: '/ecc/system/tags/dx.json',
+    CreativeCloud: '/ecc/system/tags/dme.json',
+  };
+
+  if (!sheetLocation[cloudType]) return [];
+
+  const resp = await fetch(sheetLocation[cloudType]);
+
+  if (!resp.ok) {
+    window.lana?.log('Failed to load tags data. Status:', resp.status);
+    return [];
+  }
+
+  const json = await resp.json();
+  return json.data;
+}
+
 function waitForAdobeIMS() {
   return new Promise((resolve) => {
     const checkIMS = () => {

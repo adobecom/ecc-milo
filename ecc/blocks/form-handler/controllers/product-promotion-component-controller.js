@@ -11,15 +11,19 @@ export function onSubmit(component, props) {
 
   if (selectedProducts) {
     const topicsVal = props.payload.fullTopicsValue?.map((x) => JSON.parse(x));
-    const relatedProducts = selectedProducts
-      .filter((p) => topicsVal.find((t) => p.tagID?.includes(t.tagID)))
-      .map((p) => ({
-        name: p.title,
-        showProductBlade: !!p.showProductBlade,
-        tags: p.tags.map((t) => t.tagID).join(','),
-      }));
+    if (topicsVal) {
+      const relatedProducts = selectedProducts
+        .filter((p) => topicsVal.find((t) => p.tagID?.includes(t.tagID)))
+        .map((p) => ({
+          name: p.title,
+          showProductBlade: !!p.showProductBlade,
+          tags: p.tags.map((t) => t.tagID).join(','),
+        }));
 
-    props.payload = { ...props.payload, relatedProducts };
+      props.payload = { ...props.payload, relatedProducts };
+    } else {
+      delete props.payload.relatedProducts;
+    }
   }
 }
 
@@ -101,6 +105,12 @@ async function updateProductSelector(component, props) {
 }
 
 export async function onPayloadUpdate(component, props) {
+  const { cloudType } = props.payload;
+
+  if (cloudType && cloudType !== component.dataset.cloudType) {
+    component.dataset.cloudType = cloudType;
+  }
+
   await updateProductSelector(component, props);
 }
 
@@ -109,6 +119,8 @@ export async function onRespUpdate(_component, _props) {
 }
 
 export default async function init(component, props) {
+  const { cloudType } = props.payload || props.eventDataResp;
+  if (cloudType) component.dataset.cloudType = cloudType;
   const eventData = props.eventDataResp;
   const productGroup = component.querySelector('product-selector-group');
 

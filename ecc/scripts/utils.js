@@ -113,21 +113,24 @@ export function getEventPageHost() {
   return window.location.origin;
 }
 
-export function addTooltipToHeading(em, heading) {
-  const tooltipText = em.textContent.trim();
+export function addTooltipToEl(tooltipText, appendee) {
+  if (!tooltipText || !appendee) return;
+
   const toolTipTrigger = createTag('sp-action-button', { size: 's' }, getIcon('info'));
   createTag('sp-tooltip', { 'self-managed': true, variant: 'info' }, tooltipText, { parent: toolTipTrigger });
 
-  heading.append(toolTipTrigger);
-  em.parentElement?.remove();
+  appendee.append(toolTipTrigger);
 }
 
 export function generateToolTip(el) {
   const heading = el.querySelector('h2, h3');
   const em = el.querySelector('p > em');
 
-  if (heading && em) {
-    addTooltipToHeading(em, heading);
+  const tooltipText = em?.textContent.trim();
+
+  if (heading && tooltipText) {
+    addTooltipToEl(tooltipText, heading);
+    em.parentElement?.remove();
   }
 }
 

@@ -354,20 +354,14 @@
   padding: 0 12px;
 }
 
-.form-handler .form-component > div:first-of-type > div > h2 sp-action-button,
-.form-handler .form-component > div:first-of-type > div > h3 sp-action-button,
-.form-handler .section:not(:first-of-type) > div.content > h2 sp-action-button,
-.form-handler .section:not(:first-of-type) > div.content > h3 sp-action-button {
+.form-handler sp-action-button:has(sp-tooltip) {
   padding: 0;
   background: none;
   border: none;
   cursor: help
 }
 
-.form-handler .form-component > div:first-of-type > div > h2 sp-action-button .icon-info,
-.form-handler .form-component > div:first-of-type > div > h3 sp-action-button .icon-info,
-.form-handler .section:not(:first-of-type) > div.content > h2 sp-action-button .icon-info,
-.form-handler .section:not(:first-of-type) > div.content > h3 sp-action-button .icon-info {
+.form-handler sp-action-button:has(sp-tooltip) .icon-info {
   display: block;
 }
 
@@ -521,6 +515,11 @@
 
 .form-handler .custom-switch:has(input[type='checkbox']:checked)::before {
   transform: translateX(16px);
+}
+
+.form-handler .form-component.dme-only[data-cloud-type='DX'],
+.form-handler .form-component.dx-only[data-cloud-type='CreativeCloud'] {
+  display: none;
 }
 
 @media screen and (min-width: 900px) {

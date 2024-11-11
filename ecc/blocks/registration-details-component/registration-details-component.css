@@ -22,6 +22,7 @@
 .registration-details-component .attendee-count {
   display: inline-flex;
   flex-direction: column;
+  position: relative;
 }
 
 .registration-details-component .attendee-count input {
@@ -32,6 +33,9 @@
 
 .registration-details-component .attendee-count label {
   font-size: var(--type-body-xxs-size);
+  line-height: var(--type-body-xxs-lh);
+  position: absolute;
+  bottom: 100%;
 }
 
 .registration-details-component .rsvp-field-wrapper sp-textfield {
@@ -43,9 +47,13 @@
 }
 
 .registration-details-component fieldset.checkboxes-wrapper,
-.host-contact-wrapper {
+.registration-details-component .host-contact-wrapper {
   display: flex;
   gap: 32px;
+}
+
+.registration-details-component .host-contact-wrapper sp-help-text {
+  position: absolute;
 }
 
 .registration-details-component .attendee-fields-wrapper fieldset.checkboxes-wrapper {

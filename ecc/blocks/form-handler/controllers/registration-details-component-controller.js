@@ -1,7 +1,38 @@
 import { LIBS } from '../../../scripts/scripts.js';
-import { decorateSwitchFieldset } from '../../../scripts/utils.js';
+import { addTooltipToEl, decorateSwitchFieldset } from '../../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
+
+const contentMap = {
+  CreativeCloud: {
+    tooltipText: 'Optionally enable email links to the host or add a description to the RSVP process for your attendees.',
+    eventLimit: {
+      inputLabelText: 'Registration limit',
+      switchLabelText: 'When limit is reached, disable registration button',
+      tooltipText: 'When no limit is set, all users will be admitted into event.',
+    },
+    contactHost: {
+      switchLabelText: 'Contact host',
+      tooltipText: 'Contact host is optional.',
+    },
+  },
+  DX: {
+    tooltipText: 'Dx events are waitlist only. Call-to-action buttons are will only allow waitlisting.',
+    eventLimit: {
+      inputLabelText: 'Waitlist limit',
+      switchLabelText: 'When limit is reached, disable registration button',
+      tooltipText: 'When no limit is set, all users will be admitted into event.',
+    },
+    loginRequired: {
+      switchLabelText: 'Require login to register',
+      tooltipText: 'When selected, require users to login or create an Adobe ID',
+    },
+    contactHost: {
+      switchLabelText: 'Contact host',
+      tooltipText: 'Contact host is optional.',
+    },
+  },
+};
 
 /* eslint-disable no-unused-vars */
 function prefillFields(component, props) {
@@ -45,30 +76,22 @@ function prefillFields(component, props) {
   }
 }
 
-function decorateRegConfigsRadios(component) {
+function decorateRegConfigs(component) {
   const regFieldswrapper = component.querySelector('.registration-configs-wrapper');
 
   if (!regFieldswrapper) return;
 
   const { cloudType } = component.dataset;
 
-  let labelText = '';
-
-  switch (cloudType) {
-    case 'ExperienceCloud':
-      labelText = 'Waitlist limit';
-      break;
-    case 'CreativeCloud':
-    default:
-      labelText = 'Registration limit';
-      break;
-  }
+  const attendeeConfigTooltipText = contentMap[cloudType].tooltipText;
 
   const attendeeConfigsWrapper = createTag('div', { class: 'attendee-configs-wrapper' });
-  const fieldset = decorateSwitchFieldset({ id: 'registration-disable-waitlist' }, 'When limit is reached, disable registration button');
+  const fieldset = decorateSwitchFieldset({ id: 'registration-disable-waitlist' }, contentMap[cloudType].eventLimit.switchLabelText);
+
+  if (attendeeConfigTooltipText) addTooltipToEl(attendeeConfigTooltipText, fieldset);
 
   const attendeeCount = createTag('div', { class: 'attendee-count' });
-  const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, labelText);
+  const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, contentMap[cloudType].eventLimit.inputLabelText);
   const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number', min: 0 });
 
   attendeeCount.append(label, input);
@@ -91,6 +114,8 @@ function decorateHostEmailField(component) {
   });
   createTag('sp-help-text', { size: 's', slot: 'help-text' }, 'Add host email', { parent: input });
 
+  addTooltipToEl(contentMap[component.dataset.cloudType].contactHost.tooltipText, fieldset);
+
   const wrapperDiv = createTag('div', { class: 'host-contact-wrapper' });
   wrapperDiv.append(fieldset, input);
 
@@ -106,22 +131,26 @@ function decorateLoginRequirementToggle(component) {
   const fieldset = decorateSwitchFieldset({ id: 'registration-login-required' }, 'Require login to register');
   loginRequirementWrapper.append(fieldset);
 
+  if (contentMap[component.dataset.cloudType].loginRequired.tooltipText) {
+    addTooltipToEl(contentMap[component.dataset.cloudType].loginRequired.tooltipText, fieldset);
+  }
+
   regFieldswrapper.append(loginRequirementWrapper);
 }
 
 function buildCreativeCloudFields(component) {
-  decorateRegConfigsRadios(component);
+  decorateRegConfigs(component);
   decorateHostEmailField(component);
 }
 
 function buildExperienceCloudInPersonFields(component) {
-  decorateRegConfigsRadios(component);
+  decorateRegConfigs(component);
   decorateLoginRequirementToggle(component);
   decorateHostEmailField(component);
 }
 
 function buildExperienceCloudWebinarFields(component) {
-  decorateRegConfigsRadios(component);
+  decorateRegConfigs(component);
   decorateLoginRequirementToggle(component);
 }
 
@@ -155,9 +184,24 @@ export function onSubmit(component, props) {
   props.payload = { ...props.payload, ...rsvpData };
 }
 
+function updateHeadingTooltip(component) {
+  const tooltip = component.querySelector(':scope > div .sp-tooltip');
+  if (!tooltip) return;
+
+  const { cloudType } = component.dataset;
+  const { tooltipText } = contentMap[cloudType];
+
+  tooltip.textContent = tooltipText;
+}
+
 export async function onPayloadUpdate(component, props) {
   const { cloudType, eventType } = props.payload;
+  if (eventType && eventType !== component.dataset.eventType) {
+    component.dataset.eventType = eventType;
+  }
+
   if (cloudType && cloudType !== component.dataset.cloudType) {
+    component.dataset.cloudType = cloudType;
     const registrationConfigsWrapper = component.querySelector('.registration-configs-wrapper');
 
     if (!registrationConfigsWrapper) return;
@@ -173,23 +217,27 @@ export async function onPayloadUpdate(component, props) {
         case 'InPerson':
           buildExperienceCloudInPersonFields(component);
           break;
-        case 'webinar':
+        case 'Webinar':
           buildExperienceCloudWebinarFields(component);
           break;
         default:
           break;
       }
     }
+
+    updateHeadingTooltip(component);
   } else if (eventType && eventType !== component.dataset.eventType) {
-    switch (eventType) {
-      case 'InPerson':
-        buildExperienceCloudInPersonFields(component);
-        break;
-      case 'webinar':
-        buildExperienceCloudWebinarFields(component);
-        break;
-      default:
-        break;
+    if (cloudType === 'DX') {
+      switch (eventType) {
+        case 'InPerson':
+          buildExperienceCloudInPersonFields(component);
+          break;
+        case 'Webinar':
+          buildExperienceCloudWebinarFields(component);
+          break;
+        default:
+          break;
+      }
     }
   }
 }
@@ -208,7 +256,7 @@ export default function init(component, props) {
     case 'CreativeCloud':
       buildCreativeCloudFields(component);
       break;
-    case 'ExperienceCloud':
+    case 'DX':
       switch (component.dataset.eventType) {
         case 'InPerson':
           buildExperienceCloudInPersonFields(component);
