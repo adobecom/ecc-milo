@@ -38,7 +38,7 @@ function prepopulateTimeZone(component) {
 
 function initStepLock(component) {
   const step = component.closest('.fragment');
-  const inputs = component.querySelectorAll('#bu-select-input, #series-select-input');
+  const inputs = component.querySelectorAll('#bu-select-input, #series-select-input, #format-select-input');
 
   const onFormatChange = () => {
     const componentSections = step.querySelectorAll('.section:not(:first-of-type)');
@@ -67,7 +67,7 @@ async function populateSeriesOptions(component) {
 
   seriesSelect.pending = true;
   seriesSelect.disabled = false;
-  seriesSelect.value = null;
+  changeInputValue(seriesSelect, 'value', null);
 
   const series = await getSeries();
   if (series.error) {
@@ -181,13 +181,16 @@ export default async function init(component, props) {
     eventType,
   } = eventData;
 
-  if (cloudType && seriesId) {
+  if (cloudType && seriesId && eventType) {
     changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType);
     changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId);
+    changeInputValue(component.querySelector('#format-select-input'), 'value', eventType);
     component.classList.add('prefilled');
   }
 
-  if (eventType) changeInputValue(component.querySelector('#format-select-input'), 'value', eventType);
+  if (!eventType) {
+    changeInputValue(component.querySelector('#format-select-input'), 'value', 'InPerson');
+  }
 }
 
 function getTemplateId(bu) {
@@ -214,8 +217,6 @@ export function onSubmit(component, props) {
     seriesId,
     templateId,
   };
-
-  if (cloudType === 'CreativeCloud') eventFormat.eventType = 'InPerson';
 
   props.payload = { ...props.payload, ...eventFormat };
 }
