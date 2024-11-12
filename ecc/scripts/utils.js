@@ -283,9 +283,14 @@ export async function getSecret(key) {
 }
 
 export function getServiceName(link) {
-  const url = new URL(link);
-
-  return url.hostname.replace('.com', '').replace('www.', '');
+  try {
+    const url = new URL(link);
+    const { hostname } = url;
+    return hostname.replace('.com', '').replace('www.', '');
+  } catch (error) {
+    window.lana?.log('Error trying to get service name:', error);
+    return '';
+  }
 }
 
 export async function miloReplaceKey(key) {
