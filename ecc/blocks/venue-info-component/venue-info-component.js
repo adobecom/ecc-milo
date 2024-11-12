@@ -53,72 +53,24 @@ function buildAdditionalInfo(row) {
 }
 
 function buildLocationInputGrid(row) {
-  const subs = row.querySelectorAll('li');
   const locationDetailsWrapper = createTag('div', { class: 'location-wrapper' });
 
-  subs.forEach((sub, i) => {
-    const placeholder = sub.textContent.trim();
-    switch (i) {
-      case 0:
-        locationDetailsWrapper.append(createTag('sp-textfield', {
-          id: 'location-city',
-          class: 'location-input venue-info-text text-input',
-          placeholder,
-          required: true,
-          type: 'text',
-          quiet: true,
-          size: 'l',
-          readonly: true,
-        }));
-        break;
-      case 1:
-        locationDetailsWrapper.append(createTag('sp-textfield', {
-          id: 'location-state',
-          class: 'location-input venue-info-text text-input',
-          placeholder,
-          required: true,
-          type: 'text',
-          quiet: true,
-          size: 'l',
-          readonly: true,
-        }));
-        break;
-      case 2:
-        locationDetailsWrapper.append(createTag('sp-textfield', {
-          id: 'location-postal-code',
-          class: 'location-input venue-info-text text-input',
-          placeholder,
-          required: true,
-          type: 'text',
-          quiet: true,
-          size: 'l',
-          readonly: true,
-        }));
-        break;
-      case 3:
-        locationDetailsWrapper.append(createTag('sp-textfield', {
-          id: 'location-country',
-          class: 'location-input venue-info-text text-input',
-          placeholder,
-          required: true,
-          type: 'text',
-          quiet: true,
-          size: 'l',
-          readonly: true,
-        }));
-        break;
-      default:
-        break;
-    }
-  });
+  const cityInput = createTag('input', { id: 'location-city', type: 'hidden' });
+  const stateInput = createTag('input', { id: 'location-state', type: 'hidden' });
+  const postalCodeInput = createTag('input', { id: 'location-postal-code', type: 'hidden' });
+  const countryInput = createTag('input', { id: 'location-country', type: 'hidden' });
   const stateCodeInput = createTag('input', { id: 'location-state-code', type: 'hidden' });
   const placeIdInput = createTag('input', { id: 'google-place-id', type: 'hidden' });
   const mapUrlInput = createTag('input', { id: 'google-map-url', type: 'hidden' });
   const placeLATInput = createTag('input', { id: 'google-place-lat', type: 'hidden' });
   const placeLNGInput = createTag('input', { id: 'google-place-lng', type: 'hidden' });
   const gmtOffsetInput = createTag('input', { id: 'google-place-gmt-offset', type: 'hidden' });
-  const formattedAddressInput = createTag('input', { id: 'google-place-formatted-address', type: 'hidden' });
+  const formattedAddressInput = createTag('input', { id: 'venue-info-venue-address', type: 'hidden' });
   locationDetailsWrapper.append(
+    cityInput,
+    stateInput,
+    postalCodeInput,
+    countryInput,
     stateCodeInput,
     placeIdInput,
     mapUrlInput,
@@ -151,7 +103,7 @@ export default function init(el) {
         break;
       case 2:
         decorateSWCTextField(r, {
-          id: 'venue-info-venue-address',
+          id: 'google-place-formatted-address',
           quiet: true,
           size: 'xl',
           readonly: true,
