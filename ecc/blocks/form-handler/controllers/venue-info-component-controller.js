@@ -209,7 +209,11 @@ function initAutocomplete(el, props) {
       changeInputValue(mapUrl, 'value', place.url);
 
       togglePrefillableFieldsHiddenState(el);
-      BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city: addressInfo.city });
+      BlockMediator.set('eventDupMetrics', {
+        ...BlockMediator.get('eventDupMetrics'),
+        city: addressInfo.city,
+        stateCode: addressInfo.stateCode,
+      });
     }
 
     if (place.geometry) {
@@ -246,7 +250,7 @@ export default async function init(component, props) {
   venueNameInput.addEventListener('change', () => {
     if (!venueNameInput.value) {
       resetAllFields(component);
-      togglePrefillableFieldsHiddenState(component, true);
+      togglePrefillableFieldsHiddenState(component);
     }
   });
 
