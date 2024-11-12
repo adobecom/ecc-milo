@@ -5,17 +5,9 @@ import { changeInputValue, getEventServiceEnv, getSecret } from '../../../script
 import { buildErrorMessage } from '../form-handler.js';
 
 function togglePrefillableFieldsHiddenState(component) {
-  const address = component.querySelector('#venue-info-venue-address');
-  const city = component.querySelector('#location-city');
-  const state = component.querySelector('#location-state');
-  const postal = component.querySelector('#location-postal-code');
-  const county = component.querySelector('#location-country');
+  const address = component.querySelector('#google-place-formatted-address');
 
-  const hasUnfilledFields = [address, city, state, postal, county].some((input) => !input.value);
-
-  [address, city, state, postal, county].forEach((input) => {
-    input.classList.toggle('hidden', hasUnfilledFields);
-  });
+  address.classList.toggle('hidden', !address.value);
 }
 
 async function loadGoogleMapsAPI(callback) {
@@ -220,7 +212,6 @@ function initAutocomplete(el, props) {
       }
 
       if (place.name) changeInputValue(venueName, 'value', place.name);
-      if (place.formatted_address) changeInputValue(address, 'value', place.formatted_address);
       changeInputValue(address, 'value', addressInfo.address);
       changeInputValue(city, 'value', addressInfo.city);
       changeInputValue(state, 'value', addressInfo.state);
@@ -240,7 +231,9 @@ function initAutocomplete(el, props) {
       placeLNG.value = place.geometry.location.lng();
     }
 
-
+    if (place.formatted_address) {
+      formattedAddress.value = place.formatted_address;
+    }
   });
 }
 
