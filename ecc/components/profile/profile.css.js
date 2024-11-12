@@ -170,4 +170,10 @@ modal{
 .edit-profile-title {
   color: var(--color-red);
 }
+
+sp-theme.toast-area {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem
+}
 `;

@@ -103,7 +103,7 @@ export class Profile extends LitElement {
 
     try {
       const profile = edited ? structuredClone(this.profileCopy) : structuredClone(this.profile);
-      const correctSocialMedia = profile.socialMedia.filter((sm) => sm.link !== '' && sm.link?.match(LINK_REGEX));
+      const correctSocialMedia = profile.socialMedia.filter((sm) => sm.link === '' || sm.link?.match(LINK_REGEX));
 
       if (correctSocialMedia.length < profile.socialMedia.length) {
         const dialogToastParent = edited ? this.shadowRoot.querySelector('.edit-profile-dialog') : null;
