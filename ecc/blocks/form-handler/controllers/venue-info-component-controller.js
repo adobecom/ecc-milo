@@ -194,7 +194,6 @@ function initAutocomplete(el, props) {
         if (streetAddressCandidates.some((type) => component.types.includes(type))) {
           addressInfo.address += `${component.long_name} `;
         }
-
         if (!addressInfo.city
           && cityCandidates.some((type) => component.types.includes(type))) {
           addressInfo.city = component.long_name;
