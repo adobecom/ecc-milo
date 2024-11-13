@@ -76,7 +76,7 @@ export function getFilteredCachedResponse() {
  * @param {*} value2 - The second value to compare.
  * @returns {boolean} - Returns true if the values are different, otherwise false.
  */
-export function compareObjects(value1, value2) {
+export function compareObjects(value1, value2, lengthOnly = false) {
   if (
     typeof value1 === 'object'
     && value1 !== null
@@ -93,9 +93,12 @@ export function compareObjects(value1, value2) {
       // Change detected due to different array lengths
       return true;
     }
-    for (let i = 0; i < value1.length; i += 1) {
-      if (compareObjects(value1[i], value2[i])) {
-        return true;
+
+    if (!lengthOnly) {
+      for (let i = 0; i < value1.length; i += 1) {
+        if (compareObjects(value1[i], value2[i])) {
+          return true;
+        }
       }
     }
   } else if (value1 !== value2) {
@@ -143,7 +146,11 @@ export function hasContentChanged(oldData, newData) {
 
   // Check for differences in the actual values
   return oldDataKeys.some(
-    (key) => key !== 'modificationTime' && compareObjects(oldData[key], newData[key]),
+    (key) => {
+      const lengthOnly = key === 'speakers' && !oldData[key].ordinal;
+
+      return !ignoreList.includes(key) && compareObjects(oldData[key], newData[key], lengthOnly);
+    },
   );
 }
 
