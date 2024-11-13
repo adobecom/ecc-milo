@@ -573,7 +573,7 @@ export async function getEventSpeaker(seriesId, eventId, speakerId) {
       return { status: response.status, error: data };
     }
 
-    return convertToSpeaker({ ...seriesSpeaker, type: data.speakerType });
+    return { ...seriesSpeaker, type: data.speakerType };
   } catch (error) {
     window.lana?.log('Failed to get event speaker details. Error:', error);
     return { status: 'Network Error', error: error.message };
