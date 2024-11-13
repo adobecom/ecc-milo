@@ -129,6 +129,7 @@ export function hasContentChanged(oldData, newData) {
     'status',
     'platform',
     'platformCode',
+    'liveUpdate',
   ];
 
   // Checking keys counts
