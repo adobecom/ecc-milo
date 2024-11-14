@@ -255,7 +255,7 @@ async function populateRow(props, index) {
 
   ATTENDEE_ATTR_MAP.forEach(({ key, fallback }, i, arr) => {
     const td = createTag('td', {}, attendee[key] || fallback, { parent: row });
-    if (['type', 'checkedIn'].includes(key)) {
+    if (stickyColumns.includes(key)) {
       td.classList.add(`sticky-right-${arr.length - i}`, 'actions');
     }
   });
