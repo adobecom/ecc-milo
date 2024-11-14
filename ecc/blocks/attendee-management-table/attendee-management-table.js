@@ -93,6 +93,8 @@ const ATTENDEE_ATTR_MAP = [
   },
 ];
 
+const stickyColumns = ['registrationStatus', 'checkedIn'];
+
 const FILTER_MAP = {
   companyName: [],
   jobTitle: [],
@@ -348,7 +350,7 @@ function buildTableHeaders(props, config) {
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
 
-    if (['type', 'checkedIn'].includes(key)) th.classList.add('actions', `sticky-right-${arr.length - i}`);
+    if (stickyColumns.includes(key)) th.classList.add('actions', `sticky-right-${arr.length - i}`);
     th.classList.add('sortable');
     th.dataset.field = key;
   });
