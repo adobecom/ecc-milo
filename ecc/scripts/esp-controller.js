@@ -66,7 +66,7 @@ function waitForAdobeIMS() {
 }
 
 export async function constructRequestOptions(method, body = null) {
-  const secretEnv = window.location.hostname === 'localhost' ? 'dev' : getEventServiceEnv();
+  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
@@ -100,12 +100,13 @@ export async function constructRequestOptions(method, body = null) {
 }
 
 export async function uploadImage(file, configs, tracker, imageId = null) {
+  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
   ] = await Promise.all([
     import(`${LIBS}/utils/getUuid.js`),
-    getSecret(`${getEventServiceEnv()}-client-identity`),
+    getSecret(`${secretEnv}-client-identity`),
     waitForAdobeIMS(),
   ]);
 
