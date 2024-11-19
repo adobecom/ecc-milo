@@ -21,7 +21,7 @@ export function getEventServiceEnv() {
     if (host.startsWith('main--')) return 'prod';
   }
 
-  if (host.includes('localhost')) return 'dev';
+  if (host.includes('localhost')) return 'local';
 
   if (host.includes('stage.adobe')
     || host.includes('corp.adobe')
@@ -286,9 +286,14 @@ export async function getSecret(key) {
 }
 
 export function getServiceName(link) {
-  const url = new URL(link);
-
-  return url.hostname.replace('.com', '').replace('www.', '');
+  try {
+    const url = new URL(link);
+    const { hostname } = url;
+    return hostname.replace('.com', '').replace('www.', '');
+  } catch (error) {
+    window.lana?.log('Error trying to get service name:', error);
+    return '';
+  }
 }
 
 export async function miloReplaceKey(key) {
