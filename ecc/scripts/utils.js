@@ -21,7 +21,7 @@ export function getEventServiceEnv() {
     if (host.startsWith('main--')) return 'prod';
   }
 
-  if (host.includes('localhost')) return 'dev';
+  if (host.includes('localhost')) return 'local';
 
   if (host.includes('stage.adobe')
     || host.includes('corp.adobe')
