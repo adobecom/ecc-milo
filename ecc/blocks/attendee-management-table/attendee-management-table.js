@@ -717,7 +717,7 @@ export default async function init(el) {
 
   const sp = new URLSearchParams(window.location.search);
   const devToken = sp.get('devToken');
-  if (devToken && getEventServiceEnv() === 'dev') {
+  if (devToken && getEventServiceEnv() === 'local') {
     buildDashboard(el, config);
     return;
   }
