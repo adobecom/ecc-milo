@@ -103,7 +103,7 @@ export class Profile extends LitElement {
 
     try {
       const profile = edited ? structuredClone(this.profileCopy) : structuredClone(this.profile);
-      const correctSocialMedia = profile.socialMedia.filter((sm) => sm.link !== '' && sm.link?.match(LINK_REGEX));
+      const correctSocialMedia = profile.socialMedia.filter((sm) => sm.link === '' || sm.link?.match(LINK_REGEX));
 
       if (correctSocialMedia.length < profile.socialMedia.length) {
         const dialogToastParent = edited ? this.shadowRoot.querySelector('.edit-profile-dialog') : null;
@@ -114,11 +114,14 @@ export class Profile extends LitElement {
 
       profile.isPlaceholder = false;
       profile.socialMedia = profile.socialMedia.filter((sm) => sm.link !== '');
+
+      const sProfile = { ...profile };
+      delete sProfile.type;
       let respJson;
       if (this.profile.speakerId) {
-        respJson = await updateSpeaker(profile, this.seriesId);
+        respJson = await updateSpeaker(sProfile, this.seriesId);
       } else {
-        respJson = await createSpeaker(profile, this.seriesId);
+        respJson = await createSpeaker(sProfile, this.seriesId);
       }
 
       if (respJson.error) {
