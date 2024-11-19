@@ -4,7 +4,6 @@ import {
   generateToolTip,
   decorateTextfield,
   decorateTextarea,
-  convertTo24HourFormat,
   miloReplaceKey,
 } from '../../scripts/utils.js';
 
@@ -42,13 +41,25 @@ function buildTimePicker(column, wrapper) {
 
       if (j === 1) {
         const timeSlots = c.querySelectorAll('li');
-        const select = createTag('sp-picker', { id: `time-picker-${pickerHandle}`, class: 'select-input', required: true, label: '-' });
+        const selectWrapper = createTag('div', { class: 'select-wrapper' });
+        const submitValueHolder = createTag('input', { type: 'hidden', name: `time-picker-${pickerHandle}`, id: `time-picker-${pickerHandle}-value`, value: '' });
+        const timeSelect = createTag('sp-picker', { id: `time-picker-${pickerHandle}`, class: 'select-input', required: true, label: '-' });
+        const ampmSelect = createTag('sp-picker', { id: `ampm-picker-${pickerHandle}`, class: 'select-input', required: true, label: '-' });
+
         timeSlots.forEach((t) => {
           const text = t.textContent.trim();
-          const opt = createTag('sp-menu-item', { value: convertTo24HourFormat(text) }, text);
-          select.append(opt);
+          const opt = createTag('sp-menu-item', { value: text }, text);
+          timeSelect.append(opt);
         });
-        timePickerWrapper.append(select);
+
+        ['AM', 'PM'].forEach((t, ti) => {
+          const opt = createTag('sp-menu-item', { value: t }, t);
+          if (ti === 0) opt.selected = true;
+          ampmSelect.append(opt);
+        });
+
+        selectWrapper.append(timeSelect, ampmSelect, submitValueHolder);
+        timePickerWrapper.append(selectWrapper);
       }
     });
 

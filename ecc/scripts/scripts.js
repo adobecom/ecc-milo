@@ -111,6 +111,11 @@ const CONFIG = {
   // fallbackRouting: 'off',
   decorateArea,
   locales,
+  adobeid: {
+    onTokenExpired: () => {
+      window.locaton.reload();
+    },
+  },
 };
 
 // Decorate the page with site specific needs.
