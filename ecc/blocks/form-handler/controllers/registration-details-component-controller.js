@@ -7,7 +7,7 @@ const contentMap = {
   CreativeCloud: {
     tooltipText: 'Optionally enable email links to the host or add a description to the RSVP process for your attendees.',
     eventLimit: {
-      inputLabelText: 'Registration limit',
+      inputLabelText: 'Attendee limit',
       switchLabelText: 'When limit is reached, disable registration button',
       tooltipText: 'When no limit is set, all users will be admitted into event.',
     },
@@ -19,9 +19,12 @@ const contentMap = {
   DX: {
     tooltipText: 'Dx events are waitlist only. Call-to-action buttons are will only allow waitlisting.',
     eventLimit: {
-      inputLabelText: 'Waitlist limit',
+      inputLabelText: 'Attendee limit',
       switchLabelText: 'When limit is reached, disable registration button',
-      tooltipText: 'When no limit is set, all users will be admitted into event.',
+      tooltipText: {
+        count: 'When no limit is set, all users will be admitted into event.',
+        config: 'When selected, disable registration button when limit is reached.',
+      },
     },
     loginRequired: {
       switchLabelText: 'Require login to register',
@@ -86,7 +89,8 @@ function decorateRegConfigs(component) {
   const leftCol = createTag('div', { class: 'left-col' });
   const rightCol = createTag('div', { class: 'right-col' });
 
-  const attendeeConfigTooltipText = contentMap[cloudType].eventLimit.tooltipText;
+  const attendeeCountTooltipText = contentMap[cloudType].eventLimit.tooltipText.count;
+  const attendeeConfigTooltipText = contentMap[cloudType].eventLimit.tooltipText.config;
 
   const attendeeConfigsWrapper = createTag('div', { class: 'attendee-configs-wrapper' });
   const fieldset = decorateSwitchFieldset({ id: 'registration-disable-waitlist' }, contentMap[cloudType].eventLimit.switchLabelText);
@@ -94,10 +98,13 @@ function decorateRegConfigs(component) {
   if (attendeeConfigTooltipText) addTooltipToEl(attendeeConfigTooltipText, fieldset);
 
   const attendeeCount = createTag('div', { class: 'attendee-count' });
+  const attendeeCountInputWrapper = createTag('div', { class: 'attendee-count-input-wrapper' });
   const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, contentMap[cloudType].eventLimit.inputLabelText);
   const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number', min: 0 });
 
-  attendeeCount.append(label, input);
+  attendeeCountInputWrapper.append(label, input);
+  attendeeCount.append(attendeeCountInputWrapper);
+  if (attendeeCountTooltipText) addTooltipToEl(attendeeCountTooltipText, attendeeCount);
 
   leftCol.append(attendeeCount);
   rightCol.append(fieldset);
