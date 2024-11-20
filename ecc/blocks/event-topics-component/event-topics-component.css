@@ -8,14 +8,6 @@
   gap: 12px;
 }
 
-.event-topics-component .checkbox-wrapper sp-action-button > sp-icon {
-  display: none;
-}
-
-.event-topics-component .checkbox-wrapper sp-action-button[selected]> sp-icon {
-  display: block;
-}
-
 .event-topics-component sp-progress-circle {
   margin: auto;
 }
