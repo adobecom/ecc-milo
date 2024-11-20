@@ -7,16 +7,23 @@
 }
 
 .registration-details-component .registration-configs-wrapper {
+  display: grid;
   margin-bottom: 24px;
 }
 
 .registration-details-component .registration-configs-wrapper > div {
   margin-bottom: 16px;
+  display: flex;
+  gap: 2rem;
+  padding: 0 16px;
+}
+
+.registration-details-component .registration-configs-wrapper .left-col {
+  width: 128px;
 }
 
 .registration-details-component .attendee-configs-wrapper {
-  display: flex;
-  gap: 2rem;
+  align-items: flex-end;
 }
 
 .registration-details-component .attendee-count {
@@ -34,7 +41,6 @@
 .registration-details-component .attendee-count label {
   font-size: var(--type-body-xxs-size);
   line-height: var(--type-body-xxs-lh);
-  position: absolute;
   bottom: 100%;
 }
 

@@ -83,6 +83,9 @@ function decorateRegConfigs(component) {
 
   const { cloudType } = component.dataset;
 
+  const leftCol = createTag('div', { class: 'left-col' });
+  const rightCol = createTag('div', { class: 'right-col' });
+
   const attendeeConfigTooltipText = contentMap[cloudType].eventLimit.tooltipText;
 
   const attendeeConfigsWrapper = createTag('div', { class: 'attendee-configs-wrapper' });
@@ -96,7 +99,9 @@ function decorateRegConfigs(component) {
 
   attendeeCount.append(label, input);
 
-  attendeeConfigsWrapper.append(fieldset, attendeeCount);
+  leftCol.append(attendeeCount);
+  rightCol.append(fieldset);
+  attendeeConfigsWrapper.append(leftCol, rightCol);
   regFieldswrapper.append(attendeeConfigsWrapper);
 }
 
@@ -104,6 +109,9 @@ function decorateHostEmailField(component) {
   const regFieldswrapper = component.querySelector('.registration-configs-wrapper');
 
   if (!regFieldswrapper) return;
+
+  const leftCol = createTag('div', { class: 'left-col' });
+  const rightCol = createTag('div', { class: 'right-col' });
 
   const fieldset = decorateSwitchFieldset({ id: 'registration-contact-host' }, 'Contact host');
   const input = createTag('sp-textfield', {
@@ -116,8 +124,9 @@ function decorateHostEmailField(component) {
 
   addTooltipToEl(contentMap[component.dataset.cloudType].contactHost.tooltipText, fieldset);
 
+  rightCol.append(fieldset, input);
   const wrapperDiv = createTag('div', { class: 'host-contact-wrapper' });
-  wrapperDiv.append(fieldset, input);
+  wrapperDiv.append(leftCol, rightCol);
 
   regFieldswrapper.append(wrapperDiv);
 }
@@ -127,9 +136,13 @@ function decorateLoginRequirementToggle(component) {
 
   if (!regFieldswrapper) return;
 
+  const leftCol = createTag('div', { class: 'left-col' });
+  const rightCol = createTag('div', { class: 'right-col' });
+
   const loginRequirementWrapper = createTag('div', { class: 'login-requirement-wrapper' });
   const fieldset = decorateSwitchFieldset({ id: 'registration-login-required' }, 'Require login to register');
-  loginRequirementWrapper.append(fieldset);
+  rightCol.append(fieldset);
+  loginRequirementWrapper.append(leftCol, rightCol);
 
   if (contentMap[component.dataset.cloudType].loginRequired.tooltipText) {
     addTooltipToEl(contentMap[component.dataset.cloudType].loginRequired.tooltipText, fieldset);
