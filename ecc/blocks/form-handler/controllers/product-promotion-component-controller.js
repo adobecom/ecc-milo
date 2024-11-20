@@ -69,19 +69,13 @@ async function updateProductSelector(component, props) {
     'Substance 3D Collection',
   ];
   const caasTags = await getCaasTags();
-  const topics = props.payload.fullTopicsValue?.map((x) => JSON.parse(x));
-  if (!caasTags || !topics) return;
+  if (!caasTags) return;
 
   const productGroups = component.querySelectorAll('product-selector-group');
-  let products = Object.values(caasTags.namespaces.caas.tags['product-categories'].tags).map((x) => [...Object.values(x.tags).map((y) => y)]).flat();
-
-  products = products.filter(
-    (p) => topics.find((t) => p.tagID?.includes(t.tagID)) && supportedProducts?.includes(p.title),
-  );
+  const products = Object.values(caasTags.namespaces.caas.tags['product-categories'].tags).map((x) => [...Object.values(x.tags).map((y) => y)]).flat();
 
   productGroups.forEach((pg) => {
     pg.setAttribute('data-products', JSON.stringify(products));
-    pg.setAttribute('data-selected-topics', JSON.stringify(topics));
     pg.requestUpdate();
 
     const selectedProducts = pg.getSelectedProducts();
