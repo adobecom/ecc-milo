@@ -51,7 +51,7 @@ function initStepLock(component) {
       if (s !== component.closest('.section')) {
         s.classList.toggle('hidden', !inputsFilled);
       }
-      topicsComponent.classList.toggle('hidden', !inputsFilled);
+      topicsComponent?.classList.toggle('hidden', !inputsFilled);
     });
   };
 
