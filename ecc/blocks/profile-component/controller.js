@@ -5,8 +5,8 @@ import {
   updateSpeakerInEvent,
   removeSpeakerFromEvent,
   getEventSpeaker,
-} from '../../../scripts/esp-controller.js';
-import { getFilteredCachedResponse } from '../data-handler.js';
+} from '../../scripts/esp-controller.js';
+import { getFilteredCachedResponse } from '../../scripts/event-data-handler.js';
 
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
