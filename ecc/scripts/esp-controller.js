@@ -848,23 +848,65 @@ export async function updateSeries(seriesData, seriesId) {
   }
 }
 
-export async function deleteSeries(seriesId) {
+export async function publishSeries(seriesId, seriesData) {
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const options = await constructRequestOptions('DELETE');
+  const raw = JSON.stringify({ ...seriesData, seriesId, status: 'published' });
+  const options = await constructRequestOptions('PUT', raw);
 
   try {
     const response = await fetch(`${host}/v1/series/${seriesId}`, options);
+    const data = await response.json();
 
     if (!response.ok) {
-      const data = await response.json();
-      window.lana?.log(`Failed to delete series ${seriesId}. Status:`, response.status, 'Error:', data);
+      window.lana?.log(`Failed to publish series ${seriesId}. Status:`, response.status, 'Error:', data);
       return { status: response.status, error: data };
     }
 
-    // 204 no content. Return true if no error.
-    return true;
+    return data;
   } catch (error) {
-    window.lana?.log(`Failed to delete series ${seriesId}. Error:`, error);
+    window.lana?.log(`Failed to publish series ${seriesId}. Error:`, error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function unpublishSeries(seriesId, seriesData) {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const raw = JSON.stringify({ ...seriesData, seriesId, status: 'unpublished' });
+  const options = await constructRequestOptions('PUT', raw);
+
+  try {
+    const response = await fetch(`${host}/v1/series/${seriesId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to unpublish series ${seriesId}. Status:`, response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to unpublish series ${seriesId}. Error:`, error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function archiveSeries(seriesId, seriesData) {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const raw = JSON.stringify({ ...seriesData, seriesId, status: 'archived' });
+  const options = await constructRequestOptions('PUT', raw);
+
+  try {
+    const response = await fetch(`${host}/v1/series/${seriesId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to archive series ${seriesId}. Status:`, response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to archive series ${seriesId}. Error:`, error);
     return { status: 'Network Error', error: error.message };
   }
 }
