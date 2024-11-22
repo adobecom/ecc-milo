@@ -783,7 +783,7 @@ export async function getAllSeries() {
       return { status: response.status, error: data };
     }
 
-    return data.series;
+    return data;
   } catch (error) {
     window.lana?.log('Failed to fetch series. Error:', error);
     return { status: 'Network Error', error: error.message };

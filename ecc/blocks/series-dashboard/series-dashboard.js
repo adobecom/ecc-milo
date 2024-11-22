@@ -4,12 +4,12 @@ import {
   publishSeries,
   unpublishSeries,
   archiveSeries,
+  getEvents,
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
   buildNoAccessScreen,
-  getEventPageHost,
   readBlockConfig,
   signIn,
   getEventServiceEnv,
@@ -72,6 +72,10 @@ function paginateData(props, config, page) {
   props.paginatedData = props.filteredData.slice(start, end);
 }
 
+function getSeriesEvents(seriesId, events) {
+  return events.filter((e) => e.seriesId === seriesId);
+}
+
 function sortData(props, config, options = {}) {
   const { field, el } = props.currentSort;
 
@@ -97,25 +101,25 @@ function sortData(props, config, options = {}) {
     let valA;
     let valB;
 
-    if ((field === 'title')) {
+    if ((field === 'seriesName')) {
       valA = a[field]?.toLowerCase() || '';
       valB = b[field]?.toLowerCase() || '';
       return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
     }
 
-    if (field === 'startDate' || field === 'modificationTime') {
+    if (field === 'modificationTime') {
       valA = new Date(a[field]);
       valB = new Date(b[field]);
       return sortAscending ? valA - valB : valB - valA;
     }
 
-    if (field === 'venueName') {
-      valA = a.venue?.venueName?.toLowerCase() || '';
-      valB = b.venue?.venueName?.toLowerCase() || '';
-      return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    if (field === 'eventsCount') {
+      valA = getSeriesEvents(a.seriesId, props.events).length;
+      valB = getSeriesEvents(b.seriesId, props.events).length;
+      return sortAscending ? valA - valB : valB - valA;
     }
 
-    if (typeof a[field] === typeof b[field] && typeof a[field] === 'number') {
+    if ((!Number.isNaN(+a[field]) && !Number.isNaN(+b[field]))) {
       valA = a[field] || 0;
       valB = b[field] || 0;
       return sortAscending ? valA - valB : valB - valA;
@@ -158,8 +162,9 @@ function initMoreOptions(props, config, seriesObj, row) {
 
     if (seriesObj.published) {
       const unpub = buildTool(toolBox, 'Unpublish', 'publish-remove');
+      if (seriesObj.status === 'archived') unpub.classList.add('disabled');
       unpub.addEventListener('click', async (e) => {
-        e.prseriesDefault();
+        e.preventDefault();
         toolBox.remove();
         row.classList.add('pending');
         const resp = await unpublishSeries(seriesObj.seriesId, seriesObj);
@@ -170,9 +175,9 @@ function initMoreOptions(props, config, seriesObj, row) {
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
-      if (!seriesObj.detailPagePath) pub.classList.add('disabled');
+      if (seriesObj.status === 'archived') pub.classList.add('disabled');
       pub.addEventListener('click', async (e) => {
-        e.prseriesDefault();
+        e.preventDefault();
         toolBox.remove();
         row.classList.add('pending');
         const resp = await publishSeries(seriesObj.seriesId, seriesObj);
@@ -184,33 +189,11 @@ function initMoreOptions(props, config, seriesObj, row) {
       });
     }
 
-    const previewPre = buildTool(toolBox, 'Preview pre-series', 'preview-eye');
-    const previewPost = buildTool(toolBox, 'Preview post-series', 'preview-eye');
+    const viewTemplate = buildTool(toolBox, 'View Template', 'preview-eye');
     const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
     const clone = buildTool(toolBox, 'Clone', 'clone');
-    const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
-
-    if (seriesObj.detailPagePath) {
-      previewPre.href = (() => {
-        const url = new URL(`${getEventPageHost()}${seriesObj.detailPagePath}`);
-        url.searchParams.set('previewMode', 'true');
-        url.searchParams.set('cachebuster', Date.now());
-        url.searchParams.set('timing', +seriesObj.localEndTimeMillis - 10);
-        return url.toString();
-      })();
-      previewPre.target = '_blank';
-      previewPost.href = (() => {
-        const url = new URL(`${getEventPageHost()}${seriesObj.detailPagePath}`);
-        url.searchParams.set('previewMode', 'true');
-        url.searchParams.set('cachebuster', Date.now());
-        url.searchParams.set('timing', +seriesObj.localEndTimeMillis + 10);
-        return url.toString();
-      })();
-      previewPost.target = '_blank';
-    } else {
-      previewPre.classList.add('disabled');
-      previewPost.classList.add('disabled');
-    }
+    const archive = buildTool(toolBox, 'Archive', 'archive');
+    const verHistory = buildTool(toolBox, 'Version History', 'version-history');
 
     // edit
     const url = new URL(`${window.location.origin}${config['create-form-url']}`);
@@ -219,16 +202,16 @@ function initMoreOptions(props, config, seriesObj, row) {
 
     // clone
     clone.addEventListener('click', async (e) => {
-      e.prseriesDefault();
+      e.preventDefault();
       const payload = { ...seriesObj };
       payload.title = `${seriesObj.title} - copy`;
       toolBox.remove();
       row.classList.add('pending');
-      const newEventJSON = await createSeries(payload);
+      const newSeriesObj = await createSeries(payload);
 
-      if (newEventJSON.error) {
+      if (newSeriesObj.error) {
         row.classList.remove('pending');
-        showToast(props, newEventJSON.error, { variant: 'negative' });
+        showToast(props, newSeriesObj.error, { variant: 'negative' });
         return;
       }
 
@@ -242,14 +225,14 @@ function initMoreOptions(props, config, seriesObj, row) {
         sortData(props, config, { direction: 'desc' });
       }
 
-      const newRow = props.el.querySelector(`tr[data-id="${newEventJSON.seriesId}"]`);
+      const newRow = props.el.querySelector(`tr[data-id="${newSeriesObj.seriesId}"]`);
       highlightRow(newRow);
-      showToast(props, buildToastMsgWithEventTitle(newEventJSON.title, config['clone-toast-msg']), { variant: 'info' });
+      showToast(props, buildToastMsgWithEventTitle(newSeriesObj.seriesName, config['clone-toast-msg']), { variant: 'info' });
     });
 
-    // delete
-    deleteBtn.addEventListener('click', async (e) => {
-      e.prseriesDefault();
+    // archive
+    archive.addEventListener('click', async (e) => {
+      e.preventDefault();
 
       const spTheme = props.el.querySelector('sp-theme.toast-area');
       if (!spTheme) return;
@@ -298,6 +281,9 @@ function initMoreOptions(props, config, seriesObj, row) {
     }
   });
 
+  // version history
+
+  // close tool box
   document.addEventListener('click', (e) => {
     if (!moreOptionsCell.contains(e.target) || moreOptionsCell === e.target) {
       const toolBox = moreOptionsCell.querySelector('.dashboard-tool-box');
@@ -306,46 +292,39 @@ function initMoreOptions(props, config, seriesObj, row) {
   });
 }
 
-function getCountryName(seriesObj) {
-  if (!seriesObj.venue) return '';
-
-  const { venue } = seriesObj;
-  return venue.country || '';
-}
-
 function buildStatusTag(series) {
-  const dot = series.published ? getIcon('dot-purple') : getIcon('dot-green');
-  const text = series.published ? 'Published' : 'Draft';
+  let dot;
+
+  switch (series.status) {
+    case 'published':
+      dot = getIcon('dot-purple');
+      break;
+    case 'unpublished':
+      dot = getIcon('dot-green');
+      break;
+    case 'archived':
+    default:
+      dot = getIcon('dot-gray');
+      break;
+  }
 
   const statusTag = createTag('div', { class: 'status' });
-  statusTag.append(dot, text);
+  statusTag.append(dot, series.status);
   return statusTag;
 }
 
-function buildEventTitleTag(config, seriesObj) {
+function buildSeriesNameTag(config, seriesObj) {
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
   url.searchParams.set('seriesId', seriesObj.seriesId);
-  const seriesTitleTag = createTag('a', { class: 'title-link', href: url.toString() }, seriesObj.title);
-  return seriesTitleTag;
+  const nameTag = createTag('a', { class: 'name-link', href: url.toString() }, seriesObj.seriesName);
+  return nameTag;
 }
 
-// TODO: to retire
-function buildVenueTag(seriesObj) {
-  const { venue } = seriesObj;
-  if (!venue) return null;
+function buildEventsCountTag(series, events) {
+  const seriesEvents = getSeriesEvents(series.seriesId, events);
 
-  const venueTag = createTag('span', { class: 'vanue-name' }, venue.venueName);
-  return venueTag;
-}
-
-function buildRSVPTag(config, seriesObj) {
-  const text = `${seriesObj.attendeeCount} / ${seriesObj.attendeeLimit}`;
-
-  const url = new URL(`${window.location.origin}${config['attendee-dashboard-url']}`);
-  url.searchParams.set('seriesId', seriesObj.seriesId);
-
-  const rsvpTag = createTag('a', { class: 'rsvp-tag', href: url }, text);
-  return rsvpTag;
+  const eventsCountTag = createTag('span', { class: 'events-count' }, seriesEvents.length);
+  return eventsCountTag;
 }
 
 async function populateRow(props, config, index) {
@@ -355,23 +334,21 @@ async function populateRow(props, config, index) {
 
   // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'row', 'data-id': series.seriesId }, '', { parent: tBody });
-  const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(config, series)));
+  const nameCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildSeriesNameTag(config, series)));
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(series)));
-  const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(series.startDate)));
-  const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(series.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(series)));
-  const geoCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getCountryName(series)));
-  const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, series)));
+  const modificationTimeCall = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(series.modificationTime)));
+  const createdByCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, series.createdBy));
+  const modifiedByCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, series.modifiedBy));
+  const eventsCountCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventsCountTag(series, props.events)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
   row.append(
-    titleCell,
+    nameCell,
     statusCell,
-    startDateCell,
-    modDateCell,
-    venueCell,
-    geoCell,
-    externalEventId,
+    modificationTimeCall,
+    createdByCell,
+    modifiedByCell,
+    eventsCountCell,
     moreOptionsCell,
   );
 
@@ -379,7 +356,7 @@ async function populateRow(props, config, index) {
 
   if (series.seriesId === sp.get('newEventId')) {
     if (!props.el.classList.contains('toast-shown')) {
-      showToast(props, buildToastMsgWithEventTitle(series.title, config['new-toast-msg']), { variant: 'positive' });
+      showToast(props, buildToastMsgWithEventTitle(series.seriesName, config['new-toast-msg']), { variant: 'positive' });
 
       props.el.classList.add('toast-shown');
     }
@@ -442,19 +419,17 @@ function decoratePagination(props, config) {
   updatePaginationControl(paginationContainer, props.currentPage, totalPages);
 }
 
-function initSorting(props, config) {
+function initHeaderRow(props, config) {
   const thead = props.el.querySelector('thead');
   const thRow = thead.querySelector('tr');
 
   const headers = {
-    thumbnail: '',
-    title: 'EVENT NAME',
-    published: 'PUBLISH STATUS',
-    startDate: 'DATE RUN',
+    seriesName: 'SERIES NAME',
+    status: 'STATUS',
     modificationTime: 'LAST MODIFIED',
-    venueName: 'VENUE NAME',
-    timezone: 'GEO',
-    attendeeCount: 'RSVP DATA',
+    createdBy: 'CREATED BY',
+    modifiedBy: 'MODIFIED BY',
+    eventsCount: 'NUMBER OF EVENTS IN SERIES',
     manage: 'MANAGE',
   };
 
@@ -462,7 +437,7 @@ function initSorting(props, config) {
     const thText = createTag('span', {}, val);
     const th = createTag('th', {}, thText, { parent: thRow });
 
-    if (['thumbnail', 'manage'].includes(key)) return;
+    if (['manage'].includes(key)) return;
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
     th.classList.add('sortable', key);
@@ -513,7 +488,7 @@ function populateTable(props, config) {
 
 function filterData(props, config, query) {
   const q = query.toLowerCase();
-  props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
+  props.filteredData = props.data.filter((s) => s.seriesName.toLowerCase().includes(q));
   props.currentPage = 1;
   paginateData(props, config, 1);
   sortData(props, config, { resort: true });
@@ -548,7 +523,7 @@ function buildDashboardTable(props, config) {
   const thead = createTag('thead', {}, '', { parent: table });
   createTag('tbody', {}, '', { parent: table });
   createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
-  initSorting(props, config);
+  initHeaderRow(props, config);
   populateTable(props, config);
 
   const usp = new URLSearchParams(window.location.search);
@@ -559,16 +534,6 @@ function buildDashboardTable(props, config) {
       sortData(props, config, { direction: 'desc' });
     }
   }
-}
-
-async function getSeriesArray() {
-  const resp = await getAllSeries();
-
-  if (resp.error) {
-    return [];
-  }
-
-  return resp.series;
 }
 
 function buildNoEventScreen(el, config) {
@@ -595,14 +560,15 @@ async function buildDashboard(el, config) {
     currentSort: {},
   };
 
-  const data = await getSeriesArray();
+  const [{ series }, { events }] = await Promise.all([getAllSeries(), getEvents()]);
 
-  if (!data?.length) {
+  if (!series?.length) {
     buildNoEventScreen(el, config);
   } else {
-    props.data = data;
-    props.filteredData = [...data];
-    props.paginatedData = [...data];
+    props.events = events;
+    props.data = series;
+    props.filteredData = [...series];
+    props.paginatedData = [...series];
 
     const dataHandler = {
       set(target, prop, value, receiver) {
@@ -626,7 +592,7 @@ function buildLoadingScreen(el) {
   el.classList.add('loading');
   const loadingScreen = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'loading-screen' });
   createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: loadingScreen });
-  createTag('sp-field-label', {}, 'Loading Adobe Event Creation Console dashboard...', { parent: loadingScreen });
+  createTag('sp-field-label', {}, 'Loading Series dashboard...', { parent: loadingScreen });
 
   el.prepend(loadingScreen);
 }

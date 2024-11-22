@@ -142,6 +142,7 @@
 }
 
 .series-dashboard table {
+  width: 100%;
   margin: auto;
   border-collapse: collapse; 
 }
@@ -156,15 +157,10 @@
   font-weight: 700;
   text-align: left;
   font-size: var(--type-body-xxs-size);
+  line-height: var(--type-body-xxs-lh);
   color: var(--spectrum-color-gray-500);
   user-select: none;
   width: 100px;
-  white-space: nowrap;
-}
-
-.series-dashboard table .table-header-row th span {
-  white-space: nowrap;
-  width: 60px;
 }
 
 .series-dashboard table .table-header-row th.sortable {
@@ -187,11 +183,10 @@
 
 .series-dashboard table .table-header-row th.active.desc-sort .icon-chev-down {
   display: inline-block;
-
 }
 
 .series-dashboard table .row {
-  height: 140px;
+  height: 120px;
   border-bottom: 2px solid var(--color-gray-300);
   transition: background-color 1s;
 }
@@ -205,7 +200,7 @@
   background-color: #EAEAEA;
 }
 
-.series-dashboard table .row .title-link {
+.series-dashboard table .row .name-link {
   font-weight: 700;
   text-decoration: none;
 }
