@@ -163,7 +163,7 @@ function onStepValidate(props) {
   return function updateCtaStatus() {
     const currentFrag = getCurrentFragment(props);
     const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
-    const ctas = props.el.querySelectorAll('.event-creation-form-panel-wrapper a');
+    const ctas = props.el.querySelectorAll('.series-creation-form-panel-wrapper a');
     const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
 
     ctas.forEach((cta) => {
@@ -488,8 +488,8 @@ function updateRequiredFields(props) {
 }
 
 function renderFormNavigation(props, prevStep, currentStep) {
-  const nextBtn = props.el.querySelector('.event-creation-form-ctas-panel .next-button');
-  const backBtn = props.el.querySelector('.event-creation-form-ctas-panel .back-btn');
+  const nextBtn = props.el.querySelector('.series-creation-form-ctas-panel .next-button');
+  const backBtn = props.el.querySelector('.series-creation-form-ctas-panel .back-btn');
   const frags = props.el.querySelectorAll('.fragment');
 
   frags[prevStep].classList.add('hidden');
@@ -501,10 +501,9 @@ function renderFormNavigation(props, prevStep, currentStep) {
     } else {
       nextBtn.textContent = nextBtn.dataset.finalStateText;
     }
-    nextBtn.prepend(getIcon('golden-rocket'));
   } else {
-    nextBtn.textContent = nextBtn.dataset.nextStateText;
-    nextBtn.append(getIcon('chev-right-white'));
+    nextBtn.textContent = nextBtn.dataset.finalStateText;
+    nextBtn.prepend(getIcon('golden-rocket'));
   }
 
   backBtn.classList.toggle('disabled', currentStep === 0);
@@ -710,13 +709,13 @@ function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
   decorateButtons(ctaRow, 'button-l');
   const ctas = ctaRow.querySelectorAll('a');
-  ctaRow.classList.add('event-creation-form-ctas-panel');
+  ctaRow.classList.add('series-creation-form-ctas-panel');
 
   const forwardActionsWrappers = ctaRow.querySelectorAll(':scope > div');
 
-  const panelWrapper = createTag('div', { class: 'event-creation-form-panel-wrapper' }, '', { parent: ctaRow });
-  const backwardWrapper = createTag('div', { class: 'event-creation-form-backward-wrapper' }, '', { parent: panelWrapper });
-  const forwardWrapper = createTag('div', { class: 'event-creation-form-forward-wrapper' }, '', { parent: panelWrapper });
+  const panelWrapper = createTag('div', { class: 'series-creation-form-panel-wrapper' }, '', { parent: ctaRow });
+  const backwardWrapper = createTag('div', { class: 'series-creation-form-backward-wrapper' }, '', { parent: panelWrapper });
+  const forwardWrapper = createTag('div', { class: 'series-creation-form-forward-wrapper' }, '', { parent: panelWrapper });
 
   forwardActionsWrappers.forEach((w) => {
     w.classList.add('action-area');
@@ -753,11 +752,10 @@ function initFormCtas(props) {
       if (['#save', '#next'].includes(ctaUrl.hash)) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
-          const [nextStateText, finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
+          const [finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
 
-          cta.textContent = nextStateText;
-          cta.append(getIcon('chev-right-white'));
-          cta.dataset.nextStateText = nextStateText;
+          cta.textContent = finalStateText;
+          cta.prepend(getIcon('golden-rocket'));
           cta.dataset.finalStateText = finalStateText;
           cta.dataset.doneStateText = doneStateText;
           cta.dataset.republishStateText = republishStateText;
@@ -836,7 +834,7 @@ function initFormCtas(props) {
 }
 
 function updateCtas(props) {
-  const formCtas = props.el.querySelectorAll('.event-creation-form-ctas-panel a');
+  const formCtas = props.el.querySelectorAll('.series-creation-form-ctas-panel a');
   const { eventDataResp } = props;
 
   formCtas.forEach((a) => {
@@ -855,10 +853,9 @@ function updateCtas(props) {
         } else {
           a.textContent = a.dataset.finalStateText;
         }
-        a.prepend(getIcon('golden-rocket'));
       } else {
-        a.textContent = a.dataset.nextStateText;
-        a.append(getIcon('chev-right-white'));
+        a.textContent = a.dataset.finalStateText;
+        a.prepend(getIcon('golden-rocket'));
       }
     }
   });
@@ -931,7 +928,7 @@ function updateStatusTag(props) {
   headingWrapper.append(heading, statusTag);
 }
 
-async function buildECCForm(el) {
+async function buildForm(el) {
   const props = {
     el,
     currentStep: 0,
@@ -1050,7 +1047,7 @@ export default async function init(el) {
 
   const devToken = getDevToken();
   if (devToken && getEventServiceEnv() === 'local') {
-    buildECCForm(el).then(() => {
+    buildForm(el).then(() => {
       el.classList.remove('loading');
     });
     return;
@@ -1065,7 +1062,7 @@ export default async function init(el) {
       el.classList.remove('loading');
     },
     validProfile: () => {
-      buildECCForm(el).then(() => {
+      buildForm(el).then(() => {
         el.classList.remove('loading');
       });
     },
