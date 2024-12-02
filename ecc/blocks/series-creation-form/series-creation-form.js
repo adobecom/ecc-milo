@@ -365,7 +365,7 @@ function decorateForm(el) {
     form.append(formDiv.parentElement);
   });
 
-  const cols = formBodyRow.querySelectorAll(':scope > div');
+  const cols = formBodyRow.querySelectorAll(':scope > div, :scope > sp-theme');
 
   cols.forEach((col, i) => {
     if (i === 0) {

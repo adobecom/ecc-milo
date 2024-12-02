@@ -1,0 +1,35 @@
+.series-templates-component .labeled-text-field-wrapper {
+  margin-bottom: 24px;
+}
+
+.series-templates-component .attr-text {
+  font-size: var(--type-body-xs-size);
+  text-align: right;
+}
+
+.series-templates-component sp-textfield {
+  width: 493px;
+}
+
+.series-templates-component sp-textfield#info-field-event-title sp-help-text {
+  position: absolute;
+  display: none;
+}
+
+.series-templates-component sp-textfield#info-field-event-title.show-negative-help-text sp-help-text {
+  display: flex;
+}
+
+.series-templates-component sp-textfield.textarea-input {
+  font-size: var(--type-body-m-size);;
+  width: 100%;
+  outline: none;
+  resize: vertical;
+}
+
+.series-templates-component .text-field-label {
+  width: 180px;
+  font-family: var(--body-font-family);
+  font-size: var(--type-body-s-size);
+  font-weight: 700;
+}

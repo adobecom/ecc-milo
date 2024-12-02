@@ -42,11 +42,11 @@
   line-height: normal;
 }
 
-.series-creation-form .main-frame sp-theme sp-underlay {
+.series-creation-form .main-frame sp-underlay {
   z-index: 2;
 }
 
-.series-creation-form .main-frame sp-theme sp-underlay + sp-dialog {
+.series-creation-form .main-frame sp-underlay + sp-dialog {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -56,21 +56,21 @@
   min-width: 480px;
 }
 
-.series-creation-form .main-frame sp-theme sp-underlay + sp-dialog h1 {
+.series-creation-form .main-frame sp-underlay + sp-dialog h1 {
   font-size: var(--type-heading-s-size);
 }
 
-.series-creation-form .main-frame sp-theme sp-underlay + sp-dialog p {
+.series-creation-form .main-frame sp-underlay + sp-dialog p {
   font-size: var(--type-body-s-size);
 }
 
-.series-creation-form .main-frame sp-theme sp-underlay + sp-dialog .button-container {
+.series-creation-form .main-frame sp-underlay + sp-dialog .button-container {
   display: flex;
   justify-content: flex-end;
   gap: 16px;
 }
 
-.series-creation-form .main-frame sp-theme sp-underlay:not([open]) + sp-dialog {
+.series-creation-form .main-frame sp-underlay:not([open]) + sp-dialog {
   display: none;
 }
 
@@ -91,6 +91,10 @@
 .series-creation-form .main-frame {
   flex-grow: 1;
   min-height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .series-creation-form .series-creation-form-ctas-panel {
@@ -254,14 +258,6 @@
   opacity: 0.5;
 }
 
-.series-creation-form .main-frame sp-theme {
-  min-height: 100%;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
 .series-creation-form .main-frame .section .content {
   max-width: none;
 }
@@ -290,7 +286,8 @@
 }
 
 .series-creation-form .form-component > div:first-of-type > div > h2,
-.series-creation-form .form-component > div:first-of-type > div > h3 {
+.series-creation-form .form-component > div:first-of-type > div > h3,
+.series-creation-form .form-component > div:first-of-type > div > h4 {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -356,8 +353,10 @@
 
 .series-creation-form .form-component > div:first-of-type > div > h2 sp-action-button,
 .series-creation-form .form-component > div:first-of-type > div > h3 sp-action-button,
+.series-creation-form .form-component > div:first-of-type > div > h4 sp-action-button,
 .series-creation-form .section:not(:first-of-type) > div.content > h2 sp-action-button,
-.series-creation-form .section:not(:first-of-type) > div.content > h3 sp-action-button {
+.series-creation-form .section:not(:first-of-type) > div.content > h3 sp-action-button,
+.series-creation-form .section:not(:first-of-type) > div.content > h4 sp-action-button {
   padding: 0;
   background: none;
   border: none;
@@ -366,8 +365,10 @@
 
 .series-creation-form .form-component > div:first-of-type > div > h2 sp-action-button .icon-info,
 .series-creation-form .form-component > div:first-of-type > div > h3 sp-action-button .icon-info,
+.series-creation-form .form-component > div:first-of-type > div > h4 sp-action-button .icon-info,
 .series-creation-form .section:not(:first-of-type) > div.content > h2 sp-action-button .icon-info,
-.series-creation-form .section:not(:first-of-type) > div.content > h3 sp-action-button .icon-info {
+.series-creation-form .section:not(:first-of-type) > div.content > h3 sp-action-button .icon-info,
+.series-creation-form .section:not(:first-of-type) > div.content > h4 sp-action-button .icon-info {
   display: block;
 }
 

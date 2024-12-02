@@ -131,7 +131,7 @@ export function addTooltipToHeading(em, heading) {
 }
 
 export function generateToolTip(el) {
-  const heading = el.querySelector('h2, h3');
+  const heading = el.querySelector('h2, h3, h4');
   const em = el.querySelector('p > em');
 
   if (heading && em) {
@@ -180,6 +180,42 @@ function mergeOptions(defaultOptions, overrideOptions) {
   });
 
   return combinedOptions;
+}
+
+export async function decorateLabeledTextfield(cell, inputOpts = {}, labelOpts = {}) {
+  cell.classList.add('labeled-text-field-row');
+  const cols = cell.querySelectorAll(':scope > div');
+  if (!cols.length) return;
+  const [labelCol, placeholderCol] = cols;
+
+  const text = labelCol?.textContent.trim();
+
+  const phText = placeholderCol?.textContent.trim();
+  const maxCharNum = placeholderCol?.querySelector('strong')?.textContent.trim();
+  const isRequired = text.endsWith('*');
+
+  const label = createTag('sp-field-label', mergeOptions({
+    for: 'text-input',
+    'side-aligned': 'start',
+    require: isRequired,
+    class: 'text-field-label',
+  }, labelOpts), text);
+  const input = createTag('sp-textfield', mergeOptions(
+    {
+      class: 'text-input',
+      placeholder: phText,
+      required: isRequired,
+      size: 'xl',
+    },
+    inputOpts,
+  ));
+
+  if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
+
+  const wrapper = createTag('div', { class: 'labeled-text-field-wrapper' });
+  cell.innerHTML = '';
+  wrapper.append(label, input);
+  cell.append(wrapper);
 }
 
 export async function decorateTextfield(cell, extraOptions, negativeHelperText = '') {
