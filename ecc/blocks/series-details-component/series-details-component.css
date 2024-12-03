@@ -1,3 +1,7 @@
+.series-details-component {
+  --mod-textfield-font-weight: 700;
+}
+
 .series-details-component .info-field-wrapper {
   margin-bottom: 24px;
 }

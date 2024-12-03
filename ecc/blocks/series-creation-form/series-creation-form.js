@@ -10,7 +10,7 @@ import {
   getDevToken,
 } from '../../scripts/utils.js';
 import {
-  createEvent,
+  createSeries,
   updateEvent,
   publishEvent,
   getEvent,
@@ -26,7 +26,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedData, { getFilteredCachedResponse, hasContentChanged, quickFilter, setPayloadCache, setResponseCache } from '../../scripts/event-data-handler.js';
+import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import { CustomSearch } from '../../components/custom-search/custom-search.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
@@ -276,7 +276,7 @@ async function gatherValues(props) {
   await Promise.all(allComponentPromises);
 }
 
-async function handleEventUpdate(props) {
+async function handleSeriesUpdate(props) {
   const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
@@ -421,7 +421,7 @@ function updateDashboardLink(props) {
   dashboardLink.href = url.toString();
 }
 
-async function saveEvent(props, toPublish = false) {
+async function saveSeries(props, toPublish = false) {
   try {
     await gatherValues(props);
   } catch (e) {
@@ -430,8 +430,8 @@ async function saveEvent(props, toPublish = false) {
 
   let resp;
 
-  const onEventSave = async () => {
-    if (resp?.eventId) await handleEventUpdate(props);
+  const onSeriesSave = async () => {
+    if (resp?.eventId) await handleSeriesUpdate(props);
 
     if (!resp.error) {
       showSaveSuccessMessage(props);
@@ -439,24 +439,24 @@ async function saveEvent(props, toPublish = false) {
   };
 
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    resp = await createEvent(quickFilter(props.payload));
+    resp = await createSeries(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
-    await onEventSave();
+    await onSeriesSave();
   } else if (props.currentStep <= props.maxStep && !toPublish) {
     resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    await onEventSave();
+    await onSeriesSave();
   } else if (toPublish) {
     resp = await publishEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (resp?.eventId) await handleEventUpdate(props);
+    if (resp?.eventId) await handleSeriesUpdate(props);
   }
 
   return resp;
@@ -512,189 +512,6 @@ function navigateForm(props, stepIndex) {
   updateRequiredFields(props);
 }
 
-function closeDialog(props) {
-  const spTheme = props.el.querySelector('#form-app');
-  if (!spTheme) return;
-
-  const underlay = spTheme.querySelector('sp-underlay');
-  const dialog = spTheme.querySelector('sp-dialog');
-
-  if (underlay) underlay.open = false;
-  if (dialog) dialog.innerHTML = '';
-}
-
-function buildPreviewLoadingDialog(props) {
-  const spTheme = props.el.querySelector('#form-app');
-  if (!spTheme) return null;
-
-  const underlay = spTheme.querySelector('sp-underlay');
-  const dialog = spTheme.querySelector('sp-dialog');
-
-  if (!underlay || !dialog) return null;
-
-  underlay.open = false;
-  dialog.innerHTML = '';
-
-  createTag('h1', { slot: 'heading' }, 'Generating your preview...', { parent: dialog });
-  createTag('p', {}, 'This usually takes 10-30 seconds, but it might take up to 10 minutes in rare cases. Please wait, and the preview will open in a new tab when it’s ready.', { parent: dialog });
-  createTag('p', {}, '<strong>Note: Please make sure pop-up is allowed in your browser settings.</strong>', { parent: dialog });
-  const style = createTag('style', {}, `
-    @keyframes progress-bar-indeterminate {
-      0% {
-        transform: translateX(-100%);
-      }
-      50% {
-        transform: translateX(0%);
-      }
-      100% {
-        transform: translateX(200%);
-      }
-    }
-  `);
-
-  // Create the progress bar container
-  const progressBar = createTag('div', {
-    style: `
-    position: relative;
-    width: 100%;
-    height: 8px;
-    background: #e6e6e6;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 1rem;
-    `,
-  });
-
-  // Create the progress bar indicator
-  const progressBarIndicator = createTag('div', {
-    style: `
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 50%;
-    height: 100%;
-    background: #1473e6;
-    transform: translateX(0);
-    animation: progress-bar-indeterminate 1.5s linear infinite;
-    `,
-  });
-
-  // Append the elements to the shadow root
-  progressBar.appendChild(progressBarIndicator);
-  dialog.appendChild(style);
-  dialog.appendChild(progressBar);
-  const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
-  createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'Cancel', { parent: buttonContainer });
-
-  underlay.open = true;
-
-  return dialog;
-}
-
-function buildPreviewLoadingFailedDialog(props) {
-  const spTheme = props.el.querySelector('#form-app');
-  if (!spTheme) return;
-
-  const underlay = spTheme.querySelector('sp-underlay');
-  const dialog = spTheme.querySelector('sp-dialog');
-
-  if (!underlay || !dialog) return;
-
-  underlay.open = false;
-  dialog.innerHTML = '';
-
-  createTag('h1', { slot: 'heading' }, 'Preview generation failed.', { parent: dialog });
-  createTag('p', {}, 'Your changes have been saved. Our system is working in the background to update the page.', { parent: dialog });
-  const slackLink = createTag('a', { href: 'https://adobe.enterprise.slack.com/archives/C07KPJYA760' }, 'Slack');
-  const emailLink = createTag('a', { href: 'mailto:Grp-acom-milo-events-support@adobe.com' }, 'Grp-acom-milo-events-support@adobe.com');
-  createTag('p', {}, `Please try again later. If the issue persists, please feel free to contact us on <b>${slackLink.outerHTML}</b> or email <b>${emailLink.outerHTML}</b>`, { parent: dialog });
-  const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
-  const cancelButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'OK', { parent: buttonContainer });
-
-  underlay.open = true;
-
-  cancelButton.addEventListener('click', () => {
-    closeDialog(props);
-    dialog.innerHTML = '';
-  });
-}
-
-async function getNonProdPreviewDataById(props) {
-  if (!props.eventDataResp) return null;
-
-  const { eventId } = props.eventDataResp;
-
-  if (!eventId) return null;
-
-  const esEnv = getEventServiceEnv();
-  const resp = await fetch(`${getEventPageHost()}/events/default/${esEnv === 'prod' ? '' : `${esEnv}/`}metadata-preview.json`);
-  if (resp.ok) {
-    const json = await resp.json();
-    const pageData = json.data.find((d) => d['event-id'] === eventId);
-
-    if (pageData) return pageData;
-
-    window.lana?.log('Failed to find non-prod metadata for current page');
-    return null;
-  }
-
-  window.lana?.log('Failed to fetch non-prod metadata:', resp);
-  return null;
-}
-
-async function validatePreview(props, oldResp, cta) {
-  let retryCount = 0;
-
-  const currentData = { ...props.eventDataResp };
-  const oldData = { ...oldResp };
-
-  if (!hasContentChanged(currentData, oldData) || !Object.keys(oldData).length) {
-    window.open(cta.href);
-    return Promise.resolve();
-  }
-
-  const modificationTimeMatch = (metadataObj) => {
-    const metadataModTimestamp = new Date(metadataObj['modification-time']).getTime();
-    return metadataModTimestamp === props.eventDataResp.modificationTime;
-  };
-
-  return new Promise((resolve) => {
-    const interval = setInterval(async () => {
-      try {
-        retryCount += 1;
-        const metadataJson = await getNonProdPreviewDataById(props);
-
-        if (metadataJson && modificationTimeMatch(metadataJson)) {
-          clearInterval(interval);
-          closeDialog(props);
-          window.open(cta.href);
-          resolve();
-        } else if (retryCount >= 30) {
-          clearInterval(interval);
-          buildPreviewLoadingFailedDialog(props);
-          window.lana?.log('Error: Failed to match metadata after 30 retries');
-          resolve();
-        }
-      } catch (error) {
-        window.lana?.log('Error in interval fetch:', error);
-        clearInterval(interval);
-        resolve();
-      }
-    }, Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000);
-
-    const dialog = buildPreviewLoadingDialog(props, interval);
-
-    if (dialog) {
-      const cancelButton = dialog.querySelector('#cancel-preview');
-      cancelButton.addEventListener('click', () => {
-        closeDialog(props);
-        if (interval) clearInterval(interval);
-        resolve();
-      });
-    }
-  });
-}
-
 function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
   decorateButtons(ctaRow, 'button-l');
@@ -722,22 +539,9 @@ function initFormCtas(props) {
     });
   };
 
-  let oldResp = { ...props.eventDataResp };
   ctas.forEach((cta) => {
     if (cta.href) {
       const ctaUrl = new URL(cta.href);
-
-      if (['#pre-event', '#post-event'].includes(ctaUrl.hash)) {
-        cta.classList.add('fill', 'preview-btns', 'preview-not-ready', ctaUrl.hash.replace('#', ''));
-        cta.addEventListener('click', async (e) => {
-          e.preventDefault();
-          toggleBtnsSubmittingState(true);
-          if (cta.classList.contains('preview-not-ready')) return;
-          validatePreview(props, oldResp, cta).then(() => {
-            toggleBtnsSubmittingState(false);
-          });
-        });
-      }
 
       if (['#save', '#next'].includes(ctaUrl.hash)) {
         if (ctaUrl.hash === '#next') {
@@ -758,11 +562,9 @@ function initFormCtas(props) {
           if (ctaUrl.hash === '#next') {
             let resp;
             if (props.currentStep === props.maxStep) {
-              oldResp = { ...props.eventDataResp };
-              resp = await saveEvent(props, true);
+              resp = await saveSeries(props, true);
             } else {
-              oldResp = { ...props.eventDataResp };
-              resp = await saveEvent(props);
+              resp = await saveSeries(props);
             }
 
             if (resp?.error) {
@@ -797,7 +599,7 @@ function initFormCtas(props) {
             }
           } else {
             oldResp = { ...props.eventDataResp };
-            const resp = await saveEvent(props);
+            const resp = await saveSeries(props);
             if (resp?.error) {
               buildErrorMessage(props, resp);
             }
@@ -812,7 +614,7 @@ function initFormCtas(props) {
   backBtn.addEventListener('click', async () => {
     toggleBtnsSubmittingState(true);
     oldResp = { ...props.eventDataResp };
-    const resp = await saveEvent(props);
+    const resp = await saveSeries(props);
     if (resp?.error) {
       buildErrorMessage(props, resp);
     } else {
@@ -868,7 +670,7 @@ function initNavigation(props) {
       if (!nav.disabled && !sideMenu.classList.contains('disabled')) {
         sideMenu.classList.add('disabled');
 
-        const resp = await saveEvent(props);
+        const resp = await saveSeries(props);
         if (resp?.error) {
           buildErrorMessage(props, resp);
         } else {
@@ -1019,7 +821,7 @@ function buildLoadingScreen(el) {
   el.classList.add('loading');
   const loadingScreen = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'loading-screen' });
   createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: loadingScreen });
-  createTag('sp-field-label', {}, 'Loading Adobe Event Creation Console form...', { parent: loadingScreen });
+  createTag('sp-field-label', {}, 'Loading Adobe event series creation form...', { parent: loadingScreen });
 
   el.prepend(loadingScreen);
 }
