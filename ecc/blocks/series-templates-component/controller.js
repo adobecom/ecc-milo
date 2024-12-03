@@ -36,12 +36,12 @@ async function buildPreviewListOptionsFromSource(component, source) {
   }
 
   options.forEach((option) => {
-    const itemRadio = createTag('input', { type: 'radio', name: 'series-template', value: option['template-path'] });
+    const radioLabel = createTag('label', { class: 'radio-label' }, option['template-name']);
+    createTag('input', { type: 'radio', name: 'series-template', value: option['template-path'] }, '', { parent: radioLabel });
+
     const previewListItem = createTag('div', { class: 'preview-list-item' });
     const previewListItemImage = createTag('img', { src: option['template-image'] });
-    const previewListItemTitle = createTag('h5', {}, option['template-name']);
-    const selectItemBtn = createTag('a', { class: 'con-button blue select-item-btn' }, 'Select', { parent: previewListItem });
-    previewListItem.append(previewListItemImage, previewListItemTitle, selectItemBtn);
+    previewListItem.append(radioLabel, previewListItemImage);
     previewListItems.append(previewListItem);
   });
 }

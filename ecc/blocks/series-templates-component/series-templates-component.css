@@ -12,6 +12,12 @@
   cursor: pointer;
 }
 
+.series-templates-component .preview-list-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
 .series-templates-component sp-textfield {
   width: 493px;
 }
@@ -58,10 +64,14 @@
   z-index: 2;
 }
 
+.series-templates-component .preview-list-overlay.hidden {
+  display: none;
+}
+
 .series-templates-component .preview-list-modal {
   position: relative;
   max-width: var(--grid-container-width);
-  max-height: 80vh;
+  max-height: 72vh;
   padding: 56px 72px;
   margin: auto;
   background-color: var(--color-white);
@@ -69,22 +79,59 @@
   overflow: hidden;
 }
 
+.series-templates-component .preview-list-modal h2 {
+  color: var(--color-red)
+}
+
+.series-templates-component .preview-list-modal .preview-list-subtitle {
+  font-weight: 700;
+  font-size: var(--type-body-m-size);
+}
+
+.series-templates-component .preview-list-modal .preview-list-action-area {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-gray-500);
+}
+
 .series-templates-component .preview-list-fieldset {
   border: none;
   padding: 0;
   height: 100%;
+  width: 100%;
   display: block;
 }
 
 .series-templates-component .preview-list-items {
   height: 100%;
+  width: 100%;
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  padding: 16px;
+  gap: 50px;
   overflow: auto;
+  margin-bottom: 40px;
 }
 
 .series-templates-component .preview-list-item {
-  
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.series-templates-component .preview-list-item img {
+  object-fit: contain;
+  object-position: left;
+  max-height: 600px;
+  min-width: 231px;
+}
+
+.series-templates-component .preview-list-item label.radio-label {
+  font-family: var(--body-font-family);
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
 }

@@ -17,7 +17,8 @@ async function buildPreviewList(row) {
 
   const label = createTag('span', { class: 'preview-list-label' }, labelText);
   const previewList = createTag('div', { class: 'preview-list' });
-  const previewListTitle = createTag('h4', {}, 'Select a template');
+  const previewListTitle = createTag('h2', {}, 'Template set up');
+  const previewListSubtitle = createTag('p', { class: 'preview-list-subtitle' }, 'Select a template');
   const previewListFieldset = createTag('fieldset', { class: 'preview-list-fieldset' });
   createTag('div', { class: 'preview-list-items' }, '', { parent: previewListFieldset });
 
@@ -25,14 +26,12 @@ async function buildPreviewList(row) {
   const previewListOverlay = createTag('div', { class: 'preview-list-overlay hidden' });
   const previewListModal = createTag('div', { class: 'preview-list-modal' }, '', { parent: previewListOverlay });
 
-  createTag('sp-divider', { parent: previewListModal });
-
   const actionArea = createTag('div', { class: 'preview-list-action-area' }, '');
   createTag('a', { class: 'preview-list-cancel-btn con-button outline' }, 'Cancel', { parent: actionArea });
   createTag('a', { class: 'preview-list-save-btn con-button fill' }, 'Save', { parent: actionArea });
 
   createTag('a', { class: 'preview-list-close-btn' }, getIcon('close-circle'), { parent: previewListModal });
-  previewListModal.append(previewListTitle, previewListFieldset, actionArea);
+  previewListModal.append(previewListTitle, previewListSubtitle, previewListFieldset, actionArea);
   previewList.append(label, previewListBtn, previewListOverlay);
 
   row.innerHTML = '';
