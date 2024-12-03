@@ -35,19 +35,9 @@ const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
 
 // list of controllers for the handler to load
 const VANILLA_COMPONENTS = [
-  'event-format',
-  'event-info',
-  'img-upload',
-  'venue-info',
-  'profile',
-  'event-agenda',
-  'event-community-link',
-  'event-partners',
-  'terms-conditions',
-  'product-promotion',
-  'event-topics',
-  'registration-details',
-  'registration-fields',
+  'series-details',
+  'series-templates',
+  'series-additional-info',
 ];
 
 const REQUIRED_INPUT_TYPES = [
