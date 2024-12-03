@@ -81,6 +81,6 @@ export function onSubmit(_component, _props) {
   // Do nothing
 }
 
-export function onEventUpdate(component, props) {
+export function onTargetUpdate(component, props) {
   // Do nothing
 }

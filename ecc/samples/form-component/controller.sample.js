@@ -15,6 +15,6 @@ export default function init(_component, _props) {
   // Do nothing
 }
 
-export function onEventUpdate(_component, _props) {
+export function onTargetUpdate(_component, _props) {
   // Do nothing
 }

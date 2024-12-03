@@ -292,8 +292,8 @@ async function handleEventUpdate(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onEventUpdate } = await import(`../${comp}-component/controller.js`);
-      return onEventUpdate(component, props);
+      const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
+      return onTargetUpdate(component, props);
     });
 
     return Promise.all(promises);

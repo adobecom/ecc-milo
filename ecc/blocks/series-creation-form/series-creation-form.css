@@ -189,6 +189,7 @@
 
 .series-creation-form .side-menu ul li a {
   color: var(--color-black);
+  text-decoration: none;
 }
 
 .series-creation-form .side-menu ul li a,

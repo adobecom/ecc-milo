@@ -4,16 +4,15 @@ import {
   buildNoAccessScreen,
   generateToolTip,
   camelToSentenceCase,
-  getEventPageHost,
   signIn,
   getEventServiceEnv,
   getDevToken,
 } from '../../scripts/utils.js';
 import {
   createSeries,
-  updateEvent,
-  publishEvent,
-  getEvent,
+  updateSeries,
+  publishSeries,
+  getSeries,
 } from '../../scripts/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
@@ -96,10 +95,10 @@ export function buildErrorMessage(props, resp) {
         }, { once: true });
       });
     } else if (errorMessage) {
-      if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}') {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'The event has been updated by a different session since your last save.', { parent: toastArea });
+      if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Series update invalid. The series has been modified since last fetch"}') {
+        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'The series has been updated by a different session since your last save.', { parent: toastArea });
         const url = new URL(window.location.href);
-        url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
+        url.searchParams.set('seriesId', getFilteredCachedResponse().seriesId);
 
         createTag('sp-button', {
           slot: 'action',
@@ -186,7 +185,7 @@ function initRequiredFieldsValidation(props) {
 
 function enableSideNavForEditFlow(props) {
   const frags = props.el.querySelectorAll('.fragment');
-  const completeFirstStep = Array.from(frags[0].querySelectorAll('.form-component:not(.event-agenda-component)'))
+  const completeFirstStep = Array.from(frags[0].querySelectorAll('.form-component'))
     .every((fc) => fc.classList.contains('prefilled'));
 
   if (!completeFirstStep) return;
@@ -217,18 +216,18 @@ function initCustomLitComponents() {
   customElements.define('custom-search', CustomSearch);
 }
 
-async function loadEventData(props) {
+async function loadData(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  const eventId = urlParams.get('eventId');
+  const seriesId = urlParams.get('seriesId');
 
-  if (eventId) {
+  if (seriesId) {
     setTimeout(() => {
-      if (!props.eventDataResp.eventId) {
+      if (!props.response.seriesId) {
         const toastArea = props.el.querySelector('.toast-area');
         if (!toastArea) return;
 
-        const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
+        const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the seriesId URL Param is valid.', { parent: toastArea });
         toast.addEventListener('close', () => {
           toast.remove();
         });
@@ -236,8 +235,8 @@ async function loadEventData(props) {
     }, 5000);
 
     props.el.classList.add('disabled');
-    const eventData = await getEvent(eventId);
-    props.eventDataResp = { ...props.eventDataResp, ...eventData };
+    const data = await getSeries(seriesId);
+    props.response = { ...props.response, ...data };
     props.el.classList.remove('disabled');
   }
 }
@@ -282,8 +281,8 @@ async function handleSeriesUpdate(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onEventUpdate } = await import(`../${comp}-component/controller.js`);
-      return onEventUpdate(component, props);
+      const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
+      return onTargetUpdate(component, props);
     });
 
     return Promise.all(promises);
@@ -408,16 +407,16 @@ function showSaveSuccessMessage(props, detail = { message: 'Edits saved successf
 
 function updateDashboardLink(props) {
   // FIXME: presuming first link is dashboard link is not good.
-  if (!getFilteredCachedResponse().eventId) return;
+  if (!getFilteredCachedResponse().seriesId) return;
   const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
   if (!dashboardLink) return;
 
   const url = new URL(dashboardLink.href);
 
-  if (url.searchParams.has('eventId')) return;
+  if (url.searchParams.has('seriesId')) return;
 
-  url.searchParams.set('newEventId', getFilteredCachedResponse().eventId);
+  url.searchParams.set('newEventId', getFilteredCachedResponse().seriesId);
   dashboardLink.href = url.toString();
 }
 
@@ -431,32 +430,32 @@ async function saveSeries(props, toPublish = false) {
   let resp;
 
   const onSeriesSave = async () => {
-    if (resp?.eventId) await handleSeriesUpdate(props);
+    if (resp?.seriesId) await handleSeriesUpdate(props);
 
     if (!resp.error) {
       showSaveSuccessMessage(props);
     }
   };
 
-  if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
+  if (props.currentStep === 0 && !getFilteredCachedResponse().seriesId) {
     resp = await createSeries(quickFilter(props.payload));
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    props.response = { ...props.response, ...resp };
     updateDashboardLink(props);
     await onSeriesSave();
   } else if (props.currentStep <= props.maxStep && !toPublish) {
-    resp = await updateEvent(
-      getFilteredCachedResponse().eventId,
+    resp = await updateSeries(
+      getFilteredCachedResponse().seriesId,
       getJoinedData(),
     );
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    props.response = { ...props.response, ...resp };
     await onSeriesSave();
   } else if (toPublish) {
-    resp = await publishEvent(
-      getFilteredCachedResponse().eventId,
+    resp = await publishSeries(
+      getFilteredCachedResponse().seriesId,
       getJoinedData(),
     );
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (resp?.eventId) await handleSeriesUpdate(props);
+    props.response = { ...props.response, ...resp };
+    if (resp?.seriesId) await handleSeriesUpdate(props);
   }
 
   return resp;
@@ -486,7 +485,7 @@ function renderFormNavigation(props, prevStep, currentStep) {
   frags[currentStep].classList.remove('hidden');
 
   if (props.currentStep === props.maxStep) {
-    if (props.eventDataResp.published) {
+    if (props.response.published) {
       nextBtn.textContent = nextBtn.dataset.republishStateText;
     } else {
       nextBtn.textContent = nextBtn.dataset.finalStateText;
@@ -521,7 +520,7 @@ function initFormCtas(props) {
   const forwardActionsWrappers = ctaRow.querySelectorAll(':scope > div');
 
   const panelWrapper = createTag('div', { class: 'series-creation-form-panel-wrapper' }, '', { parent: ctaRow });
-  const backwardWrapper = createTag('div', { class: 'series-creation-form-backward-wrapper' }, '', { parent: panelWrapper });
+  createTag('div', { class: 'series-creation-form-backward-wrapper' }, '', { parent: panelWrapper });
   const forwardWrapper = createTag('div', { class: 'series-creation-form-forward-wrapper' }, '', { parent: panelWrapper });
 
   forwardActionsWrappers.forEach((w) => {
@@ -529,12 +528,8 @@ function initFormCtas(props) {
     forwardWrapper.append(w);
   });
 
-  const backBtn = createTag('a', { class: 'back-btn' }, getIcon('chev-left-white'));
-
-  backwardWrapper.append(backBtn);
-
   const toggleBtnsSubmittingState = (submitting) => {
-    [...ctas, backBtn].forEach((c) => {
+    ctas.forEach((c) => {
       c.classList.toggle('submitting', submitting);
     });
   };
@@ -575,7 +570,7 @@ function initFormCtas(props) {
               cta.classList.add('disabled');
 
               if (toastArea) {
-                const toast = createTag('sp-toast', { open: true, variant: 'positive' }, 'Success! This event has been published.', { parent: toastArea });
+                const toast = createTag('sp-toast', { open: true, variant: 'positive' }, 'Success! This series has been published.', { parent: toastArea });
                 const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
                 createTag(
@@ -598,7 +593,6 @@ function initFormCtas(props) {
               navigateForm(props);
             }
           } else {
-            oldResp = { ...props.eventDataResp };
             const resp = await saveSeries(props);
             if (resp?.error) {
               buildErrorMessage(props, resp);
@@ -610,37 +604,15 @@ function initFormCtas(props) {
       }
     }
   });
-
-  backBtn.addEventListener('click', async () => {
-    toggleBtnsSubmittingState(true);
-    oldResp = { ...props.eventDataResp };
-    const resp = await saveSeries(props);
-    if (resp?.error) {
-      buildErrorMessage(props, resp);
-    } else {
-      props.currentStep -= 1;
-    }
-
-    toggleBtnsSubmittingState(false);
-  });
 }
 
 function updateCtas(props) {
   const formCtas = props.el.querySelectorAll('.series-creation-form-ctas-panel a');
-  const { eventDataResp } = props;
 
   formCtas.forEach((a) => {
-    if (a.classList.contains('preview-btns')) {
-      const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
-      if (eventDataResp.detailPagePath) {
-        a.href = `${getEventPageHost()}${eventDataResp.detailPagePath}?previewMode=true&cachebuster=${Date.now()}&timing=${testTime}`;
-        a.classList.remove('preview-not-ready');
-      }
-    }
-
     if (a.classList.contains('next-button')) {
       if (props.currentStep === props.maxStep) {
-        if (props.eventDataResp.published) {
+        if (props.response.published) {
           a.textContent = a.dataset.republishStateText;
         } else {
           a.textContent = a.dataset.finalStateText;
@@ -698,22 +670,22 @@ function initDeepLink(props) {
 }
 
 function updateStatusTag(props) {
-  const { eventDataResp } = props;
+  const { response } = props;
 
-  if (eventDataResp?.published === undefined) return;
+  if (response?.published === undefined) return;
 
   const currentFragment = getCurrentFragment(props);
 
   const headingSection = currentFragment.querySelector(':scope > .section:first-child');
 
-  const eixstingStatusTag = headingSection.querySelector('.event-status-tag');
+  const eixstingStatusTag = headingSection.querySelector('.status-tag');
   if (eixstingStatusTag) eixstingStatusTag.remove();
 
   const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
   const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
-  const dot = eventDataResp.published ? getIcon('dot-purple') : getIcon('dot-green');
-  const text = eventDataResp.published ? 'Published' : 'Draft';
-  const statusTag = createTag('span', { class: 'event-status-tag' });
+  const dot = response.published ? getIcon('dot-purple') : getIcon('dot-green');
+  const text = response.published ? 'Published' : 'Draft';
+  const statusTag = createTag('span', { class: 'status-tag' });
 
   statusTag.append(dot, text);
   heading.parentElement?.replaceChild(headingWrapper, heading);
@@ -727,7 +699,7 @@ async function buildForm(el) {
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
-    eventDataResp: {},
+    response: {},
   };
 
   const dataHandler = {
@@ -761,7 +733,7 @@ async function buildForm(el) {
           break;
         }
 
-        case 'eventDataResp': {
+        case 'response': {
           setResponseCache(value);
           updateComponentsOnRespChange(target);
           updateCtas(target);
@@ -795,7 +767,7 @@ async function buildForm(el) {
     });
   });
 
-  await loadEventData(proxyProps);
+  await loadData(proxyProps);
   initFormCtas(proxyProps);
   initNavigation(proxyProps);
   await initComponents(proxyProps);

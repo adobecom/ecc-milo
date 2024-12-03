@@ -130,6 +130,6 @@ export default async function init(component, props) {
   initInteractions(component);
 }
 
-export function onEventUpdate(component, props) {
+export function onTargetUpdate(component, props) {
   // Do nothing
 }
