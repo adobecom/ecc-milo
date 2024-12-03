@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import buildCarousel from '../../scripts/features/carousel.js';
 import { LIBS } from '../../scripts/scripts.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -44,6 +45,8 @@ async function buildPreviewListOptionsFromSource(component, source) {
     previewListItem.append(radioLabel, previewListItemImage);
     previewListItems.append(previewListItem);
   });
+
+  await buildCarousel('.preview-list-item', previewListItems);
 }
 
 export default async function init(component, props) {

@@ -102,14 +102,12 @@
   height: 100%;
   width: 100%;
   display: block;
+  min-inline-size: unset;
 }
 
 .series-templates-component .preview-list-items {
   height: 100%;
   width: 100%;
-  display: flex;
-  gap: 50px;
-  overflow: auto;
   margin-bottom: 40px;
 }
 
@@ -129,9 +127,15 @@
 
 .series-templates-component .preview-list-item label.radio-label {
   font-family: var(--body-font-family);
+  font-size: var(--type-body-s-size);
   display: flex;
   flex-direction: row-reverse;
   justify-content: flex-end;
   align-items: center;
   gap: 8px;
+  margin-bottom: 24px;
+}
+
+.series-templates-component .carousel-platform {
+  gap: 50px;
 }
