@@ -12,6 +12,15 @@
   cursor: pointer;
 }
 
+.series-templates-component .preview-list .series-template-name {
+  display: none;
+  margin-right: 24px;
+}
+
+.series-templates-component .preview-list.selected .series-template-name {
+  display: inline-block;
+}
+
 .series-templates-component .preview-list-btn {
   padding: 10px 20px;
   border-radius: 20px;
@@ -81,7 +90,7 @@
   margin: auto;
   background-color: var(--color-white);
   border-radius: 24px;
-  overflow: auto;
+  overflow: hidden auto;
 }
 
 .series-templates-component .preview-list-modal h2 {

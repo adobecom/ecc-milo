@@ -6,6 +6,15 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
+
+  const eventTemplateInput = component.querySelector('input[name="series-template-input"]');
+  const emailTemplateInput = component.querySelector('sp-textfield[name="series-email-template"]');
+
+  props.payload = {
+    ...props.payload,
+    eventTemplate: eventTemplateInput.value,
+    emailTemplate: emailTemplateInput.value,
+  };
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -60,7 +69,8 @@ function initInteractions(component) {
   const closeBtn = component.querySelector('.preview-list-close-btn');
   const cancelBtn = component.querySelector('.preview-list-cancel-btn');
   const saveBtn = component.querySelector('.preview-list-save-btn');
-  const valueInput = component.querySelector('input[name="series-template-input"]');
+  const valueInput = component.querySelector('input.series-template-input');
+  const nameInput = component.querySelector('sp-textfield.series-template-name');
 
   if (
     !previewList
@@ -94,14 +104,12 @@ function initInteractions(component) {
     if (saveBtn.classList.contains('disabled')) return;
     previewListOverlay.classList.add('hidden');
     valueInput.value = previewList.querySelector('input[name="series-template"]:checked').value;
+    nameInput.value = previewList.querySelector('input[name="series-template"]:checked').parentElement.textContent.trim();
+    valueInput.dispatchEvent(new Event('change'));
   });
 
   valueInput.addEventListener('change', () => {
-    if (valueInput.value) {
-      valueInput.type = 'text';
-    } else {
-      valueInput.type = 'hidden';
-    }
+    previewList.classList.toggle('selected', valueInput.value);
   });
 
   saveBtn.classList.toggle('disabled', !valueInput.value);

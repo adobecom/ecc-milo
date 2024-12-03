@@ -21,7 +21,8 @@ async function buildPreviewList(row) {
   const previewListSubtitle = createTag('p', { class: 'preview-list-subtitle' }, 'Select a template');
   const previewListFieldset = createTag('fieldset', { class: 'preview-list-fieldset' });
   createTag('div', { class: 'preview-list-items' }, '', { parent: previewListFieldset });
-  createTag('input', { type: 'hidden', name: 'series-template-input', value: '' }, '', { parent: previewList });
+  const previewListInput = createTag('input', { type: 'hidden', name: 'series-template-input', class: 'series-template-input' });
+  const templateNameInput = createTag('sp-textfield', { class: 'series-template-name', size: 'xl', readonly: true });
 
   const previewListBtn = createTag('a', { class: 'con-button fill preview-list-btn' }, 'Select');
   const previewListOverlay = createTag('div', { class: 'preview-list-overlay hidden' });
@@ -33,7 +34,13 @@ async function buildPreviewList(row) {
 
   createTag('a', { class: 'preview-list-close-btn' }, getIcon('close-circle'), { parent: previewListModal });
   previewListModal.append(previewListTitle, previewListSubtitle, previewListFieldset, actionArea);
-  previewList.append(label, previewListBtn, previewListOverlay);
+  previewList.append(
+    label,
+    templateNameInput,
+    previewListInput,
+    previewListBtn,
+    previewListOverlay,
+  );
 
   row.innerHTML = '';
   row.append(previewList);
@@ -53,7 +60,7 @@ export default async function init(el) {
     if (ri === 0) generateToolTip(r);
 
     if (ri === 1) {
-      await decorateLabeledTextfield(r, { id: 'info-field-series-susi' });
+      await decorateLabeledTextfield(r, { id: 'series-email-template' });
     }
 
     if (ri === 2) {
