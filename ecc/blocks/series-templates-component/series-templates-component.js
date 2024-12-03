@@ -21,6 +21,7 @@ async function buildPreviewList(row) {
   const previewListSubtitle = createTag('p', { class: 'preview-list-subtitle' }, 'Select a template');
   const previewListFieldset = createTag('fieldset', { class: 'preview-list-fieldset' });
   createTag('div', { class: 'preview-list-items' }, '', { parent: previewListFieldset });
+  createTag('input', { type: 'hidden', name: 'series-template-input', value: '' }, '', { parent: previewList });
 
   const previewListBtn = createTag('a', { class: 'con-button fill preview-list-btn' }, 'Select');
   const previewListOverlay = createTag('div', { class: 'preview-list-overlay hidden' });

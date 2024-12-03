@@ -197,18 +197,22 @@ export async function decorateLabeledTextfield(cell, inputOpts = {}, labelOpts =
   const label = createTag('sp-field-label', mergeOptions({
     for: 'text-input',
     'side-aligned': 'start',
-    require: isRequired,
     class: 'text-field-label',
   }, labelOpts), text);
+
   const input = createTag('sp-textfield', mergeOptions(
     {
       class: 'text-input',
       placeholder: phText,
-      required: isRequired,
       size: 'xl',
     },
     inputOpts,
   ));
+
+  if (isRequired) {
+    input.required = true;
+    label.required = true;
+  }
 
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
 
