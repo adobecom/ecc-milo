@@ -26,9 +26,6 @@ async function loadGoogleMapsAPI(callback) {
 
 function resetAllFields(component) {
   const venueNameInput = component.querySelector('#venue-info-venue-name');
-  const cityInput = component.querySelector('#location-city');
-  const postalCodeInput = component.querySelector('#location-postal-code');
-  const countryInput = component.querySelector('#location-country');
   const placeLatInput = component.querySelector('#google-place-lat');
   const placeLngInput = component.querySelector('#google-place-lng');
   const placeIdInput = component.querySelector('#google-place-id');
@@ -37,9 +34,6 @@ function resetAllFields(component) {
   const formattedAddressInput = component.querySelector('#google-place-formatted-address');
 
   venueNameInput.value = '';
-  changeInputValue(cityInput, 'value', '');
-  changeInputValue(postalCodeInput, 'value', '');
-  changeInputValue(countryInput, 'value', '');
   changeInputValue(placeLatInput, 'value', '');
   changeInputValue(placeLngInput, 'value', '');
   changeInputValue(placeIdInput, 'value', '');
@@ -50,9 +44,6 @@ function resetAllFields(component) {
 
 function updateAllFields(venueData, component) {
   const venueNameInput = component.querySelector('#venue-info-venue-name');
-  const cityInput = component.querySelector('#location-city');
-  const postalCodeInput = component.querySelector('#location-postal-code');
-  const countryInput = component.querySelector('#location-country');
   const placeLatInput = component.querySelector('#google-place-lat');
   const placeLngInput = component.querySelector('#google-place-lng');
   const placeIdInput = component.querySelector('#google-place-id');
@@ -61,9 +52,6 @@ function updateAllFields(venueData, component) {
   const formattedAddressInput = component.querySelector('#google-place-formatted-address');
 
   changeInputValue(venueNameInput, 'value', venueData.venueName);
-  changeInputValue(cityInput, 'value', venueData.city);
-  changeInputValue(postalCodeInput, 'value', venueData.postalCode);
-  changeInputValue(countryInput, 'value', venueData.country);
   changeInputValue(placeLatInput, 'value', venueData.coordinates?.lat);
   changeInputValue(placeLngInput, 'value', venueData.coordinates?.lon);
   changeInputValue(placeIdInput, 'value', venueData.placeId);
@@ -74,9 +62,6 @@ function updateAllFields(venueData, component) {
 
 function getVenueDataInForm(component) {
   const venueNameInput = component.querySelector('#venue-info-venue-name');
-  const cityInput = component.querySelector('#location-city');
-  const postalCodeInput = component.querySelector('#location-postal-code');
-  const countryInput = component.querySelector('#location-country');
   const placeLatInput = component.querySelector('#google-place-lat');
   const placeLngInput = component.querySelector('#google-place-lng');
   const placeIdInput = component.querySelector('#google-place-id');
@@ -85,9 +70,6 @@ function getVenueDataInForm(component) {
   const formattedAddressInput = component.querySelector('#google-place-formatted-address');
 
   const venueName = venueNameInput.value;
-  const city = cityInput.value;
-  const postalCode = postalCodeInput.value;
-  const country = countryInput.value;
   const placeId = placeIdInput.value;
   const lat = +placeLatInput.value;
   const lon = +placeLngInput.value;
@@ -97,9 +79,6 @@ function getVenueDataInForm(component) {
 
   const venueData = {
     venueName,
-    city,
-    postalCode,
-    country,
     placeId,
     coordinates: {
       lat,
@@ -120,11 +99,7 @@ function initAutocomplete(el, props) {
   // eslint-disable-next-line no-undef
   const autocomplete = new google.maps.places.Autocomplete(venueName.shadowRoot.querySelector('input'));
 
-  const city = el.querySelector('#location-city');
-  const postalCode = el.querySelector('#location-postal-code');
-  const country = el.querySelector('#location-country');
   const placeId = el.querySelector('#google-place-id');
-  const mapUrl = el.querySelector('#google-map-url');
   const placeLAT = el.querySelector('#google-place-lat');
   const placeLNG = el.querySelector('#google-place-lng');
   const placeGmtOffset = el.querySelector('#google-place-gmt-offset');
@@ -139,26 +114,14 @@ function initAutocomplete(el, props) {
     if (place.address_components) {
       const components = place.address_components;
 
-      const addressInfo = {
-        city: '',
-        postalCode: '',
-        country: '',
-      };
+      const addressInfo = { city: '' };
 
-      const cityCandidates = ['locality', 'postal_town', 'administrative_area_level_1'];
+      const cityCandidates = ['locality', 'postal_town', 'administrative_area_level_2', 'sublocality_level_1'];
 
       components.forEach((component) => {
         if (!addressInfo.city
           && cityCandidates.some((type) => component.types.includes(type))) {
           addressInfo.city = component.long_name;
-        }
-
-        if (component.types.includes('postal_code')) {
-          addressInfo.postalCode = component.long_name;
-        }
-
-        if (component.types.includes('country')) {
-          addressInfo.country = component.short_name;
         }
       });
 
@@ -172,11 +135,7 @@ function initAutocomplete(el, props) {
       }
 
       if (place.name) changeInputValue(venueName, 'value', place.name);
-      changeInputValue(city, 'value', addressInfo.city);
-      changeInputValue(postalCode, 'value', addressInfo.postalCode);
-      changeInputValue(country, 'value', addressInfo.country);
       changeInputValue(placeId, 'value', place.place_id);
-      changeInputValue(mapUrl, 'value', place.url);
 
       togglePrefillableFieldsHiddenState(el);
       BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city: addressInfo.city });
