@@ -39,15 +39,30 @@ async function buildPickerOverlay() {
   const pickerOverlay = createTag('div', { class: 'picker-overlay hidden' });
   const pickerModal = createTag('div', { class: 'picker-modal' }, '', { parent: pickerOverlay });
   const pickerTitle = createTag('h2', {}, 'Select a template');
+
+  const previewContainer = createTag('div', { class: 'picker-preview-container' });
+  const previewHeading = createTag('h3', { class: 'picker-preview-heading' }, 'Preview');
+  const previewFrame = createTag('div', { class: 'picker-preview-frame' });
+  const previewImageHolder = createTag('div', { class: 'picker-preview-image-holder' });
+  const previewImage = createTag('img', { class: 'picker-preview-image' });
+  const previewActions = createTag('div', { class: 'picker-preview-actions' });
+  const zoomInBtn = createTag('button', { class: 'picker-zoom-in-btn' }, getIcon('zoom-in'));
+  const zoomOutBtn = createTag('button', { class: 'picker-zoom-out-btn' }, getIcon('zoom-out'));
+
   const pickerFieldset = createTag('fieldset', { class: 'picker-fieldset' });
-  const actionArea = createTag('div', { class: 'picker-action-area' }, '');
+
+  const actionArea = createTag('div', { class: 'picker-action-area' });
 
   createTag('div', { class: 'picker-items' }, '', { parent: pickerFieldset });
   createTag('a', { class: 'picker-close-btn' }, getIcon('close-circle'), { parent: pickerModal });
   createTag('a', { class: 'picker-cancel-btn con-button outline' }, 'Cancel', { parent: actionArea });
   createTag('a', { class: 'picker-save-btn con-button fill' }, 'Save', { parent: actionArea });
 
-  pickerModal.append(pickerTitle, pickerFieldset, actionArea);
+  pickerModal.append(pickerTitle, previewContainer, pickerFieldset, actionArea);
+  previewContainer.append(previewHeading, previewFrame);
+  previewFrame.append(previewImageHolder, previewActions);
+  previewActions.append(zoomInBtn, zoomOutBtn);
+  previewImageHolder.append(previewImage);
 
   return pickerOverlay;
 }

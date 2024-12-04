@@ -42,10 +42,10 @@ async function buildPreviewListOptionsFromSource(component, source) {
 
     const pickerItem = createTag('div', { class: 'picker-item' });
     const pickerItemImage = createTag('img', { src: option['template-image'] });
-    pickerItem.append(radioLabel, pickerItemImage);
+    pickerItem.append(pickerItemImage, radioLabel);
     pickerItems.append(pickerItem);
 
-    pickerItem.addEventListener('click', async () => {
+    pickerItem.addEventListener('click', () => {
       if (radio && !radio.checked) {
         radio.checked = true;
         radio.dispatchEvent(new Event('change'));
@@ -53,8 +53,14 @@ async function buildPreviewListOptionsFromSource(component, source) {
     });
 
     radio.addEventListener('change', () => {
+      const alItems = component.querySelectorAll('.picker-item');
       const saveBtn = component.querySelector('.picker-save-btn');
+
       saveBtn.classList.toggle('disabled', !radio.checked);
+      alItems.forEach((item) => {
+        if (pickerItem !== item) item.setAttribute('aria-selected', 'false');
+      });
+      pickerItem.setAttribute('aria-selected', radio.checked);
     });
   });
 
@@ -70,6 +76,7 @@ function initInteractions(component) {
   const saveBtn = component.querySelector('.picker-save-btn');
   const valueInput = component.querySelector('input.series-template-input');
   const nameInput = component.querySelector('sp-textfield.series-template-name');
+  const pickerItems = component.querySelectorAll('.picker-item');
   const allRadioInputs = component.querySelectorAll('input[name="series-template"]');
 
   if (
@@ -83,6 +90,10 @@ function initInteractions(component) {
   ) return;
 
   const resetPreviewList = () => {
+    pickerItems.forEach((item) => {
+      item.setAttribute('aria-selected', 'false');
+    });
+
     allRadioInputs.forEach((radio) => {
       radio.checked = false;
     });
