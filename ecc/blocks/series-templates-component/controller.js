@@ -38,36 +38,18 @@ async function buildPreviewListOptionsFromSource(component, source) {
 
   options.forEach((option) => {
     const radioLabel = createTag('label', { class: 'radio-label' }, option['template-name']);
-    const radio = createTag('input', { type: 'radio', name: 'series-template', value: option['template-path'] }, '', { parent: radioLabel });
+    createTag('input', { type: 'radio', name: 'series-template', value: option['template-path'] }, '', { parent: radioLabel });
 
     const pickerItem = createTag('div', { class: 'picker-item' });
     const pickerItemImage = createTag('img', { src: option['template-image'] });
     pickerItem.append(pickerItemImage, radioLabel);
     pickerItems.append(pickerItem);
-
-    pickerItem.addEventListener('click', () => {
-      if (radio && !radio.checked) {
-        radio.checked = true;
-        radio.dispatchEvent(new Event('change'));
-      }
-    });
-
-    radio.addEventListener('change', () => {
-      const alItems = component.querySelectorAll('.picker-item');
-      const saveBtn = component.querySelector('.picker-save-btn');
-
-      saveBtn.classList.toggle('disabled', !radio.checked);
-      alItems.forEach((item) => {
-        if (pickerItem !== item) item.setAttribute('aria-selected', 'false');
-      });
-      pickerItem.setAttribute('aria-selected', radio.checked);
-    });
   });
 
   await buildCarousel('.picker-item', pickerItems);
 }
 
-function initInteractions(component) {
+function initPicker(component) {
   const picker = component.querySelector('.picker');
   const pickerOverlay = component.querySelector('.picker-overlay');
   const pickerBtn = component.querySelector('.picker-btn');
@@ -78,6 +60,9 @@ function initInteractions(component) {
   const nameInput = component.querySelector('sp-textfield.series-template-name');
   const pickerItems = component.querySelectorAll('.picker-item');
   const allRadioInputs = component.querySelectorAll('input[name="series-template"]');
+  const previewImage = component.querySelector('.picker-preview-image');
+  const zoomInBtn = component.querySelector('.picker-zoom-in-btn');
+  const zoomOutBtn = component.querySelector('.picker-zoom-out-btn');
 
   if (
     !picker
@@ -100,6 +85,7 @@ function initInteractions(component) {
 
     pickerOverlay.classList.add('hidden');
     saveBtn.classList.add('disabled');
+    previewImage.src = '';
   };
 
   pickerBtn.addEventListener('click', () => {
@@ -137,15 +123,52 @@ function initInteractions(component) {
       resetPreviewList();
     }
   });
+
+  zoomInBtn.addEventListener('click', () => {
+    if (!previewImage.src) return;
+
+    const scale = previewImage.style.transform?.match(/scale\((\d+(\.\d+)?)\)/)?.[1] || 1;
+    previewImage.style.transform = `scale(${parseFloat(scale) + 0.5})`;
+  });
+
+  zoomOutBtn.addEventListener('click', () => {
+    if (!previewImage.src) return;
+
+    const scale = previewImage.style.transform?.match(/scale\((\d+(\.\d+)?)\)/)?.[1] || 1;
+    previewImage.style.transform = `scale(${parseFloat(scale) - 0.5})`;
+  });
+
+  pickerItems.forEach((pickerItem) => {
+    const radio = pickerItem.querySelector('input[type="radio"]');
+
+    pickerItem.addEventListener('click', () => {
+      if (radio && !radio.checked) {
+        radio.checked = true;
+        radio.dispatchEvent(new Event('change'));
+      }
+    });
+
+    radio.addEventListener('change', () => {
+      saveBtn.classList.toggle('disabled', !radio.checked);
+      pickerItems.forEach((item) => {
+        if (pickerItem !== item) item.setAttribute('aria-selected', 'false');
+      });
+      pickerItem.setAttribute('aria-selected', radio.checked);
+
+      if (previewImage) {
+        previewImage.src = pickerItem.querySelector('img')?.src;
+      }
+    });
+  });
 }
 
 export default async function init(component, props) {
   const picker = component.querySelector('.picker');
   if (!picker) return;
 
-  buildPreviewListOptionsFromSource(component, picker.getAttribute('data-source-link'));
+  await buildPreviewListOptionsFromSource(component, picker.getAttribute('data-source-link'));
 
-  initInteractions(component);
+  initPicker(component);
 }
 
 export function onTargetUpdate(component, props) {
