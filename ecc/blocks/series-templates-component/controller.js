@@ -71,6 +71,7 @@ function initInteractions(component) {
   const saveBtn = component.querySelector('.preview-list-save-btn');
   const valueInput = component.querySelector('input.series-template-input');
   const nameInput = component.querySelector('sp-textfield.series-template-name');
+  const allRadioInputs = previewList.querySelectorAll('input[name="series-template"]');
 
   if (
     !previewList
@@ -83,13 +84,20 @@ function initInteractions(component) {
   ) return;
 
   const resetPreviewList = () => {
-    previewList.querySelector('input[name="series-template"]:checked')?.removeAttribute('checked');
+    allRadioInputs.forEach((radio) => {
+      radio.checked = false;
+    });
+
     previewListOverlay.classList.add('hidden');
     saveBtn.classList.add('disabled');
   };
 
   previewListBtn.addEventListener('click', () => {
     previewListOverlay.classList.remove('hidden');
+    if (valueInput.value) {
+      const selectedRadio = previewList.querySelector(`input[type='radio'][value="${valueInput.value}"]`);
+      if (selectedRadio) selectedRadio.checked = true;
+    }
   });
 
   closeBtn.addEventListener('click', () => {
@@ -116,7 +124,7 @@ function initInteractions(component) {
 
   previewListOverlay.addEventListener('click', (e) => {
     if (e.target === previewListOverlay) {
-      previewListOverlay.classList.add('hidden');
+      resetPreviewList();
     }
   });
 }
