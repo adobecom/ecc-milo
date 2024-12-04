@@ -26,8 +26,7 @@ export async function onRespUpdate(_component, _props) {
 }
 
 async function buildPreviewListOptionsFromSource(component, source) {
-  const previewList = component.querySelector('.preview-list');
-  const previewListItems = previewList.querySelector('.preview-list-items');
+  const pickerItems = component.querySelector('.picker-items');
 
   const jsonResp = await fetch(source).then((res) => {
     if (!res.ok) throw new Error('Failed to fetch series templates');
@@ -41,12 +40,12 @@ async function buildPreviewListOptionsFromSource(component, source) {
     const radioLabel = createTag('label', { class: 'radio-label' }, option['template-name']);
     const radio = createTag('input', { type: 'radio', name: 'series-template', value: option['template-path'] }, '', { parent: radioLabel });
 
-    const previewListItem = createTag('div', { class: 'preview-list-item' });
-    const previewListItemImage = createTag('img', { src: option['template-image'] });
-    previewListItem.append(radioLabel, previewListItemImage);
-    previewListItems.append(previewListItem);
+    const pickerItem = createTag('div', { class: 'picker-item' });
+    const pickerItemImage = createTag('img', { src: option['template-image'] });
+    pickerItem.append(radioLabel, pickerItemImage);
+    pickerItems.append(pickerItem);
 
-    previewListItem.addEventListener('click', async () => {
+    pickerItem.addEventListener('click', async () => {
       if (radio && !radio.checked) {
         radio.checked = true;
         radio.dispatchEvent(new Event('change'));
@@ -54,29 +53,29 @@ async function buildPreviewListOptionsFromSource(component, source) {
     });
 
     radio.addEventListener('change', () => {
-      const saveBtn = component.querySelector('.preview-list-save-btn');
+      const saveBtn = component.querySelector('.picker-save-btn');
       saveBtn.classList.toggle('disabled', !radio.checked);
     });
   });
 
-  await buildCarousel('.preview-list-item', previewListItems);
+  await buildCarousel('.picker-item', pickerItems);
 }
 
 function initInteractions(component) {
-  const previewList = component.querySelector('.preview-list');
-  const previewListOverlay = previewList.querySelector('.preview-list-overlay');
-  const previewListBtn = component.querySelector('.preview-list-btn');
-  const closeBtn = component.querySelector('.preview-list-close-btn');
-  const cancelBtn = component.querySelector('.preview-list-cancel-btn');
-  const saveBtn = component.querySelector('.preview-list-save-btn');
+  const picker = component.querySelector('.picker');
+  const pickerOverlay = component.querySelector('.picker-overlay');
+  const pickerBtn = component.querySelector('.picker-btn');
+  const closeBtn = component.querySelector('.picker-close-btn');
+  const cancelBtn = component.querySelector('.picker-cancel-btn');
+  const saveBtn = component.querySelector('.picker-save-btn');
   const valueInput = component.querySelector('input.series-template-input');
   const nameInput = component.querySelector('sp-textfield.series-template-name');
-  const allRadioInputs = previewList.querySelectorAll('input[name="series-template"]');
+  const allRadioInputs = component.querySelectorAll('input[name="series-template"]');
 
   if (
-    !previewList
-    || !previewListOverlay
-    || !previewListBtn
+    !picker
+    || !pickerOverlay
+    || !pickerBtn
     || !closeBtn
     || !cancelBtn
     || !saveBtn
@@ -88,14 +87,14 @@ function initInteractions(component) {
       radio.checked = false;
     });
 
-    previewListOverlay.classList.add('hidden');
+    pickerOverlay.classList.add('hidden');
     saveBtn.classList.add('disabled');
   };
 
-  previewListBtn.addEventListener('click', () => {
-    previewListOverlay.classList.remove('hidden');
+  pickerBtn.addEventListener('click', () => {
+    pickerOverlay.classList.remove('hidden');
     if (valueInput.value) {
-      const selectedRadio = previewList.querySelector(`input[type='radio'][value="${valueInput.value}"]`);
+      const selectedRadio = component.querySelector(`input[type='radio'][value="${valueInput.value}"]`);
       if (selectedRadio) selectedRadio.checked = true;
     }
   });
@@ -110,30 +109,30 @@ function initInteractions(component) {
 
   saveBtn.addEventListener('click', () => {
     if (saveBtn.classList.contains('disabled')) return;
-    previewListOverlay.classList.add('hidden');
-    valueInput.value = previewList.querySelector('input[name="series-template"]:checked').value;
-    nameInput.value = previewList.querySelector('input[name="series-template"]:checked').parentElement.textContent.trim();
+    pickerOverlay.classList.add('hidden');
+    valueInput.value = component.querySelector('input[name="series-template"]:checked').value;
+    nameInput.value = component.querySelector('input[name="series-template"]:checked').parentElement.textContent.trim();
     valueInput.dispatchEvent(new Event('change'));
   });
 
   valueInput.addEventListener('change', () => {
-    previewList.classList.toggle('selected', valueInput.value);
+    picker.classList.toggle('selected', valueInput.value);
   });
 
   saveBtn.classList.toggle('disabled', !valueInput.value);
 
-  previewListOverlay.addEventListener('click', (e) => {
-    if (e.target === previewListOverlay) {
+  pickerOverlay.addEventListener('click', (e) => {
+    if (e.target === pickerOverlay) {
       resetPreviewList();
     }
   });
 }
 
 export default async function init(component, props) {
-  const previewList = component.querySelector('.preview-list');
-  if (!previewList) return;
+  const picker = component.querySelector('.picker');
+  if (!picker) return;
 
-  buildPreviewListOptionsFromSource(component, previewList.getAttribute('data-source-link'));
+  buildPreviewListOptionsFromSource(component, picker.getAttribute('data-source-link'));
 
   initInteractions(component);
 }

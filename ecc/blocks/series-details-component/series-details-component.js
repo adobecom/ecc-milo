@@ -19,8 +19,7 @@ async function decorateCloudTagSelect(column) {
 
   // FIXME: cloulds shouldn't be hardcoded
   // const clouds = await getClouds();
-  // const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
-  const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }];
+  const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
 
   Object.entries(clouds).forEach(([, val]) => {
     const opt = createTag('sp-menu-item', { value: val.id }, val.name);
@@ -28,25 +27,6 @@ async function decorateCloudTagSelect(column) {
   });
 
   select.pending = false;
-}
-
-function decorateSeriesFormatSelect(cell) {
-  const formatSelectWrapper = createTag('div', { class: 'format-picker-wrapper' });
-  const label = createTag('sp-field-label', { for: 'format-select-input' }, cell.textContent.trim());
-  const select = createTag('sp-picker', { id: 'format-select-input', class: 'select-input', size: 'm', label: 'Format' });
-  const options = [
-    { id: 'InPerson', name: 'In-Person' },
-    { id: 'Webinar', name: 'Webinar' },
-  ];
-
-  options.forEach((o) => {
-    const opt = createTag('sp-menu-item', { value: o.id }, o.name);
-    select.append(opt);
-  });
-
-  cell.innerHTML = '';
-  formatSelectWrapper.append(label, select);
-  cell.append(formatSelectWrapper);
 }
 
 export default function init(el) {
@@ -62,7 +42,6 @@ export default function init(el) {
 
       cols.forEach(async (c, ci) => {
         if (ci === 0) decorateCloudTagSelect(c);
-        if (ci === 1) decorateSeriesFormatSelect(c);
       });
     }
 
