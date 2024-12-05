@@ -112,7 +112,7 @@ function initAutocomplete(el, props) {
     const place = autocomplete.getPlace();
 
     if (place.address_components) {
-      const components = place.address_components;
+      let components = place.address_components;
 
       const addressInfo = { city: '' };
 
@@ -124,6 +124,15 @@ function initAutocomplete(el, props) {
           addressInfo.city = component.long_name;
         }
       });
+
+      components = components.reduce((acc, component) => {
+        const key = component.types[0];
+        acc[key] = {
+          longName: component.long_name,
+          shortName: component.short_name,
+        };
+        return acc;
+      }, {});
 
       changeInputValue(addressComponentsInput, 'value', JSON.stringify(components));
 
