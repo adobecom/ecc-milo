@@ -7,6 +7,7 @@ import {
   getEventPageHost,
   signIn,
   getEventServiceEnv,
+  getDevToken,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -1047,8 +1048,7 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const sp = new URLSearchParams(window.location.search);
-  const devToken = sp.get('devToken');
+  const devToken = getDevToken();
   if (devToken && getEventServiceEnv() === 'local') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
