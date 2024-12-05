@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-import { LIBS } from '../../../scripts/scripts.js';
-import HtmlSanitizer from '../../../scripts/deps/html-sanitizer.js';
-import { fetchThrottledMemoizedText, getEventServiceEnv } from '../../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
+import HtmlSanitizer from '../../scripts/deps/html-sanitizer.js';
+import { fetchThrottledMemoizedText, getEventServiceEnv } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 

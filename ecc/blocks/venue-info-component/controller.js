@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-import { createVenue, replaceVenue } from '../../../scripts/esp-controller.js';
-import BlockMediator from '../../../scripts/deps/block-mediator.min.js';
-import { changeInputValue, getEventServiceEnv, getSecret } from '../../../scripts/utils.js';
-import { buildErrorMessage } from '../form-handler.js';
+import { createVenue, replaceVenue } from '../../scripts/esp-controller.js';
+import BlockMediator from '../../scripts/deps/block-mediator.min.js';
+import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
+import { buildErrorMessage } from '../form-handler/form-handler.js';
 
 function togglePrefillableFieldsHiddenState(component) {
   const address = component.querySelector('#google-place-formatted-address');
