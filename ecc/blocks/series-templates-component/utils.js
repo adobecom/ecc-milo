@@ -3,16 +3,14 @@ let image;
 let zoomInBtn;
 let zoomOutBtn;
 
-let scale = 1; // Initial scale
-let posX = 0; // Initial horizontal offset
-let posY = 0; // Initial vertical offset
+let scale = 1;
+let posX = 0;
+let posY = 0;
 
-// Dragging state
 let isDragging = false;
 let startX;
 let startY;
 
-// Handle zooming
 function zoom(scaleFactor) {
   if (scale + scaleFactor < 0.5) return;
 
@@ -22,7 +20,6 @@ function zoom(scaleFactor) {
   zoomOutBtn.disabled = scale <= 0.5;
 }
 
-// Handle dragging start
 function onDragStart(event) {
   image.classList.add('grabbing');
   event.preventDefault();
@@ -33,7 +30,6 @@ function onDragStart(event) {
   container.style.cursor = 'grabbing';
 }
 
-// Handle dragging move
 function onDragMove(event) {
   if (!isDragging) return;
 
@@ -48,15 +44,12 @@ function onDragMove(event) {
   posX += deltaX;
   posY += deltaY;
 
-  // Apply transformations
   image.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
 
-  // Update start positions for next move
   startX = currentX;
   startY = currentY;
 }
 
-// Handle dragging end
 function onDragEnd() {
   isDragging = false;
   image.classList.remove('grabbing');
