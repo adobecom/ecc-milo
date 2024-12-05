@@ -85,7 +85,7 @@ function getVenueDataInForm(component) {
       lon,
     },
     gmtOffset,
-    addressComponents,
+    addressComponents: JSON.parse(addressComponents),
     formattedAddress,
   };
 
