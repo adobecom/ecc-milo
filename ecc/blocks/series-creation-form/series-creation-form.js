@@ -70,6 +70,12 @@ const SPECTRUM_COMPONENTS = [
   'progress-circle',
 ];
 
+const PUBLISHABLE_ATTRS = [
+  'seriesName',
+  'cloudType',
+  'templateId',
+];
+
 export function buildErrorMessage(props, resp) {
   if (!resp) return;
 
@@ -144,24 +150,18 @@ function getCurrentFragment(props) {
   return currentFrag;
 }
 
-function validateRequiredFields(fields) {
+function validateFields(fields) {
   return fields.length === 0 || Array.from(fields).every((f) => f.value && !f.invalid);
 }
 
 function onStepValidate(props) {
-  return function updateCtaStatus() {
+  return function updateSaveCtaStatus() {
     const currentFrag = getCurrentFragment(props);
-    const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
-    const ctas = props.el.querySelectorAll('.series-creation-form-panel-wrapper a');
+    const stepValid = validateFields(props[`required-fields-in-${currentFrag.id}`]);
+    const saveButton = props.el.querySelector('.series-creation-form-ctas-panel .save-button');
     const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
 
-    ctas.forEach((cta) => {
-      if (cta.classList.contains('back-btn')) {
-        cta.classList.toggle('disabled', props.currentStep === 0);
-      } else {
-        cta.classList.toggle('disabled', !stepValid);
-      }
-    });
+    saveButton.classList.toggle('disabled', !stepValid);
 
     sideNavs.forEach((nav, i) => {
       if (i !== props.currentStep) {
@@ -181,6 +181,14 @@ function initRequiredFieldsValidation(props) {
   });
 
   inputValidationCB();
+}
+
+function validatePublishFields(props) {
+  const publishAttributesFilled = PUBLISHABLE_ATTRS.every((attr) => props.payload[attr]);
+  console.log('publishAttributesFilled', publishAttributesFilled);
+  const publishButton = props.el.querySelector('.series-creation-form-ctas-panel .next-button');
+
+  publishButton.classList.toggle('disabled', !publishAttributesFilled);
 }
 
 function enableSideNavForEditFlow(props) {
@@ -489,6 +497,7 @@ function renderFormNavigation(props, prevStep, currentStep) {
       nextBtn.textContent = nextBtn.dataset.republishStateText;
     } else {
       nextBtn.textContent = nextBtn.dataset.finalStateText;
+      nextBtn.prepend(getIcon('golden-rocket'));
     }
   } else {
     nextBtn.textContent = nextBtn.dataset.finalStateText;
@@ -548,6 +557,10 @@ function initFormCtas(props) {
           cta.dataset.finalStateText = finalStateText;
           cta.dataset.doneStateText = doneStateText;
           cta.dataset.republishStateText = republishStateText;
+        }
+
+        if (ctaUrl.hash === '#save') {
+          cta.classList.add('save-button');
         }
 
         cta.addEventListener('click', async (e) => {
@@ -616,6 +629,7 @@ function updateCtas(props) {
           a.textContent = a.dataset.republishStateText;
         } else {
           a.textContent = a.dataset.finalStateText;
+          a.prepend(getIcon('golden-rocket'));
         }
       } else {
         a.textContent = a.dataset.finalStateText;
@@ -730,6 +744,7 @@ async function buildForm(el) {
           setPayloadCache(value);
           updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);
+          validatePublishFields(target);
           break;
         }
 
@@ -771,6 +786,7 @@ async function buildForm(el) {
   initFormCtas(proxyProps);
   initNavigation(proxyProps);
   await initComponents(proxyProps);
+  validatePublishFields(proxyProps);
   updateRequiredFields(proxyProps);
   enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);

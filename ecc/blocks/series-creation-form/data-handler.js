@@ -6,11 +6,12 @@ let payloadCache = {};
 const submissionFilter = [
   // from payload and response
   'seriesName',
+  'seriesDescription',
+  'susiContextId',
   'externalThemeId',
   'cloudType',
   'templateId',
   'relatedDomain',
-  'emailTemplate',
   'modificationTime',
 ];
 

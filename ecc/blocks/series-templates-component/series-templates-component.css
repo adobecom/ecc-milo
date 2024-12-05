@@ -1,3 +1,7 @@
+.series-templates-component {
+  --mod-textfield-font-weight: 700;
+}
+
 .series-templates-component .labeled-text-field-wrapper {
   margin-bottom: 24px;
 }

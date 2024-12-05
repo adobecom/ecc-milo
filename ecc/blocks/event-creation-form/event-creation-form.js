@@ -763,6 +763,10 @@ function initFormCtas(props) {
           cta.dataset.republishStateText = republishStateText;
         }
 
+        if (ctaUrl.hash === '#save') {
+          cta.classList.add('save-button');
+        }
+
         cta.addEventListener('click', async (e) => {
           e.preventDefault();
           toggleBtnsSubmittingState(true);

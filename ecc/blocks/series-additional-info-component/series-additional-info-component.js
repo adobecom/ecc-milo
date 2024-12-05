@@ -1,3 +1,4 @@
+import { LINK_REGEX } from '../../constants/constants.js';
 import {
   generateToolTip,
   decorateLabeledTextfield,
@@ -16,7 +17,7 @@ export default function init(el) {
     }
 
     if (ri === 2) {
-      await decorateLabeledTextfield(r, { id: 'info-field-series-related-domain' });
+      await decorateLabeledTextfield(r, { id: 'info-field-series-related-domain', pattern: LINK_REGEX });
     }
 
     if (ri === 3) {

@@ -9,12 +9,10 @@ export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const eventTemplateInput = component.querySelector('input[name="series-template-input"]');
-  const emailTemplateInput = component.querySelector('sp-textfield[name="series-email-template"]');
 
   props.payload = {
     ...props.payload,
-    eventTemplate: eventTemplateInput.value,
-    emailTemplate: emailTemplateInput.value,
+    templateId: eventTemplateInput.value,
   };
 }
 
