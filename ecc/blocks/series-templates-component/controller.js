@@ -49,6 +49,12 @@ async function buildPreviewListOptionsFromSource(component, source) {
   await buildCarousel('.picker-item', pickerItems);
 }
 
+function resizeImage(image, newScale) {
+  const scale = newScale;
+
+  image.style.transform = `scale(${scale})`;
+}
+
 function initPicker(component) {
   const picker = component.querySelector('.picker');
   const pickerOverlay = component.querySelector('.picker-overlay');
@@ -92,7 +98,10 @@ function initPicker(component) {
     pickerOverlay.classList.remove('hidden');
     if (valueInput.value) {
       const selectedRadio = component.querySelector(`input[type='radio'][value="${valueInput.value}"]`);
-      if (selectedRadio) selectedRadio.checked = true;
+      if (selectedRadio) {
+        selectedRadio.checked = true;
+        selectedRadio.dispatchEvent(new Event('change'));
+      }
     }
   });
 
@@ -128,14 +137,24 @@ function initPicker(component) {
     if (!previewImage.src) return;
 
     const scale = previewImage.style.transform?.match(/scale\((\d+(\.\d+)?)\)/)?.[1] || 1;
-    previewImage.style.transform = `scale(${parseFloat(scale) + 0.5})`;
+
+    const newScale = parseFloat(scale) + 0.25;
+
+    resizeImage(previewImage, newScale);
+
+    if (parseFloat(newScale) > 0.5) zoomOutBtn.disabled = false;
   });
 
   zoomOutBtn.addEventListener('click', () => {
     if (!previewImage.src) return;
 
     const scale = previewImage.style.transform?.match(/scale\((\d+(\.\d+)?)\)/)?.[1] || 1;
-    previewImage.style.transform = `scale(${parseFloat(scale) - 0.5})`;
+
+    const newScale = parseFloat(scale) - 0.25;
+
+    resizeImage(previewImage, newScale);
+
+    if (parseFloat(newScale) <= 0.5) zoomOutBtn.disabled = true;
   });
 
   pickerItems.forEach((pickerItem) => {
@@ -157,6 +176,7 @@ function initPicker(component) {
 
       if (previewImage) {
         previewImage.src = pickerItem.querySelector('img')?.src;
+        previewImage.style.transform = 'scale(1)';
       }
     });
   });

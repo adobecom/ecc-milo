@@ -117,11 +117,14 @@
 }
 
 .series-templates-component .picker-preview-image-holder img.picker-preview-image {
+  padding: 16px;
+  transform: scale(1);
+  width: 50%;
   display: block;
   margin: auto;
-  width: 50%;
   transform-origin: top left;
-  transition: transform 0.2s;
+  transition: transform 0.3s; 
+  will-change: transform;
 }
 
 .series-templates-component .picker-preview-actions {
@@ -140,10 +143,16 @@
   background: none;
   border: none;
   cursor: pointer;
+  filter: drop-shadow(1px 1px 1px #ffffff);  
 }
 
 .series-templates-component .picker-preview-actions button:hover {
   opacity: 0.8;
+}
+
+.series-templates-component .picker-preview-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .series-templates-component .picker-modal .picker-action-area {
