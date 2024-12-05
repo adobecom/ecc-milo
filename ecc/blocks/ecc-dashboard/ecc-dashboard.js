@@ -16,7 +16,7 @@ import {
   getEventServiceEnv,
   getDevToken,
 } from '../../scripts/utils.js';
-import { quickFilter } from '../form-handler/data-handler.js';
+import { quickFilter } from '../../scripts/event-data-handler.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);

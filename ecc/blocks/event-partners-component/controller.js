@@ -6,8 +6,8 @@ import {
   getSponsors,
   removeSponsorFromEvent,
   updateSponsorInEvent,
-} from '../../../scripts/esp-controller.js';
-import { getFilteredCachedResponse } from '../data-handler.js';
+} from '../../scripts/esp-controller.js';
+import { getFilteredCachedResponse } from '../../scripts/event-data-handler.js';
 
 let PARTNERS_SERIES_ID;
 

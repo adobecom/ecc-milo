@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
-import { getEvents } from '../../../scripts/esp-controller.js';
-import BlockMediator from '../../../scripts/deps/block-mediator.min.js';
-import { LIBS } from '../../../scripts/scripts.js';
-import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../../../scripts/utils.js';
+import { getEvents } from '../../scripts/esp-controller.js';
+import BlockMediator from '../../scripts/deps/block-mediator.min.js';
+import { LIBS } from '../../scripts/scripts.js';
+import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../../scripts/utils.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
