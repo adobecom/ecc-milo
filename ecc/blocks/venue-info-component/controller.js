@@ -125,14 +125,15 @@ function initAutocomplete(el, props) {
         }
       });
 
-      components = components.reduce((acc, component) => {
-        const key = component.types[0];
-        acc[key] = {
-          longName: component.long_name,
-          shortName: component.short_name,
-        };
-        return acc;
-      }, {});
+      components = components.map((component) => {
+        const obj = {};
+        Object.keys(component).forEach((key) => {
+          const newKey = key.replace(/_(.)/g, (_, match) => match.toUpperCase());
+          obj[newKey] = component[key];
+        });
+
+        return obj;
+      });
 
       changeInputValue(addressComponentsInput, 'value', JSON.stringify(components));
 
