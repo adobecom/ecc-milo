@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import buildCarousel from '../../scripts/features/carousel.js';
+import initPreviewFrame, { resetPreviewFrame } from './utils.js';
 import { LIBS } from '../../scripts/scripts.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -49,12 +50,6 @@ async function buildPreviewListOptionsFromSource(component, source) {
   await buildCarousel('.picker-item', pickerItems);
 }
 
-function resizeImage(image, newScale) {
-  const scale = newScale;
-
-  image.style.transform = `scale(${scale})`;
-}
-
 function initPicker(component) {
   const picker = component.querySelector('.picker');
   const pickerOverlay = component.querySelector('.picker-overlay');
@@ -66,9 +61,9 @@ function initPicker(component) {
   const nameInput = component.querySelector('sp-textfield.series-template-name');
   const pickerItems = component.querySelectorAll('.picker-item');
   const allRadioInputs = component.querySelectorAll('input[name="series-template"]');
+  const previewFrame = component.querySelector('.picker-preview-frame');
   const previewImage = component.querySelector('.picker-preview-image');
-  const zoomInBtn = component.querySelector('.picker-zoom-in-btn');
-  const zoomOutBtn = component.querySelector('.picker-zoom-out-btn');
+  const pickerPreviewHeading = component.querySelector('.picker-preview-heading');
 
   if (
     !picker
@@ -80,7 +75,7 @@ function initPicker(component) {
     || !valueInput
   ) return;
 
-  const resetPreviewList = () => {
+  const resetPreview = () => {
     pickerItems.forEach((item) => {
       item.setAttribute('aria-selected', 'false');
     });
@@ -92,6 +87,10 @@ function initPicker(component) {
     pickerOverlay.classList.add('hidden');
     saveBtn.classList.add('disabled');
     previewImage.src = '';
+    previewFrame.classList.remove('has-image');
+    pickerPreviewHeading.textContent = 'Preview';
+
+    resetPreviewFrame();
   };
 
   pickerBtn.addEventListener('click', () => {
@@ -106,11 +105,11 @@ function initPicker(component) {
   });
 
   closeBtn.addEventListener('click', () => {
-    resetPreviewList();
+    resetPreview();
   });
 
   cancelBtn.addEventListener('click', () => {
-    resetPreviewList();
+    resetPreview();
   });
 
   saveBtn.addEventListener('click', () => {
@@ -127,35 +126,7 @@ function initPicker(component) {
 
   saveBtn.classList.toggle('disabled', !valueInput.value);
 
-  pickerOverlay.addEventListener('click', (e) => {
-    if (e.target === pickerOverlay) {
-      resetPreviewList();
-    }
-  });
-
-  zoomInBtn.addEventListener('click', () => {
-    if (!previewImage.src) return;
-
-    const scale = previewImage.style.transform?.match(/scale\((\d+(\.\d+)?)\)/)?.[1] || 1;
-
-    const newScale = parseFloat(scale) + 0.25;
-
-    resizeImage(previewImage, newScale);
-
-    if (parseFloat(newScale) > 0.5) zoomOutBtn.disabled = false;
-  });
-
-  zoomOutBtn.addEventListener('click', () => {
-    if (!previewImage.src) return;
-
-    const scale = previewImage.style.transform?.match(/scale\((\d+(\.\d+)?)\)/)?.[1] || 1;
-
-    const newScale = parseFloat(scale) - 0.25;
-
-    resizeImage(previewImage, newScale);
-
-    if (parseFloat(newScale) <= 0.5) zoomOutBtn.disabled = true;
-  });
+  initPreviewFrame(component);
 
   pickerItems.forEach((pickerItem) => {
     const radio = pickerItem.querySelector('input[type="radio"]');
@@ -172,11 +143,19 @@ function initPicker(component) {
       pickerItems.forEach((item) => {
         if (pickerItem !== item) item.setAttribute('aria-selected', 'false');
       });
-      pickerItem.setAttribute('aria-selected', radio.checked);
 
+      pickerItem.setAttribute('aria-selected', radio.checked);
+      pickerPreviewHeading.textContent = `Preview ${radio.parentElement.textContent.trim()}`;
       if (previewImage) {
+        previewImage.src = '';
+        previewFrame.classList.remove('has-image');
+
         previewImage.src = pickerItem.querySelector('img')?.src;
-        previewImage.style.transform = 'scale(1)';
+        resetPreviewFrame();
+
+        previewImage.addEventListener('load', () => {
+          previewFrame.classList.add('has-image');
+        });
       }
     });
   });

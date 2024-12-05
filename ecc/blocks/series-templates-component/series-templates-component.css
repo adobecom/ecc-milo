@@ -113,30 +113,40 @@
 .series-templates-component .picker-preview-image-holder {
   width: 100%;
   height: 100%;
-  overflow: auto;
+  overflow: hidden; /* Prevent default scrollbars */
+  position: relative;
+  cursor: grab; /* Indicate draggable behavior */
 }
 
 .series-templates-component .picker-preview-image-holder img.picker-preview-image {
-  padding: 16px;
-  transform: scale(1);
-  width: 50%;
   display: block;
-  margin: auto;
-  transform-origin: top left;
-  transition: transform 0.3s; 
+  transform-origin: center; /* Zoom from the center */
+  transition: transform 0.2s ease-out; /* Smooth zoom effect */
   will-change: transform;
+  height: auto;
+  padding: 24px;
+  width: 50%;
+  margin: auto;
+}
+
+.series-templates-component .picker-preview-image-holder img.picker-preview-image.grabbing {
+  transition: none;
 }
 
 .series-templates-component .picker-preview-actions {
   position: absolute;
   top: 0;
   left: 0;
-  display: flex;
+  display: none;
   width: max-content;
   flex-direction: column;
   align-items: center;
   padding: 16px 8px;
   gap: 8px;
+}
+
+.series-templates-component .picker-preview-frame.has-image .picker-preview-actions {
+  display: flex;
 }
 
 .series-templates-component .picker-preview-actions button {

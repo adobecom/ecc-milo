@@ -243,12 +243,13 @@ export async function decorateTextfield(cell, extraOptions, negativeHelperText =
     {
       class: 'text-input',
       placeholder: text,
-      required: isRequired,
       quiet: true,
       size: 'xl',
     },
     extraOptions,
   ));
+
+  if (isRequired) input.required = true;
 
   if (negativeHelperText) {
     createTag('sp-help-text', { variant: 'negative', slot: 'negative-help-text' }, negativeHelperText, { parent: input });
@@ -289,13 +290,13 @@ export async function decorateTextarea(cell, extraOptions) {
     {
       multiline: true,
       class: 'textarea-input',
-      // quiet: true,
       placeholder: text,
-      required: isRequired,
       ...extraOptions,
     },
     extraOptions,
   ));
+
+  if (isRequired) input.required = true;
 
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
 
