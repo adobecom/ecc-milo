@@ -54,26 +54,17 @@ function buildAdditionalInfo(row) {
 
 function buildLocationInputGrid(row) {
   const locationDetailsWrapper = createTag('div', { class: 'location-wrapper' });
-
-  const cityInput = createTag('input', { id: 'location-city', type: 'hidden' });
-  const postalCodeInput = createTag('input', { id: 'location-postal-code', type: 'hidden' });
-  const countryInput = createTag('input', { id: 'location-country', type: 'hidden' });
   const placeIdInput = createTag('input', { id: 'google-place-id', type: 'hidden' });
   const placeLATInput = createTag('input', { id: 'google-place-lat', type: 'hidden' });
   const placeLNGInput = createTag('input', { id: 'google-place-lng', type: 'hidden' });
   const gmtOffsetInput = createTag('input', { id: 'google-place-gmt-offset', type: 'hidden' });
-  const addressComponents = createTag('input', { id: 'google-place-address-components', type: 'hidden' });
-  const formattedAddressInput = createTag('input', { id: 'venue-info-venue-address', type: 'hidden' });
+  const formattedAddressInput = createTag('input', { id: 'google-place-formatted-address', type: 'hidden' });
 
   locationDetailsWrapper.append(
-    cityInput,
-    postalCodeInput,
-    countryInput,
     placeIdInput,
     placeLATInput,
     placeLNGInput,
     gmtOffsetInput,
-    addressComponents,
     formattedAddressInput,
   );
 
