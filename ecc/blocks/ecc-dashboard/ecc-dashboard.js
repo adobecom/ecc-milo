@@ -14,8 +14,10 @@ import {
   readBlockConfig,
   signIn,
   getEventServiceEnv,
+  getDevToken,
 } from '../../scripts/utils.js';
-import { quickFilter } from '../form-handler/data-handler.js';
+
+import { quickFilter } from '../../scripts/event-data-handler.js';
 import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -721,9 +723,8 @@ export default async function init(el) {
   el.innerHTML = '';
   buildLoadingScreen(el);
 
-  const sp = new URLSearchParams(window.location.search);
-  const devToken = sp.get('devToken');
-  if (devToken && getEventServiceEnv() === 'dev') {
+  const devToken = getDevToken();
+  if (devToken && getEventServiceEnv() === 'local') {
     buildDashboard(el, config);
     return;
   }

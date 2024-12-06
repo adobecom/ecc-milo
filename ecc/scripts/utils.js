@@ -4,6 +4,14 @@ const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 let secretCache = [];
 
+export function getDevToken() {
+  const sp = new URLSearchParams(window.location.search);
+  const sessionDevToken = sessionStorage.getItem('devToken');
+  const devToken = sessionDevToken || sp.get('devToken');
+
+  return devToken;
+}
+
 export function getEventServiceEnv() {
   const validEnvs = ['dev', 'stage', 'prod'];
   const { host, search } = window.location;
@@ -21,7 +29,7 @@ export function getEventServiceEnv() {
     if (host.startsWith('main--')) return 'prod';
   }
 
-  if (host.includes('localhost')) return 'dev';
+  if (host.includes('localhost')) return 'local';
 
   if (host.includes('stage.adobe')
     || host.includes('corp.adobe')
@@ -82,6 +90,27 @@ export function convertTo24HourFormat(timeStr) {
   const formattedMinutes = minutes.toString().padStart(2, '0');
 
   return `${formattedHours}:${formattedMinutes}:00`;
+}
+
+export function parse24HourFormat(timeStr) {
+  if (!timeStr) return null;
+
+  const timeFormat = /^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
+
+  if (!timeStr.match(timeFormat)) {
+    throw new Error("Invalid time format. Expected format: 'HH:mm:ss'");
+  }
+
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  const period = hours < 12 ? 'AM' : 'PM';
+  const formattedHours = hours % 12 || 12;
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+
+  return {
+    hours: formattedHours,
+    minutes: formattedMinutes,
+    period,
+  };
 }
 
 export function getEventPageHost() {
@@ -263,9 +292,14 @@ export async function getSecret(key) {
 }
 
 export function getServiceName(link) {
-  const url = new URL(link);
-
-  return url.hostname.replace('.com', '').replace('www.', '');
+  try {
+    const url = new URL(link);
+    const { hostname } = url;
+    return hostname.replace('.com', '').replace('www.', '');
+  } catch (error) {
+    window.lana?.log('Error trying to get service name:', error);
+    return '';
+  }
 }
 
 export async function miloReplaceKey(key) {

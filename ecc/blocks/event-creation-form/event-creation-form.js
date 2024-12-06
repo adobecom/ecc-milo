@@ -7,7 +7,6 @@ import {
   getEventPageHost,
   signIn,
   getEventServiceEnv,
-  getDevToken,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -28,7 +27,7 @@ import PartnerSelector from '../../components/partner-selector/partner-selector.
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, hasContentChanged, quickFilter, setPayloadCache, setResponseCache } from '../../scripts/event-data-handler.js';
 import { CustomSearch } from '../../components/custom-search/custom-search.js';
-import { getUser, initProfileLogicTree, userHasAccessToEvent } from '../../scripts/profile.js';
+import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -163,7 +162,7 @@ function onStepValidate(props) {
   return function updateCtaStatus() {
     const currentFrag = getCurrentFragment(props);
     const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
-    const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
+    const ctas = props.el.querySelectorAll('.event-creation-form-panel-wrapper a');
     const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
 
     ctas.forEach((cta) => {
@@ -233,29 +232,22 @@ async function loadEventData(props) {
   const eventId = urlParams.get('eventId');
 
   if (eventId) {
-    const user = await getUser();
-    if (userHasAccessToEvent(user, eventId)) {
-      setTimeout(() => {
-        if (!props.eventDataResp.eventId) {
-          const toastArea = props.el.querySelector('.toast-area');
-          if (!toastArea) return;
+    setTimeout(() => {
+      if (!props.eventDataResp.eventId) {
+        const toastArea = props.el.querySelector('.toast-area');
+        if (!toastArea) return;
 
-          const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
-          toast.addEventListener('close', () => {
-            toast.remove();
-          });
-        }
-      }, 5000);
+        const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
+        toast.addEventListener('close', () => {
+          toast.remove();
+        });
+      }
+    }, 5000);
 
-      props.el.classList.add('disabled');
-      const eventData = await getEvent(eventId);
-      props.eventDataResp = { ...props.eventDataResp, ...eventData };
-      props.el.classList.remove('disabled');
-    } else {
-      buildNoAccessScreen(props.el);
-      props.el.classList.remove('loading');
-      return;
-    }
+    props.el.classList.add('disabled');
+    const eventData = await getEvent(eventId);
+    props.eventDataResp = { ...props.eventDataResp, ...eventData };
+    props.el.classList.remove('disabled');
   }
 }
 
@@ -495,8 +487,8 @@ function updateRequiredFields(props) {
 }
 
 function renderFormNavigation(props, prevStep, currentStep) {
-  const nextBtn = props.el.querySelector('.form-handler-ctas-panel .next-button');
-  const backBtn = props.el.querySelector('.form-handler-ctas-panel .back-btn');
+  const nextBtn = props.el.querySelector('.event-creation-form-ctas-panel .next-button');
+  const backBtn = props.el.querySelector('.event-creation-form-ctas-panel .back-btn');
   const frags = props.el.querySelectorAll('.fragment');
 
   frags[prevStep].classList.add('hidden');
@@ -717,13 +709,13 @@ function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
   decorateButtons(ctaRow, 'button-l');
   const ctas = ctaRow.querySelectorAll('a');
-  ctaRow.classList.add('form-handler-ctas-panel');
+  ctaRow.classList.add('event-creation-form-ctas-panel');
 
   const forwardActionsWrappers = ctaRow.querySelectorAll(':scope > div');
 
-  const panelWrapper = createTag('div', { class: 'form-handler-panel-wrapper' }, '', { parent: ctaRow });
-  const backwardWrapper = createTag('div', { class: 'form-handler-backward-wrapper' }, '', { parent: panelWrapper });
-  const forwardWrapper = createTag('div', { class: 'form-handler-forward-wrapper' }, '', { parent: panelWrapper });
+  const panelWrapper = createTag('div', { class: 'event-creation-form-panel-wrapper' }, '', { parent: ctaRow });
+  const backwardWrapper = createTag('div', { class: 'event-creation-form-backward-wrapper' }, '', { parent: panelWrapper });
+  const forwardWrapper = createTag('div', { class: 'event-creation-form-forward-wrapper' }, '', { parent: panelWrapper });
 
   forwardActionsWrappers.forEach((w) => {
     w.classList.add('action-area');
@@ -843,7 +835,7 @@ function initFormCtas(props) {
 }
 
 function updateCtas(props) {
-  const formCtas = props.el.querySelectorAll('.form-handler-ctas-panel a');
+  const formCtas = props.el.querySelectorAll('.event-creation-form-ctas-panel a');
   const { eventDataResp } = props;
 
   formCtas.forEach((a) => {
@@ -1055,7 +1047,8 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const devToken = getDevToken();
+  const sp = new URLSearchParams(window.location.search);
+  const devToken = sp.get('devToken');
   if (devToken && getEventServiceEnv() === 'local') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
@@ -1063,7 +1056,7 @@ export default async function init(el) {
     return;
   }
 
-  await initProfileLogicTree({
+  initProfileLogicTree({
     noProfile: () => {
       signIn();
     },
