@@ -8,6 +8,7 @@ import {
   readBlockConfig,
   signIn,
   getEventServiceEnv,
+  getDevToken,
 } from '../../scripts/utils.js';
 import { SearchablePicker } from '../../components/searchable-picker/searchable-picker.js';
 import { FilterMenu } from '../../components/filter-menu/filter-menu.js';
@@ -715,8 +716,7 @@ export default async function init(el) {
   el.innerHTML = '';
   buildLoadingScreen(el);
 
-  const sp = new URLSearchParams(window.location.search);
-  const devToken = sp.get('devToken');
+  const devToken = getDevToken();
   if (devToken && getEventServiceEnv() === 'local') {
     buildDashboard(el, config);
     return;
