@@ -7,7 +7,6 @@ import {
   getEventPageHost,
   signIn,
   getEventServiceEnv,
-  getDevToken,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -163,7 +162,7 @@ function onStepValidate(props) {
   return function updateCtaStatus() {
     const currentFrag = getCurrentFragment(props);
     const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
-    const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
+    const ctas = props.el.querySelectorAll('.event-creation-form-panel-wrapper a');
     const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
 
     ctas.forEach((cta) => {
@@ -488,8 +487,8 @@ function updateRequiredFields(props) {
 }
 
 function renderFormNavigation(props, prevStep, currentStep) {
-  const nextBtn = props.el.querySelector('.form-handler-ctas-panel .next-button');
-  const backBtn = props.el.querySelector('.form-handler-ctas-panel .back-btn');
+  const nextBtn = props.el.querySelector('.event-creation-form-ctas-panel .next-button');
+  const backBtn = props.el.querySelector('.event-creation-form-ctas-panel .back-btn');
   const frags = props.el.querySelectorAll('.fragment');
 
   frags[prevStep].classList.add('hidden');
@@ -710,13 +709,13 @@ function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
   decorateButtons(ctaRow, 'button-l');
   const ctas = ctaRow.querySelectorAll('a');
-  ctaRow.classList.add('form-handler-ctas-panel');
+  ctaRow.classList.add('event-creation-form-ctas-panel');
 
   const forwardActionsWrappers = ctaRow.querySelectorAll(':scope > div');
 
-  const panelWrapper = createTag('div', { class: 'form-handler-panel-wrapper' }, '', { parent: ctaRow });
-  const backwardWrapper = createTag('div', { class: 'form-handler-backward-wrapper' }, '', { parent: panelWrapper });
-  const forwardWrapper = createTag('div', { class: 'form-handler-forward-wrapper' }, '', { parent: panelWrapper });
+  const panelWrapper = createTag('div', { class: 'event-creation-form-panel-wrapper' }, '', { parent: ctaRow });
+  const backwardWrapper = createTag('div', { class: 'event-creation-form-backward-wrapper' }, '', { parent: panelWrapper });
+  const forwardWrapper = createTag('div', { class: 'event-creation-form-forward-wrapper' }, '', { parent: panelWrapper });
 
   forwardActionsWrappers.forEach((w) => {
     w.classList.add('action-area');
@@ -836,7 +835,7 @@ function initFormCtas(props) {
 }
 
 function updateCtas(props) {
-  const formCtas = props.el.querySelectorAll('.form-handler-ctas-panel a');
+  const formCtas = props.el.querySelectorAll('.event-creation-form-ctas-panel a');
   const { eventDataResp } = props;
 
   formCtas.forEach((a) => {
@@ -917,8 +916,8 @@ function updateStatusTag(props) {
 
   const headingSection = currentFragment.querySelector(':scope > .section:first-child');
 
-  const existingStatusTag = headingSection.querySelector('.event-status-tag');
-  if (existingStatusTag) existingStatusTag.remove();
+  const eixstingStatusTag = headingSection.querySelector('.event-status-tag');
+  if (eixstingStatusTag) eixstingStatusTag.remove();
 
   const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
   const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
@@ -929,22 +928,6 @@ function updateStatusTag(props) {
   statusTag.append(dot, text);
   heading.parentElement?.replaceChild(headingWrapper, heading);
   headingWrapper.append(heading, statusTag);
-}
-
-function toggleSections(props) {
-  const sections = props.el.querySelectorAll('.section:not(:first-child)');
-
-  sections.forEach((section) => {
-    const allComponentsHidden = Array.from(section.querySelectorAll('.form-component')).every((fc) => {
-      const hasHiddenClass = fc.classList.contains('hidden');
-      const isCloudMismatch = (fc.classList.contains('dx-only') && fc.dataset.cloudType === 'CreativeCloud')
-       || (fc.classList.contains('dme-only') && fc.dataset.cloudType === 'DX');
-
-      return hasHiddenClass || isCloudMismatch;
-    });
-
-    section.classList.toggle('hidden', allComponentsHidden);
-  });
 }
 
 async function buildECCForm(el) {
@@ -985,7 +968,6 @@ async function buildECCForm(el) {
           setPayloadCache(value);
           updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);
-          toggleSections(target);
           break;
         }
 
@@ -993,7 +975,6 @@ async function buildECCForm(el) {
           setResponseCache(value);
           updateComponentsOnRespChange(target);
           updateCtas(target);
-          toggleSections(target);
           if (value.error) {
             props.el.classList.add('show-error');
           } else {
@@ -1032,7 +1013,6 @@ async function buildECCForm(el) {
   enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
   updateStatusTag(proxyProps);
-  toggleSections(proxyProps);
 
   el.addEventListener('show-error-toast', (e) => {
     e.stopPropagation();
@@ -1067,7 +1047,8 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const devToken = getDevToken();
+  const sp = new URLSearchParams(window.location.search);
+  const devToken = sp.get('devToken');
   if (devToken && getEventServiceEnv() === 'local') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');

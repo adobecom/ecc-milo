@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-import { deleteImage, getEventImages, uploadImage } from '../../../scripts/esp-controller.js';
-import { LIBS } from '../../../scripts/scripts.js';
-import { getFilteredCachedResponse } from '../data-handler.js';
+import { deleteImage, getEventImages, uploadImage } from '../../scripts/esp-controller.js';
+import { LIBS } from '../../scripts/scripts.js';
+import { getFilteredCachedResponse } from '../../scripts/event-data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
