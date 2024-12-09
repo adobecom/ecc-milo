@@ -254,7 +254,6 @@ async function loadEventData(props) {
     } else {
       buildNoAccessScreen(props.el);
       props.el.classList.remove('loading');
-      return;
     }
   }
 }
