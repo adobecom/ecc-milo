@@ -852,7 +852,7 @@ export async function updateSeries(seriesData, seriesId) {
 
 export async function publishSeries(seriesId, seriesData) {
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...seriesData, seriesId, status: 'published' });
+  const raw = JSON.stringify({ ...seriesData, seriesId, seriesStatus: 'published' });
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -873,7 +873,7 @@ export async function publishSeries(seriesId, seriesData) {
 
 export async function unpublishSeries(seriesId, seriesData) {
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...seriesData, seriesId, status: 'unpublished' });
+  const raw = JSON.stringify({ ...seriesData, seriesId, seriesStatus: 'draft' });
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -894,7 +894,7 @@ export async function unpublishSeries(seriesId, seriesData) {
 
 export async function archiveSeries(seriesId, seriesData) {
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...seriesData, seriesId, status: 'archived' });
+  const raw = JSON.stringify({ ...seriesData, seriesId, seriesStatus: 'archived' });
   const options = await constructRequestOptions('PUT', raw);
 
   try {

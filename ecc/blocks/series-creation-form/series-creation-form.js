@@ -4,16 +4,15 @@ import {
   buildNoAccessScreen,
   generateToolTip,
   camelToSentenceCase,
-  getEventPageHost,
   signIn,
   getEventServiceEnv,
   getDevToken,
 } from '../../scripts/utils.js';
 import {
-  createEvent,
-  updateEvent,
-  publishEvent,
-  getEvent,
+  createSeries,
+  updateSeries,
+  publishSeries,
+  getSeries,
 } from '../../scripts/esp-controller.js';
 import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
 import { Profile } from '../../components/profile/profile.js';
@@ -26,7 +25,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedData, { getFilteredCachedResponse, hasContentChanged, quickFilter, setPayloadCache, setResponseCache } from '../../scripts/event-data-handler.js';
+import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import { CustomSearch } from '../../components/custom-search/custom-search.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
@@ -35,22 +34,12 @@ const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
 
 // list of controllers for the handler to load
 const VANILLA_COMPONENTS = [
-  'event-format',
-  'event-info',
-  'img-upload',
-  'venue-info',
-  'profile',
-  'event-agenda',
-  'event-community-link',
-  'event-partners',
-  'terms-conditions',
-  'product-promotion',
-  'event-topics',
-  'registration-details',
-  'registration-fields',
+  'series-details',
+  'series-templates',
+  'series-additional-info',
 ];
 
-const INPUT_TYPES = [
+const REQUIRED_INPUT_TYPES = [
   'input[required]',
   'select[required]',
   'textarea[required]',
@@ -81,6 +70,12 @@ const SPECTRUM_COMPONENTS = [
   'progress-circle',
 ];
 
+const PUBLISHABLE_ATTRS = [
+  'seriesName',
+  'cloudType',
+  'templateId',
+];
+
 export function buildErrorMessage(props, resp) {
   if (!resp) return;
 
@@ -106,10 +101,10 @@ export function buildErrorMessage(props, resp) {
         }, { once: true });
       });
     } else if (errorMessage) {
-      if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}') {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'The event has been updated by a different session since your last save.', { parent: toastArea });
+      if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Series update invalid. The series has been modified since last fetch"}') {
+        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'The series has been updated by a different session since your last save.', { parent: toastArea });
         const url = new URL(window.location.href);
-        url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
+        url.searchParams.set('seriesId', getFilteredCachedResponse().seriesId);
 
         createTag('sp-button', {
           slot: 'action',
@@ -155,24 +150,18 @@ function getCurrentFragment(props) {
   return currentFrag;
 }
 
-function validateRequiredFields(fields) {
+function validateFields(fields) {
   return fields.length === 0 || Array.from(fields).every((f) => f.value && !f.invalid);
 }
 
 function onStepValidate(props) {
-  return function updateCtaStatus() {
+  return function updateSaveCtaStatus() {
     const currentFrag = getCurrentFragment(props);
-    const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
-    const ctas = props.el.querySelectorAll('.event-creation-form-panel-wrapper a');
+    const stepValid = validateFields(props[`required-fields-in-${currentFrag.id}`]);
+    const saveButton = props.el.querySelector('.series-creation-form-ctas-panel .save-button');
     const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
 
-    ctas.forEach((cta) => {
-      if (cta.classList.contains('back-btn')) {
-        cta.classList.toggle('disabled', props.currentStep === 0);
-      } else {
-        cta.classList.toggle('disabled', !stepValid);
-      }
-    });
+    saveButton.classList.toggle('disabled', !stepValid);
 
     sideNavs.forEach((nav, i) => {
       if (i !== props.currentStep) {
@@ -194,9 +183,17 @@ function initRequiredFieldsValidation(props) {
   inputValidationCB();
 }
 
+function validatePublishFields(props) {
+  const publishAttributesFilled = PUBLISHABLE_ATTRS.every((attr) => props.payload[attr]);
+  console.log('publishAttributesFilled', publishAttributesFilled);
+  const publishButton = props.el.querySelector('.series-creation-form-ctas-panel .next-button');
+
+  publishButton.classList.toggle('disabled', !publishAttributesFilled);
+}
+
 function enableSideNavForEditFlow(props) {
   const frags = props.el.querySelectorAll('.fragment');
-  const completeFirstStep = Array.from(frags[0].querySelectorAll('.form-component:not(.event-agenda-component)'))
+  const completeFirstStep = Array.from(frags[0].querySelectorAll('.form-component'))
     .every((fc) => fc.classList.contains('prefilled'));
 
   if (!completeFirstStep) return;
@@ -227,18 +224,18 @@ function initCustomLitComponents() {
   customElements.define('custom-search', CustomSearch);
 }
 
-async function loadEventData(props) {
+async function loadData(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  const eventId = urlParams.get('eventId');
+  const seriesId = urlParams.get('seriesId');
 
-  if (eventId) {
+  if (seriesId) {
     setTimeout(() => {
-      if (!props.eventDataResp.eventId) {
+      if (!props.response.seriesId) {
         const toastArea = props.el.querySelector('.toast-area');
         if (!toastArea) return;
 
-        const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
+        const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the seriesId URL Param is valid.', { parent: toastArea });
         toast.addEventListener('close', () => {
           toast.remove();
         });
@@ -246,8 +243,8 @@ async function loadEventData(props) {
     }, 5000);
 
     props.el.classList.add('disabled');
-    const eventData = await getEvent(eventId);
-    props.eventDataResp = { ...props.eventDataResp, ...eventData };
+    const data = await getSeries(seriesId);
+    props.response = { ...props.response, ...data };
     props.el.classList.remove('disabled');
   }
 }
@@ -286,7 +283,7 @@ async function gatherValues(props) {
   await Promise.all(allComponentPromises);
 }
 
-async function handleEventUpdate(props) {
+async function handleSeriesUpdate(props) {
   const allComponentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
     if (!mappedComponents.length) return {};
@@ -365,7 +362,7 @@ function decorateForm(el) {
     form.append(formDiv.parentElement);
   });
 
-  const cols = formBodyRow.querySelectorAll(':scope > div');
+  const cols = formBodyRow.querySelectorAll(':scope > div, :scope > sp-theme');
 
   cols.forEach((col, i) => {
     if (i === 0) {
@@ -418,20 +415,20 @@ function showSaveSuccessMessage(props, detail = { message: 'Edits saved successf
 
 function updateDashboardLink(props) {
   // FIXME: presuming first link is dashboard link is not good.
-  if (!getFilteredCachedResponse().eventId) return;
+  if (!getFilteredCachedResponse().seriesId) return;
   const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
   if (!dashboardLink) return;
 
   const url = new URL(dashboardLink.href);
 
-  if (url.searchParams.has('eventId')) return;
+  if (url.searchParams.has('seriesId')) return;
 
-  url.searchParams.set('newEventId', getFilteredCachedResponse().eventId);
+  url.searchParams.set('newEventId', getFilteredCachedResponse().seriesId);
   dashboardLink.href = url.toString();
 }
 
-async function saveEvent(props, toPublish = false) {
+async function saveSeries(props, toPublish = false) {
   try {
     await gatherValues(props);
   } catch (e) {
@@ -440,33 +437,33 @@ async function saveEvent(props, toPublish = false) {
 
   let resp;
 
-  const onEventSave = async () => {
-    if (resp?.eventId) await handleEventUpdate(props);
+  const onSeriesSave = async () => {
+    if (resp?.seriesId) await handleSeriesUpdate(props);
 
     if (!resp.error) {
       showSaveSuccessMessage(props);
     }
   };
 
-  if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    resp = await createEvent(quickFilter(props.payload));
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
+  if (props.currentStep === 0 && !getFilteredCachedResponse().seriesId) {
+    resp = await createSeries(quickFilter(props.payload));
+    props.response = { ...props.response, ...resp };
     updateDashboardLink(props);
-    await onEventSave();
+    await onSeriesSave();
   } else if (props.currentStep <= props.maxStep && !toPublish) {
-    resp = await updateEvent(
-      getFilteredCachedResponse().eventId,
+    resp = await updateSeries(
+      getFilteredCachedResponse().seriesId,
       getJoinedData(),
     );
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
-    await onEventSave();
+    props.response = { ...props.response, ...resp };
+    await onSeriesSave();
   } else if (toPublish) {
-    resp = await publishEvent(
-      getFilteredCachedResponse().eventId,
+    resp = await publishSeries(
+      getFilteredCachedResponse().seriesId,
       getJoinedData(),
     );
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
-    if (resp?.eventId) await handleEventUpdate(props);
+    props.response = { ...props.response, ...resp };
+    if (resp?.seriesId) await handleSeriesUpdate(props);
   }
 
   return resp;
@@ -484,27 +481,27 @@ function updateSideNav(props) {
 
 function updateRequiredFields(props) {
   const currentFrag = getCurrentFragment(props);
-  props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(INPUT_TYPES.join());
+  props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(REQUIRED_INPUT_TYPES.join());
 }
 
 function renderFormNavigation(props, prevStep, currentStep) {
-  const nextBtn = props.el.querySelector('.event-creation-form-ctas-panel .next-button');
-  const backBtn = props.el.querySelector('.event-creation-form-ctas-panel .back-btn');
+  const nextBtn = props.el.querySelector('.series-creation-form-ctas-panel .next-button');
+  const backBtn = props.el.querySelector('.series-creation-form-ctas-panel .back-btn');
   const frags = props.el.querySelectorAll('.fragment');
 
   frags[prevStep].classList.add('hidden');
   frags[currentStep].classList.remove('hidden');
 
   if (props.currentStep === props.maxStep) {
-    if (props.eventDataResp.published) {
+    if (props.response.published) {
       nextBtn.textContent = nextBtn.dataset.republishStateText;
     } else {
       nextBtn.textContent = nextBtn.dataset.finalStateText;
+      nextBtn.prepend(getIcon('golden-rocket'));
     }
-    nextBtn.prepend(getIcon('golden-rocket'));
   } else {
-    nextBtn.textContent = nextBtn.dataset.nextStateText;
-    nextBtn.append(getIcon('chev-right-white'));
+    nextBtn.textContent = nextBtn.dataset.finalStateText;
+    nextBtn.prepend(getIcon('golden-rocket'));
   }
 
   backBtn.classList.toggle('disabled', currentStep === 0);
@@ -523,241 +520,40 @@ function navigateForm(props, stepIndex) {
   updateRequiredFields(props);
 }
 
-function closeDialog(props) {
-  const spTheme = props.el.querySelector('#form-app');
-  if (!spTheme) return;
-
-  const underlay = spTheme.querySelector('sp-underlay');
-  const dialog = spTheme.querySelector('sp-dialog');
-
-  if (underlay) underlay.open = false;
-  if (dialog) dialog.innerHTML = '';
-}
-
-function buildPreviewLoadingDialog(props) {
-  const spTheme = props.el.querySelector('#form-app');
-  if (!spTheme) return null;
-
-  const underlay = spTheme.querySelector('sp-underlay');
-  const dialog = spTheme.querySelector('sp-dialog');
-
-  if (!underlay || !dialog) return null;
-
-  underlay.open = false;
-  dialog.innerHTML = '';
-
-  createTag('h1', { slot: 'heading' }, 'Generating your preview...', { parent: dialog });
-  createTag('p', {}, 'This usually takes 10-30 seconds, but it might take up to 10 minutes in rare cases. Please wait, and the preview will open in a new tab when it’s ready.', { parent: dialog });
-  createTag('p', {}, '<strong>Note: Please make sure pop-up is allowed in your browser settings.</strong>', { parent: dialog });
-  const style = createTag('style', {}, `
-    @keyframes progress-bar-indeterminate {
-      0% {
-        transform: translateX(-100%);
-      }
-      50% {
-        transform: translateX(0%);
-      }
-      100% {
-        transform: translateX(200%);
-      }
-    }
-  `);
-
-  // Create the progress bar container
-  const progressBar = createTag('div', {
-    style: `
-    position: relative;
-    width: 100%;
-    height: 8px;
-    background: #e6e6e6;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 1rem;
-    `,
-  });
-
-  // Create the progress bar indicator
-  const progressBarIndicator = createTag('div', {
-    style: `
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 50%;
-    height: 100%;
-    background: #1473e6;
-    transform: translateX(0);
-    animation: progress-bar-indeterminate 1.5s linear infinite;
-    `,
-  });
-
-  // Append the elements to the shadow root
-  progressBar.appendChild(progressBarIndicator);
-  dialog.appendChild(style);
-  dialog.appendChild(progressBar);
-  const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
-  createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'Cancel', { parent: buttonContainer });
-
-  underlay.open = true;
-
-  return dialog;
-}
-
-function buildPreviewLoadingFailedDialog(props) {
-  const spTheme = props.el.querySelector('#form-app');
-  if (!spTheme) return;
-
-  const underlay = spTheme.querySelector('sp-underlay');
-  const dialog = spTheme.querySelector('sp-dialog');
-
-  if (!underlay || !dialog) return;
-
-  underlay.open = false;
-  dialog.innerHTML = '';
-
-  createTag('h1', { slot: 'heading' }, 'Preview generation failed.', { parent: dialog });
-  createTag('p', {}, 'Your changes have been saved. Our system is working in the background to update the page.', { parent: dialog });
-  const slackLink = createTag('a', { href: 'https://adobe.enterprise.slack.com/archives/C07KPJYA760' }, 'Slack');
-  const emailLink = createTag('a', { href: 'mailto:Grp-acom-milo-events-support@adobe.com' }, 'Grp-acom-milo-events-support@adobe.com');
-  createTag('p', {}, `Please try again later. If the issue persists, please feel free to contact us on <b>${slackLink.outerHTML}</b> or email <b>${emailLink.outerHTML}</b>`, { parent: dialog });
-  const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
-  const cancelButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'OK', { parent: buttonContainer });
-
-  underlay.open = true;
-
-  cancelButton.addEventListener('click', () => {
-    closeDialog(props);
-    dialog.innerHTML = '';
-  });
-}
-
-async function getNonProdPreviewDataById(props) {
-  if (!props.eventDataResp) return null;
-
-  const { eventId } = props.eventDataResp;
-
-  if (!eventId) return null;
-
-  const esEnv = getEventServiceEnv();
-  const resp = await fetch(`${getEventPageHost()}/events/default/${esEnv === 'prod' ? '' : `${esEnv}/`}metadata-preview.json`);
-  if (resp.ok) {
-    const json = await resp.json();
-    const pageData = json.data.find((d) => d['event-id'] === eventId);
-
-    if (pageData) return pageData;
-
-    window.lana?.log('Failed to find non-prod metadata for current page');
-    return null;
-  }
-
-  window.lana?.log('Failed to fetch non-prod metadata:', resp);
-  return null;
-}
-
-async function validatePreview(props, oldResp, cta) {
-  let retryCount = 0;
-
-  const currentData = { ...props.eventDataResp };
-  const oldData = { ...oldResp };
-
-  if (!hasContentChanged(currentData, oldData) || !Object.keys(oldData).length) {
-    window.open(cta.href);
-    return Promise.resolve();
-  }
-
-  const modificationTimeMatch = (metadataObj) => {
-    const metadataModTimestamp = new Date(metadataObj['modification-time']).getTime();
-    return metadataModTimestamp === props.eventDataResp.modificationTime;
-  };
-
-  return new Promise((resolve) => {
-    const interval = setInterval(async () => {
-      try {
-        retryCount += 1;
-        const metadataJson = await getNonProdPreviewDataById(props);
-
-        if (metadataJson && modificationTimeMatch(metadataJson)) {
-          clearInterval(interval);
-          closeDialog(props);
-          window.open(cta.href);
-          resolve();
-        } else if (retryCount >= 30) {
-          clearInterval(interval);
-          buildPreviewLoadingFailedDialog(props);
-          window.lana?.log('Error: Failed to match metadata after 30 retries');
-          resolve();
-        }
-      } catch (error) {
-        window.lana?.log('Error in interval fetch:', error);
-        clearInterval(interval);
-        resolve();
-      }
-    }, Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000);
-
-    const dialog = buildPreviewLoadingDialog(props, interval);
-
-    if (dialog) {
-      const cancelButton = dialog.querySelector('#cancel-preview');
-      cancelButton.addEventListener('click', () => {
-        closeDialog(props);
-        if (interval) clearInterval(interval);
-        resolve();
-      });
-    }
-  });
-}
-
 function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
   decorateButtons(ctaRow, 'button-l');
   const ctas = ctaRow.querySelectorAll('a');
-  ctaRow.classList.add('event-creation-form-ctas-panel');
+  ctaRow.classList.add('series-creation-form-ctas-panel');
 
   const forwardActionsWrappers = ctaRow.querySelectorAll(':scope > div');
 
-  const panelWrapper = createTag('div', { class: 'event-creation-form-panel-wrapper' }, '', { parent: ctaRow });
-  const backwardWrapper = createTag('div', { class: 'event-creation-form-backward-wrapper' }, '', { parent: panelWrapper });
-  const forwardWrapper = createTag('div', { class: 'event-creation-form-forward-wrapper' }, '', { parent: panelWrapper });
+  const panelWrapper = createTag('div', { class: 'series-creation-form-panel-wrapper' }, '', { parent: ctaRow });
+  createTag('div', { class: 'series-creation-form-backward-wrapper' }, '', { parent: panelWrapper });
+  const forwardWrapper = createTag('div', { class: 'series-creation-form-forward-wrapper' }, '', { parent: panelWrapper });
 
   forwardActionsWrappers.forEach((w) => {
     w.classList.add('action-area');
     forwardWrapper.append(w);
   });
 
-  const backBtn = createTag('a', { class: 'back-btn' }, getIcon('chev-left-white'));
-
-  backwardWrapper.append(backBtn);
-
   const toggleBtnsSubmittingState = (submitting) => {
-    [...ctas, backBtn].forEach((c) => {
+    ctas.forEach((c) => {
       c.classList.toggle('submitting', submitting);
     });
   };
 
-  let oldResp = { ...props.eventDataResp };
   ctas.forEach((cta) => {
     if (cta.href) {
       const ctaUrl = new URL(cta.href);
 
-      if (['#pre-event', '#post-event'].includes(ctaUrl.hash)) {
-        cta.classList.add('fill', 'preview-btns', 'preview-not-ready', ctaUrl.hash.replace('#', ''));
-        cta.addEventListener('click', async (e) => {
-          e.preventDefault();
-          toggleBtnsSubmittingState(true);
-          if (cta.classList.contains('preview-not-ready')) return;
-          validatePreview(props, oldResp, cta).then(() => {
-            toggleBtnsSubmittingState(false);
-          });
-        });
-      }
-
       if (['#save', '#next'].includes(ctaUrl.hash)) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
-          const [nextStateText, finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
+          const [finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
 
-          cta.textContent = nextStateText;
-          cta.append(getIcon('chev-right-white'));
-          cta.dataset.nextStateText = nextStateText;
+          cta.textContent = finalStateText;
+          cta.prepend(getIcon('golden-rocket'));
           cta.dataset.finalStateText = finalStateText;
           cta.dataset.doneStateText = doneStateText;
           cta.dataset.republishStateText = republishStateText;
@@ -774,11 +570,9 @@ function initFormCtas(props) {
           if (ctaUrl.hash === '#next') {
             let resp;
             if (props.currentStep === props.maxStep) {
-              oldResp = { ...props.eventDataResp };
-              resp = await saveEvent(props, true);
+              resp = await saveSeries(props, true);
             } else {
-              oldResp = { ...props.eventDataResp };
-              resp = await saveEvent(props);
+              resp = await saveSeries(props);
             }
 
             if (resp?.error) {
@@ -789,7 +583,7 @@ function initFormCtas(props) {
               cta.classList.add('disabled');
 
               if (toastArea) {
-                const toast = createTag('sp-toast', { open: true, variant: 'positive' }, 'Success! This event has been published.', { parent: toastArea });
+                const toast = createTag('sp-toast', { open: true, variant: 'positive' }, 'Success! This series has been published.', { parent: toastArea });
                 const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
                 createTag(
@@ -812,8 +606,7 @@ function initFormCtas(props) {
               navigateForm(props);
             }
           } else {
-            oldResp = { ...props.eventDataResp };
-            const resp = await saveEvent(props);
+            const resp = await saveSeries(props);
             if (resp?.error) {
               buildErrorMessage(props, resp);
             }
@@ -824,45 +617,23 @@ function initFormCtas(props) {
       }
     }
   });
-
-  backBtn.addEventListener('click', async () => {
-    toggleBtnsSubmittingState(true);
-    oldResp = { ...props.eventDataResp };
-    const resp = await saveEvent(props);
-    if (resp?.error) {
-      buildErrorMessage(props, resp);
-    } else {
-      props.currentStep -= 1;
-    }
-
-    toggleBtnsSubmittingState(false);
-  });
 }
 
 function updateCtas(props) {
-  const formCtas = props.el.querySelectorAll('.event-creation-form-ctas-panel a');
-  const { eventDataResp } = props;
+  const formCtas = props.el.querySelectorAll('.series-creation-form-ctas-panel a');
 
   formCtas.forEach((a) => {
-    if (a.classList.contains('preview-btns')) {
-      const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
-      if (eventDataResp.detailPagePath) {
-        a.href = `${getEventPageHost()}${eventDataResp.detailPagePath}?previewMode=true&cachebuster=${Date.now()}&timing=${testTime}`;
-        a.classList.remove('preview-not-ready');
-      }
-    }
-
     if (a.classList.contains('next-button')) {
       if (props.currentStep === props.maxStep) {
-        if (props.eventDataResp.published) {
+        if (props.response.published) {
           a.textContent = a.dataset.republishStateText;
         } else {
           a.textContent = a.dataset.finalStateText;
+          a.prepend(getIcon('golden-rocket'));
         }
-        a.prepend(getIcon('golden-rocket'));
       } else {
-        a.textContent = a.dataset.nextStateText;
-        a.append(getIcon('chev-right-white'));
+        a.textContent = a.dataset.finalStateText;
+        a.prepend(getIcon('golden-rocket'));
       }
     }
   });
@@ -885,7 +656,7 @@ function initNavigation(props) {
       if (!nav.disabled && !sideMenu.classList.contains('disabled')) {
         sideMenu.classList.add('disabled');
 
-        const resp = await saveEvent(props);
+        const resp = await saveSeries(props);
         if (resp?.error) {
           buildErrorMessage(props, resp);
         } else {
@@ -913,36 +684,36 @@ function initDeepLink(props) {
 }
 
 function updateStatusTag(props) {
-  const { eventDataResp } = props;
+  const { response } = props;
 
-  if (eventDataResp?.published === undefined) return;
+  if (response?.published === undefined) return;
 
   const currentFragment = getCurrentFragment(props);
 
   const headingSection = currentFragment.querySelector(':scope > .section:first-child');
 
-  const eixstingStatusTag = headingSection.querySelector('.event-status-tag');
+  const eixstingStatusTag = headingSection.querySelector('.status-tag');
   if (eixstingStatusTag) eixstingStatusTag.remove();
 
   const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
   const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
-  const dot = eventDataResp.published ? getIcon('dot-purple') : getIcon('dot-green');
-  const text = eventDataResp.published ? 'Published' : 'Draft';
-  const statusTag = createTag('span', { class: 'event-status-tag' });
+  const dot = response.published ? getIcon('dot-purple') : getIcon('dot-green');
+  const text = response.published ? 'Published' : 'Draft';
+  const statusTag = createTag('span', { class: 'status-tag' });
 
   statusTag.append(dot, text);
   heading.parentElement?.replaceChild(headingWrapper, heading);
   headingWrapper.append(heading, statusTag);
 }
 
-async function buildECCForm(el) {
+async function buildForm(el) {
   const props = {
     el,
     currentStep: 0,
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
-    eventDataResp: {},
+    response: {},
   };
 
   const dataHandler = {
@@ -973,10 +744,11 @@ async function buildECCForm(el) {
           setPayloadCache(value);
           updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);
+          validatePublishFields(target);
           break;
         }
 
-        case 'eventDataResp': {
+        case 'response': {
           setResponseCache(value);
           updateComponentsOnRespChange(target);
           updateCtas(target);
@@ -1010,10 +782,11 @@ async function buildECCForm(el) {
     });
   });
 
-  await loadEventData(proxyProps);
+  await loadData(proxyProps);
   initFormCtas(proxyProps);
   initNavigation(proxyProps);
   await initComponents(proxyProps);
+  validatePublishFields(proxyProps);
   updateRequiredFields(proxyProps);
   enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
@@ -1036,7 +809,7 @@ function buildLoadingScreen(el) {
   el.classList.add('loading');
   const loadingScreen = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'loading-screen' });
   createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: loadingScreen });
-  createTag('sp-field-label', {}, 'Loading Adobe Event Creation Console form...', { parent: loadingScreen });
+  createTag('sp-field-label', {}, 'Loading Adobe event series creation form...', { parent: loadingScreen });
 
   el.prepend(loadingScreen);
 }
@@ -1054,7 +827,7 @@ export default async function init(el) {
 
   const devToken = getDevToken();
   if (devToken && getEventServiceEnv() === 'local') {
-    buildECCForm(el).then(() => {
+    buildForm(el).then(() => {
       el.classList.remove('loading');
     });
     return;
@@ -1069,7 +842,7 @@ export default async function init(el) {
       el.classList.remove('loading');
     },
     validProfile: () => {
-      buildECCForm(el).then(() => {
+      buildForm(el).then(() => {
         el.classList.remove('loading');
       });
     },

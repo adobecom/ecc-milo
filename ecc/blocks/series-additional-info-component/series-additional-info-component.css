@@ -1,0 +1,39 @@
+.series-additional-info-component .labeled-text-field-wrapper {
+  margin-bottom: 40px;
+}
+
+.series-additional-info-component .attr-text {
+  font-size: var(--type-body-xs-size);
+  text-align: right;
+}
+
+.series-additional-info-component sp-field-label {
+  width: 180px;
+  font-family: var(--body-font-family);
+  font-size: var(--type-body-s-size);
+  font-weight: 700;
+}
+
+.series-additional-info-component sp-textfield {
+  width: 493px;
+}
+
+.series-additional-info-component sp-textfield#info-field-event-title sp-help-text {
+  position: absolute;
+  display: none;
+}
+
+.series-additional-info-component sp-textfield#info-field-event-title.show-negative-help-text sp-help-text {
+  display: flex;
+}
+
+.series-additional-info-component sp-textfield.textarea-input {
+  font-size: var(--type-body-m-size);;
+  width: 100%;
+  outline: none;
+  resize: vertical;
+}
+
+.series-additional-info-component label {
+  font-weight: 700;
+}
