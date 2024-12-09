@@ -1,5 +1,5 @@
-import { LIBS } from '../../../scripts/scripts.js';
-import { addTooltipToEl, decorateSwitchFieldset } from '../../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
+import { addTooltipToEl, decorateSwitchFieldset } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 

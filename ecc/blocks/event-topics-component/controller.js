@@ -1,6 +1,6 @@
-import { LIBS } from '../../../scripts/scripts.js';
-import { getCaasTags, getMiloTagsData } from '../../../scripts/esp-controller.js';
-import { isEmptyObject } from '../../../scripts/utils.js';
+import { LIBS } from '../../scripts/scripts.js';
+import { getCaasTags, getMiloTagsData } from '../../scripts/esp-controller.js';
+import { isEmptyObject } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
