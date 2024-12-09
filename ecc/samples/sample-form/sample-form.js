@@ -58,6 +58,10 @@ const SPECTRUM_COMPONENTS = [
   'progress-circle',
 ];
 
+const CUSTOM_LIT_COMPONENTS = [
+  'custom-textfield',
+];
+
 const PUBLISHABLE_ATTRS = [
   'seriesName',
   'cloudType',
@@ -196,8 +200,14 @@ function enableSideNavForEditFlow(props) {
   initRequiredFieldsValidation(props);
 }
 
-function initCustomLitComponents() {
-  // no-op
+async function initCustomLitComponents() {
+  // aync import all custom lit components
+  const promises = CUSTOM_LIT_COMPONENTS.map(async (componentName) => {
+    const { default: component } = await import(`../components/${componentName}/${componentName}.js`);
+    customElements.define(componentName, component);
+  });
+
+  await Promise.all(promises);
 }
 
 async function loadData(props) {
@@ -226,7 +236,7 @@ async function loadData(props) {
 }
 
 async function initComponents(props) {
-  initCustomLitComponents();
+  await initCustomLitComponents();
 
   const componentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);

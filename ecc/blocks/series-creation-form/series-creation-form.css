@@ -78,15 +78,6 @@
   --mod-textfield-border-color-invalid-default: unset;
 }
 
-.series-creation-form.show-dup-event-error #info-field-event-title  {
-  --mod-textfield-icon-size-invalid: 16px;
-  --mod-textfield-border-color-invalid-default: unset;
-}
-
-.series-creation-form.show-dup-event-error #info-field-event-title sp-help-text {
-  display: flex;
-}
-
 .series-creation-form .main-frame {
   flex-grow: 1;
   min-height: 100%;
@@ -307,7 +298,7 @@
   gap: 16px;
 }
 
-.series-creation-form .main-frame .section:first-of-type .step-heading-wrapper .event-status-tag {
+.series-creation-form .main-frame .section:first-of-type .step-heading-wrapper .status-tag {
   padding: 0 8px;
   background-color: var(--color-white);
   border-radius: 4px;
@@ -331,15 +322,6 @@
 
 .series-creation-form .form-component:not(:last-of-type):not(.no-divider) {
   border-bottom: 3px solid var(--stroke-color-divider);
-}
-
-.series-creation-form .event-heading-tooltip-wrapper .event-heading-tooltip-icon {
-  height: 16px;
-  width: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: help;
 }
 
 .series-creation-form .section:not(:first-of-type) > div.content > h2,
@@ -397,7 +379,7 @@
   width: 20px;
 }
 
-.series-creation-form .main-frame .section:first-of-type .step-heading-wrapper .event-status-tag .icon {
+.series-creation-form .main-frame .section:first-of-type .step-heading-wrapper .status-tag .icon {
   margin-right: 4px;
 }
 
