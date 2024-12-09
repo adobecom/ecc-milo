@@ -12,7 +12,6 @@ const defaultProductValue = {
 export default class ProductSelectorGroup extends LitElement {
   static properties = {
     selectedProducts: { type: Array },
-    selectedTopics: { type: Array },
     products: { type: Array },
   };
 
@@ -24,12 +23,6 @@ export default class ProductSelectorGroup extends LitElement {
       this.products = JSON.parse(this.dataset.products);
     } catch {
       this.products = [];
-    }
-
-    try {
-      this.selectedTopics = JSON.parse(this.dataset.topics);
-    } catch {
-      this.selectedTopics = [];
     }
   }
 
@@ -87,7 +80,6 @@ export default class ProductSelectorGroup extends LitElement {
 
   render() {
     this.products = this.dataset.products ? JSON.parse(this.dataset.products) : [];
-    this.selectedTopics = this.dataset.selectedTopics ? JSON.parse(this.dataset.selectedTopics) : [];
     const uniqueProducts = this.getUniqueProducts();
 
     if (uniqueProducts.length === 0) return html`<div class="error">No product available for topics selected</div>`;

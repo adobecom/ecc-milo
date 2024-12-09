@@ -917,8 +917,8 @@ function updateStatusTag(props) {
 
   const headingSection = currentFragment.querySelector(':scope > .section:first-child');
 
-  const eixstingStatusTag = headingSection.querySelector('.event-status-tag');
-  if (eixstingStatusTag) eixstingStatusTag.remove();
+  const existingStatusTag = headingSection.querySelector('.event-status-tag');
+  if (existingStatusTag) existingStatusTag.remove();
 
   const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
   const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
@@ -929,6 +929,22 @@ function updateStatusTag(props) {
   statusTag.append(dot, text);
   heading.parentElement?.replaceChild(headingWrapper, heading);
   headingWrapper.append(heading, statusTag);
+}
+
+function toggleSections(props) {
+  const sections = props.el.querySelectorAll('.section:not(:first-child)');
+
+  sections.forEach((section) => {
+    const allComponentsHidden = Array.from(section.querySelectorAll('.form-component')).every((fc) => {
+      const hasHiddenClass = fc.classList.contains('hidden');
+      const isCloudMismatch = (fc.classList.contains('dx-only') && fc.dataset.cloudType === 'CreativeCloud')
+       || (fc.classList.contains('dme-only') && fc.dataset.cloudType === 'DX');
+
+      return hasHiddenClass || isCloudMismatch;
+    });
+
+    section.classList.toggle('hidden', allComponentsHidden);
+  });
 }
 
 async function buildECCForm(el) {
@@ -969,6 +985,7 @@ async function buildECCForm(el) {
           setPayloadCache(value);
           updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);
+          toggleSections(target);
           break;
         }
 
@@ -976,6 +993,7 @@ async function buildECCForm(el) {
           setResponseCache(value);
           updateComponentsOnRespChange(target);
           updateCtas(target);
+          toggleSections(target);
           if (value.error) {
             props.el.classList.add('show-error');
           } else {
@@ -1014,6 +1032,7 @@ async function buildECCForm(el) {
   enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
   updateStatusTag(proxyProps);
+  toggleSections(proxyProps);
 
   el.addEventListener('show-error-toast', (e) => {
     e.stopPropagation();
