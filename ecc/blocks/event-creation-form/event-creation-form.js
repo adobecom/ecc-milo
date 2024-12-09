@@ -7,6 +7,7 @@ import {
   getEventPageHost,
   signIn,
   getEventServiceEnv,
+  getDevToken,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -291,8 +292,8 @@ async function handleEventUpdate(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onEventUpdate } = await import(`../${comp}-component/controller.js`);
-      return onEventUpdate(component, props);
+      const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
+      return onTargetUpdate(component, props);
     });
 
     return Promise.all(promises);
@@ -762,6 +763,10 @@ function initFormCtas(props) {
           cta.dataset.republishStateText = republishStateText;
         }
 
+        if (ctaUrl.hash === '#save') {
+          cta.classList.add('save-button');
+        }
+
         cta.addEventListener('click', async (e) => {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
@@ -1047,8 +1052,7 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const sp = new URLSearchParams(window.location.search);
-  const devToken = sp.get('devToken');
+  const devToken = getDevToken();
   if (devToken && getEventServiceEnv() === 'local') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
