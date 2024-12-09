@@ -13,6 +13,7 @@ import {
   readBlockConfig,
   signIn,
   getEventServiceEnv,
+  getDevToken,
 } from '../../scripts/utils.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
@@ -162,7 +163,7 @@ function initMoreOptions(props, config, seriesObj, row) {
 
     if (seriesObj.published) {
       const unpub = buildTool(toolBox, 'Unpublish', 'publish-remove');
-      if (seriesObj.status === 'archived') unpub.classList.add('disabled');
+      if (seriesObj.seriesStatus === 'archived') unpub.classList.add('disabled');
       unpub.addEventListener('click', async (e) => {
         e.preventDefault();
         toolBox.remove();
@@ -175,7 +176,7 @@ function initMoreOptions(props, config, seriesObj, row) {
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
-      if (seriesObj.status === 'archived') pub.classList.add('disabled');
+      if (seriesObj.seriesStatus === 'archived') pub.classList.add('disabled');
       pub.addEventListener('click', async (e) => {
         e.preventDefault();
         toolBox.remove();
@@ -189,11 +190,11 @@ function initMoreOptions(props, config, seriesObj, row) {
       });
     }
 
-    const viewTemplate = buildTool(toolBox, 'View Template', 'preview-eye');
+    // const viewTemplate = buildTool(toolBox, 'View Template', 'preview-eye');
     const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
     const clone = buildTool(toolBox, 'Clone', 'clone');
     const archive = buildTool(toolBox, 'Archive', 'archive');
-    const verHistory = buildTool(toolBox, 'Version History', 'version-history');
+    // const verHistory = buildTool(toolBox, 'Version History', 'version-history');
 
     // edit
     const url = new URL(`${window.location.origin}${config['create-form-url']}`);
@@ -295,7 +296,7 @@ function initMoreOptions(props, config, seriesObj, row) {
 function buildStatusTag(series) {
   let dot;
 
-  switch (series.status) {
+  switch (series.seriesStatus) {
     case 'published':
       dot = getIcon('dot-purple');
       break;
@@ -309,7 +310,7 @@ function buildStatusTag(series) {
   }
 
   const statusTag = createTag('div', { class: 'status' });
-  statusTag.append(dot, series.status);
+  statusTag.append(dot, series.seriesStatus || 'unknown');
   return statusTag;
 }
 
@@ -321,6 +322,11 @@ function buildSeriesNameTag(config, seriesObj) {
 }
 
 function buildEventsCountTag(series, events) {
+  if (!events) {
+    const eventsCountTag = createTag('span', { class: 'events-count' }, 'N/A');
+    return eventsCountTag;
+  }
+
   const seriesEvents = getSeriesEvents(series.seriesId, events);
 
   const eventsCountTag = createTag('span', { class: 'events-count' }, seriesEvents.length);
@@ -356,7 +362,7 @@ async function populateRow(props, config, index) {
 
   if (series.seriesId === sp.get('newEventId')) {
     if (!props.el.classList.contains('toast-shown')) {
-      showToast(props, buildToastMsgWithEventTitle(series.seriesName, config['new-toast-msg']), { variant: 'positive' });
+      showToast(props, buildToastMsgWithEventTitle(series.seriesName, config['new-creation-msg']), { variant: 'positive' });
 
       props.el.classList.add('toast-shown');
     }
@@ -499,7 +505,7 @@ function buildDashboardHeader(props, config) {
   const textContainer = createTag('div', { class: 'dashboard-header-text' });
   const actionsContainer = createTag('div', { class: 'dashboard-actions-container' });
 
-  createTag('h1', { class: 'dashboard-header-heading' }, 'All Events', { parent: textContainer });
+  createTag('h1', { class: 'dashboard-header-heading' }, 'All Event series', { parent: textContainer });
   createTag('p', { class: 'dashboard-header-series-count' }, `(${props.data.length} series)`, { parent: textContainer });
 
   const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
@@ -512,7 +518,7 @@ function buildDashboardHeader(props, config) {
   props.el.prepend(dashboardHeader);
 }
 
-function updateEventsCount(props) {
+function updateDataCount(props) {
   const seriesCount = props.el.querySelector('.dashboard-header-series-count');
   seriesCount.textContent = `(${props.data.length} series)`;
 }
@@ -536,13 +542,13 @@ function buildDashboardTable(props, config) {
   }
 }
 
-function buildNoEventScreen(el, config) {
+function buildNoDataScreen(el, config) {
   el.classList.add('no-data');
 
-  const h1 = createTag('h1', {}, 'All Events');
+  const h1 = createTag('h1', {}, 'All Event series');
   const area = createTag('div', { class: 'no-data-area' });
-  const noEventHeading = createTag('h2', {}, config['no-heading']);
-  const noEventDescription = createTag('p', {}, config['no-description']);
+  const noEventHeading = createTag('h2', {}, config['no-data-heading']);
+  const noEventDescription = createTag('p', {}, config['no-data-description']);
   const cta = createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-cta-text']);
 
   el.append(h1, area);
@@ -563,7 +569,7 @@ async function buildDashboard(el, config) {
   const [{ series }, { events }] = await Promise.all([getAllSeries(), getEvents()]);
 
   if (!series?.length) {
-    buildNoEventScreen(el, config);
+    buildNoDataScreen(el, config);
   } else {
     props.events = events;
     props.data = series;
@@ -574,7 +580,7 @@ async function buildDashboard(el, config) {
       set(target, prop, value, receiver) {
         target[prop] = value;
         populateTable(receiver, config);
-        updateEventsCount(receiver);
+        updateDataCount(receiver);
         return true;
       },
     };
@@ -613,8 +619,7 @@ export default async function init(el) {
   el.innerHTML = '';
   buildLoadingScreen(el);
 
-  const sp = new URLSearchParams(window.location.search);
-  const devToken = sp.get('devToken');
+  const devToken = getDevToken();
   if (devToken && getEventServiceEnv() === 'local') {
     buildDashboard(el, config);
     return;
