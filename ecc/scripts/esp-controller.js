@@ -1,5 +1,6 @@
 import { LIBS } from './scripts.js';
 import { getDevToken, getEventServiceEnv, getSecret } from './utils.js';
+import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
 
 const API_CONFIG = {
   esl: {
@@ -711,6 +712,24 @@ export async function getEvents() {
   }
 }
 
+export async function getEventsForUser() {
+  const user = await getUser();
+
+  if (!user) return [];
+
+  const resp = await getEvents();
+  if (!resp.error) {
+    const { role } = user;
+
+    if (role === 'admin') return resp.events;
+    if (role === 'manager') return resp.events.filter((e) => userHasAccessToBU(user, e.cloudType));
+    if (role === 'creator') return resp.events.filter((e) => userHasAccessToSeries(user, e.seriesId));
+    if (role === 'editor') return resp.events.filter((e) => userHasAccessToEvent(user, e.eventId));
+  }
+
+  return [];
+}
+
 export async function getEvent(eventId) {
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
@@ -911,6 +930,24 @@ export async function archiveSeries(seriesId, seriesData) {
     window.lana?.log(`Failed to archive series ${seriesId}. Error:`, error);
     return { status: 'Network Error', error: error.message };
   }
+}
+
+export async function getSeriesForUser() {
+  const user = await getUser();
+
+  if (!user) return [];
+
+  const series = await getAllSeries();
+
+  if (!series.error) {
+    const { role } = user;
+
+    if (role === 'admin') return series;
+    if (role === 'manager') return series.filter((s) => userHasAccessToBU(user, s.cloudType));
+    if (role === 'creator' || role === 'editor') return series.filter((s) => userHasAccessToSeries(user, s.seriesId));
+  }
+
+  return [];
 }
 
 export async function createAttendee(eventId, attendeeData) {

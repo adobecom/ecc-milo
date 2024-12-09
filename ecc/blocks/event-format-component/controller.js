@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { getAllSeries } from '../../scripts/esp-controller.js';
+import { getSeriesForUser } from '../../scripts/esp-controller.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { changeInputValue } from '../../scripts/utils.js';
@@ -76,7 +76,8 @@ async function populateSeriesOptions(props, component) {
   const seriesSelect = component.querySelector('#series-select-input');
   if (!seriesSelect) return;
 
-  const series = await getAllSeries();
+  const series = await getSeriesForUser();
+
   if (!series) {
     seriesSelect.pending = false;
     seriesSelect.disabled = true;
