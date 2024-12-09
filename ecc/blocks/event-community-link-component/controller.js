@@ -22,11 +22,6 @@ export async function onPayloadUpdate(component, props) {
   if (cloudType && cloudType !== component.dataset.cloudType) {
     component.classList.toggle('hidden', cloudType !== 'CreativeCloud');
     component.dataset.cloudType = cloudType;
-
-    const previousComponent = component.previousElementSibling;
-    if (previousComponent) {
-      previousComponent.classList.toggle('no-divider', component.classList.contains('hidden'));
-    }
   }
 }
 
