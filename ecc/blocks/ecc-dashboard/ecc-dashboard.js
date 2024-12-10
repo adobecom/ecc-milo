@@ -13,9 +13,10 @@ import {
   getEventPageHost,
   readBlockConfig,
   signIn,
-  getECCEnv,
+  getEventServiceEnv,
+  getDevToken,
 } from '../../scripts/utils.js';
-import { quickFilter } from '../form-handler/data-handler.js';
+import { quickFilter } from '../../scripts/event-data-handler.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -345,6 +346,13 @@ function initMoreOptions(props, config, eventObj, row) {
       toolBox.remove();
       row.classList.add('pending');
       const newEventJSON = await createEvent(cloneFilter(payload));
+
+      if (newEventJSON.error) {
+        row.classList.remove('pending');
+        showToast(props, newEventJSON.error, { variant: 'negative' });
+        return;
+      }
+
       const newJson = await getEvents();
       props.data = newJson.events;
       props.filteredData = newJson.events;
@@ -658,6 +666,11 @@ function updateEventsCount(props) {
   eventsCount.textContent = `(${props.data.length} events)`;
 }
 
+function updateEventsCount(props) {
+  const eventsCount = props.el.querySelector('.dashboard-header-events-count');
+  eventsCount.textContent = `(${props.data.length} events)`;
+}
+
 function buildDashboardTable(props, config) {
   const mainContainer = props.el.querySelector('sp-theme.sp-main-container');
   const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: mainContainer });
@@ -934,9 +947,8 @@ export default async function init(el) {
   el.innerHTML = '';
   buildLoadingScreen(el);
 
-  const sp = new URLSearchParams(window.location.search);
-  const devToken = sp.get('devToken');
-  if (devToken && getECCEnv() === 'dev') {
+  const devToken = getDevToken();
+  if (devToken && getEventServiceEnv() === 'local') {
     buildDashboard(el, config);
     return;
   }

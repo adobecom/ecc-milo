@@ -7,8 +7,9 @@ import {
   camelToSentenceCase,
   readBlockConfig,
   signIn,
-  getECCEnv,
   handlize,
+  getEventServiceEnv,
+  getDevToken,
 } from '../../scripts/utils.js';
 import { SearchablePicker } from '../../components/searchable-picker/searchable-picker.js';
 import { FilterMenu } from '../../components/filter-menu/filter-menu.js';
@@ -83,7 +84,7 @@ const ATTENDEE_ATTR_MAP = [
     fallback: '',
   },
   {
-    key: 'type',
+    key: 'registrationStatus',
     label: 'RSVP status',
     fallback: 'registered',
   },
@@ -93,6 +94,8 @@ const ATTENDEE_ATTR_MAP = [
     fallback: '-',
   },
 ];
+
+const stickyColumns = ['registrationStatus', 'checkedIn'];
 
 const FILTER_MAP = {
   companyName: [],
@@ -258,7 +261,7 @@ async function populateRow(props, index) {
 
   ATTENDEE_ATTR_MAP.forEach(({ key, fallback }, i, arr) => {
     const td = createTag('td', {}, attendee[key] || fallback, { parent: row });
-    if (['registrationStatus', 'checkedIn'].includes(key)) {
+    if (stickyColumns.includes(key)) {
       td.classList.add(`sticky-right-${arr.length - i}`, 'actions');
     }
   });
@@ -356,7 +359,7 @@ function buildTableHeaders(props, config) {
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
 
-    if (['registrationStatus', 'checkedIn'].includes(key)) th.classList.add('actions', `sticky-right-${arr.length - i}`);
+    if (stickyColumns.includes(key)) th.classList.add('actions', `sticky-right-${arr.length - i}`);
     th.classList.add('sortable');
     th.dataset.field = key;
   });
@@ -797,10 +800,10 @@ function initCustomLitComponents() {
 }
 
 async function buildDashboard(el, config) {
-  createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
+  const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
+  createTag('sp-underlay', {}, '', { parent: spTheme });
+  createTag('sp-dialog', { size: 's' }, '', { parent: spTheme });
   const mainContainer = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'dashboard-main-container' }, '', { parent: el });
-  createTag('sp-underlay', {}, '', { parent: mainContainer });
-  createTag('sp-dialog', { size: 's' }, '', { parent: mainContainer });
   createTag('div', { class: 'dashboard-body-container' }, '', { parent: mainContainer });
 
   const uspEventId = new URLSearchParams(window.location.search).get('eventId');
@@ -894,9 +897,8 @@ export default async function init(el) {
   el.innerHTML = '';
   buildLoadingScreen(el);
 
-  const sp = new URLSearchParams(window.location.search);
-  const devToken = sp.get('devToken');
-  if (devToken && getECCEnv() === 'dev') {
+  const devToken = getDevToken();
+  if (devToken && getEventServiceEnv() === 'local') {
     buildDashboard(el, config);
     return;
   }

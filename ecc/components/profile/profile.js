@@ -103,21 +103,34 @@ export class Profile extends LitElement {
 
     try {
       const profile = edited ? structuredClone(this.profileCopy) : structuredClone(this.profile);
+      const correctSocialMedia = profile.socialMedia.filter((sm) => sm.link === '' || sm.link?.match(LINK_REGEX));
+
+      if (correctSocialMedia.length < profile.socialMedia.length) {
+        const dialogToastParent = edited ? this.shadowRoot.querySelector('.edit-profile-dialog') : null;
+        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Some of the social media links are not valid.' }, targetEl: dialogToastParent }, bubbles: true, composed: true }));
+        saveButton.pending = false;
+        return false;
+      }
+
       profile.isPlaceholder = false;
       profile.socialMedia = profile.socialMedia.filter((sm) => sm.link !== '');
+
+      const sProfile = { ...profile };
+      delete sProfile.type;
       let respJson;
       if (this.profile.speakerId) {
-        respJson = await updateSpeaker(profile, this.seriesId);
+        respJson = await updateSpeaker(sProfile, this.seriesId);
       } else {
-        respJson = await createSpeaker(profile, this.seriesId);
+        respJson = await createSpeaker(sProfile, this.seriesId);
       }
 
       if (respJson.error) {
         const { errors, message } = respJson.error;
         window.lana?.log(`error occured while saving profile ${errors ?? message}`);
         saveButton.pending = false;
-        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message } }, bubbles: true, composed: true }));
-        return;
+        const dialogToastParent = edited ? this.shadowRoot.querySelector('.edit-profile-dialog') : null;
+        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message }, targetEl: dialogToastParent }, bubbles: true, composed: true }));
+        return false;
       }
 
       if (respJson.speakerId) {
@@ -162,12 +175,15 @@ export class Profile extends LitElement {
 
         this.updateProfile(profile);
         this.requestUpdate();
+        saveButton.pending = false;
+        return true;
       }
     } catch (error) {
       window.lana?.log(`error occured while saving profile ${error}`);
     }
 
     saveButton.pending = false;
+    return false;
   }
 
   handleProfileSelection(e) {
@@ -365,9 +381,11 @@ export class Profile extends LitElement {
     <sp-button-group class="footer-button-group">
       <sp-button variant="secondary" class="profile-edit-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));">Cancel</sp-button>
       <sp-button variant="primary" class="profile-edit-button" @click=${async (e) => {
-    this.saveProfile(e, true).then(() => {
-      const dialog = this.shadowRoot.querySelector('sp-dialog-wrapper');
-      dialog?.dispatchEvent(new Event('close', { bubbles: true, composed: true }));
+    this.saveProfile(e, true).then((success) => {
+      if (success) {
+        const dialog = this.shadowRoot.querySelector('sp-dialog-wrapper');
+        dialog?.dispatchEvent(new Event('close', { bubbles: true, composed: true }));
+      }
     });
   }} ?disabled=${this.saveDisabled()}>
   <img src="/ecc/icons/user-edit.svg" slot="icon"></img>
@@ -438,6 +456,7 @@ export class Profile extends LitElement {
         underlay
     >
         ${this.renderProfileEditFormWrapper()}
+        <sp-theme class="toast-area"></sp-theme>
     </sp-dialog-wrapper>
     <sp-button slot="trigger" variant="primary" class="profile-action-button" @click=${this.initializeProfileCopy}>
     <img src="/ecc/icons/user-edit.svg" slot="icon"></img>Edit</sp-button>

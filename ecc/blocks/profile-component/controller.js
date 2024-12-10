@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
 import {
   addSpeakerToEvent,
-  getSpeaker,
   getSpeakers,
   updateSpeakerInEvent,
   removeSpeakerFromEvent,
-} from '../../../scripts/esp-controller.js';
-import { getFilteredCachedResponse } from '../data-handler.js';
+  getEventSpeaker,
+} from '../../scripts/esp-controller.js';
+import { getFilteredCachedResponse } from '../../scripts/event-data-handler.js';
 
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -120,10 +120,10 @@ export async function onRespUpdate(_component, _props) {
 async function prefillProfiles(props) {
   const d = await props.eventDataResp;
   if (d?.eventId && d.seriesId) {
-    const { seriesId } = d;
+    const { eventId, seriesId } = d;
     try {
       // eslint-disable-next-line max-len
-      const speakers = await Promise.all(d.speakers.map(async (sp) => getSpeaker(seriesId, sp.speakerId)));
+      const speakers = await Promise.all(d.speakers.map(async (sp) => getEventSpeaker(seriesId, eventId, sp.speakerId)));
       for (let idx = 0; idx < d.speakers.length; idx += 1) {
         // eslint-disable-next-line max-len
         d.speakers[idx] = { ...d.speakers[idx], type: d.speakers[idx].speakerType, ...speakers[idx] };
