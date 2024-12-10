@@ -841,8 +841,9 @@ export async function removeAttendeeFromEvent(eventId, attendeeId) {
     const response = await fetch(`${host}/v1/events/${eventId}/attendees/${attendeeId}`, options);
 
     if (!response.ok) {
+      const data = await response.json();
       window.lana?.log(`Failed to delete attendee ${attendeeId} for event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { status: response.status, error: data };
+      return { status: response.status, error };
     }
 
     return { ok: true, data: await response.json() };
