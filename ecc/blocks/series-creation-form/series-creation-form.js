@@ -12,7 +12,7 @@ import {
   createSeries,
   updateSeries,
   publishSeries,
-  getSeries,
+  getSeriesById,
 } from '../../scripts/esp-controller.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
@@ -219,7 +219,7 @@ async function loadData(props) {
     }, 5000);
 
     props.el.classList.add('disabled');
-    const data = await getSeries(seriesId);
+    const data = await getSeriesById(seriesId);
     props.response = { ...props.response, ...data };
     props.el.classList.remove('disabled');
   }
