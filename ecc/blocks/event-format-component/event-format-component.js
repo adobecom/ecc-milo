@@ -55,13 +55,6 @@ function decorateTimeZoneSelect(column) {
   column.append(tzWrapper);
 }
 
-// FIXME: comment out for now. Might support other checkboxes later.
-// function decorateCheckbox(column) {
-//   const checkbox = createTag('sp-checkbox', { id: 'rsvp-required-check' }, column.textContent.trim());
-//   column.innerHTML = '';
-//   column.append(checkbox);
-// }
-
 export default function init(el) {
   el.classList.add('form-component');
 
