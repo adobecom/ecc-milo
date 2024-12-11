@@ -809,7 +809,7 @@ export default async function init(el) {
     return;
   }
 
-  initProfileLogicTree({
+  initProfileLogicTree('sample-form', {
     noProfile: () => {
       signIn();
     },
