@@ -409,12 +409,12 @@ async function saveSeries(props, toPublish = false) {
     }
   };
 
-  if (props.currentStep === 0 && !getFilteredCachedResponse().seriesId) {
+  if (!getFilteredCachedResponse().seriesId) {
     resp = await createSeries(quickFilter(props.payload));
     props.response = { ...props.response, ...resp };
     updateDashboardLink(props);
     await onSeriesSave();
-  } else if (props.currentStep <= props.maxStep && !toPublish) {
+  } else if (!toPublish) {
     resp = await updateSeries(
       getFilteredCachedResponse().seriesId,
       getJoinedData(),
