@@ -12,21 +12,9 @@ import {
   createSeries,
   updateSeries,
   publishSeries,
-  getSeries,
+  getSeriesById,
 } from '../../scripts/esp-controller.js';
-import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
-import { Profile } from '../../components/profile/profile.js';
-import { Repeater } from '../../components/repeater/repeater.js';
-import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
-import AgendaFieldsetGroup from '../../components/agenda-fieldset-group/agenda-fieldset-group.js';
-import { ProfileContainer } from '../../components/profile-container/profile-container.js';
-import { CustomTextfield } from '../../components/custom-textfield/custom-textfield.js';
-import ProductSelector from '../../components/product-selector/product-selector.js';
-import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
-import PartnerSelector from '../../components/partner-selector/partner-selector.js';
-import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import { CustomSearch } from '../../components/custom-search/custom-search.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -185,7 +173,6 @@ function initRequiredFieldsValidation(props) {
 
 function validatePublishFields(props) {
   const publishAttributesFilled = PUBLISHABLE_ATTRS.every((attr) => props.payload[attr]);
-  console.log('publishAttributesFilled', publishAttributesFilled);
   const publishButton = props.el.querySelector('.series-creation-form-ctas-panel .next-button');
 
   publishButton.classList.toggle('disabled', !publishAttributesFilled);
@@ -210,18 +197,7 @@ function enableSideNavForEditFlow(props) {
 }
 
 function initCustomLitComponents() {
-  customElements.define('image-dropzone', ImageDropzone);
-  customElements.define('profile-ui', Profile);
-  customElements.define('repeater-element', Repeater);
-  customElements.define('partner-selector', PartnerSelector);
-  customElements.define('partner-selector-group', PartnerSelectorGroup);
-  customElements.define('agenda-fieldset', AgendaFieldset);
-  customElements.define('agenda-fieldset-group', AgendaFieldsetGroup);
-  customElements.define('product-selector', ProductSelector);
-  customElements.define('product-selector-group', ProductSelectorGroup);
-  customElements.define('profile-container', ProfileContainer);
-  customElements.define('custom-textfield', CustomTextfield);
-  customElements.define('custom-search', CustomSearch);
+  // no-op
 }
 
 async function loadData(props) {
@@ -243,7 +219,7 @@ async function loadData(props) {
     }, 5000);
 
     props.el.classList.add('disabled');
-    const data = await getSeries(seriesId);
+    const data = await getSeriesById(seriesId);
     props.response = { ...props.response, ...data };
     props.el.classList.remove('disabled');
   }

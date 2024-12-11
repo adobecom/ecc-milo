@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
 import { getSpeakers } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
@@ -9,7 +8,7 @@ const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all
 
 const defaultProfile = { socialMedia: [{ link: '' }], isPlaceholder: true };
 
-export class ProfileContainer extends LitElement {
+export default class ProfileContainer extends LitElement {
   static properties = {
     fieldlabels: { type: Object, reflect: true },
     profiles: { type: Array, reflect: true },
