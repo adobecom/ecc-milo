@@ -213,26 +213,17 @@ async function initCustomLitComponents() {
 async function loadData(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  const seriesId = urlParams.get('seriesId');
+  // use more specific query param if available
+  const id = urlParams.get('id');
 
-  if (seriesId) {
-    setTimeout(() => {
-      if (!props.response.seriesId) {
-        const toastArea = props.el.querySelector('.toast-area');
-        if (!toastArea) return;
+  if (!id) return;
+  
+  // fetch data to prefill the form
 
-        const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the seriesId URL Param is valid.', { parent: toastArea });
-        toast.addEventListener('close', () => {
-          toast.remove();
-        });
-      }
-    }, 5000);
-
-    props.el.classList.add('disabled');
-    const data = await getSeries(seriesId);
-    props.response = { ...props.response, ...data };
-    props.el.classList.remove('disabled');
-  }
+  // props.el.classList.add('disabled');
+  // const data = await getSeries(id);
+  // props.response = { ...props.response, ...data };
+  // props.el.classList.remove('disabled');
 }
 
 async function initComponents(props) {

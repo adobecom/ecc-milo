@@ -161,11 +161,31 @@ function initPicker(component) {
 
 export default async function init(component, props) {
   const picker = component.querySelector('.picker');
+  const data = props.response;
+
   if (!picker) return;
 
   await buildPreviewListOptionsFromSource(component, picker.getAttribute('data-source-link'));
 
   initPicker(component);
+
+  if (data) {
+    const { templateId } = data;
+
+    if (templateId) {
+      const selectedRadio = component.querySelector(`input[type='radio'][value="${templateId}"]`);
+      const valueInput = picker.querySelector('input.series-template-input');
+      const nameInput = picker.querySelector('sp-textfield.series-template-name');
+
+      if (selectedRadio) {
+        picker.classList.add('selected');
+        selectedRadio.checked = true;
+        selectedRadio.dispatchEvent(new Event('change'));
+        valueInput.value = templateId;
+        nameInput.value = selectedRadio.parentElement?.textContent;
+      }
+    }
+  }
 }
 
 export function onTargetUpdate(component, props) {
