@@ -5,7 +5,6 @@ import {
   unpublishSeries,
   archiveSeries,
   getEvents,
-  deleteSeries,
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
@@ -241,20 +240,20 @@ function initMoreOptions(props, config, seriesObj, row) {
 
       const underlay = spTheme.querySelector('sp-underlay');
       const dialog = spTheme.querySelector('sp-dialog');
-      createTag('h1', { slot: 'heading' }, 'You are deleting this series.', { parent: dialog });
+      createTag('h1', { slot: 'heading' }, 'You are archiving this series.', { parent: dialog });
       createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
       const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
-      const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to delete this series', { parent: buttonContainer });
-      const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not delete', { parent: buttonContainer });
+      const dialogArchiveBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to archive this series', { parent: buttonContainer });
+      const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not archive', { parent: buttonContainer });
 
       underlay.open = true;
 
-      dialogDeleteBtn.addEventListener('click', async () => {
+      dialogArchiveBtn.addEventListener('click', async () => {
         toolBox.remove();
         underlay.open = false;
         dialog.innerHTML = '';
         row.classList.add('pending');
-        const resp = await deleteSeries(seriesObj.seriesId);
+        const resp = await archiveSeries(seriesObj.seriesId);
 
         if (resp.error) {
           row.classList.remove('pending');
