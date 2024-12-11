@@ -87,19 +87,40 @@ export async function getUser() {
 
 export function userHasAccessToBU(user, bu) {
   if (!user) return false;
-  const businessUnits = user['business-units'].split(',').map((b) => b.trim());
+
+  const userBU = user['business-units'];
+
+  if (!userBU) return false;
+
+  if (userBU === 'all') return true;
+
+  const businessUnits = userBU.split(',').map((b) => b.trim());
   return businessUnits.length === 0 || businessUnits.includes(bu);
 }
 
 export function userHasAccessToSeries(user, seriesId) {
   if (!user) return false;
-  const series = user.series.split(',').map((b) => b.trim());
+
+  const userSeries = user.series;
+
+  if (!userSeries) return false;
+
+  if (userSeries === 'all') return true;
+
+  const series = userSeries.split(',').map((b) => b.trim());
   return series.length === 0 || series.includes(seriesId);
 }
 
 export function userHasAccessToEvent(user, eventId) {
   if (!user) return false;
-  const events = user.events.split(',').map((b) => b.trim());
+
+  const userEvents = user.events;
+
+  if (!userEvents) return false;
+
+  if (userEvents === 'all') return true;
+
+  const events = userEvents.split(',').map((b) => b.trim());
   return events.length === 0 || events.includes(eventId);
 }
 
