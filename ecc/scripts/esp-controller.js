@@ -829,7 +829,7 @@ export async function createSeries(seriesData) {
   }
 }
 
-export async function updateSeries(seriesData, seriesId) {
+export async function updateSeries(seriesId, seriesData) {
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify({ ...seriesData, seriesId });
   const options = await constructRequestOptions('PUT', raw);
@@ -909,6 +909,27 @@ export async function archiveSeries(seriesId, seriesData) {
     return data;
   } catch (error) {
     window.lana?.log(`Failed to archive series ${seriesId}. Error:`, error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function deleteSeries(seriesId) {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const options = await constructRequestOptions('DELETE');
+
+  try {
+    const response = await fetch(`${host}/v1/series/${seriesId}`, options);
+
+    if (!response.ok) {
+      const data = await response.json();
+      window.lana?.log(`Failed to delete series ${seriesId}. Status:`, response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    // 204 no content. Return true if no error.
+    return true;
+  } catch (error) {
+    window.lana?.log(`Failed to delete series ${seriesId}. Error:`, error);
     return { status: 'Network Error', error: error.message };
   }
 }

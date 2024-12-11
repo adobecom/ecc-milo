@@ -5,6 +5,7 @@ import {
   unpublishSeries,
   archiveSeries,
   getEvents,
+  deleteSeries,
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
@@ -253,7 +254,7 @@ function initMoreOptions(props, config, seriesObj, row) {
         underlay.open = false;
         dialog.innerHTML = '';
         row.classList.add('pending');
-        const resp = await archiveSeries(seriesObj.seriesId);
+        const resp = await deleteSeries(seriesObj.seriesId);
 
         if (resp.error) {
           row.classList.remove('pending');

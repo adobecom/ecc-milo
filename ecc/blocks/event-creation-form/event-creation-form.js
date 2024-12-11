@@ -431,16 +431,16 @@ function updateDashboardLink(props) {
   dashboardLink.href = url.toString();
 }
 
-async function saveEvent(props, toPublish = false) {
+async function save(props, toPublish = false) {
   try {
     await gatherValues(props);
   } catch (e) {
     return { error: { message: e.message } };
   }
 
-  let resp;
+  let resp = props.response;
 
-  const onEventSave = async () => {
+  const onSave = async () => {
     if (resp?.eventId) await handleEventUpdate(props);
 
     if (!resp.error) {
@@ -448,18 +448,18 @@ async function saveEvent(props, toPublish = false) {
     }
   };
 
-  if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
+  if (!resp.eventId) {
     resp = await createEvent(quickFilter(props.payload));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
-    await onEventSave();
-  } else if (props.currentStep <= props.maxStep && !toPublish) {
+    await onSave();
+  } else if (!toPublish) {
     resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    await onEventSave();
+    await onSave();
   } else if (toPublish) {
     resp = await publishEvent(
       getFilteredCachedResponse().eventId,
@@ -775,10 +775,10 @@ function initFormCtas(props) {
             let resp;
             if (props.currentStep === props.maxStep) {
               oldResp = { ...props.eventDataResp };
-              resp = await saveEvent(props, true);
+              resp = await save(props, true);
             } else {
               oldResp = { ...props.eventDataResp };
-              resp = await saveEvent(props);
+              resp = await save(props);
             }
 
             if (resp?.error) {
@@ -813,7 +813,7 @@ function initFormCtas(props) {
             }
           } else {
             oldResp = { ...props.eventDataResp };
-            const resp = await saveEvent(props);
+            const resp = await save(props);
             if (resp?.error) {
               buildErrorMessage(props, resp);
             }
@@ -828,7 +828,7 @@ function initFormCtas(props) {
   backBtn.addEventListener('click', async () => {
     toggleBtnsSubmittingState(true);
     oldResp = { ...props.eventDataResp };
-    const resp = await saveEvent(props);
+    const resp = await save(props);
     if (resp?.error) {
       buildErrorMessage(props, resp);
     } else {
@@ -885,7 +885,7 @@ function initNavigation(props) {
       if (!nav.disabled && !sideMenu.classList.contains('disabled')) {
         sideMenu.classList.add('disabled');
 
-        const resp = await saveEvent(props);
+        const resp = await save(props);
         if (resp?.error) {
           buildErrorMessage(props, resp);
         } else {
