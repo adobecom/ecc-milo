@@ -92,7 +92,7 @@ export function userHasAccessToBU(user, bu) {
 
   if (!userBU) return false;
 
-  if (userBU === 'all') return true;
+  if (userBU.toLowerCase() === 'all') return true;
 
   const businessUnits = userBU.split(',').map((b) => b.trim());
   return businessUnits.length === 0 || businessUnits.includes(bu);
@@ -105,7 +105,7 @@ export function userHasAccessToSeries(user, seriesId) {
 
   if (!userSeries) return false;
 
-  if (userSeries === 'all') return true;
+  if (userSeries.toLowerCase() === 'all') return true;
 
   const series = userSeries.split(',').map((b) => b.trim());
   return series.length === 0 || series.includes(seriesId);
@@ -118,7 +118,7 @@ export function userHasAccessToEvent(user, eventId) {
 
   if (!userEvents) return false;
 
-  if (userEvents === 'all') return true;
+  if (userEvents.toLowerCase() === 'all') return true;
 
   const events = userEvents.split(',').map((b) => b.trim());
   return events.length === 0 || events.includes(eventId);
