@@ -409,7 +409,7 @@ async function saveSeries(props, toPublish = false) {
     }
   };
 
-  if (props.currentStep === 0 && !getFilteredCachedResponse().seriesId) {
+  if (!getFilteredCachedResponse().seriesId) {
     resp = await createSeries(quickFilter(props.payload));
     props.response = { ...props.response, ...resp };
     updateDashboardLink(props);
