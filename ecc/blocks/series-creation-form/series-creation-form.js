@@ -402,25 +402,31 @@ async function save(props, toPublish = false) {
   let resp = props.response;
 
   const onSave = async () => {
-    if (resp?.seriesId) await handleSeriesUpdate(props);
 
-    if (!resp.error) {
-      showSaveSuccessMessage(props);
-    }
   };
 
   if (!resp.seriesId) {
     resp = await createSeries(quickFilter(props.payload));
     props.response = { ...props.response, ...resp };
     updateDashboardLink(props);
-    await onSave();
+    
+    if (resp?.seriesId) await handleSeriesUpdate(props);
+
+    if (!resp.error) {
+      showSaveSuccessMessage(props);
+    }
   } else if (!toPublish) {
     resp = await updateSeries(
       resp.seriesId,
       getJoinedData(),
     );
     props.response = { ...props.response, ...resp };
-    await onSave();
+
+    if (resp?.seriesId) await handleSeriesUpdate(props);
+
+    if (!resp.error) {
+      showSaveSuccessMessage(props);
+    }
   } else if (toPublish) {
     resp = await publishSeries(
       resp.seriesId,
