@@ -414,7 +414,7 @@ async function saveSeries(props, toPublish = false) {
     props.response = { ...props.response, ...resp };
     updateDashboardLink(props);
     await onSeriesSave();
-  } else if (props.currentStep <= props.maxStep && !toPublish) {
+  } else if (!toPublish) {
     resp = await updateSeries(
       getFilteredCachedResponse().seriesId,
       getJoinedData(),
