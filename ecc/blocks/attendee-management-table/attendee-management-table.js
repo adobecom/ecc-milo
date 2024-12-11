@@ -717,7 +717,7 @@ export default async function init(el) {
     return;
   }
 
-  await initProfileLogicTree({
+  await initProfileLogicTree('attendee-management-table', {
     noProfile: () => {
       signIn();
     },

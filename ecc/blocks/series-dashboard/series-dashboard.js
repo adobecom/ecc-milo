@@ -625,7 +625,7 @@ export default async function init(el) {
     return;
   }
 
-  initProfileLogicTree({
+  initProfileLogicTree('series-dashboard', {
     noProfile: () => {
       signIn();
     },

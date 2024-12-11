@@ -124,7 +124,45 @@ export function userHasAccessToEvent(user, eventId) {
   return events.length === 0 || events.includes(eventId);
 }
 
-export async function initProfileLogicTree(callbacks) {
+export function userHasAccessToView(user, blockName) {
+  const { role } = user;
+  const managerAccess = [
+    'events-dashboard',
+    'event-creation-form',
+    'series-dashboard',
+    'series-creation-form',
+  ];
+
+  const creatorAccess = [
+    'events-dashboard',
+    'event-creation-form',
+  ];
+
+  const editorAccess = [
+    'events-dashboard',
+    'event-creation-form',
+  ];
+
+  if (!role) return false;
+
+  if (role === 'admin') return true;
+
+  if (role === 'manager') {
+    return managerAccess.includes(blockName);
+  }
+
+  if (role === 'creator') {
+    return creatorAccess.includes(blockName);
+  }
+
+  if (role === 'editor') {
+    return editorAccess.includes(blockName);
+  }
+
+  return false;
+}
+
+export async function initProfileLogicTree(blockName, callbacks) {
   const { noProfile, noAccessProfile, validProfile } = callbacks;
 
   const profile = BlockMediator.get('imsProfile');
@@ -134,7 +172,7 @@ export async function initProfileLogicTree(callbacks) {
     user = await getUser();
     if (profile.noProfile) {
       noProfile();
-    } else if (!user) {
+    } else if (!user || !userHasAccessToView(user, blockName)) {
       noAccessProfile();
     } else {
       validProfile(profile);

@@ -1062,7 +1062,7 @@ export default async function init(el) {
     return;
   }
 
-  await initProfileLogicTree({
+  await initProfileLogicTree('event-creation-form', {
     noProfile: () => {
       signIn();
     },
