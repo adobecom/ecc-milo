@@ -5,8 +5,7 @@ const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all
 
 const SEARCH_TIMEOUT_MS = 500;
 
-// eslint-disable-next-line import/prefer-default-export
-export class CustomSearch extends LitElement {
+export default class CustomSearch extends LitElement {
   static properties = {
     identifier: { type: String },
     searchMap: { type: Object },

@@ -1,5 +1,3 @@
-/* eslint-disable import/prefer-default-export */
-/* eslint-disable class-methods-use-this */
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './custom-textfield.css.js';
 
@@ -17,7 +15,7 @@ const defaultData = {
   helperText: '',
 };
 
-export class CustomTextfield extends LitElement {
+export default class CustomTextfield extends LitElement {
   static properties = {
     config: { type: Object, reflect: true },
     fielddata: { type: Object, reflect: true },

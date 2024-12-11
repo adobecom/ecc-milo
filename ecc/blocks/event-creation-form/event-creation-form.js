@@ -7,6 +7,7 @@ import {
   getEventPageHost,
   signIn,
   getEventServiceEnv,
+  getDevToken,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -14,19 +15,19 @@ import {
   publishEvent,
   getEvent,
 } from '../../scripts/esp-controller.js';
-import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
-import { Profile } from '../../components/profile/profile.js';
-import { Repeater } from '../../components/repeater/repeater.js';
+import ImageDropzone from '../../components/image-dropzone/image-dropzone.js';
+import Profile from '../../components/profile/profile.js';
+import Repeater from '../../components/repeater/repeater.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
 import AgendaFieldsetGroup from '../../components/agenda-fieldset-group/agenda-fieldset-group.js';
-import { ProfileContainer } from '../../components/profile-container/profile-container.js';
-import { CustomTextfield } from '../../components/custom-textfield/custom-textfield.js';
+import ProfileContainer from '../../components/profile-container/profile-container.js';
+import CustomTextfield from '../../components/custom-textfield/custom-textfield.js';
 import ProductSelector from '../../components/product-selector/product-selector.js';
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, hasContentChanged, quickFilter, setPayloadCache, setResponseCache } from '../../scripts/event-data-handler.js';
-import { CustomSearch } from '../../components/custom-search/custom-search.js';
+import CustomSearch from '../../components/custom-search/custom-search.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -291,8 +292,8 @@ async function handleEventUpdate(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onEventUpdate } = await import(`../${comp}-component/controller.js`);
-      return onEventUpdate(component, props);
+      const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
+      return onTargetUpdate(component, props);
     });
 
     return Promise.all(promises);
@@ -762,6 +763,10 @@ function initFormCtas(props) {
           cta.dataset.republishStateText = republishStateText;
         }
 
+        if (ctaUrl.hash === '#save') {
+          cta.classList.add('save-button');
+        }
+
         cta.addEventListener('click', async (e) => {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
@@ -916,14 +921,14 @@ function updateStatusTag(props) {
 
   const headingSection = currentFragment.querySelector(':scope > .section:first-child');
 
-  const eixstingStatusTag = headingSection.querySelector('.event-status-tag');
+  const eixstingStatusTag = headingSection.querySelector('.status-tag');
   if (eixstingStatusTag) eixstingStatusTag.remove();
 
   const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
   const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
   const dot = eventDataResp.published ? getIcon('dot-purple') : getIcon('dot-green');
   const text = eventDataResp.published ? 'Published' : 'Draft';
-  const statusTag = createTag('span', { class: 'event-status-tag' });
+  const statusTag = createTag('span', { class: 'status-tag' });
 
   statusTag.append(dot, text);
   heading.parentElement?.replaceChild(headingWrapper, heading);
@@ -1047,8 +1052,7 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const sp = new URLSearchParams(window.location.search);
-  const devToken = sp.get('devToken');
+  const devToken = getDevToken();
   if (devToken && getEventServiceEnv() === 'local') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');

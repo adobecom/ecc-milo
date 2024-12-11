@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './profile.css.js';
@@ -23,7 +22,7 @@ const DEFAULT_FIELD_LABELS = {
 const SPEAKER_TYPE = ['Host', 'Speaker', 'Judge'];
 const SUPPORTED_SOCIAL = ['YouTube', 'LinkedIn', 'Web', 'Twitter', 'X', 'TikTok', 'Instagram', 'Facebook', 'Pinterest'];
 
-export class Profile extends LitElement {
+export default class Profile extends LitElement {
   static properties = {
     seriesId: { type: String },
     fieldlabels: { type: Object, reflect: true },
