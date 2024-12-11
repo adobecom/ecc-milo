@@ -24,16 +24,22 @@ export async function onRespUpdate(_component, _props) {
 }
 
 export default function init(component, props) {
-  const data = props.resp;
+  const data = props.response;
 
   if (data) {
-    const cloudType = component.querySelector('#bu-select-input');
-    const seriesName = component.querySelector('#info-field-series-name');
-    const seriesDescription = component.querySelector('#info-field-series-description');
+    const {
+      cloudType,
+      seriesName,
+      seriesDescription,
+    } = data;
 
-    cloudType.value = data.cloudType;
-    seriesName.value = data.seriesName;
-    seriesDescription.value = data.seriesDescription;
+    const cloudTypeEl = component.querySelector('#bu-select-input');
+    const seriesNameEl = component.querySelector('#info-field-series-name');
+    const seriesDescriptionEl = component.querySelector('#info-field-series-description');
+
+    if (cloudType) cloudTypeEl.value = cloudType;
+    if (seriesName) seriesNameEl.value = seriesName;
+    if (seriesDescription) seriesDescriptionEl.value = seriesDescription;
 
     component.classList.add('prefilled');
   }

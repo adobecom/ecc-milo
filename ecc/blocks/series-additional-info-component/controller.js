@@ -24,7 +24,7 @@ export async function onRespUpdate(_component, _props) {
 }
 
 export default function init(component, props) {
-  const data = props.resp;
+  const data = props.response;
 
   if (data) {
     const susiContextId = component.querySelector('#info-field-series-susi');
