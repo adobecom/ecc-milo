@@ -12,10 +12,9 @@ import {
   createSeries,
   updateSeries,
   publishSeries,
-  getSeries,
 } from '../../scripts/esp-controller.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import { initProfileLogicTree } from '../../scripts/event-apis.js';
+import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);

@@ -10,8 +10,8 @@ import {
   getEventServiceEnv,
   getDevToken,
 } from '../../scripts/utils.js';
-import { SearchablePicker } from '../../components/searchable-picker/searchable-picker.js';
-import { FilterMenu } from '../../components/filter-menu/filter-menu.js';
+import SearchablePicker from '../../components/searchable-picker/searchable-picker.js';
+import FilterMenu from '../../components/filter-menu/filter-menu.js';
 import { getUser, initProfileLogicTree, userHasAccessToEvent } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
