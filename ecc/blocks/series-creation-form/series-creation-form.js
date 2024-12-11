@@ -392,16 +392,16 @@ function updateDashboardLink(props) {
   dashboardLink.href = url.toString();
 }
 
-async function saveSeries(props, toPublish = false) {
+async function save(props, toPublish = false) {
   try {
     await gatherValues(props);
   } catch (e) {
     return { error: { message: e.message } };
   }
 
-  let resp;
+  let resp = props.response;
 
-  const onSeriesSave = async () => {
+  const onSave = async () => {
     if (resp?.seriesId) await handleSeriesUpdate(props);
 
     if (!resp.error) {
@@ -409,21 +409,21 @@ async function saveSeries(props, toPublish = false) {
     }
   };
 
-  if (!getFilteredCachedResponse().seriesId) {
+  if (!resp.seriesId) {
     resp = await createSeries(quickFilter(props.payload));
     props.response = { ...props.response, ...resp };
     updateDashboardLink(props);
-    await onSeriesSave();
+    await onSave();
   } else if (!toPublish) {
     resp = await updateSeries(
-      getFilteredCachedResponse().seriesId,
+      resp.seriesId,
       getJoinedData(),
     );
     props.response = { ...props.response, ...resp };
-    await onSeriesSave();
+    await onSave();
   } else if (toPublish) {
     resp = await publishSeries(
-      getFilteredCachedResponse().seriesId,
+      resp.seriesId,
       getJoinedData(),
     );
     props.response = { ...props.response, ...resp };
@@ -534,9 +534,9 @@ function initFormCtas(props) {
           if (ctaUrl.hash === '#next') {
             let resp;
             if (props.currentStep === props.maxStep) {
-              resp = await saveSeries(props, true);
+              resp = await save(props, true);
             } else {
-              resp = await saveSeries(props);
+              resp = await save(props);
             }
 
             if (resp?.error) {
@@ -570,7 +570,7 @@ function initFormCtas(props) {
               navigateForm(props);
             }
           } else {
-            const resp = await saveSeries(props);
+            const resp = await save(props);
             if (resp?.error) {
               buildErrorMessage(props, resp);
             }
@@ -620,7 +620,7 @@ function initNavigation(props) {
       if (!nav.disabled && !sideMenu.classList.contains('disabled')) {
         sideMenu.classList.add('disabled');
 
-        const resp = await saveSeries(props);
+        const resp = await save(props);
         if (resp?.error) {
           buildErrorMessage(props, resp);
         } else {
