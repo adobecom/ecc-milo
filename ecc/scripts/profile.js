@@ -1,5 +1,6 @@
 import BlockMediator from './deps/block-mediator.min.js';
-import { ALLOWED_ACCOUNT_TYPES } from '../constants/constants.js';
+
+let usersCache = [];
 
 export async function getProfile() {
   const { feds, adobeProfile, fedsConfig, adobeIMS } = window;
@@ -63,15 +64,56 @@ export function lazyCaptureProfile() {
   }, 1000);
 }
 
-export function initProfileLogicTree(callbacks) {
+export async function getUser() {
+  const profile = BlockMediator.get('imsProfile');
+  if (!profile || profile.noProfile) return null;
+
+  const { email } = profile;
+
+  if (usersCache.length === 0) {
+    const resp = await fetch('/ecc/system/users.json')
+      .then((r) => r)
+      .catch((e) => window.lana?.log(`Failed to fetch Google Places API key: ${e}`));
+
+    if (!resp.ok) return null;
+
+    const json = await resp.json();
+    usersCache = json.data;
+  }
+
+  const user = usersCache.find((s) => s.email === email);
+  return user;
+}
+
+export function userHasAccessToBU(user, bu) {
+  if (!user) return false;
+  const businessUnits = user['business-units'].split(',').map((b) => b.trim());
+  return businessUnits.length === 0 || businessUnits.includes(bu);
+}
+
+export function userHasAccessToSeries(user, seriesId) {
+  if (!user) return false;
+  const series = user.series.split(',').map((b) => b.trim());
+  return series.length === 0 || series.includes(seriesId);
+}
+
+export function userHasAccessToEvent(user, eventId) {
+  if (!user) return false;
+  const events = user.events.split(',').map((b) => b.trim());
+  return events.length === 0 || events.includes(eventId);
+}
+
+export async function initProfileLogicTree(callbacks) {
   const { noProfile, noAccessProfile, validProfile } = callbacks;
 
   const profile = BlockMediator.get('imsProfile');
+  let user;
 
   if (profile) {
+    user = await getUser();
     if (profile.noProfile) {
       noProfile();
-    } else if (!ALLOWED_ACCOUNT_TYPES.includes(profile.account_type)) {
+    } else if (!user) {
       noAccessProfile();
     } else {
       validProfile(profile);
@@ -82,17 +124,19 @@ export function initProfileLogicTree(callbacks) {
 
   if (!profile) {
     const unsubscribe = BlockMediator.subscribe('imsProfile', ({ newValue }) => {
-      if (newValue) {
-        if (newValue.noProfile) {
-          noProfile();
-        } else if (!ALLOWED_ACCOUNT_TYPES.includes(newValue.account_type)) {
-          noAccessProfile();
-        } else {
-          validProfile(newValue);
+      getUser().then((u) => {
+        if (newValue) {
+          if (newValue.noProfile) {
+            noProfile();
+          } else if (!u) {
+            noAccessProfile();
+          } else {
+            validProfile(newValue);
+          }
         }
-      }
 
-      unsubscribe();
+        unsubscribe();
+      });
     });
   }
 }

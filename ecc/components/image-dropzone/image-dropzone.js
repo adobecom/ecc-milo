@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 /* eslint-disable class-methods-use-this */
 import { isImageTypeValid, isImageSizeValid } from '../../scripts/image-validator.js';
 import { LIBS } from '../../scripts/scripts.js';
@@ -6,7 +5,7 @@ import { style } from './image-dropzone.css.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
-export class ImageDropzone extends LitElement {
+export default class ImageDropzone extends LitElement {
   static properties = {
     file: { type: Object, reflect: true },
     handleImage: { type: Function },
