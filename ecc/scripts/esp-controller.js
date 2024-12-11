@@ -841,7 +841,7 @@ export async function getSeriesById(seriesId) {
 
 export async function createSeries(seriesData) {
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(seriesData);
+  const raw = JSON.stringify({ ...seriesData, seriesStatus: 'draft' });
   const options = await constructRequestOptions('POST', raw);
 
   try {

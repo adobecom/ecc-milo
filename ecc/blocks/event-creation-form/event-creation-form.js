@@ -440,26 +440,26 @@ async function save(props, toPublish = false) {
 
   let resp = props.response;
 
-  const onSave = async () => {
+  if (!resp.eventId) {
+    resp = await createEvent(quickFilter(props.payload));
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    updateDashboardLink(props);
     if (resp?.eventId) await handleEventUpdate(props);
 
     if (!resp.error) {
       showSaveSuccessMessage(props);
     }
-  };
-
-  if (!resp.eventId) {
-    resp = await createEvent(quickFilter(props.payload));
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
-    updateDashboardLink(props);
-    await onSave();
   } else if (!toPublish) {
     resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    await onSave();
+    if (resp?.eventId) await handleEventUpdate(props);
+
+    if (!resp.error) {
+      showSaveSuccessMessage(props);
+    }
   } else if (toPublish) {
     resp = await publishEvent(
       getFilteredCachedResponse().eventId,
