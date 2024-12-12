@@ -161,50 +161,104 @@ function initMoreOptions(props, config, seriesObj, row) {
   moreOptionIcon.addEventListener('click', () => {
     const toolBox = createTag('div', { class: 'dashboard-tool-box' });
 
-    if (seriesObj.published) {
-      const unpub = buildTool(toolBox, 'Unpublish', 'publish-remove');
-      if (seriesObj.seriesStatus === 'archived') unpub.classList.add('disabled');
-      unpub.addEventListener('click', async (e) => {
-        e.preventDefault();
-        toolBox.remove();
-        row.classList.add('pending');
-        const resp = await unpublishSeries(seriesObj.seriesId, seriesObj);
-        updateDashboardData(resp, props);
+    const { seriesStatus } = seriesObj;
 
-        sortData(props, config, { resort: true });
-        showToast(props, buildToastMsgWithEventTitle(seriesObj.title, config['unpublished-msg']), { variant: 'positive' });
-      });
-    } else {
-      const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
-      if (seriesObj.seriesStatus === 'archived') pub.classList.add('disabled');
-      pub.addEventListener('click', async (e) => {
-        e.preventDefault();
-        toolBox.remove();
-        row.classList.add('pending');
-        const resp = await publishSeries(seriesObj.seriesId, seriesObj);
-        updateDashboardData(resp, props);
-
-        sortData(props, config, { resort: true });
-
-        showToast(props, buildToastMsgWithEventTitle(seriesObj.title, config['published-msg']), { variant: 'positive' });
-      });
+    if (seriesStatus && seriesStatus !== 'archived') {
+      if (seriesStatus === 'published') {
+        const unpub = buildTool(toolBox, 'Unpublish', 'publish-remove');
+        if (seriesObj.seriesStatus === 'archived') unpub.classList.add('disabled');
+        unpub.addEventListener('click', async (e) => {
+          e.preventDefault();
+          toolBox.remove();
+          row.classList.add('pending');
+          const resp = await unpublishSeries(seriesObj.seriesId, seriesObj);
+          updateDashboardData(resp, props);
+  
+          sortData(props, config, { resort: true });
+          showToast(props, buildToastMsgWithEventTitle(seriesObj.title, config['unpublished-msg']), { variant: 'positive' });
+        });
+      } else {
+        const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
+        if (seriesObj.seriesStatus === 'archived') pub.classList.add('disabled');
+        pub.addEventListener('click', async (e) => {
+          e.preventDefault();
+          toolBox.remove();
+          row.classList.add('pending');
+          const resp = await publishSeries(seriesObj.seriesId, seriesObj);
+          updateDashboardData(resp, props);
+  
+          sortData(props, config, { resort: true });
+  
+          showToast(props, buildToastMsgWithEventTitle(seriesObj.title, config['published-msg']), { variant: 'positive' });
+        });
+      }
     }
 
     // const viewTemplate = buildTool(toolBox, 'View Template', 'preview-eye');
-    const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
+
     const clone = buildTool(toolBox, 'Clone', 'clone');
-    const archive = buildTool(toolBox, 'Archive', 'archive');
+    
+    if (seriesStatus && seriesStatus !== 'archived') {
+      const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
+
+      const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+      url.searchParams.set('seriesId', seriesObj.seriesId);
+      edit.href = url.toString();
+
+
+      const archive = buildTool(toolBox, 'Archive', 'archive');
+
+      archive.addEventListener('click', async (e) => {
+        e.preventDefault();
+  
+        const spTheme = props.el.querySelector('sp-theme.toast-area');
+        if (!spTheme) return;
+  
+        const underlay = spTheme.querySelector('sp-underlay');
+        const dialog = spTheme.querySelector('sp-dialog');
+        createTag('h1', { slot: 'heading' }, 'You are archiving this series.', { parent: dialog });
+        createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
+        const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+        const dialogArchiveBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to archive this series', { parent: buttonContainer });
+        const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not archive', { parent: buttonContainer });
+  
+        underlay.open = true;
+  
+        dialogArchiveBtn.addEventListener('click', async () => {
+          toolBox.remove();
+          underlay.open = false;
+          dialog.innerHTML = '';
+          row.classList.add('pending');
+          const resp = await archiveSeries(seriesObj.seriesId);
+  
+          if (resp.error) {
+            row.classList.remove('pending');
+            showToast(props, resp.error, { variant: 'negative' });
+            return;
+          }
+  
+          const newJson = await getAllSeries();
+          props.data = newJson.series;
+          props.filteredData = newJson.series;
+          props.paginatedData = newJson.series;
+  
+          sortData(props, config, { resort: true });
+          showToast(props, config['delete-toast-msg']);
+        });
+  
+        dialogCancelBtn.addEventListener('click', () => {
+          toolBox.remove();
+          underlay.open = false;
+          dialog.innerHTML = '';
+        });
+      });
+    }
     // const verHistory = buildTool(toolBox, 'Version History', 'version-history');
-
-    // edit
-    const url = new URL(`${window.location.origin}${config['create-form-url']}`);
-    url.searchParams.set('seriesId', seriesObj.seriesId);
-    edit.href = url.toString();
-
+    
     // clone
     clone.addEventListener('click', async (e) => {
       e.preventDefault();
-      const payload = { ...seriesObj };
+      const payload = { ...quickFilter(seriesObj), seriesStatus: 'draft' };
       payload.title = `${seriesObj.title} - copy`;
       toolBox.remove();
       row.classList.add('pending');
@@ -231,52 +285,6 @@ function initMoreOptions(props, config, seriesObj, row) {
       showToast(props, buildToastMsgWithEventTitle(newSeriesObj.seriesName, config['clone-toast-msg']), { variant: 'info' });
     });
 
-    // archive
-    archive.addEventListener('click', async (e) => {
-      e.preventDefault();
-
-      const spTheme = props.el.querySelector('sp-theme.toast-area');
-      if (!spTheme) return;
-
-      const underlay = spTheme.querySelector('sp-underlay');
-      const dialog = spTheme.querySelector('sp-dialog');
-      createTag('h1', { slot: 'heading' }, 'You are archiving this series.', { parent: dialog });
-      createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
-      const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
-      const dialogArchiveBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to archive this series', { parent: buttonContainer });
-      const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not archive', { parent: buttonContainer });
-
-      underlay.open = true;
-
-      dialogArchiveBtn.addEventListener('click', async () => {
-        toolBox.remove();
-        underlay.open = false;
-        dialog.innerHTML = '';
-        row.classList.add('pending');
-        const resp = await archiveSeries(seriesObj.seriesId);
-
-        if (resp.error) {
-          row.classList.remove('pending');
-          showToast(props, resp.error, { variant: 'negative' });
-          return;
-        }
-
-        const newJson = await getAllSeries();
-        props.data = newJson.series;
-        props.filteredData = newJson.series;
-        props.paginatedData = newJson.series;
-
-        sortData(props, config, { resort: true });
-        showToast(props, config['delete-toast-msg']);
-      });
-
-      dialogCancelBtn.addEventListener('click', () => {
-        toolBox.remove();
-        underlay.open = false;
-        dialog.innerHTML = '';
-      });
-    });
-
     if (!moreOptionsCell.querySelector('.dashboard-tool-box')) {
       moreOptionsCell.append(toolBox);
     }
@@ -300,7 +308,7 @@ function buildStatusTag(series) {
     case 'published':
       dot = getIcon('dot-purple');
       break;
-    case 'unpublished':
+    case 'draft':
       dot = getIcon('dot-green');
       break;
     case 'archived':
