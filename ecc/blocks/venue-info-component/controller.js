@@ -208,7 +208,7 @@ export default async function init(component, props) {
   }
 }
 
-export async function onEventUpdate(component, props) {
+export async function onTargetUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const venueData = getVenueDataInForm(component);

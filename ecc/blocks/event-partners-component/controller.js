@@ -178,6 +178,6 @@ export default async function init(component, props) {
   partnerVisible.checked = eventData.showSponsors;
 }
 
-export function onEventUpdate(component, props) {
+export function onTargetUpdate(component, props) {
   // Do nothing
 }

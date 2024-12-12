@@ -186,6 +186,7 @@
 
 .event-creation-form .side-menu ul li a {
   color: var(--color-black);
+  text-decoration: none;
 }
 
 .event-creation-form .side-menu ul li a,
@@ -310,7 +311,7 @@
   gap: 16px;
 }
 
-.event-creation-form .main-frame .section:first-of-type .step-heading-wrapper .event-status-tag {
+.event-creation-form .main-frame .section:first-of-type .step-heading-wrapper .status-tag {
   padding: 0 8px;
   background-color: var(--color-white);
   border-radius: 4px;
@@ -334,15 +335,6 @@
 
 .event-creation-form .form-component:not(:last-of-type):not(.no-divider) {
   border-bottom: 3px solid var(--stroke-color-divider);
-}
-
-.event-creation-form .event-heading-tooltip-wrapper .event-heading-tooltip-icon {
-  height: 16px;
-  width: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: help;
 }
 
 .event-creation-form .section:not(:first-of-type) > div.content > h2,
@@ -396,7 +388,7 @@
   width: 20px;
 }
 
-.event-creation-form .main-frame .section:first-of-type .step-heading-wrapper .event-status-tag .icon {
+.event-creation-form .main-frame .section:first-of-type .step-heading-wrapper .status-tag .icon {
   margin-right: 4px;
 }
 

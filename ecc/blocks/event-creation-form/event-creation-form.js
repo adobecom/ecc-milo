@@ -7,6 +7,7 @@ import {
   getEventPageHost,
   signIn,
   getEventServiceEnv,
+  getDevToken,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -14,19 +15,19 @@ import {
   publishEvent,
   getEvent,
 } from '../../scripts/esp-controller.js';
-import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
-import { Profile } from '../../components/profile/profile.js';
-import { Repeater } from '../../components/repeater/repeater.js';
+import ImageDropzone from '../../components/image-dropzone/image-dropzone.js';
+import Profile from '../../components/profile/profile.js';
+import Repeater from '../../components/repeater/repeater.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
 import AgendaFieldsetGroup from '../../components/agenda-fieldset-group/agenda-fieldset-group.js';
-import { ProfileContainer } from '../../components/profile-container/profile-container.js';
-import { CustomTextfield } from '../../components/custom-textfield/custom-textfield.js';
+import ProfileContainer from '../../components/profile-container/profile-container.js';
+import CustomTextfield from '../../components/custom-textfield/custom-textfield.js';
 import ProductSelector from '../../components/product-selector/product-selector.js';
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, hasContentChanged, quickFilter, setPayloadCache, setResponseCache } from '../../scripts/event-data-handler.js';
-import { CustomSearch } from '../../components/custom-search/custom-search.js';
+import CustomSearch from '../../components/custom-search/custom-search.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -291,8 +292,8 @@ async function handleEventUpdate(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onEventUpdate } = await import(`../${comp}-component/controller.js`);
-      return onEventUpdate(component, props);
+      const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
+      return onTargetUpdate(component, props);
     });
 
     return Promise.all(promises);
@@ -430,35 +431,35 @@ function updateDashboardLink(props) {
   dashboardLink.href = url.toString();
 }
 
-async function saveEvent(props, toPublish = false) {
+async function save(props, toPublish = false) {
   try {
     await gatherValues(props);
   } catch (e) {
     return { error: { message: e.message } };
   }
 
-  let resp;
+  let resp = props.response;
 
-  const onEventSave = async () => {
+  if (!resp.eventId) {
+    resp = await createEvent(quickFilter(props.payload));
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    updateDashboardLink(props);
     if (resp?.eventId) await handleEventUpdate(props);
 
     if (!resp.error) {
       showSaveSuccessMessage(props);
     }
-  };
-
-  if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    resp = await createEvent(quickFilter(props.payload));
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
-    updateDashboardLink(props);
-    await onEventSave();
-  } else if (props.currentStep <= props.maxStep && !toPublish) {
+  } else if (!toPublish) {
     resp = await updateEvent(
       getFilteredCachedResponse().eventId,
       getJoinedData(),
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
-    await onEventSave();
+    if (resp?.eventId) await handleEventUpdate(props);
+
+    if (!resp.error) {
+      showSaveSuccessMessage(props);
+    }
   } else if (toPublish) {
     resp = await publishEvent(
       getFilteredCachedResponse().eventId,
@@ -762,6 +763,10 @@ function initFormCtas(props) {
           cta.dataset.republishStateText = republishStateText;
         }
 
+        if (ctaUrl.hash === '#save') {
+          cta.classList.add('save-button');
+        }
+
         cta.addEventListener('click', async (e) => {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
@@ -770,10 +775,10 @@ function initFormCtas(props) {
             let resp;
             if (props.currentStep === props.maxStep) {
               oldResp = { ...props.eventDataResp };
-              resp = await saveEvent(props, true);
+              resp = await save(props, true);
             } else {
               oldResp = { ...props.eventDataResp };
-              resp = await saveEvent(props);
+              resp = await save(props);
             }
 
             if (resp?.error) {
@@ -808,7 +813,7 @@ function initFormCtas(props) {
             }
           } else {
             oldResp = { ...props.eventDataResp };
-            const resp = await saveEvent(props);
+            const resp = await save(props);
             if (resp?.error) {
               buildErrorMessage(props, resp);
             }
@@ -823,7 +828,7 @@ function initFormCtas(props) {
   backBtn.addEventListener('click', async () => {
     toggleBtnsSubmittingState(true);
     oldResp = { ...props.eventDataResp };
-    const resp = await saveEvent(props);
+    const resp = await save(props);
     if (resp?.error) {
       buildErrorMessage(props, resp);
     } else {
@@ -880,7 +885,7 @@ function initNavigation(props) {
       if (!nav.disabled && !sideMenu.classList.contains('disabled')) {
         sideMenu.classList.add('disabled');
 
-        const resp = await saveEvent(props);
+        const resp = await save(props);
         if (resp?.error) {
           buildErrorMessage(props, resp);
         } else {
@@ -916,14 +921,14 @@ function updateStatusTag(props) {
 
   const headingSection = currentFragment.querySelector(':scope > .section:first-child');
 
-  const eixstingStatusTag = headingSection.querySelector('.event-status-tag');
+  const eixstingStatusTag = headingSection.querySelector('.status-tag');
   if (eixstingStatusTag) eixstingStatusTag.remove();
 
   const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
   const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
   const dot = eventDataResp.published ? getIcon('dot-purple') : getIcon('dot-green');
   const text = eventDataResp.published ? 'Published' : 'Draft';
-  const statusTag = createTag('span', { class: 'event-status-tag' });
+  const statusTag = createTag('span', { class: 'status-tag' });
 
   statusTag.append(dot, text);
   heading.parentElement?.replaceChild(headingWrapper, heading);
@@ -1047,8 +1052,7 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const sp = new URLSearchParams(window.location.search);
-  const devToken = sp.get('devToken');
+  const devToken = getDevToken();
   if (devToken && getEventServiceEnv() === 'local') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
