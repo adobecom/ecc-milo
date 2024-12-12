@@ -1,0 +1,51 @@
+.series-details-component {
+  --mod-textfield-font-weight: 700;
+}
+
+.series-details-component .info-field-wrapper {
+  margin-bottom: 24px;
+}
+
+.series-details-component .attr-text {
+  font-size: var(--type-body-xs-size);
+  text-align: right;
+}
+
+.series-details-component .series-fields-wrapper {
+  display: flex;
+  gap: 64px;
+}
+
+.series-details-component .format-picker-wrapper {
+  display: flex;
+  gap: 12px;
+}
+
+.series-details-component .series-fields-wrapper,
+.series-details-component .text-field-row {
+  margin-bottom: 52px;
+}
+
+.series-details-component sp-textfield {
+  width: 100%;
+}
+
+.series-details-component sp-textfield#info-field-series-name sp-help-text {
+  position: absolute;
+  display: none;
+}
+
+.series-details-component sp-textfield#info-field-series-name.show-negative-help-text sp-help-text {
+  display: flex;
+}
+
+.series-details-component sp-textfield.textarea-input {
+  font-size: var(--type-body-m-size);;
+  width: 100%;
+  outline: none;
+  resize: vertical;
+}
+
+.series-details-component label {
+  font-weight: 700;
+}

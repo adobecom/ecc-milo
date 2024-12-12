@@ -15,19 +15,19 @@ import {
   publishEvent,
   getEvent,
 } from '../../scripts/esp-controller.js';
-import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
-import { Profile } from '../../components/profile/profile.js';
-import { Repeater } from '../../components/repeater/repeater.js';
+import ImageDropzone from '../../components/image-dropzone/image-dropzone.js';
+import Profile from '../../components/profile/profile.js';
+import Repeater from '../../components/repeater/repeater.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
 import AgendaFieldsetGroup from '../../components/agenda-fieldset-group/agenda-fieldset-group.js';
-import { ProfileContainer } from '../../components/profile-container/profile-container.js';
-import { CustomTextfield } from '../../components/custom-textfield/custom-textfield.js';
+import ProfileContainer from '../../components/profile-container/profile-container.js';
+import CustomTextfield from '../../components/custom-textfield/custom-textfield.js';
 import ProductSelector from '../../components/product-selector/product-selector.js';
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, hasContentChanged, quickFilter, setPayloadCache, setResponseCache } from '../../scripts/event-data-handler.js';
-import { CustomSearch } from '../../components/custom-search/custom-search.js';
+import CustomSearch from '../../components/custom-search/custom-search.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -292,8 +292,8 @@ async function handleEventUpdate(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onEventUpdate } = await import(`../${comp}-component/controller.js`);
-      return onEventUpdate(component, props);
+      const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
+      return onTargetUpdate(component, props);
     });
 
     return Promise.all(promises);
