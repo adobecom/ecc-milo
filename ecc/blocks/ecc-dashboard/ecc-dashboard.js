@@ -17,7 +17,7 @@ import {
   getDevToken,
 } from '../../scripts/utils.js';
 
-import { quickFilter } from '../../scripts/event-data-handler.js';
+import { quickFilter } from '../event-creation-form/data-handler.js';
 import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
