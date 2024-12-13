@@ -949,9 +949,9 @@ export async function getSeriesForUser() {
 
   if (!user) return [];
 
-  const series = await getAllSeries();
+  const { series } = await getAllSeries();
 
-  if (!series.error) {
+  if (series) {
     const { role } = user;
 
     if (role === 'admin') return series;
