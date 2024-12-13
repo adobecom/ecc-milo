@@ -10,20 +10,16 @@ export function onSubmit(component, props) {
   const selectedProducts = productGroup?.getSelectedProducts();
 
   if (selectedProducts) {
-    const topicsVal = props.payload.fullTopicsValue?.map((x) => JSON.parse(x));
-    if (topicsVal) {
-      const relatedProducts = selectedProducts
-        .filter((p) => topicsVal.find((t) => p.tagID?.includes(t.tagID)))
-        .map((p) => ({
-          name: p.title,
-          showProductBlade: !!p.showProductBlade,
-          tags: p.tags.map((t) => t.tagID).join(','),
-        }));
+    const relatedProducts = selectedProducts
+      .map((p) => ({
+        name: p.title,
+        showProductBlade: !!p.showProductBlade,
+        tags: p.tags.map((t) => t.tagID).join(','),
+      }));
 
-      props.payload = { ...props.payload, relatedProducts };
-    } else {
-      delete props.payload.relatedProducts;
-    }
+    props.payload = { ...props.payload, relatedProducts };
+  } else {
+    delete props.payload.relatedProducts;
   }
 }
 
