@@ -401,15 +401,11 @@ async function save(props, toPublish = false) {
 
   let resp = props.response;
 
-  const onSave = async () => {
-
-  };
-
   if (!resp.seriesId) {
     resp = await createSeries(quickFilter(props.payload));
     props.response = { ...props.response, ...resp };
     updateDashboardLink(props);
-    
+
     if (resp?.seriesId) await handleSeriesUpdate(props);
 
     if (!resp.error) {

@@ -216,13 +216,14 @@ async function loadData(props) {
   const id = urlParams.get('id');
 
   if (!id) return;
-  
+
   // fetch data to prefill the form
 
-  // props.el.classList.add('disabled');
-  // const data = await getSeries(id);
-  // props.response = { ...props.response, ...data };
-  // props.el.classList.remove('disabled');
+  props.el.classList.add('disabled');
+  // const data = await get(id);
+  const data = {};
+  props.response = { ...props.response, ...data };
+  props.el.classList.remove('disabled');
 }
 
 async function initComponents(props) {
