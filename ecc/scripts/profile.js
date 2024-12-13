@@ -127,19 +127,19 @@ export function userHasAccessToEvent(user, eventId) {
 export function userHasAccessToView(user, blockName) {
   const { role } = user;
   const managerAccess = [
-    'events-dashboard',
+    'ecc-dashboard',
     'event-creation-form',
     'series-dashboard',
     'series-creation-form',
   ];
 
   const creatorAccess = [
-    'events-dashboard',
+    'ecc-dashboard',
     'event-creation-form',
   ];
 
   const editorAccess = [
-    'events-dashboard',
+    'ecc-dashboard',
     'event-creation-form',
   ];
 

@@ -729,7 +729,7 @@ export default async function init(el) {
     return;
   }
 
-  await initProfileLogicTree('events-dashboard', {
+  await initProfileLogicTree('ecc-dashboard', {
     noProfile: () => {
       signIn();
     },
