@@ -16,6 +16,7 @@ import {
   getDevToken,
 } from '../../scripts/utils.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
+import { quickFilter } from '../series-creation-form/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -173,7 +174,7 @@ function initMoreOptions(props, config, seriesObj, row) {
           row.classList.add('pending');
           const resp = await unpublishSeries(seriesObj.seriesId, seriesObj);
           updateDashboardData(resp, props);
-  
+
           sortData(props, config, { resort: true });
           showToast(props, buildToastMsgWithEventTitle(seriesObj.title, config['unpublished-msg']), { variant: 'positive' });
         });
@@ -186,9 +187,9 @@ function initMoreOptions(props, config, seriesObj, row) {
           row.classList.add('pending');
           const resp = await publishSeries(seriesObj.seriesId, seriesObj);
           updateDashboardData(resp, props);
-  
+
           sortData(props, config, { resort: true });
-  
+
           showToast(props, buildToastMsgWithEventTitle(seriesObj.title, config['published-msg']), { variant: 'positive' });
         });
       }
@@ -197,7 +198,7 @@ function initMoreOptions(props, config, seriesObj, row) {
     // const viewTemplate = buildTool(toolBox, 'View Template', 'preview-eye');
 
     const clone = buildTool(toolBox, 'Clone', 'clone');
-    
+
     if (seriesStatus && seriesStatus !== 'archived') {
       const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
 
@@ -205,15 +206,14 @@ function initMoreOptions(props, config, seriesObj, row) {
       url.searchParams.set('seriesId', seriesObj.seriesId);
       edit.href = url.toString();
 
-
       const archive = buildTool(toolBox, 'Archive', 'archive');
 
       archive.addEventListener('click', async (e) => {
         e.preventDefault();
-  
+
         const spTheme = props.el.querySelector('sp-theme.toast-area');
         if (!spTheme) return;
-  
+
         const underlay = spTheme.querySelector('sp-underlay');
         const dialog = spTheme.querySelector('sp-dialog');
         createTag('h1', { slot: 'heading' }, 'You are archiving this series.', { parent: dialog });
@@ -221,31 +221,31 @@ function initMoreOptions(props, config, seriesObj, row) {
         const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
         const dialogArchiveBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to archive this series', { parent: buttonContainer });
         const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not archive', { parent: buttonContainer });
-  
+
         underlay.open = true;
-  
+
         dialogArchiveBtn.addEventListener('click', async () => {
           toolBox.remove();
           underlay.open = false;
           dialog.innerHTML = '';
           row.classList.add('pending');
           const resp = await archiveSeries(seriesObj.seriesId);
-  
+
           if (resp.error) {
             row.classList.remove('pending');
             showToast(props, resp.error, { variant: 'negative' });
             return;
           }
-  
+
           const newJson = await getAllSeries();
           props.data = newJson.series;
           props.filteredData = newJson.series;
           props.paginatedData = newJson.series;
-  
+
           sortData(props, config, { resort: true });
           showToast(props, config['delete-toast-msg']);
         });
-  
+
         dialogCancelBtn.addEventListener('click', () => {
           toolBox.remove();
           underlay.open = false;
@@ -254,7 +254,7 @@ function initMoreOptions(props, config, seriesObj, row) {
       });
     }
     // const verHistory = buildTool(toolBox, 'Version History', 'version-history');
-    
+
     // clone
     clone.addEventListener('click', async (e) => {
       e.preventDefault();

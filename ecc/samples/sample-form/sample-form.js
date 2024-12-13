@@ -12,7 +12,6 @@ import {
   createSeries,
   updateSeries,
   publishSeries,
-  getSeries,
 } from '../../scripts/esp-controller.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import { initProfileLogicTree } from '../../scripts/event-apis.js';
@@ -217,13 +216,14 @@ async function loadData(props) {
   const id = urlParams.get('id');
 
   if (!id) return;
-  
+
   // fetch data to prefill the form
 
-  // props.el.classList.add('disabled');
+  props.el.classList.add('disabled');
   // const data = await getSeries(id);
-  // props.response = { ...props.response, ...data };
-  // props.el.classList.remove('disabled');
+  const data = {};
+  props.response = { ...props.response, ...data };
+  props.el.classList.remove('disabled');
 }
 
 async function initComponents(props) {
