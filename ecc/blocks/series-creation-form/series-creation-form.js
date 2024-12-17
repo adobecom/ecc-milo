@@ -15,7 +15,7 @@ import {
   getSeriesById,
 } from '../../scripts/esp-controller.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import { initProfileLogicTree } from '../../scripts/event-apis.js';
+import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -815,7 +815,7 @@ export default async function init(el) {
     return;
   }
 
-  initProfileLogicTree({
+  initProfileLogicTree('series-creation-form', {
     noProfile: () => {
       signIn();
     },

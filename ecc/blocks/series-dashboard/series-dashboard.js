@@ -15,7 +15,7 @@ import {
   getEventServiceEnv,
   getDevToken,
 } from '../../scripts/utils.js';
-import { initProfileLogicTree } from '../../scripts/event-apis.js';
+import { initProfileLogicTree } from '../../scripts/profile.js';
 import { quickFilter } from '../series-creation-form/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -606,7 +606,7 @@ function buildLoadingScreen(el) {
   el.classList.add('loading');
   const loadingScreen = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'loading-screen' });
   createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: loadingScreen });
-  createTag('sp-field-label', {}, 'Loading Series dashboard...', { parent: loadingScreen });
+  createTag('sp-field-label', {}, 'Loading event series dashboard...', { parent: loadingScreen });
 
   el.prepend(loadingScreen);
 }
@@ -633,7 +633,7 @@ export default async function init(el) {
     return;
   }
 
-  initProfileLogicTree({
+  initProfileLogicTree('series-dashboard', {
     noProfile: () => {
       signIn();
     },
