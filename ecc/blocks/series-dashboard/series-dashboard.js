@@ -325,7 +325,8 @@ function buildStatusTag(series) {
 function buildSeriesNameTag(config, seriesObj) {
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
   url.searchParams.set('seriesId', seriesObj.seriesId);
-  const nameTag = createTag('a', { class: 'name-link', href: url.toString() }, seriesObj.seriesName);
+  const nameTag = createTag('a', { class: 'name-link' }, seriesObj.seriesName);
+  if (['published', 'draft'].includes(seriesObj.seriesStatus)) nameTag.href = url.toString();
   return nameTag;
 }
 
