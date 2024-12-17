@@ -681,10 +681,9 @@ function updateStatusTag(props) {
       break;
   }
 
-  const text = response.published ? 'Published' : 'Draft';
   const statusTag = createTag('span', { class: 'status-tag' });
 
-  statusTag.append(dot, text);
+  statusTag.append(dot, seriesStatus);
   heading.parentElement?.replaceChild(headingWrapper, heading);
   headingWrapper.append(heading, statusTag);
 }
