@@ -293,7 +293,7 @@ export async function createSpeaker(profile, seriesId) {
   const nSpeaker = convertToNSpeaker(profile);
 
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...nSpeaker, seriesId });
+  const raw = JSON.stringify(nSpeaker);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -588,7 +588,7 @@ export async function getEventSpeaker(seriesId, eventId, speakerId) {
 export async function updateSpeaker(profile, seriesId) {
   const nSpeaker = convertToNSpeaker(profile);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...nSpeaker, seriesId });
+  const raw = JSON.stringify(nSpeaker);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
