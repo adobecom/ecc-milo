@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+import { SUPPORTED_CLOUDS } from '../../constants/constants.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { generateToolTip } from '../../scripts/utils.js';
 
@@ -15,10 +16,8 @@ async function decorateCloudTagSelect(column) {
 
   // FIXME: cloulds shouldn't be hardcoded
   // const clouds = await getClouds();
-  // const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
-  const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }];
 
-  Object.entries(clouds).forEach(([, val]) => {
+  Object.entries(SUPPORTED_CLOUDS).forEach(([, val]) => {
     const opt = createTag('sp-menu-item', { value: val.id }, val.name);
     select.append(opt);
   });
