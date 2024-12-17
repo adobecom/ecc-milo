@@ -69,8 +69,6 @@ export default function init(el) {
       cols.forEach(async (c, ci) => {
         if (ci === 0) decorateCloudTagSelect(c);
         if (ci === 1) decorateSeriesSelect(c);
-        // if (ci === 2) decorateNewSeriesBtnAndModal(c);
-        // if (ci === 2) decorateCheckbox(c);
       });
     }
 
