@@ -13,7 +13,7 @@ import {
   updateSeries,
   publishSeries,
 } from '../../scripts/esp-controller.js';
-import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.sample.js';
 import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
