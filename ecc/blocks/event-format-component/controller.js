@@ -84,7 +84,15 @@ async function populateSeriesOptions(props, component) {
     return;
   }
 
-  Object.values(series).forEach((val) => {
+  Object.values(series).filter((s) => {
+    const hasRequiredVals = s.seriesId && s.seriesName;
+    const isPublished = s.seriesStatus?.toLowerCase() === 'published';
+
+    const currentCloud = props.eventDataResp.cloudType || props.payload.cloudType;
+    const isInCurrentCloud = s.cloudType === currentCloud;
+
+    return hasRequiredVals && isPublished && isInCurrentCloud;
+  }).forEach((val) => {
     if (!val.seriesId || !val.seriesName) return;
     if (val.seriesStatus?.toLowerCase() !== 'published') return;
 
