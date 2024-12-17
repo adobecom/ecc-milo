@@ -173,6 +173,7 @@ function initRequiredFieldsValidation(props) {
 
 function validatePublishFields(props) {
   const publishAttributesFilled = PUBLISHABLE_ATTRS.every((attr) => props.payload[attr]);
+  console.log('publishAttributesFilled', publishAttributesFilled);
   const publishButton = props.el.querySelector('.series-creation-form-ctas-panel .next-button');
 
   publishButton.classList.toggle('disabled', !publishAttributesFilled);

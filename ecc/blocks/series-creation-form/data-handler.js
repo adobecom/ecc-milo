@@ -7,6 +7,7 @@ const submissionFilter = [
   // from payload and response
   'seriesName',
   'seriesDescription',
+  'seriesStatus',
   'susiContextId',
   'externalThemeId',
   'cloudType',
