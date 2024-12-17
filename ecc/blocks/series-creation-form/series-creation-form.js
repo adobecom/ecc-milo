@@ -651,8 +651,10 @@ function initDeepLink(props) {
 
 function updateStatusTag(props) {
   const { response } = props;
+  if (!response) return;
 
-  if (response?.published === undefined) return;
+  const { seriesStatus } = response;
+  if (seriesStatus === undefined) return;
 
   const currentFragment = getCurrentFragment(props);
 
@@ -663,7 +665,22 @@ function updateStatusTag(props) {
 
   const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
   const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
-  const dot = response.published ? getIcon('dot-purple') : getIcon('dot-green');
+
+  let dot;
+
+  switch (seriesStatus) {
+    case 'published':
+      dot = getIcon('dot-purple');
+      break;
+    case 'draft':
+      dot = getIcon('dot-green');
+      break;
+    case 'archived':
+    default:
+      dot = getIcon('dot-gray');
+      break;
+  }
+
   const text = response.published ? 'Published' : 'Draft';
   const statusTag = createTag('span', { class: 'status-tag' });
 
