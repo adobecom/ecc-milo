@@ -1,19 +1,11 @@
 /* eslint-disable no-use-before-define */
-// FIXME: this whole data handler thing can be done better
+// FIXME: Needs better implementation overall
+
 let responseCache = {};
 let payloadCache = {};
 
 const submissionFilter = [
-  // from payload and response
-  'seriesName',
-  'seriesDescription',
-  'seriesStatus',
-  'susiContextId',
-  'externalThemeId',
-  'cloudType',
-  'templateId',
-  'relatedDomain',
-  'modificationTime',
+  // list attribute keys submittable by this form
 ];
 
 function isValidAttribute(attr) {

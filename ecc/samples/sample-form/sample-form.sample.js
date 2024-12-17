@@ -12,9 +12,8 @@ import {
   createSeries,
   updateSeries,
   publishSeries,
-  getSeriesById,
 } from '../../scripts/esp-controller.js';
-import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.sample.js';
 import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -56,6 +55,10 @@ const SPECTRUM_COMPONENTS = [
   'icon',
   'action-button',
   'progress-circle',
+];
+
+const CUSTOM_LIT_COMPONENTS = [
+  'custom-textfield',
 ];
 
 const PUBLISHABLE_ATTRS = [
@@ -173,7 +176,6 @@ function initRequiredFieldsValidation(props) {
 
 function validatePublishFields(props) {
   const publishAttributesFilled = PUBLISHABLE_ATTRS.every((attr) => props.payload[attr]);
-  console.log('publishAttributesFilled', publishAttributesFilled);
   const publishButton = props.el.querySelector('.series-creation-form-ctas-panel .next-button');
 
   publishButton.classList.toggle('disabled', !publishAttributesFilled);
@@ -197,25 +199,35 @@ function enableSideNavForEditFlow(props) {
   initRequiredFieldsValidation(props);
 }
 
-function initCustomLitComponents() {
-  // no-op
+async function initCustomLitComponents() {
+  // aync import all custom lit components
+  const promises = CUSTOM_LIT_COMPONENTS.map(async (componentName) => {
+    const { default: component } = await import(`../components/${componentName}/${componentName}.js`);
+    customElements.define(componentName, component);
+  });
+
+  await Promise.all(promises);
 }
 
 async function loadData(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  const seriesId = urlParams.get('seriesId');
+  // use more specific query param if available
+  const id = urlParams.get('id');
 
-  if (seriesId) {
-    props.el.classList.add('disabled');
-    const data = await getSeriesById(seriesId);
-    props.response = { ...props.response, ...data };
-    props.el.classList.remove('disabled');
-  }
+  if (!id) return;
+
+  // fetch data to prefill the form
+
+  props.el.classList.add('disabled');
+  // const data = await get(id);
+  const data = {};
+  props.response = { ...props.response, ...data };
+  props.el.classList.remove('disabled');
 }
 
 async function initComponents(props) {
-  initCustomLitComponents();
+  await initCustomLitComponents();
 
   const componentPromises = VANILLA_COMPONENTS.map(async (comp) => {
     const mappedComponents = props.el.querySelectorAll(`.${comp}-component`);
@@ -393,40 +405,38 @@ function updateDashboardLink(props) {
   dashboardLink.href = url.toString();
 }
 
-async function save(props, toPublish = false) {
+async function saveSeries(props, toPublish = false) {
   try {
     await gatherValues(props);
   } catch (e) {
     return { error: { message: e.message } };
   }
 
-  let resp = props.response;
+  let resp;
 
-  if (!resp.seriesId) {
+  const onSeriesSave = async () => {
+    if (resp?.seriesId) await handleSeriesUpdate(props);
+
+    if (!resp.error) {
+      showSaveSuccessMessage(props);
+    }
+  };
+
+  if (props.currentStep === 0 && !getFilteredCachedResponse().seriesId) {
     resp = await createSeries(quickFilter(props.payload));
     props.response = { ...props.response, ...resp };
     updateDashboardLink(props);
-
-    if (resp?.seriesId) await handleSeriesUpdate(props);
-
-    if (!resp.error) {
-      showSaveSuccessMessage(props);
-    }
-  } else if (!toPublish) {
+    await onSeriesSave();
+  } else if (props.currentStep <= props.maxStep && !toPublish) {
     resp = await updateSeries(
-      resp.seriesId,
+      getFilteredCachedResponse().seriesId,
       getJoinedData(),
     );
     props.response = { ...props.response, ...resp };
-
-    if (resp?.seriesId) await handleSeriesUpdate(props);
-
-    if (!resp.error) {
-      showSaveSuccessMessage(props);
-    }
+    await onSeriesSave();
   } else if (toPublish) {
     resp = await publishSeries(
-      resp.seriesId,
+      getFilteredCachedResponse().seriesId,
       getJoinedData(),
     );
     props.response = { ...props.response, ...resp };
@@ -537,9 +547,9 @@ function initFormCtas(props) {
           if (ctaUrl.hash === '#next') {
             let resp;
             if (props.currentStep === props.maxStep) {
-              resp = await save(props, true);
+              resp = await saveSeries(props, true);
             } else {
-              resp = await save(props);
+              resp = await saveSeries(props);
             }
 
             if (resp?.error) {
@@ -573,7 +583,7 @@ function initFormCtas(props) {
               navigateForm(props);
             }
           } else {
-            const resp = await save(props);
+            const resp = await saveSeries(props);
             if (resp?.error) {
               buildErrorMessage(props, resp);
             }
@@ -623,7 +633,7 @@ function initNavigation(props) {
       if (!nav.disabled && !sideMenu.classList.contains('disabled')) {
         sideMenu.classList.add('disabled');
 
-        const resp = await save(props);
+        const resp = await saveSeries(props);
         if (resp?.error) {
           buildErrorMessage(props, resp);
         } else {
@@ -652,10 +662,8 @@ function initDeepLink(props) {
 
 function updateStatusTag(props) {
   const { response } = props;
-  if (!response) return;
 
-  const { seriesStatus } = response;
-  if (seriesStatus === undefined) return;
+  if (response?.published === undefined) return;
 
   const currentFragment = getCurrentFragment(props);
 
@@ -666,25 +674,11 @@ function updateStatusTag(props) {
 
   const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
   const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
-
-  let dot;
-
-  switch (seriesStatus) {
-    case 'published':
-      dot = getIcon('dot-purple');
-      break;
-    case 'draft':
-      dot = getIcon('dot-green');
-      break;
-    case 'archived':
-    default:
-      dot = getIcon('dot-gray');
-      break;
-  }
-
+  const dot = response.published ? getIcon('dot-purple') : getIcon('dot-green');
+  const text = response.published ? 'Published' : 'Draft';
   const statusTag = createTag('span', { class: 'status-tag' });
 
-  statusTag.append(dot, seriesStatus);
+  statusTag.append(dot, text);
   heading.parentElement?.replaceChild(headingWrapper, heading);
   headingWrapper.append(heading, statusTag);
 }
@@ -816,7 +810,7 @@ export default async function init(el) {
     return;
   }
 
-  initProfileLogicTree('series-creation-form', {
+  initProfileLogicTree('sample-form', {
     noProfile: () => {
       signIn();
     },

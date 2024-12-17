@@ -105,10 +105,11 @@ export function userHasAccessToBU(user, bu) {
   if (!user) return false;
 
   const userBU = user['business-units'];
+  const { role } = user;
+
+  if (userBU.toLowerCase() === 'all' || role === 'admin') return true;
 
   if (!userBU) return false;
-
-  if (userBU.toLowerCase() === 'all') return true;
 
   const businessUnits = userBU.split(',').map((b) => b.trim());
   return businessUnits.length === 0 || businessUnits.includes(bu);
@@ -117,27 +118,27 @@ export function userHasAccessToBU(user, bu) {
 export function userHasAccessToSeries(user, seriesId) {
   if (!user) return false;
 
-  const userSeries = user.series;
+  const { series, role } = user;
 
-  if (!userSeries) return false;
+  if (series.toLowerCase() === 'all' || role === 'admin') return true;
 
-  if (userSeries.toLowerCase() === 'all') return true;
+  if (!series) return false;
 
-  const series = userSeries.split(',').map((b) => b.trim());
-  return series.length === 0 || series.includes(seriesId);
+  const userSeries = series.split(',').map((b) => b.trim());
+  return userSeries.length === 0 || userSeries.includes(seriesId);
 }
 
 export function userHasAccessToEvent(user, eventId) {
   if (!user) return false;
 
-  const userEvents = user.events;
+  const { events, role } = user;
 
-  if (!userEvents) return false;
+  if (events.toLowerCase() === 'all' || role === 'admin') return true;
 
-  if (userEvents.toLowerCase() === 'all') return true;
+  if (!events) return false;
 
-  const events = userEvents.split(',').map((b) => b.trim());
-  return events.length === 0 || events.includes(eventId);
+  const eventsArray = events.split(',').map((b) => b.trim());
+  return eventsArray.length === 0 || eventsArray.includes(eventId);
 }
 
 export function userHasAccessToView(user, blockName) {
