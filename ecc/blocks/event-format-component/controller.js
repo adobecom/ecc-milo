@@ -86,7 +86,8 @@ async function populateSeriesOptions(props, component) {
 
   Object.values(series).forEach((val) => {
     if (!val.seriesId || !val.seriesName) return;
-    if (!val.seriesStatus?.toLowerCase() === 'published') return;
+    if (val.seriesStatus?.toLowerCase() !== 'published') return;
+
     const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
     seriesSelect.append(opt);
   });
