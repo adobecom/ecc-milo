@@ -84,6 +84,8 @@ export async function getUser() {
 
   const { email } = profile;
 
+  if (!email) return null;
+
   if (usersCache.length === 0) {
     const resp = await fetch('/ecc/system/users.json')
       .then((r) => r)
@@ -95,7 +97,7 @@ export async function getUser() {
     usersCache = json.data;
   }
 
-  const user = usersCache.find((s) => s.email === email);
+  const user = usersCache.find((s) => s.email.toLowerCase() === email.toLowerCase());
   return user;
 }
 
