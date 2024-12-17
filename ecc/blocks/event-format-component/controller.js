@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { getAllSeries } from '../../scripts/esp-controller.js';
+import { getSeriesForUser } from '../../scripts/esp-controller.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { changeInputValue } from '../../scripts/utils.js';
@@ -76,14 +76,26 @@ async function populateSeriesOptions(props, component) {
   const seriesSelect = component.querySelector('#series-select-input');
   if (!seriesSelect) return;
 
-  const { series } = await getAllSeries();
+  const series = await getSeriesForUser();
+
   if (!series) {
     seriesSelect.pending = false;
     seriesSelect.disabled = true;
     return;
   }
 
-  Object.values(series).forEach((val) => {
+  Object.values(series).filter((s) => {
+    const hasRequiredVals = s.seriesId && s.seriesName;
+    const isPublished = s.seriesStatus?.toLowerCase() === 'published';
+
+    const currentCloud = props.eventDataResp.cloudType || props.payload.cloudType;
+    const isInCurrentCloud = s.cloudType === currentCloud;
+
+    return hasRequiredVals && isPublished && isInCurrentCloud;
+  }).forEach((val) => {
+    if (!val.seriesId || !val.seriesName) return;
+    if (val.seriesStatus?.toLowerCase() !== 'published') return;
+
     const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
     seriesSelect.append(opt);
   });

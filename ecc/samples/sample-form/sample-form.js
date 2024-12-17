@@ -14,7 +14,7 @@ import {
   publishSeries,
 } from '../../scripts/esp-controller.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import { initProfileLogicTree } from '../../scripts/event-apis.js';
+import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -220,7 +220,7 @@ async function loadData(props) {
   // fetch data to prefill the form
 
   props.el.classList.add('disabled');
-  // const data = await getSeries(id);
+  // const data = await get(id);
   const data = {};
   props.response = { ...props.response, ...data };
   props.el.classList.remove('disabled');
@@ -810,7 +810,7 @@ export default async function init(el) {
     return;
   }
 
-  initProfileLogicTree({
+  initProfileLogicTree('sample-form', {
     noProfile: () => {
       signIn();
     },
