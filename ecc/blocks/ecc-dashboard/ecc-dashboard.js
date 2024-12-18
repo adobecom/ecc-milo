@@ -17,7 +17,6 @@ import {
   getDevToken,
 } from '../../scripts/utils.js';
 
-import { quickFilter } from '../event-creation-form/data-handler.js';
 import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -58,6 +57,50 @@ export function cloneFilter(obj) {
 
   wl.forEach((attr) => {
     if (attr !== undefined && attr !== null) {
+      output[attr] = obj[attr];
+    }
+  });
+
+  return output;
+}
+
+function eventObjFilter(obj) {
+  const submissionFilter = [
+    // from payload and response
+    'agenda',
+    'topics',
+    'eventType',
+    'cloudType',
+    'seriesId',
+    'templateId',
+    'communityTopicUrl',
+    'title',
+    'description',
+    'localStartDate',
+    'localEndDate',
+    'localStartTime',
+    'localEndTime',
+    'timezone',
+    'showAgendaPostEvent',
+    'showVenuePostEvent',
+    'showVenueImage',
+    'showSponsors',
+    'rsvpFormFields',
+    'relatedProducts',
+    'rsvpDescription',
+    'attendeeLimit',
+    'allowWaitlisting',
+    'hostEmail',
+    'eventId',
+    'published',
+    'creationTime',
+    'modificationTime',
+  ];
+
+  const output = {};
+
+  submissionFilter.forEach((attr) => {
+    if (obj[attr] !== undefined && obj[attr] !== null) {
       output[attr] = obj[attr];
     }
   });
@@ -247,7 +290,7 @@ function initMoreOptions(props, config, eventObj, row) {
         e.preventDefault();
         toolBox.remove();
         row.classList.add('pending');
-        const resp = await unpublishEvent(eventObj.eventId, quickFilter(eventObj));
+        const resp = await unpublishEvent(eventObj.eventId, eventObjFilter(eventObj));
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
@@ -260,7 +303,7 @@ function initMoreOptions(props, config, eventObj, row) {
         e.preventDefault();
         toolBox.remove();
         row.classList.add('pending');
-        const resp = await publishEvent(eventObj.eventId, quickFilter(eventObj));
+        const resp = await publishEvent(eventObj.eventId, eventObjFilter(eventObj));
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
