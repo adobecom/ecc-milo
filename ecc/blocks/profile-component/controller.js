@@ -6,14 +6,13 @@ import {
   removeSpeakerFromEvent,
   getEventSpeaker,
 } from '../../scripts/esp-controller.js';
-import { getFilteredCachedResponse } from '../event-creation-form/data-handler.js';
 
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const profileContainer = component.querySelector('profile-container');
   if (profileContainer) {
-    const { eventId } = getFilteredCachedResponse();
+    const { eventId } = props.eventDataResp;
     const speakers = profileContainer.getProfiles();
 
     if (speakers.length === 0) {
