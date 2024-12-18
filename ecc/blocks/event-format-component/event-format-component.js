@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+import { SUPPORTED_CLOUDS } from '../../constants/constants.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { generateToolTip } from '../../scripts/utils.js';
 
@@ -15,10 +16,8 @@ async function decorateCloudTagSelect(column) {
 
   // FIXME: cloulds shouldn't be hardcoded
   // const clouds = await getClouds();
-  // const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
-  const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }];
 
-  Object.entries(clouds).forEach(([, val]) => {
+  Object.entries(SUPPORTED_CLOUDS).forEach(([, val]) => {
     const opt = createTag('sp-menu-item', { value: val.id }, val.name);
     select.append(opt);
   });
@@ -55,13 +54,6 @@ function decorateTimeZoneSelect(column) {
   column.append(tzWrapper);
 }
 
-// FIXME: comment out for now. Might support other checkboxes later.
-// function decorateCheckbox(column) {
-//   const checkbox = createTag('sp-checkbox', { id: 'rsvp-required-check' }, column.textContent.trim());
-//   column.innerHTML = '';
-//   column.append(checkbox);
-// }
-
 export default function init(el) {
   el.classList.add('form-component');
 
@@ -76,8 +68,6 @@ export default function init(el) {
       cols.forEach(async (c, ci) => {
         if (ci === 0) decorateCloudTagSelect(c);
         if (ci === 1) decorateSeriesSelect(c);
-        // if (ci === 2) decorateNewSeriesBtnAndModal(c);
-        // if (ci === 2) decorateCheckbox(c);
       });
     }
 

@@ -7,6 +7,7 @@ import {
   getEventPageHost,
   signIn,
   getEventServiceEnv,
+  getDevToken,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -14,20 +15,20 @@ import {
   publishEvent,
   getEvent,
 } from '../../scripts/esp-controller.js';
-import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
-import { Profile } from '../../components/profile/profile.js';
-import { Repeater } from '../../components/repeater/repeater.js';
+import ImageDropzone from '../../components/image-dropzone/image-dropzone.js';
+import Profile from '../../components/profile/profile.js';
+import Repeater from '../../components/repeater/repeater.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
 import AgendaFieldsetGroup from '../../components/agenda-fieldset-group/agenda-fieldset-group.js';
-import { ProfileContainer } from '../../components/profile-container/profile-container.js';
-import { CustomTextfield } from '../../components/custom-textfield/custom-textfield.js';
+import ProfileContainer from '../../components/profile-container/profile-container.js';
+import CustomTextfield from '../../components/custom-textfield/custom-textfield.js';
 import ProductSelector from '../../components/product-selector/product-selector.js';
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, hasContentChanged, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import { CustomSearch } from '../../components/custom-search/custom-search.js';
-import { initProfileLogicTree } from '../../scripts/event-apis.js';
+import { getUser, initProfileLogicTree, userHasAccessToEvent } from '../../scripts/profile.js';
+import CustomSearch from '../../components/custom-search/custom-search.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -232,22 +233,28 @@ async function loadEventData(props) {
   const eventId = urlParams.get('eventId');
 
   if (eventId) {
-    setTimeout(() => {
-      if (!props.eventDataResp.eventId) {
-        const toastArea = props.el.querySelector('.toast-area');
-        if (!toastArea) return;
+    const user = await getUser();
+    if (userHasAccessToEvent(user, eventId)) {
+      setTimeout(() => {
+        if (!props.eventDataResp.eventId) {
+          const toastArea = props.el.querySelector('.toast-area');
+          if (!toastArea) return;
 
-        const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
-        toast.addEventListener('close', () => {
-          toast.remove();
-        });
-      }
-    }, 5000);
+          const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
+          toast.addEventListener('close', () => {
+            toast.remove();
+          });
+        }
+      }, 5000);
 
-    props.el.classList.add('disabled');
-    const eventData = await getEvent(eventId);
-    props.eventDataResp = { ...props.eventDataResp, ...eventData };
-    props.el.classList.remove('disabled');
+      props.el.classList.add('disabled');
+      const eventData = await getEvent(eventId);
+      props.eventDataResp = { ...props.eventDataResp, ...eventData };
+      props.el.classList.remove('disabled');
+    } else {
+      buildNoAccessScreen(props.el);
+      props.el.classList.remove('loading');
+    }
   }
 }
 
@@ -259,7 +266,7 @@ async function initComponents(props) {
     if (!mappedComponents?.length) return;
 
     const componentInitPromises = Array.from(mappedComponents).map(async (component) => {
-      const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
+      const { default: initComponent } = await import(`../${comp}-component/controller.js`);
       await initComponent(component, props);
     });
 
@@ -275,7 +282,7 @@ async function gatherValues(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onSubmit } = await import(`./controllers/${comp}-component-controller.js`);
+      const { onSubmit } = await import(`../${comp}-component/controller.js`);
       return onSubmit(component, props);
     });
 
@@ -291,8 +298,8 @@ async function handleEventUpdate(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onEventUpdate } = await import(`./controllers/${comp}-component-controller.js`);
-      return onEventUpdate(component, props);
+      const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
+      return onTargetUpdate(component, props);
     });
 
     return Promise.all(promises);
@@ -307,7 +314,7 @@ async function updateComponentsOnPayloadChange(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onPayloadUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      const { onPayloadUpdate } = await import(`../${comp}-component/controller.js`);
       const componentPayload = await onPayloadUpdate(component, props);
       return componentPayload;
     });
@@ -324,7 +331,7 @@ async function updateComponentsOnRespChange(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onRespUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      const { onRespUpdate } = await import(`../${comp}-component/controller.js`);
       const componentPayload = await onRespUpdate(component, props);
       return componentPayload;
     });
@@ -1047,16 +1054,15 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const sp = new URLSearchParams(window.location.search);
-  const devToken = sp.get('devToken');
-  if (devToken && getEventServiceEnv() === 'dev') {
+  const devToken = getDevToken();
+  if (devToken && getEventServiceEnv() === 'local') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
     });
     return;
   }
 
-  initProfileLogicTree({
+  await initProfileLogicTree('event-creation-form', {
     noProfile: () => {
       signIn();
     },

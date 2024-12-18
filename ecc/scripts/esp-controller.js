@@ -1,19 +1,22 @@
 import { LIBS } from './scripts.js';
-import { getEventServiceEnv, getSecret } from './utils.js';
+import { getDevToken, getEventServiceEnv, getSecret } from './utils.js';
+import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
 
 const API_CONFIG = {
   esl: {
+    local: { host: 'http://localhost:8499' },
     dev: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
     dev02: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-d5dc93.stage.cloud.adobe.io' },
     stage: { host: 'https://events-service-layer-stage.adobe.io' },
-    stage02: { host: 'https://events-service-layer-stage02.adobe.io' },
+    stage02: { host: 'https://wcms-events-service-layer-deploy-ethos105-stage-or-8f7ce1.stage.cloud.adobe.io' },
     prod: { host: 'https://events-service-layer.adobe.io' },
   },
   esp: {
+    local: { host: 'http://localhost:8500' },
     dev: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
     dev02: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-c81eb6.stage.cloud.adobe.io' },
     stage: { host: 'https://events-service-platform-stage-or2.adobe.io' },
-    stage02: { host: 'https://events-service-platform-stage02.adobe.io' },
+    stage02: { host: 'https://wcms-events-service-platform-deploy-ethos105-stage-9a5fdc.stage.cloud.adobe.io' },
     prod: { host: 'https://events-service-platform.adobe.io' },
   },
 };
@@ -51,6 +54,9 @@ export const getCaasTags = (() => {
 })();
 
 function waitForAdobeIMS() {
+  const urlParam = new URLSearchParams(window.location.search);
+  if (urlParam.has('devToken')) return Promise.resolve();
+
   return new Promise((resolve) => {
     const checkIMS = () => {
       if (window.adobeIMS && window.adobeIMS.getAccessToken) {
@@ -64,18 +70,18 @@ function waitForAdobeIMS() {
 }
 
 export async function constructRequestOptions(method, body = null) {
+  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
   ] = await Promise.all([
     import(`${LIBS}/utils/getUuid.js`),
-    getSecret(`${getEventServiceEnv()}-client-identity`),
+    getSecret(`${secretEnv}-client-identity`),
     waitForAdobeIMS(),
   ]);
 
   const headers = new Headers();
-  const sp = new URLSearchParams(window.location.search);
-  const devToken = sp.get('devToken');
+  const devToken = getDevToken();
   const authToken = devToken && getEventServiceEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   if (!authToken) window.lana?.log('Error: Failed to get Adobe IMS auth token');
@@ -97,19 +103,19 @@ export async function constructRequestOptions(method, body = null) {
 }
 
 export async function uploadImage(file, configs, tracker, imageId = null) {
+  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
   ] = await Promise.all([
     import(`${LIBS}/utils/getUuid.js`),
-    getSecret(`${getEventServiceEnv()}-client-identity`),
+    getSecret(`${secretEnv}-client-identity`),
     waitForAdobeIMS(),
   ]);
 
   const requestId = await getUuid(new Date().getTime());
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const sp = new URLSearchParams(window.location.search);
-  const devToken = sp.get('devToken');
+  const devToken = getDevToken();
   const authToken = devToken && getEventServiceEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   let respJson = null;
@@ -288,7 +294,7 @@ export async function createSpeaker(profile, seriesId) {
   const nSpeaker = convertToNSpeaker(profile);
 
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...nSpeaker, seriesId });
+  const raw = JSON.stringify(nSpeaker);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -583,7 +589,7 @@ export async function getEventSpeaker(seriesId, eventId, speakerId) {
 export async function updateSpeaker(profile, seriesId) {
   const nSpeaker = convertToNSpeaker(profile);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...nSpeaker, seriesId });
+  const raw = JSON.stringify(nSpeaker);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -706,6 +712,36 @@ export async function getEvents() {
   }
 }
 
+export async function getEventsForUser() {
+  const user = await getUser();
+
+  if (!user) return [];
+
+  const resp = await getEvents();
+  if (!resp.error) {
+    const { role } = user;
+
+    if (role === 'admin') return resp.events;
+
+    if (role === 'manager') return resp.events.filter((e) => userHasAccessToBU(user, e.cloudType));
+
+    if (role === 'creator') {
+      return resp.events
+        .filter((e) => userHasAccessToBU(user, e.cloudType))
+        .filter((e) => userHasAccessToSeries(user, e.seriesId));
+    }
+
+    if (role === 'editor') {
+      return resp.events
+        .filter((e) => userHasAccessToBU(user, e.cloudType))
+        .filter((e) => userHasAccessToSeries(user, e.seriesId))
+        .filter((e) => userHasAccessToEvent(user, e.eventId));
+    }
+  }
+
+  return [];
+}
+
 export async function getEvent(eventId) {
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
@@ -763,7 +799,7 @@ export async function getClouds() {
   return null;
 }
 
-export async function getSeries() {
+export async function getAllSeries() {
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
@@ -776,9 +812,177 @@ export async function getSeries() {
       return { status: response.status, error: data };
     }
 
-    return data.series;
+    return data;
   } catch (error) {
     window.lana?.log('Failed to fetch series. Error:', error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function getSeriesById(seriesId) {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await fetch(`${host}/v1/series/${seriesId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to fetch series ${seriesId}. Status:`, response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to fetch series ${seriesId}. Error:`, error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function createSeries(seriesData) {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const raw = JSON.stringify({ ...seriesData, seriesStatus: 'draft' });
+  const options = await constructRequestOptions('POST', raw);
+
+  try {
+    const response = await fetch(`${host}/v1/series`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log('Failed to create series. Status:', response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log('Failed to create series. Error:', error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function updateSeries(seriesId, seriesData) {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const raw = JSON.stringify({ ...seriesData, seriesId });
+  const options = await constructRequestOptions('PUT', raw);
+
+  try {
+    const response = await fetch(`${host}/v1/series/${seriesId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to update series ${seriesId}. Status:`, response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to update series ${seriesId}. Error:`, error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function publishSeries(seriesId, seriesData) {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const raw = JSON.stringify({ ...seriesData, seriesId, seriesStatus: 'published' });
+  const options = await constructRequestOptions('PUT', raw);
+
+  try {
+    const response = await fetch(`${host}/v1/series/${seriesId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to publish series ${seriesId}. Status:`, response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to publish series ${seriesId}. Error:`, error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function unpublishSeries(seriesId, seriesData) {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const raw = JSON.stringify({ ...seriesData, seriesId, seriesStatus: 'draft' });
+  const options = await constructRequestOptions('PUT', raw);
+
+  try {
+    const response = await fetch(`${host}/v1/series/${seriesId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to unpublish series ${seriesId}. Status:`, response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to unpublish series ${seriesId}. Error:`, error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function archiveSeries(seriesId, seriesData) {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const raw = JSON.stringify({ ...seriesData, seriesId, seriesStatus: 'archived' });
+  const options = await constructRequestOptions('PUT', raw);
+
+  try {
+    const response = await fetch(`${host}/v1/series/${seriesId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to archive series ${seriesId}. Status:`, response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to archive series ${seriesId}. Error:`, error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function getSeriesForUser() {
+  const user = await getUser();
+
+  if (!user) return [];
+
+  const { series } = await getAllSeries();
+
+  if (series) {
+    const { role } = user;
+
+    if (role === 'admin') return series;
+    if (role === 'manager') return series.filter((s) => userHasAccessToBU(user, s.cloudType));
+    if (role === 'creator' || role === 'editor') {
+      return series
+        .filter((s) => userHasAccessToBU(user, s.cloudType))
+        .filter((s) => userHasAccessToSeries(user, s.seriesId));
+    }
+  }
+
+  return [];
+}
+
+export async function deleteSeries(seriesId) {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const options = await constructRequestOptions('DELETE');
+
+  try {
+    const response = await fetch(`${host}/v1/series/${seriesId}`, options);
+
+    if (!response.ok) {
+      const data = await response.json();
+      window.lana?.log(`Failed to delete series ${seriesId}. Status:`, response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    // 204 no content. Return true if no error.
+    return true;
+  } catch (error) {
+    window.lana?.log(`Failed to delete series ${seriesId}. Error:`, error);
     return { status: 'Network Error', error: error.message };
   }
 }

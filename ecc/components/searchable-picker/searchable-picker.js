@@ -4,8 +4,7 @@ import { style } from './searchable-picker.css.js';
 
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
 
-// eslint-disable-next-line import/prefer-default-export
-export class SearchablePicker extends LitElement {
+export default class SearchablePicker extends LitElement {
   static styles = style;
 
   static properties = {
