@@ -147,7 +147,6 @@ function initAutocomplete(el, props) {
       if (place.name) changeInputValue(venueName, 'value', place.name);
       changeInputValue(placeId, 'value', place.place_id);
 
-      togglePrefillableFieldsHiddenState(el);
       BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city: addressInfo.city });
     }
 
@@ -158,8 +157,10 @@ function initAutocomplete(el, props) {
     }
 
     if (place.formatted_address) {
-      formattedAddress.value = place.formatted_address;
+      changeInputValue(formattedAddress, 'value', place.formatted_address);
     }
+
+    togglePrefillableFieldsHiddenState(el);
   });
 }
 
