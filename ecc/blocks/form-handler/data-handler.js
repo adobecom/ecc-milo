@@ -62,7 +62,6 @@ export function getFilteredCachedPayload() {
     payloadCache.topics = Object.values(topics).reduce((acc, val) => acc.concat(val), []);
   }
 
-  console.log('payloadCache', payloadCache);
   return payloadCache;
 }
 

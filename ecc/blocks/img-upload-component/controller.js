@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { deleteImage, getEventImages, uploadImage } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
-import { getFilteredCachedResponse } from '../event-creation-form/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -27,19 +26,23 @@ export function onSubmit(component, props) {
   }
 }
 
-function updateImgUploadComponentConfigs(component) {
+function updateImgUploadComponentConfigs(component, props) {
+  const { eventId } = props.eventDataResp;
+
+  if (!eventId) return;
+
   const type = getComponentImageType(component);
 
   const configs = {
     type,
-    targetUrl: `/v1/events/${getFilteredCachedResponse().eventId}/images`,
+    targetUrl: `/v1/events/${eventId}/images`,
   };
 
   component.dataset.configs = JSON.stringify(configs);
 }
 
 export async function onPayloadUpdate(component, props) {
-  updateImgUploadComponentConfigs(component);
+  updateImgUploadComponentConfigs(component, props);
 }
 
 export async function onRespUpdate(_component, _props) {

@@ -59,7 +59,6 @@ function buildLocationInputGrid(row) {
   const placeLNGInput = createTag('input', { id: 'google-place-lng', type: 'hidden' });
   const gmtOffsetInput = createTag('input', { id: 'google-place-gmt-offset', type: 'hidden' });
   const addressComponentsInput = createTag('input', { id: 'google-place-address-components', type: 'hidden' });
-  const formattedAddressInput = createTag('input', { id: 'google-place-formatted-address', type: 'hidden' });
 
   locationDetailsWrapper.append(
     placeIdInput,
@@ -67,7 +66,6 @@ function buildLocationInputGrid(row) {
     placeLNGInput,
     gmtOffsetInput,
     addressComponentsInput,
-    formattedAddressInput,
   );
 
   row.innerHTML = '';
