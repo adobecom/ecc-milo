@@ -333,8 +333,13 @@
   padding: 32px 12px;
 }
 
-.event-creation-form .form-component:not(:last-of-type):not(.no-divider) {
-  border-bottom: 3px solid var(--stroke-color-divider);
+.event-creation-form .event-heading-tooltip-wrapper .event-heading-tooltip-icon {
+  height: 16px;
+  width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
 }
 
 .event-creation-form .section:not(:first-of-type) > div.content > h2,

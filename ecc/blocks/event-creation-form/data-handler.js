@@ -4,7 +4,6 @@ let responseCache = {};
 let payloadCache = {};
 
 const submissionFilter = [
-  // from payload and response
   'agenda',
   'topics',
   'eventType',
@@ -57,6 +56,12 @@ export function setPayloadCache(payload) {
 }
 
 export function getFilteredCachedPayload() {
+  const { pendingTopics } = payloadCache;
+
+  if (pendingTopics) {
+    payloadCache.topics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
+  }
+
   return payloadCache;
 }
 

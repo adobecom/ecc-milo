@@ -56,10 +56,10 @@ export function setPayloadCache(payload) {
 }
 
 export function getFilteredCachedPayload() {
-  const { topics } = payloadCache;
+  const { pendingTopics } = payloadCache;
 
-  if (topics) {
-    payloadCache.topics = Object.values(topics).reduce((acc, val) => acc.concat(val), []);
+  if (pendingTopics) {
+    payloadCache.topics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
   }
 
   return payloadCache;
