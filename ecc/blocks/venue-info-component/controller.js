@@ -56,7 +56,7 @@ function updateAllFields(venueData, component) {
   changeInputValue(placeLngInput, 'value', venueData.coordinates?.lon);
   changeInputValue(placeIdInput, 'value', venueData.placeId);
   changeInputValue(gmtoffsetInput, 'value', venueData.gmtOffset);
-  changeInputValue(addressComponentsInput, 'value', venueData.addressComponents);
+  changeInputValue(addressComponentsInput, 'value', JSON.stringify(venueData.addressComponents));
   changeInputValue(formattedAddressInput, 'value', venueData.formattedAddress);
 }
 
@@ -74,7 +74,7 @@ function getVenueDataInForm(component) {
   const lat = +placeLatInput.value;
   const lon = +placeLngInput.value;
   const gmtOffset = +gmtoffsetInput.value;
-  const addressComponents = addressComponentsInput.value;
+  const addressComponents = JSON.parse(addressComponentsInput.value);
   const formattedAddress = formattedAddressInput.value;
 
   const venueData = {
@@ -85,7 +85,7 @@ function getVenueDataInForm(component) {
       lon,
     },
     gmtOffset,
-    addressComponents: JSON.parse(addressComponents),
+    addressComponents,
     formattedAddress,
   };
 
@@ -147,12 +147,7 @@ function initAutocomplete(el, props) {
       if (place.name) changeInputValue(venueName, 'value', place.name);
       changeInputValue(placeId, 'value', place.place_id);
 
-      togglePrefillableFieldsHiddenState(el);
-      BlockMediator.set('eventDupMetrics', {
-        ...BlockMediator.get('eventDupMetrics'),
-        city: addressInfo.city,
-        stateCode: addressInfo.stateCode,
-      });
+      BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city: addressInfo.city });
     }
 
     if (place.geometry) {
@@ -162,8 +157,10 @@ function initAutocomplete(el, props) {
     }
 
     if (place.formatted_address) {
-      formattedAddress.value = place.formatted_address;
+      changeInputValue(formattedAddress, 'value', place.formatted_address);
     }
+
+    togglePrefillableFieldsHiddenState(el);
   });
 }
 
@@ -212,7 +209,7 @@ export default async function init(component, props) {
   }
 }
 
-export async function onEventUpdate(component, props) {
+export async function onTargetUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const venueData = getVenueDataInForm(component);
@@ -221,10 +218,11 @@ export async function onEventUpdate(component, props) {
   if (!props.eventDataResp.venue) {
     resp = await createVenue(props.eventDataResp.eventId, venueData);
   } else if (props.eventDataResp.venue.placeId !== venueData.placeId) {
-    resp = await replaceVenue(props.eventDataResp.eventId, props.eventDataResp.venue.venueId, {
-      ...props.eventDataResp.venue,
-      ...venueData,
-    });
+    resp = await replaceVenue(
+      props.eventDataResp.eventId,
+      props.eventDataResp.venue.venueId,
+      { ...venueData },
+    );
 
     if (resp.error) {
       buildErrorMessage(props, resp);

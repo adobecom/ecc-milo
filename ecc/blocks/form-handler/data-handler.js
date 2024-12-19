@@ -4,7 +4,6 @@ let responseCache = {};
 let payloadCache = {};
 
 const submissionFilter = [
-  // from payload and response
   'agenda',
   'topics',
   'eventType',

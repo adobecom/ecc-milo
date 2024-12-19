@@ -7,7 +7,6 @@ import {
   removeSponsorFromEvent,
   updateSponsorInEvent,
 } from '../../scripts/esp-controller.js';
-import { getFilteredCachedResponse } from '../../scripts/event-data-handler.js';
 
 let PARTNERS_SERIES_ID;
 
@@ -17,7 +16,7 @@ export async function onSubmit(component, props) {
 
   const showSponsors = component.querySelector('#partners-visible')?.checked;
   const partnerSelectorGroup = component.querySelector('partner-selector-group');
-  const { eventId } = getFilteredCachedResponse();
+  const { eventId } = props.eventDataResp;
 
   if (partnerSelectorGroup && eventId) {
     const partners = partnerSelectorGroup.getSavedPartners();
@@ -178,6 +177,6 @@ export default async function init(component, props) {
   partnerVisible.checked = eventData.showSponsors;
 }
 
-export function onEventUpdate(component, props) {
+export function onTargetUpdate(component, props) {
   // Do nothing
 }

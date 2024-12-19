@@ -2,7 +2,7 @@ import {
   createEvent,
   deleteEvent,
   getEventImages,
-  getEvents,
+  getEventsForUser,
   publishEvent,
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
@@ -16,8 +16,8 @@ import {
   getEventServiceEnv,
   getDevToken,
 } from '../../scripts/utils.js';
-import { quickFilter } from '../../scripts/event-data-handler.js';
-import { initProfileLogicTree } from '../../scripts/event-apis.js';
+
+import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -57,6 +57,50 @@ export function cloneFilter(obj) {
 
   wl.forEach((attr) => {
     if (attr !== undefined && attr !== null) {
+      output[attr] = obj[attr];
+    }
+  });
+
+  return output;
+}
+
+function eventObjFilter(obj) {
+  const submissionFilter = [
+    // from payload and response
+    'agenda',
+    'topics',
+    'eventType',
+    'cloudType',
+    'seriesId',
+    'templateId',
+    'communityTopicUrl',
+    'title',
+    'description',
+    'localStartDate',
+    'localEndDate',
+    'localStartTime',
+    'localEndTime',
+    'timezone',
+    'showAgendaPostEvent',
+    'showVenuePostEvent',
+    'showVenueImage',
+    'showSponsors',
+    'rsvpFormFields',
+    'relatedProducts',
+    'rsvpDescription',
+    'attendeeLimit',
+    'allowWaitlisting',
+    'hostEmail',
+    'eventId',
+    'published',
+    'creationTime',
+    'modificationTime',
+  ];
+
+  const output = {};
+
+  submissionFilter.forEach((attr) => {
+    if (obj[attr] !== undefined && obj[attr] !== null) {
       output[attr] = obj[attr];
     }
   });
@@ -246,7 +290,7 @@ function initMoreOptions(props, config, eventObj, row) {
         e.preventDefault();
         toolBox.remove();
         row.classList.add('pending');
-        const resp = await unpublishEvent(eventObj.eventId, quickFilter(eventObj));
+        const resp = await unpublishEvent(eventObj.eventId, eventObjFilter(eventObj));
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
@@ -259,7 +303,7 @@ function initMoreOptions(props, config, eventObj, row) {
         e.preventDefault();
         toolBox.remove();
         row.classList.add('pending');
-        const resp = await publishEvent(eventObj.eventId, quickFilter(eventObj));
+        const resp = await publishEvent(eventObj.eventId, eventObjFilter(eventObj));
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
@@ -316,10 +360,10 @@ function initMoreOptions(props, config, eventObj, row) {
         return;
       }
 
-      const newJson = await getEvents();
-      props.data = newJson.events;
-      props.filteredData = newJson.events;
-      props.paginatedData = newJson.events;
+      const newJson = await getEventsForUser();
+      props.data = newJson;
+      props.filteredData = newJson;
+      props.paginatedData = newJson;
       const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
       if (modTimeHeader) {
         props.currentSort = { field: 'modificationTime', el: modTimeHeader };
@@ -361,7 +405,7 @@ function initMoreOptions(props, config, eventObj, row) {
           return;
         }
 
-        const newJson = await getEvents();
+        const newJson = await getEventsForUser();
         props.data = newJson.events;
         props.filteredData = newJson.events;
         props.paginatedData = newJson.events;
@@ -647,16 +691,6 @@ function buildDashboardTable(props, config) {
   }
 }
 
-async function getEventsArray() {
-  const resp = await getEvents();
-
-  if (resp.error) {
-    return [];
-  }
-
-  return resp.events;
-}
-
 function buildNoEventScreen(el, config) {
   el.classList.add('no-events');
 
@@ -681,7 +715,7 @@ async function buildDashboard(el, config) {
     currentSort: {},
   };
 
-  const data = await getEventsArray();
+  const data = await getEventsForUser();
   if (!data?.length) {
     buildNoEventScreen(el, config);
   } else {
@@ -738,7 +772,7 @@ export default async function init(el) {
     return;
   }
 
-  initProfileLogicTree({
+  await initProfileLogicTree('ecc-dashboard', {
     noProfile: () => {
       signIn();
     },

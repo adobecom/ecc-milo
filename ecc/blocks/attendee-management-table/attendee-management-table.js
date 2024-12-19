@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { getAllEventAttendees, getEvents } from '../../scripts/esp-controller.js';
+import { getAllEventAttendees, getEventsForUser } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -10,9 +10,9 @@ import {
   getEventServiceEnv,
   getDevToken,
 } from '../../scripts/utils.js';
-import { SearchablePicker } from '../../components/searchable-picker/searchable-picker.js';
-import { FilterMenu } from '../../components/filter-menu/filter-menu.js';
-import { initProfileLogicTree } from '../../scripts/event-apis.js';
+import SearchablePicker from '../../components/searchable-picker/searchable-picker.js';
+import FilterMenu from '../../components/filter-menu/filter-menu.js';
+import { getUser, initProfileLogicTree, userHasAccessToEvent } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -512,16 +512,6 @@ function buildDashboardTable(props, config) {
   populateTable(props, config);
 }
 
-async function getEventsArray() {
-  const resp = await getEvents();
-
-  if (resp.error) {
-    return [];
-  }
-
-  return resp.events;
-}
-
 function renderTableLoadingOverlay(props) {
   const tableContainer = props.el.querySelector('.dashboard-table-container');
   const loadingOverlay = createTag('div', { class: 'loading-overlay' });
@@ -628,7 +618,7 @@ async function buildDashboard(el, config) {
   createTag('div', { class: 'dashboard-body-container' }, '', { parent: mainContainer });
 
   const uspEventId = new URLSearchParams(window.location.search).get('eventId');
-  const events = await getEventsArray();
+  const events = await getEventsForUser();
 
   const props = {
     el,
@@ -644,8 +634,13 @@ async function buildDashboard(el, config) {
   let data = [];
 
   if (props.currentEventId) {
-    const resp = await getAllEventAttendees(props.currentEventId);
-    if (resp && !resp.error) data = resp;
+    if (userHasAccessToEvent(await getUser(), props.currentEventId)) {
+      const resp = await getAllEventAttendees(props.currentEventId);
+      if (resp && !resp.error) data = resp;
+    } else {
+      buildNoAccessScreen(el);
+      return;
+    }
   }
 
   props.data = data;
@@ -722,7 +717,7 @@ export default async function init(el) {
     return;
   }
 
-  initProfileLogicTree({
+  await initProfileLogicTree('attendee-management-table', {
     noProfile: () => {
       signIn();
     },

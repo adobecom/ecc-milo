@@ -295,6 +295,6 @@ export default function init(component, props) {
   prefillFields(component, props);
 }
 
-export function onEventUpdate(component, props) {
+export function onTargetUpdate(component, props) {
   // Do nothing
 }

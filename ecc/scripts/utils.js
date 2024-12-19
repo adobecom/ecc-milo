@@ -131,7 +131,7 @@ export function addTooltipToEl(tooltipText, appendee) {
 }
 
 export function generateToolTip(el) {
-  const heading = el.querySelector('h2, h3');
+  const heading = el.querySelector('h2, h3, h4');
   const em = el.querySelector('p > em');
 
   const tooltipText = em?.textContent.trim();
@@ -149,10 +149,11 @@ export function buildNoAccessScreen(el) {
 
   const h1 = createTag('h1', {}, 'You do not have sufficient access to view.');
   const area = createTag('div', { class: 'no-access-area' });
-  const noAccessDescription = createTag('p', {}, 'An Adobe corporate account is required to access this feature.');
+  const noAccessDescription = createTag('p', {}, 'If you have another authorized account, please sign in with that account to access this page.');
+  const requestAccessButton = createTag('a', { class: 'con-button primary' }, 'Request Access');
 
   el.append(h1, area);
-  area.append(getIcon('browser-access-forbidden-lg'), noAccessDescription);
+  area.append(getIcon('browser-access-forbidden-lg'), noAccessDescription, requestAccessButton);
 }
 
 export function querySelectorAllDeep(selector, root = document) {
@@ -185,6 +186,46 @@ function mergeOptions(defaultOptions, overrideOptions) {
   return combinedOptions;
 }
 
+export async function decorateLabeledTextfield(cell, inputOpts = {}, labelOpts = {}) {
+  cell.classList.add('labeled-text-field-row');
+  const cols = cell.querySelectorAll(':scope > div');
+  if (!cols.length) return;
+  const [labelCol, placeholderCol] = cols;
+
+  const text = labelCol?.textContent.trim();
+
+  const phText = placeholderCol?.textContent.trim();
+  const maxCharNum = placeholderCol?.querySelector('strong')?.textContent.trim();
+  const isRequired = text.endsWith('*');
+
+  const label = createTag('sp-field-label', mergeOptions({
+    for: 'text-input',
+    'side-aligned': 'start',
+    class: 'text-field-label',
+  }, labelOpts), text);
+
+  const input = createTag('sp-textfield', mergeOptions(
+    {
+      class: 'text-input',
+      placeholder: phText,
+      size: 'xl',
+    },
+    inputOpts,
+  ));
+
+  if (isRequired) {
+    input.required = true;
+    label.required = true;
+  }
+
+  if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
+
+  const wrapper = createTag('div', { class: 'labeled-text-field-wrapper' });
+  cell.innerHTML = '';
+  wrapper.append(label, input);
+  cell.append(wrapper);
+}
+
 export async function decorateTextfield(cell, extraOptions, negativeHelperText = '') {
   cell.classList.add('text-field-row');
   const cols = cell.querySelectorAll(':scope > div');
@@ -206,12 +247,13 @@ export async function decorateTextfield(cell, extraOptions, negativeHelperText =
     {
       class: 'text-input',
       placeholder: text,
-      required: isRequired,
       quiet: true,
       size: 'xl',
     },
     extraOptions,
   ));
+
+  if (isRequired) input.required = true;
 
   if (negativeHelperText) {
     createTag('sp-help-text', { variant: 'negative', slot: 'negative-help-text' }, negativeHelperText, { parent: input });
@@ -252,13 +294,13 @@ export async function decorateTextarea(cell, extraOptions) {
     {
       multiline: true,
       class: 'textarea-input',
-      // quiet: true,
       placeholder: text,
-      required: isRequired,
       ...extraOptions,
     },
     extraOptions,
   ));
+
+  if (isRequired) input.required = true;
 
   if (maxCharNum) input.setAttribute('maxlength', maxCharNum);
 
