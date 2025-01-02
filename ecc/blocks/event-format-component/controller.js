@@ -70,7 +70,7 @@ async function populateSeriesOptions(component) {
   seriesSelect.disabled = false;
   changeInputValue(seriesSelect, 'value', null);
 
-  const series = await getSeries();
+  const series = await getSeriesForUser();
   if (series.error) {
     seriesSelect.pending = false;
     seriesSelect.disabled = true;

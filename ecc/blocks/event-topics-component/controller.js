@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 import { LIBS } from '../../scripts/scripts.js';
 import { getCaasTags, getMiloTagsData } from '../../scripts/esp-controller.js';
 import { isEmptyObject } from '../../scripts/utils.js';
@@ -60,26 +62,19 @@ function prefillTopics(component, eventData) {
   const actionButtons = component.querySelectorAll('sp-action-button');
   const selectedButtons = [];
 
-  if (eventData.topics?.length !== 0) {
-    actionButtons.forEach((cb) => {
-      if (eventData.topics?.includes(cb.getAttribute('name'))) {
-        cb.selected = true;
-        selectedButtons.push(cb);
-      }
-    });
+  if (!eventData.topics || eventData.topics.length === 0) return selectedButtons;
 
-    const topics = selectedButtons.map((cb) => cb.getAttribute('name'));
-
-    if (component.dataset.cloudType === 'CreativeCloud') {
-      return { topics };
+  actionButtons.forEach((cb) => {
+    const { name } = cb;
+    if (eventData.topics.includes(name)) {
+      cb.selected = true;
+      selectedButtons.push(name);
     }
-    return { topics };
-  }
+  });
 
-  return {};
+  return selectedButtons;
 }
 
-/* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -116,7 +111,7 @@ export default async function init(component, props) {
   const topicType = SUPPORTED_TOPIC_TYPES.find((type) => component.classList.contains(type));
 
   const { payload } = props;
-  payload.pendingTopics = { ...payload.prefilledTopics };
+  payload[topicType] = payload.prefilledTopics;
   props.payload = payload;
 
   if (prefilledTopics.length) component.classList.add('prefilled');
