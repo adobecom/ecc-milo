@@ -45,7 +45,7 @@ async function buildTopicsCheckboxes(el, cloudType) {
     Object.values(productTags).forEach((topic) => {
       const { name, tags } = topic;
       if (!tags) return;
-      const button = createTag('sp-action-button', { name, toggles: true }, name, { parent: cw });
+      const button = createTag('sp-action-button', { name: tags, toggles: true }, name, { parent: cw });
       const checkboxIcon = createTag('sp-icon', { size: 's', slot: 'icon' }, addSvg);
       button.prepend(checkboxIcon);
 
