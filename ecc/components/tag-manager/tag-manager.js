@@ -65,9 +65,6 @@ export default class TagManager extends LitElement {
   }
 
   render() {
-    console.log('this.tags', this.tags);
-    console.log('this.selectedTags', this.selectedTags);
-    console.log('this.currentPath', this.currentPath);
     return html`
     <div class="menu-group">
       ${this.currentPath.split('/').map((_p, i, arr) => {
