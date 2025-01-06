@@ -60,6 +60,7 @@ export default async function init(el) {
   if (!caasTags) return;
 
   customElements.define('tag-manager', TagManager);
+
   const tagManager = createTag('tag-manager', { class: 'tag-manager' }, '', { parent: el });
   tagManager.tags = { tags: caasTags.namespaces };
 }

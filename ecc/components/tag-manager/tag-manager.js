@@ -21,10 +21,10 @@ export default class TagManager extends LitElement {
   }
 
   handleTagSelect(tag) {
-    if (this.selectedTags.has(tag.tagID)) {
-      this.selectedTags.delete(tag.tagID);
+    if (this.selectedTags.has(tag)) {
+      this.selectedTags.delete(tag);
     } else {
-      this.selectedTags.add(tag.tagID);
+      this.selectedTags.add(tag);
     }
 
     this.dispatchEvent(new CustomEvent('tag-select', { detail: { selectedTags: Array.from(this.selectedTags) }, bubbles: true, composed: true }));
@@ -49,14 +49,32 @@ export default class TagManager extends LitElement {
     this.requestUpdate();
   }
 
+  determineCheckboxState(tag) {
+    // if selectedTags has tag.tagID, return checked
+    if (this.selectedTags.has(tag)) {
+      return html`<sp-checkbox checked @click=${() => this.handleItemCheck(tag)}/>`;
+    }
+
+    // if currentPath starts with the tag tr, return indeterminate
+    const trimmedPath = tag.path.replace('/content/cq:tags/', '');
+    if ([...this.selectedTags].some((t) => {
+      const { path } = t;
+      const trimmedSelectedTagPath = path.replace('/content/cq:tags/', '');
+      return trimmedSelectedTagPath.startsWith(trimmedPath);
+    })) {
+      return html`<sp-checkbox indeterminate @click=${() => this.handleItemCheck(tag)}/>`;
+    }
+
+    return html`<sp-checkbox @click=${() => this.handleItemCheck(tag)}/>`;
+  }
+
   buildItem = (tag) => {
     const { title, tags, tagID } = tag;
 
     return html`
           <div class="menu-item" data-tagid=${tagID} @click=${(e) => this.handleItemClick(e, tag)}>
             <div class="menu-item-inner">
-              
-              ${this.selectedTags.has(tagID) ? html`<sp-checkbox checked @click=${() => this.handleItemCheck(tag)}/>` : html`<sp-checkbox @click=${() => this.handleItemCheck(tag)}/>`}
+              ${this.determineCheckboxState(tag)}
               <span>${title}</span>
             </div>
             ${tags && Object.keys(tags).length ? html`
