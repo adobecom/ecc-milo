@@ -2,8 +2,7 @@ import { LIBS } from '../../scripts/scripts.js';
 
 const { css } = await import(`${LIBS}/deps/lit-all.min.js`);
 
-// eslint-disable-next-line import/prefer-default-export
-export const style = css`
+const style = css`
   :host {
     display: block;
     position: relative;
@@ -12,8 +11,9 @@ export const style = css`
   .tags-pool {
     min-height: 189px;
     padding: 10px;
-    border: 1px solid var(--color-gray-300);
+    border: 1px solid var(--color-gray-500);
     width: 100%;
+    margin-bottom: 36px;
   }
 
   .tags {
@@ -39,9 +39,27 @@ export const style = css`
     cursor: pointer;
   }
 
+  .menu-breadcrumbs {
+    display: flex;
+    align-items: center;
+    margin-bottom: 36px;
+  }
+
+  .menu-breadcrumbs a {
+    cursor: pointer;
+    padding: 6px 21px;
+    border-radius: 8px;
+  }
+
+  .menu-breadcrumbs a:last-of-type:not(:first-of-type) {
+    font-weight: 700;
+    background-color: var(--color-gray-200);
+  }
+
   .menu-group {
     display: flex;
     align-items: flex-start;
+    margin-bottom: 36px;
   }
 
   .menu {
@@ -62,7 +80,7 @@ export const style = css`
   }
 
   .menu-item:hover {
-    background-color: var(--color-gray-100);
+    background-color: var(--color-gray-200);
   }
 
   .menu .menu-item-inner {
@@ -71,3 +89,5 @@ export const style = css`
     align-items: center;
   }
 `;
+
+export default style;

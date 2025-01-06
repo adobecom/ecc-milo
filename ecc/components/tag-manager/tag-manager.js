@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { LIBS } from '../../scripts/scripts.js';
-import { style } from './tag-manager.css.js';
+import style from './tag-manager.css.js';
 import { getIcon } from '../../scripts/utils.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
@@ -19,6 +19,21 @@ export default class TagManager extends LitElement {
     this.tags = {};
     this.currentPath = 'caas';
     this.selectedTags = new Set();
+  }
+
+  static getParsedTitle(tag) {
+    const { title } = tag;
+
+    if (!title) return nothing;
+
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = title;
+
+    return html`<span>${textarea.value}</span>`;
+  }
+
+  static getChevRight() {
+    return html`${getIcon('chev-right')}`;
   }
 
   handleTagSelect(tag) {
@@ -69,17 +84,6 @@ export default class TagManager extends LitElement {
     return html`<sp-checkbox @click=${() => this.handleItemCheck(tag)}/>`;
   }
 
-  static getParsedTitle(tag) {
-    const { title } = tag;
-
-    if (!title) return nothing;
-
-    const textarea = document.createElement('textarea');
-    textarea.innerHTML = title;
-
-    return html`<span>${textarea.value}</span>`;
-  }
-
   buildItem(tag) {
     const { tags, tagID } = tag;
 
@@ -89,18 +93,7 @@ export default class TagManager extends LitElement {
           ${this.determineCheckboxState(tag)}
           ${this.constructor.getParsedTitle(tag)}
         </div>
-        ${tags && Object.keys(tags).length ? html`
-        <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18">
-          <defs>
-            <style>
-              .fill {
-                fill: #464646;
-              }
-            </style>
-          </defs>
-          <title>S ChevronRight 18 N</title>
-          <rect id="Canvas" fill="#ff13dc" opacity="0" width="18" height="18" /><path class="fill" d="M12,9a.994.994,0,0,1-.2925.7045l-3.9915,3.99a1,1,0,1,1-1.4355-1.386l.0245-.0245L9.5905,9,6.3045,5.715A1,1,0,0,1,7.691,4.28l.0245.0245,3.9915,3.99A.994.994,0,0,1,12,9Z" />
-        </svg>` : ''}
+        ${tags && Object.keys(tags).length ? this.constructor.getChevRight() : ''}
       </div>
     `;
   }
@@ -141,6 +134,21 @@ export default class TagManager extends LitElement {
           <a class="tag" >${tag.title}${this.buildDeleteBtn(tag)}</a>
         `)}
       </div>
+    </div>
+    <div class="menu-breadcrumbs">
+      ${this.currentPath.split('/').map((path, i, arr) => {
+    const tag = this.deepGetTag(arr, i);
+
+    if (tag) {
+      return html`
+        <a @click=${() => { this.currentPath = arr.slice(0, i + 1).join('/'); }}> ${tag.title} </a>
+        ${i < arr.length - 1 ? this.constructor.getChevRight() : nothing}
+      `;
+    }
+
+    return nothing;
+  })}
+
     </div>
     <div class="menu-group">
       ${this.currentPath.split('/').map((_p, i, arr) => {
