@@ -22,6 +22,23 @@ export const style = css`
     gap: 8px;
   }
 
+  .tag {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background-color: var(--color-white);
+    border: 1px solid var(--color-black);
+    border-radius: 4px;
+  }
+
+  .tag .icon-cross {
+    height: 8px;
+    width: 8px;
+    display: block;
+    cursor: pointer;
+  }
+
   .menu-group {
     display: flex;
     align-items: flex-start;

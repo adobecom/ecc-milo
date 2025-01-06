@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './tag-manager.css.js';
+import { getIcon } from '../../scripts/utils.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -105,12 +106,28 @@ export default class TagManager extends LitElement {
     return currentTag;
   }
 
+  buildDeleteBtn(tag) {
+    const crossIcon = getIcon('cross');
+    const btnHTML = html`${crossIcon}`;
+
+    crossIcon.addEventListener('click', () => {
+      this.selectedTags.delete(tag);
+      this.requestUpdate();
+    });
+
+    return btnHTML;
+  }
+
+  getSelectedTags() {
+    return Array.from(this.selectedTags);
+  }
+
   render() {
     return html`
     <div class="tags-pool">
       <div class="tags">
         ${repeat(this.selectedTags.values(), (tag) => html`
-          <a class="tag">${tag.title}</a>
+          <a class="tag" >${tag.title}${this.buildDeleteBtn(tag)}</a>
         `)}
       </div>
     </div>
