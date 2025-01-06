@@ -103,7 +103,7 @@ export default class TagManager extends LitElement {
         </svg>` : ''}
       </div>
     `;
-  };
+  }
 
   deepGetTag(tags, index) {
     let currentTag = this.tags;

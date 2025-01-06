@@ -46,9 +46,8 @@ export const style = css`
 
   .menu {
     background-color: var(--color-white);
-    border: 1px solid var(--color-gray-300);
     border-radius: 4px;
-    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 10%);
+    box-shadow: 0 2px 8px 0 rgb(0 0 0 / 10%);
     padding: 8px;
   }
 
