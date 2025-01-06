@@ -72,25 +72,25 @@ export default class TagManager extends LitElement {
     const { title, tags, tagID } = tag;
 
     return html`
-          <div class="menu-item" data-tagid=${tagID} @click=${(e) => this.handleItemClick(e, tag)}>
-            <div class="menu-item-inner">
-              ${this.determineCheckboxState(tag)}
-              <span>${title}</span>
-            </div>
-            ${tags && Object.keys(tags).length ? html`
-            <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18">
-              <defs>
-                <style>
-                  .fill {
-                    fill: #464646;
-                  }
-                </style>
-              </defs>
-              <title>S ChevronRight 18 N</title>
-              <rect id="Canvas" fill="#ff13dc" opacity="0" width="18" height="18" /><path class="fill" d="M12,9a.994.994,0,0,1-.2925.7045l-3.9915,3.99a1,1,0,1,1-1.4355-1.386l.0245-.0245L9.5905,9,6.3045,5.715A1,1,0,0,1,7.691,4.28l.0245.0245,3.9915,3.99A.994.994,0,0,1,12,9Z" />
-            </svg>` : ''}
-          </div>
-        `;
+      <div class="menu-item" data-tagid=${tagID} @click=${(e) => this.handleItemClick(e, tag)}>
+        <div class="menu-item-inner">
+          ${this.determineCheckboxState(tag)}
+          <span>${title}</span>
+        </div>
+        ${tags && Object.keys(tags).length ? html`
+        <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18">
+          <defs>
+            <style>
+              .fill {
+                fill: #464646;
+              }
+            </style>
+          </defs>
+          <title>S ChevronRight 18 N</title>
+          <rect id="Canvas" fill="#ff13dc" opacity="0" width="18" height="18" /><path class="fill" d="M12,9a.994.994,0,0,1-.2925.7045l-3.9915,3.99a1,1,0,1,1-1.4355-1.386l.0245-.0245L9.5905,9,6.3045,5.715A1,1,0,0,1,7.691,4.28l.0245.0245,3.9915,3.99A.994.994,0,0,1,12,9Z" />
+        </svg>` : ''}
+      </div>
+    `;
   };
 
   deepGetTag(tags, index) {
@@ -107,6 +107,13 @@ export default class TagManager extends LitElement {
 
   render() {
     return html`
+    <div class="tags-pool">
+      <div class="tags">
+        ${repeat(this.selectedTags.values(), (tag) => html`
+          <a class="tag">${tag.title}</a>
+        `)}
+      </div>
+    </div>
     <div class="menu-group">
       ${this.currentPath.split('/').map((_p, i, arr) => {
     const tag = this.deepGetTag(arr, i);

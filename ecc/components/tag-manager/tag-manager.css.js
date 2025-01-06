@@ -9,6 +9,19 @@ export const style = css`
     position: relative;
   }
 
+  .tags-pool {
+    min-height: 189px;
+    padding: 10px;
+    border: 1px solid var(--color-gray-300);
+    width: 100%;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
   .menu-group {
     display: flex;
     align-items: flex-start;
