@@ -47,12 +47,14 @@ const style = css`
 
   .menu-breadcrumbs a {
     cursor: pointer;
-    padding: 6px 21px;
     border-radius: 8px;
+    margin: 0 4px;
+    padding: 8px;
   }
 
   .menu-breadcrumbs a:last-of-type:not(:first-of-type) {
     font-weight: 700;
+    padding: 8px 24px;
     background-color: var(--color-gray-200);
   }
 
@@ -67,6 +69,7 @@ const style = css`
     border-radius: 4px;
     box-shadow: 0 2px 8px 0 rgb(0 0 0 / 10%);
     padding: 8px;
+    width: 220px;
   }
 
   .menu-item {
@@ -86,7 +89,11 @@ const style = css`
   .menu .menu-item-inner {
     display: flex;
     gap: 8px;
-    align-items: center;
+    align-items: flex-start;
+  }
+
+  .menu .menu-item-inner sp-checkbox {
+    margin-top: -2px;
   }
 `;
 

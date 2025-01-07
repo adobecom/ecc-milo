@@ -48,6 +48,7 @@ export default async function init(el) {
     import(`${LIBS}/features/spectrum-web-components/dist/theme.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/checkbox.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/menu.js`),
+    import(`${LIBS}/features/spectrum-web-components/dist/picker.js`),
   ]);
 
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium' });
@@ -62,5 +63,5 @@ export default async function init(el) {
   customElements.define('tag-manager', TagManager);
 
   const tagManager = createTag('tag-manager', { class: 'tag-manager' }, '', { parent: el });
-  tagManager.tags = { tags: caasTags.namespaces };
+  tagManager.tags = caasTags.namespaces.caas;
 }

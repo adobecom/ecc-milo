@@ -5,10 +5,14 @@ import { getIcon } from '../../scripts/utils.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
+const traversalBase = '/content/cq:tags/caas/';
+const startingPath = 'events';
+
 export default class TagManager extends LitElement {
   static styles = style;
 
   static properties = {
+    currentCloud: { type: String },
     tags: { type: Object },
     currentPath: { type: String },
     selectedTags: { type: Set },
@@ -17,7 +21,7 @@ export default class TagManager extends LitElement {
   constructor() {
     super();
     this.tags = {};
-    this.currentPath = 'caas';
+    this.currentPath = startingPath;
     this.selectedTags = new Set();
   }
 
@@ -53,7 +57,7 @@ export default class TagManager extends LitElement {
       this.handleTagSelect(tag);
     } else {
       const { path } = tag;
-      const trimmedPath = path.replace('/content/cq:tags/', '');
+      const trimmedPath = path.replace(traversalBase, '');
       this.currentPath = trimmedPath;
     }
 
@@ -72,10 +76,10 @@ export default class TagManager extends LitElement {
     }
 
     // if currentPath starts with the tag tr, return indeterminate
-    const trimmedPath = tag.path.replace('/content/cq:tags/', '');
+    const trimmedPath = tag.path.replace(traversalBase, '');
     if ([...this.selectedTags].some((t) => {
       const { path } = t;
-      const trimmedSelectedTagPath = path.replace('/content/cq:tags/', '');
+      const trimmedSelectedTagPath = path.replace(traversalBase, '');
       return trimmedSelectedTagPath.startsWith(trimmedPath);
     })) {
       return html`<sp-checkbox indeterminate @click=${() => this.handleItemCheck(tag)}/>`;
@@ -126,8 +130,24 @@ export default class TagManager extends LitElement {
     return Array.from(this.selectedTags);
   }
 
+  switchCloudType(cloudType) {
+    this.currentCloud = cloudType;
+    this.currentPath = startingPath;
+    this.selectedTags = new Set();
+    this.requestUpdate();
+  }
+
   render() {
     return html`
+    <sp-picker class="cloud-type-picker" @change=${(e) => this.switchCloudType(e.target.value)} label="Selected a Cloud type">
+      <sp-menu>
+        <sp-menu-item value="CreativeCloud" ?active=${this.currentCloud === 'CreativeCloud'}>Creative Cloud</sp-menu-item>
+        <sp-menu-item value="DX" ?active=${this.currentCloud === 'DX'}>Experience Cloud</sp-menu-item>
+      </sp-menu>
+    </sp-picker>
+
+    <h2>Cloud tags</h2>
+
     <div class="tags-pool">
       <div class="tags">
         ${repeat(this.selectedTags.values(), (tag) => html`
@@ -135,6 +155,7 @@ export default class TagManager extends LitElement {
         `)}
       </div>
     </div>
+    <h2>Manage tags</h2>
     <div class="menu-breadcrumbs">
       ${this.currentPath.split('/').map((path, i, arr) => {
     const tag = this.deepGetTag(arr, i);
