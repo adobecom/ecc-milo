@@ -1,7 +1,7 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { getCaasTags } from '../../scripts/esp-controller.js';
 import { generateToolTip } from '../../scripts/utils.js';
-import TagManager from '../../components/tag-manager/tag-manager.js';
+import CloudManagementConsole from '../../components/cmc/cmc.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -60,8 +60,8 @@ export default async function init(el) {
 
   if (!caasTags) return;
 
-  customElements.define('tag-manager', TagManager);
+  customElements.define('cloud-management-console', CloudManagementConsole);
 
-  const tagManager = createTag('tag-manager', { class: 'tag-manager' }, '', { parent: el });
+  const tagManager = createTag('cloud-management-console', { class: 'cloud-management-console' }, '', { parent: el });
   tagManager.tags = caasTags.namespaces.caas;
 }

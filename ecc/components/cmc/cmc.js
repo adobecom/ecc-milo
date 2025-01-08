@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { LIBS } from '../../scripts/scripts.js';
-import style from './tag-manager.css.js';
+import style from './cmc.css.js';
 import { getIcon } from '../../scripts/utils.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
@@ -8,7 +8,7 @@ const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all
 const traversalBase = '/content/cq:tags/caas/';
 const startingPath = 'events';
 
-export default class TagManager extends LitElement {
+export default class CloudManagementConsole extends LitElement {
   static styles = style;
 
   static properties = {
