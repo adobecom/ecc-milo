@@ -223,8 +223,8 @@ export default class CloudManagementConsole extends LitElement {
       </div>
     </div>
     <div class="action-bar">
-        <sp-button variant="secondary" @click=${() => { this.selectedTags = new Set(this.savedTags[this.currentCloud] || []); this.pendingChanges = false; }}>Cancel</sp-button>
-        <sp-button variant="cta" @click=${() => { this.savedTags[this.currentCloud] = this.getSelectedTags().map((tag) => tag.tagID); this.pendingChanges = false; }}>Save</sp-button>
+        <sp-button variant="secondary" size="l" @click=${() => { this.selectedTags = new Set(this.savedTags[this.currentCloud] || []); this.pendingChanges = false; }}>Cancel</sp-button>
+        <sp-button variant="primary" size="l" @click=${() => { this.savedTags[this.currentCloud] = this.getSelectedTags().map((tag) => tag.tagID); this.pendingChanges = false; }}>Save</sp-button>
     </div>
     `;
   }

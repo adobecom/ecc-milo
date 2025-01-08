@@ -112,6 +112,17 @@ const style = css`
   .menu .menu-item-inner sp-checkbox {
     margin-top: -2px;
   }
+
+  .action-bar {
+    position: sticky;
+    bottom: 0;
+    background-color: #EB1000;
+    padding: 12px 24px;
+    gap: 16px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
 `;
 
 export default style;
