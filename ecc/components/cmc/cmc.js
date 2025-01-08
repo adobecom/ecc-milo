@@ -16,13 +16,17 @@ export default class CloudManagementConsole extends LitElement {
     tags: { type: Object },
     currentPath: { type: String },
     selectedTags: { type: Set },
+    savedTags: { type: Object },
+    pendingChanges: { type: Boolean },
   };
 
   constructor() {
     super();
+    this.currentCloud = '';
     this.tags = {};
     this.currentPath = startingPath;
     this.selectedTags = new Set();
+    this.pendingChanges = false;
   }
 
   static getParsedTitle(tag) {
@@ -47,7 +51,11 @@ export default class CloudManagementConsole extends LitElement {
       this.selectedTags.add(tag);
     }
 
-    this.dispatchEvent(new CustomEvent('tag-select', { detail: { selectedTags: Array.from(this.selectedTags) }, bubbles: true, composed: true }));
+    const selectedTags = Array.from(this.selectedTags).map((t) => t.tagID);
+    const savedCloudTags = this.savedTags[this.currentCloud] || [];
+    this.pendingChanges = JSON.stringify(selectedTags) !== JSON.stringify(savedCloudTags);
+
+    this.requestUpdate();
   }
 
   handleItemClick(e, tag) {
@@ -102,13 +110,24 @@ export default class CloudManagementConsole extends LitElement {
     `;
   }
 
-  deepGetTag(tags, index) {
+  deepGetTagByPath(pathArray, index) {
     let currentTag = this.tags;
 
-    tags.forEach((tag, i) => {
+    pathArray.forEach((path, i) => {
       if (i <= index) {
-        currentTag = currentTag.tags[tag];
+        currentTag = currentTag.tags[path];
       }
+    });
+
+    return currentTag;
+  }
+
+  deepGetTagByTagID(tagID) {
+    const tagIDs = tagID.replace('caas:', '').split('/');
+    let currentTag = this.tags;
+
+    tagIDs.forEach((tag) => {
+      currentTag = currentTag.tags[tag];
     });
 
     return currentTag;
@@ -131,61 +150,77 @@ export default class CloudManagementConsole extends LitElement {
   }
 
   switchCloudType(cloudType) {
+    if (cloudType === this.currentCloud) return;
+    const savedCloudTags = this.savedTags[cloudType] || [];
+
     this.currentCloud = cloudType;
     this.currentPath = startingPath;
-    this.selectedTags = new Set();
+    this.selectedTags = new Set(savedCloudTags.map((tag) => this.deepGetTagByTagID(tag)));
+    this.pendingChanges = false;
     this.requestUpdate();
   }
 
   render() {
     return html`
-    <sp-picker class="cloud-type-picker" @change=${(e) => this.switchCloudType(e.target.value)} label="Selected a Cloud type">
-      <sp-menu>
-        <sp-menu-item value="CreativeCloud" ?active=${this.currentCloud === 'CreativeCloud'}>Creative Cloud</sp-menu-item>
-        <sp-menu-item value="DX" ?active=${this.currentCloud === 'DX'}>Experience Cloud</sp-menu-item>
-      </sp-menu>
-    </sp-picker>
-
-    <h2>Cloud tags</h2>
-
-    <div class="tags-pool">
-      <div class="tags">
-        ${repeat(this.selectedTags.values(), (tag) => html`
-          <a class="tag" >${tag.title}${this.buildDeleteBtn(tag)}</a>
-        `)}
+    <div class="header">
+      <div>
+        <h1>Manage Clouds</h1>
+        <div class="change-status">
+          ${html`${this.pendingChanges
+    ? html`<span class="status" size="s">${html`${getIcon('dot-orange')}`} Unsaved change</span>`
+    : html`<span class="status" size="s">${html`${getIcon('dot-green')}`} Up-to-date</span>`}`}
+        </div>
       </div>
     </div>
-    <h2>Manage tags</h2>
-    <div class="menu-breadcrumbs">
-      ${this.currentPath.split('/').map((path, i, arr) => {
-    const tag = this.deepGetTag(arr, i);
+    <div class="tag-manager">
+      <sp-picker class="cloud-type-picker" @change=${(e) => this.switchCloudType(e.target.value)} label="Selected a Cloud type">
+        <sp-menu>
+          <sp-menu-item value="CreativeCloud" ?active=${this.currentCloud === 'CreativeCloud'}>Creative Cloud</sp-menu-item>
+          <sp-menu-item value="DX" ?active=${this.currentCloud === 'DX'}>Experience Cloud</sp-menu-item>
+          <sp-menu-item value="DocumentCloud" ?active=${this.currentCloud === 'DocumentCloud'}>Document Cloud</sp-menu-item>
+        </sp-menu>
+      </sp-picker>
+
+      <h2>Cloud tags</h2>
+
+      <div class="tags-pool">
+        <div class="tags">
+          ${repeat(this.selectedTags.values(), (tag) => html`
+            <a class="tag" >${tag.title}${this.buildDeleteBtn(tag)}</a>
+          `)}
+        </div>
+      </div>
+      <h2>Manage tags</h2>
+      <div class="menu-breadcrumbs">
+        ${this.currentPath.split('/').map((path, i, arr) => {
+    const tag = this.deepGetTagByPath(arr, i);
 
     if (tag) {
       return html`
-        <a @click=${() => { this.currentPath = arr.slice(0, i + 1).join('/'); }}> ${tag.title} </a>
-        ${i < arr.length - 1 ? this.constructor.getChevRight() : nothing}
-      `;
+              <a @click=${() => { this.currentPath = arr.slice(0, i + 1).join('/'); }}> ${tag.title} </a>
+              ${i < arr.length - 1 ? this.constructor.getChevRight() : nothing}
+            `;
     }
 
     return nothing;
   })}
 
-    </div>
-    <div class="menu-group">
-      ${this.currentPath.split('/').map((_p, i, arr) => {
-    const tag = this.deepGetTag(arr, i);
+      </div>
+      <div class="menu-group">
+        ${this.currentPath.split('/').map((_p, i, arr) => {
+    const tag = this.deepGetTagByPath(arr, i);
 
     if (tag && tag.tags && Object.keys(tag.tags).length) {
       return html`
-        <div class="menu">
-          ${repeat(Object.entries(tag.tags), ([, value]) => this.buildItem(value))}
-        </div>
-        `;
+              <div class="menu">
+                ${repeat(Object.entries(tag.tags), ([, value]) => this.buildItem(value))}
+              </div>
+              `;
     }
 
     return nothing;
-  })
-}
+  })}
+      </div>
     </div>
     `;
   }

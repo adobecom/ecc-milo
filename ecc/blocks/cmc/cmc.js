@@ -5,42 +5,7 @@ import CloudManagementConsole from '../../components/cmc/cmc.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
-// function buildLevel(caasTags, parent, currentLevel = 0) {
-//   const tagsArray = Object.entries(caasTags);
-
-//   if (!tagsArray.length) return;
-
-//   const menuWrapper = createTag('div', { class: 'menu-wrapper' });
-//   const menu = createTag('sp-menu');
-
-//   menuWrapper.append(menu);
-//   parent.append(menuWrapper);
-
-//   tagsArray.forEach(([key, value]) => {
-//     const { title, tags } = value;
-//     const menuItem = createTag('sp-menu-item', { value: key }, title);
-
-//     menu.append(menuItem);
-
-//     if (tags && Object.keys(tags).length) {
-//       menuItem.append(getIcon('chev-right'));
-//       menuItem.addEventListener('click', () => {
-//         const lastMenuWrapper = parent.querySelectorAll('.menu-wrapper');
-
-//         lastMenuWrapper.forEach((wrapper, i) => {
-//           if (i > currentLevel) wrapper.remove();
-//         });
-
-//         buildLevel(tags, parent, currentLevel + 1);
-//       });
-//     }
-//   });
-
-//   parent.append(menuWrapper);
-// }
-
 export default async function init(el) {
-  el.classList.add('form-component');
   generateToolTip(el);
 
   await Promise.all([
@@ -60,8 +25,22 @@ export default async function init(el) {
 
   if (!caasTags) return;
 
+  const mockSavedTags = {
+    DX: [
+      'caas:events/session-type',
+    ],
+    CreativeCloud: [
+      'caas:events/session-type/creativity-workshop',
+    ],
+    DocumentCloud: [
+      'caas:events/session-type/creativity-workshop',
+      'caas:events/max/primary-poi',
+    ],
+  };
+
   customElements.define('cloud-management-console', CloudManagementConsole);
 
   const tagManager = createTag('cloud-management-console', { class: 'cloud-management-console' }, '', { parent: el });
   tagManager.tags = caasTags.namespaces.caas;
+  tagManager.savedTags = mockSavedTags;
 }

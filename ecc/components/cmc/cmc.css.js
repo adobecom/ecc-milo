@@ -8,6 +8,23 @@ const style = css`
     position: relative;
   }
 
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .header h1 {
+    color: #EB1000;
+  }
+
+  .header > div {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
   .tags-pool {
     min-height: 189px;
     padding: 10px;
