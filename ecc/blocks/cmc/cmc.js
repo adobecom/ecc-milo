@@ -14,6 +14,7 @@ export default async function init(el) {
     import(`${LIBS}/features/spectrum-web-components/dist/checkbox.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/menu.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/picker.js`),
+    import(`${LIBS}/features/spectrum-web-components/dist/button.js`),
   ]);
 
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium' });
