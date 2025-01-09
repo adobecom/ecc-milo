@@ -534,7 +534,7 @@ function closeDialog(props) {
   if (dialog) dialog.innerHTML = '';
 }
 
-function buildPreviewLoadingDialog(props) {
+function buildPreviewLoadingDialog(props, targetHref, poll) {
   const spTheme = props.el.querySelector('#form-app');
   if (!spTheme) return null;
 
@@ -595,14 +595,28 @@ function buildPreviewLoadingDialog(props) {
   dialog.appendChild(style);
   dialog.appendChild(progressBar);
   const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
-  createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'Cancel', { parent: buttonContainer });
+  const seePreviewButton = createTag('sp-button', { variant: 'secondary', slot: 'button', id: 'see-preview' }, 'Go to preview page now', { parent: buttonContainer });
+  const cancelButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'Cancel', { parent: buttonContainer });
 
   underlay.open = true;
+
+  seePreviewButton.addEventListener('click', () => {
+    window.open(targetHref);
+    closeDialog(props);
+    if (poll.interval) clearInterval(poll.interval);
+    poll.resolve();
+  });
+
+  cancelButton.addEventListener('click', () => {
+    closeDialog(props);
+    if (poll.interval) clearInterval(poll.interval);
+    poll.resolve();
+  });
 
   return dialog;
 }
 
-function buildPreviewLoadingFailedDialog(props) {
+function buildPreviewLoadingFailedDialog(props, targetHref) {
   const spTheme = props.el.querySelector('#form-app');
   if (!spTheme) return;
 
@@ -615,14 +629,21 @@ function buildPreviewLoadingFailedDialog(props) {
   dialog.innerHTML = '';
 
   createTag('h1', { slot: 'heading' }, 'Preview generation failed.', { parent: dialog });
-  createTag('p', {}, 'Your changes have been saved. Our system is working in the background to update the page.', { parent: dialog });
+  createTag('p', {}, 'Our system is working in the background to update the page.', { parent: dialog });
   const slackLink = createTag('a', { href: 'https://adobe.enterprise.slack.com/archives/C07KPJYA760' }, 'Slack');
   const emailLink = createTag('a', { href: 'mailto:Grp-acom-milo-events-support@adobe.com' }, 'Grp-acom-milo-events-support@adobe.com');
   createTag('p', {}, `Please try again later. If the issue persists, please feel free to contact us on <b>${slackLink.outerHTML}</b> or email <b>${emailLink.outerHTML}</b>`, { parent: dialog });
   const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+  const seePreviewButton = createTag('sp-button', { variant: 'secondary', slot: 'button', id: 'see-preview' }, 'Go to preview page now', { parent: buttonContainer });
   const cancelButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'OK', { parent: buttonContainer });
 
   underlay.open = true;
+
+  seePreviewButton.addEventListener('click', () => {
+    window.open(targetHref);
+    closeDialog(props);
+    dialog.innerHTML = '';
+  });
 
   cancelButton.addEventListener('click', () => {
     closeDialog(props);
@@ -655,12 +676,13 @@ async function getNonProdPreviewDataById(props) {
 
 async function validatePreview(props, oldResp, cta) {
   let retryCount = 0;
+  const previewHref = cta.href;
 
   const currentData = { ...props.eventDataResp };
   const oldData = { ...oldResp };
 
   if (!hasContentChanged(currentData, oldData) || !Object.keys(oldData).length) {
-    window.open(cta.href);
+    window.open(previewHref);
     return Promise.resolve();
   }
 
@@ -678,12 +700,12 @@ async function validatePreview(props, oldResp, cta) {
         if (metadataJson && modificationTimeMatch(metadataJson)) {
           clearInterval(interval);
           closeDialog(props);
-          window.open(cta.href);
+          window.open(previewHref);
           resolve();
-        } else if (retryCount >= 30) {
+        } else if (!metadataJson || retryCount >= 30) {
           clearInterval(interval);
-          buildPreviewLoadingFailedDialog(props);
-          window.lana?.log('Error: Failed to match metadata after 30 retries');
+          buildPreviewLoadingFailedDialog(props, previewHref);
+          window.lana?.log('Error: Failed to fetch metadata');
           resolve();
         }
       } catch (error) {
@@ -693,16 +715,12 @@ async function validatePreview(props, oldResp, cta) {
       }
     }, Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000);
 
-    const dialog = buildPreviewLoadingDialog(props, interval);
+    const poll = {
+      interval,
+      resolve,
+    };
 
-    if (dialog) {
-      const cancelButton = dialog.querySelector('#cancel-preview');
-      cancelButton.addEventListener('click', () => {
-        closeDialog(props);
-        if (interval) clearInterval(interval);
-        resolve();
-      });
-    }
+    buildPreviewLoadingDialog(props, previewHref, poll);
   });
 }
 
