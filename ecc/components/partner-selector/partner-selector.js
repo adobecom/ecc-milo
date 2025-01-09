@@ -80,6 +80,12 @@ export default class PartnerSelector extends LitElement {
       respJson = await updateSponsor(payload, this.partner.sponsorId, this.seriesId);
     }
 
+    if (respJson.error) {
+      this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to save the partner. Please try again later.' } }, bubbles: true, composed: true }));
+      this.buttonStatePending = false;
+      return;
+    }
+
     if (respJson.sponsorId) {
       const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
       this.partner.sponsorId = respJson.sponsorId;
