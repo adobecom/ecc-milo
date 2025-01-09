@@ -254,8 +254,16 @@ async function populateRow(props, index) {
 
   const row = createTag('tr', { class: 'attendee-row', 'data-attendee-id': attendee.attendeeId }, '', { parent: tBody });
 
+  const getDisplayVal = (key) => {
+    if (key === 'checkedIn') {
+      return attendee[key] ? 'yes' : 'no';
+    }
+
+    return attendee[key];
+  };
+
   ATTENDEE_ATTR_MAP.forEach(({ key, fallback }, i, arr) => {
-    const td = createTag('td', {}, attendee[key] || fallback, { parent: row });
+    const td = createTag('td', {}, getDisplayVal(key) || fallback, { parent: row });
     if (stickyColumns.includes(key)) {
       td.classList.add(`sticky-right-${arr.length - i}`, 'actions');
     }
