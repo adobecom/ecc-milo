@@ -233,7 +233,7 @@ function initMoreOptions(props, config, seriesObj, row) {
 
           if (resp.error) {
             row.classList.remove('pending');
-            showToast(props, resp.error, { variant: 'negative' });
+            showToast(props, resp.error.message || 'Unknown error while archiving the series.', { variant: 'negative' });
             return;
           }
 
@@ -258,7 +258,7 @@ function initMoreOptions(props, config, seriesObj, row) {
     // clone
     clone.addEventListener('click', async (e) => {
       e.preventDefault();
-      const payload = { ...quickFilter(seriesObj), seriesStatus: 'draft' };
+      const payload = { ...quickFilter(seriesObj, 'clone'), seriesStatus: 'draft' };
       payload.seriesName = `${seriesObj.seriesName} - copy`;
       toolBox.remove();
       row.classList.add('pending');
@@ -266,7 +266,7 @@ function initMoreOptions(props, config, seriesObj, row) {
 
       if (newSeriesObj.error) {
         row.classList.remove('pending');
-        showToast(props, newSeriesObj.error, { variant: 'negative' });
+        showToast(props, newSeriesObj.error.message || 'Unknown error while cloning the series.', { variant: 'negative' });
         return;
       }
 
