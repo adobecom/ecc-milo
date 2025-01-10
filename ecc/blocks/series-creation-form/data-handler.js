@@ -3,27 +3,38 @@
 let responseCache = {};
 let payloadCache = {};
 
-const submissionFilter = [
-  // from payload and response
-  'seriesName',
-  'seriesDescription',
-  'seriesStatus',
-  'susiContextId',
-  'externalThemeId',
-  'cloudType',
-  'templateId',
-  'relatedDomain',
-  'modificationTime',
-];
+const filters = {
+  submission: [
+    'seriesName',
+    'seriesDescription',
+    'seriesStatus',
+    'susiContextId',
+    'externalThemeId',
+    'cloudType',
+    'templateId',
+    'relatedDomain',
+    'modificationTime',
+  ],
+  clone: [
+    'seriesName',
+    'seriesDescription',
+    'seriesStatus',
+    'susiContextId',
+    'externalThemeId',
+    'cloudType',
+    'templateId',
+    'relatedDomain',
+  ],
+}
 
 function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
 }
 
-export function quickFilter(obj) {
+export function quickFilter(obj, filter = 'submission') {
   const output = {};
 
-  submissionFilter.forEach((attr) => {
+  filters[filter].forEach((attr) => {
     if (isValidAttribute(obj[attr])) {
       output[attr] = obj[attr];
     }
