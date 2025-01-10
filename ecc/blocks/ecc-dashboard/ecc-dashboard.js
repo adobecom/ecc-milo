@@ -294,6 +294,7 @@ function initMoreOptions(props, config, eventObj, row) {
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
+
         showToast(props, buildToastMsgWithEventTitle(eventObj.title, config['event-unpublished-msg']), { variant: 'positive' });
       });
     } else {
@@ -320,19 +321,33 @@ function initMoreOptions(props, config, eventObj, row) {
 
     if (eventObj.detailPagePath) {
       previewPre.href = (() => {
-        const url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
-        url.searchParams.set('previewMode', 'true');
-        url.searchParams.set('cachebuster', Date.now());
-        url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
-        return url.toString();
+        let url;
+
+        try {
+          url = new URL(`${eventObj.detailPagePath}`);
+          url.searchParams.set('previewMode', 'true');
+          url.searchParams.set('cachebuster', Date.now());
+          url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
+          return url.toString();
+        } catch (e) {
+          previewPre.classList.add('disabled');
+          return '$';
+        }
       })();
       previewPre.target = '_blank';
       previewPost.href = (() => {
-        const url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
-        url.searchParams.set('previewMode', 'true');
-        url.searchParams.set('cachebuster', Date.now());
-        url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
-        return url.toString();
+        let url;
+
+        try {
+          url = new URL(`${eventObj.detailPagePath}`);
+          url.searchParams.set('previewMode', 'true');
+          url.searchParams.set('cachebuster', Date.now());
+          url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
+          return url.toString();
+        } catch (e) {
+          previewPost.classList.add('disabled');
+          return '#';
+        }
       })();
       previewPost.target = '_blank';
     } else {
