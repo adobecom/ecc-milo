@@ -26,9 +26,9 @@ const contentMap = {
         config: 'When selected, disable registration button when limit is reached.',
       },
     },
-    loginRequired: {
-      switchLabelText: 'Require login to register',
-      tooltipText: 'When selected, require users to login or create an Adobe ID',
+    allowGuestRegistration: {
+      switchLabelText: 'Allow guest registration',
+      tooltipText: 'When selected, uesrs can register for events without logging in.',
     },
     contactHost: {
       switchLabelText: 'Contact host',
@@ -151,8 +151,9 @@ function decorateLoginRequirementToggle(component) {
   rightCol.append(fieldset);
   loginRequirementWrapper.append(leftCol, rightCol);
 
-  if (contentMap[component.dataset.cloudType].loginRequired.tooltipText) {
-    addTooltipToEl(contentMap[component.dataset.cloudType].loginRequired.tooltipText, fieldset);
+  if (contentMap[component.dataset.cloudType].allowGuestRegistration.tooltipText) {
+    addTooltipToEl(contentMap[component.dataset.cloudType]
+      .allowGuestRegistration.tooltipText, fieldset);
   }
 
   regFieldswrapper.append(loginRequirementWrapper);
