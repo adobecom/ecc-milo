@@ -176,7 +176,7 @@ function initMoreOptions(props, config, seriesObj, row) {
           updateDashboardData(resp, props);
 
           sortData(props, config, { resort: true });
-          showToast(props, buildToastMsgWithEventTitle(seriesObj.title, config['unpublished-msg']), { variant: 'positive' });
+          showToast(props, buildToastMsgWithEventTitle(seriesObj.seriesName, config['unpublished-msg']), { variant: 'positive' });
         });
       } else {
         const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
@@ -190,7 +190,7 @@ function initMoreOptions(props, config, seriesObj, row) {
 
           sortData(props, config, { resort: true });
 
-          showToast(props, buildToastMsgWithEventTitle(seriesObj.title, config['published-msg']), { variant: 'positive' });
+          showToast(props, buildToastMsgWithEventTitle(seriesObj.seriesName, config['published-msg']), { variant: 'positive' });
         });
       }
     }
@@ -233,7 +233,7 @@ function initMoreOptions(props, config, seriesObj, row) {
 
           if (resp.error) {
             row.classList.remove('pending');
-            showToast(props, resp.error, { variant: 'negative' });
+            showToast(props, resp.error.message || 'Unknown error while archiving the series.', { variant: 'negative' });
             return;
           }
 
@@ -258,15 +258,15 @@ function initMoreOptions(props, config, seriesObj, row) {
     // clone
     clone.addEventListener('click', async (e) => {
       e.preventDefault();
-      const payload = { ...quickFilter(seriesObj), seriesStatus: 'draft' };
-      payload.title = `${seriesObj.title} - copy`;
+      const payload = { ...quickFilter(seriesObj, 'clone'), seriesStatus: 'draft' };
+      payload.seriesName = `${seriesObj.seriesName} - copy`;
       toolBox.remove();
       row.classList.add('pending');
       const newSeriesObj = await createSeries(payload);
 
       if (newSeriesObj.error) {
         row.classList.remove('pending');
-        showToast(props, newSeriesObj.error, { variant: 'negative' });
+        showToast(props, newSeriesObj.error.message || 'Unknown error while cloning the series.', { variant: 'negative' });
         return;
       }
 
