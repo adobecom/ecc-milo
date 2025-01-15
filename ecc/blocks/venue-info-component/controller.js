@@ -217,15 +217,14 @@ export async function onTargetUpdate(component, props) {
   let resp;
   if (!oldVenueData) {
     resp = await createVenue(props.eventDataResp.eventId, venueData);
-  } else if (
-    oldVenueData.placeId !== venueData.placeId
-  || (oldVenueData.placeId === venueData.placeId && !oldVenueData.formattedAddress)) {
-    const { modificationTime } = oldVenueData;
+  } else if (oldVenueData.placeId !== venueData.placeId) {
+    const { creationTime, modificationTime } = oldVenueData;
     resp = await replaceVenue(
       props.eventDataResp.eventId,
       oldVenueData.venueId,
       {
         ...venueData,
+        creationTime,
         modificationTime,
       },
     );
