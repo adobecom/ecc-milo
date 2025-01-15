@@ -112,6 +112,10 @@ const CONFIG = {
   decorateArea,
   locales,
   adobeid: {
+    enableGuestAccounts: true,
+    enableGuestTokenForceRefresh: true,
+    enableGuestBotDetection: false,
+    api_parameters: { check_token: { guest_allowed: true } },
     onTokenExpired: () => {
       window.locaton.reload();
     },
