@@ -37,7 +37,7 @@
       "id": "localize-2",
       "title": "Localize project (V2)",
       "environments": [ "edit" ],
-      "url": "https://main--ecc-milo--adobecom.hlx.page/tools/loc?milolibs=locui",
+      "url": "https://main--ecc-milo--adobecom.aem.page/tools/loc?milolibs=locui",
       "passReferrer": true,
       "passConfig": true,
       "includePaths": [ "**.xlsx**" ]

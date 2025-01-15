@@ -14,8 +14,8 @@ From your newly created project
 4. Start creating your content.
 
 ## Developing
-1. Install the [Helix CLI](https://github.com/adobe/helix-cli): `sudo npm install -g @adobe/helix-cli`
-1. Run `hlx up` this repo's folder. (opens your browser at `http://localhost:3000`)
+1. Install the [AEM CLI](https://github.com/adobe/helix-cli): `sudo npm install -g @adobe/aem-cli`
+1. Run `aem up` this repo's folder. (opens your browser at `http://localhost:3000`)
 1. Open this repo's folder in your favorite editor and start coding.
 
 ## Testing
