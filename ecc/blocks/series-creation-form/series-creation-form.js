@@ -516,7 +516,9 @@ function initFormCtas(props) {
       if (['#save', '#next'].includes(ctaUrl.hash)) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
-          const [finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
+          const finalStateText = 'Publish series';
+          const doneStateText = 'Done';
+          const republishStateText = 'Re-publish series';
 
           cta.textContent = finalStateText;
           cta.prepend(getIcon('golden-rocket'));
