@@ -74,8 +74,15 @@ function getVenueDataInForm(component) {
   const lat = +placeLatInput.value;
   const lon = +placeLngInput.value;
   const gmtOffset = +gmtoffsetInput.value;
-  const addressComponents = JSON.parse(addressComponentsInput.value);
   const formattedAddress = formattedAddressInput.value;
+
+  let addressComponents;
+
+  try {
+    addressComponents = JSON.parse(addressComponentsInput.value);
+  } catch (e) {
+    addressComponents = [];
+  }
 
   const venueData = {
     venueName,
@@ -127,6 +134,7 @@ function initAutocomplete(el, props) {
 
       components = components.map((component) => {
         const obj = {};
+
         Object.keys(component).forEach((key) => {
           const newKey = key.replace(/_(.)/g, (_, match) => match.toUpperCase());
           obj[newKey] = component[key];
