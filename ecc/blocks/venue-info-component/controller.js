@@ -220,12 +220,13 @@ export async function onTargetUpdate(component, props) {
   } else if (
     oldVenueData.placeId !== venueData.placeId
   || (oldVenueData.placeId === venueData.placeId && !oldVenueData.formattedAddress)) {
-    const { modificationTime } = oldVenueData;
+    const { creationTime, modificationTime } = oldVenueData;
     resp = await replaceVenue(
       props.eventDataResp.eventId,
       oldVenueData.venueId,
       {
         ...venueData,
+        creationTime,
         modificationTime,
       },
     );
