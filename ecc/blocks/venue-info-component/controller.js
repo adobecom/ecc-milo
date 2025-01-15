@@ -213,14 +213,16 @@ export async function onTargetUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const venueData = getVenueDataInForm(component);
-
+  const oldVenueData = props.eventDataResp.venue;
   let resp;
-  if (!props.eventDataResp.venue) {
+  if (!oldVenueData) {
     resp = await createVenue(props.eventDataResp.eventId, venueData);
-  } else if (props.eventDataResp.venue.placeId !== venueData.placeId) {
+  } else if (
+    oldVenueData.placeId !== venueData.placeId
+  || (oldVenueData.placeId === venueData.placeId && !oldVenueData.formattedAddress)) {
     resp = await replaceVenue(
       props.eventDataResp.eventId,
-      props.eventDataResp.venue.venueId,
+      oldVenueData.venueId,
       { ...venueData },
     );
 
