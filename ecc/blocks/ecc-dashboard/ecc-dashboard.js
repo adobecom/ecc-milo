@@ -325,29 +325,36 @@ function initMoreOptions(props, config, eventObj, row) {
 
         try {
           url = new URL(`${eventObj.detailPagePath}`);
+        } catch (e) {
+          url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+        }
+
+        if (url) {
           url.searchParams.set('previewMode', 'true');
           url.searchParams.set('cachebuster', Date.now());
           url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
           return url.toString();
-        } catch (e) {
-          previewPre.classList.add('disabled');
-          return '$';
         }
+        return '#';
       })();
       previewPre.target = '_blank';
+
       previewPost.href = (() => {
         let url;
-
         try {
           url = new URL(`${eventObj.detailPagePath}`);
+        } catch (e) {
+          url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+        }
+
+        if (url) {
           url.searchParams.set('previewMode', 'true');
           url.searchParams.set('cachebuster', Date.now());
           url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
           return url.toString();
-        } catch (e) {
-          previewPost.classList.add('disabled');
-          return '#';
         }
+
+        return '#';
       })();
       previewPost.target = '_blank';
     } else {
