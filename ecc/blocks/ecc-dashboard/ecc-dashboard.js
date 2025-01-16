@@ -386,6 +386,7 @@ function initMoreOptions(props, config, eventObj, row) {
       props.data = newJson;
       props.filteredData = newJson;
       props.paginatedData = newJson;
+
       const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
       if (modTimeHeader) {
         props.currentSort = { field: 'modificationTime', el: modTimeHeader };
@@ -428,9 +429,10 @@ function initMoreOptions(props, config, eventObj, row) {
         }
 
         const newJson = await getEventsForUser();
-        props.data = newJson.events;
-        props.filteredData = newJson.events;
-        props.paginatedData = newJson.events;
+
+        props.data = newJson;
+        props.filteredData = newJson;
+        props.paginatedData = newJson;
 
         sortData(props, config, { resort: true });
         showToast(props, config['delete-event-toast-msg']);
@@ -748,8 +750,10 @@ async function buildDashboard(el, config) {
     const dataHandler = {
       set(target, prop, value, receiver) {
         target[prop] = value;
+
         populateTable(receiver, config);
         updateEventsCount(receiver);
+
         return true;
       },
     };
