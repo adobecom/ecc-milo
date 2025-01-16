@@ -229,7 +229,7 @@ function initMoreOptions(props, config, seriesObj, row) {
           underlay.open = false;
           dialog.innerHTML = '';
           row.classList.add('pending');
-          const resp = await archiveSeries(seriesObj.seriesId);
+          const resp = await archiveSeries(seriesObj.seriesId, seriesObj);
 
           if (resp.error) {
             row.classList.remove('pending');
