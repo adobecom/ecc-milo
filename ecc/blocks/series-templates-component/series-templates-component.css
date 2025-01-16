@@ -1,0 +1,243 @@
+.series-templates-component {
+  --mod-textfield-font-weight: 700;
+}
+
+.series-templates-component .labeled-text-field-wrapper {
+  margin-bottom: 24px;
+}
+
+.series-templates-component .attr-text {
+  font-size: var(--type-body-xs-size);
+  text-align: right;
+}
+
+.series-templates-component .con-button,
+.series-templates-component .picker-close-btn {
+  cursor: pointer;
+}
+
+.series-templates-component .picker .series-template-name {
+  display: none;
+  margin-right: 24px;
+}
+
+.series-templates-component .picker.selected .series-template-name {
+  display: inline-block;
+}
+
+.series-templates-component .picker-btn {
+  padding: 10px 20px;
+  border-radius: 20px;
+}
+
+.series-templates-component .picker-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.series-templates-component sp-textfield {
+  width: 493px;
+}
+
+.series-templates-component sp-textfield#info-field-event-title sp-help-text {
+  position: absolute;
+  display: none;
+}
+
+.series-templates-component sp-textfield#info-field-event-title.show-negative-help-text sp-help-text {
+  display: flex;
+}
+
+.series-templates-component sp-textfield.textarea-input {
+  font-size: var(--type-body-m-size);;
+  width: 100%;
+  outline: none;
+  resize: vertical;
+}
+
+.series-templates-component .text-field-label,
+.series-templates-component .picker-label {
+  width: 180px;
+  font-family: var(--body-font-family);
+  font-size: var(--type-body-s-size);
+  font-weight: 700;
+}
+
+.series-templates-component .picker-label {
+  display: inline-block;
+  margin: 4px 12px 0 0;
+}
+
+.series-templates-component .picker-overlay {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(0 0 0 / 50%);
+  z-index: 2;
+}
+
+.series-templates-component .picker-overlay.hidden {
+  display: none;
+}
+
+.series-templates-component .picker-modal {
+  position: relative;
+  max-width: 1000px;
+  box-sizing: border-box;
+  max-height: 72vh;
+  padding: 56px 72px;
+  margin: auto;
+  background-color: var(--color-white);
+  border-radius: 24px;
+  overflow: hidden auto;
+}
+
+.series-templates-component .picker-modal h2 {
+  color: var(--color-red)
+}
+
+.series-templates-component .picker-preview-container {
+  margin-bottom: 64px;
+}
+
+.series-templates-component .picker-preview-frame {
+  width: 100%;
+  max-width: 892px;
+  height: 539px;
+  background-color: var(--color-gray-100);
+  position: relative;
+}
+
+.series-templates-component .picker-preview-image-holder {
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Prevent default scrollbars */
+  position: relative;
+  cursor: grab; /* Indicate draggable behavior */
+}
+
+.series-templates-component .picker-preview-image-holder img.picker-preview-image {
+  display: block;
+  transform-origin: center; /* Zoom from the center */
+  transition: transform 0.2s ease-out; /* Smooth zoom effect */
+  will-change: transform;
+  height: auto;
+  padding: 24px;
+  width: 50%;
+  margin: auto;
+}
+
+.series-templates-component .picker-preview-image-holder img.picker-preview-image.grabbing {
+  transition: none;
+}
+
+.series-templates-component .picker-preview-actions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+  width: max-content;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px;
+  gap: 8px;
+}
+
+.series-templates-component .picker-preview-frame.has-image .picker-preview-actions {
+  display: flex;
+}
+
+.series-templates-component .picker-preview-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  filter: drop-shadow(1px 1px 1px #fff);  
+}
+
+.series-templates-component .picker-preview-actions button:hover {
+  opacity: 0.8;
+}
+
+.series-templates-component .picker-preview-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.series-templates-component .picker-modal .picker-action-area {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-gray-500);
+}
+
+.series-templates-component .picker-fieldset {
+  border: none;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  display: block;
+  min-inline-size: unset;
+}
+
+.series-templates-component .picker-items {
+  height: 100%;
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+.series-templates-component .picker-item {
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.series-templates-component .picker-item img {
+  object-fit: cover;
+  object-position: left;
+  max-height: 220px;
+  min-width: 154px;
+  margin-bottom: 8px;
+  border: 1px solid var(--color-gray-400);
+}
+
+.series-templates-component .picker-item[aria-selected="true"] img {
+  border-radius: 4px;
+  border: 3px solid var(--color-accent);
+}
+
+.series-templates-component .picker-item label.radio-label {
+  font-family: var(--body-font-family);
+  font-size: var(--type-body-s-size);
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.series-templates-component .picker-item[aria-selected="true"] label.radio-label {
+  font-weight: 700;
+}
+
+.series-templates-component .picker-item label.radio-label input[type="radio"] {
+  display: none;
+}
+
+.series-templates-component .carousel-platform {
+  gap: 24px;
+}
+
+.series-templates-component .picker-save-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
