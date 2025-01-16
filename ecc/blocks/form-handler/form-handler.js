@@ -7,6 +7,7 @@ import {
   getEventPageHost,
   signIn,
   getEventServiceEnv,
+  getDevToken,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -14,20 +15,20 @@ import {
   publishEvent,
   getEvent,
 } from '../../scripts/esp-controller.js';
-import { ImageDropzone } from '../../components/image-dropzone/image-dropzone.js';
-import { Profile } from '../../components/profile/profile.js';
-import { Repeater } from '../../components/repeater/repeater.js';
+import ImageDropzone from '../../components/image-dropzone/image-dropzone.js';
+import Profile from '../../components/profile/profile.js';
+import Repeater from '../../components/repeater/repeater.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
 import AgendaFieldsetGroup from '../../components/agenda-fieldset-group/agenda-fieldset-group.js';
-import { ProfileContainer } from '../../components/profile-container/profile-container.js';
-import { CustomTextfield } from '../../components/custom-textfield/custom-textfield.js';
+import ProfileContainer from '../../components/profile-container/profile-container.js';
+import CustomTextfield from '../../components/custom-textfield/custom-textfield.js';
 import ProductSelector from '../../components/product-selector/product-selector.js';
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, hasContentChanged, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import { CustomSearch } from '../../components/custom-search/custom-search.js';
-import { initProfileLogicTree } from '../../scripts/event-apis.js';
+import { getUser, initProfileLogicTree, userHasAccessToEvent } from '../../scripts/profile.js';
+import CustomSearch from '../../components/custom-search/custom-search.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -232,22 +233,28 @@ async function loadEventData(props) {
   const eventId = urlParams.get('eventId');
 
   if (eventId) {
-    setTimeout(() => {
-      if (!props.eventDataResp.eventId) {
-        const toastArea = props.el.querySelector('.toast-area');
-        if (!toastArea) return;
+    const user = await getUser();
+    if (userHasAccessToEvent(user, eventId)) {
+      setTimeout(() => {
+        if (!props.eventDataResp.eventId) {
+          const toastArea = props.el.querySelector('.toast-area');
+          if (!toastArea) return;
 
-        const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
-        toast.addEventListener('close', () => {
-          toast.remove();
-        });
-      }
-    }, 5000);
+          const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
+          toast.addEventListener('close', () => {
+            toast.remove();
+          });
+        }
+      }, 5000);
 
-    props.el.classList.add('disabled');
-    const eventData = await getEvent(eventId);
-    props.eventDataResp = { ...props.eventDataResp, ...eventData };
-    props.el.classList.remove('disabled');
+      props.el.classList.add('disabled');
+      const eventData = await getEvent(eventId);
+      props.eventDataResp = { ...props.eventDataResp, ...eventData };
+      props.el.classList.remove('disabled');
+    } else {
+      buildNoAccessScreen(props.el);
+      props.el.classList.remove('loading');
+    }
   }
 }
 
@@ -259,7 +266,7 @@ async function initComponents(props) {
     if (!mappedComponents?.length) return;
 
     const componentInitPromises = Array.from(mappedComponents).map(async (component) => {
-      const { default: initComponent } = await import(`./controllers/${comp}-component-controller.js`);
+      const { default: initComponent } = await import(`../${comp}-component/controller.js`);
       await initComponent(component, props);
     });
 
@@ -275,7 +282,7 @@ async function gatherValues(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onSubmit } = await import(`./controllers/${comp}-component-controller.js`);
+      const { onSubmit } = await import(`../${comp}-component/controller.js`);
       return onSubmit(component, props);
     });
 
@@ -291,8 +298,8 @@ async function handleEventUpdate(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onEventUpdate } = await import(`./controllers/${comp}-component-controller.js`);
-      return onEventUpdate(component, props);
+      const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
+      return onTargetUpdate(component, props);
     });
 
     return Promise.all(promises);
@@ -307,7 +314,7 @@ async function updateComponentsOnPayloadChange(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onPayloadUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      const { onPayloadUpdate } = await import(`../${comp}-component/controller.js`);
       const componentPayload = await onPayloadUpdate(component, props);
       return componentPayload;
     });
@@ -324,7 +331,7 @@ async function updateComponentsOnRespChange(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onRespUpdate } = await import(`./controllers/${comp}-component-controller.js`);
+      const { onRespUpdate } = await import(`../${comp}-component/controller.js`);
       const componentPayload = await onRespUpdate(component, props);
       return componentPayload;
     });
@@ -533,7 +540,7 @@ function closeDialog(props) {
   if (dialog) dialog.innerHTML = '';
 }
 
-function buildPreviewLoadingDialog(props) {
+function buildPreviewLoadingDialog(props, targetHref, poll) {
   const spTheme = props.el.querySelector('#form-app');
   if (!spTheme) return null;
 
@@ -594,14 +601,28 @@ function buildPreviewLoadingDialog(props) {
   dialog.appendChild(style);
   dialog.appendChild(progressBar);
   const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
-  createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'Cancel', { parent: buttonContainer });
+  const seePreviewButton = createTag('sp-button', { variant: 'secondary', slot: 'button', id: 'see-preview' }, 'Go to preview page now', { parent: buttonContainer });
+  const cancelButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'Cancel', { parent: buttonContainer });
 
   underlay.open = true;
+
+  seePreviewButton.addEventListener('click', () => {
+    window.open(targetHref);
+    closeDialog(props);
+    if (poll.interval) clearInterval(poll.interval);
+    poll.resolve();
+  });
+
+  cancelButton.addEventListener('click', () => {
+    closeDialog(props);
+    if (poll.interval) clearInterval(poll.interval);
+    poll.resolve();
+  });
 
   return dialog;
 }
 
-function buildPreviewLoadingFailedDialog(props) {
+function buildPreviewLoadingFailedDialog(props, targetHref) {
   const spTheme = props.el.querySelector('#form-app');
   if (!spTheme) return;
 
@@ -614,14 +635,21 @@ function buildPreviewLoadingFailedDialog(props) {
   dialog.innerHTML = '';
 
   createTag('h1', { slot: 'heading' }, 'Preview generation failed.', { parent: dialog });
-  createTag('p', {}, 'Your changes have been saved. Our system is working in the background to update the page.', { parent: dialog });
+  createTag('p', {}, 'Our system is working in the background to update the page.', { parent: dialog });
   const slackLink = createTag('a', { href: 'https://adobe.enterprise.slack.com/archives/C07KPJYA760' }, 'Slack');
   const emailLink = createTag('a', { href: 'mailto:Grp-acom-milo-events-support@adobe.com' }, 'Grp-acom-milo-events-support@adobe.com');
   createTag('p', {}, `Please try again later. If the issue persists, please feel free to contact us on <b>${slackLink.outerHTML}</b> or email <b>${emailLink.outerHTML}</b>`, { parent: dialog });
   const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+  const seePreviewButton = createTag('sp-button', { variant: 'secondary', slot: 'button', id: 'see-preview' }, 'Go to preview page now', { parent: buttonContainer });
   const cancelButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'OK', { parent: buttonContainer });
 
   underlay.open = true;
+
+  seePreviewButton.addEventListener('click', () => {
+    window.open(targetHref);
+    closeDialog(props);
+    dialog.innerHTML = '';
+  });
 
   cancelButton.addEventListener('click', () => {
     closeDialog(props);
@@ -654,12 +682,13 @@ async function getNonProdPreviewDataById(props) {
 
 async function validatePreview(props, oldResp, cta) {
   let retryCount = 0;
+  const previewHref = cta.href;
 
   const currentData = { ...props.eventDataResp };
   const oldData = { ...oldResp };
 
   if (!hasContentChanged(currentData, oldData) || !Object.keys(oldData).length) {
-    window.open(cta.href);
+    window.open(previewHref);
     return Promise.resolve();
   }
 
@@ -677,12 +706,12 @@ async function validatePreview(props, oldResp, cta) {
         if (metadataJson && modificationTimeMatch(metadataJson)) {
           clearInterval(interval);
           closeDialog(props);
-          window.open(cta.href);
+          window.open(previewHref);
           resolve();
-        } else if (retryCount >= 30) {
+        } else if (!metadataJson || retryCount >= 30) {
           clearInterval(interval);
-          buildPreviewLoadingFailedDialog(props);
-          window.lana?.log('Error: Failed to match metadata after 30 retries');
+          buildPreviewLoadingFailedDialog(props, previewHref);
+          window.lana?.log('Error: Failed to fetch metadata');
           resolve();
         }
       } catch (error) {
@@ -692,16 +721,12 @@ async function validatePreview(props, oldResp, cta) {
       }
     }, Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000);
 
-    const dialog = buildPreviewLoadingDialog(props, interval);
+    const poll = {
+      interval,
+      resolve,
+    };
 
-    if (dialog) {
-      const cancelButton = dialog.querySelector('#cancel-preview');
-      cancelButton.addEventListener('click', () => {
-        closeDialog(props);
-        if (interval) clearInterval(interval);
-        resolve();
-      });
-    }
+    buildPreviewLoadingDialog(props, previewHref, poll);
   });
 }
 
@@ -752,7 +777,10 @@ function initFormCtas(props) {
       if (['#save', '#next'].includes(ctaUrl.hash)) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
-          const [nextStateText, finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
+          const nextStateText = 'Next step';
+          const finalStateText = 'Publish event';
+          const doneStateText = 'Done';
+          const republishStateText = 'Re-publish event';
 
           cta.textContent = nextStateText;
           cta.append(getIcon('chev-right-white'));
@@ -842,7 +870,7 @@ function updateCtas(props) {
     if (a.classList.contains('preview-btns')) {
       const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
       if (eventDataResp.detailPagePath) {
-        a.href = `${getEventPageHost()}${eventDataResp.detailPagePath}?previewMode=true&cachebuster=${Date.now()}&timing=${testTime}`;
+        a.href = `${eventDataResp.detailPagePath}?previewMode=true&cachebuster=${Date.now()}&timing=${testTime}`;
         a.classList.remove('preview-not-ready');
       }
     }
@@ -1047,16 +1075,15 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const sp = new URLSearchParams(window.location.search);
-  const devToken = sp.get('devToken');
-  if (devToken && getEventServiceEnv() === 'dev') {
+  const devToken = getDevToken();
+  if (devToken && getEventServiceEnv() === 'local') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
     });
     return;
   }
 
-  initProfileLogicTree({
+  await initProfileLogicTree('event-creation-form', {
     noProfile: () => {
       signIn();
     },
