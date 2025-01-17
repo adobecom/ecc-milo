@@ -100,7 +100,7 @@ export async function onPayloadUpdate(component, props) {
   const { seriesId, cloudType } = props.payload;
   if (cloudType && cloudType !== component.dataset.cloudType) {
     component.dataset.cloudType = cloudType;
-    populateSeriesOptions(component);
+    await populateSeriesOptions(component);
     toggleFormatSelect(component);
   }
 
@@ -155,11 +155,6 @@ async function initDupCheck(component) {
   Object.values(series).filter((s) => {
     const hasRequiredVals = s.seriesId && s.seriesName;
     const isPublished = s.seriesStatus?.toLowerCase() === 'published';
-
-    // const currentCloud = props.eventDataResp.cloudType || props.payload.cloudType;
-    // const isInCurrentCloud = s.cloudType === currentCloud;
-
-    // return hasRequiredVals && isPublished && isInCurrentCloud;
     return hasRequiredVals && isPublished;
   }).forEach((val) => {
     if (!val.seriesId || !val.seriesName) return;
@@ -208,7 +203,6 @@ export default async function init(component, props) {
   component.dataset.cloudType = props.payload.cloudType || eventData.cloudType;
   initCloudTypeSelect(props, component);
   prepopulateTimeZone(component);
-  await populateSeriesOptions(component);
   toggleFormatSelect(component);
   initStepLock(component);
   initDupCheck(component);
