@@ -117,8 +117,18 @@ export async function onPayloadUpdate(component, props) {
   }
 }
 
-export async function onRespUpdate(_component, _props) {
-  // Do nothing
+export async function onRespUpdate(component, props) {
+  // lock series selector on seriesId given
+
+  if (props.eventDataResp) {
+    const { seriesId, cloudType } = props.eventDataResp;
+
+    const seriesSelect = component.querySelector('#series-select-input');
+    const buSelect = component.querySelector('#bu-select-input');
+
+    if (seriesSelect && !seriesSelect.disabled) seriesSelect.disabled = !!seriesId;
+    if (buSelect && !buSelect.disbaled) buSelect.disabled = !!cloudType;
+  }
 }
 
 function initCloudTypeSelect(props, component) {
@@ -183,7 +193,7 @@ export default async function init(component, props) {
   setTimeout(() => {
     const seriesSelect = component.querySelector('#series-select-input');
 
-    if (seriesSelect.pending || seriesSelect.disabled) {
+    if (seriesSelect.pending) {
       const toastArea = props.el.querySelector('.toast-area');
       if (!toastArea) return;
 

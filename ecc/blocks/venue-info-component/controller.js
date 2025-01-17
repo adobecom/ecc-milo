@@ -74,8 +74,15 @@ function getVenueDataInForm(component) {
   const lat = +placeLatInput.value;
   const lon = +placeLngInput.value;
   const gmtOffset = +gmtoffsetInput.value;
-  const addressComponents = JSON.parse(addressComponentsInput.value);
   const formattedAddress = formattedAddressInput.value;
+
+  let addressComponents;
+
+  try {
+    addressComponents = JSON.parse(addressComponentsInput.value);
+  } catch (e) {
+    addressComponents = [];
+  }
 
   const venueData = {
     venueName,
@@ -127,6 +134,7 @@ function initAutocomplete(el, props) {
 
       components = components.map((component) => {
         const obj = {};
+
         Object.keys(component).forEach((key) => {
           const newKey = key.replace(/_(.)/g, (_, match) => match.toUpperCase());
           obj[newKey] = component[key];
@@ -213,15 +221,20 @@ export async function onTargetUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const venueData = getVenueDataInForm(component);
-
+  const oldVenueData = props.eventDataResp.venue;
   let resp;
-  if (!props.eventDataResp.venue) {
+  if (!oldVenueData) {
     resp = await createVenue(props.eventDataResp.eventId, venueData);
-  } else if (props.eventDataResp.venue.placeId !== venueData.placeId) {
+  } else if (oldVenueData.placeId !== venueData.placeId) {
+    const { creationTime, modificationTime } = oldVenueData;
     resp = await replaceVenue(
       props.eventDataResp.eventId,
-      props.eventDataResp.venue.venueId,
-      { ...venueData },
+      oldVenueData.venueId,
+      {
+        ...venueData,
+        creationTime,
+        modificationTime,
+      },
     );
 
     if (resp.error) {
