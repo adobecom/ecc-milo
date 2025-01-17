@@ -1,5 +1,5 @@
 import { LIBS } from './scripts.js';
-import { getDevToken, getEventServiceEnv, getSecret } from './utils.js';
+import { getLocalDevToken, getEventServiceEnv, getSecret } from './utils.js';
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
 
 const API_CONFIG = {
@@ -102,8 +102,8 @@ export async function constructRequestOptions(method, body = null) {
   ]);
 
   const headers = new Headers();
-  const devToken = getDevToken();
-  const authToken = devToken && getEventServiceEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
+  const devToken = getLocalDevToken();
+  const authToken = devToken && getEventServiceEnv() === 'local' ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   if (!authToken) window.lana?.log('Error: Failed to get Adobe IMS auth token');
 
@@ -136,7 +136,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
 
   const requestId = await getUuid(new Date().getTime());
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const devToken = getDevToken();
+  const devToken = getLocalDevToken();
   const authToken = devToken && getEventServiceEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   let respJson = null;

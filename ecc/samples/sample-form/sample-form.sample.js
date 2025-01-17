@@ -6,7 +6,7 @@ import {
   camelToSentenceCase,
   signIn,
   getEventServiceEnv,
-  getDevToken,
+  getLocalDevToken,
 } from '../../scripts/utils.js';
 import {
   createSeries,
@@ -802,7 +802,7 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const devToken = getDevToken();
+  const devToken = getLocalDevToken();
   if (devToken && getEventServiceEnv() === 'local') {
     buildForm(el).then(() => {
       el.classList.remove('loading');

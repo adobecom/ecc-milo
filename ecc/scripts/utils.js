@@ -4,7 +4,7 @@ const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 let secretCache = [];
 
-export function getDevToken() {
+export function getLocalDevToken() {
   const sp = new URLSearchParams(window.location.search);
   const sessionDevToken = sessionStorage.getItem('devToken');
   const devToken = sessionDevToken || sp.get('devToken');

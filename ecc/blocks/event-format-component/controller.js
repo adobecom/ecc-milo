@@ -11,7 +11,7 @@ function filterSeriesBasedOnCloudType(series, cloudType) {
   if (!cloudType) return [];
   let filteredSeries = Object.values(series).filter((s) => s.cloudType === cloudType);
 
-  // remove mock fallback
+  // FIXME: remove mock fallback
   if (filteredSeries.length === 0) {
     filteredSeries = Object.values(series);
   }

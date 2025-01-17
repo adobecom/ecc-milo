@@ -14,7 +14,7 @@ import {
   readBlockConfig,
   signIn,
   getEventServiceEnv,
-  getDevToken,
+  getLocalDevToken,
 } from '../../scripts/utils.js';
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
@@ -781,7 +781,7 @@ export default async function init(el) {
   el.innerHTML = '';
   buildLoadingScreen(el);
 
-  const devToken = getDevToken();
+  const devToken = getLocalDevToken();
   if (devToken && getEventServiceEnv() === 'local') {
     buildDashboard(el, config);
     return;

@@ -7,7 +7,7 @@ import {
   getEventPageHost,
   signIn,
   getEventServiceEnv,
-  getDevToken,
+  getLocalDevToken,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -1070,7 +1070,7 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const devToken = getDevToken();
+  const devToken = getLocalDevToken();
   if (devToken && getEventServiceEnv() === 'local') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
