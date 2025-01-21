@@ -27,6 +27,7 @@ export function getEventServiceEnv() {
     if (host.startsWith('stage--')) return 'stage';
     if (host.startsWith('stage02--')) return 'stage02';
     if (host.startsWith('main--')) return 'prod';
+    return 'feature';
   }
 
   if (host.includes('localhost')) return 'local';

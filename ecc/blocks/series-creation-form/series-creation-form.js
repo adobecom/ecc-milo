@@ -15,7 +15,7 @@ import {
   getSeriesById,
 } from '../../scripts/esp-controller.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import { initProfileLogicTree } from '../../scripts/profile.js';
+import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToSeries } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -206,10 +206,17 @@ async function loadData(props) {
   const seriesId = urlParams.get('seriesId');
 
   if (seriesId) {
-    props.el.classList.add('disabled');
-    const data = await getSeriesById(seriesId);
-    props.response = { ...props.response, ...data };
-    props.el.classList.remove('disabled');
+    const [user, data] = await Promise.all([getUser(), getSeriesById(seriesId)]);
+
+    if (userHasAccessToSeries(user, data.seriesId)
+    || userHasAccessToBU(user, data.cloudType)) {
+      props.el.classList.add('disabled');
+      props.response = { ...props.response, ...data };
+      props.el.classList.remove('disabled');
+    } else {
+      buildNoAccessScreen(props.el);
+      props.el.classList.remove('loading');
+    }
   }
 }
 
@@ -810,7 +817,7 @@ export default async function init(el) {
   ]);
 
   const devToken = getDevToken();
-  if (devToken && getEventServiceEnv() === 'local') {
+  if (devToken && ['local', 'feature'].includes(getEventServiceEnv())) {
     buildForm(el).then(() => {
       el.classList.remove('loading');
     });

@@ -70,7 +70,7 @@ function waitForAdobeIMS() {
 }
 
 export async function constructRequestOptions(method, body = null) {
-  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
+  const secretEnv = ['local', 'feature'].includes(getEventServiceEnv()) ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
@@ -103,7 +103,7 @@ export async function constructRequestOptions(method, body = null) {
 }
 
 export async function uploadImage(file, configs, tracker, imageId = null) {
-  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
+  const secretEnv = ['local', 'feature'].includes(getEventServiceEnv()) ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
