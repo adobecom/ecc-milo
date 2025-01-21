@@ -232,7 +232,7 @@ async function loadEventData(props) {
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
 
-  if (!eventId) return;
+  if (!eventId) return false;
 
   const [user, event] = await Promise.all([getUser(), getEvent(eventId)]);
   if (userHasAccessToEvent(user, eventId)
@@ -257,7 +257,10 @@ async function loadEventData(props) {
   } else {
     buildNoAccessScreen(props.el);
     props.el.classList.remove('loading');
+    return false;
   }
+
+  return true;
 }
 
 async function initComponents(props) {
@@ -1035,7 +1038,10 @@ async function buildECCForm(el) {
     });
   });
 
-  await loadEventData(proxyProps);
+  const success = await loadEventData(proxyProps);
+
+  if (!success) return;
+
   initFormCtas(proxyProps);
   initNavigation(proxyProps);
   await initComponents(proxyProps);
@@ -1078,7 +1084,7 @@ export default async function init(el) {
   ]);
 
   const devToken = getDevToken();
-  if (devToken && ['local', 'feature'].includes(getEventServiceEnv())) {
+  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
     });

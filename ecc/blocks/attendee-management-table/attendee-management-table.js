@@ -738,7 +738,7 @@ export default async function init(el) {
   buildLoadingScreen(el);
 
   const devToken = getDevToken();
-  if (devToken && ['local', 'feature'].includes(getEventServiceEnv())) {
+  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
     buildDashboard(el, config);
     return;
   }
