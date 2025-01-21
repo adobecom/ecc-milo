@@ -22,12 +22,11 @@ export function getEventServiceEnv() {
   if (validEnvs.includes(eccEnv)) return eccEnv;
 
   if ((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`))) {
-    if (host.startsWith('dev--')) return 'dev';
     if (host.startsWith('dev02--') || host.startsWith('main02--')) return 'dev02';
     if (host.startsWith('stage--')) return 'stage';
     if (host.startsWith('stage02--')) return 'stage02';
     if (host.startsWith('main--')) return 'prod';
-    return 'feature';
+    return 'dev';
   }
 
   if (host.includes('localhost')) return 'local';
