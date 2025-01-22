@@ -240,10 +240,6 @@
   justify-content: flex-end;
 }
 
-.attendee-management-table.no-results .dashboard-actions-container {
-  visibility: hidden;
-}
-
 .attendee-management-table .dashboard-actions-container .search-input-wrapper {
   position: relative;
 }
