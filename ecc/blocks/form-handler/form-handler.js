@@ -870,7 +870,15 @@ function updateCtas(props) {
     if (a.classList.contains('preview-btns')) {
       const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
       if (eventDataResp.detailPagePath) {
-        a.href = `${eventDataResp.detailPagePath}?previewMode=true&cachebuster=${Date.now()}&timing=${testTime}`;
+        let previewUrl;
+
+        try {
+          previewUrl = new URL(eventDataResp.detailPagePath).href;
+        } catch (e) {
+          previewUrl = `${getEventPageHost()}${eventDataResp.detailPagePath}`;
+        }
+
+        a.href = `${previewUrl}?previewMode=true&cachebuster=${Date.now()}&timing=${testTime}`;
         a.classList.remove('preview-not-ready');
       }
     }
