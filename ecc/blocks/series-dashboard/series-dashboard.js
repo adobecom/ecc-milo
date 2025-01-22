@@ -243,7 +243,7 @@ function initMoreOptions(props, config, seriesObj, row) {
           props.paginatedData = newJson.series;
 
           sortData(props, config, { resort: true });
-          showToast(props, config['delete-toast-msg']);
+          showToast(props, config['archive-msg']);
         });
 
         dialogCancelBtn.addEventListener('click', () => {
