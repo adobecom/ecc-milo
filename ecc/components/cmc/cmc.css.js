@@ -6,6 +6,10 @@ const style = css`
   :host {
     display: block;
     position: relative;
+    max-width: 1440px;
+    box-sizing: border-box;
+    padding: 0 20px;
+    margin: 0 auto;
   }
 
   .header {
@@ -13,10 +17,23 @@ const style = css`
     justify-content: space-between;
     align-items: center;
     gap: 16px;
+    margin-bottom: 10px;
   }
 
   .header h1 {
     color: #EB1000;
+  }
+
+  .header .status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .header .icon {
+    height: 10px;
+    width: 10px;
+    display: block;
   }
 
   .header > div {
@@ -25,10 +42,26 @@ const style = css`
     gap: 32px;
   }
 
+  .tag-manager {
+    background-color: var(--color-white);
+    padding: 44px 67px;
+    box-shadow: 0px 4px 4px 0px rgb(0 0 0 / 25%);
+    border-radius: 8px;
+  }
+
+  .cloud-type-picker {
+    margin-bottom: 18px;
+  }
+
+  .tag-manager h2 {
+    color: var(--color-gray-600)
+  }
+
   .tags-pool {
     min-height: 189px;
     padding: 10px;
-    border: 1px solid var(--color-gray-500);
+    border: 1px solid var(--color-gray-300);
+    border-radius: 10px;
     width: 100%;
     margin-bottom: 36px;
   }
@@ -56,29 +89,41 @@ const style = css`
     cursor: pointer;
   }
 
+  .millar-menu {
+    background-color: var(--color-gray-100);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
   .menu-breadcrumbs {
     display: flex;
     align-items: center;
-    margin-bottom: 36px;
+    padding: 16px;
+    background-color: var(--color-gray-200);
   }
 
   .menu-breadcrumbs a {
     cursor: pointer;
     border-radius: 8px;
     margin: 0 4px;
-    padding: 8px;
+  }
+
+  .menu-breadcrumbs a img {
+    display: block;
+    height: 27px;
+    width: 18px;
   }
 
   .menu-breadcrumbs a:last-of-type:not(:first-of-type) {
     font-weight: 700;
-    padding: 8px 24px;
-    background-color: var(--color-gray-200);
   }
 
   .menu-group {
     display: flex;
     align-items: flex-start;
     margin-bottom: 36px;
+    padding: 20px;
+    overflow-x: auto;
   }
 
   .menu {
@@ -86,7 +131,8 @@ const style = css`
     border-radius: 4px;
     box-shadow: 0 2px 8px 0 rgb(0 0 0 / 10%);
     padding: 8px;
-    width: 220px;
+    max-width: 220px;
+    min-width: 220px;
   }
 
   .menu-item {

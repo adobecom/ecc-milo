@@ -192,34 +192,38 @@ export default class CloudManagementConsole extends LitElement {
         </div>
       </div>
       <h2>Manage tags</h2>
-      <div class="menu-breadcrumbs">
-        ${this.currentPath.split('/').map((path, i, arr) => {
-          const tag = this.deepGetTagByPath(arr, i);
+      <div class="millar-menu">
+        <div class="menu-breadcrumbs">
+          ${this.currentPath.split('/').map((path, i, arr) => {
+            const tag = this.deepGetTagByPath(arr, i);
 
-          if (tag) {
-            return html`
-                    <a @click=${() => { this.currentPath = arr.slice(0, i + 1).join('/'); }}> ${tag.title} </a>
-                    ${i < arr.length - 1 ? this.constructor.getChevRight() : nothing}
-                  `;
-          }
-
-          return nothing;
-        })}
-      </div>
-      <div class="menu-group">
-        ${this.currentPath.split('/').map((_p, i, arr) => {
-          const tag = this.deepGetTagByPath(arr, i);
-
-          if (tag && tag.tags && Object.keys(tag.tags).length) {
-            return html`
-                    <div class="menu">
-                      ${repeat(Object.entries(tag.tags), ([, value]) => this.buildItem(value))}
-                    </div>
+            if (tag) {
+              return html`
+                      <a @click=${() => { this.currentPath = arr.slice(0, i + 1).join('/'); }}>
+                        ${i === 0 ? getIcon('home-wire') : tag.title}
+                      </a>
+                      ${i < arr.length - 1 ? this.constructor.getChevRight() : nothing}
                     `;
-          }
+            }
 
-          return nothing;
-        })}
+            return nothing;
+          })}
+        </div>
+        <div class="menu-group">
+          ${this.currentPath.split('/').map((_p, i, arr) => {
+            const tag = this.deepGetTagByPath(arr, i);
+
+            if (tag && tag.tags && Object.keys(tag.tags).length) {
+              return html`
+                      <div class="menu">
+                        ${repeat(Object.entries(tag.tags), ([, value]) => this.buildItem(value))}
+                      </div>
+                      `;
+            }
+
+            return nothing;
+          })}
+        </div>
       </div>
     </div>
     <div class="action-bar">
