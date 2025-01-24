@@ -1,4 +1,5 @@
 {
+  "project": "ECC",
   "plugins": [
     {
       "id": "library",
