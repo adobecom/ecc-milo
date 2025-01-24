@@ -19,6 +19,7 @@ export default class CloudManagementConsole extends LitElement {
     selectedTags: { type: Set },
     savedTags: { type: Object },
     pendingChanges: { type: Boolean },
+    toastState: { type: Object },
   };
 
   constructor() {
@@ -28,6 +29,11 @@ export default class CloudManagementConsole extends LitElement {
     this.currentPath = startingPath;
     this.selectedTags = new Set();
     this.pendingChanges = false;
+    this.toastState = {
+      open: false,
+      variant: 'info',
+      text: '',
+    };
   }
 
   static getParsedTitle(tag) {
@@ -140,6 +146,7 @@ export default class CloudManagementConsole extends LitElement {
 
     crossIcon.addEventListener('click', () => {
       this.selectedTags.delete(tag);
+      this.pendingChanges = true;
       this.requestUpdate();
     });
 
@@ -161,6 +168,18 @@ export default class CloudManagementConsole extends LitElement {
     this.requestUpdate();
   }
 
+  save() {
+    this.savedTags[this.currentCloud] = this.getSelectedTags().map((tag) => tag.tagID);
+    this.pendingChanges = false;
+
+    this.toastState = {
+      open: true,
+      variant: 'positive',
+      text: 'Changes saved',
+    };
+    // save to the server
+  }
+
   render() {
     return html`
     <div class="header">
@@ -171,6 +190,10 @@ export default class CloudManagementConsole extends LitElement {
     ? html`<span class="status" size="s">${html`${getIcon('dot-orange')}`} Unsaved change</span>`
     : html`<span class="status" size="s">${html`${getIcon('dot-green')}`} Up-to-date</span>`}`}
         </div>
+      </div>
+
+      <div>
+        <a href="#" class="back-button">${getIcon('left-arrow-wire')}Back to Series dashboard</a>
       </div>
     </div>
     <div class="tag-manager">
@@ -227,8 +250,12 @@ export default class CloudManagementConsole extends LitElement {
       </div>
     </div>
     <div class="action-bar">
-        <sp-button variant="secondary" size="l" @click=${() => { this.selectedTags = new Set(this.savedTags[this.currentCloud] || []); this.pendingChanges = false; }}>Cancel</sp-button>
-        <sp-button variant="primary" size="l" @click=${() => { this.savedTags[this.currentCloud] = this.getSelectedTags().map((tag) => tag.tagID); this.pendingChanges = false; }}>Save</sp-button>
+        <sp-toast ?open=${this.toastState.open} variant=${this.toastState.variant} size="m" timeout="6000">${this.toastState.text}</sp-toast>
+        <sp-button variant="secondary" size="l" ?disabled=${!this.pendingChanges} @click=${() => {
+          const fullSavedTags = this.savedTags[this.currentCloud]?.map((tag) => this.deepGetTagByTagID(tag)) || [];
+          this.selectedTags = new Set(fullSavedTags); this.pendingChanges = false;
+        }}>Cancel</sp-button>
+        <sp-button variant="primary" size="l" ?disabled=${!this.pendingChanges} @click=${this.save}>Save</sp-button>
     </div>
     `;
   }

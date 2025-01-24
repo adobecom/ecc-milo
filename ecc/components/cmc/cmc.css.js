@@ -6,22 +6,27 @@ const style = css`
   :host {
     display: block;
     position: relative;
-    max-width: 1440px;
     box-sizing: border-box;
-    padding: 0 20px;
     margin: 0 auto;
+    --color-white: #ffffff;
+    --color-black: #000000;
+    --color-red: #EB1000;
   }
 
   .header {
+    box-sizing: border-box;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
-    margin-bottom: 10px;
+    padding: 0 20px;
+    max-width: 1440px;
+    margin: 0 auto 10px;
   }
 
   .header h1 {
-    color: #EB1000;
+    color: var(--color-red);
+    font-weight: 900;
   }
 
   .header .status {
@@ -42,11 +47,30 @@ const style = css`
     gap: 32px;
   }
 
+  .header .back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-red);
+    font-size: 24px;
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .header .back-button .icon {
+    height: 16px;
+    width: 16px;
+    display: block;
+  }
+
   .tag-manager {
     background-color: var(--color-white);
     padding: 44px 67px;
     box-shadow: 0px 4px 4px 0px rgb(0 0 0 / 25%);
     border-radius: 8px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    max-width: 1400px;
   }
 
   .cloud-type-picker {
@@ -163,11 +187,17 @@ const style = css`
     position: sticky;
     bottom: 0;
     background-color: #EB1000;
+    margin-top: 40px;
     padding: 12px 24px;
     gap: 16px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
+  }
+
+  sp-toast {
+    position: absolute;
+    top: -100%;
   }
 `;
 

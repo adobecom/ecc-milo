@@ -11,6 +11,7 @@ export default async function init(el) {
   await Promise.all([
     import(`${LIBS}/deps/lit-all.min.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/theme.js`),
+    import(`${LIBS}/features/spectrum-web-components/dist/toast.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/checkbox.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/menu.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/picker.js`),
