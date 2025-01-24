@@ -20,6 +20,7 @@ export default class CloudManagementConsole extends LitElement {
     savedTags: { type: Object },
     pendingChanges: { type: Boolean },
     toastState: { type: Object },
+    config: { type: Object },
   };
 
   constructor() {
@@ -29,6 +30,7 @@ export default class CloudManagementConsole extends LitElement {
     this.currentPath = startingPath;
     this.selectedTags = new Set();
     this.pendingChanges = false;
+    this.config = { 'series-dashboard-location': '/ecc/dashboard/t3/series' };
     this.toastState = {
       open: false,
       variant: 'info',
@@ -193,7 +195,7 @@ export default class CloudManagementConsole extends LitElement {
       </div>
 
       <div>
-        <a href="#" class="back-button">${getIcon('left-arrow-wire')}Back to Series dashboard</a>
+        <a href="${this.config['series-dashboard-location']}" class="back-button">${getIcon('left-arrow-wire')}Back to Series dashboard</a>
       </div>
     </div>
     <div class="tag-manager">
