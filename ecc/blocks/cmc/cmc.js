@@ -1,12 +1,16 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { getCaasTags } from '../../scripts/esp-controller.js';
-import { generateToolTip } from '../../scripts/utils.js';
+import { generateToolTip, readBlockConfig } from '../../scripts/utils.js';
 import CloudManagementConsole from '../../components/cmc/cmc.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 export default async function init(el) {
   generateToolTip(el);
+
+  const blockConfig = readBlockConfig(el);
+
+  el.innerHTML = '';
 
   await Promise.all([
     import(`${LIBS}/deps/lit-all.min.js`),
@@ -46,4 +50,5 @@ export default async function init(el) {
   const tagManager = createTag('cloud-management-console', { class: 'cloud-management-console' }, '', { parent: el });
   tagManager.tags = caasTags.namespaces.caas;
   tagManager.savedTags = mockSavedTags;
+  tagManager.config = blockConfig;
 }
