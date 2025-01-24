@@ -73,8 +73,8 @@ const ATTENDEE_ATTR_MAP = [
     fallback: '',
   },
   {
-    key: 'contactMethod',
-    label: 'Contact method',
+    key: 'contactMethods',
+    label: 'Contact methods',
     fallback: '',
   },
   {
