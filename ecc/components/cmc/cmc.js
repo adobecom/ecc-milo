@@ -240,9 +240,11 @@ export default class CloudManagementConsole extends LitElement {
 
             if (tag && tag.tags && Object.keys(tag.tags).length) {
               return html`
+                    <div class="menu-rail">
                       <div class="menu">
                         ${repeat(Object.entries(tag.tags), ([, value]) => this.buildItem(value))}
                       </div>
+                    </div>
                       `;
             }
 

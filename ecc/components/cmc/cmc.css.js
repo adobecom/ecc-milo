@@ -147,15 +147,28 @@ const style = css`
   .menu-group {
     display: flex;
     align-items: flex-start;
-    padding: 20px;
-    overflow-x: auto;
+    padding: 0 20px;
+    overflow: visible;
+  }
+
+  .menu-rail {
+    padding: 20px 4px;
+    overflow: auto;
     max-height: 348px;
+  }
+  .menu-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .menu-rail {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   .menu {
-    background-color: var(--color-white);
     border-radius: 4px;
     box-shadow: 0 2px 8px 0 rgb(0 0 0 / 10%);
+    background-color: var(--color-white);
     padding: 8px;
     max-width: 220px;
     min-width: 220px;
