@@ -117,6 +117,7 @@ const style = css`
     background-color: var(--color-gray-100);
     border-radius: 10px;
     overflow: hidden;
+    max-height: 408px;
   }
 
   .menu-breadcrumbs {
