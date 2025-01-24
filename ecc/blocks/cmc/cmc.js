@@ -27,6 +27,7 @@ export default async function init(el) {
 
   if (!caasTags) return;
 
+  // TODO: remove this mock data after cloud management console is fully integrated
   const mockSavedTags = {
     DX: [
       'caas:events/session-type',
