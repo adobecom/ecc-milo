@@ -117,7 +117,6 @@ const style = css`
     background-color: var(--color-gray-100);
     border-radius: 10px;
     overflow: hidden;
-    max-height: 408px;
   }
 
   .menu-breadcrumbs {
@@ -125,12 +124,14 @@ const style = css`
     align-items: center;
     padding: 16px;
     background-color: var(--color-gray-200);
+    overflow-x: auto;
   }
 
   .menu-breadcrumbs a {
     cursor: pointer;
     border-radius: 8px;
     margin: 0 4px;
+    white-space: nowrap;
   }
 
   .menu-breadcrumbs a img {
@@ -146,9 +147,9 @@ const style = css`
   .menu-group {
     display: flex;
     align-items: flex-start;
-    margin-bottom: 36px;
     padding: 20px;
     overflow-x: auto;
+    max-height: 348px;
   }
 
   .menu {
