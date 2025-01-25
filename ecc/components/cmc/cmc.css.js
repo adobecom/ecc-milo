@@ -147,31 +147,24 @@ const style = css`
   .menu-group {
     display: flex;
     align-items: flex-start;
-    padding: 0 20px;
+    padding: 20px;
     overflow: visible;
   }
 
-  .menu-rail {
-    padding: 20px 4px;
+  .menu {
+    box-shadow: 0 2px 8px 0 rgb(0 0 0 / 10%);
+    background-color: var(--color-white);
+    padding: 8px;
     overflow: auto;
-    max-height: 348px;
-  }
-  .menu-rail::-webkit-scrollbar {
-    display: none;
-  }
-
-  .menu-rail {
+    max-width: 220px;
+    min-width: 220px;
+    max-height: 400px;
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
-  .menu {
-    border-radius: 4px;
-    box-shadow: 0 2px 8px 0 rgb(0 0 0 / 10%);
-    background-color: var(--color-white);
-    padding: 8px;
-    max-width: 220px;
-    min-width: 220px;
+  .menu::-webkit-scrollbar {
+    display: none;
   }
 
   .menu-item {
@@ -182,6 +175,10 @@ const style = css`
     padding: 4px 12px;
     cursor: pointer;
     border-radius: 4px;
+  }
+
+  .menu-item[aria-selected='true'] {
+    background-color: var(--color-gray-200);
   }
 
   .menu-item:hover {
@@ -195,7 +192,11 @@ const style = css`
   }
 
   .menu .menu-item-inner sp-checkbox {
-    margin-top: -2px;
+    margin-top: -4px;
+  }
+
+  .menu .menu-item-inner span {
+    line-height: 1.65;
   }
 
   .action-bar {

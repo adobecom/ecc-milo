@@ -93,11 +93,12 @@ export default class CloudManagementConsole extends LitElement {
     }
 
     // if currentPath starts with the tag tr, return indeterminate
-    const trimmedPath = tag.path.replace(traversalBase, '');
+    const trimmedPathSegments = tag.path.replace(traversalBase, '').split('/');
     if ([...this.selectedTags].some((t) => {
       const { path } = t;
-      const trimmedSelectedTagPath = path.replace(traversalBase, '');
-      return trimmedSelectedTagPath.startsWith(trimmedPath);
+      const trimmedSelectedTagPathSegments = path.replace(traversalBase, '').split('/');
+
+      return trimmedPathSegments.every((segment, i) => trimmedSelectedTagPathSegments[i] === segment);
     })) {
       return html`<sp-checkbox indeterminate @click=${() => this.handleItemCheck(tag)}/>`;
     }
@@ -107,9 +108,11 @@ export default class CloudManagementConsole extends LitElement {
 
   buildItem(tag) {
     const { tags, tagID } = tag;
+    const currentPathSegments = `${traversalBase}${this.currentPath}`.split('/');
+    const tagPathSegments = tag.path.split('/');
 
     return html`
-      <div class="menu-item" data-tagid=${tagID} @click=${(e) => this.handleItemClick(e, tag)}>
+      <div class="menu-item" aria-selected="${tagPathSegments.every((segment) => currentPathSegments.includes(segment))}" data-tagid=${tagID} @click=${(e) => this.handleItemClick(e, tag)}>
         <div class="menu-item-inner">
           ${this.determineCheckboxState(tag)}
           ${this.constructor.getParsedTitle(tag)}
@@ -240,10 +243,8 @@ export default class CloudManagementConsole extends LitElement {
 
             if (tag && tag.tags && Object.keys(tag.tags).length) {
               return html`
-                    <div class="menu-rail">
-                      <div class="menu">
-                        ${repeat(Object.entries(tag.tags), ([, value]) => this.buildItem(value))}
-                      </div>
+                    <div class="menu">
+                      ${repeat(Object.entries(tag.tags), ([, value]) => this.buildItem(value))}
                     </div>
                       `;
             }
