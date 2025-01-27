@@ -205,7 +205,7 @@ export default class CloudManagementConsole extends LitElement {
       <sp-picker class="cloud-type-picker" @change=${(e) => this.switchCloudType(e.target.value)} label="Selected a Cloud type">
         <sp-menu>
           <sp-menu-item value="CreativeCloud" ?active=${this.currentCloud === 'CreativeCloud'}>Creative Cloud</sp-menu-item>
-          <sp-menu-item value="DX" ?active=${this.currentCloud === 'DX'}>Experience Cloud</sp-menu-item>
+          <sp-menu-item value="DX" ?active=${this.currentCloud === 'ExperienceCloud'}>Experience Cloud</sp-menu-item>
           <sp-menu-item value="DocumentCloud" ?active=${this.currentCloud === 'DocumentCloud'}>Document Cloud</sp-menu-item>
         </sp-menu>
       </sp-picker>

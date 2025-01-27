@@ -54,8 +54,7 @@ export const getCaasTags = (() => {
 })();
 
 export function waitForAdobeIMS() {
-  const urlParam = new URLSearchParams(window.location.search);
-  if (urlParam.has('devToken')) return Promise.resolve();
+  if (getDevToken()) return Promise.resolve();
 
   return new Promise((resolve) => {
     const checkIMS = () => {
@@ -143,7 +142,7 @@ export async function constructRequestOptions(method, body = null) {
 
   const headers = new Headers();
   const devToken = getDevToken();
-  const authToken = devToken && getEventServiceEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
+  const authToken = devToken && ['local', 'dev'].includes(getEventServiceEnv()) ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   if (!authToken) {
     throw new Error('Missing authentication token');
@@ -203,7 +202,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
   const requestId = await getUuid(new Date().getTime());
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const devToken = getDevToken();
-  const authToken = devToken && getEventServiceEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
+  const authToken = devToken && ['local', 'dev'].includes(getEventServiceEnv()) ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   let respJson = null;
 
@@ -362,6 +361,73 @@ export async function replaceVenue(eventId, venueId, venueData) {
     return data.espProvider || data;
   } catch (error) {
     window.lana?.log('Failed to replace venue. Error:', error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function getClouds() {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/clouds`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log('Failed to get clouds. Status:', response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return data.clouds;
+  } catch (error) {
+    window.lana?.log('Failed to get clouds. Error:', error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function getCloud(cloudId) {
+  if (!cloudId || typeof cloudId !== 'string') throw new Error('Invalid cloud ID');
+
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/clouds/${cloudId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log('Failed to get cloud. Status:', response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log('Failed to get cloud. Error:', error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function updateCloud(cloudId, cloudData) {
+  if (!cloudId || typeof cloudId !== 'string') throw new Error('Invalid cloud ID');
+  if (!cloudData || typeof cloudData !== 'object') throw new Error('Invalid cloud data');
+
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const raw = JSON.stringify(cloudData);
+
+  const options = await constructRequestOptions('PUT', raw);
+
+  try {
+    const response = await safeFetch(`${host}/v1/clouds/${cloudId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log('Failed to update cloud. Status:', response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log('Failed to update cloud. Error:', error);
     return { status: 'Network Error', error: error.message };
   }
 }
@@ -948,18 +1014,6 @@ export async function getVenue(eventId) {
     window.lana?.log('Failed to get venue details. Error:', error);
     return { status: 'Network Error', error: error.message };
   }
-}
-
-export async function getClouds() {
-  // TODO: use ESP to fetch clouds rather than Chimera
-  const tags = await getCaasTags();
-
-  if (tags) {
-    const clouds = tags.namespaces.caas.tags['business-unit'].tags;
-    return clouds;
-  }
-
-  return null;
 }
 
 export async function getAllSeries() {

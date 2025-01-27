@@ -1,5 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { getCaasTags } from '../../scripts/esp-controller.js';
+import { getCaasTags, getClouds } from '../../scripts/esp-controller.js';
 import { generateToolTip, readBlockConfig } from '../../scripts/utils.js';
 import CloudManagementConsole from '../../components/cmc/cmc.js';
 
@@ -31,24 +31,18 @@ export default async function init(el) {
 
   if (!caasTags) return;
 
-  // TODO: remove this mock data after cloud management console is fully integrated
-  const mockSavedTags = {
-    DX: [
-      'caas:events/session-type',
-    ],
-    CreativeCloud: [
-      'caas:events/session-type/creativity-workshop',
-    ],
-    DocumentCloud: [
-      'caas:events/session-type/creativity-workshop',
-      'caas:events/max/primary-poi',
-    ],
-  };
+  const clouds = await getClouds();
+
+  const savedTags = {};
+  Object.entries(clouds).forEach((cloud) => {
+    const { cloudType, tags } = cloud;
+    savedTags[cloudType] = tags || [];
+  });
 
   customElements.define('cloud-management-console', CloudManagementConsole);
 
   const tagManager = createTag('cloud-management-console', { class: 'cloud-management-console' }, '', { parent: el });
   tagManager.tags = caasTags.namespaces.caas;
-  tagManager.savedTags = mockSavedTags;
+  tagManager.savedTags = savedTags;
   tagManager.config = blockConfig;
 }
