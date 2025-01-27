@@ -59,8 +59,8 @@ export default class AgendaFieldsetGroup extends LitElement {
     const agendaComponents = {
       startTime: agendaItem.startTime,
       description: agendaItem.description,
-      startTimeValue: `${hours}:${minutes}`,
-      startTimePeriod: period,
+      startTimeValue: agendaItem.startTimeValue || ((hours && minutes) && `${hours}:${minutes}`) || '',
+      startTimePeriod: agendaItem.startTimePeriod || period || '',
     };
 
     return html`
