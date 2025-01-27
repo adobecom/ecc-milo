@@ -385,14 +385,14 @@ export async function getClouds() {
   }
 }
 
-export async function getCloud(cloudId) {
-  if (!cloudId || typeof cloudId !== 'string') throw new Error('Invalid cloud ID');
+export async function getCloud(cloudType) {
+  if (!cloudType || typeof cloudType !== 'string') throw new Error('Invalid cloud ID');
 
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
-    const response = await safeFetch(`${host}/v1/clouds/${cloudId}`, options);
+    const response = await safeFetch(`${host}/v1/clouds/${cloudType}`, options);
     const data = await response.json();
 
     if (!response.ok) {
@@ -407,8 +407,8 @@ export async function getCloud(cloudId) {
   }
 }
 
-export async function updateCloud(cloudId, cloudData) {
-  if (!cloudId || typeof cloudId !== 'string') throw new Error('Invalid cloud ID');
+export async function updateCloud(cloudType, cloudData) {
+  if (!cloudType || typeof cloudType !== 'string') throw new Error('Invalid cloud Type');
   if (!cloudData || typeof cloudData !== 'object') throw new Error('Invalid cloud data');
 
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
@@ -417,7 +417,7 @@ export async function updateCloud(cloudId, cloudData) {
   const options = await constructRequestOptions('PUT', raw);
 
   try {
-    const response = await safeFetch(`${host}/v1/clouds/${cloudId}`, options);
+    const response = await safeFetch(`${host}/v1/clouds/${cloudType}`, options);
     const data = await response.json();
 
     if (!response.ok) {

@@ -3,6 +3,7 @@
 import { LIBS } from '../../scripts/scripts.js';
 import style from './cmc.css.js';
 import { getIcon } from '../../scripts/utils.js';
+import { updateCloud } from '../../scripts/esp-controller.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -13,6 +14,7 @@ export default class CloudManagementConsole extends LitElement {
   static styles = style;
 
   static properties = {
+    clouds: { type: Array },
     currentCloud: { type: String },
     tags: { type: Object },
     currentPath: { type: String },
@@ -173,7 +175,7 @@ export default class CloudManagementConsole extends LitElement {
     this.requestUpdate();
   }
 
-  save() {
+  async save() {
     this.savedTags[this.currentCloud] = this.getSelectedTags().map((tag) => tag.tagID);
     this.pendingChanges = false;
 
@@ -182,7 +184,6 @@ export default class CloudManagementConsole extends LitElement {
       variant: 'positive',
       text: 'Changes saved',
     };
-    // save to the server
   }
 
   render() {
@@ -204,9 +205,9 @@ export default class CloudManagementConsole extends LitElement {
     <div class="tag-manager">
       <sp-picker class="cloud-type-picker" @change=${(e) => this.switchCloudType(e.target.value)} label="Selected a Cloud type">
         <sp-menu>
-          <sp-menu-item value="CreativeCloud" ?active=${this.currentCloud === 'CreativeCloud'}>Creative Cloud</sp-menu-item>
-          <sp-menu-item value="DX" ?active=${this.currentCloud === 'ExperienceCloud'}>Experience Cloud</sp-menu-item>
-          <sp-menu-item value="DocumentCloud" ?active=${this.currentCloud === 'DocumentCloud'}>Document Cloud</sp-menu-item>
+          ${repeat(this.clouds.values(), (cloud) => html`
+            <sp-menu-item value="${cloud.cloudType}" ?active=${this.currentCloud === cloud.cloudType}>${cloud.cloudName}</sp-menu-item>
+          `)}
         </sp-menu>
       </sp-picker>
 
@@ -256,11 +257,11 @@ export default class CloudManagementConsole extends LitElement {
     </div>
     <div class="action-bar">
         <sp-toast ?open=${this.toastState.open} variant=${this.toastState.variant} size="m" timeout="6000">${this.toastState.text}</sp-toast>
-        <sp-button variant="secondary" size="l" ?disabled=${!this.pendingChanges} @click=${() => {
+        <sp-button variant="secondary" size="l" ?disabled=${!this.pendingChanges || !this.currentCloud} @click=${() => {
           const fullSavedTags = this.savedTags[this.currentCloud]?.map((tag) => this.deepGetTagByTagID(tag)) || [];
           this.selectedTags = new Set(fullSavedTags); this.pendingChanges = false;
         }}>Cancel</sp-button>
-        <sp-button variant="primary" size="l" ?disabled=${!this.pendingChanges} @click=${this.save}>Save</sp-button>
+        <sp-button variant="primary" size="l" ?disabled=${!this.pendingChanges || !this.currentCloud} @click=${this.save}>Save</sp-button>
     </div>
     `;
   }

@@ -34,7 +34,7 @@ export default async function init(el) {
   const clouds = await getClouds();
 
   const savedTags = {};
-  Object.entries(clouds).forEach((cloud) => {
+  clouds.forEach((cloud) => {
     const { cloudType, tags } = cloud;
     savedTags[cloudType] = tags || [];
   });
@@ -45,4 +45,5 @@ export default async function init(el) {
   tagManager.tags = caasTags.namespaces.caas;
   tagManager.savedTags = savedTags;
   tagManager.config = blockConfig;
+  tagManager.clouds = clouds;
 }
