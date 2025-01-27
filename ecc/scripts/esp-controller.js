@@ -54,8 +54,7 @@ export const getCaasTags = (() => {
 })();
 
 export function waitForAdobeIMS() {
-  const urlParam = new URLSearchParams(window.location.search);
-  if (urlParam.has('devToken')) return Promise.resolve();
+  if (getDevToken()) return Promise.resolve();
 
   return new Promise((resolve) => {
     const checkIMS = () => {
@@ -143,7 +142,7 @@ export async function constructRequestOptions(method, body = null) {
 
   const headers = new Headers();
   const devToken = getDevToken();
-  const authToken = devToken && getEventServiceEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
+  const authToken = devToken && ['local', 'dev'].includes(getEventServiceEnv()) ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   if (!authToken) {
     throw new Error('Missing authentication token');
@@ -203,7 +202,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
   const requestId = await getUuid(new Date().getTime());
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const devToken = getDevToken();
-  const authToken = devToken && getEventServiceEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
+  const authToken = devToken && ['local', 'dev'].includes(getEventServiceEnv()) ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   let respJson = null;
 
