@@ -25,7 +25,7 @@ const filters = {
     'templateId',
     'relatedDomain',
   ],
-}
+};
 
 function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;

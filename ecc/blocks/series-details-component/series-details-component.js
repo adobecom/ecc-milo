@@ -1,4 +1,3 @@
-import { SUPPORTED_CLOUDS } from '../../constants/constants.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
   generateToolTip,
@@ -17,16 +16,6 @@ async function decorateCloudTagSelect(column) {
   column.innerHTML = '';
   buSelectWrapper.append(select);
   column.append(buSelectWrapper);
-
-  // FIXME: cloulds shouldn't be hardcoded
-  // const clouds = await getClouds();
-
-  Object.entries(SUPPORTED_CLOUDS).forEach(([, val]) => {
-    const opt = createTag('sp-menu-item', { value: val.id }, val.name);
-    select.append(opt);
-  });
-
-  select.pending = false;
 }
 
 export default function init(el) {
@@ -41,7 +30,7 @@ export default function init(el) {
       r.classList.add('series-fields-wrapper');
 
       cols.forEach(async (c, ci) => {
-        if (ci === 0) decorateCloudTagSelect(c);
+        if (ci === 0) await decorateCloudTagSelect(c);
       });
     }
 
