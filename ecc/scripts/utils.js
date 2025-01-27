@@ -22,11 +22,11 @@ export function getEventServiceEnv() {
   if (validEnvs.includes(eccEnv)) return eccEnv;
 
   if ((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`))) {
+    if (host.startsWith('dev--')) return 'dev';
     if (host.startsWith('dev02--') || host.startsWith('main02--')) return 'dev02';
     if (host.startsWith('stage--')) return 'stage';
     if (host.startsWith('stage02--')) return 'stage02';
     if (host.startsWith('main--')) return 'prod';
-    return 'dev';
   }
 
   if (host.includes('localhost')) return 'local';
@@ -147,7 +147,7 @@ export function buildNoAccessScreen(el) {
   const h1 = createTag('h1', {}, 'You do not have sufficient access to view.');
   const area = createTag('div', { class: 'no-access-area' });
   const noAccessDescription = createTag('p', {}, 'If you have another authorized account, please sign in with that account to access this page.');
-  const requestAccessButton = createTag('a', { class: 'con-button primary', href: 'https://adobe.enterprise.slack.com/archives/C07KPJYA760' }, 'Request Access');
+  const requestAccessButton = createTag('a', { class: 'con-button primary' }, 'Request Access');
 
   el.append(h1, area);
   area.append(getIcon('browser-access-forbidden-lg'), noAccessDescription, requestAccessButton);
