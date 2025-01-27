@@ -11,7 +11,7 @@ function togglePrefillableFieldsHiddenState(component) {
 }
 
 async function loadGoogleMapsAPI(callback) {
-  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
+  const secretEnv = ['local', 'dev'].includes(getEventServiceEnv()) ? 'dev' : getEventServiceEnv();
   const script = document.createElement('script');
   const apiKey = await getSecret(`${secretEnv}-google-places-api`);
   script.src = `https://maps.googleapis.com/maps/api/js?loading=async&key=${apiKey}&libraries=places&callback=onGoogleMapsApiLoaded`;

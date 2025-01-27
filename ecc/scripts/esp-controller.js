@@ -53,9 +53,8 @@ export const getCaasTags = (() => {
   };
 })();
 
-function waitForAdobeIMS() {
-  const urlParam = new URLSearchParams(window.location.search);
-  if (urlParam.has('devToken')) return Promise.resolve();
+export function waitForAdobeIMS() {
+  if (getDevToken()) return Promise.resolve();
 
   return new Promise((resolve) => {
     const checkIMS = () => {
@@ -131,7 +130,7 @@ async function safeFetch(url, options) {
 }
 
 export async function constructRequestOptions(method, body = null) {
-  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
+  const secretEnv = ['local', 'dev'].includes(getEventServiceEnv()) ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
@@ -143,7 +142,7 @@ export async function constructRequestOptions(method, body = null) {
 
   const headers = new Headers();
   const devToken = getDevToken();
-  const authToken = devToken && getEventServiceEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
+  const authToken = devToken && ['local', 'dev'].includes(getEventServiceEnv()) ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   if (!authToken) {
     throw new Error('Missing authentication token');
@@ -190,7 +189,7 @@ export async function constructRequestOptions(method, body = null) {
 }
 
 export async function uploadImage(file, configs, tracker, imageId = null) {
-  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
+  const secretEnv = ['local', 'dev'].includes(getEventServiceEnv()) ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
@@ -203,7 +202,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
   const requestId = await getUuid(new Date().getTime());
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const devToken = getDevToken();
-  const authToken = devToken && getEventServiceEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
+  const authToken = devToken && ['local', 'dev'].includes(getEventServiceEnv()) ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   let respJson = null;
 

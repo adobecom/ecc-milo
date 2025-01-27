@@ -27,7 +27,7 @@ import ProductSelectorGroup from '../../components/product-selector-group/produc
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import getJoinedData, { getFilteredCachedResponse, hasContentChanged, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import { getUser, initProfileLogicTree, userHasAccessToEvent } from '../../scripts/profile.js';
+import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 import CustomSearch from '../../components/custom-search/custom-search.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -233,8 +233,10 @@ async function loadEventData(props) {
   const eventId = urlParams.get('eventId');
 
   if (eventId) {
-    const user = await getUser();
-    if (userHasAccessToEvent(user, eventId)) {
+    const [user, event] = await Promise.all([getUser(), getEvent(eventId)]);
+    if (userHasAccessToEvent(user, eventId)
+      || userHasAccessToSeries(user, event.seriesId)
+      || userHasAccessToBU(user, event.cloudType)) {
       setTimeout(() => {
         if (!props.eventDataResp.eventId) {
           const toastArea = props.el.querySelector('.toast-area');
@@ -1084,7 +1086,7 @@ export default async function init(el) {
   ]);
 
   const devToken = getDevToken();
-  if (devToken && getEventServiceEnv() === 'local') {
+  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
     });

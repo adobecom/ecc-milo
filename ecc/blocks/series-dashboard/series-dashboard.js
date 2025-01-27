@@ -4,7 +4,8 @@ import {
   publishSeries,
   unpublishSeries,
   archiveSeries,
-  getEvents,
+  getSeriesForUser,
+  getEventsForUser,
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
@@ -575,7 +576,7 @@ async function buildDashboard(el, config) {
     currentSort: {},
   };
 
-  const [{ series }, { events }] = await Promise.all([getAllSeries(), getEvents()]);
+  const [series, events] = await Promise.all([getSeriesForUser(), getEventsForUser()]);
 
   if (!series?.length) {
     buildNoDataScreen(el, config);
@@ -629,7 +630,7 @@ export default async function init(el) {
   buildLoadingScreen(el);
 
   const devToken = getDevToken();
-  if (devToken && getEventServiceEnv() === 'local') {
+  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
     buildDashboard(el, config);
     return;
   }
