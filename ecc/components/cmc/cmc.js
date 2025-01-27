@@ -188,7 +188,7 @@ export default class CloudManagementConsole extends LitElement {
     const newCloudData = await updateCloud(this.currentCloud, { ...cloudData, ...payload });
     console.log(newCloudData);
 
-    if (newCloudData) {
+    if (newCloudData && !newCloudData.error) {
       this.toastState = {
         open: true,
         variant: 'positive',
