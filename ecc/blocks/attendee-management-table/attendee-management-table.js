@@ -12,7 +12,7 @@ import {
 } from '../../scripts/utils.js';
 import SearchablePicker from '../../components/searchable-picker/searchable-picker.js';
 import FilterMenu from '../../components/filter-menu/filter-menu.js';
-import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
+import { getUser, initProfileLogicTree, userHasAccessToEvent } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -658,9 +658,7 @@ async function buildDashboard(el, config) {
   let data = [];
 
   if (props.currentEventId) {
-    const currentEvent = events.find((e) => e.eventId === props.currentEventId);
-    const user = await getUser();
-    if (userHasAccessToEvent(user, props.currentEventId) || userHasAccessToSeries(user, currentEvent.seriesId) || userHasAccessToBU(user, currentEvent.cloudType)) {
+    if (userHasAccessToEvent(await getUser(), props.currentEventId)) {
       const resp = await getAllEventAttendees(props.currentEventId);
       if (resp && !resp.error) data = resp;
     } else {
@@ -738,7 +736,7 @@ export default async function init(el) {
   buildLoadingScreen(el);
 
   const devToken = getDevToken();
-  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
+  if (devToken && getEventServiceEnv() === 'local') {
     buildDashboard(el, config);
     return;
   }

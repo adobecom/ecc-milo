@@ -1,9 +1,3 @@
-import { SUPPORTED_CLOUDS } from '../../constants/constants.js';
-import { getUser, userHasAccessToBU } from '../../scripts/profile.js';
-import { LIBS } from '../../scripts/scripts.js';
-
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
-
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -29,21 +23,7 @@ export async function onRespUpdate(_component, _props) {
   // Do nothing
 }
 
-export default async function init(component, props) {
-  const cloudTypeEl = component.querySelector('#bu-select-input');
-  const seriesNameEl = component.querySelector('#info-field-series-name');
-  const seriesDescriptionEl = component.querySelector('#info-field-series-description');
-
-  const user = await getUser();
-  const filteredClouds = Object.entries(SUPPORTED_CLOUDS)
-    .filter(([, val]) => userHasAccessToBU(user, val.id));
-  filteredClouds.forEach(([, val]) => {
-    const opt = createTag('sp-menu-item', { value: val.id }, val.name);
-    cloudTypeEl.append(opt);
-  });
-
-  if (cloudTypeEl) cloudTypeEl.removeAttribute('pending');
-
+export default function init(component, props) {
   const data = props.response;
 
   if (data) {
@@ -53,10 +33,11 @@ export default async function init(component, props) {
       seriesDescription,
     } = data;
 
-    if (cloudType) {
-      cloudTypeEl.value = cloudType;
-      cloudTypeEl.disabled = true;
-    }
+    const cloudTypeEl = component.querySelector('#bu-select-input');
+    const seriesNameEl = component.querySelector('#info-field-series-name');
+    const seriesDescriptionEl = component.querySelector('#info-field-series-description');
+
+    if (cloudType) cloudTypeEl.value = cloudType;
     if (seriesName) seriesNameEl.value = seriesName;
     if (seriesDescription) seriesDescriptionEl.value = seriesDescription;
 

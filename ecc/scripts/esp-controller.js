@@ -53,7 +53,7 @@ export const getCaasTags = (() => {
   };
 })();
 
-export function waitForAdobeIMS() {
+function waitForAdobeIMS() {
   const urlParam = new URLSearchParams(window.location.search);
   if (urlParam.has('devToken')) return Promise.resolve();
 
@@ -131,7 +131,7 @@ async function safeFetch(url, options) {
 }
 
 export async function constructRequestOptions(method, body = null) {
-  const secretEnv = ['local', 'dev'].includes(getEventServiceEnv()) ? 'dev' : getEventServiceEnv();
+  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
@@ -190,7 +190,7 @@ export async function constructRequestOptions(method, body = null) {
 }
 
 export async function uploadImage(file, configs, tracker, imageId = null) {
-  const secretEnv = ['local', 'dev'].includes(getEventServiceEnv()) ? 'dev' : getEventServiceEnv();
+  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,

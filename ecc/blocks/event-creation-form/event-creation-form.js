@@ -1074,7 +1074,7 @@ export default async function init(el) {
   ]);
 
   const devToken = getDevToken();
-  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
+  if (devToken && getEventServiceEnv() === 'local') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
     });
