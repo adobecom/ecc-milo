@@ -54,7 +54,12 @@ export const getCaasTags = (() => {
 })();
 
 export function waitForAdobeIMS() {
-  if (getDevToken()) return Promise.resolve();
+  if (getEventServiceEnv() === 'local') {
+    if (getDevToken()) {
+      return Promise.resolve();
+    }
+    return Promise.reject(new Error('Missing authentication token'));
+  }
 
   return new Promise((resolve) => {
     const checkIMS = () => {

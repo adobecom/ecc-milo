@@ -3,7 +3,7 @@
 import { LIBS } from '../../scripts/scripts.js';
 import style from './cmc.css.js';
 import { getIcon } from '../../scripts/utils.js';
-import { updateCloud } from '../../scripts/esp-controller.js';
+import { getCloud, updateCloud } from '../../scripts/esp-controller.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -176,14 +176,25 @@ export default class CloudManagementConsole extends LitElement {
   }
 
   async save() {
-    this.savedTags[this.currentCloud] = this.getSelectedTags().map((tag) => tag.tagID);
+    this.savedTags[this.currentCloud] = this.getSelectedTags().map((tag) => ({
+        tagID: tag.tagID,
+        title: tag.title,
+      }));
     this.pendingChanges = false;
 
-    this.toastState = {
-      open: true,
-      variant: 'positive',
-      text: 'Changes saved',
-    };
+    const cloudData = await getCloud(this.currentCloud);
+    const payload = { tags: this.savedTags[this.currentCloud] };
+
+    const newCloudData = await updateCloud(this.currentCloud, { ...cloudData, ...payload });
+    console.log(newCloudData);
+
+    if (newCloudData) {
+      this.toastState = {
+        open: true,
+        variant: 'positive',
+        text: 'Changes saved',
+      };
+    }
   }
 
   render() {

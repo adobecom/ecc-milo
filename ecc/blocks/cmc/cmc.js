@@ -5,6 +5,17 @@ import CloudManagementConsole from '../../components/cmc/cmc.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
+function deepGetTagByTagID(tags, tagID) {
+  const tagIDs = tagID.replace('caas:', '').split('/');
+  let currentTag = tags;
+
+  tagIDs.forEach((tag) => {
+    currentTag = currentTag.tags[tag];
+  });
+
+  return currentTag;
+}
+
 export default async function init(el) {
   generateToolTip(el);
 
@@ -36,8 +47,15 @@ export default async function init(el) {
   const savedTags = {};
   clouds.forEach((cloud) => {
     const { cloudType, tags } = cloud;
-    savedTags[cloudType] = tags || [];
+
+    if (!tags) return;
+
+    const fullTags = tags.map((tag) => deepGetTagByTagID(caasTags, tag));
+
+    savedTags[cloudType] = fullTags || [];
   });
+
+  console.log(savedTags);
 
   customElements.define('cloud-management-console', CloudManagementConsole);
 
