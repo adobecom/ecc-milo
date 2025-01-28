@@ -20,6 +20,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            console.log('PR Details:', context.payload.pull_request);
             const prDetails = JSON.parse(core.getInput('pr-details'));
             const baseBranch = prDetails.base;
             const targetBranch = prDetails.head;
