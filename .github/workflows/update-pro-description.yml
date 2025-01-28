@@ -21,8 +21,8 @@ jobs:
         with:
           script: |
             const prDetails = core.getInput('pr-details');
-            const baseBranch = prDetails.base;
-            const targetBranch = prDetails.head;
+            const baseBranch = prDetails['base'];
+            const targetBranch = prDetails['head'];
 
             const updatedBody = context.payload.pull_request.body
               .replace('<BASE_BRANCH>', baseBranch)
