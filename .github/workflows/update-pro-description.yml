@@ -14,27 +14,27 @@ jobs:
         with:
           script: |
             const pr = context.payload.pull_request;
-            console.log(pr.base.ref, pr.head.ref);
-            return { base: pr.base.ref, head: pr.head.ref };
+            const details = {
+              base: pr.base.ref,
+              head: pr.head.ref
+            };
+            core.setOutput('base', details.base);
+            core.setOutput('head', details.head);
 
       - name: Update PR Description
         uses: actions/github-script@v6
         with:
           script: |
-            const prDetails = core.getInput('pr-details');
-            console.log(prDetails);
-            const baseBranch = prDetails.base;
-            const targetBranch = prDetails.head;
+            const baseBranch = '${{ steps.pr-details.outputs.base }}';
+            const targetBranch = '${{ steps.pr-details.outputs.head }}';
 
             const updatedBody = context.payload.pull_request.body
               .replace('<BASE_BRANCH>', baseBranch)
               .replace('<TARGET_BRANCH>', targetBranch);
 
-            github.rest.pulls.update({
+            await github.rest.pulls.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
-              body: updatedBody,
+              body: updatedBody
             });
-        env:
-          pr-details: ${{ steps.pr-details.outputs.result }}
