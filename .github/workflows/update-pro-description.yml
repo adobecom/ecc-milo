@@ -14,6 +14,7 @@ jobs:
         with:
           script: |
             const pr = context.payload.pull_request;
+            console.log(pr.base.ref, pr.head.ref);
             return JSON.stringify({ base: pr.base.ref, head: pr.head.ref });
 
       - name: Update PR Description
