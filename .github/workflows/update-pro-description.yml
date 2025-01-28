@@ -2,29 +2,31 @@ name: Update PR Description
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, edited]
 
 jobs:
   update-description:
     runs-on: ubuntu-latest
     steps:
       - name: Get PR Details
-        id: pr
+        id: pr-details
         uses: actions/github-script@v6
         with:
           script: |
             const pr = context.payload.pull_request;
-            console.log('PR Details in get:', pr.base.ref, pr.head.ref);
             return { base: pr.base.ref, head: pr.head.ref };
+        result-encoding: string
+
+      - name: Debug PR Details
+        run: echo "PR Details: ${{ steps.pr-details.outputs.result }}"
 
       - name: Update PR Description
         uses: actions/github-script@v6
         with:
           script: |
-            console.log('core input', core.getInput('pr-details'));
-            const prDetails = core.getInput('pr-details');
-            const baseBranch = prDetails['base'];
-            const targetBranch = prDetails['head'];
+            const prDetails = JSON.parse(core.getInput('pr-details'));
+            const baseBranch = prDetails.base;
+            const targetBranch = prDetails.head;
 
             const updatedBody = context.payload.pull_request.body
               .replace('<BASE_BRANCH>', baseBranch)
@@ -37,4 +39,4 @@ jobs:
               body: updatedBody,
             });
         env:
-          pr-details: ${{ steps.pr.outputs.result }}
+          pr-details: ${{ steps.pr-details.outputs.result }}
