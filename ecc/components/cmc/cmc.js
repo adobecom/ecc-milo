@@ -170,23 +170,26 @@ export default class CloudManagementConsole extends LitElement {
 
     this.currentCloud = cloudType;
     this.currentPath = startingPath;
-    this.selectedTags = new Set(savedCloudTags.map((tag) => this.deepGetTagByTagID(tag)));
+    this.selectedTags = new Set(savedCloudTags.map((tag) => this.deepGetTagByTagID(tag.tagID)));
     this.pendingChanges = false;
     this.requestUpdate();
   }
 
   async save() {
-    this.savedTags[this.currentCloud] = this.getSelectedTags().map((tag) => ({
-        tagID: tag.tagID,
-        title: tag.title,
-      }));
+    this.savedTags[this.currentCloud] = this.getSelectedTags();
     this.pendingChanges = false;
 
     const cloudData = await getCloud(this.currentCloud);
-    const payload = { tags: this.savedTags[this.currentCloud] };
+
+    // translate tagID to caasId, and title to name, and save to cloudData
+    const payload = {
+      tags: this.getSelectedTags().map((tag) => ({
+        caasId: tag.tagID,
+        name: tag.title,
+      })),
+    };
 
     const newCloudData = await updateCloud(this.currentCloud, { ...cloudData, ...payload });
-    console.log(newCloudData);
 
     if (newCloudData && !newCloudData.error) {
       this.toastState = {
@@ -249,6 +252,7 @@ export default class CloudManagementConsole extends LitElement {
             return nothing;
           })}
         </div>
+        ${this.currentCloud ? html`
         <div class="menu-group">
           ${this.currentPath.split('/').map((_p, i, arr) => {
             const tag = this.deepGetTagByPath(arr, i);
@@ -263,7 +267,7 @@ export default class CloudManagementConsole extends LitElement {
 
             return nothing;
           })}
-        </div>
+        </div>` : nothing}
       </div>
     </div>
     <div class="action-bar">

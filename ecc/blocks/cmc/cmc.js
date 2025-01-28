@@ -50,12 +50,10 @@ export default async function init(el) {
 
     if (!tags) return;
 
-    const fullTags = tags.map((tag) => deepGetTagByTagID(caasTags, tag));
+    const fullTags = tags.map((tag) => deepGetTagByTagID(caasTags, tag.caasId));
 
     savedTags[cloudType] = fullTags || [];
   });
-
-  console.log(savedTags);
 
   customElements.define('cloud-management-console', CloudManagementConsole);
 
