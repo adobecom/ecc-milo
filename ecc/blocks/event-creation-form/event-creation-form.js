@@ -771,7 +771,10 @@ function initFormCtas(props) {
       if (['#save', '#next'].includes(ctaUrl.hash)) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
-          const [nextStateText, finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
+          const nextStateText = 'Next step';
+          const finalStateText = 'Publish event';
+          const doneStateText = 'Done';
+          const republishStateText = 'Re-publish event';
 
           cta.textContent = nextStateText;
           cta.append(getIcon('chev-right-white'));
@@ -1071,7 +1074,7 @@ export default async function init(el) {
   ]);
 
   const devToken = getDevToken();
-  if (devToken && getEventServiceEnv() === 'local') {
+  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
     });

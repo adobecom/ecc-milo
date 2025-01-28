@@ -4,7 +4,8 @@ import {
   publishSeries,
   unpublishSeries,
   archiveSeries,
-  getEvents,
+  getSeriesForUser,
+  getEventsForUser,
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
@@ -229,7 +230,7 @@ function initMoreOptions(props, config, seriesObj, row) {
           underlay.open = false;
           dialog.innerHTML = '';
           row.classList.add('pending');
-          const resp = await archiveSeries(seriesObj.seriesId);
+          const resp = await archiveSeries(seriesObj.seriesId, seriesObj);
 
           if (resp.error) {
             row.classList.remove('pending');
@@ -243,7 +244,7 @@ function initMoreOptions(props, config, seriesObj, row) {
           props.paginatedData = newJson.series;
 
           sortData(props, config, { resort: true });
-          showToast(props, config['delete-toast-msg']);
+          showToast(props, config['archive-msg']);
         });
 
         dialogCancelBtn.addEventListener('click', () => {
@@ -575,7 +576,7 @@ async function buildDashboard(el, config) {
     currentSort: {},
   };
 
-  const [{ series }, { events }] = await Promise.all([getAllSeries(), getEvents()]);
+  const [series, events] = await Promise.all([getSeriesForUser(), getEventsForUser()]);
 
   if (!series?.length) {
     buildNoDataScreen(el, config);
@@ -629,7 +630,7 @@ export default async function init(el) {
   buildLoadingScreen(el);
 
   const devToken = getDevToken();
-  if (devToken && getEventServiceEnv() === 'local') {
+  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
     buildDashboard(el, config);
     return;
   }

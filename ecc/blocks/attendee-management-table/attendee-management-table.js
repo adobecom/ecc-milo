@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { getAllEventAttendees, getEventsForUser } from '../../scripts/esp-controller.js';
+import { getAllEventAttendees, getEventImages, getEventsForUser } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -12,7 +12,7 @@ import {
 } from '../../scripts/utils.js';
 import SearchablePicker from '../../components/searchable-picker/searchable-picker.js';
 import FilterMenu from '../../components/filter-menu/filter-menu.js';
-import { getUser, initProfileLogicTree, userHasAccessToEvent } from '../../scripts/profile.js';
+import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -421,7 +421,7 @@ function calculatePercentage(part, total) {
   return `${percentage.toFixed(2)}%`;
 }
 
-function buildEventInfo(props) {
+async function buildEventInfo(props) {
   const eventInfoContainer = props.el.querySelector('.dashboard-header-event-info');
   if (!eventInfoContainer) return;
 
@@ -429,15 +429,31 @@ function buildEventInfo(props) {
   const eventInfo = props.events.find((e) => e.eventId === props.currentEventId);
 
   if (!eventInfo) return;
-  const heroImgObj = eventInfo.photos?.find((p) => p.imageKind === 'event-hero-image');
 
-  // build event image
-  createTag(
-    'div',
-    { class: 'event-image-container' },
-    createTag('img', { class: 'event-image', src: heroImgObj ? heroImgObj.sharepointUrl || heroImgObj.imageUrl : '' }),
-    { parent: eventInfoContainer },
-  );
+  const { photos } = eventInfo;
+
+  if (!photos) {
+    getEventImages(eventInfo.eventId).then(({ images }) => {
+      if (!images) return;
+
+      const heroImgObj = images?.find((p) => p.imageKind === 'event-hero-image');
+
+      const eventImage = createTag(
+        'div',
+        { class: 'event-image-container' },
+        createTag('img', { class: 'event-image', src: heroImgObj ? heroImgObj.sharepointUrl || heroImgObj.imageUrl : '' }),
+      );
+
+      eventInfoContainer.prepend(eventImage);
+    });
+  } else {
+    const heroImgObj = photos?.find((p) => p.imageKind === 'event-hero-image');
+    createTag(
+      'div',
+      { class: 'event-image-container' },
+      createTag('img', { class: 'event-image', src: heroImgObj ? heroImgObj.sharepointUrl || heroImgObj.imageUrl : '' }),
+    );
+  }
 
   const infoContainer = createTag('div', { class: 'event-info-container' }, '', { parent: eventInfoContainer });
   const infoRow = createTag('div', { class: 'event-info-row' }, '', { parent: infoContainer });
@@ -642,7 +658,9 @@ async function buildDashboard(el, config) {
   let data = [];
 
   if (props.currentEventId) {
-    if (userHasAccessToEvent(await getUser(), props.currentEventId)) {
+    const currentEvent = events.find((e) => e.eventId === props.currentEventId);
+    const user = await getUser();
+    if (userHasAccessToEvent(user, props.currentEventId) || userHasAccessToSeries(user, currentEvent.seriesId) || userHasAccessToBU(user, currentEvent.cloudType)) {
       const resp = await getAllEventAttendees(props.currentEventId);
       if (resp && !resp.error) data = resp;
     } else {
@@ -720,7 +738,7 @@ export default async function init(el) {
   buildLoadingScreen(el);
 
   const devToken = getDevToken();
-  if (devToken && getEventServiceEnv() === 'local') {
+  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
     buildDashboard(el, config);
     return;
   }

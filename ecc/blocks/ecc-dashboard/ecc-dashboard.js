@@ -325,29 +325,36 @@ function initMoreOptions(props, config, eventObj, row) {
 
         try {
           url = new URL(`${eventObj.detailPagePath}`);
+        } catch (e) {
+          url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+        }
+
+        if (url) {
           url.searchParams.set('previewMode', 'true');
           url.searchParams.set('cachebuster', Date.now());
           url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
           return url.toString();
-        } catch (e) {
-          previewPre.classList.add('disabled');
-          return '$';
         }
+        return '#';
       })();
       previewPre.target = '_blank';
+
       previewPost.href = (() => {
         let url;
-
         try {
           url = new URL(`${eventObj.detailPagePath}`);
+        } catch (e) {
+          url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+        }
+
+        if (url) {
           url.searchParams.set('previewMode', 'true');
           url.searchParams.set('cachebuster', Date.now());
           url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
           return url.toString();
-        } catch (e) {
-          previewPost.classList.add('disabled');
-          return '#';
         }
+
+        return '#';
       })();
       previewPost.target = '_blank';
     } else {
@@ -379,6 +386,7 @@ function initMoreOptions(props, config, eventObj, row) {
       props.data = newJson;
       props.filteredData = newJson;
       props.paginatedData = newJson;
+
       const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
       if (modTimeHeader) {
         props.currentSort = { field: 'modificationTime', el: modTimeHeader };
@@ -421,9 +429,10 @@ function initMoreOptions(props, config, eventObj, row) {
         }
 
         const newJson = await getEventsForUser();
-        props.data = newJson.events;
-        props.filteredData = newJson.events;
-        props.paginatedData = newJson.events;
+
+        props.data = newJson;
+        props.filteredData = newJson;
+        props.paginatedData = newJson;
 
         sortData(props, config, { resort: true });
         showToast(props, config['delete-event-toast-msg']);
@@ -741,8 +750,10 @@ async function buildDashboard(el, config) {
     const dataHandler = {
       set(target, prop, value, receiver) {
         target[prop] = value;
+
         populateTable(receiver, config);
         updateEventsCount(receiver);
+
         return true;
       },
     };
@@ -782,7 +793,7 @@ export default async function init(el) {
   buildLoadingScreen(el);
 
   const devToken = getDevToken();
-  if (devToken && getEventServiceEnv() === 'local') {
+  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
     buildDashboard(el, config);
     return;
   }
