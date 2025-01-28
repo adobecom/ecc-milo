@@ -21,8 +21,8 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            console.log('core input', core.getInput('pr-details'));
             const prDetails = core.getInput('pr-details');
-            console.log('PR Details in update:', prDetails);
             const baseBranch = prDetails['base'];
             const targetBranch = prDetails['head'];
 
