@@ -14,6 +14,7 @@ jobs:
         with:
           script: |
             const pr = context.payload.pull_request;
+            console.log('PR Details in get:', pr.base.ref, pr.head.ref);
             return { base: pr.base.ref, head: pr.head.ref };
 
       - name: Update PR Description
@@ -21,6 +22,7 @@ jobs:
         with:
           script: |
             const prDetails = core.getInput('pr-details');
+            console.log('PR Details in update:', prDetails);
             const baseBranch = prDetails['base'];
             const targetBranch = prDetails['head'];
 
