@@ -14,13 +14,13 @@ jobs:
         with:
           script: |
             const pr = context.payload.pull_request;
-            return { base: pr.base.ref, head: pr.head.ref };
+            return JSON.stringify({ base: pr.base.ref, head: pr.head.ref });
 
       - name: Update PR Description
         uses: actions/github-script@v6
         with:
           script: |
-            const prDetails = core.getInput('pr-details');
+            const prDetails = JSON.parse(core.getInput('pr-details'));
             const baseBranch = prDetails.base;
             const targetBranch = prDetails.head;
 
