@@ -1,0 +1,34 @@
+name: Update PR Description
+
+on:
+  pull_request:
+    types: [opened, edited]
+
+jobs:
+  update-description:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get PR Details
+        id: pr
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            return { base: pr.base.ref, head: pr.head.ref };
+
+      - name: Update PR Description
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { base, head } = JSON.parse(core.getInput('pr-details'));
+            const updatedBody = context.payload.pull_request.body
+              .replace('<BASE_BRANCH>', base)
+              .replace('<TARGET_BRANCH>', head);
+            github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              body: updatedBody,
+            });
+        env:
+          pr-details: ${{ steps.pr.outputs.result }}
