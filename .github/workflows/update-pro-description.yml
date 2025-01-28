@@ -12,17 +12,18 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const pr = context.payload.pull_request;
-            const baseBranch = pr.base.ref;
-            const targetBranch = pr.head.ref;
+            if (context.payload.pull_request.body.includes('<BASE_BRANCH>')) {
+              const baseBranch = context.payload.pull_request.base.ref;
+              const targetBranch = context.payload.pull_request.head.ref;
 
-            const updatedBody = context.payload.pull_request.body
-              .replace('<BASE_BRANCH>', baseBranch)
-              .replace('<TARGET_BRANCH>', targetBranch);
+              const updatedBody = context.payload.pull_request.body
+                .replace('<BASE_BRANCH>', baseBranch)
+                .replace('<TARGET_BRANCH>', targetBranch);
 
-            github.rest.pulls.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-              body: updatedBody,
-            });
+              github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                body: updatedBody,
+              });
+            }
