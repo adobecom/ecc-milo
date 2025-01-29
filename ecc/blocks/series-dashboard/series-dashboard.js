@@ -4,7 +4,8 @@ import {
   publishSeries,
   unpublishSeries,
   archiveSeries,
-  getEvents,
+  getSeriesForUser,
+  getEventsForUser,
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
@@ -243,7 +244,7 @@ function initMoreOptions(props, config, seriesObj, row) {
           props.paginatedData = newJson.series;
 
           sortData(props, config, { resort: true });
-          showToast(props, config['delete-toast-msg']);
+          showToast(props, config['archive-msg']);
         });
 
         dialogCancelBtn.addEventListener('click', () => {
@@ -575,7 +576,7 @@ async function buildDashboard(el, config) {
     currentSort: {},
   };
 
-  const [{ series }, { events }] = await Promise.all([getAllSeries(), getEvents()]);
+  const [series, events] = await Promise.all([getSeriesForUser(), getEventsForUser()]);
 
   if (!series?.length) {
     buildNoDataScreen(el, config);
@@ -629,8 +630,7 @@ export default async function init(el) {
   buildLoadingScreen(el);
 
   const devToken = getLocalDevToken();
-  if (devToken && getEventServiceEnv() === 'local') {
-    console.log('dev token detected, skipping profile check');
+  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
     buildDashboard(el, config);
     return;
   }

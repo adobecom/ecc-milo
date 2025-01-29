@@ -138,7 +138,10 @@ export function hasContentChanged(oldData, newData) {
     'platform',
     'platformCode',
     'liveUpdate',
+    'externalProvider',
   ];
+
+  const lengthOnlyList = ['speakers'];
 
   // Checking keys counts
   const oldDataKeys = Object.keys(oldData).filter((key) => !ignoreList.includes(key));
@@ -152,7 +155,7 @@ export function hasContentChanged(oldData, newData) {
   // Check for differences in the actual values
   return oldDataKeys.some(
     (key) => {
-      const lengthOnly = key === 'speakers' && !oldData[key].ordinal;
+      const lengthOnly = lengthOnlyList.includes(key) && !oldData[key].ordinal;
 
       return !ignoreList.includes(key) && compareObjects(oldData[key], newData[key], lengthOnly);
     },
