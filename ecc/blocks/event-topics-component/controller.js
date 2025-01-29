@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 import { LIBS } from '../../scripts/scripts.js';
-import { getCaasTags, getMiloTagsData } from '../../scripts/esp-controller.js';
+import { getCloud } from '../../scripts/esp-controller.js';
 import { isEmptyObject } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -17,45 +17,26 @@ async function buildTopicsCheckboxes(el, cloudType) {
 
   cw.innerHTML = '';
   const loadingCircle = createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: cw });
-  if (cloudType === 'CreativeCloud') {
-    const caasTags = await getCaasTags();
+  const currentCloudData = await getCloud(cloudType);
 
-    if (!caasTags) return;
-    const productTags = caasTags.namespaces.caas.tags['product-categories'].tags;
-    Object.values(productTags).forEach((p) => {
-      if (isEmptyObject(p.tags)) return;
-      const button = createTag('sp-action-button', { name: p.title, toggles: true, 'data-value': JSON.stringify(p) }, p.title, { parent: cw });
-      const checkboxIcon = createTag('sp-icon', { size: 's', slot: 'icon' }, addSvg);
-      button.prepend(checkboxIcon);
+  if (!currentCloudData) return;
 
-      button.addEventListener('change', () => {
-        checkboxIcon.innerHTML = button.selected ? checkSvg : addSvg;
-      });
+  const { cloudTags } = currentCloudData;
+
+  Object.values(cloudTags).forEach((tag) => {
+    const { name, caasId } = tag;
+    if (!caasId || !name) return;
+
+    const button = createTag('sp-action-button', { name, toggles: true, 'data-value': JSON.stringify(tag) }, name, { parent: cw });
+    const checkboxIcon = createTag('sp-icon', { size: 's', slot: 'icon' }, addSvg);
+    button.prepend(checkboxIcon);
+
+    button.addEventListener('change', () => {
+      checkboxIcon.innerHTML = button.selected ? checkSvg : addSvg;
     });
-    loadingCircle.remove();
-    el.append(cw);
-  }
+  });
 
-  if (cloudType === 'DX') {
-    const caasTags = await getMiloTagsData(cloudType);
-    const tagType = SUPPORTED_TOPIC_TYPES.find((type) => el.classList.contains(type));
-
-    if (!tagType) return;
-    const productTags = caasTags.filter((t) => t.type === tagType);
-    Object.values(productTags).forEach((topic) => {
-      const { name, tags } = topic;
-      if (!tags) return;
-      const button = createTag('sp-action-button', { name: tags, toggles: true }, name, { parent: cw });
-      const checkboxIcon = createTag('sp-icon', { size: 's', slot: 'icon' }, addSvg);
-      button.prepend(checkboxIcon);
-
-      button.addEventListener('change', () => {
-        checkboxIcon.innerHTML = button.selected ? checkSvg : addSvg;
-      });
-    });
-    loadingCircle.remove();
-    el.append(cw);
-  }
+  loadingCircle.remove();
 }
 
 function prefillTopics(component, eventData) {
