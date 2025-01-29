@@ -1,7 +1,8 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { getCaasTags, getClouds } from '../../scripts/esp-controller.js';
-import { generateToolTip, readBlockConfig } from '../../scripts/utils.js';
+import { buildNoAccessScreen, generateToolTip, getDevToken, getEventServiceEnv, readBlockConfig, signIn } from '../../scripts/utils.js';
 import CloudManagementConsole from '../../components/cmc/cmc.js';
+import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -16,13 +17,16 @@ function deepGetTagByTagID(tags, tagID) {
   return currentTag;
 }
 
-export default async function init(el) {
-  generateToolTip(el);
+function buildLoadingScreen(el) {
+  el.classList.add('loading');
+  const loadingScreen = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'loading-screen' });
+  createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: loadingScreen });
+  createTag('sp-field-label', {}, 'Loading Adobe Events Cloud Management Console...', { parent: loadingScreen });
 
-  const blockConfig = readBlockConfig(el);
+  el.prepend(loadingScreen);
+}
 
-  el.innerHTML = '';
-
+async function buildCMC(el, blockConfig) {
   await Promise.all([
     import(`${LIBS}/deps/lit-all.min.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/theme.js`),
@@ -62,4 +66,31 @@ export default async function init(el) {
   tagManager.savedTags = savedTags;
   tagManager.config = blockConfig;
   tagManager.clouds = clouds;
+}
+
+export default async function init(el) {
+  generateToolTip(el);
+
+  const blockConfig = readBlockConfig(el);
+
+  el.innerHTML = '';
+  buildLoadingScreen(el);
+
+  const devToken = getDevToken();
+  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
+    buildCMC(el, blockConfig);
+    return;
+  }
+
+  await initProfileLogicTree('cmc', {
+    noProfile: () => {
+      signIn();
+    },
+    noAccessProfile: () => {
+      buildNoAccessScreen(el);
+    },
+    validProfile: () => {
+      buildCMC(el, blockConfig);
+    },
+  });
 }
