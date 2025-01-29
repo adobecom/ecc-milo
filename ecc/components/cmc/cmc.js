@@ -3,6 +3,7 @@
 import { LIBS } from '../../scripts/scripts.js';
 import style from './cmc.css.js';
 import { getIcon } from '../../scripts/utils.js';
+import { getCloud, updateCloud } from '../../scripts/esp-controller.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -13,6 +14,7 @@ export default class CloudManagementConsole extends LitElement {
   static styles = style;
 
   static properties = {
+    clouds: { type: Array },
     currentCloud: { type: String },
     tags: { type: Object },
     currentPath: { type: String },
@@ -168,21 +170,34 @@ export default class CloudManagementConsole extends LitElement {
 
     this.currentCloud = cloudType;
     this.currentPath = startingPath;
-    this.selectedTags = new Set(savedCloudTags.map((tag) => this.deepGetTagByTagID(tag)));
+    this.selectedTags = new Set(savedCloudTags.map((tag) => this.deepGetTagByTagID(tag.tagID)));
     this.pendingChanges = false;
     this.requestUpdate();
   }
 
-  save() {
-    this.savedTags[this.currentCloud] = this.getSelectedTags().map((tag) => tag.tagID);
+  async save() {
+    this.savedTags[this.currentCloud] = this.getSelectedTags();
     this.pendingChanges = false;
 
-    this.toastState = {
-      open: true,
-      variant: 'positive',
-      text: 'Changes saved',
+    const cloudData = await getCloud(this.currentCloud);
+
+    // translate tagID to caasId, and title to name, and save to cloudData
+    const payload = {
+      cloudTags: this.getSelectedTags().map((tag) => ({
+        caasId: tag.tagID,
+        name: tag.title,
+      })),
     };
-    // save to the server
+
+    const newCloudData = await updateCloud(this.currentCloud, { ...cloudData, ...payload });
+
+    if (newCloudData && !newCloudData.error) {
+      this.toastState = {
+        open: true,
+        variant: 'positive',
+        text: 'Changes saved',
+      };
+    }
   }
 
   render() {
@@ -204,9 +219,9 @@ export default class CloudManagementConsole extends LitElement {
     <div class="tag-manager">
       <sp-picker class="cloud-type-picker" @change=${(e) => this.switchCloudType(e.target.value)} label="Selected a Cloud type">
         <sp-menu>
-          <sp-menu-item value="CreativeCloud" ?active=${this.currentCloud === 'CreativeCloud'}>Creative Cloud</sp-menu-item>
-          <sp-menu-item value="DX" ?active=${this.currentCloud === 'DX'}>Experience Cloud</sp-menu-item>
-          <sp-menu-item value="DocumentCloud" ?active=${this.currentCloud === 'DocumentCloud'}>Document Cloud</sp-menu-item>
+          ${repeat(this.clouds.values(), (cloud) => html`
+            <sp-menu-item value="${cloud.cloudType}" ?active=${this.currentCloud === cloud.cloudType}>${cloud.cloudName}</sp-menu-item>
+          `)}
         </sp-menu>
       </sp-picker>
 
@@ -237,6 +252,7 @@ export default class CloudManagementConsole extends LitElement {
             return nothing;
           })}
         </div>
+        ${this.currentCloud ? html`
         <div class="menu-group">
           ${this.currentPath.split('/').map((_p, i, arr) => {
             const tag = this.deepGetTagByPath(arr, i);
@@ -251,16 +267,16 @@ export default class CloudManagementConsole extends LitElement {
 
             return nothing;
           })}
-        </div>
+        </div>` : nothing}
       </div>
     </div>
     <div class="action-bar">
         <sp-toast ?open=${this.toastState.open} variant=${this.toastState.variant} size="m" timeout="6000">${this.toastState.text}</sp-toast>
-        <sp-button variant="secondary" size="l" ?disabled=${!this.pendingChanges} @click=${() => {
+        <sp-button variant="secondary" size="l" ?disabled=${!this.pendingChanges || !this.currentCloud} @click=${() => {
           const fullSavedTags = this.savedTags[this.currentCloud]?.map((tag) => this.deepGetTagByTagID(tag)) || [];
           this.selectedTags = new Set(fullSavedTags); this.pendingChanges = false;
         }}>Cancel</sp-button>
-        <sp-button variant="primary" size="l" ?disabled=${!this.pendingChanges} @click=${this.save}>Save</sp-button>
+        <sp-button variant="primary" size="l" ?disabled=${!this.pendingChanges || !this.currentCloud} @click=${this.save}>Save</sp-button>
     </div>
     `;
   }
