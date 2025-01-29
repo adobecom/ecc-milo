@@ -46,11 +46,11 @@ export default async function init(el) {
 
   const savedTags = {};
   clouds.forEach((cloud) => {
-    const { cloudType, tags } = cloud;
+    const { cloudType, cloudTags } = cloud;
 
-    if (!tags) return;
+    if (!cloudTags) return;
 
-    const fullTags = tags.map((tag) => deepGetTagByTagID(caasTags, tag.caasId));
+    const fullTags = cloudTags.map((tag) => deepGetTagByTagID(caasTags, tag.caasId));
 
     savedTags[cloudType] = fullTags || [];
   });

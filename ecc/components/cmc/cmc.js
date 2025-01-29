@@ -183,7 +183,7 @@ export default class CloudManagementConsole extends LitElement {
 
     // translate tagID to caasId, and title to name, and save to cloudData
     const payload = {
-      tags: this.getSelectedTags().map((tag) => ({
+      cloudTags: this.getSelectedTags().map((tag) => ({
         caasId: tag.tagID,
         name: tag.title,
       })),
