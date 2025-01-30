@@ -68,7 +68,6 @@ export function onSubmit(component, props) {
 
   const { payload } = props;
   payload.pendingTopics = { ...payload.topics, [topicType]: pendingTopics };
-  payload.tags = { ...payload.tags, ...tagIds };
   props.payload = payload;
 }
 

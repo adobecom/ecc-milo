@@ -24,46 +24,6 @@ export function onSubmit(component, props) {
 }
 
 async function updateProductSelector(component, props) {
-  const supportedProducts = [
-    'Acrobat Pro',
-    'Acrobat Reader',
-    'Adobe Express',
-    'Adobe Firefly',
-    'Adobe Fonts',
-    'Adobe Photoshop',
-    'Adobe Substance 3D Collection',
-    'Adobe Stock',
-    'Aero',
-    'After Effects',
-    'AI Assistant for Acrobat',
-    'Animate',
-    'Audition',
-    'Behance',
-    'Bridge',
-    'Capture',
-    'Character Animator',
-    'Color',
-    'Creative Cloud Libraries',
-    'Dimension',
-    'Dreamweaver',
-    'Fill & Sign',
-    'Firefly',
-    'Frame.io',
-    'Fresco',
-    'Illustrator',
-    'InCopy',
-    'InDesign',
-    'Lightroom',
-    'Lightroom Classic',
-    'Media Encoder',
-    'Photoshop',
-    'Photoshop Express',
-    'Portfolio',
-    'Premiere Pro',
-    'Premiere Rush',
-    'Scan',
-    'Substance 3D Collection',
-  ];
   const caasTags = await getCaasTags();
   if (!caasTags) return;
 
