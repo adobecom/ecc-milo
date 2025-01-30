@@ -67,7 +67,9 @@ export function onSubmit(component, props) {
   if (pendingTopics.length === 0) return;
 
   const { payload } = props;
+  console.log('old payload', payload);
   payload.pendingTopics = { ...payload.topics, [topicType]: pendingTopics };
+  console.log('updated payload', payload);
   props.payload = payload;
 }
 
