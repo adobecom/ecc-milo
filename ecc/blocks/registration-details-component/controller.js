@@ -16,7 +16,7 @@ const contentMap = {
       tooltipText: 'Contact host is optional.',
     },
   },
-  DX: {
+  ExperienceCloud: {
     tooltipText: 'Dx events are waitlist only. Call-to-action buttons are will only allow waitlisting.',
     eventLimit: {
       inputLabelText: 'Attendee limit',
@@ -233,7 +233,7 @@ export async function onPayloadUpdate(component, props) {
       buildCreativeCloudFields(component);
     }
 
-    if (cloudType === 'DX') {
+    if (cloudType === 'ExperienceCloud') {
       switch (eventType) {
         case 'InPerson':
           buildExperienceCloudInPersonFields(component);
@@ -248,7 +248,7 @@ export async function onPayloadUpdate(component, props) {
 
     updateHeadingTooltip(component);
   } else if (eventType && eventType !== component.dataset.eventType) {
-    if (cloudType === 'DX') {
+    if (cloudType === 'ExperienceCloud') {
       switch (eventType) {
         case 'InPerson':
           buildExperienceCloudInPersonFields(component);
@@ -277,7 +277,7 @@ export default function init(component, props) {
     case 'CreativeCloud':
       buildCreativeCloudFields(component);
       break;
-    case 'DX':
+    case 'ExperienceCloud':
       switch (component.dataset.eventType) {
         case 'InPerson':
           buildExperienceCloudInPersonFields(component);

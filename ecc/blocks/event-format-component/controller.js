@@ -92,6 +92,9 @@ async function populateSeriesOptions(props, component) {
 
 function toggleFormatSelect(component) {
   const formatSelect = component.querySelector('.format-picker-wrapper');
+
+  if (!formatSelect) return;
+
   formatSelect.classList.toggle('hidden', component.dataset.cloudType !== 'ExperienceCloud');
 }
 
@@ -139,7 +142,7 @@ function initCloudTypeSelect(props, component) {
   });
 }
 
-async function initDupCheck(component) {
+async function initDupCheck(props, component) {
   const currentCloudType = component.dataset.cloudType;
   const seriesSelect = component.querySelector('#series-select-input');
 
@@ -162,7 +165,7 @@ async function initDupCheck(component) {
   });
 
   seriesSelect.pending = false;
-  seriesSelect.disabled = filteredSeries.length === 0;
+  seriesSelect.disabled = filteredSeries.length === 0 || props.eventDataResp.seriesId;
 
   seriesSelect.addEventListener('change', () => {
     const seriesId = seriesSelect.value;
@@ -188,7 +191,7 @@ export default async function init(component, props) {
   initCloudTypeSelect(props, component);
   prepopulateTimeZone(component);
   toggleFormatSelect(component);
-  await initDupCheck(component);
+  await initDupCheck(props, component);
   initStepLock(component);
 
   const {
@@ -211,7 +214,7 @@ export default async function init(component, props) {
 
 function getTemplateId(bu) {
   switch (bu) {
-    case 'DX':
+    case 'ExperienceCloud':
       return '/events/fragments/event-templates/dx/simple';
     case 'CreativeCloud':
     default:
@@ -224,7 +227,8 @@ export function onSubmit(component, props) {
 
   const cloudType = component.querySelector('#bu-select-input').value;
   const seriesId = component.querySelector('#series-select-input')?.value;
-  const eventType = component.querySelector('#format-select-input')?.value;
+  // FIXME: format select should be front loaded into a dropdown on create event button
+  const eventType = component.querySelector('#format-select-input')?.value || 'InPerson';
   const templateId = getTemplateId(cloudType);
 
   const eventFormat = {

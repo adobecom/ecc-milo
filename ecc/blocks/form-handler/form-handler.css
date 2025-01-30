@@ -526,7 +526,7 @@
   transform: translateX(16px);
 }
 
-.form-handler .form-component.dme-only[data-cloud-type='DX'],
+.form-handler .form-component.dme-only[data-cloud-type='ExperienceCloud'],
 .form-handler .form-component.dx-only[data-cloud-type='CreativeCloud'] {
   display: none;
 }

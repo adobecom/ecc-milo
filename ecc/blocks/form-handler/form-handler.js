@@ -975,7 +975,7 @@ function toggleSections(props) {
     const allComponentsHidden = Array.from(section.querySelectorAll('.form-component')).every((fc) => {
       const hasHiddenClass = fc.classList.contains('hidden');
       const isCloudMismatch = (fc.classList.contains('dx-only') && fc.dataset.cloudType === 'CreativeCloud')
-       || (fc.classList.contains('dme-only') && fc.dataset.cloudType === 'DX');
+       || (fc.classList.contains('dme-only') && fc.dataset.cloudType === 'ExperienceCloud');
 
       return hasHiddenClass || isCloudMismatch;
     });

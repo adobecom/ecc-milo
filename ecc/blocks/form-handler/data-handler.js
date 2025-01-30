@@ -12,6 +12,7 @@ const submissionFilter = [
   'templateId',
   'communityTopicUrl',
   'title',
+  'tags',
   'description',
   'localStartDate',
   'localEndDate',
