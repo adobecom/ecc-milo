@@ -52,16 +52,16 @@ export function quickFilter(obj) {
 
 export function setPayloadCache(payload) {
   if (!payload) return;
+
   payloadCache = quickFilter(payload);
-}
 
-export function getFilteredCachedPayload() {
-  const { pendingTopics } = payloadCache;
-
+  const { pendingTopics } = payload;
   if (pendingTopics) {
     payloadCache.topics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
   }
+}
 
+export function getFilteredCachedPayload() {
   return payloadCache;
 }
 

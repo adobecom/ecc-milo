@@ -14,7 +14,6 @@ export function onSubmit(component, props) {
       .map((p) => ({
         name: p.title,
         showProductBlade: !!p.showProductBlade,
-        tags: p.tags.map((t) => t.tagID).join(','),
       }));
 
     props.payload = { ...props.payload, relatedProducts };
@@ -79,7 +78,6 @@ export default async function init(component, props) {
       name: handlize(p.name),
       title: p.name,
       showProductBlade: !!p.showProductBlade,
-      tags: p.tags.split(',').map((tagID) => ({ tagID })),
     }));
 
     productGroup.selectedProducts = selectedProducts;

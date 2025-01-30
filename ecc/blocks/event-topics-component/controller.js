@@ -46,9 +46,10 @@ function prefillTopics(component, eventData) {
   if (!eventData.topics || eventData.topics.length === 0) return selectedButtons;
 
   actionButtons.forEach((cb) => {
-    const { name } = cb;
+    const name = cb.getAttribute('name');
     if (eventData.topics.includes(name)) {
       cb.selected = true;
+      cb.dispatchEvent(new Event('change'));
       selectedButtons.push(name);
     }
   });
@@ -62,22 +63,32 @@ export function onSubmit(component, props) {
   const selectedButtons = component.querySelectorAll('sp-action-button[selected]');
   const pendingTopics = Array.from(selectedButtons).map((cb) => cb.getAttribute('name'));
   const topicType = SUPPORTED_TOPIC_TYPES.find((type) => component.classList.contains(type));
-  const tagIds = Array.from(selectedButtons).map((cb) => JSON.parse(cb.getAttribute('data-value')).caasId);
+  const tags = Array.from(selectedButtons).map((cb) => JSON.parse(cb.getAttribute('data-value')));
 
   if (pendingTopics.length === 0) return;
 
   const { payload } = props;
-  console.log('old payload', payload);
   payload.pendingTopics = { ...payload.topics, [topicType]: pendingTopics };
-  console.log('updated payload', payload);
+  const existingTags = payload.tags ? payload.tags.split(',') : [];
+  payload.tags = [...new Set([...existingTags, ...tags.map((tag) => tag.caasId)])].join(',');
   props.payload = payload;
 }
 
 export async function onPayloadUpdate(component, props) {
   const { cloudType } = props.payload;
+  const eventData = props.eventDataResp;
 
   if (cloudType && cloudType !== component.dataset.cloudType) {
     await buildTopicsCheckboxes(component, cloudType);
+
+    const prefilledTopics = prefillTopics(component, eventData);
+    const topicType = SUPPORTED_TOPIC_TYPES.find((type) => component.classList.contains(type));
+
+    const { payload } = props;
+    payload[topicType] = payload.prefilledTopics;
+    props.payload = payload;
+
+    if (prefilledTopics.length) component.classList.add('prefilled');
     component.dataset.cloudType = cloudType;
   }
 }
