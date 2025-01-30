@@ -6,6 +6,15 @@ import { changeInputValue } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
+function filterSeries(series, currentCloud) {
+  return Object.values(series).filter((s) => {
+    const hasRequiredVals = s.seriesId && s.seriesName;
+    const isPublished = s.seriesStatus?.toLowerCase() === 'published';
+    const isInCurrentCloud = s.cloudType === currentCloud;
+    return hasRequiredVals && isPublished && isInCurrentCloud;
+  });
+}
+
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   if (!currentTimeZone) return;
@@ -36,9 +45,9 @@ function initStepLock(component) {
 
     componentSections.forEach((s) => {
       if (s !== component.closest('.section')) {
-        s.classList.toggle('hidden', !inputsFilled);
+        s.classList.toggle('disabled', !inputsFilled);
       }
-      topicsComponent?.classList.toggle('hidden', !inputsFilled);
+      topicsComponent?.classList.toggle('disabled', !inputsFilled);
     });
   };
 
@@ -67,15 +76,7 @@ async function populateSeriesOptions(props, component) {
   const existingOptions = seriesSelect.querySelectorAll('sp-menu-item');
   existingOptions.forEach((opt) => opt.remove());
 
-  const filteredSeries = Object.values(series).filter((s) => {
-    const hasRequiredVals = s.seriesId && s.seriesName;
-    const isPublished = s.seriesStatus?.toLowerCase() === 'published';
-
-    const currentCloud = props.eventDataResp.cloudType || props.payload.cloudType;
-    const isInCurrentCloud = s.cloudType === currentCloud;
-
-    return hasRequiredVals && isPublished && isInCurrentCloud;
-  });
+  const filteredSeries = filterSeries(series, component.dataset.cloudType);
 
   filteredSeries.forEach((val) => {
     if (!val.seriesId || !val.seriesName) return;
@@ -91,7 +92,7 @@ async function populateSeriesOptions(props, component) {
 
 function toggleFormatSelect(component) {
   const formatSelect = component.querySelector('.format-picker-wrapper');
-  formatSelect.classList.toggle('hidden', component.dataset.cloudType !== 'DX');
+  formatSelect.classList.toggle('hidden', component.dataset.cloudType !== 'ExperienceCloud');
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -139,7 +140,7 @@ function initCloudTypeSelect(props, component) {
 }
 
 async function initDupCheck(component) {
-  const buSelect = component.querySelector('#bu-select-input');
+  const currentCloudType = component.dataset.cloudType;
   const seriesSelect = component.querySelector('#series-select-input');
 
   const series = await getSeriesForUser();
@@ -150,11 +151,9 @@ async function initDupCheck(component) {
     return;
   }
 
-  Object.values(series).filter((s) => {
-    const hasRequiredVals = s.seriesId && s.seriesName;
-    const isPublished = s.seriesStatus?.toLowerCase() === 'published';
-    return hasRequiredVals && isPublished;
-  }).forEach((val) => {
+  const filteredSeries = filterSeries(series, currentCloudType);
+
+  filteredSeries.forEach((val) => {
     if (!val.seriesId || !val.seriesName) return;
     if (val.seriesStatus?.toLowerCase() !== 'published') return;
 
@@ -163,6 +162,7 @@ async function initDupCheck(component) {
   });
 
   seriesSelect.pending = false;
+  seriesSelect.disabled = filteredSeries.length === 0;
 
   seriesSelect.addEventListener('change', () => {
     const seriesId = seriesSelect.value;
@@ -188,8 +188,8 @@ export default async function init(component, props) {
   initCloudTypeSelect(props, component);
   prepopulateTimeZone(component);
   toggleFormatSelect(component);
+  await initDupCheck(component);
   initStepLock(component);
-  initDupCheck(component);
 
   const {
     cloudType,

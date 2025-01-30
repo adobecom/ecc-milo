@@ -462,6 +462,11 @@
   display: none;
 }
 
+.form-handler .section.disabled,
+.form-handler .form-component.disabled {
+  display: none;
+}
+
 .form-handler:not(.loading) .loading-screen {
   opacity: 0;
   z-index: -1;

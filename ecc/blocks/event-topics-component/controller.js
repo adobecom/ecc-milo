@@ -2,7 +2,6 @@
 
 import { LIBS } from '../../scripts/scripts.js';
 import { getCloud } from '../../scripts/esp-controller.js';
-import { isEmptyObject } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -13,18 +12,19 @@ const checkSvg = '<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0
 async function buildTopicsCheckboxes(el, cloudType) {
   if (!el || !cloudType) return;
 
-  const cw = el.querySelector('.checkbox-wrapper') || createTag('div', { class: 'checkbox-wrapper' });
+  const cw = el.querySelector('.checkbox-wrapper') || createTag('div', { class: 'checkbox-wrapper' }, '', { parent: el });
 
   cw.innerHTML = '';
   const loadingCircle = createTag('sp-progress-circle', { size: 'l', indeterminate: true }, '', { parent: cw });
   const currentCloudData = await getCloud(cloudType);
 
-  if (!currentCloudData) return;
+  if (!currentCloudData || currentCloudData.error) return;
 
   const { cloudTags } = currentCloudData;
 
-  Object.values(cloudTags).forEach((tag) => {
+  cloudTags.forEach((tag) => {
     const { name, caasId } = tag;
+
     if (!caasId || !name) return;
 
     const button = createTag('sp-action-button', { name, toggles: true, 'data-value': JSON.stringify(tag) }, name, { parent: cw });
@@ -73,6 +73,7 @@ export function onSubmit(component, props) {
 export async function onPayloadUpdate(component, props) {
   const { cloudType } = props.payload;
 
+  console.log(cloudType);
   if (cloudType && cloudType !== component.dataset.cloudType) {
     await buildTopicsCheckboxes(component, cloudType);
     component.dataset.cloudType = cloudType;
@@ -87,15 +88,17 @@ export default async function init(component, props) {
   component.dataset.cloudType = props.payload.cloudType;
   const eventData = props.eventDataResp;
 
-  await buildTopicsCheckboxes(component, component.dataset.cloudType);
-  const prefilledTopics = prefillTopics(component, eventData);
-  const topicType = SUPPORTED_TOPIC_TYPES.find((type) => component.classList.contains(type));
+  if (props.payload.cloudType) {
+    await buildTopicsCheckboxes(component, props.payload.cloudType);
+    const prefilledTopics = prefillTopics(component, eventData);
+    const topicType = SUPPORTED_TOPIC_TYPES.find((type) => component.classList.contains(type));
 
-  const { payload } = props;
-  payload[topicType] = payload.prefilledTopics;
-  props.payload = payload;
+    const { payload } = props;
+    payload[topicType] = payload.prefilledTopics;
+    props.payload = payload;
 
-  if (prefilledTopics.length) component.classList.add('prefilled');
+    if (prefilledTopics.length) component.classList.add('prefilled');
+  }
 }
 
 export function onTargetUpdate(component, props) {
