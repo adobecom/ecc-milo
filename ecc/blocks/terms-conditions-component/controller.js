@@ -34,8 +34,8 @@ async function loadPreview(component, templateId) {
   if (existingPreview) return;
 
   let host;
-  if (window.location.href.includes('.hlx.')) {
-    host = window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.hlx.page`);
+  if (window.location.hostname.includes('.hlx.') || window.location.hostname.includes('.aem.')) {
+    host = window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.aem.page`);
   } else {
     host = window.location.origin;
   }
