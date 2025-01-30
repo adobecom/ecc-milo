@@ -73,7 +73,6 @@ export function onSubmit(component, props) {
 export async function onPayloadUpdate(component, props) {
   const { cloudType } = props.payload;
 
-  console.log(cloudType);
   if (cloudType && cloudType !== component.dataset.cloudType) {
     await buildTopicsCheckboxes(component, cloudType);
     component.dataset.cloudType = cloudType;
