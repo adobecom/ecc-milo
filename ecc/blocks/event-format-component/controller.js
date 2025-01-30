@@ -75,7 +75,6 @@ async function populateSeriesOptions(props, component, cloud = null) {
     return hasRequiredVals && isPublished && isInCurrentCloud;
   });
 
-  console.log('filteredSeries', filteredSeries);
   filteredSeries.forEach((val) => {
     if (!val.seriesId || !val.seriesName) return;
     if (val.seriesStatus?.toLowerCase() !== 'published') return;

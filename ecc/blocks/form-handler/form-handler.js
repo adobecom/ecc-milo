@@ -14,6 +14,7 @@ import {
   updateEvent,
   publishEvent,
   getEvent,
+  previewEvent,
 } from '../../scripts/esp-controller.js';
 import ImageDropzone from '../../components/image-dropzone/image-dropzone.js';
 import Profile from '../../components/profile/profile.js';
@@ -26,7 +27,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedData, { getFilteredCachedResponse, hasContentChanged, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 import CustomSearch from '../../components/custom-search/custom-search.js';
 
@@ -682,17 +683,9 @@ async function getNonProdPreviewDataById(props) {
   return null;
 }
 
-async function validatePreview(props, oldResp, cta) {
+async function validatePreview(props, cta) {
   let retryCount = 0;
   const previewHref = cta.href;
-
-  const currentData = { ...props.eventDataResp };
-  const oldData = { ...oldResp };
-
-  if (!hasContentChanged(currentData, oldData) || !Object.keys(oldData).length) {
-    window.open(previewHref);
-    return Promise.resolve();
-  }
 
   const modificationTimeMatch = (metadataObj) => {
     const metadataModTimestamp = new Date(metadataObj['modification-time']).getTime();
@@ -759,7 +752,6 @@ function initFormCtas(props) {
     });
   };
 
-  let oldResp = { ...props.eventDataResp };
   ctas.forEach((cta) => {
     if (cta.href) {
       const ctaUrl = new URL(cta.href);
@@ -769,8 +761,22 @@ function initFormCtas(props) {
         cta.addEventListener('click', async (e) => {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
+
+          const resp = await previewEvent(
+            getFilteredCachedResponse().eventId,
+            getJoinedData(),
+          );
+
+          props.eventDataResp = { ...props.eventDataResp, ...resp };
+
+          if (resp?.eventId) await handleEventUpdate(props);
+
+          if (!resp.error) {
+            showSaveSuccessMessage(props);
+          }
+
           if (cta.classList.contains('preview-not-ready')) return;
-          validatePreview(props, oldResp, cta).then(() => {
+          validatePreview(props, cta).then(() => {
             toggleBtnsSubmittingState(false);
           });
         });
@@ -799,10 +805,8 @@ function initFormCtas(props) {
           if (ctaUrl.hash === '#next') {
             let resp;
             if (props.currentStep === props.maxStep) {
-              oldResp = { ...props.eventDataResp };
               resp = await saveEvent(props, true);
             } else {
-              oldResp = { ...props.eventDataResp };
               resp = await saveEvent(props);
             }
 
@@ -837,7 +841,6 @@ function initFormCtas(props) {
               navigateForm(props);
             }
           } else {
-            oldResp = { ...props.eventDataResp };
             const resp = await saveEvent(props);
             if (resp?.error) {
               buildErrorMessage(props, resp);
@@ -852,7 +855,6 @@ function initFormCtas(props) {
 
   backBtn.addEventListener('click', async () => {
     toggleBtnsSubmittingState(true);
-    oldResp = { ...props.eventDataResp };
     const resp = await saveEvent(props);
     if (resp?.error) {
       buildErrorMessage(props, resp);

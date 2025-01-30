@@ -831,7 +831,7 @@ export async function updateEvent(eventId, payload) {
   if (!payload || typeof payload !== 'object') throw new Error('Invalid event payload');
 
   const { host } = API_CONFIG.esl[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...payload, liveUpdate: false });
+  const raw = JSON.stringify({ ...payload, liveUpdate: false, forceSpWrite: false });
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -855,7 +855,12 @@ export async function publishEvent(eventId, payload) {
   if (!payload || typeof payload !== 'object') throw new Error('Invalid event payload');
 
   const { host } = API_CONFIG.esl[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...payload, published: true, liveUpdate: true });
+  const raw = JSON.stringify({
+    ...payload,
+    published: true,
+    liveUpdate: true,
+    forceSpWrite: false,
+  });
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -879,7 +884,12 @@ export async function unpublishEvent(eventId, payload) {
   if (!payload || typeof payload !== 'object') throw new Error('Invalid event payload');
 
   const { host } = API_CONFIG.esl[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...payload, published: false, liveUpdate: true });
+  const raw = JSON.stringify({
+    ...payload,
+    published: false,
+    liveUpdate: true,
+    forceSpWrite: false,
+  });
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -894,6 +904,34 @@ export async function unpublishEvent(eventId, payload) {
     return data.espProvider || data;
   } catch (error) {
     window.lana?.log(`Failed to unpublish event ${eventId}. Error:`, error);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function previewEvent(eventId, payload) {
+  if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
+  if (!payload || typeof payload !== 'object') throw new Error('Invalid event payload');
+
+  const { host } = API_CONFIG.esl[getEventServiceEnv()];
+  const raw = JSON.stringify({
+    ...payload,
+    liveUpdate: false,
+    forceSpWrite: true,
+  });
+  const options = await constructRequestOptions('PUT', raw);
+
+  try {
+    const response = await safeFetch(`${host}/v1/events/${eventId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to preview event ${eventId}. Status:`, response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return data.espProvider || data;
+  } catch (error) {
+    window.lana?.log(`Failed to preview event ${eventId}. Error:`, error);
     return { status: 'Network Error', error: error.message };
   }
 }
