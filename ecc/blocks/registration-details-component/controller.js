@@ -43,8 +43,7 @@ function prefillFields(component, props) {
   const hostEmailEl = component.querySelector('#event-host-email-input');
   const attendeeLimitEl = component.querySelector('#attendee-count-input');
   const allowWaitlistEl = component.querySelector('#registration-allow-waitlist');
-  const signInRequiredEl = component.querySelector('#registration-login-required');
-  // TODO: map signInRequired to correct backend attribute
+  const allowGuestRegistrationEl = component.querySelector('#allow-guest-registration');
   const descriptionEl = component.querySelector('#rsvp-form-detail-description');
 
   const eventData = props.eventDataResp;
@@ -54,6 +53,7 @@ function prefillFields(component, props) {
       allowWaitlisting,
       hostEmail,
       rsvpDescription,
+      allowGuestRegistration,
     } = eventData;
 
     if (attendeeLimitEl && attendeeLimit) attendeeLimitEl.value = attendeeLimit;
@@ -63,8 +63,13 @@ function prefillFields(component, props) {
       if (contactHostEl) contactHostEl.checked = true;
       if (hostEmailEl) hostEmailEl.value = hostEmail;
     }
+    if (allowGuestRegistrationEl) allowGuestRegistrationEl.checked = allowGuestRegistration;
 
-    if (attendeeLimit || allowWaitlisting || hostEmail || rsvpDescription) {
+    if (attendeeLimit
+      || allowWaitlisting
+      || hostEmail
+      || rsvpDescription
+      || allowGuestRegistrationEl) {
       component.classList.add('prefilled');
     }
   }
@@ -147,7 +152,7 @@ function decorateLoginRequirementToggle(component) {
   const rightCol = createTag('div', { class: 'right-col' });
 
   const loginRequirementWrapper = createTag('div', { class: 'login-requirement-wrapper' });
-  const fieldset = decorateSwitchFieldset({ id: 'registration-login-required' }, 'Require login to register');
+  const fieldset = decorateSwitchFieldset({ id: 'allow-guest-registration' }, 'Allow Guest Registration');
   rightCol.append(fieldset);
   loginRequirementWrapper.append(leftCol, rightCol);
 
@@ -183,14 +188,14 @@ export function onSubmit(component, props) {
   const contactHostInput = component.querySelector('#registration-contact-host');
   const hostEmailInput = component.querySelector('#event-host-email-input');
   const rsvpDescriptionInput = component.querySelector('#rsvp-form-detail-description');
-  const signInRequiredInput = component.querySelector('#registration-login-required');
+  const guestRegistrationInput = component.querySelector('#allow-guest-registration');
 
   const attendeeLimitVal = attendeeCountInput ? attendeeCountInput.value?.trim() : null;
   const allowWaitlisting = allowWaitlistingInput?.checked;
   const contactHost = contactHostInput?.checked;
   const hostEmail = hostEmailInput?.value?.trim();
   const rsvpDescription = rsvpDescriptionInput?.value || '';
-  const signInRequired = signInRequiredInput ? signInRequiredInput.checked : true;
+  const allowGuestRegistration = guestRegistrationInput ? guestRegistrationInput.checked : true;
 
   const attendeeLimit = Number.isNaN(+attendeeLimitVal) ? null : +attendeeLimitVal;
 
@@ -198,7 +203,7 @@ export function onSubmit(component, props) {
 
   rsvpData.rsvpDescription = rsvpDescription;
   rsvpData.allowWaitlisting = !!allowWaitlisting;
-  rsvpData.signInRequired = !!signInRequired;
+  rsvpData.allowGuestRegistration = !!allowGuestRegistration;
   if (contactHost && hostEmail) rsvpData.hostEmail = hostEmail;
   if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
 
