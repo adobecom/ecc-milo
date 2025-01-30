@@ -6,19 +6,6 @@ import { changeInputValue } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
-// FIXME: mocking with complete list
-function filterSeriesBasedOnCloudType(series, cloudType) {
-  if (!cloudType) return [];
-  let filteredSeries = Object.values(series).filter((s) => s.cloudType === cloudType);
-
-  // FIXME: remove mock fallback
-  if (filteredSeries.length === 0) {
-    filteredSeries = Object.values(series);
-  }
-
-  return filteredSeries;
-}
-
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   if (!currentTimeZone) return;
@@ -62,7 +49,7 @@ function initStepLock(component) {
   onFormatChange();
 }
 
-async function populateSeriesOptions(component) {
+async function populateSeriesOptions(props, component) {
   const seriesSelect = component.querySelector('#series-select-input');
   if (!seriesSelect) return;
 
@@ -80,15 +67,26 @@ async function populateSeriesOptions(component) {
   const existingOptions = seriesSelect.querySelectorAll('sp-menu-item');
   existingOptions.forEach((opt) => opt.remove());
 
-  const filteredSeries = filterSeriesBasedOnCloudType(series, component.dataset.cloudType);
+  const filteredSeries = Object.values(series).filter((s) => {
+    const hasRequiredVals = s.seriesId && s.seriesName;
+    const isPublished = s.seriesStatus?.toLowerCase() === 'published';
 
-  filteredSeries.forEach((s) => {
-    const opt = createTag('sp-menu-item', { value: s.seriesId }, s.seriesName);
+    const currentCloud = props.eventDataResp.cloudType || props.payload.cloudType;
+    const isInCurrentCloud = s.cloudType === currentCloud;
+
+    return hasRequiredVals && isPublished && isInCurrentCloud;
+  });
+
+  filteredSeries.forEach((val) => {
+    if (!val.seriesId || !val.seriesName) return;
+    if (val.seriesStatus?.toLowerCase() !== 'published') return;
+
+    const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
     seriesSelect.append(opt);
   });
 
   seriesSelect.pending = false;
-  seriesSelect.disabled = false;
+  seriesSelect.disabled = filteredSeries.length === 0;
 }
 
 function toggleFormatSelect(component) {
@@ -97,10 +95,10 @@ function toggleFormatSelect(component) {
 }
 
 export async function onPayloadUpdate(component, props) {
-  const { seriesId, cloudType } = props.payload;
+  const { cloudType, seriesId } = props.payload;
   if (cloudType && cloudType !== component.dataset.cloudType) {
     component.dataset.cloudType = cloudType;
-    await populateSeriesOptions(component);
+    await populateSeriesOptions(props, component);
     toggleFormatSelect(component);
   }
 
@@ -141,8 +139,8 @@ function initCloudTypeSelect(props, component) {
 }
 
 async function initDupCheck(component) {
+  const buSelect = component.querySelector('#bu-select-input');
   const seriesSelect = component.querySelector('#series-select-input');
-  if (!seriesSelect) return;
 
   const series = await getSeriesForUser();
 
@@ -185,20 +183,6 @@ async function initDupCheck(component) {
 }
 
 export default async function init(component, props) {
-  setTimeout(() => {
-    const seriesSelect = component.querySelector('#series-select-input');
-
-    if (seriesSelect.pending) {
-      const toastArea = props.el.querySelector('.toast-area');
-      if (!toastArea) return;
-
-      const toast = createTag('sp-toast', { open: true, timeout: 8000 }, 'Series ID is taking longer than usual to load. Please check if the Adobe corp. VPN is connected.', { parent: toastArea });
-      toast.addEventListener('close', () => {
-        toast.remove();
-      });
-    }
-  }, 6000);
-
   const eventData = props.eventDataResp;
   component.dataset.cloudType = props.payload.cloudType || eventData.cloudType;
   initCloudTypeSelect(props, component);

@@ -16,7 +16,7 @@ async function decorateCloudTagSelect(column) {
 
   const clouds = await getClouds();
 
-  Object.entries(clouds).forEach((cloud) => {
+  clouds.forEach((cloud) => {
     const { cloudType, cloudName } = cloud;
 
     if (!cloudType || !cloudName) return;
