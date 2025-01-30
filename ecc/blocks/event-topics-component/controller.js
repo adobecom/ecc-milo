@@ -62,11 +62,13 @@ export function onSubmit(component, props) {
   const selectedButtons = component.querySelectorAll('sp-action-button[selected]');
   const pendingTopics = Array.from(selectedButtons).map((cb) => cb.getAttribute('name'));
   const topicType = SUPPORTED_TOPIC_TYPES.find((type) => component.classList.contains(type));
+  const tagIds = Array.from(selectedButtons).map((cb) => JSON.parse(cb.getAttribute('data-value')).caasId);
 
   if (pendingTopics.length === 0) return;
 
   const { payload } = props;
   payload.pendingTopics = { ...payload.topics, [topicType]: pendingTopics };
+  payload.tags = { ...payload.tags, ...tagIds };
   props.payload = payload;
 }
 
