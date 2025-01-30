@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { SUPPORTED_CLOUDS } from '../../constants/constants.js';
+import { getClouds } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { generateToolTip } from '../../scripts/utils.js';
 
@@ -14,11 +14,14 @@ async function decorateCloudTagSelect(column) {
   buSelectWrapper.append(select);
   column.append(buSelectWrapper);
 
-  // FIXME: cloulds shouldn't be hardcoded
-  // const clouds = await getClouds();
+  const clouds = await getClouds();
 
-  Object.entries(SUPPORTED_CLOUDS).forEach(([, val]) => {
-    const opt = createTag('sp-menu-item', { value: val.id }, val.name);
+  clouds.forEach((cloud) => {
+    const { cloudType, cloudName } = cloud;
+
+    if (!cloudType || !cloudName) return;
+
+    const opt = createTag('sp-menu-item', { value: cloudType }, cloudName);
     select.append(opt);
   });
 
