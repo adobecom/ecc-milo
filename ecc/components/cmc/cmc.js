@@ -273,7 +273,7 @@ export default class CloudManagementConsole extends LitElement {
     <div class="action-bar">
         <sp-toast ?open=${this.toastState.open} variant=${this.toastState.variant} size="m" timeout="6000">${this.toastState.text}</sp-toast>
         <sp-button variant="secondary" size="l" ?disabled=${!this.pendingChanges || !this.currentCloud} @click=${() => {
-          const fullSavedTags = this.savedTags[this.currentCloud]?.map((tag) => this.deepGetTagByTagID(tag)) || [];
+          const fullSavedTags = this.savedTags[this.currentCloud]?.map((tag) => this.deepGetTagByTagID(tag.tagID)) || [];
           this.selectedTags = new Set(fullSavedTags); this.pendingChanges = false;
         }}>Cancel</sp-button>
         <sp-button variant="primary" size="l" ?disabled=${!this.pendingChanges || !this.currentCloud} @click=${this.save}>Save</sp-button>
