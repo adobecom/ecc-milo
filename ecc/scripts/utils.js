@@ -114,8 +114,8 @@ export function parse24HourFormat(timeStr) {
 }
 
 export function getEventPageHost() {
-  if (window.location.href.includes('.hlx.')) {
-    return window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.hlx.page`);
+  if (window.location.href.includes('.hlx.') || window.location.href.includes('.aem.')) {
+    return window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.aem.page`);
   }
 
   return window.location.origin;

@@ -15,8 +15,8 @@ From your newly created project
 
 ## Developing
 1. Install the [Aem CLI](https://www.npmjs.com/package/@adobe/aem-cli): `npm install -g @adobe/aem-cli`
-1. Run `aem up` this repo's folder. (opens your browser at `http://localhost:3000`)
-1. Open this repo's folder in your favorite editor and start coding.
+2. Run `aem up` this repo's folder. (opens your browser at `http://localhost:3000`)
+3. Open this repo's folder in your favorite editor and start coding.
 
 ## Testing
 ```sh
