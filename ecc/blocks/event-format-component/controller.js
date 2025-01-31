@@ -160,29 +160,17 @@ export default async function init(component, props) {
   });
 }
 
-function getTemplateId(bu) {
-  switch (bu) {
-    case 'DX':
-      return '/events/fragments/event-templates/dx/simple';
-    case 'CreativeCloud':
-    default:
-      return '/events/fragments/event-templates/dme/simple';
-  }
-}
-
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const eventType = 'InPerson';
   const cloudType = component.querySelector('#bu-select-input').value;
   const seriesId = component.querySelector('#series-select-input')?.value;
-  const templateId = getTemplateId(cloudType);
 
   const eventFormat = {
     eventType,
     cloudType,
     seriesId,
-    templateId,
   };
 
   props.payload = { ...props.payload, ...eventFormat };

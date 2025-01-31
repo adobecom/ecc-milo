@@ -9,7 +9,6 @@ const submissionFilter = [
   'eventType',
   'cloudType',
   'seriesId',
-  'templateId',
   'communityTopicUrl',
   'title',
   'description',
