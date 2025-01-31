@@ -1,9 +1,49 @@
+import { LIBS } from '../../scripts/scripts.js';
+import { addTooltipToEl, decorateSwitchFieldset } from '../../scripts/utils.js';
+
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
+
+const contentMap = {
+  CreativeCloud: {
+    tooltipText: 'Optionally enable email links to the host or add a description to the RSVP process for your attendees.',
+    eventLimit: {
+      inputLabelText: 'Attendee limit',
+      switchLabelText: 'When limit is reached, disable registration button',
+      tooltipText: 'When no limit is set, all users will be admitted into event.',
+    },
+    contactHost: {
+      switchLabelText: 'Contact host',
+      tooltipText: 'Contact host is optional.',
+    },
+  },
+  ExperienceCloud: {
+    tooltipText: 'Dx events are waitlist only. Call-to-action buttons are will only allow waitlisting.',
+    eventLimit: {
+      inputLabelText: 'Attendee limit',
+      switchLabelText: 'When limit is reached, disable registration button',
+      tooltipText: {
+        count: 'When no limit is set, all users will be admitted into event.',
+        config: 'When selected, disable registration button when limit is reached.',
+      },
+    },
+    allowGuestRegistration: {
+      switchLabelText: 'Allow guest registration',
+      tooltipText: 'When selected, uesrs can register for events without logging in.',
+    },
+    contactHost: {
+      switchLabelText: 'Contact host',
+      tooltipText: 'Contact host is optional.',
+    },
+  },
+};
+
 /* eslint-disable no-unused-vars */
 function prefillFields(component, props) {
   const contactHostEl = component.querySelector('#registration-contact-host');
   const hostEmailEl = component.querySelector('#event-host-email-input');
   const attendeeLimitEl = component.querySelector('#attendee-count-input');
   const allowWaitlistEl = component.querySelector('#registration-allow-waitlist');
+  const allowGuestRegistrationEl = component.querySelector('#allow-guest-registration');
   const descriptionEl = component.querySelector('#rsvp-form-detail-description');
 
   const eventData = props.eventDataResp;
@@ -13,6 +53,7 @@ function prefillFields(component, props) {
       allowWaitlisting,
       hostEmail,
       rsvpDescription,
+      allowGuestRegistration,
     } = eventData;
 
     if (attendeeLimitEl && attendeeLimit) attendeeLimitEl.value = attendeeLimit;
@@ -22,8 +63,13 @@ function prefillFields(component, props) {
       if (contactHostEl) contactHostEl.checked = true;
       if (hostEmailEl) hostEmailEl.value = hostEmail;
     }
+    if (allowGuestRegistrationEl) allowGuestRegistrationEl.checked = allowGuestRegistration;
 
-    if (attendeeLimit || allowWaitlisting || hostEmail || rsvpDescription) {
+    if (attendeeLimit
+      || allowWaitlisting
+      || hostEmail
+      || rsvpDescription
+      || allowGuestRegistrationEl) {
       component.classList.add('prefilled');
     }
   }
@@ -38,42 +84,220 @@ function prefillFields(component, props) {
   }
 }
 
+function decorateRegConfigs(component) {
+  const regFieldswrapper = component.querySelector('.registration-configs-wrapper');
+
+  if (!regFieldswrapper) return;
+
+  const { cloudType } = component.dataset;
+
+  const leftCol = createTag('div', { class: 'left-col' });
+  const rightCol = createTag('div', { class: 'right-col' });
+
+  const attendeeCountTooltipText = contentMap[cloudType].eventLimit.tooltipText.count;
+  const attendeeConfigTooltipText = contentMap[cloudType].eventLimit.tooltipText.config;
+
+  const attendeeConfigsWrapper = createTag('div', { class: 'attendee-configs-wrapper' });
+  const fieldset = decorateSwitchFieldset({ id: 'registration-disable-waitlist' }, contentMap[cloudType].eventLimit.switchLabelText);
+
+  if (attendeeConfigTooltipText) addTooltipToEl(attendeeConfigTooltipText, fieldset);
+
+  const attendeeCount = createTag('div', { class: 'attendee-count' });
+  const attendeeCountInputWrapper = createTag('div', { class: 'attendee-count-input-wrapper' });
+  const label = createTag('label', { for: 'attendee-count-input', class: 'number-input-label' }, contentMap[cloudType].eventLimit.inputLabelText);
+  const input = createTag('input', { id: 'attendee-count-input', name: 'attendee-count-input', class: 'number-input', type: 'number', min: 0 });
+
+  attendeeCountInputWrapper.append(label, input);
+  attendeeCount.append(attendeeCountInputWrapper);
+  if (attendeeCountTooltipText) addTooltipToEl(attendeeCountTooltipText, attendeeCount);
+
+  leftCol.append(attendeeCount);
+  rightCol.append(fieldset);
+  attendeeConfigsWrapper.append(leftCol, rightCol);
+  regFieldswrapper.append(attendeeConfigsWrapper);
+}
+
+function decorateHostEmailField(component) {
+  const regFieldswrapper = component.querySelector('.registration-configs-wrapper');
+
+  if (!regFieldswrapper) return;
+
+  const leftCol = createTag('div', { class: 'left-col' });
+  const rightCol = createTag('div', { class: 'right-col' });
+
+  const fieldset = decorateSwitchFieldset({ id: 'registration-contact-host' }, 'Contact host');
+  const input = createTag('sp-textfield', {
+    id: 'event-host-email-input',
+    class: 'text-input',
+    type: 'email',
+    size: 's',
+  });
+  createTag('sp-help-text', { size: 's', slot: 'help-text' }, 'Add host email', { parent: input });
+
+  addTooltipToEl(contentMap[component.dataset.cloudType].contactHost.tooltipText, fieldset);
+
+  rightCol.append(fieldset, input);
+  const wrapperDiv = createTag('div', { class: 'host-contact-wrapper' });
+  wrapperDiv.append(leftCol, rightCol);
+
+  regFieldswrapper.append(wrapperDiv);
+}
+
+function decorateLoginRequirementToggle(component) {
+  const regFieldswrapper = component.querySelector('.registration-configs-wrapper');
+
+  if (!regFieldswrapper) return;
+
+  const leftCol = createTag('div', { class: 'left-col' });
+  const rightCol = createTag('div', { class: 'right-col' });
+
+  const loginRequirementWrapper = createTag('div', { class: 'login-requirement-wrapper' });
+  const fieldset = decorateSwitchFieldset({ id: 'allow-guest-registration' }, 'Allow Guest Registration');
+  rightCol.append(fieldset);
+  loginRequirementWrapper.append(leftCol, rightCol);
+
+  if (contentMap[component.dataset.cloudType].allowGuestRegistration.tooltipText) {
+    addTooltipToEl(contentMap[component.dataset.cloudType]
+      .allowGuestRegistration.tooltipText, fieldset);
+  }
+
+  regFieldswrapper.append(loginRequirementWrapper);
+}
+
+function buildCreativeCloudFields(component) {
+  decorateRegConfigs(component);
+  decorateHostEmailField(component);
+}
+
+function buildExperienceCloudInPersonFields(component) {
+  decorateRegConfigs(component);
+  decorateLoginRequirementToggle(component);
+  decorateHostEmailField(component);
+}
+
+function buildExperienceCloudWebinarFields(component) {
+  decorateRegConfigs(component);
+  decorateLoginRequirementToggle(component);
+}
+
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const attendeeLimitVal = component.querySelector('#attendee-count-input')?.value?.trim();
-  const allowWaitlisting = component.querySelector('#registration-allow-waitlist')?.checked;
-  const contactHost = component.querySelector('#registration-contact-host')?.checked;
-  const hostEmail = component.querySelector('#event-host-email-input')?.value?.trim();
-  const rsvpDescription = component.querySelector('#rsvp-form-detail-description')?.value;
+  const attendeeCountInput = component.querySelector('#attendee-count-input');
+  const allowWaitlistingInput = component.querySelector('#registration-disable-waitlist');
+  const contactHostInput = component.querySelector('#registration-contact-host');
+  const hostEmailInput = component.querySelector('#event-host-email-input');
+  const rsvpDescriptionInput = component.querySelector('#rsvp-form-detail-description');
+  const guestRegistrationInput = component.querySelector('#allow-guest-registration');
+
+  const attendeeLimitVal = attendeeCountInput ? attendeeCountInput.value?.trim() : null;
+  const allowWaitlisting = allowWaitlistingInput?.checked;
+  const contactHost = contactHostInput?.checked;
+  const hostEmail = hostEmailInput?.value?.trim();
+  const rsvpDescription = rsvpDescriptionInput?.value || '';
+  const allowGuestRegistration = guestRegistrationInput ? guestRegistrationInput.checked : true;
 
   const attendeeLimit = Number.isNaN(+attendeeLimitVal) ? null : +attendeeLimitVal;
 
   const rsvpData = {};
 
-  rsvpData.rsvpDescription = rsvpDescription || '';
+  rsvpData.rsvpDescription = rsvpDescription;
   rsvpData.allowWaitlisting = !!allowWaitlisting;
+  rsvpData.allowGuestRegistration = !!allowGuestRegistration;
   if (contactHost && hostEmail) rsvpData.hostEmail = hostEmail;
   if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
 
   props.payload = { ...props.payload, ...rsvpData };
 }
 
+function updateHeadingTooltip(component) {
+  const tooltip = component.querySelector(':scope > div .sp-tooltip');
+  if (!tooltip) return;
+
+  const { cloudType } = component.dataset;
+  const { tooltipText } = contentMap[cloudType];
+
+  tooltip.textContent = tooltipText;
+}
+
 export async function onPayloadUpdate(component, props) {
-  // Do nothing
+  const { cloudType, eventType } = props.payload;
+  if (eventType && eventType !== component.dataset.eventType) {
+    component.dataset.eventType = eventType;
+  }
+
+  if (cloudType && cloudType !== component.dataset.cloudType) {
+    component.dataset.cloudType = cloudType;
+    const registrationConfigsWrapper = component.querySelector('.registration-configs-wrapper');
+
+    if (!registrationConfigsWrapper) return;
+
+    registrationConfigsWrapper.innerHTML = '';
+
+    if (cloudType === 'CreativeCloud') {
+      buildCreativeCloudFields(component);
+    }
+
+    if (cloudType === 'ExperienceCloud') {
+      switch (eventType) {
+        case 'InPerson':
+          buildExperienceCloudInPersonFields(component);
+          break;
+        case 'Webinar':
+          buildExperienceCloudWebinarFields(component);
+          break;
+        default:
+          break;
+      }
+    }
+
+    updateHeadingTooltip(component);
+  } else if (eventType && eventType !== component.dataset.eventType) {
+    if (cloudType === 'ExperienceCloud') {
+      switch (eventType) {
+        case 'InPerson':
+          buildExperienceCloudInPersonFields(component);
+          break;
+        case 'Webinar':
+          buildExperienceCloudWebinarFields(component);
+          break;
+        default:
+          break;
+      }
+    }
+  }
 }
 
 export async function onRespUpdate(component, props) {
   if (!props.eventDataResp) return;
 
-  if (props.eventDataResp.cloudType === 'CreativeCloud') {
-    component.querySelector('#registration-allow-waitlist')?.classList.add('hidden');
-  }
-
   prefillFields(component, props);
 }
 
 export default function init(component, props) {
+  component.dataset.cloudType = props.payload.cloudType || props.eventDataResp.cloudType;
+  component.dataset.eventType = props.payload.eventType || props.eventDataResp.eventType;
+
+  switch (component.dataset.cloudType) {
+    case 'CreativeCloud':
+      buildCreativeCloudFields(component);
+      break;
+    case 'ExperienceCloud':
+      switch (component.dataset.eventType) {
+        case 'InPerson':
+          buildExperienceCloudInPersonFields(component);
+          break;
+        case 'webinar':
+          buildExperienceCloudWebinarFields(component);
+          break;
+        default:
+          break;
+      }
+      break;
+    default:
+      break;
+  }
+
   prefillFields(component, props);
 }
 
