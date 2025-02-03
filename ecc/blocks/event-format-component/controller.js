@@ -84,7 +84,7 @@ async function populateSeriesOptions(props, component, cloud = null) {
   });
 
   seriesSelect.pending = false;
-  seriesSelect.disabled = filteredSeries.length === 0;
+  seriesSelect.disabled = filteredSeries.length === 0 || props.eventDataResp.seriesId;
 }
 
 export async function onPayloadUpdate(component, props) {
