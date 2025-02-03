@@ -129,10 +129,10 @@ decorateArea();
 
 export const LIBS = (() => {
   const { hostname, search } = window.location;
-  if (!(hostname.includes('.hlx.') || hostname.includes('local'))) return '/libs';
+  if (!(hostname.includes('.hlx.') || hostname.includes('.aem.') || hostname.includes('local'))) return '/libs';
   const branch = new URLSearchParams(search).get('milolibs') || 'main';
   if (branch === 'local') return 'http://localhost:6456/libs';
-  return branch.includes('--') ? `https://${branch}.hlx.live/libs` : `https://${branch}--milo--adobecom.hlx.live/libs`;
+  return branch.includes('--') ? `https://${branch}.aem.live/libs` : `https://${branch}--milo--adobecom.aem.live/libs`;
 })();
 
 (function loadStyles() {
