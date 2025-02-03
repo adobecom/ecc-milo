@@ -87,7 +87,7 @@ async function populateSeriesOptions(props, component) {
   });
 
   seriesSelect.pending = false;
-  seriesSelect.disabled = filteredSeries.length === 0;
+  seriesSelect.disabled = filteredSeries.length === 0 || props.eventDataResp.seriesId;
 }
 
 function toggleFormatSelect(component) {
