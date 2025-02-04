@@ -33,11 +33,10 @@ export default class CloudManagementConsole extends LitElement {
     this.selectedTags = new Set();
     this.pendingChanges = false;
     this.config = { 'series-dashboard-location': '/ecc/dashboard/t3/series' };
-    this.toastState = {
-      open: false,
-      variant: 'info',
-      text: '',
-    };
+  }
+
+  firstUpdated() {
+    this.toast = this.shadowRoot.querySelector('sp-toast');
   }
 
   static getParsedTitle(tag) {
@@ -192,11 +191,7 @@ export default class CloudManagementConsole extends LitElement {
     const newCloudData = await updateCloud(this.currentCloud, { ...cloudData, ...payload });
 
     if (newCloudData && !newCloudData.error) {
-      this.toastState = {
-        open: true,
-        variant: 'positive',
-        text: 'Changes saved',
-      };
+      if (this.toast) this.toast.open = true;
     }
   }
 
@@ -271,7 +266,7 @@ export default class CloudManagementConsole extends LitElement {
       </div>
     </div>
     <div class="action-bar">
-        <sp-toast ?open=${this.toastState.open} variant=${this.toastState.variant} size="m" timeout="6000">${this.toastState.text}</sp-toast>
+        <sp-toast variant="positive" size="m" timeout="6000">Changes saved</sp-toast>
         <sp-button variant="secondary" size="l" ?disabled=${!this.pendingChanges || !this.currentCloud} @click=${() => {
           const fullSavedTags = this.savedTags[this.currentCloud]?.map((tag) => this.deepGetTagByTagID(tag.tagID)) || [];
           this.selectedTags = new Set(fullSavedTags); this.pendingChanges = false;
