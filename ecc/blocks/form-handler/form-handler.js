@@ -559,7 +559,7 @@ function buildPreviewLoadingDialog(props, targetHref, poll) {
   dialog.innerHTML = '';
 
   createTag('h1', { slot: 'heading' }, 'Generating your preview...', { parent: dialog });
-  createTag('p', {}, 'This usually takes 10-30 seconds, but in rare cases it might take up to 10 minutes. Please wait, and the preview will open in a new tab when it’s ready.', { parent: dialog });
+  createTag('p', {}, 'This usually takes less than a minute, but in rare cases it might take up to 10 minutes. Please wait, and the preview will open in a new tab when it’s ready.', { parent: dialog });
   createTag('p', {}, '<strong>Note: Please ensure pop-ups are allowed in your browser.</strong>', { parent: dialog });
 
   const style = createTag('style', {}, `
@@ -706,7 +706,7 @@ async function validatePreview(props, cta) {
     buildPreviewLoadingDialog(props, previewHref, poll);
 
     (async function pollLoop() {
-      while (!cancelled && retryCount < 30) {
+      while (!cancelled && retryCount < 60) {
         retryCount += 1;
         const delay = Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000;
         await new Promise((r) => setTimeout(r, delay));
