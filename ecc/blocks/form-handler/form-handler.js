@@ -1,3 +1,6 @@
+/* eslint-disable no-async-promise-executor */
+/* eslint-disable no-promise-executor-return */
+/* eslint-disable no-await-in-loop */
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -14,6 +17,7 @@ import {
   updateEvent,
   publishEvent,
   getEvent,
+  previewEvent,
 } from '../../scripts/esp-controller.js';
 import ImageDropzone from '../../components/image-dropzone/image-dropzone.js';
 import Profile from '../../components/profile/profile.js';
@@ -26,8 +30,8 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedData, { getFilteredCachedResponse, hasContentChanged, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import { getUser, initProfileLogicTree, userHasAccessToEvent } from '../../scripts/profile.js';
+import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
+import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 import CustomSearch from '../../components/custom-search/custom-search.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -233,8 +237,10 @@ async function loadEventData(props) {
   const eventId = urlParams.get('eventId');
 
   if (eventId) {
-    const user = await getUser();
-    if (userHasAccessToEvent(user, eventId)) {
+    const [user, event] = await Promise.all([getUser(), getEvent(eventId)]);
+    if (userHasAccessToEvent(user, eventId)
+      || userHasAccessToSeries(user, event.seriesId)
+      || userHasAccessToBU(user, event.cloudType)) {
       setTimeout(() => {
         if (!props.eventDataResp.eventId) {
           const toastArea = props.el.querySelector('.toast-area');
@@ -553,53 +559,46 @@ function buildPreviewLoadingDialog(props, targetHref, poll) {
   dialog.innerHTML = '';
 
   createTag('h1', { slot: 'heading' }, 'Generating your preview...', { parent: dialog });
-  createTag('p', {}, 'This usually takes 10-30 seconds, but it might take up to 10 minutes in rare cases. Please wait, and the preview will open in a new tab when it’s ready.', { parent: dialog });
-  createTag('p', {}, '<strong>Note: Please make sure pop-up is allowed in your browser settings.</strong>', { parent: dialog });
+  createTag('p', {}, 'This usually takes less than a minute, but in rare cases it might take up to 10 minutes. Please wait, and the preview will open in a new tab when it’s ready.', { parent: dialog });
+  createTag('p', {}, '<strong>Note: Please ensure pop-ups are allowed in your browser.</strong>', { parent: dialog });
+
   const style = createTag('style', {}, `
     @keyframes progress-bar-indeterminate {
-      0% {
-        transform: translateX(-100%);
-      }
-      50% {
-        transform: translateX(0%);
-      }
-      100% {
-        transform: translateX(200%);
-      }
+      0% { transform: translateX(-100%); }
+      50% { transform: translateX(0%); }
+      100% { transform: translateX(200%); }
     }
   `);
 
-  // Create the progress bar container
   const progressBar = createTag('div', {
     style: `
-    position: relative;
-    width: 100%;
-    height: 8px;
-    background: #e6e6e6;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 1rem;
+      position: relative;
+      width: 100%;
+      height: 8px;
+      background: #e6e6e6;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 1rem;
     `,
   });
 
-  // Create the progress bar indicator
   const progressBarIndicator = createTag('div', {
     style: `
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 50%;
-    height: 100%;
-    background: #1473e6;
-    transform: translateX(0);
-    animation: progress-bar-indeterminate 1.5s linear infinite;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50%;
+      height: 100%;
+      background: #1473e6;
+      transform: translateX(0);
+      animation: progress-bar-indeterminate 1.5s linear infinite;
     `,
   });
 
-  // Append the elements to the shadow root
   progressBar.appendChild(progressBarIndicator);
   dialog.appendChild(style);
   dialog.appendChild(progressBar);
+
   const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
   const seePreviewButton = createTag('sp-button', { variant: 'secondary', slot: 'button', id: 'see-preview' }, 'Go to preview page now', { parent: buttonContainer });
   const cancelButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'cancel-preview' }, 'Cancel', { parent: buttonContainer });
@@ -607,16 +606,18 @@ function buildPreviewLoadingDialog(props, targetHref, poll) {
   underlay.open = true;
 
   seePreviewButton.addEventListener('click', () => {
+    seePreviewButton.disabled = true;
+    cancelButton.disabled = true;
     window.open(targetHref);
     closeDialog(props);
-    if (poll.interval) clearInterval(poll.interval);
-    poll.resolve();
+    poll.cancel();
   });
 
   cancelButton.addEventListener('click', () => {
+    seePreviewButton.disabled = true;
+    cancelButton.disabled = true;
     closeDialog(props);
-    if (poll.interval) clearInterval(poll.interval);
-    poll.resolve();
+    poll.cancel();
   });
 
   return dialog;
@@ -680,17 +681,9 @@ async function getNonProdPreviewDataById(props) {
   return null;
 }
 
-async function validatePreview(props, oldResp, cta) {
+async function validatePreview(props, cta) {
   let retryCount = 0;
   const previewHref = cta.href;
-
-  const currentData = { ...props.eventDataResp };
-  const oldData = { ...oldResp };
-
-  if (!hasContentChanged(currentData, oldData) || !Object.keys(oldData).length) {
-    window.open(previewHref);
-    return Promise.resolve();
-  }
 
   const modificationTimeMatch = (metadataObj) => {
     const metadataModTimestamp = new Date(metadataObj['modification-time']).getTime();
@@ -698,35 +691,46 @@ async function validatePreview(props, oldResp, cta) {
   };
 
   return new Promise((resolve) => {
-    const interval = setInterval(async () => {
-      try {
-        retryCount += 1;
-        const metadataJson = await getNonProdPreviewDataById(props);
-
-        if (metadataJson && modificationTimeMatch(metadataJson)) {
-          clearInterval(interval);
-          closeDialog(props);
-          window.open(previewHref);
-          resolve();
-        } else if (!metadataJson || retryCount >= 30) {
-          clearInterval(interval);
-          buildPreviewLoadingFailedDialog(props, previewHref);
-          window.lana?.log('Error: Failed to fetch metadata');
-          resolve();
-        }
-      } catch (error) {
-        window.lana?.log('Error in interval fetch:', error);
-        clearInterval(interval);
-        resolve();
-      }
-    }, Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000);
+    let cancelled = false;
+    let isResolved = false;
 
     const poll = {
-      interval,
-      resolve,
+      cancel: () => {
+        if (isResolved) return;
+        isResolved = true;
+        cancelled = true;
+        resolve();
+      },
     };
 
     buildPreviewLoadingDialog(props, previewHref, poll);
+
+    (async function pollLoop() {
+      while (!cancelled && retryCount < 60) {
+        retryCount += 1;
+        const delay = Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000;
+        await new Promise((r) => setTimeout(r, delay));
+        if (cancelled) break;
+        try {
+          const metadataJson = await getNonProdPreviewDataById(props);
+          if (metadataJson && modificationTimeMatch(metadataJson)) {
+            closeDialog(props);
+            window.open(previewHref);
+            poll.cancel();
+            return;
+          }
+        } catch (error) {
+          window.lana?.log('Error in sequential poll:', error);
+          break;
+        }
+      }
+
+      if (!cancelled) {
+        buildPreviewLoadingFailedDialog(props, previewHref);
+        window.lana?.log('Error: Failed to fetch metadata');
+      }
+      poll.cancel();
+    }());
   });
 }
 
@@ -757,7 +761,6 @@ function initFormCtas(props) {
     });
   };
 
-  let oldResp = { ...props.eventDataResp };
   ctas.forEach((cta) => {
     if (cta.href) {
       const ctaUrl = new URL(cta.href);
@@ -767,8 +770,22 @@ function initFormCtas(props) {
         cta.addEventListener('click', async (e) => {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
+
+          const resp = await previewEvent(
+            getFilteredCachedResponse().eventId,
+            getJoinedData(),
+          );
+
+          props.eventDataResp = { ...props.eventDataResp, ...resp };
+
+          if (resp?.eventId) await handleEventUpdate(props);
+
+          if (!resp.error) {
+            showSaveSuccessMessage(props);
+          }
+
           if (cta.classList.contains('preview-not-ready')) return;
-          validatePreview(props, oldResp, cta).then(() => {
+          validatePreview(props, cta).then(() => {
             toggleBtnsSubmittingState(false);
           });
         });
@@ -797,10 +814,8 @@ function initFormCtas(props) {
           if (ctaUrl.hash === '#next') {
             let resp;
             if (props.currentStep === props.maxStep) {
-              oldResp = { ...props.eventDataResp };
               resp = await saveEvent(props, true);
             } else {
-              oldResp = { ...props.eventDataResp };
               resp = await saveEvent(props);
             }
 
@@ -835,7 +850,6 @@ function initFormCtas(props) {
               navigateForm(props);
             }
           } else {
-            oldResp = { ...props.eventDataResp };
             const resp = await saveEvent(props);
             if (resp?.error) {
               buildErrorMessage(props, resp);
@@ -850,7 +864,6 @@ function initFormCtas(props) {
 
   backBtn.addEventListener('click', async () => {
     toggleBtnsSubmittingState(true);
-    oldResp = { ...props.eventDataResp };
     const resp = await saveEvent(props);
     if (resp?.error) {
       buildErrorMessage(props, resp);
@@ -1084,7 +1097,7 @@ export default async function init(el) {
   ]);
 
   const devToken = getDevToken();
-  if (devToken && getEventServiceEnv() === 'local') {
+  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
     });

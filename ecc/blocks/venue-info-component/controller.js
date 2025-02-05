@@ -11,7 +11,7 @@ function togglePrefillableFieldsHiddenState(component) {
 }
 
 async function loadGoogleMapsAPI(callback) {
-  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
+  const secretEnv = ['local', 'dev'].includes(getEventServiceEnv()) ? 'dev' : getEventServiceEnv();
   const script = document.createElement('script');
   const apiKey = await getSecret(`${secretEnv}-google-places-api`);
   script.src = `https://maps.googleapis.com/maps/api/js?loading=async&key=${apiKey}&libraries=places&callback=onGoogleMapsApiLoaded`;
@@ -173,7 +173,7 @@ function initAutocomplete(el, props) {
 }
 
 export async function onSubmit(component, props) {
-  // do nothing. Depend on onEventUpdate cb.
+  // do nothing. Depend on onTargetUpdate cb.
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -221,6 +221,12 @@ export async function onTargetUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const venueData = getVenueDataInForm(component);
+
+  if (!venueData.placeId) {
+    component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please select a valid venue.' } }, bubbles: true, composed: true }));
+    return;
+  }
+
   const oldVenueData = props.eventDataResp.venue;
   let resp;
   if (!oldVenueData) {

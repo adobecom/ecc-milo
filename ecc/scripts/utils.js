@@ -22,11 +22,11 @@ export function getEventServiceEnv() {
   if (validEnvs.includes(eccEnv)) return eccEnv;
 
   if ((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`))) {
-    if (host.startsWith('dev--')) return 'dev';
     if (host.startsWith('dev02--') || host.startsWith('main02--')) return 'dev02';
     if (host.startsWith('stage--')) return 'stage';
     if (host.startsWith('stage02--')) return 'stage02';
     if (host.startsWith('main--')) return 'prod';
+    return 'dev';
   }
 
   if (host.includes('localhost')) return 'local';
@@ -114,8 +114,8 @@ export function parse24HourFormat(timeStr) {
 }
 
 export function getEventPageHost() {
-  if (window.location.href.includes('.hlx.')) {
-    return window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.hlx.page`);
+  if (window.location.href.includes('.hlx.') || window.location.href.includes('.aem.')) {
+    return window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.aem.page`);
   }
 
   return window.location.origin;
@@ -147,7 +147,7 @@ export function buildNoAccessScreen(el) {
   const h1 = createTag('h1', {}, 'You do not have sufficient access to view.');
   const area = createTag('div', { class: 'no-access-area' });
   const noAccessDescription = createTag('p', {}, 'If you have another authorized account, please sign in with that account to access this page.');
-  const requestAccessButton = createTag('a', { class: 'con-button primary' }, 'Request Access');
+  const requestAccessButton = createTag('a', { class: 'con-button primary', href: 'https://adobe.enterprise.slack.com/archives/C07KPJYA760' }, 'Request Access');
 
   el.append(h1, area);
   area.append(getIcon('browser-access-forbidden-lg'), noAccessDescription, requestAccessButton);
