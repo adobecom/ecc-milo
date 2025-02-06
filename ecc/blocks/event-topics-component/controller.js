@@ -65,8 +65,6 @@ export function onSubmit(component, props) {
   const topicType = SUPPORTED_TOPIC_TYPES.find((type) => component.classList.contains(type));
   const tags = Array.from(selectedButtons).map((cb) => JSON.parse(cb.getAttribute('data-value')));
 
-  if (pendingTopics.length === 0) return;
-
   const { payload } = props;
   payload.pendingTopics = { ...payload.topics, [topicType]: pendingTopics };
   const existingTags = payload.tags ? payload.tags.split(',') : [];
