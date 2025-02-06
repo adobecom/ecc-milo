@@ -19,7 +19,7 @@ async function loadGoogleMapsAPI(callback) {
   script.defer = true;
   window.onGoogleMapsApiLoaded = callback;
   script.onerror = () => {
-    window.lana?.error('Failed to load the Google Maps script!');
+    window.lana?.log('Failed to load the Google Maps script!');
   };
   document.head.appendChild(script);
 }
