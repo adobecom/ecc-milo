@@ -14,7 +14,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import { WYSIWYGEditor } from '../../components/wysiwyg-editor/wysiwyg-editor.js';
+import { RichTextEditor } from '../../components/rich-text-editor/rich-text-editor.js';
 import getJoinedData, { getFilteredCachedResponse, setPayloadCache, setResponseCache } from './data-handler.js';
 
 const { createTag } = await import(`${getLibs()}/utils/utils.js`);
@@ -128,7 +128,7 @@ async function initComponents(props) {
   customElements.define('product-selector-group', ProductSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
-  customElements.define('wysiwyg-editor', WYSIWYGEditor);
+  customElements.define('rich-text-editor', RichTextEditor);
 }
 
 async function gatherValues(props) {
