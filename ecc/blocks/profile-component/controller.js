@@ -129,7 +129,7 @@ async function prefillProfiles(props) {
       }
       props.eventDataResp = { ...props.eventDataResp, ...d };
     } catch (e) {
-      window.lana?.error('Error fetching speaker data: ', e);
+      window.lana?.log('Error fetching speaker data: ', e);
     }
   }
 }
