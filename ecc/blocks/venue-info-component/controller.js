@@ -198,7 +198,7 @@ export default async function init(component, props) {
   venueNameInput.addEventListener('change', () => {
     if (!venueNameInput.value) {
       resetAllFields(component);
-      togglePrefillableFieldsHiddenState(component, true);
+      togglePrefillableFieldsHiddenState(component);
     }
   });
 
