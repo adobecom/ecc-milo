@@ -202,30 +202,17 @@ export default async function init(component, props) {
   }
 }
 
-function getTemplateId(bu) {
-  switch (bu) {
-    case 'ExperienceCloud':
-      return '/events/fragments/event-templates/dx/simple';
-    case 'CreativeCloud':
-    default:
-      return '/events/fragments/event-templates/dme/simple';
-  }
-}
-
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const cloudType = component.querySelector('#bu-select-input').value;
   const seriesId = component.querySelector('#series-select-input')?.value;
-  // FIXME: format select should be front loaded into a dropdown on create event button
   const eventType = component.querySelector('#format-select-input')?.value || 'InPerson';
-  const templateId = getTemplateId(cloudType);
 
   const eventFormat = {
     eventType,
     cloudType,
     seriesId,
-    templateId,
   };
 
   props.payload = { ...props.payload, ...eventFormat };
