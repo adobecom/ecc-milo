@@ -1,5 +1,5 @@
 import { LIBS } from './scripts.js';
-import { getDevToken, getEventServiceEnv, getSecret } from './utils.js';
+import { getLocalDevToken, getEventServiceEnv, getSecret } from './utils.js';
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
 
 const API_CONFIG = {
@@ -55,7 +55,7 @@ export const getCaasTags = (() => {
 
 export function waitForAdobeIMS() {
   if (getEventServiceEnv() === 'local') {
-    if (getDevToken()) {
+    if (getLocalDevToken()) {
       return Promise.resolve();
     }
     return Promise.reject(new Error('Missing authentication token'));
@@ -146,7 +146,7 @@ export async function constructRequestOptions(method, body = null) {
   ]);
 
   const headers = new Headers();
-  const devToken = getDevToken();
+  const devToken = getLocalDevToken();
   const authToken = devToken && ['local', 'dev'].includes(getEventServiceEnv()) ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   if (!authToken) {
@@ -206,7 +206,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
 
   const requestId = await getUuid(new Date().getTime());
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const devToken = getDevToken();
+  const devToken = getLocalDevToken();
   const authToken = devToken && ['local', 'dev'].includes(getEventServiceEnv()) ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   let respJson = null;

@@ -356,8 +356,9 @@ function checkEventDuplication(event, compareMetrics) {
   const startDateMatch = event.localStartDate === compareMetrics.startDate;
   const venueIdMatch = event.venue?.city === compareMetrics.city;
   const eventIdNoMatch = event.eventId !== compareMetrics.eventId;
+  const stateCodeMatch = event.venue?.stateCode === compareMetrics.stateCode;
 
-  return titleMatch && startDateMatch && venueIdMatch && eventIdNoMatch;
+  return titleMatch && startDateMatch && venueIdMatch && eventIdNoMatch && stateCodeMatch;
 }
 
 export default async function init(component, props) {
