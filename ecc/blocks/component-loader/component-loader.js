@@ -10,7 +10,7 @@ export default async function init(el) {
 
   el.innerHTML = '';
 
-  await Promise.all([loadScript('https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js'), loadStyle('https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css')]);
+  await Promise.all([loadScript('https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js'), loadScript('https://unpkg.com/turndown/dist/turndown.js'), loadScript('https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js'), loadStyle('https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css')]);
 
   createTag('h1', {}, 'Quill Rich Text Editor', { parent: el });
   createTag('div', { id: 'quill' }, '', { parent: el });
@@ -37,15 +37,28 @@ export default async function init(el) {
     ['clean']
   ];
 
-    const quill = new Quill('#quill', { 
-      modules: {
-        toolbar: toolbarOptions
-      },
-      theme: 'snow' 
-    });
+  const quill = new Quill('#quill', { 
+    modules: {
+      toolbar: toolbarOptions
+    },
+    theme: 'snow' 
+  });
 
-    quill.on('text-change', () => {
-    quillOutput.innerHTML = quill.getSemanticHTML();
+  const turndownService = new TurndownService();
+  /*
+  turndownService.addRule('keepParagraphs', {
+    filter: 'p',
+    replacement: function (content) {
+      return `<p>${content}</p>`;
+    }
+  });
+  */
+  quill.on('text-change', () => {
+    const markdown = turndownService.turndown(quill.getSemanticHTML());
+    const clean = DOMPurify.sanitize(quill.getSemanticHTML());
+    quillOutput.innerHTML = `<pre>${markdown}</pre>`;
+    // quillOutput.innerHTML = clean;
+    // quillOutput.innerHTML = quill.getSemanticHTML();
   });
 
   createTag('hr', {}, '', { parent: el });
