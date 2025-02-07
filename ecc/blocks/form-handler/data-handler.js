@@ -11,6 +11,7 @@ const submissionFilter = [
   'seriesId',
   'communityTopicUrl',
   'title',
+  'tags',
   'description',
   'localStartDate',
   'localEndDate',
@@ -51,16 +52,16 @@ export function quickFilter(obj) {
 
 export function setPayloadCache(payload) {
   if (!payload) return;
+
   payloadCache = quickFilter(payload);
+
+  const { pendingTopics } = payload;
+  if (pendingTopics) {
+    payloadCache.topics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
+  }
 }
 
 export function getFilteredCachedPayload() {
-  const { topics } = payloadCache;
-
-  if (topics) {
-    payloadCache.topics = Object.values(topics).reduce((acc, val) => acc.concat(val), []);
-  }
-
   return payloadCache;
 }
 
