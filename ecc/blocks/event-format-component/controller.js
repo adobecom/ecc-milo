@@ -90,20 +90,11 @@ async function populateSeriesOptions(props, component) {
   seriesSelect.disabled = filteredSeries.length === 0 || props.eventDataResp.seriesId;
 }
 
-function toggleFormatSelect(component) {
-  const formatSelect = component.querySelector('.format-picker-wrapper');
-
-  if (!formatSelect) return;
-
-  formatSelect.classList.toggle('hidden', component.dataset.cloudType !== 'ExperienceCloud');
-}
-
 export async function onPayloadUpdate(component, props) {
   const { cloudType, seriesId } = props.payload;
   if (cloudType && cloudType !== component.dataset.cloudType) {
     component.dataset.cloudType = cloudType;
     await populateSeriesOptions(props, component);
-    toggleFormatSelect(component);
   }
 
   if (seriesId) {
@@ -190,7 +181,6 @@ export default async function init(component, props) {
   component.dataset.cloudType = props.payload.cloudType || eventData.cloudType;
   initCloudTypeSelect(props, component);
   prepopulateTimeZone(component);
-  toggleFormatSelect(component);
   await initDupCheck(props, component);
   initStepLock(component);
 

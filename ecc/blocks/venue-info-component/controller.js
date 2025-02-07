@@ -19,7 +19,7 @@ async function loadGoogleMapsAPI(callback) {
   script.defer = true;
   window.onGoogleMapsApiLoaded = callback;
   script.onerror = () => {
-    window.lana?.error('Failed to load the Google Maps script!');
+    window.lana?.log('Failed to load the Google Maps script!');
   };
   document.head.appendChild(script);
 }
@@ -173,7 +173,7 @@ function initAutocomplete(el, props) {
 }
 
 export async function onSubmit(component, props) {
-  // do nothing. Depend on onEventUpdate cb.
+  // do nothing. Depend on onTargetUpdate cb.
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -221,6 +221,12 @@ export async function onTargetUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const venueData = getVenueDataInForm(component);
+
+  if (!venueData.placeId) {
+    component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please select a valid venue.' } }, bubbles: true, composed: true }));
+    return;
+  }
+
   const oldVenueData = props.eventDataResp.venue;
   let resp;
   if (!oldVenueData) {
