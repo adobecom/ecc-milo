@@ -72,7 +72,7 @@ export default async function init(el) {
 
   createTag('hr', {}, '', { parent: el });
 
-  /* RTE Custom */
+  /* RTE Custom test request */
   createTag('h1', {}, 'Custom Rich Text Editor', { parent: el });
 
   customElements.define('rich-text-editor', RichTextEditor);
