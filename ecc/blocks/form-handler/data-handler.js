@@ -57,7 +57,8 @@ export function setPayloadCache(payload) {
 
   const { pendingTopics } = payload;
   if (pendingTopics) {
-    payloadCache.topics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
+    const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
+    if (jointTopics.length) payloadCache.topics = jointTopics;
   }
 }
 
