@@ -68,7 +68,8 @@ export function onSubmit(component, props) {
   const { payload } = props;
   payload.pendingTopics = { ...payload.topics, [topicType]: pendingTopics };
   const existingTags = payload.tags ? payload.tags.split(',') : [];
-  payload.tags = [...new Set([...existingTags, ...tags.map((tag) => tag.caasId)])].join(',');
+  const tagsToSubmit = [...new Set([...existingTags, ...tags.map((tag) => tag.caasId)])].join(',');
+  if (tagsToSubmit) payload.tags = tagsToSubmit;
   props.payload = payload;
 }
 
