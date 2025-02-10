@@ -123,8 +123,8 @@ async function safeFetch(url, options) {
     const response = await fetch(url, options);
 
     const contentType = response.headers.get('content-type');
-    if (!contentType?.includes('application/json')) {
-      throw new Error('Invalid response content type');
+    if (contentType && !contentType.includes('application/json') && !contentType.includes('text/plain')) {
+      throw new Error(`Invalid content type: ${contentType}`);
     }
 
     return response;
