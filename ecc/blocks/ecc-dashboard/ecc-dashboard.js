@@ -14,7 +14,7 @@ import {
   readBlockConfig,
   signIn,
   getEventServiceEnv,
-  getDevToken,
+  getLocalDevToken,
 } from '../../scripts/utils.js';
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
@@ -30,7 +30,6 @@ export function cloneFilter(obj) {
     'eventType',
     'cloudType',
     'seriesId',
-    'templateId',
     'communityTopicUrl',
     'title',
     'description',
@@ -72,7 +71,6 @@ function eventObjFilter(obj) {
     'eventType',
     'cloudType',
     'seriesId',
-    'templateId',
     'communityTopicUrl',
     'title',
     'description',
@@ -792,7 +790,7 @@ export default async function init(el) {
   el.innerHTML = '';
   buildLoadingScreen(el);
 
-  const devToken = getDevToken();
+  const devToken = getLocalDevToken();
   if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
     buildDashboard(el, config);
     return;

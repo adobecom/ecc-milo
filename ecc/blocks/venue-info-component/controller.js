@@ -19,7 +19,7 @@ async function loadGoogleMapsAPI(callback) {
   script.defer = true;
   window.onGoogleMapsApiLoaded = callback;
   script.onerror = () => {
-    window.lana?.error('Failed to load the Google Maps script!');
+    window.lana?.log('Failed to load the Google Maps script!');
   };
   document.head.appendChild(script);
 }
@@ -198,7 +198,7 @@ export default async function init(component, props) {
   venueNameInput.addEventListener('change', () => {
     if (!venueNameInput.value) {
       resetAllFields(component);
-      togglePrefillableFieldsHiddenState(component, true);
+      togglePrefillableFieldsHiddenState(component);
     }
   });
 

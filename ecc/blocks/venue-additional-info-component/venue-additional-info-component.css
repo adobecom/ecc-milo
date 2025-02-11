@@ -1,0 +1,15 @@
+.event-community-link-component .field-container {
+  display: flex;
+  align-items: center;
+  gap: 100px; 
+}
+
+.event-community-link-component .text-field-row .text-input {
+  flex-grow: 1;
+  max-width: 500px;
+
+}
+
+.event-community-link-component .text-field-row sp-checkbox {
+  margin-left: 10px; 
+}

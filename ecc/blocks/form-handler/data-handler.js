@@ -9,9 +9,9 @@ const submissionFilter = [
   'eventType',
   'cloudType',
   'seriesId',
-  'templateId',
   'communityTopicUrl',
   'title',
+  'tags',
   'description',
   'localStartDate',
   'localEndDate',
@@ -52,16 +52,17 @@ export function quickFilter(obj) {
 
 export function setPayloadCache(payload) {
   if (!payload) return;
+
   payloadCache = quickFilter(payload);
+
+  const { pendingTopics } = payload;
+  if (pendingTopics) {
+    const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
+    if (jointTopics.length) payloadCache.topics = jointTopics;
+  }
 }
 
 export function getFilteredCachedPayload() {
-  const { topics } = payloadCache;
-
-  if (topics) {
-    payloadCache.topics = Object.values(topics).reduce((acc, val) => acc.concat(val), []);
-  }
-
   return payloadCache;
 }
 

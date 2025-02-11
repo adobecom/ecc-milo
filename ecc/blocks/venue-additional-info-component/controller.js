@@ -16,13 +16,8 @@ export function onSubmit(component, props) {
   }
 }
 
-export async function onPayloadUpdate(component, props) {
-  const { cloudType } = props.payload;
-
-  if (cloudType && cloudType !== component.dataset.cloudType) {
-    component.classList.toggle('hidden', cloudType !== 'CreativeCloud');
-    component.dataset.cloudType = cloudType;
-  }
+export async function onPayloadUpdate(_component, _props) {
+  // Do nothing
 }
 
 export async function onRespUpdate(_component, _props) {
@@ -31,8 +26,6 @@ export async function onRespUpdate(_component, _props) {
 
 export default function init(component, props) {
   const eventData = props.eventDataResp;
-
-  component.dataset.cloudType = props.payload.cloudType || eventData.cloudType;
   const checkbox = component.querySelector('#checkbox-community');
   const input = component.querySelector('#community-url-details');
 
