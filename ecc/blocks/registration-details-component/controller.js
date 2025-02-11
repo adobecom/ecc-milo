@@ -222,12 +222,12 @@ function updateHeadingTooltip(component) {
 
 export async function onPayloadUpdate(component, props) {
   const { cloudType, eventType } = props.payload;
-  if (eventType && eventType !== component.dataset.eventType) {
-    component.dataset.eventType = eventType;
-  }
+  const eventTypeChange = eventType && eventType !== component.dataset.eventType;
+  const cloudTypeChange = cloudType && cloudType !== component.dataset.cloudType;
 
-  if (cloudType && cloudType !== component.dataset.cloudType) {
-    component.dataset.cloudType = cloudType;
+  if (eventTypeChange) component.dataset.eventType = eventType;
+  if (eventTypeChange) component.dataset.cloudType = cloudType;
+  if (cloudTypeChange || eventTypeChange) {
     const registrationConfigsWrapper = component.querySelector('.registration-configs-wrapper');
 
     if (!registrationConfigsWrapper) return;
