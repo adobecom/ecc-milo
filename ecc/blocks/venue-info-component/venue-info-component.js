@@ -1,5 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { generateToolTip } from '../../scripts/utils.js';
+import { handlize, generateToolTip } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -33,12 +33,69 @@ function decorateSWCTextField(row, extraOptions) {
   row.append(wrapper);
 }
 
-function buildAdditionalInfo(row) {
+function decorateImageDropzones(row) {
+  row.classList.add('image-dropzones');
+  const cols = row.querySelectorAll(':scope > div');
+  const gridItems = [];
+
+  cols.forEach((c, i) => {
+    if (i === 0) {
+      c.classList.add('image-dropzone');
+      const dzWrapper = createTag('div', { class: 'img-dropzone-wrapper' });
+      const uploadName = c.querySelector(':scope > p:first-of-type')?.textContent.trim();
+      const existingFileInput = document.querySelectorAll('.img-file-input');
+      const inputId = uploadName ? `${handlize(uploadName)}` : `img-file-input-${existingFileInput.length + i}`;
+      const paragraphs = c.querySelectorAll(':scope > p');
+
+      const dropzoneUI = createTag('image-dropzone', { id: inputId }, '', { parent: dzWrapper });
+      const inputLabel = createTag('div', { slot: 'img-label', class: 'img-upload-text' });
+
+      const progressWrapper = createTag('div', { class: 'progress-wrapper hidden' }, '', { parent: dzWrapper });
+      createTag('sp-progress-circle', { label: 'Uploading image' }, '', { parent: progressWrapper });
+
+      paragraphs.forEach((p) => {
+        inputLabel.append(p);
+      });
+
+      dropzoneUI.append(inputLabel);
+      gridItems.push(dzWrapper);
+    }
+
+    if (i === 1) {
+      gridItems.push(buildCheckbox(c));
+    }
+  });
+
+  row.innerHTML = '';
+  gridItems.forEach((dz) => {
+    row.append(dz);
+  });
+}
+
+function decorateRTETiptap(row) {
+  row.classList.add('rte-tiptap-row');
+  const rte = createTag('rte-tiptap', { id: 'venue-additional-info-rte' });
+  row.append(rte);
+}
+
+function decorateToolTip(row) {
+  row.classList.add('venue-additional-info');
+  generateToolTip(row);
+}
+
+function buildAdditionalInfo(row, index) {
   row.classList.add('venue-info-addition');
   const fieldSet = createTag('fieldset', { class: 'checkboxes' });
   const [inputLabel, comment] = [...row.querySelectorAll(':scope  p')];
   const labelText = inputLabel.textContent.trim();
-  const checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-info-visible' }, labelText);
+  let checkbox;
+  console.log(row);
+  if (index === 4) {
+    checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-info-visible' }, labelText);
+  } else if (index === 8) {
+    checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-additional-info-visible' }, labelText);
+  }
+  
   const wrapper = createTag('div', { class: 'checkbox-wrapper' });
 
   wrapper.append(checkbox);
@@ -102,7 +159,19 @@ export default function init(el) {
         buildLocationInputGrid(r);
         break;
       case 4:
-        buildAdditionalInfo(r);
+        buildAdditionalInfo(r, i);
+        break;
+      case 5:
+        decorateToolTip(r);
+        break;
+      case 6:
+        decorateImageDropzones(r);
+        break;
+      case 7:
+        decorateRTETiptap(r);
+        break;
+      case 8:
+        buildAdditionalInfo(r, i);
         break;
       default:
         break;

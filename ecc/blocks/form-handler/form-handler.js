@@ -30,6 +30,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
+import RTETiptap from '../../components/rte-tiptap/rte-tiptap.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 import CustomSearch from '../../components/custom-search/custom-search.js';
@@ -229,6 +230,7 @@ function initCustomLitComponents() {
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
   customElements.define('custom-search', CustomSearch);
+  customElements.define('rte-tiptap', RTETiptap);
 }
 
 async function loadEventData(props) {

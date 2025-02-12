@@ -4,13 +4,14 @@
 import { Editor } from 'https://esm.sh/@tiptap/core';
 import StarterKit from 'https://esm.sh/@tiptap/starter-kit';
 import Link from 'https://esm.sh/@tiptap/extension-link';
+import ListItem from 'https://esm.sh/@tiptap/extension-list-item';
 
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './rte-tiptap.css.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
-export class RteTiptap extends LitElement {
+export default class RteTiptap extends LitElement {
   static styles = style;
 
   constructor() {
@@ -19,8 +20,8 @@ export class RteTiptap extends LitElement {
   }
 
   firstUpdated() {
-    const editorEl = this.shadowRoot.getElementById('editor');
-    const outputEl = this.shadowRoot.getElementById('output');
+    const editorEl = this.shadowRoot.querySelector('.rte-tiptap-editor');
+    const outputEl = this.shadowRoot.querySelector('.rte-tiptap-output');
     this.editor = new Editor({
       element: editorEl,
       extensions: [
@@ -33,8 +34,10 @@ export class RteTiptap extends LitElement {
               target: '_blank',
           },
         }),
+        ListItem.extend({
+          content: 'block*',
+        })
       ],
-      content: "",
       onUpdate({ editor }) {
         outputEl.innerHTML = editor.getHTML();
       },
@@ -42,7 +45,6 @@ export class RteTiptap extends LitElement {
   }
   
   rteAddLink() {
-    console.log('testing');
     const url = prompt("Enter the URL:");
     if (url) {
         this.editor.chain().focus().setLink({ href: url }).run();
@@ -53,7 +55,7 @@ export class RteTiptap extends LitElement {
 
   render() {
     return html`
-            <div id="toolbar">
+            <div class="rte-tiptap-toolbar">
               <button @click=${() => this.editor.chain().focus().toggleBold().run()}>Bold</button>
               <button @click=${() => this.editor.chain().focus().toggleItalic().run()}>Italic</button>
               <button @click=${() => this.editor.chain().focus().toggleStrike().run()}>Strike</button>
@@ -70,9 +72,9 @@ export class RteTiptap extends LitElement {
               <button @click=${() => this.editor.chain().focus().setHorizontalRule().run()}>Horizontal rule</button>
               <button @click=${this.rteAddLink}>Link</button>
             </div>
-            <div id="editor"></div>
+            <div class="rte-tiptap-editor"></div>
             <h2>TipTap Output</h2>
-            <div id="output"></div>
+            <div class="rte-tiptap-output"></div>
         `;
   }
 }
