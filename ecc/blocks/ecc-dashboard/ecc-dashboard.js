@@ -426,7 +426,7 @@ function initMoreOptions(props, config, eventObj, row) {
           return;
         }
 
-        const newJson = await getEventsForUser();
+        const newJson = props.data.filter((event) => event.eventId !== eventObj.eventId);
 
         props.data = newJson;
         props.filteredData = newJson;
