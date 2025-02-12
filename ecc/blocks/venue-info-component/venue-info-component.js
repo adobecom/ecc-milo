@@ -89,7 +89,6 @@ function buildAdditionalInfo(row, index) {
   const [inputLabel, comment] = [...row.querySelectorAll(':scope  p')];
   const labelText = inputLabel.textContent.trim();
   let checkbox;
-  console.log(row);
   if (index === 4) {
     checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-info-visible' }, labelText);
   } else if (index === 8) {
