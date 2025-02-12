@@ -24,23 +24,33 @@ export const style = css`
   border-radius: 4px;
 }
 
-.tiptap ul,.tiptap ol {
+.tiptap ul,
+.tiptap ol {
     padding: 0 1rem;
     margin: 1rem 1rem 1rem .4rem
 }
 
-.tiptap ul ul,.tiptap ol ol {
+.tiptap ul ul,
+.tiptap ul ol,
+.tiptap ol ol,
+.tiptap ol ul {
     padding: 0 1rem;
     margin-top: 0;
     margin-bottom: 0;
 }
 
-.tiptap ul li p,.tiptap ol li p {
+.tiptap ul li p,
+.tiptap ol li p {
     margin-top: 0;
     margin-bottom: 0;
 }
 
-.tiptap h1,.tiptap h2,.tiptap h3,.tiptap h4,.tiptap h5,.tiptap h6 {
+.tiptap h1,
+.tiptap h2,
+.tiptap h3,
+.tiptap h4,
+.tiptap h5,
+.tiptap h6 {
     line-height: 1.1;
     text-wrap: pretty
 }
@@ -57,7 +67,7 @@ export const style = css`
     font-size: 1.1rem
 }
 
-.tiptap h4,.tiptap h5,.tiptap h6 {
+.tiptap h4, .tiptap h5, .tiptap h6 {
     font-size: 1rem
 }
 
