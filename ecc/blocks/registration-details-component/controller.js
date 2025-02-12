@@ -252,19 +252,6 @@ export async function onPayloadUpdate(component, props) {
     }
 
     updateHeadingTooltip(component);
-  } else if (eventType && eventType !== component.dataset.eventType) {
-    if (cloudType === 'ExperienceCloud') {
-      switch (eventType) {
-        case 'InPerson':
-          buildExperienceCloudInPersonFields(component);
-          break;
-        case 'Webinar':
-          buildExperienceCloudWebinarFields(component);
-          break;
-        default:
-          break;
-      }
-    }
   }
 }
 
