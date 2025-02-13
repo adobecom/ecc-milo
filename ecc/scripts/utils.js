@@ -1,3 +1,4 @@
+import { ALLOWED_HOSTS } from '../constants/constants.js';
 import { LIBS } from './scripts.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
@@ -28,8 +29,6 @@ export function getEventServiceEnv() {
     if (host.startsWith('main--')) return 'prod';
     return 'dev';
   }
-
-  if (host.includes('localhost')) return 'local';
 
   if (host.includes('stage.adobe')
     || host.includes('corp.adobe')
@@ -118,7 +117,12 @@ export function getEventPageHost() {
     return window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.aem.page`);
   }
 
-  return window.location.origin;
+  if (ALLOWED_HOSTS(window.location.hostname)) {
+    return window.location.origin;
+  }
+
+  // fallback to prod
+  return 'www.adobe.com';
 }
 
 export function addTooltipToEl(tooltipText, appendee) {

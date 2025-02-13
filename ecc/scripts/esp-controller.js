@@ -1,25 +1,7 @@
 import { LIBS } from './scripts.js';
 import { getLocalDevToken, getEventServiceEnv, getSecret } from './utils.js';
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
-
-const API_CONFIG = {
-  esl: {
-    local: { host: 'http://localhost:8499' },
-    dev: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
-    dev02: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-d5dc93.stage.cloud.adobe.io' },
-    stage: { host: 'https://events-service-layer-stage.adobe.io' },
-    stage02: { host: 'https://wcms-events-service-layer-deploy-ethos105-stage-or-8f7ce1.stage.cloud.adobe.io' },
-    prod: { host: 'https://events-service-layer.adobe.io' },
-  },
-  esp: {
-    local: { host: 'http://localhost:8500' },
-    dev: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
-    dev02: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-c81eb6.stage.cloud.adobe.io' },
-    stage: { host: 'https://events-service-platform-stage-or2.adobe.io' },
-    stage02: { host: 'https://wcms-events-service-platform-deploy-ethos105-stage-9a5fdc.stage.cloud.adobe.io' },
-    prod: { host: 'https://events-service-platform.adobe.io' },
-  },
-};
+import { API_CONFIG, ALLOWED_HOSTS } from '../constants/constants.js';
 
 export const getCaasTags = (() => {
   let cache;
@@ -54,7 +36,7 @@ export const getCaasTags = (() => {
 })();
 
 export function waitForAdobeIMS() {
-  if (getEventServiceEnv() === 'local') {
+  if (getEventServiceEnv() === 'dev' && window.location.hostname === 'localhost') {
     if (getLocalDevToken()) {
       return Promise.resolve();
     }
@@ -72,26 +54,6 @@ export function waitForAdobeIMS() {
     checkIMS();
   });
 }
-
-const ALLOWED_HOSTS = {
-  localhost: true,
-  'events-service-layer.adobe.io': true,
-  'events-service-layer-stage.adobe.io': true,
-  'events-service-platform.adobe.io': true,
-  'events-service-platform-stage-or2.adobe.io': true,
-  'www.adobe.com': true,
-
-  ...Object.values(API_CONFIG.esl).reduce((acc, env) => {
-    const url = new URL(env.host);
-    acc[url.hostname] = true;
-    return acc;
-  }, {}),
-  ...Object.values(API_CONFIG.esp).reduce((acc, env) => {
-    const url = new URL(env.host);
-    acc[url.hostname] = true;
-    return acc;
-  }, {}),
-};
 
 function isValidUrl(urlString) {
   try {
@@ -135,7 +97,7 @@ async function safeFetch(url, options) {
 }
 
 export async function constructRequestOptions(method, body = null) {
-  const secretEnv = ['local', 'dev'].includes(getEventServiceEnv()) ? 'dev' : getEventServiceEnv();
+  const secretEnv = getEventServiceEnv() === 'dev' ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
@@ -147,7 +109,7 @@ export async function constructRequestOptions(method, body = null) {
 
   const headers = new Headers();
   const devToken = getLocalDevToken();
-  const authToken = devToken && ['local', 'dev'].includes(getEventServiceEnv()) ? devToken : window.adobeIMS?.getAccessToken()?.token;
+  const authToken = devToken && getEventServiceEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   if (!authToken) {
     throw new Error('Missing authentication token');
@@ -194,7 +156,7 @@ export async function constructRequestOptions(method, body = null) {
 }
 
 export async function uploadImage(file, configs, tracker, imageId = null) {
-  const secretEnv = ['local', 'dev'].includes(getEventServiceEnv()) ? 'dev' : getEventServiceEnv();
+  const secretEnv = getEventServiceEnv() === 'dev' ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
@@ -207,7 +169,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
   const requestId = await getUuid(new Date().getTime());
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const devToken = getLocalDevToken();
-  const authToken = devToken && ['local', 'dev'].includes(getEventServiceEnv()) ? devToken : window.adobeIMS?.getAccessToken()?.token;
+  const authToken = devToken && getEventServiceEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
   let respJson = null;
 
