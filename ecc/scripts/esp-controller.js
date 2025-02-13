@@ -97,7 +97,7 @@ async function safeFetch(url, options) {
 }
 
 export async function constructRequestOptions(method, body = null) {
-  const secretEnv = getEventServiceEnv() === 'dev' ? 'dev' : getEventServiceEnv();
+  const secretEnv = getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
@@ -156,7 +156,7 @@ export async function constructRequestOptions(method, body = null) {
 }
 
 export async function uploadImage(file, configs, tracker, imageId = null) {
-  const secretEnv = getEventServiceEnv() === 'dev' ? 'dev' : getEventServiceEnv();
+  const secretEnv = getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
