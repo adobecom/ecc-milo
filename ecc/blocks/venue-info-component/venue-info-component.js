@@ -60,10 +60,6 @@ function decorateImageDropzones(row) {
       dropzoneUI.append(inputLabel);
       gridItems.push(dzWrapper);
     }
-
-    if (i === 1) {
-      gridItems.push(buildCheckbox(c));
-    }
   });
 
   row.innerHTML = '';
@@ -94,7 +90,6 @@ function buildAdditionalInfo(row, index) {
   } else if (index === 8) {
     checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-additional-info-visible' }, labelText);
   }
-  
   const wrapper = createTag('div', { class: 'checkbox-wrapper' });
 
   wrapper.append(checkbox);

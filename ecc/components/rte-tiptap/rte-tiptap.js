@@ -1,13 +1,18 @@
 /* eslint-disable no-use-before-define */
-/* eslint-disable import/prefer-default-export */
-/* eslint-disable class-methods-use-this */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable no-undef */
+/* eslint-disable func-names */
+/* eslint-disable object-shorthand */
 import { Editor } from 'https://esm.sh/@tiptap/core';
 import StarterKit from 'https://esm.sh/@tiptap/starter-kit';
+import Underline from 'https://esm.sh/@tiptap/extension-underline';
 import Link from 'https://esm.sh/@tiptap/extension-link';
-import ListItem from 'https://esm.sh/@tiptap/extension-list-item';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align';
 
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './rte-tiptap.css.js';
+
+const { loadScript } = await import(`${LIBS}/utils/utils.js`);
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -19,46 +24,61 @@ export default class RteTiptap extends LitElement {
     this.editor = () => {};
   }
 
-  firstUpdated() {
+  async firstUpdated() {
+    await Promise.all([loadScript('https://unpkg.com/turndown/dist/turndown.js'), loadScript('https://unpkg.com/showdown/dist/showdown.min.js')]);
     const editorEl = this.shadowRoot.querySelector('.rte-tiptap-editor');
-    const outputEl = this.shadowRoot.querySelector('.rte-tiptap-output');
+    const outputHtmlEl = this.shadowRoot.querySelector('.rte-tiptap-html');
+    const outputHtmlToMarkdownEl = this.shadowRoot.querySelector('.rte-tiptap-html-to-markdown');
+    const outputMarkdownToHtmlEl = this.shadowRoot.querySelector('.rte-tiptap-markdown-to-html');
+    const turndownService = new TurndownService({ headingStyle: 'setText' });
+    turndownService.keep(['u', 'ins', 'sub', 'sup']);
+    turndownService.addRule('strikethrough', {
+      filter: ['del', 's', 'strike'],
+      replacement: function (content) {
+        return `~~${content}~~`;
+      },
+    });
+    const showdownService = new showdown.Converter();
+    showdownService.setOption('strikethrough', true);
     this.editor = new Editor({
       element: editorEl,
       extensions: [
         StarterKit,
+        Underline,
+        TextAlign.configure({ types: ['heading', 'paragraph'] }),
         Link.configure({
           openOnClick: false, // avoid opening links immediately when clicked
           autolink: true, // auto-detects links
           HTMLAttributes: {
-              rel: 'noopener noreferrer',
-              target: '_blank',
+            rel: 'noopener noreferrer',
+            target: '_blank',
           },
         }),
-        ListItem.extend({
-          content: 'block*',
-        })
       ],
       onUpdate({ editor }) {
-        outputEl.innerHTML = editor.getHTML();
+        const outputHtml = editor.getHTML();
+        const markdown = turndownService.turndown(outputHtml);
+        const showdown = showdownService.makeHtml(markdown);
+        outputHtmlEl.innerHTML = outputHtml;
+        outputHtmlToMarkdownEl.innerHTML = markdown;
+        outputMarkdownToHtmlEl.innerHTML = showdown;
       },
     });
   }
-  
+
   rteAddLink() {
-    const url = prompt("Enter the URL:");
+    /* eslint-disable no-alert */
+    const url = prompt('Enter the URL:');
     if (url) {
-        this.editor.chain().focus().setLink({ href: url }).run();
+      this.editor.chain().focus().setLink({ href: url }).run();
     } else {
-        this.editor.chain().focus().unsetLink().run();
+      this.editor.chain().focus().unsetLink().run();
     }
   }
 
   render() {
     return html`
             <div class="rte-tiptap-toolbar">
-              <button @click=${() => this.editor.chain().focus().toggleBold().run()}>Bold</button>
-              <button @click=${() => this.editor.chain().focus().toggleItalic().run()}>Italic</button>
-              <button @click=${() => this.editor.chain().focus().toggleStrike().run()}>Strike</button>
               <button @click=${() => this.editor.chain().focus().setParagraph().run()}>Paragraph</button>
               <button @click=${() => this.editor.chain().focus().toggleHeading({ level: 1 }).run()}>H1</button>
               <button @click=${() => this.editor.chain().focus().toggleHeading({ level: 2 }).run()}>H2</button>
@@ -66,6 +86,13 @@ export default class RteTiptap extends LitElement {
               <button @click=${() => this.editor.chain().focus().toggleHeading({ level: 4 }).run()}>H4</button>
               <button @click=${() => this.editor.chain().focus().toggleHeading({ level: 5 }).run()}>H5</button>
               <button @click=${() => this.editor.chain().focus().toggleHeading({ level: 6 }).run()}>H6</button>
+              <button @click=${() => this.editor.chain().focus().toggleBold().run()}>Bold</button>
+              <button @click=${() => this.editor.chain().focus().toggleItalic().run()}>Italic</button>
+              <button @click=${() => this.editor.chain().focus().toggleUnderline().run()}>Underline</button>
+              <button @click=${() => this.editor.chain().focus().toggleStrike().run()}>Strike</button>
+              <button @click=${() => this.editor.chain().focus().setTextAlign('left').run()}>Left</button>
+              <button @click=${() => this.editor.chain().focus().setTextAlign('center').run()}>Center</button>
+              <button @click=${() => this.editor.chain().focus().setTextAlign('right').run()}>Right</button>
               <button @click=${() => this.editor.chain().focus().toggleBulletList().run()}>Bullet List</button>
               <button @click=${() => this.editor.chain().focus().toggleOrderedList().run()}>Ordered List</button>
               <button @click=${() => this.editor.chain().focus().toggleBlockquote().run()}>Blockquote</button>
@@ -73,8 +100,14 @@ export default class RteTiptap extends LitElement {
               <button @click=${this.rteAddLink}>Link</button>
             </div>
             <div class="rte-tiptap-editor"></div>
-            <h2>TipTap Output</h2>
-            <div class="rte-tiptap-output"></div>
+            <h2>TipTap HTML</h2>
+            <div class="rte-tiptap-html"></div>
+            <hr>
+            <h2>HTML to Markdown</h2>
+            <pre class="rte-tiptap-html-to-markdown"></pre>
+            <hr>
+            <h2>Markdown to HTML</h2>
+            <div class="rte-tiptap-markdown-to-html"></div>
         `;
   }
 }
