@@ -4,11 +4,17 @@ const { css } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
-.field-container {
+.agenda-container {
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-bottom: 24px;
+  gap: 42px;
+}
+
+.field-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .time-picker {

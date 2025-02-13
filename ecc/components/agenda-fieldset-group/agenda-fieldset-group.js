@@ -54,6 +54,7 @@ export default class AgendaFieldsetGroup extends LitElement {
 
   render() {
     return html`
+      <div class="agenda-group-container">
       ${repeat(this.agendaItems, (agendaItem, index) => {
     const { hours, minutes, period } = agendaItem.startTime ? parse24HourFormat(agendaItem.startTime) : {};
     const agendaComponents = {
@@ -75,6 +76,7 @@ export default class AgendaFieldsetGroup extends LitElement {
       `;
   })}
       <repeater-element text="Add agenda time and details" @repeat=${this.addAgenda}></repeater-element>
+      </div>
     `;
   }
 }

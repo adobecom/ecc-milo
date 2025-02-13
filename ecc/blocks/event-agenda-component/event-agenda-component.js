@@ -61,6 +61,10 @@ export default async function init(el) {
   el.classList.add('form-component');
   generateToolTip(el);
   const rows = [...el.querySelectorAll(':scope > div')];
+  const div = createTag('div', { class: 'agenda-group-container' });
+  div.append(rows[1]);
+  div.append(rows[2]);
+  el.append(div);
   decorateFields(rows[1]);
   decorateCheckBox(rows[2]);
 }
