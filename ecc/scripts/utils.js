@@ -1,4 +1,3 @@
-import { ALLOWED_HOSTS } from '../constants/constants.js';
 import { LIBS } from './scripts.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
@@ -112,16 +111,19 @@ export function parse24HourFormat(timeStr) {
   };
 }
 
-export function getEventPageHost() {
+export function getEventPageHost(relativeDomain) {
   if (window.location.href.includes('.hlx.') || window.location.href.includes('.aem.')) {
     return window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.aem.page`);
   }
-
-  if (ALLOWED_HOSTS(window.location.hostname)) {
+  if (relativeDomain) return relativeDomain;
+  if ([
+    'www.stage.adobe.com',
+    'www.adobe.com',
+  ].includes(window.location.hostname)) {
     return window.location.origin;
   }
 
-  // fallback to prod
+  // fallback to a.com prod
   return 'www.adobe.com';
 }
 

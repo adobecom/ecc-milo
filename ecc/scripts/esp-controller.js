@@ -167,7 +167,7 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
   ]);
 
   const requestId = await getUuid(new Date().getTime());
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const devToken = getLocalDevToken();
   const authToken = devToken && getEventServiceEnv() === 'dev' ? devToken : window.adobeIMS?.getAccessToken()?.token;
 
@@ -263,7 +263,7 @@ export async function deleteImage(configs, imageId) {
   if (!configs || typeof configs !== 'object') throw new Error('Invalid image configs');
 
   await waitForAdobeIMS();
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('DELETE');
 
   try {
@@ -333,7 +333,7 @@ export async function replaceVenue(eventId, venueId, venueData) {
 }
 
 export async function getClouds() {
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -355,7 +355,7 @@ export async function getClouds() {
 export async function getCloud(cloudType) {
   if (!cloudType || typeof cloudType !== 'string') throw new Error('Invalid cloud ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -378,7 +378,7 @@ export async function updateCloud(cloudType, cloudData) {
   if (!cloudType || typeof cloudType !== 'string') throw new Error('Invalid cloud Type');
   if (!cloudData || typeof cloudData !== 'object') throw new Error('Invalid cloud data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(cloudData);
 
   const options = await constructRequestOptions('PUT', raw);
@@ -428,7 +428,7 @@ export async function createSpeaker(profile, seriesId) {
 
   const nSpeaker = convertToNSpeaker(profile);
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(nSpeaker);
   const options = await constructRequestOptions('POST', raw);
 
@@ -452,7 +452,7 @@ export async function createSponsor(sponsorData, seriesId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('POST', raw);
 
@@ -477,7 +477,7 @@ export async function updateSponsor(sponsorData, sponsorId, seriesId) {
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('PUT', raw);
 
@@ -501,7 +501,7 @@ export async function addSponsorToEvent(sponsorData, eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('POST', raw);
 
@@ -526,7 +526,7 @@ export async function updateSponsorInEvent(sponsorData, sponsorId, eventId) {
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('PUT', raw);
 
@@ -550,7 +550,7 @@ export async function removeSponsorFromEvent(sponsorId, eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('DELETE');
 
   try {
@@ -573,7 +573,7 @@ export async function getSponsor(seriesId, sponsorId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -595,7 +595,7 @@ export async function getSponsor(seriesId, sponsorId) {
 export async function getSponsors(seriesId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -618,7 +618,7 @@ export async function getSponsorImages(seriesId, sponsorId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -641,7 +641,7 @@ export async function addSpeakerToEvent(speakerData, eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!speakerData || typeof speakerData !== 'object') throw new Error('Invalid speaker data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(speakerData);
   const options = await constructRequestOptions('POST', raw);
 
@@ -666,7 +666,7 @@ export async function updateSpeakerInEvent(speakerData, speakerId, eventId) {
   if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
   if (!speakerData || typeof speakerData !== 'object') throw new Error('Invalid speaker data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(speakerData);
   const options = await constructRequestOptions('PUT', raw);
 
@@ -690,7 +690,7 @@ export async function removeSpeakerFromEvent(speakerId, eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('DELETE');
 
   try {
@@ -713,7 +713,7 @@ export async function getSpeaker(seriesId, speakerId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -737,7 +737,7 @@ export async function getEventSpeaker(seriesId, eventId, speakerId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   const seriesSpeaker = await getSpeaker(seriesId, speakerId);
@@ -768,7 +768,7 @@ export async function updateSpeaker(profile, seriesId) {
   if (!profile || typeof profile !== 'object') throw new Error('Invalid speaker profile');
 
   const nSpeaker = convertToNSpeaker(profile);
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(nSpeaker);
   const options = await constructRequestOptions('PUT', raw);
 
@@ -922,7 +922,7 @@ export async function deleteEvent(eventId) {
 }
 
 export async function getEvents() {
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -974,7 +974,7 @@ export async function getEventsForUser() {
 export async function getEvent(eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid eventId');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
   const url = `${host}/v1/events/${encodeURIComponent(eventId)}`;
 
@@ -1002,7 +1002,7 @@ export async function getEvent(eventId) {
 export async function getVenue(eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid eventId');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -1022,7 +1022,7 @@ export async function getVenue(eventId) {
 }
 
 export async function getAllSeries() {
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -1044,7 +1044,7 @@ export async function getAllSeries() {
 export async function getSeriesById(seriesId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -1066,7 +1066,7 @@ export async function getSeriesById(seriesId) {
 export async function createSeries(seriesData) {
   if (!seriesData || typeof seriesData !== 'object') throw new Error('Invalid series data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify({ ...seriesData, seriesStatus: 'draft' });
   const options = await constructRequestOptions('POST', raw);
 
@@ -1090,7 +1090,7 @@ export async function updateSeries(seriesId, seriesData) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!seriesData || typeof seriesData !== 'object') throw new Error('Invalid series data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify({ ...seriesData, seriesId });
   const options = await constructRequestOptions('PUT', raw);
 
@@ -1114,7 +1114,7 @@ export async function publishSeries(seriesId, seriesData) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!seriesData || typeof seriesData !== 'object') throw new Error('Invalid series data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify({ ...seriesData, seriesId, seriesStatus: 'published' });
   const options = await constructRequestOptions('PUT', raw);
 
@@ -1138,7 +1138,7 @@ export async function unpublishSeries(seriesId, seriesData) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!seriesData || typeof seriesData !== 'object') throw new Error('Invalid series data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify({ ...seriesData, seriesId, seriesStatus: 'draft' });
   const options = await constructRequestOptions('PUT', raw);
 
@@ -1162,7 +1162,7 @@ export async function archiveSeries(seriesId, seriesData) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!seriesData || typeof seriesData !== 'object') throw new Error('Invalid series data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify({ ...seriesData, seriesId, seriesStatus: 'archived' });
   const options = await constructRequestOptions('PUT', raw);
 
@@ -1207,7 +1207,7 @@ export async function getSeriesForUser() {
 export async function deleteSeries(seriesId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('DELETE');
 
   try {
@@ -1231,7 +1231,7 @@ export async function createAttendee(eventId, attendeeData) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!attendeeData || typeof attendeeData !== 'object') throw new Error('Invalid attendee data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(attendeeData);
   const options = await constructRequestOptions('POST', raw);
 
@@ -1256,7 +1256,7 @@ export async function updateAttendee(eventId, attendeeId, attendeeData) {
   if (!attendeeId || typeof attendeeId !== 'string') throw new Error('Invalid attendee ID');
   if (!attendeeData || typeof attendeeData !== 'object') throw new Error('Invalid attendee data');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(attendeeData);
   const options = await constructRequestOptions('PUT', raw);
 
@@ -1302,7 +1302,7 @@ export async function removeAttendeeFromEvent(eventId, attendeeId) {
 export async function getEventAttendees(eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -1325,7 +1325,7 @@ export async function getAllEventAttendees(eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
 
   const recurGetAttendees = async (fullAttendeeArr = [], nextPageToken = null) => {
-    const { host } = API_CONFIG.esp[getEventServiceEnv()];
+    const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
     const options = await constructRequestOptions('GET');
     const fetchUrl = nextPageToken ? `${host}/v1/events/${eventId}/attendees?nextPageToken=${nextPageToken}` : `${host}/v1/events/${eventId}/attendees`;
 
@@ -1358,7 +1358,7 @@ export async function getAttendee(eventId, attendeeId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!attendeeId || typeof attendeeId !== 'string') throw new Error('Invalid attendee ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -1380,7 +1380,7 @@ export async function getAttendee(eventId, attendeeId) {
 export async function getSpeakers(seriesId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -1402,7 +1402,7 @@ export async function getSpeakers(seriesId) {
 export async function getEventImages(eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
 
   try {
@@ -1426,7 +1426,7 @@ export async function deleteSpeakerImage(speakerId, seriesId, imageId) {
   if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
   if (!imageId || typeof imageId !== 'string') throw new Error('Invalid image ID');
 
-  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const { host } = window.location.hostname.includes('localhost') ? API_CONFIG.esp.local : API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('DELETE');
 
   try {
