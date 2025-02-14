@@ -32,6 +32,8 @@ function resetAllFields(component) {
   const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
   const addressComponentsInput = component.querySelector('#google-place-address-components');
   const formattedAddressInput = component.querySelector('#google-place-formatted-address');
+  const venueAdditionalInfoInput = component.querySelector('#venue-additional-info-rte-output');
+  const venueRTE = component.querySelector('#venue-additional-info-rte');
 
   venueNameInput.value = '';
   changeInputValue(placeLatInput, 'value', '');
@@ -40,6 +42,8 @@ function resetAllFields(component) {
   changeInputValue(gmtoffsetInput, 'value', '');
   changeInputValue(addressComponentsInput, 'value', '');
   changeInputValue(formattedAddressInput, 'value', '');
+  changeInputValue(venueAdditionalInfoInput, 'value', '');
+  venueRTE.content = '';
 }
 
 function updateAllFields(venueData, component) {
@@ -50,6 +54,8 @@ function updateAllFields(venueData, component) {
   const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
   const addressComponentsInput = component.querySelector('#google-place-address-components');
   const formattedAddressInput = component.querySelector('#google-place-formatted-address');
+  const venueAdditionalInfoInput = component.querySelector('#venue-additional-info-rte-output');
+  const venueRTE = component.querySelector('#venue-additional-info-rte');
 
   changeInputValue(venueNameInput, 'value', venueData.venueName);
   changeInputValue(placeLatInput, 'value', venueData.coordinates?.lat);
@@ -58,6 +64,30 @@ function updateAllFields(venueData, component) {
   changeInputValue(gmtoffsetInput, 'value', venueData.gmtOffset);
   changeInputValue(addressComponentsInput, 'value', JSON.stringify(venueData.addressComponents));
   changeInputValue(formattedAddressInput, 'value', venueData.formattedAddress);
+  changeInputValue(venueAdditionalInfoInput, 'value', venueData.venueAdditionalInfo);
+  venueRTE.content = `# heading 1
+
+## heading 2
+
+*   bullet 1
+    
+    *   nested bullet 1.1
+        
+*   bullet 2
+    
+    *   nested bullet 2.1
+        
+    *   some [link.com](http://link.com)
+        
+
+1.  order 1
+    
+2.  order 2
+    
+    1.  nested order 2.1
+        
+    2.  **_<u>nested order 2.2 bold underline italic</u>_**`;
+  venueRTE.content = venueData.venueAdditionalInfo; // commment out for above sample data
 }
 
 function getVenueDataInForm(component) {
@@ -68,6 +98,7 @@ function getVenueDataInForm(component) {
   const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
   const addressComponentsInput = component.querySelector('#google-place-address-components');
   const formattedAddressInput = component.querySelector('#google-place-formatted-address');
+  const venueAdditionalInfoInput = component.querySelector('#venue-additional-info-rte-output');
 
   const venueName = venueNameInput.value;
   const placeId = placeIdInput.value;
@@ -75,6 +106,7 @@ function getVenueDataInForm(component) {
   const lon = +placeLngInput.value;
   const gmtOffset = +gmtoffsetInput.value;
   const formattedAddress = formattedAddressInput.value;
+  const venueAdditionalInfo = venueAdditionalInfoInput.value;
 
   let addressComponents;
 
@@ -94,6 +126,7 @@ function getVenueDataInForm(component) {
     gmtOffset,
     addressComponents,
     formattedAddress,
+    venueAdditionalInfo,
   };
 
   return venueData;
@@ -192,6 +225,7 @@ export default async function init(component, props) {
   const { venue, showVenuePostEvent } = eventData;
 
   const venueNameInput = component.querySelector('#venue-info-venue-name');
+  const venueRTE = component.querySelector('#venue-additional-info-rte');
 
   togglePrefillableFieldsHiddenState(component);
 
@@ -201,6 +235,10 @@ export default async function init(component, props) {
       togglePrefillableFieldsHiddenState(component);
     }
   });
+
+  venueRTE.handleInput = (output) => {
+    changeInputValue(component.querySelector('#venue-additional-info-rte-output'), 'value', output);
+  };
 
   if (venue) {
     updateAllFields(venue, component);
@@ -221,7 +259,7 @@ export async function onTargetUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const venueData = getVenueDataInForm(component);
-
+  console.log(venueData);
   if (!venueData.placeId) {
     component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please select a valid venue.' } }, bubbles: true, composed: true }));
     return;

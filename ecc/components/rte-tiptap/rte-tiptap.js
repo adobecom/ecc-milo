@@ -7,7 +7,6 @@ import { Editor } from 'https://esm.sh/@tiptap/core';
 import StarterKit from 'https://esm.sh/@tiptap/starter-kit';
 import Underline from 'https://esm.sh/@tiptap/extension-underline';
 import Link from 'https://esm.sh/@tiptap/extension-link';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align';
 
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './rte-tiptap.css.js';
@@ -17,11 +16,18 @@ const { loadScript } = await import(`${LIBS}/utils/utils.js`);
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 export default class RteTiptap extends LitElement {
+  static properties = {
+    content: { type: String },
+    handleChange: { type: Function },
+  };
+
   static styles = style;
 
   constructor() {
     super();
     this.editor = () => {};
+    this.content = '';
+    this.handleInput = () => {};
   }
 
   async firstUpdated() {
@@ -31,21 +37,16 @@ export default class RteTiptap extends LitElement {
     const outputHtmlToMarkdownEl = this.shadowRoot.querySelector('.rte-tiptap-html-to-markdown');
     const outputMarkdownToHtmlEl = this.shadowRoot.querySelector('.rte-tiptap-markdown-to-html');
     const turndownService = new TurndownService({ headingStyle: 'setText' });
-    turndownService.keep(['u', 'ins', 'sub', 'sup']);
-    turndownService.addRule('strikethrough', {
-      filter: ['del', 's', 'strike'],
-      replacement: function (content) {
-        return `~~${content}~~`;
-      },
-    });
+    turndownService.keep(['u']);
     const showdownService = new showdown.Converter();
-    showdownService.setOption('strikethrough', true);
+    const content = this.content ? showdownService.makeHtml(this.content) : '';
+    const tiptap = this;
     this.editor = new Editor({
+      content: content,
       element: editorEl,
       extensions: [
         StarterKit,
         Underline,
-        TextAlign.configure({ types: ['heading', 'paragraph'] }),
         Link.configure({
           openOnClick: false, // avoid opening links immediately when clicked
           autolink: true, // auto-detects links
@@ -62,6 +63,7 @@ export default class RteTiptap extends LitElement {
         outputHtmlEl.innerHTML = outputHtml;
         outputHtmlToMarkdownEl.innerHTML = markdown;
         outputMarkdownToHtmlEl.innerHTML = showdown;
+        tiptap.handleInput(markdown);
       },
     });
   }
@@ -89,14 +91,8 @@ export default class RteTiptap extends LitElement {
               <button @click=${() => this.editor.chain().focus().toggleBold().run()}>Bold</button>
               <button @click=${() => this.editor.chain().focus().toggleItalic().run()}>Italic</button>
               <button @click=${() => this.editor.chain().focus().toggleUnderline().run()}>Underline</button>
-              <button @click=${() => this.editor.chain().focus().toggleStrike().run()}>Strike</button>
-              <button @click=${() => this.editor.chain().focus().setTextAlign('left').run()}>Left</button>
-              <button @click=${() => this.editor.chain().focus().setTextAlign('center').run()}>Center</button>
-              <button @click=${() => this.editor.chain().focus().setTextAlign('right').run()}>Right</button>
               <button @click=${() => this.editor.chain().focus().toggleBulletList().run()}>Bullet List</button>
               <button @click=${() => this.editor.chain().focus().toggleOrderedList().run()}>Ordered List</button>
-              <button @click=${() => this.editor.chain().focus().toggleBlockquote().run()}>Blockquote</button>
-              <button @click=${() => this.editor.chain().focus().setHorizontalRule().run()}>Horizontal rule</button>
               <button @click=${this.rteAddLink}>Link</button>
             </div>
             <div class="rte-tiptap-editor"></div>
@@ -104,7 +100,7 @@ export default class RteTiptap extends LitElement {
             <div class="rte-tiptap-html"></div>
             <hr>
             <h2>HTML to Markdown</h2>
-            <pre class="rte-tiptap-html-to-markdown"></pre>
+            <pre id="venue-additional-info-rte-output" class="rte-tiptap-html-to-markdown"></pre>
             <hr>
             <h2>Markdown to HTML</h2>
             <div class="rte-tiptap-markdown-to-html"></div>

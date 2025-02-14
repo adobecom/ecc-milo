@@ -9,7 +9,6 @@ function getComponentImageType(component) {
     hero: 'event-hero-image',
     card: 'event-card-image',
     venue: 'venue-image',
-    additional: 'additional-image',
   };
   const type = typeMap[component.classList[1]];
   return type;

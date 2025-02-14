@@ -71,6 +71,8 @@ function decorateImageDropzones(row) {
 function decorateRTETiptap(row) {
   row.classList.add('rte-tiptap-row');
   const rte = createTag('rte-tiptap', { id: 'venue-additional-info-rte' });
+  const rteOutput = createTag('input', { id: 'venue-additional-info-rte-output', type: 'hidden' });
+  row.append(rteOutput);
   row.append(rte);
 }
 
