@@ -1,7 +1,7 @@
 import { LIBS } from './scripts.js';
 import { getLocalDevToken, getEventServiceEnv, getSecret } from './utils.js';
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
-import { API_CONFIG, ALLOWED_HOSTS } from '../constants/constants.js';
+import { API_CONFIG, ALLOWED_HOSTS } from './constants.js';
 
 export const getCaasTags = (() => {
   let cache;

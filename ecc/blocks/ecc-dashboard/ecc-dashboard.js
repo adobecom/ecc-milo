@@ -143,7 +143,6 @@ function buildThumbnail(data) {
     const heroImage = images.find((photo) => photo.imageKind === 'event-hero-image');
     const venueImage = images.find((photo) => photo.imageKind === 'venue-image');
 
-    // TODO: remove after no more adobe.com images
     const imgSrc = cardImage?.sharepointUrl
     || cardImage?.imageUrl
     || heroImage?.sharepointUrl
