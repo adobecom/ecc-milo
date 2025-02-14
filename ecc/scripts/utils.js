@@ -117,6 +117,7 @@ export function getEventPageHost(relativeDomain) {
   }
   if (relativeDomain) return relativeDomain;
   if ([
+    'localhost',
     'www.stage.adobe.com',
     'www.adobe.com',
   ].includes(window.location.hostname)) {
