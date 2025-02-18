@@ -21,6 +21,7 @@ const SPECTRUM_COMPONENTS = [
   'picker',
   'button',
   'progress-circle',
+  'action-button',
 ];
 
 function deepGetTagByTagID(tags, tagID) {
@@ -62,14 +63,17 @@ async function buildCMC(el, blockConfig) {
   const clouds = await getClouds();
 
   const savedTags = {};
+  const savedLangs = {};
+
   clouds.forEach((cloud) => {
-    const { cloudType, cloudTags } = cloud;
+    const { cloudType, cloudTags, cloudLangs } = cloud;
 
     if (!cloudTags) return;
 
     const fullTags = cloudTags.map((tag) => deepGetTagByTagID(caasTags, tag.caasId));
 
     savedTags[cloudType] = fullTags || [];
+    savedLangs[cloudType] = cloudLangs || [];
   });
 
   customElements.define('cloud-management-console', CloudManagementConsole);
@@ -77,6 +81,7 @@ async function buildCMC(el, blockConfig) {
   const tagManager = createTag('cloud-management-console', { class: 'cloud-management-console' }, '', { parent: el });
   tagManager.tags = caasTags;
   tagManager.savedTags = savedTags;
+  tagManager.savedLangs = savedLangs;
   tagManager.config = blockConfig;
   tagManager.clouds = clouds;
 }
