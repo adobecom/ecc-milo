@@ -11,9 +11,16 @@ function togglePrefillableFieldsHiddenState(component) {
 }
 
 async function loadGoogleMapsAPI(callback) {
-  const secretEnv = ['local', 'dev'].includes(getEventServiceEnv()) ? 'dev' : getEventServiceEnv();
+  const ALLOWED_ENVS = new Set(['dev', 'stage', 'prod']);
+
+  const currentEnv = getEventServiceEnv();
+
+  if (!ALLOWED_ENVS.has(currentEnv)) {
+    throw new Error('Invalid environment detected.');
+  }
+
   const script = document.createElement('script');
-  const apiKey = await getSecret(`${secretEnv}-google-places-api`);
+  const apiKey = await getSecret(`${currentEnv}-google-places-api`);
   script.src = `https://maps.googleapis.com/maps/api/js?loading=async&key=${apiKey}&libraries=places&callback=onGoogleMapsApiLoaded`;
   script.async = true;
   script.defer = true;
