@@ -29,8 +29,6 @@ export function getEventServiceEnv() {
     return 'dev';
   }
 
-  if (host.includes('localhost')) return 'local';
-
   if (host.includes('stage.adobe')
     || host.includes('corp.adobe')
     || host.includes('graybox.adobe')) return 'stage';
@@ -113,12 +111,21 @@ export function parse24HourFormat(timeStr) {
   };
 }
 
-export function getEventPageHost() {
+export function getEventPageHost(relativeDomain) {
   if (window.location.href.includes('.hlx.') || window.location.href.includes('.aem.')) {
     return window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.aem.page`);
   }
+  if (relativeDomain) return relativeDomain;
+  if ([
+    'localhost',
+    'www.stage.adobe.com',
+    'www.adobe.com',
+  ].includes(window.location.hostname)) {
+    return window.location.origin;
+  }
 
-  return window.location.origin;
+  // fallback to a.com prod
+  return 'www.adobe.com';
 }
 
 export function addTooltipToEl(tooltipText, appendee) {

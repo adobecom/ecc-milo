@@ -143,15 +143,11 @@ function buildThumbnail(data) {
     const heroImage = images.find((photo) => photo.imageKind === 'event-hero-image');
     const venueImage = images.find((photo) => photo.imageKind === 'venue-image');
 
-    // TODO: remove after no more adobe.com images
-    const imgSrc = (cardImage?.sharepointUrl
-      && `${getEventPageHost()}${cardImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+    const imgSrc = cardImage?.sharepointUrl
     || cardImage?.imageUrl
-    || (heroImage?.sharepointUrl
-      && `${getEventPageHost()}${heroImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+    || heroImage?.sharepointUrl
     || heroImage?.imageUrl
-    || (venueImage?.sharepointUrl
-      && `${getEventPageHost()}${venueImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+    || venueImage?.sharepointUrl
     || venueImage?.imageUrl
     || images[0]?.imageUrl;
 
@@ -791,7 +787,7 @@ export default async function init(el) {
   buildLoadingScreen(el);
 
   const devToken = getLocalDevToken();
-  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
+  if (devToken && getEventServiceEnv() === 'dev') {
     buildDashboard(el, config);
     return;
   }

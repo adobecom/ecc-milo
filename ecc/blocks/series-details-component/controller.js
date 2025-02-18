@@ -1,4 +1,3 @@
-import { SUPPORTED_CLOUDS } from '../../constants/constants.js';
 import { getClouds } from '../../scripts/esp-controller.js';
 import { getUser, userHasAccessToBU } from '../../scripts/profile.js';
 import { LIBS } from '../../scripts/scripts.js';
