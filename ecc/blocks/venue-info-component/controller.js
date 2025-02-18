@@ -1,8 +1,11 @@
 /* eslint-disable no-unused-vars */
-import { createVenue, replaceVenue } from '../../scripts/esp-controller.js';
+import { createVenue, deleteImage, getEventImages, replaceVenue, uploadImage } from '../../scripts/esp-controller.js';
+import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler/form-handler.js';
+
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function togglePrefillableFieldsHiddenState(component) {
   const address = component.querySelector('#google-place-formatted-address');
@@ -222,10 +225,17 @@ export default async function init(component, props) {
 
   await loadGoogleMapsAPI(() => initAutocomplete(component, props));
 
-  const { venue, showVenuePostEvent } = eventData;
+  const { venue, showVenuePostEvent, showVenueAdditionalPostEvent } = eventData;
 
   const venueNameInput = component.querySelector('#venue-info-venue-name');
   const venueRTE = component.querySelector('#venue-additional-info-rte');
+  const dz = component.querySelector('image-dropzone');
+  const type = 'venue-additional-image';
+  const progressWrapper = component.querySelector('.progress-wrapper');
+  const progress = component.querySelector('sp-progress-circle');
+  let configs = null;
+  let imageId = null;
+  let file = null;
 
   togglePrefillableFieldsHiddenState(component);
 
@@ -240,6 +250,98 @@ export default async function init(component, props) {
     changeInputValue(component.querySelector('#venue-additional-info-rte-output'), 'value', output);
   };
 
+  if (eventData.eventId) {
+    configs = {
+      type,
+      targetUrl: `/v1/events/${eventData.eventId}/images`,
+    };
+  }
+
+  dz.handleImage = async () => {
+    file = dz.getFile();
+
+    if (!file || !(file instanceof File) || !configs) return;
+
+    progressWrapper.classList.remove('hidden');
+
+    if (eventData.eventId) {
+      const eventImagesResp = await getEventImages(eventData.eventId);
+
+      if (eventImagesResp?.images) {
+        const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
+        if (photoObj) imageId = photoObj.imageId;
+      }
+    }
+
+    try {
+      const resp = await uploadImage(
+        file,
+        configs,
+        progress,
+        imageId,
+      );
+
+      if (resp?.imageId) imageId = resp.imageId;
+    } catch (error) {
+      dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
+      dz.deleteImage();
+    } finally {
+      progressWrapper.classList.add('hidden');
+    }
+  };
+
+  dz.handleDelete = async () => {
+    if (eventData.eventId) {
+      const eventImagesResp = await getEventImages(eventData.eventId);
+
+      if (eventImagesResp?.images) {
+        const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
+        if (photoObj) imageId = photoObj.imageId;
+      }
+    }
+
+    if (!imageId || !configs) return;
+
+    const underlay = props.el.querySelector('sp-underlay');
+    const dialog = props.el.querySelector('sp-dialog');
+
+    dialog.innerHTML = '';
+
+    createTag('h1', { slot: 'heading' }, 'You are deleting this image.', { parent: dialog });
+    createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
+    const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+    const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to delete this image', { parent: buttonContainer });
+    const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not delete', { parent: buttonContainer });
+
+    underlay.open = true;
+
+    dialogDeleteBtn.addEventListener('click', async () => {
+      try {
+        dialogDeleteBtn.disabled = true;
+        dialogCancelBtn.disabled = true;
+        const resp = await deleteImage(configs, imageId);
+        if (resp.error) {
+          dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+        } else {
+          dz.file = null;
+          imageId = null;
+          dz.requestUpdate();
+        }
+      } catch (error) {
+        window.lana?.log('Failed to perform image DELETE operation. Error:', error);
+        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+      }
+
+      underlay.open = false;
+      dialog.innerHTML = '';
+    });
+
+    dialogCancelBtn.addEventListener('click', () => {
+      underlay.open = false;
+      dialog.innerHTML = '';
+    });
+  };
+
   if (venue) {
     updateAllFields(venue, component);
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city: venue.city });
@@ -248,10 +350,26 @@ export default async function init(component, props) {
       component.classList.add('prefilled');
       togglePrefillableFieldsHiddenState(component);
     }
+
+    if (eventData.eventId) {
+      const { images } = await getEventImages(eventData.eventId);
+      if (images) {
+        const photoObj = images.find((p) => p.imageKind === type);
+
+        if (photoObj) {
+          dz.file = { ...photoObj, url: photoObj.imageUrl };
+          dz.requestUpdate();
+        }
+      }
+    }
   }
 
   if (showVenuePostEvent) {
     changeInputValue(component.querySelector('#checkbox-venue-info-visible'), 'checked', showVenuePostEvent);
+  }
+
+  if (showVenueAdditionalPostEvent) {
+    changeInputValue(component.querySelector('#checkbox-venue-additional-info-visible'), 'checked', showVenueAdditionalPostEvent);
   }
 }
 
@@ -259,7 +377,7 @@ export async function onTargetUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const venueData = getVenueDataInForm(component);
-  console.log(venueData);
+
   if (!venueData.placeId) {
     component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please select a valid venue.' } }, bubbles: true, composed: true }));
     return;
@@ -291,6 +409,7 @@ export async function onTargetUpdate(component, props) {
     props.payload = {
       ...props.payload,
       showVenuePostEvent: venueData.showVenuePostEvent,
+      showVenueAdditionalPostEvent: venueData.showVenueAdditionalPostEvent,
     };
   }
 }

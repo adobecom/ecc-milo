@@ -44,20 +44,6 @@ export default class ImageDropzone extends LitElement {
     return this.file;
   }
 
-  isExistingFile(files) {
-    const [file] = files;
-    let existing = false;
-
-    if (this.file && file) {
-      if (this.file.name === file.name
-        && this.file.size === file.size
-        && this.file.lastModified === file.lastModified) {
-        existing = true;
-      }
-    }
-    return existing;
-  }
-
   async handleImageDrop(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -65,7 +51,6 @@ export default class ImageDropzone extends LitElement {
 
     if (files.length > 0) {
       await this.setFile(files);
-      // if (this.isExistingFile(files)) return;
       this.handleImage();
     }
   }
@@ -75,7 +60,6 @@ export default class ImageDropzone extends LitElement {
 
     if (files.length > 0) {
       await this.setFile(files);
-      // if (this.isExistingFile(files)) return;
       this.handleImage();
     }
     this.dispatchEvent(new CustomEvent('image-change', { detail: { file: this.file } }));
