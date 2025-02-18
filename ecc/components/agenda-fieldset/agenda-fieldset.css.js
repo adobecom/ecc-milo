@@ -21,7 +21,6 @@ export const style = css`
   display: flex;
   align-items: center;
   gap: 16px;
-  padding-bottom: 13px;
 }
  
 .time-picker > p {

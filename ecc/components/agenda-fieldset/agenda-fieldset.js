@@ -5,9 +5,9 @@ import { style } from './agenda-fieldset.css.js';
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 const placeholderTitle = "Add agenda title";
-const titleMaxLengthText = "55 characters max";
+const titleMaxLengthText = "55 characters max *";
 const placeholderDetails = "Add agenda details";
-const detailsMaxLengthText = "160 characters max";
+const detailsMaxLengthText = "160 characters max *";
 
 export default class AgendaFieldset extends LitElement {
   static properties = {
