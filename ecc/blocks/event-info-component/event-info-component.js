@@ -124,6 +124,7 @@ function buildUrlInput(el) {
     placeholder: 'Add event title for page URL',
     size: 'xl',
     quiet: true,
+    required: true,
   }, '', { parent: inputWrapper });
   el.append(inputWrapper);
 }

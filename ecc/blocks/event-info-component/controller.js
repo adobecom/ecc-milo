@@ -346,6 +346,34 @@ async function updateLanguagePicker(component) {
   languagePicker.disabled = false;
 }
 
+function initTitleWatcher(component, props) {
+  const titleInput = component.querySelector('#info-field-event-title');
+  const engTitle = component.querySelector('#event-info-url-input');
+
+  let existingTitle = titleInput.value;
+
+  if (!engTitle) return;
+
+  engTitle.value = props.eventDataResp?.engTitle;
+  if (!engTitle.value || engTitle.value === existingTitle) {
+    engTitle.value = titleInput.value;
+  }
+
+  BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: engTitle.value });
+
+  titleInput.addEventListener('input', () => {
+    if (engTitle) {
+      if (engTitle.value === '' || engTitle.value === existingTitle) {
+        engTitle.value = titleInput.value;
+      }
+    }
+
+    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: engTitle.value });
+
+    existingTitle = titleInput.value;
+  });
+}
+
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -413,6 +441,8 @@ export default async function init(component, props) {
   }) || [];
 
   const eventTitleInput = component.querySelector('#info-field-event-title');
+  const eventDescriptionInput = component.querySelector('#info-field-event-description');
+  const eventUrlInput = component.querySelector('#event-info-url-input');
   const startTimeInput = component.querySelector('#time-picker-start-time');
   const allStartTimeOptions = startTimeInput.querySelectorAll('sp-menu-item');
   const startAmpmInput = component.querySelector('#ampm-picker-start-time');
@@ -426,10 +456,6 @@ export default async function init(component, props) {
   const datePicker = component.querySelector('#event-info-date-picker');
 
   initCalendar(component);
-
-  eventTitleInput.addEventListener('input', () => {
-    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: eventTitleInput.value });
-  });
 
   const resetAllOptions = () => {
     [allEndTimeOptions, allStartTimeOptions, endAmpmOptions, startAmpmOptions]
@@ -614,8 +640,8 @@ export default async function init(component, props) {
       selectedEndDate: parseFormatedDate(localEndDate),
     });
 
-    component.querySelector('#info-field-event-title').value = title || '';
-    component.querySelector('#info-field-event-description').value = description || '';
+    eventTitleInput.value = title || '';
+    eventDescriptionInput.value = description || '';
     changeInputValue(startTime, 'value', `${localStartTime}` || '');
     changeInputValue(endTime, 'value', `${localEndTime}` || '');
     changeInputValue(startTimeInput, 'value', `${startTimePieces.hours}:${startTimePieces.minutes}` || '');
@@ -634,6 +660,8 @@ export default async function init(component, props) {
     });
 
     component.classList.add('prefilled');
+
+    initTitleWatcher(component, props);
   }
 }
 
