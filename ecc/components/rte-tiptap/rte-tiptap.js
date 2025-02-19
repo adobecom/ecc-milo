@@ -26,12 +26,19 @@ export default class RteTiptap extends LitElement {
   constructor() {
     super();
     this.editor = () => {};
-    this.content = '';
-    this.handleInput = () => {};
+    this.content = this.content ?? '';
+    this.handleInput = this.handleInput || null;
+    this.editorInitialized = false;
+    this.markdownInitialized = false;
   }
 
   async firstUpdated() {
     await Promise.all([loadScript('https://unpkg.com/turndown/dist/turndown.js'), loadScript('https://unpkg.com/showdown/dist/showdown.min.js')]);
+    this.markdownInitialized = true;
+    this.requestUpdate();
+  }
+
+  initializeEditor() {
     const editorEl = this.shadowRoot.querySelector('.rte-tiptap-editor');
     const outputHtmlEl = this.shadowRoot.querySelector('.rte-tiptap-html');
     const outputHtmlToMarkdownEl = this.shadowRoot.querySelector('.rte-tiptap-html-to-markdown');
@@ -67,6 +74,7 @@ export default class RteTiptap extends LitElement {
         tiptap.handleInput(markdown);
       },
     });
+    this.editorInitialized = true;
   }
 
   rteAddLink() {
@@ -80,6 +88,9 @@ export default class RteTiptap extends LitElement {
   }
 
   render() {
+    if (this.handleInput && this.markdownInitialized && !this.editorInitialized) {
+      this.initializeEditor();
+    }
     return html`
             <div class="rte-tiptap-toolbar">
               <button @click=${() => this.editor.chain().focus().setParagraph().run()}>Paragraph</button>

@@ -59,7 +59,7 @@ function updateAllFields(venueData, component) {
   const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
   const addressComponentsInput = component.querySelector('#google-place-address-components');
   const formattedAddressInput = component.querySelector('#google-place-formatted-address');
-  const venueAdditionalInfoInput = component.querySelector('#venue-additional-info-rte-output');
+  const additionalInformationInput = component.querySelector('#venue-additional-info-rte-output');
   const venueRTE = component.querySelector('#venue-additional-info-rte');
 
   changeInputValue(venueNameInput, 'value', venueData.venueName);
@@ -69,7 +69,7 @@ function updateAllFields(venueData, component) {
   changeInputValue(gmtoffsetInput, 'value', venueData.gmtOffset);
   changeInputValue(addressComponentsInput, 'value', JSON.stringify(venueData.addressComponents));
   changeInputValue(formattedAddressInput, 'value', venueData.formattedAddress);
-  changeInputValue(venueAdditionalInfoInput, 'value', venueData.venueAdditionalInfo);
+  changeInputValue(additionalInformationInput, 'value', venueData.additionalInformation);
   if (venueRTE) {
     venueRTE.content = `heading 1
 =========
@@ -95,7 +95,7 @@ heading 2
       1.  nested order 2.1
           
       2.  **_<u>nested order 2.2 bold underline italic</u>_**`;
-    // venueRTE.content = venueData.venueAdditionalInfo; // commment out for above sample data
+    venueRTE.content = venueData.additionalInformation; // commment out for above sample data
   }
 }
 
@@ -107,7 +107,7 @@ function getVenueDataInForm(component) {
   const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
   const addressComponentsInput = component.querySelector('#google-place-address-components');
   const formattedAddressInput = component.querySelector('#google-place-formatted-address');
-  const venueAdditionalInfoInput = component.querySelector('#venue-additional-info-rte-output');
+  const additionalInformationInput = component.querySelector('#venue-additional-info-rte-output');
 
   const venueName = venueNameInput.value;
   const placeId = placeIdInput.value;
@@ -115,7 +115,7 @@ function getVenueDataInForm(component) {
   const lon = +placeLngInput.value;
   const gmtOffset = +gmtoffsetInput.value;
   const formattedAddress = formattedAddressInput.value;
-  const venueAdditionalInfo = venueAdditionalInfoInput?.value;
+  const additionalInformation = additionalInformationInput?.value;
 
   let addressComponents;
 
@@ -135,7 +135,7 @@ function getVenueDataInForm(component) {
     gmtOffset,
     addressComponents,
     formattedAddress,
-    venueAdditionalInfo,
+    additionalInformation,
   };
 
   return venueData;
@@ -406,7 +406,8 @@ export async function onTargetUpdate(component, props) {
   let resp;
   if (!oldVenueData) {
     resp = await createVenue(props.eventDataResp.eventId, venueData);
-  } else if (oldVenueData.placeId !== venueData.placeId) {
+  } else if (oldVenueData.placeId !== venueData.placeId
+    || oldVenueData.additionalInformation !== venueData.additionalInformation) {
     const { creationTime, modificationTime } = oldVenueData;
     resp = await replaceVenue(
       props.eventDataResp.eventId,
