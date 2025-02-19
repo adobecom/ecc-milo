@@ -24,6 +24,7 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 export function cloneFilter(obj) {
   const wl = [
     'agenda',
+    'tags',
     'topics',
     'speakers',
     'sponsors',
@@ -46,6 +47,7 @@ export function cloneFilter(obj) {
     'attendeeLimit',
     'rsvpDescription',
     'allowWaitlisting',
+    'allowGuestRegistration',
     'hostEmail',
     'rsvpFormFields',
     'relatedProducts',
