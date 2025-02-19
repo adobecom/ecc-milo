@@ -91,6 +91,8 @@ function decorateRegConfigs(component) {
 
   const { cloudType } = component.dataset;
 
+  if (!contentMap[cloudType]) return;
+
   const leftCol = createTag('div', { class: 'left-col' });
   const rightCol = createTag('div', { class: 'right-col' });
 
@@ -226,7 +228,7 @@ export async function onPayloadUpdate(component, props) {
   const cloudTypeChange = cloudType && cloudType !== component.dataset.cloudType;
 
   if (eventTypeChange) component.dataset.eventType = eventType;
-  if (eventTypeChange) component.dataset.cloudType = cloudType;
+  if (cloudTypeChange) component.dataset.cloudType = cloudType;
   if (cloudTypeChange || eventTypeChange) {
     const registrationConfigsWrapper = component.querySelector('.registration-configs-wrapper');
 
