@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
-import { getEvents } from '../../scripts/esp-controller.js';
+import { getCloud, getEvents } from '../../scripts/esp-controller.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../../scripts/utils.js';
@@ -311,6 +311,41 @@ function dateTimeStringToTimestamp(dateString, timeString) {
   return date.getTime();
 }
 
+async function updateLanguagePicker(component) {
+  const languagePicker = component.querySelector('#language-picker');
+
+  if (!languagePicker) return;
+
+  const { cloudType } = component.dataset;
+
+  if (!cloudType) return;
+
+  const cloud = await getCloud(cloudType);
+
+  if (!cloud || cloud.error) return;
+  // const { cloudLangs } = cloud;
+  // TODO: remove mock
+  const cloudLangs = [
+    { ietf: 'en', language: 'English' },
+    { ietf: 'es', language: 'Spanish' },
+    { ietf: 'fr', language: 'French' },
+    { ietf: 'de', language: 'German' },
+    { ietf: 'it', language: 'Italian' },
+    { ietf: 'ja', language: 'Japanese' },
+    { ietf: 'ko', language: 'Korean' },
+    { ietf: 'pt', language: 'Portuguese' },
+    { ietf: 'ru', language: 'Russian' },
+    { ietf: 'zh', language: 'Chinese' },
+  ];
+
+  cloudLangs.forEach((l) => {
+    const opt = createTag('sp-menu-item', { value: l.ietf }, l.language);
+    languagePicker.append(opt);
+  });
+
+  languagePicker.disabled = false;
+}
+
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -344,7 +379,13 @@ export function onSubmit(component, props) {
 }
 
 export async function onPayloadUpdate(component, props) {
-  // do nothing
+  const { cloudType } = props.payload;
+
+  if (cloudType && cloudType !== component.dataset.cloudType) {
+    component.dataset.cloudType = cloudType;
+  }
+
+  updateLanguagePicker(component);
 }
 
 export async function onRespUpdate(_component, _props) {

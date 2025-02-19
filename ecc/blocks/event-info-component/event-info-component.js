@@ -5,6 +5,7 @@ import {
   decorateTextfield,
   decorateTextarea,
   miloReplaceKey,
+  addTooltipToEl,
 } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -16,6 +17,15 @@ function buildDatePicker(column) {
 
   column.innerHTML = '';
   column.append(datePicker, calendarIcon);
+}
+
+async function addLanguagePicker(row) {
+  const pickerWrapper = createTag('div', { class: 'language-picker-wrapper' });
+  createTag('sp-label', { for: 'language-picker' }, 'Language', { parent: pickerWrapper });
+  const picker = createTag('sp-picker', { id: 'language-picker', class: 'select-input', required: true, label: 'Pick a Language' }, '', { parent: pickerWrapper });
+
+  picker.disabled = true;
+  row.append(pickerWrapper);
 }
 
 function buildTimePicker(column, wrapper) {
@@ -91,15 +101,31 @@ function decorateTimeZoneSelect(cell, wrapper) {
 
 function decorateDateTimeFields(row) {
   row.classList.add('date-time-row');
-  const timeInputsWrapper = createTag('div', { class: 'time-inputs-wrapper' });
+  const timePickerContainer = createTag('div', { class: 'time-picker-container' });
+  const timeInputsWrapper = createTag('div', { class: 'time-inputs-wrapper' }, '', { parent: timePickerContainer });
   const cols = row.querySelectorAll(':scope > div');
-  row.append(timeInputsWrapper);
+  row.append(timePickerContainer);
 
   cols.forEach((c, i) => {
     if (i === 0) buildDatePicker(c);
     if (i === 1) buildTimePicker(c, timeInputsWrapper);
     if (i === 2) decorateTimeZoneSelect(c, timeInputsWrapper);
   });
+}
+
+function buildUrlInput(el) {
+  const inputWrapper = createTag('div', { class: 'url-input-wrapper' }, '', { parent: el });
+  const label = createTag('sp-label', { for: 'event-info-url-input' }, 'English title for page URL', { parent: inputWrapper });
+
+  addTooltipToEl('SEO friendly title', label);
+  createTag('sp-textfield', {
+    id: 'event-info-url-input',
+    label: 'URL',
+    placeholder: 'Add event title for page URL',
+    size: 'xl',
+    quiet: true,
+  }, '', { parent: inputWrapper });
+  el.append(inputWrapper);
 }
 
 export default function init(el) {
@@ -110,6 +136,7 @@ export default function init(el) {
     switch (i) {
       case 0:
         generateToolTip(r);
+        addLanguagePicker(r);
         break;
       case 1:
         await decorateTextfield(r, { id: 'info-field-event-title' }, await miloReplaceKey('duplicate-event-title-error'));
@@ -124,4 +151,6 @@ export default function init(el) {
         break;
     }
   });
+
+  buildUrlInput(el);
 }
