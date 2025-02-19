@@ -46,7 +46,9 @@ function resetAllFields(component) {
   changeInputValue(addressComponentsInput, 'value', '');
   changeInputValue(formattedAddressInput, 'value', '');
   changeInputValue(venueAdditionalInfoInput, 'value', '');
-  venueRTE.content = '';
+  if (venueRTE) {
+    venueRTE.content = '';
+  }
 }
 
 function updateAllFields(venueData, component) {
@@ -68,29 +70,33 @@ function updateAllFields(venueData, component) {
   changeInputValue(addressComponentsInput, 'value', JSON.stringify(venueData.addressComponents));
   changeInputValue(formattedAddressInput, 'value', venueData.formattedAddress);
   changeInputValue(venueAdditionalInfoInput, 'value', venueData.venueAdditionalInfo);
-  venueRTE.content = `# heading 1
+  if (venueRTE) {
+    venueRTE.content = `heading 1
+=========
 
-## heading 2
+heading 2
+---------
 
-*   bullet 1
-    
-    *   nested bullet 1.1
-        
-*   bullet 2
-    
-    *   nested bullet 2.1
-        
-    *   some [link.com](http://link.com)
-        
+  *   bullet 1
+      
+      *   nested bullet 1.1
+          
+  *   bullet 2
+      
+      *   nested bullet 2.1
+          
+      *   some [link.com](http://link.com)
+          
 
-1.  order 1
-    
-2.  order 2
-    
-    1.  nested order 2.1
-        
-    2.  **_<u>nested order 2.2 bold underline italic</u>_**`;
-  venueRTE.content = venueData.venueAdditionalInfo; // commment out for above sample data
+  1.  order 1
+      
+  2.  order 2
+      
+      1.  nested order 2.1
+          
+      2.  **_<u>nested order 2.2 bold underline italic</u>_**`;
+    // venueRTE.content = venueData.venueAdditionalInfo; // commment out for above sample data
+  }
 }
 
 function getVenueDataInForm(component) {
@@ -109,7 +115,7 @@ function getVenueDataInForm(component) {
   const lon = +placeLngInput.value;
   const gmtOffset = +gmtoffsetInput.value;
   const formattedAddress = formattedAddressInput.value;
-  const venueAdditionalInfo = venueAdditionalInfoInput.value;
+  const venueAdditionalInfo = venueAdditionalInfoInput?.value;
 
   let addressComponents;
 
@@ -209,7 +215,16 @@ function initAutocomplete(el, props) {
 }
 
 export async function onSubmit(component, props) {
-  // do nothing. Depend on onTargetUpdate cb.
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+
+  const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible')?.checked;
+  const showVenueAdditionalPostEvent = component.querySelector('#checkbox-venue-additional-info-visible')?.checked;
+
+  props.payload = {
+    ...props.payload,
+    showVenuePostEvent,
+    showVenueAdditionalPostEvent,
+  };
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -246,9 +261,11 @@ export default async function init(component, props) {
     }
   });
 
-  venueRTE.handleInput = (output) => {
-    changeInputValue(component.querySelector('#venue-additional-info-rte-output'), 'value', output);
-  };
+  if (venueRTE) {
+    venueRTE.handleInput = (output) => {
+      changeInputValue(component.querySelector('#venue-additional-info-rte-output'), 'value', output);
+    };
+  }
 
   if (eventData.eventId) {
     configs = {
@@ -257,90 +274,92 @@ export default async function init(component, props) {
     };
   }
 
-  dz.handleImage = async () => {
-    file = dz.getFile();
+  if (dz) {
+    dz.handleImage = async () => {
+      file = dz.getFile();
 
-    if (!file || !(file instanceof File) || !configs) return;
+      if (!file || !(file instanceof File) || !configs) return;
 
-    progressWrapper.classList.remove('hidden');
+      progressWrapper.classList.remove('hidden');
 
-    if (eventData.eventId) {
-      const eventImagesResp = await getEventImages(eventData.eventId);
+      if (eventData.eventId) {
+        const eventImagesResp = await getEventImages(eventData.eventId);
 
-      if (eventImagesResp?.images) {
-        const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
-        if (photoObj) imageId = photoObj.imageId;
-      }
-    }
-
-    try {
-      const resp = await uploadImage(
-        file,
-        configs,
-        progress,
-        imageId,
-      );
-
-      if (resp?.imageId) imageId = resp.imageId;
-    } catch (error) {
-      dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
-      dz.deleteImage();
-    } finally {
-      progressWrapper.classList.add('hidden');
-    }
-  };
-
-  dz.handleDelete = async () => {
-    if (eventData.eventId) {
-      const eventImagesResp = await getEventImages(eventData.eventId);
-
-      if (eventImagesResp?.images) {
-        const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
-        if (photoObj) imageId = photoObj.imageId;
-      }
-    }
-
-    if (!imageId || !configs) return;
-
-    const underlay = props.el.querySelector('sp-underlay');
-    const dialog = props.el.querySelector('sp-dialog');
-
-    dialog.innerHTML = '';
-
-    createTag('h1', { slot: 'heading' }, 'You are deleting this image.', { parent: dialog });
-    createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
-    const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
-    const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to delete this image', { parent: buttonContainer });
-    const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not delete', { parent: buttonContainer });
-
-    underlay.open = true;
-
-    dialogDeleteBtn.addEventListener('click', async () => {
-      try {
-        dialogDeleteBtn.disabled = true;
-        dialogCancelBtn.disabled = true;
-        const resp = await deleteImage(configs, imageId);
-        if (resp.error) {
-          dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
-        } else {
-          dz.file = null;
-          imageId = null;
-          dz.requestUpdate();
+        if (eventImagesResp?.images) {
+          const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
+          if (photoObj) imageId = photoObj.imageId;
         }
-      } catch (error) {
-        window.lana?.log('Failed to perform image DELETE operation. Error:', error);
-        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
       }
 
-      underlay.open = false;
-      dialog.innerHTML = '';
-    });
+      try {
+        const resp = await uploadImage(
+          file,
+          configs,
+          progress,
+          imageId,
+        );
 
-    dialogCancelBtn.addEventListener('click', () => {
-      underlay.open = false;
+        if (resp?.imageId) imageId = resp.imageId;
+      } catch (error) {
+        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
+        dz.deleteImage();
+      } finally {
+        progressWrapper.classList.add('hidden');
+      }
+    };
+
+    dz.handleDelete = async () => {
+      if (eventData.eventId) {
+        const eventImagesResp = await getEventImages(eventData.eventId);
+
+        if (eventImagesResp?.images) {
+          const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
+          if (photoObj) imageId = photoObj.imageId;
+        }
+      }
+
+      if (!imageId || !configs) return;
+
+      const underlay = props.el.querySelector('sp-underlay');
+      const dialog = props.el.querySelector('sp-dialog');
+
       dialog.innerHTML = '';
-    });
-  };
+
+      createTag('h1', { slot: 'heading' }, 'You are deleting this image.', { parent: dialog });
+      createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
+      const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+      const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to delete this image', { parent: buttonContainer });
+      const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not delete', { parent: buttonContainer });
+
+      underlay.open = true;
+
+      dialogDeleteBtn.addEventListener('click', async () => {
+        try {
+          dialogDeleteBtn.disabled = true;
+          dialogCancelBtn.disabled = true;
+          const resp = await deleteImage(configs, imageId);
+          if (resp.error) {
+            dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+          } else {
+            dz.file = null;
+            imageId = null;
+            dz.requestUpdate();
+          }
+        } catch (error) {
+          window.lana?.log('Failed to perform image DELETE operation. Error:', error);
+          dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+        }
+
+        underlay.open = false;
+        dialog.innerHTML = '';
+      });
+
+      dialogCancelBtn.addEventListener('click', () => {
+        underlay.open = false;
+        dialog.innerHTML = '';
+      });
+    };
+  }
 
   if (venue) {
     updateAllFields(venue, component);
@@ -402,14 +421,5 @@ export async function onTargetUpdate(component, props) {
     if (resp.error) {
       buildErrorMessage(props, resp);
     }
-  }
-
-  if (resp) {
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
-    props.payload = {
-      ...props.payload,
-      showVenuePostEvent: venueData.showVenuePostEvent,
-      showVenueAdditionalPostEvent: venueData.showVenueAdditionalPostEvent,
-    };
   }
 }

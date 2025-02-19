@@ -88,9 +88,9 @@ function buildAdditionalInfo(row, index) {
   const labelText = inputLabel.textContent.trim();
   let checkbox;
   if (index === 4) {
-    checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-info-visible' }, labelText);
+    checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-info-visible', name: 'checkbox-venue-info-visible-name' }, labelText);
   } else if (index === 8) {
-    checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-additional-info-visible' }, labelText);
+    checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-additional-info-visible', name: 'checkbox-venue-additional-info-visible-name' }, labelText);
   }
   const wrapper = createTag('div', { class: 'checkbox-wrapper' });
 

@@ -18,7 +18,7 @@ const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 export default class RteTiptap extends LitElement {
   static properties = {
     content: { type: String },
-    handleChange: { type: Function },
+    handleInput: { type: Function },
   };
 
   static styles = style;
@@ -36,7 +36,8 @@ export default class RteTiptap extends LitElement {
     const outputHtmlEl = this.shadowRoot.querySelector('.rte-tiptap-html');
     const outputHtmlToMarkdownEl = this.shadowRoot.querySelector('.rte-tiptap-html-to-markdown');
     const outputMarkdownToHtmlEl = this.shadowRoot.querySelector('.rte-tiptap-markdown-to-html');
-    const turndownService = new TurndownService({ headingStyle: 'setText' });
+    // const turndownService = new TurndownService({ headingStyle: 'setText' });
+    const turndownService = new TurndownService();
     turndownService.keep(['u']);
     const showdownService = new showdown.Converter();
     const content = this.content ? showdownService.makeHtml(this.content) : '';
