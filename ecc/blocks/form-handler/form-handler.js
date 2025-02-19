@@ -30,8 +30,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import RTETiptap from '../../components/rte-tiptap/rte-tiptap.js';
-import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, { getFilteredCachedResponse, setPayloadCache, setResponseCache } from './data-handler.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 import CustomSearch from '../../components/custom-search/custom-search.js';
 
@@ -230,7 +229,6 @@ function initCustomLitComponents() {
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
   customElements.define('custom-search', CustomSearch);
-  customElements.define('rte-tiptap', RTETiptap);
 }
 
 async function loadEventData(props) {
@@ -463,7 +461,7 @@ async function saveEvent(props, toPublish = false) {
   };
 
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    resp = await createEvent(quickFilter(props.payload));
+    resp = await createEvent(getJoinedData());
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
     await onEventSave();
@@ -1118,7 +1116,7 @@ export default async function init(el) {
   ]);
 
   const devToken = getLocalDevToken();
-  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
+  if (devToken && getEventServiceEnv() === 'dev') {
     buildECCForm(el).then(() => {
       el.classList.remove('loading');
     });
