@@ -311,7 +311,7 @@ function dateTimeStringToTimestamp(dateString, timeString) {
   return date.getTime();
 }
 
-async function updateLanguagePicker(component) {
+async function updateLanguagePicker(component, props) {
   const languagePicker = component.querySelector('#language-picker');
 
   if (!languagePicker) return;
@@ -338,9 +338,15 @@ async function updateLanguagePicker(component) {
     { ietf: 'zh', language: 'Chinese' },
   ];
 
-  cloudLangs.forEach((l) => {
+  cloudLangs.forEach((l, i) => {
     const opt = createTag('sp-menu-item', { value: l.ietf }, l.language);
     languagePicker.append(opt);
+
+    if (props.eventDataResp?.defaultLang === l.ietf) {
+      languagePicker.value = l.ietf;
+    } else if (i === 0) {
+      languagePicker.value = l.ietf;
+    }
   });
 
   languagePicker.disabled = false;
@@ -413,7 +419,7 @@ export async function onPayloadUpdate(component, props) {
     component.dataset.cloudType = cloudType;
   }
 
-  updateLanguagePicker(component);
+  updateLanguagePicker(component, props);
 }
 
 export async function onRespUpdate(_component, _props) {

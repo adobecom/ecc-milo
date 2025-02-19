@@ -122,6 +122,7 @@ function buildUrlInput(el) {
     id: 'event-info-url-input',
     label: 'URL',
     placeholder: 'Add event title for page URL',
+    class: 'text-input',
     size: 'xl',
     quiet: true,
     required: true,
