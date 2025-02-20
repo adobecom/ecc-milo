@@ -365,8 +365,8 @@ function initMoreOptions(props, config, eventObj, row) {
 
         if (url) {
           e.preventDefault();
-          navigator.clipboard.writeText(previewPre.href);
-          showToast(props, config['copy-url-toast-msg'], { variant: 'info' });
+          navigator.clipboard.writeText(url.href);
+          showToast(props, config['copy-url-toast-msg'] || 'The URL has been added to the clipboard', { variant: 'positive', timeout: 6000 });
         }
       });
     } else {
