@@ -313,6 +313,7 @@ function initMoreOptions(props, config, eventObj, row) {
 
     const previewPre = buildTool(toolBox, 'Preview pre-event', 'preview-eye');
     const previewPost = buildTool(toolBox, 'Preview post-event', 'preview-eye');
+    const copyUrl = buildTool(toolBox, 'Copy URL', 'copy');
     const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
     const clone = buildTool(toolBox, 'Clone', 'clone');
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
@@ -355,9 +356,25 @@ function initMoreOptions(props, config, eventObj, row) {
         return '#';
       })();
       previewPost.target = '_blank';
+
+      copyUrl.addEventListener('click', (e) => {
+        let url;
+        try {
+          url = new URL(`${eventObj.detailPagePath}`);
+        } catch (err) {
+          url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+        }
+
+        if (url) {
+          e.preventDefault();
+          navigator.clipboard.writeText(url.href);
+          showToast(props, config['copy-url-toast-msg'] || 'The URL has been added to the clipboard', { variant: 'positive', timeout: 6000 });
+        }
+      });
     } else {
       previewPre.classList.add('disabled');
       previewPost.classList.add('disabled');
+      copyUrl.classList.add('disabled');
     }
 
     // edit
