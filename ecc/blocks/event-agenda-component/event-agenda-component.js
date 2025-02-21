@@ -13,25 +13,11 @@ function decorateFields(row) {
   const cols = row.querySelectorAll(':scope > div');
   if (!cols.length) return;
 
-  const [placeholderCol, maxLengthCol] = cols;
-  const maxLengthText = maxLengthCol.textContent.trim();
-  const placeholder = placeholderCol.textContent.trim();
-  const maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
-  const isRequired = maxLengthText.endsWith('*');
-
-  const options = {
-    maxLengthText,
-    maxCharNum,
-    placeholder,
-    isRequired,
-  };
-
   row.innerHTML = '';
 
   const timeslots = getTimeSlots(cols[2]);
   const fieldSetWrapper = createTag('agenda-fieldset-group');
   fieldSetWrapper.dataset.timeslots = timeslots.join(',');
-  fieldSetWrapper.dataset.options = JSON.stringify(options);
 
   row.append(fieldSetWrapper);
 }
