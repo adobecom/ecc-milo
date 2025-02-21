@@ -17,4 +17,9 @@ export const style = css`
   .icon-remove-circle:hover {
     opacity: 1;
   }
+  
+  repeater-element {
+    margin-top: 16px;
+    margin-bottom: 24px;
+  }
 `;

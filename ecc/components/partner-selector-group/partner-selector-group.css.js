@@ -29,4 +29,9 @@ export const style = css`
     top: 32px;
     right: 0;
   }
+  
+  repeater-element {
+    margin-top: 16px;
+    margin-bottom: 24px;
+  }
 `;
