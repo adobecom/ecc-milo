@@ -40,9 +40,9 @@ export default class RteTiptap extends LitElement {
 
   initializeEditor() {
     const editorEl = this.shadowRoot.querySelector('.rte-tiptap-editor');
-    const outputHtmlEl = this.shadowRoot.querySelector('.rte-tiptap-html');
-    const outputHtmlToMarkdownEl = this.shadowRoot.querySelector('.rte-tiptap-html-to-markdown');
-    const outputMarkdownToHtmlEl = this.shadowRoot.querySelector('.rte-tiptap-markdown-to-html');
+    // const outputHtmlEl = this.shadowRoot.querySelector('.rte-tiptap-html');
+    // const outputHtmlToMarkdownEl = this.shadowRoot.querySelector('.rte-tiptap-html-to-markdown');
+    // const outputMarkdownToHtmlEl = this.shadowRoot.querySelector('.rte-tiptap-markdown-to-html');
     // const turndownService = new TurndownService({ headingStyle: 'setText' });
     const turndownService = new TurndownService();
     turndownService.keep(['u']);
@@ -67,10 +67,7 @@ export default class RteTiptap extends LitElement {
       onUpdate({ editor }) {
         const outputHtml = editor.getHTML();
         const markdown = turndownService.turndown(outputHtml);
-        const showdown = showdownService.makeHtml(markdown);
-        outputHtmlEl.innerHTML = outputHtml;
-        outputHtmlToMarkdownEl.innerHTML = markdown;
-        outputMarkdownToHtmlEl.innerHTML = showdown;
+
         tiptap.handleInput(markdown);
       },
     });
@@ -108,14 +105,6 @@ export default class RteTiptap extends LitElement {
               <button @click=${this.rteAddLink}>Link</button>
             </div>
             <div class="rte-tiptap-editor"></div>
-            <h2>TipTap HTML</h2>
-            <div class="rte-tiptap-html"></div>
-            <hr>
-            <h2>HTML to Markdown</h2>
-            <pre id="venue-additional-info-rte-output" class="rte-tiptap-html-to-markdown"></pre>
-            <hr>
-            <h2>Markdown to HTML</h2>
-            <div class="rte-tiptap-markdown-to-html"></div>
         `;
   }
 }
