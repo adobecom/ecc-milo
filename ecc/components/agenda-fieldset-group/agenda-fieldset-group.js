@@ -58,12 +58,12 @@ export default class AgendaFieldsetGroup extends LitElement {
     const agendaComponents = {
       startTime: agendaItem.startTime,
       title: agendaItem.title || '',
-      description: agendaItem.description || '',
+      detail: agendaItem.description || '',
       startTimeValue: agendaItem.startTimeValue || ((hours && minutes) && `${hours}:${minutes}`) || '',
       startTimePeriod: agendaItem.startTimePeriod || period || '',
     };
 
-    const options = {timeslots:this.timeslots}
+    const options = { timeslots:this.timeslots };
     return html`
         <agenda-fieldset .agenda=${agendaComponents} .options=${options}
           @update-agenda=${(event) => this.handleAgendaUpdate(event, index)}>
