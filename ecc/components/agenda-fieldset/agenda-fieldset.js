@@ -4,10 +4,10 @@ import { style } from './agenda-fieldset.css.js';
 
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
 
-const placeholderTitle = 'Add agenda title';
-const placeholderDetails = 'Add agenda details';
+const titlePlaceholder = 'Add agenda title';
 const titleMaxLength = 55;
-const detailsMaxLength = 160;
+const descriptionPlaceholder = 'Add agenda details';
+const descriptionMaxLength = 160;
 const maxLengthSuffix = ' characters max *';
 
 export default class AgendaFieldset extends LitElement {
@@ -68,14 +68,14 @@ export default class AgendaFieldset extends LitElement {
           <slot name="delete-btn"></slot>
         </div>
         <div class="text-field-wrapper">
-          <sp-textfield class="text-input" placeholder=${placeholderTitle} value=${this.agenda.title} quiet size="xl" maxlength=${titleMaxLength} @change=${(event) => {
+          <sp-textfield class="text-input" placeholder=${titlePlaceholder} value=${this.agenda.title} quiet size="xl" maxlength=${titleMaxLength} @change=${(event) => {
   this.updateValue('title', event.target.value);
 }}></sp-textfield>
           <div class="attr-text">${titleMaxLength + maxLengthSuffix}</div>
-          <sp-textfield class="text-input" placeholder=${placeholderDetails} value=${this.agenda.detail} quiet size="l" maxlength=${detailsMaxLength} @change=${(event) => {
-  this.updateValue('details', event.target.value);
+          <sp-textfield class="text-input" placeholder=${descriptionPlaceholder} value=${this.agenda.description} quiet size="l" maxlength=${descriptionMaxLength} @change=${(event) => {
+  this.updateValue('description', event.target.value);
 }} multiline=${true}></sp-textfield>
-          <div class="attr-text">${detailsMaxLength + maxLengthSuffix}</div>
+          <div class="attr-text">${descriptionMaxLength + maxLengthSuffix}</div>
         </div>
       </div>
     `;
