@@ -1,7 +1,7 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './partner-selector.css.js';
 import { createSponsor, deleteImage, updateSponsor, uploadImage } from '../../scripts/esp-controller.js';
-import { LINK_REGEX } from '../../constants/constants.js';
+import { LINK_REGEX } from '../../scripts/constants.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 

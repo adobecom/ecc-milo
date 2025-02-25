@@ -27,6 +27,7 @@ const submissionFilter = [
   'rsvpDescription',
   'attendeeLimit',
   'allowWaitlisting',
+  'allowGuestRegistration',
   'hostEmail',
   'eventId',
   'published',

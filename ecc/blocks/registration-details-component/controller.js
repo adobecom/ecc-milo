@@ -91,6 +91,8 @@ function decorateRegConfigs(component) {
 
   const { cloudType } = component.dataset;
 
+  if (!contentMap[cloudType]) return;
+
   const leftCol = createTag('div', { class: 'left-col' });
   const rightCol = createTag('div', { class: 'right-col' });
 
@@ -222,12 +224,12 @@ function updateHeadingTooltip(component) {
 
 export async function onPayloadUpdate(component, props) {
   const { cloudType, eventType } = props.payload;
-  if (eventType && eventType !== component.dataset.eventType) {
-    component.dataset.eventType = eventType;
-  }
+  const eventTypeChange = eventType && eventType !== component.dataset.eventType;
+  const cloudTypeChange = cloudType && cloudType !== component.dataset.cloudType;
 
-  if (cloudType && cloudType !== component.dataset.cloudType) {
-    component.dataset.cloudType = cloudType;
+  if (eventTypeChange) component.dataset.eventType = eventType;
+  if (cloudTypeChange) component.dataset.cloudType = cloudType;
+  if (cloudTypeChange || eventTypeChange) {
     const registrationConfigsWrapper = component.querySelector('.registration-configs-wrapper');
 
     if (!registrationConfigsWrapper) return;
@@ -252,19 +254,6 @@ export async function onPayloadUpdate(component, props) {
     }
 
     updateHeadingTooltip(component);
-  } else if (eventType && eventType !== component.dataset.eventType) {
-    if (cloudType === 'ExperienceCloud') {
-      switch (eventType) {
-        case 'InPerson':
-          buildExperienceCloudInPersonFields(component);
-          break;
-        case 'Webinar':
-          buildExperienceCloudWebinarFields(component);
-          break;
-        default:
-          break;
-      }
-    }
   }
 }
 

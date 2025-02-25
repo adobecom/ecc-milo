@@ -24,6 +24,7 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 export function cloneFilter(obj) {
   const wl = [
     'agenda',
+    'tags',
     'topics',
     'speakers',
     'sponsors',
@@ -46,6 +47,7 @@ export function cloneFilter(obj) {
     'attendeeLimit',
     'rsvpDescription',
     'allowWaitlisting',
+    'allowGuestRegistration',
     'hostEmail',
     'rsvpFormFields',
     'relatedProducts',
@@ -143,15 +145,11 @@ function buildThumbnail(data) {
     const heroImage = images.find((photo) => photo.imageKind === 'event-hero-image');
     const venueImage = images.find((photo) => photo.imageKind === 'venue-image');
 
-    // TODO: remove after no more adobe.com images
-    const imgSrc = (cardImage?.sharepointUrl
-      && `${getEventPageHost()}${cardImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+    const imgSrc = cardImage?.sharepointUrl
     || cardImage?.imageUrl
-    || (heroImage?.sharepointUrl
-      && `${getEventPageHost()}${heroImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+    || heroImage?.sharepointUrl
     || heroImage?.imageUrl
-    || (venueImage?.sharepointUrl
-      && `${getEventPageHost()}${venueImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+    || venueImage?.sharepointUrl
     || venueImage?.imageUrl
     || images[0]?.imageUrl;
 
@@ -313,6 +311,7 @@ function initMoreOptions(props, config, eventObj, row) {
 
     const previewPre = buildTool(toolBox, 'Preview pre-event', 'preview-eye');
     const previewPost = buildTool(toolBox, 'Preview post-event', 'preview-eye');
+    const copyUrl = buildTool(toolBox, 'Copy URL', 'copy');
     const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
     const clone = buildTool(toolBox, 'Clone', 'clone');
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
@@ -355,9 +354,25 @@ function initMoreOptions(props, config, eventObj, row) {
         return '#';
       })();
       previewPost.target = '_blank';
+
+      copyUrl.addEventListener('click', (e) => {
+        let url;
+        try {
+          url = new URL(`${eventObj.detailPagePath}`);
+        } catch (err) {
+          url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+        }
+
+        if (url) {
+          e.preventDefault();
+          navigator.clipboard.writeText(url.href);
+          showToast(props, config['copy-url-toast-msg'] || 'The URL has been added to the clipboard', { variant: 'positive', timeout: 6000 });
+        }
+      });
     } else {
       previewPre.classList.add('disabled');
       previewPost.classList.add('disabled');
+      copyUrl.classList.add('disabled');
     }
 
     // edit
@@ -426,7 +441,7 @@ function initMoreOptions(props, config, eventObj, row) {
           return;
         }
 
-        const newJson = await getEventsForUser();
+        const newJson = props.data.filter((event) => event.eventId !== eventObj.eventId);
 
         props.data = newJson;
         props.filteredData = newJson;
@@ -791,7 +806,7 @@ export default async function init(el) {
   buildLoadingScreen(el);
 
   const devToken = getLocalDevToken();
-  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
+  if (devToken && getEventServiceEnv() === 'dev') {
     buildDashboard(el, config);
     return;
   }
