@@ -40,9 +40,10 @@ export default class AgendaFieldsetGroup extends LitElement {
   }
 
   getCompleteAgenda() {
-    return this.agendaItems.filter((agenda) => agenda.startTime && agenda.description).map((agenda) => ({
+    return this.agendaItems.filter((agenda) => agenda.startTime && agenda.title).map((agenda) => ({
       startTime: agenda.startTime,
       description: agenda.description,
+      title: agenda.title,
     }));
   }
 
@@ -58,7 +59,7 @@ export default class AgendaFieldsetGroup extends LitElement {
     const agendaComponents = {
       startTime: agendaItem.startTime,
       title: agendaItem.title || '',
-      detail: agendaItem.description || '',
+      description: agendaItem.description,
       startTimeValue: agendaItem.startTimeValue || ((hours && minutes) && `${hours}:${minutes}`) || '',
       startTimePeriod: agendaItem.startTimePeriod || period || '',
     };
