@@ -14,10 +14,9 @@ import {
   readBlockConfig,
   signIn,
   getEventServiceEnv,
-  getDevToken,
+  getLocalDevToken,
 } from '../../scripts/utils.js';
 
-import { quickFilter } from '../../scripts/event-data-handler.js';
 import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -31,7 +30,6 @@ export function cloneFilter(obj) {
     'eventType',
     'cloudType',
     'seriesId',
-    'templateId',
     'communityTopicUrl',
     'title',
     'description',
@@ -58,6 +56,49 @@ export function cloneFilter(obj) {
 
   wl.forEach((attr) => {
     if (attr !== undefined && attr !== null) {
+      output[attr] = obj[attr];
+    }
+  });
+
+  return output;
+}
+
+function eventObjFilter(obj) {
+  const submissionFilter = [
+    // from payload and response
+    'agenda',
+    'topics',
+    'eventType',
+    'cloudType',
+    'seriesId',
+    'communityTopicUrl',
+    'title',
+    'description',
+    'localStartDate',
+    'localEndDate',
+    'localStartTime',
+    'localEndTime',
+    'timezone',
+    'showAgendaPostEvent',
+    'showVenuePostEvent',
+    'showVenueImage',
+    'showSponsors',
+    'rsvpFormFields',
+    'relatedProducts',
+    'rsvpDescription',
+    'attendeeLimit',
+    'allowWaitlisting',
+    'hostEmail',
+    'eventId',
+    'published',
+    'creationTime',
+    'modificationTime',
+  ];
+
+  const output = {};
+
+  submissionFilter.forEach((attr) => {
+    if (obj[attr] !== undefined && obj[attr] !== null) {
       output[attr] = obj[attr];
     }
   });
@@ -247,10 +288,11 @@ function initMoreOptions(props, config, eventObj, row) {
         e.preventDefault();
         toolBox.remove();
         row.classList.add('pending');
-        const resp = await unpublishEvent(eventObj.eventId, quickFilter(eventObj));
+        const resp = await unpublishEvent(eventObj.eventId, eventObjFilter(eventObj));
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
+
         showToast(props, buildToastMsgWithEventTitle(eventObj.title, config['event-unpublished-msg']), { variant: 'positive' });
       });
     } else {
@@ -260,7 +302,7 @@ function initMoreOptions(props, config, eventObj, row) {
         e.preventDefault();
         toolBox.remove();
         row.classList.add('pending');
-        const resp = await publishEvent(eventObj.eventId, quickFilter(eventObj));
+        const resp = await publishEvent(eventObj.eventId, eventObjFilter(eventObj));
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
@@ -277,19 +319,40 @@ function initMoreOptions(props, config, eventObj, row) {
 
     if (eventObj.detailPagePath) {
       previewPre.href = (() => {
-        const url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
-        url.searchParams.set('previewMode', 'true');
-        url.searchParams.set('cachebuster', Date.now());
-        url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
-        return url.toString();
+        let url;
+
+        try {
+          url = new URL(`${eventObj.detailPagePath}`);
+        } catch (e) {
+          url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+        }
+
+        if (url) {
+          url.searchParams.set('previewMode', 'true');
+          url.searchParams.set('cachebuster', Date.now());
+          url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
+          return url.toString();
+        }
+        return '#';
       })();
       previewPre.target = '_blank';
+
       previewPost.href = (() => {
-        const url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
-        url.searchParams.set('previewMode', 'true');
-        url.searchParams.set('cachebuster', Date.now());
-        url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
-        return url.toString();
+        let url;
+        try {
+          url = new URL(`${eventObj.detailPagePath}`);
+        } catch (e) {
+          url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+        }
+
+        if (url) {
+          url.searchParams.set('previewMode', 'true');
+          url.searchParams.set('cachebuster', Date.now());
+          url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
+          return url.toString();
+        }
+
+        return '#';
       })();
       previewPost.target = '_blank';
     } else {
@@ -321,6 +384,7 @@ function initMoreOptions(props, config, eventObj, row) {
       props.data = newJson;
       props.filteredData = newJson;
       props.paginatedData = newJson;
+
       const modTimeHeader = props.el.querySelector('th.sortable.modificationTime');
       if (modTimeHeader) {
         props.currentSort = { field: 'modificationTime', el: modTimeHeader };
@@ -363,9 +427,10 @@ function initMoreOptions(props, config, eventObj, row) {
         }
 
         const newJson = await getEventsForUser();
-        props.data = newJson.events;
-        props.filteredData = newJson.events;
-        props.paginatedData = newJson.events;
+
+        props.data = newJson;
+        props.filteredData = newJson;
+        props.paginatedData = newJson;
 
         sortData(props, config, { resort: true });
         showToast(props, config['delete-event-toast-msg']);
@@ -683,8 +748,10 @@ async function buildDashboard(el, config) {
     const dataHandler = {
       set(target, prop, value, receiver) {
         target[prop] = value;
+
         populateTable(receiver, config);
         updateEventsCount(receiver);
+
         return true;
       },
     };
@@ -723,13 +790,13 @@ export default async function init(el) {
   el.innerHTML = '';
   buildLoadingScreen(el);
 
-  const devToken = getDevToken();
-  if (devToken && getEventServiceEnv() === 'local') {
+  const devToken = getLocalDevToken();
+  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
     buildDashboard(el, config);
     return;
   }
 
-  await initProfileLogicTree('events-dashboard', {
+  await initProfileLogicTree('ecc-dashboard', {
     noProfile: () => {
       signIn();
     },

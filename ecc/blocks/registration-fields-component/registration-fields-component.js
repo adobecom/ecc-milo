@@ -1,5 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { generateToolTip } from '../../scripts/utils.js';
+import { decorateSwitchFieldset, generateToolTip } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -44,8 +44,10 @@ async function decorateRSVPFields(el) {
     }
     const catText = convertString(field.Field);
     createTag('div', { class: 'cat-text' }, catText, { parent: tds[0] });
-    createTag('sp-checkbox', { class: 'check-appear', name: field.Field }, 'Appears on form', { parent: tds[1] });
-    createTag('sp-checkbox', { class: 'check-require', name: field.Field }, 'Required field', { parent: tds[2] });
+    const appearFieldset = decorateSwitchFieldset({ class: 'check-appear', name: field.Field }, 'Appears on form');
+    const requiredFieldset = decorateSwitchFieldset({ class: 'check-require', name: field.Field }, 'Required field');
+    tds[1].append(appearFieldset);
+    tds[2].append(requiredFieldset);
   });
 }
 

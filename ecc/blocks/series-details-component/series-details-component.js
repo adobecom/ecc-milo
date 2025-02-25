@@ -16,17 +16,6 @@ async function decorateCloudTagSelect(column) {
   column.innerHTML = '';
   buSelectWrapper.append(select);
   column.append(buSelectWrapper);
-
-  // FIXME: cloulds shouldn't be hardcoded
-  // const clouds = await getClouds();
-  const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
-
-  Object.entries(clouds).forEach(([, val]) => {
-    const opt = createTag('sp-menu-item', { value: val.id }, val.name);
-    select.append(opt);
-  });
-
-  select.pending = false;
 }
 
 export default function init(el) {
@@ -41,7 +30,7 @@ export default function init(el) {
       r.classList.add('series-fields-wrapper');
 
       cols.forEach(async (c, ci) => {
-        if (ci === 0) decorateCloudTagSelect(c);
+        if (ci === 0) await decorateCloudTagSelect(c);
       });
     }
 

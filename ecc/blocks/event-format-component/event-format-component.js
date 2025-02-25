@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+import { getClouds } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { generateToolTip } from '../../scripts/utils.js';
 
@@ -13,13 +14,14 @@ async function decorateCloudTagSelect(column) {
   buSelectWrapper.append(select);
   column.append(buSelectWrapper);
 
-  // FIXME: cloulds shouldn't be hardcoded
-  // const clouds = await getClouds();
-  // const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }, { id: 'DX', name: 'Experience Cloud' }];
-  const clouds = [{ id: 'CreativeCloud', name: 'Creative Cloud' }];
+  const clouds = await getClouds();
 
-  Object.entries(clouds).forEach(([, val]) => {
-    const opt = createTag('sp-menu-item', { value: val.id }, val.name);
+  clouds.forEach((cloud) => {
+    const { cloudType, cloudName } = cloud;
+
+    if (!cloudType || !cloudName) return;
+
+    const opt = createTag('sp-menu-item', { value: cloudType }, cloudName);
     select.append(opt);
   });
 
@@ -34,6 +36,24 @@ async function decorateSeriesSelect(column) {
   column.innerHTML = '';
   column.append(seriesSelectWrapper);
 }
+
+// function decorateFormatSelect(row) {
+//   const formatSelectWrapper = createTag('div', { class: 'format-picker-wrapper' });
+//   const label = createTag('sp-label', { for: 'format-select-input' }, 'Select format');
+//   const select = createTag('sp-picker', { id: 'format-select-input', class: 'select-input', size: 'm', label: 'Format' });
+//   const options = [
+//     { id: 'InPerson', name: 'In-Person' },
+//     { id: 'Webinar', name: 'Webinar' },
+//   ];
+
+//   options.forEach((o) => {
+//     const opt = createTag('sp-menu-item', { value: o.id }, o.name);
+//     select.append(opt);
+//   });
+
+//   formatSelectWrapper.append(label, select);
+//   row.append(formatSelectWrapper);
+// }
 
 function decorateTimeZoneSelect(column) {
   const tzWrapper = createTag('div', { class: 'time-zone-picker-wrapper' });
@@ -69,9 +89,11 @@ export default function init(el) {
       cols.forEach(async (c, ci) => {
         if (ci === 0) decorateCloudTagSelect(c);
         if (ci === 1) decorateSeriesSelect(c);
-        // if (ci === 2) decorateNewSeriesBtnAndModal(c);
-        // if (ci === 2) decorateCheckbox(c);
+        // if (ci === 2) decorateFormatSelect(c);
       });
+
+      // FIXME: remove after authored
+      // if (!el.querySelector('.format-picker-wrapper')) decorateFormatSelect(r);
     }
 
     if (ri === 2) {

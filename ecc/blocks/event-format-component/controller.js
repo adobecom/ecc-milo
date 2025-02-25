@@ -6,6 +6,15 @@ import { changeInputValue } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
+function filterSeries(series, currentCloud) {
+  return Object.values(series).filter((s) => {
+    const hasRequiredVals = s.seriesId && s.seriesName;
+    const isPublished = s.seriesStatus?.toLowerCase() === 'published';
+    const isInCurrentCloud = s.cloudType === currentCloud;
+    return hasRequiredVals && isPublished && isInCurrentCloud;
+  });
+}
+
 function prepopulateTimeZone(component) {
   const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   if (!currentTimeZone) return;
@@ -26,24 +35,20 @@ function prepopulateTimeZone(component) {
 
 function initStepLock(component) {
   const step = component.closest('.fragment');
-  const inputs = component.querySelectorAll('#bu-select-input, #series-select-input');
+  const inputs = component.querySelectorAll('#bu-select-input, #series-select-input, #format-select-input');
 
   const onFormatChange = () => {
     const componentSections = step.querySelectorAll('.section:not(:first-of-type)');
+    const topicsComponent = step.querySelector('.event-topics-component');
 
-    if (Array.from(inputs).every((input) => !!input.value)) {
-      componentSections.forEach((s) => {
-        if (s !== component.closest('.section')) {
-          s.classList.remove('hidden');
-        }
-      });
-    } else {
-      componentSections.forEach((s) => {
-        if (s !== component.closest('.section')) {
-          s.classList.add('hidden');
-        }
-      });
-    }
+    const inputsFilled = Array.from(inputs).every((input) => !!input.value);
+
+    componentSections.forEach((s) => {
+      if (s !== component.closest('.section')) {
+        s.classList.toggle('disabled', !inputsFilled);
+      }
+      topicsComponent?.classList.toggle('disabled', !inputsFilled);
+    });
   };
 
   inputs.forEach((input) => {
@@ -53,8 +58,45 @@ function initStepLock(component) {
   onFormatChange();
 }
 
+async function populateSeriesOptions(props, component) {
+  const seriesSelect = component.querySelector('#series-select-input');
+  if (!seriesSelect) return;
+
+  seriesSelect.pending = true;
+  seriesSelect.disabled = false;
+  changeInputValue(seriesSelect, 'value', null);
+
+  const series = await getSeriesForUser();
+  if (series.error) {
+    seriesSelect.pending = false;
+    seriesSelect.disabled = true;
+    return;
+  }
+
+  const existingOptions = seriesSelect.querySelectorAll('sp-menu-item');
+  existingOptions.forEach((opt) => opt.remove());
+
+  const filteredSeries = filterSeries(series, component.dataset.cloudType);
+
+  filteredSeries.forEach((val) => {
+    if (!val.seriesId || !val.seriesName) return;
+    if (val.seriesStatus?.toLowerCase() !== 'published') return;
+
+    const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
+    seriesSelect.append(opt);
+  });
+
+  seriesSelect.pending = false;
+  seriesSelect.disabled = filteredSeries.length === 0 || props.eventDataResp.seriesId;
+}
+
 export async function onPayloadUpdate(component, props) {
-  const { seriesId } = props.payload;
+  const { cloudType, seriesId } = props.payload;
+  if (cloudType && cloudType !== component.dataset.cloudType) {
+    component.dataset.cloudType = cloudType;
+    await populateSeriesOptions(props, component);
+  }
+
   if (seriesId) {
     const partnerSelectorGroups = document.querySelectorAll('partner-selector-group');
     if (partnerSelectorGroups.length) {
@@ -68,13 +110,32 @@ export async function onPayloadUpdate(component, props) {
   }
 }
 
-export async function onRespUpdate(_component, _props) {
-  // Do nothing
+export async function onRespUpdate(component, props) {
+  // lock series selector on seriesId given
+
+  if (props.eventDataResp) {
+    const { seriesId, cloudType } = props.eventDataResp;
+
+    const seriesSelect = component.querySelector('#series-select-input');
+    const buSelect = component.querySelector('#bu-select-input');
+
+    if (seriesSelect && !seriesSelect.disabled) seriesSelect.disabled = !!seriesId;
+    if (buSelect && !buSelect.disbaled) buSelect.disabled = !!cloudType;
+  }
 }
 
-async function populateSeriesOptions(props, component) {
+function initCloudTypeSelect(props, component) {
+  const cloudTypeSelect = component.querySelector('#bu-select-input');
+  if (!cloudTypeSelect) return;
+
+  cloudTypeSelect.addEventListener('change', async () => {
+    props.payload = { ...props.payload, cloudType: cloudTypeSelect.value };
+  });
+}
+
+async function initDupCheck(props, component) {
+  const currentCloudType = component.dataset.cloudType;
   const seriesSelect = component.querySelector('#series-select-input');
-  if (!seriesSelect) return;
 
   const series = await getSeriesForUser();
 
@@ -84,16 +145,26 @@ async function populateSeriesOptions(props, component) {
     return;
   }
 
-  Object.values(series).forEach((val) => {
+  const filteredSeries = filterSeries(series, currentCloudType);
+
+  filteredSeries.forEach((val) => {
+    if (!val.seriesId || !val.seriesName) return;
+    if (val.seriesStatus?.toLowerCase() !== 'published') return;
+
     const opt = createTag('sp-menu-item', { value: val.seriesId }, val.seriesName);
     seriesSelect.append(opt);
   });
 
   seriesSelect.pending = false;
+  seriesSelect.disabled = filteredSeries.length === 0 || props.eventDataResp.seriesId;
 
   seriesSelect.addEventListener('change', () => {
     const seriesId = seriesSelect.value;
-    const seriesName = seriesSelect.querySelector(`[value="${seriesId}"]`).textContent;
+    const selectedSeries = seriesSelect.querySelector(`[value="${seriesId}"]`);
+
+    if (!selectedSeries) return;
+
+    const seriesName = selectedSeries.textContent;
 
     BlockMediator.set('eventDupMetrics', {
       ...BlockMediator.get('eventDupMetrics'),
@@ -106,60 +177,42 @@ async function populateSeriesOptions(props, component) {
 }
 
 export default async function init(component, props) {
-  setTimeout(() => {
-    const seriesSelect = component.querySelector('#series-select-input');
-
-    if (seriesSelect.pending || seriesSelect.disabled) {
-      const toastArea = props.el.querySelector('.toast-area');
-      if (!toastArea) return;
-
-      const toast = createTag('sp-toast', { open: true, timeout: 8000 }, 'Series ID is taking longer than usual to load. Please check if the Adobe corp. VPN is connected.', { parent: toastArea });
-      toast.addEventListener('close', () => {
-        toast.remove();
-      });
-    }
-  }, 5000);
-
   const eventData = props.eventDataResp;
+  component.dataset.cloudType = props.payload.cloudType || eventData.cloudType;
+  initCloudTypeSelect(props, component);
   prepopulateTimeZone(component);
+  await initDupCheck(props, component);
   initStepLock(component);
-  await populateSeriesOptions(props, component);
 
   const {
     cloudType,
     seriesId,
+    eventType,
   } = eventData;
 
-  if (cloudType && seriesId) {
+  if (cloudType && seriesId && eventType) {
     changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType);
     changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId);
+    changeInputValue(component.querySelector('#format-select-input'), 'value', eventType);
     component.classList.add('prefilled');
   }
-}
 
-function getTemplateId(bu) {
-  switch (bu) {
-    case 'DX':
-      return '/events/fragments/event-templates/dx/simple';
-    case 'CreativeCloud':
-    default:
-      return '/events/fragments/event-templates/dme/simple';
+  if (!eventType) {
+    changeInputValue(component.querySelector('#format-select-input'), 'value', 'InPerson');
   }
 }
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const eventType = 'InPerson';
   const cloudType = component.querySelector('#bu-select-input').value;
   const seriesId = component.querySelector('#series-select-input')?.value;
-  const templateId = getTemplateId(cloudType);
+  const eventType = component.querySelector('#format-select-input')?.value || 'InPerson';
 
   const eventFormat = {
     eventType,
     cloudType,
     seriesId,
-    templateId,
   };
 
   props.payload = { ...props.payload, ...eventFormat };

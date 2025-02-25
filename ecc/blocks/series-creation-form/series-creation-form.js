@@ -6,7 +6,7 @@ import {
   camelToSentenceCase,
   signIn,
   getEventServiceEnv,
-  getDevToken,
+  getLocalDevToken,
 } from '../../scripts/utils.js';
 import {
   createSeries,
@@ -15,7 +15,7 @@ import {
   getSeriesById,
 } from '../../scripts/esp-controller.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
-import { initProfileLogicTree } from '../../scripts/profile.js';
+import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToSeries } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -206,10 +206,17 @@ async function loadData(props) {
   const seriesId = urlParams.get('seriesId');
 
   if (seriesId) {
-    props.el.classList.add('disabled');
-    const data = await getSeriesById(seriesId);
-    props.response = { ...props.response, ...data };
-    props.el.classList.remove('disabled');
+    const [user, data] = await Promise.all([getUser(), getSeriesById(seriesId)]);
+
+    if (userHasAccessToSeries(user, data.seriesId)
+    || userHasAccessToBU(user, data.cloudType)) {
+      props.el.classList.add('disabled');
+      props.response = { ...props.response, ...data };
+      props.el.classList.remove('disabled');
+    } else {
+      buildNoAccessScreen(props.el);
+      props.el.classList.remove('loading');
+    }
   }
 }
 
@@ -401,15 +408,11 @@ async function save(props, toPublish = false) {
 
   let resp = props.response;
 
-  const onSave = async () => {
-
-  };
-
   if (!resp.seriesId) {
     resp = await createSeries(quickFilter(props.payload));
     props.response = { ...props.response, ...resp };
     updateDashboardLink(props);
-    
+
     if (resp?.seriesId) await handleSeriesUpdate(props);
 
     if (!resp.error) {
@@ -520,7 +523,9 @@ function initFormCtas(props) {
       if (['#save', '#next'].includes(ctaUrl.hash)) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
-          const [finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
+          const finalStateText = 'Publish series';
+          const doneStateText = 'Done';
+          const republishStateText = 'Re-publish series';
 
           cta.textContent = finalStateText;
           cta.prepend(getIcon('golden-rocket'));
@@ -655,8 +660,10 @@ function initDeepLink(props) {
 
 function updateStatusTag(props) {
   const { response } = props;
+  if (!response) return;
 
-  if (response?.published === undefined) return;
+  const { seriesStatus } = response;
+  if (seriesStatus === undefined) return;
 
   const currentFragment = getCurrentFragment(props);
 
@@ -667,11 +674,25 @@ function updateStatusTag(props) {
 
   const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
   const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
-  const dot = response.published ? getIcon('dot-purple') : getIcon('dot-green');
-  const text = response.published ? 'Published' : 'Draft';
+
+  let dot;
+
+  switch (seriesStatus) {
+    case 'published':
+      dot = getIcon('dot-purple');
+      break;
+    case 'draft':
+      dot = getIcon('dot-green');
+      break;
+    case 'archived':
+    default:
+      dot = getIcon('dot-gray');
+      break;
+  }
+
   const statusTag = createTag('span', { class: 'status-tag' });
 
-  statusTag.append(dot, text);
+  statusTag.append(dot, seriesStatus);
   heading.parentElement?.replaceChild(headingWrapper, heading);
   headingWrapper.append(heading, statusTag);
 }
@@ -795,8 +816,8 @@ export default async function init(el) {
     ...promises,
   ]);
 
-  const devToken = getDevToken();
-  if (devToken && getEventServiceEnv() === 'local') {
+  const devToken = getLocalDevToken();
+  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
     buildForm(el).then(() => {
       el.classList.remove('loading');
     });

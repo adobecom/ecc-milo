@@ -4,10 +4,15 @@ const { css } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
+  .agenda-group-container {
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
   agenda-fieldset {
     display: flex;
     width: 100%;
-    align-items: center;
     gap: 16px;
   }
 
@@ -21,5 +26,10 @@ export const style = css`
   
   .icon-remove-circle:hover {
     opacity: 1;
+  }
+  
+  repeater-element {
+    margin-top: 0px;
+    margin-bottom: 0px;
   }
 `;

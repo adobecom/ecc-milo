@@ -18,7 +18,7 @@ function decorateSWCTextField(row, extraOptions) {
     maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
   }
 
-  const isRequired = attrTextEl?.textContent.trim().endsWith('*');
+  const isRequired = extraOptions.required || attrTextEl?.textContent.trim().endsWith('*');
 
   const input = createTag('sp-textfield', { ...extraOptions, class: 'venue-info-text text-input', placeholder: text });
 
@@ -54,12 +54,11 @@ function buildAdditionalInfo(row) {
 
 function buildLocationInputGrid(row) {
   const locationDetailsWrapper = createTag('div', { class: 'location-wrapper' });
-  const placeIdInput = createTag('input', { id: 'google-place-id', type: 'hidden' });
+  const placeIdInput = createTag('input', { id: 'google-place-id', type: 'hidden', required: true });
   const placeLATInput = createTag('input', { id: 'google-place-lat', type: 'hidden' });
   const placeLNGInput = createTag('input', { id: 'google-place-lng', type: 'hidden' });
   const gmtOffsetInput = createTag('input', { id: 'google-place-gmt-offset', type: 'hidden' });
   const addressComponentsInput = createTag('input', { id: 'google-place-address-components', type: 'hidden' });
-  const formattedAddressInput = createTag('input', { id: 'google-place-formatted-address', type: 'hidden' });
 
   locationDetailsWrapper.append(
     placeIdInput,
@@ -67,7 +66,6 @@ function buildLocationInputGrid(row) {
     placeLNGInput,
     gmtOffsetInput,
     addressComponentsInput,
-    formattedAddressInput,
   );
 
   row.innerHTML = '';
@@ -97,6 +95,7 @@ export default function init(el) {
           quiet: true,
           size: 'xl',
           readonly: true,
+          required: true,
         });
         break;
       case 3:

@@ -19,7 +19,7 @@ const DEFAULT_FIELD_LABELS = {
   addSocialMediaRepeater: 'Add Social Media',
 };
 
-const SPEAKER_TYPE = ['Host', 'Speaker', 'Judge'];
+const SPEAKER_TYPE = ['Host', 'Presenter', 'Speaker', 'Keynote', 'Judge', 'PortfolioReviewer'];
 const SUPPORTED_SOCIAL = ['YouTube', 'LinkedIn', 'Web', 'Twitter', 'X', 'TikTok', 'Instagram', 'Facebook', 'Pinterest'];
 
 export default class Profile extends LitElement {
@@ -88,7 +88,7 @@ export default class Profile extends LitElement {
     <div><sp-field-label size="l" required>${fieldLabel} *</sp-field-label></div>
     <sp-picker label=${fieldLabel} value=${shallow ? this.profileCopy?.type : this.profile?.type} size="l" @change=${(event) => this.updateProfile({ type: event.target.value }, shallow)}>
         ${repeat(SPEAKER_TYPE, (type) => html`
-            <sp-menu-item value="${type}">${type}</sp-menu-item>
+            <sp-menu-item value="${type}">${type.replace(/([a-z])([A-Z])/g, '$1 $2')}</sp-menu-item>
         `)}
     </sp-picker>
     </div>`;

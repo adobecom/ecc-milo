@@ -5,5 +5,9 @@
 .event-topics-component .checkbox-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 32px;
+  gap: 12px;
+}
+
+.event-topics-component sp-progress-circle {
+  margin: auto;
 }

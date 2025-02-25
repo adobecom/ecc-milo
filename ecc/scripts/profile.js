@@ -66,9 +66,25 @@ export function lazyCaptureProfile() {
 
 export async function getUser() {
   const profile = BlockMediator.get('imsProfile');
-  if (!profile || profile.noProfile) return null;
+
+  if (!profile || profile.noProfile) {
+    const devToken = sessionStorage.getItem('devToken');
+    if (devToken && window.location.hostname === 'localhost') {
+      return {
+        role: 'admin',
+        email: 'admin@adobe.com',
+        'business-units': 'all',
+        series: 'all',
+        events: 'all',
+      };
+    }
+
+    return null;
+  }
 
   const { email } = profile;
+
+  if (!email) return null;
 
   if (usersCache.length === 0) {
     const resp = await fetch('/ecc/system/users.json')
@@ -81,7 +97,7 @@ export async function getUser() {
     usersCache = json.data;
   }
 
-  const user = usersCache.find((s) => s.email === email);
+  const user = usersCache.find((s) => s.email.toLowerCase() === email.toLowerCase());
   return user;
 }
 
@@ -89,10 +105,11 @@ export function userHasAccessToBU(user, bu) {
   if (!user) return false;
 
   const userBU = user['business-units'];
+  const { role } = user;
+
+  if (userBU.toLowerCase() === 'all' || role === 'admin') return true;
 
   if (!userBU) return false;
-
-  if (userBU.toLowerCase() === 'all') return true;
 
   const businessUnits = userBU.split(',').map((b) => b.trim());
   return businessUnits.length === 0 || businessUnits.includes(bu);
@@ -101,45 +118,45 @@ export function userHasAccessToBU(user, bu) {
 export function userHasAccessToSeries(user, seriesId) {
   if (!user) return false;
 
-  const userSeries = user.series;
+  const { series, role } = user;
 
-  if (!userSeries) return false;
+  if (series.toLowerCase() === 'all' || role === 'admin') return true;
 
-  if (userSeries.toLowerCase() === 'all') return true;
+  if (!series) return false;
 
-  const series = userSeries.split(',').map((b) => b.trim());
-  return series.length === 0 || series.includes(seriesId);
+  const userSeries = series.split(',').map((b) => b.trim());
+  return userSeries.length === 0 || userSeries.includes(seriesId);
 }
 
 export function userHasAccessToEvent(user, eventId) {
   if (!user) return false;
 
-  const userEvents = user.events;
+  const { events, role } = user;
 
-  if (!userEvents) return false;
+  if (events.toLowerCase() === 'all' || role === 'admin') return true;
 
-  if (userEvents.toLowerCase() === 'all') return true;
+  if (!events) return false;
 
-  const events = userEvents.split(',').map((b) => b.trim());
-  return events.length === 0 || events.includes(eventId);
+  const eventsArray = events.split(',').map((b) => b.trim());
+  return eventsArray.length === 0 || eventsArray.includes(eventId);
 }
 
 export function userHasAccessToView(user, blockName) {
   const { role } = user;
   const managerAccess = [
-    'events-dashboard',
+    'ecc-dashboard',
     'event-creation-form',
     'series-dashboard',
     'series-creation-form',
   ];
 
   const creatorAccess = [
-    'events-dashboard',
+    'ecc-dashboard',
     'event-creation-form',
   ];
 
   const editorAccess = [
-    'events-dashboard',
+    'ecc-dashboard',
     'event-creation-form',
   ];
 

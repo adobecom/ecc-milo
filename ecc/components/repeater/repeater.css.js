@@ -14,8 +14,6 @@ export const style = css`
   display: flex;
   align-items: center;
   padding: 0 32px;
-  margin-top: 16px;
-  margin-bottom: 24px;
   cursor: pointer;
 }
   

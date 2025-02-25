@@ -6,14 +6,13 @@ import {
   removeSpeakerFromEvent,
   getEventSpeaker,
 } from '../../scripts/esp-controller.js';
-import { getFilteredCachedResponse } from '../../scripts/event-data-handler.js';
 
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const profileContainer = component.querySelector('profile-container');
   if (profileContainer) {
-    const { eventId } = getFilteredCachedResponse();
+    const { eventId } = props.eventDataResp;
     const speakers = profileContainer.getProfiles();
 
     if (speakers.length === 0) {
@@ -130,7 +129,7 @@ async function prefillProfiles(props) {
       }
       props.eventDataResp = { ...props.eventDataResp, ...d };
     } catch (e) {
-      window.lana?.error('Error fetching speaker data: ', e);
+      window.lana?.log('Error fetching speaker data: ', e);
     }
   }
 }

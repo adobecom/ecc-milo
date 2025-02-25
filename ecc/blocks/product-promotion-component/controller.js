@@ -10,74 +10,27 @@ export function onSubmit(component, props) {
   const selectedProducts = productGroup?.getSelectedProducts();
 
   if (selectedProducts) {
-    const topicsVal = props.payload.fullTopicsValue?.map((x) => JSON.parse(x));
     const relatedProducts = selectedProducts
-      .filter((p) => topicsVal.find((t) => p.tagID?.includes(t.tagID)))
       .map((p) => ({
         name: p.title,
         showProductBlade: !!p.showProductBlade,
-        tags: p.tags.map((t) => t.tagID).join(','),
       }));
 
     props.payload = { ...props.payload, relatedProducts };
+  } else {
+    delete props.payload.relatedProducts;
   }
 }
 
 async function updateProductSelector(component, props) {
-  const supportedProducts = [
-    'Acrobat Pro',
-    'Acrobat Reader',
-    'Adobe Express',
-    'Adobe Firefly',
-    'Adobe Fonts',
-    'Adobe Photoshop',
-    'Adobe Substance 3D Collection',
-    'Adobe Stock',
-    'Aero',
-    'After Effects',
-    'AI Assistant for Acrobat',
-    'Animate',
-    'Audition',
-    'Behance',
-    'Bridge',
-    'Capture',
-    'Character Animator',
-    'Color',
-    'Creative Cloud Libraries',
-    'Dimension',
-    'Dreamweaver',
-    'Fill & Sign',
-    'Firefly',
-    'Frame.io',
-    'Fresco',
-    'Illustrator',
-    'InCopy',
-    'InDesign',
-    'Lightroom',
-    'Lightroom Classic',
-    'Media Encoder',
-    'Photoshop',
-    'Photoshop Express',
-    'Portfolio',
-    'Premiere Pro',
-    'Premiere Rush',
-    'Scan',
-    'Substance 3D Collection',
-  ];
   const caasTags = await getCaasTags();
-  const topics = props.payload.fullTopicsValue?.map((x) => JSON.parse(x));
-  if (!caasTags || !topics) return;
+  if (!caasTags) return;
 
   const productGroups = component.querySelectorAll('product-selector-group');
-  let products = Object.values(caasTags.namespaces.caas.tags['product-categories'].tags).map((x) => [...Object.values(x.tags).map((y) => y)]).flat();
-
-  products = products.filter(
-    (p) => topics.find((t) => p.tagID?.includes(t.tagID)) && supportedProducts?.includes(p.title),
-  );
+  const products = Object.values(caasTags.namespaces.caas.tags['product-categories'].tags).map((x) => [...Object.values(x.tags).map((y) => y)]).flat();
 
   productGroups.forEach((pg) => {
     pg.setAttribute('data-products', JSON.stringify(products));
-    pg.setAttribute('data-selected-topics', JSON.stringify(topics));
     pg.requestUpdate();
 
     const selectedProducts = pg.getSelectedProducts();
@@ -101,6 +54,12 @@ async function updateProductSelector(component, props) {
 }
 
 export async function onPayloadUpdate(component, props) {
+  const { cloudType } = props.payload;
+
+  if (cloudType && cloudType !== component.dataset.cloudType) {
+    component.dataset.cloudType = cloudType;
+  }
+
   await updateProductSelector(component, props);
 }
 
@@ -109,6 +68,8 @@ export async function onRespUpdate(_component, _props) {
 }
 
 export default async function init(component, props) {
+  const { cloudType } = props.payload || props.eventDataResp;
+  if (cloudType) component.dataset.cloudType = cloudType;
   const eventData = props.eventDataResp;
   const productGroup = component.querySelector('product-selector-group');
 
@@ -117,7 +78,6 @@ export default async function init(component, props) {
       name: handlize(p.name),
       title: p.name,
       showProductBlade: !!p.showProductBlade,
-      tags: p.tags.split(',').map((tagID) => ({ tagID })),
     }));
 
     productGroup.selectedProducts = selectedProducts;

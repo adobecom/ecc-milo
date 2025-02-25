@@ -11,7 +11,7 @@ function togglePrefillableFieldsHiddenState(component) {
 }
 
 async function loadGoogleMapsAPI(callback) {
-  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
+  const secretEnv = ['local', 'dev'].includes(getEventServiceEnv()) ? 'dev' : getEventServiceEnv();
   const script = document.createElement('script');
   const apiKey = await getSecret(`${secretEnv}-google-places-api`);
   script.src = `https://maps.googleapis.com/maps/api/js?loading=async&key=${apiKey}&libraries=places&callback=onGoogleMapsApiLoaded`;
@@ -19,7 +19,7 @@ async function loadGoogleMapsAPI(callback) {
   script.defer = true;
   window.onGoogleMapsApiLoaded = callback;
   script.onerror = () => {
-    window.lana?.error('Failed to load the Google Maps script!');
+    window.lana?.log('Failed to load the Google Maps script!');
   };
   document.head.appendChild(script);
 }
@@ -56,7 +56,7 @@ function updateAllFields(venueData, component) {
   changeInputValue(placeLngInput, 'value', venueData.coordinates?.lon);
   changeInputValue(placeIdInput, 'value', venueData.placeId);
   changeInputValue(gmtoffsetInput, 'value', venueData.gmtOffset);
-  changeInputValue(addressComponentsInput, 'value', venueData.addressComponents);
+  changeInputValue(addressComponentsInput, 'value', JSON.stringify(venueData.addressComponents));
   changeInputValue(formattedAddressInput, 'value', venueData.formattedAddress);
 }
 
@@ -74,8 +74,15 @@ function getVenueDataInForm(component) {
   const lat = +placeLatInput.value;
   const lon = +placeLngInput.value;
   const gmtOffset = +gmtoffsetInput.value;
-  const addressComponents = addressComponentsInput.value;
   const formattedAddress = formattedAddressInput.value;
+
+  let addressComponents;
+
+  try {
+    addressComponents = JSON.parse(addressComponentsInput.value);
+  } catch (e) {
+    addressComponents = [];
+  }
 
   const venueData = {
     venueName,
@@ -85,7 +92,7 @@ function getVenueDataInForm(component) {
       lon,
     },
     gmtOffset,
-    addressComponents: JSON.parse(addressComponents),
+    addressComponents,
     formattedAddress,
   };
 
@@ -127,6 +134,7 @@ function initAutocomplete(el, props) {
 
       components = components.map((component) => {
         const obj = {};
+
         Object.keys(component).forEach((key) => {
           const newKey = key.replace(/_(.)/g, (_, match) => match.toUpperCase());
           obj[newKey] = component[key];
@@ -147,7 +155,6 @@ function initAutocomplete(el, props) {
       if (place.name) changeInputValue(venueName, 'value', place.name);
       changeInputValue(placeId, 'value', place.place_id);
 
-      togglePrefillableFieldsHiddenState(el);
       BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city: addressInfo.city });
     }
 
@@ -158,13 +165,15 @@ function initAutocomplete(el, props) {
     }
 
     if (place.formatted_address) {
-      formattedAddress.value = place.formatted_address;
+      changeInputValue(formattedAddress, 'value', place.formatted_address);
     }
+
+    togglePrefillableFieldsHiddenState(el);
   });
 }
 
 export async function onSubmit(component, props) {
-  // do nothing. Depend on onEventUpdate cb.
+  // do nothing. Depend on onTargetUpdate cb.
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -189,7 +198,7 @@ export default async function init(component, props) {
   venueNameInput.addEventListener('change', () => {
     if (!venueNameInput.value) {
       resetAllFields(component);
-      togglePrefillableFieldsHiddenState(component, true);
+      togglePrefillableFieldsHiddenState(component);
     }
   });
 
@@ -213,14 +222,26 @@ export async function onTargetUpdate(component, props) {
 
   const venueData = getVenueDataInForm(component);
 
+  if (!venueData.placeId) {
+    component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please select a valid venue.' } }, bubbles: true, composed: true }));
+    return;
+  }
+
+  const oldVenueData = props.eventDataResp.venue;
   let resp;
-  if (!props.eventDataResp.venue) {
+  if (!oldVenueData) {
     resp = await createVenue(props.eventDataResp.eventId, venueData);
-  } else if (props.eventDataResp.venue.placeId !== venueData.placeId) {
-    resp = await replaceVenue(props.eventDataResp.eventId, props.eventDataResp.venue.venueId, {
-      ...props.eventDataResp.venue,
-      ...venueData,
-    });
+  } else if (oldVenueData.placeId !== venueData.placeId) {
+    const { creationTime, modificationTime } = oldVenueData;
+    resp = await replaceVenue(
+      props.eventDataResp.eventId,
+      oldVenueData.venueId,
+      {
+        ...venueData,
+        creationTime,
+        modificationTime,
+      },
+    );
 
     if (resp.error) {
       buildErrorMessage(props, resp);

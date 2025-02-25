@@ -4,15 +4,14 @@ let responseCache = {};
 let payloadCache = {};
 
 const submissionFilter = [
-  // from payload and response
   'agenda',
   'topics',
   'eventType',
   'cloudType',
   'seriesId',
-  'templateId',
   'communityTopicUrl',
   'title',
+  'tags',
   'description',
   'localStartDate',
   'localEndDate',
@@ -53,7 +52,14 @@ export function quickFilter(obj) {
 
 export function setPayloadCache(payload) {
   if (!payload) return;
+
   payloadCache = quickFilter(payload);
+
+  const { pendingTopics } = payload;
+  if (pendingTopics) {
+    const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
+    if (jointTopics.length) payloadCache.topics = jointTopics;
+  }
 }
 
 export function getFilteredCachedPayload() {
@@ -133,7 +139,10 @@ export function hasContentChanged(oldData, newData) {
     'platform',
     'platformCode',
     'liveUpdate',
+    'externalProvider',
   ];
+
+  const lengthOnlyList = ['speakers'];
 
   // Checking keys counts
   const oldDataKeys = Object.keys(oldData).filter((key) => !ignoreList.includes(key));
@@ -147,7 +156,7 @@ export function hasContentChanged(oldData, newData) {
   // Check for differences in the actual values
   return oldDataKeys.some(
     (key) => {
-      const lengthOnly = key === 'speakers' && !oldData[key].ordinal;
+      const lengthOnly = lengthOnlyList.includes(key) && !oldData[key].ordinal;
 
       return !ignoreList.includes(key) && compareObjects(oldData[key], newData[key], lengthOnly);
     },
