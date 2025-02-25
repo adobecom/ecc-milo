@@ -72,7 +72,7 @@ export default class AgendaFieldset extends LitElement {
   this.updateValue('title', event.target.value);
 }}></sp-textfield>
           <div class="attr-text">${titleMaxLength + maxLengthSuffix}</div>
-          <sp-textfield class="text-input" placeholder=${placeholderDetails} value=${this.agenda.a} quiet size="l" maxlength=${detailsMaxLength} @change=${(event) => {
+          <sp-textfield class="text-input" placeholder=${placeholderDetails} value=${this.agenda.detail} quiet size="l" maxlength=${detailsMaxLength} @change=${(event) => {
   this.updateValue('details', event.target.value);
 }} multiline=${true}></sp-textfield>
           <div class="attr-text">${detailsMaxLength + maxLengthSuffix}</div>
