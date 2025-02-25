@@ -13,25 +13,11 @@ function decorateFields(row) {
   const cols = row.querySelectorAll(':scope > div');
   if (!cols.length) return;
 
-  const [placeholderCol, maxLengthCol] = cols;
-  const maxLengthText = maxLengthCol.textContent.trim();
-  const placeholder = placeholderCol.textContent.trim();
-  const maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
-  const isRequired = maxLengthText.endsWith('*');
-
-  const options = {
-    maxLengthText,
-    maxCharNum,
-    placeholder,
-    isRequired,
-  };
-
   row.innerHTML = '';
 
   const timeslots = getTimeSlots(cols[2]);
   const fieldSetWrapper = createTag('agenda-fieldset-group');
   fieldSetWrapper.dataset.timeslots = timeslots.join(',');
-  fieldSetWrapper.dataset.options = JSON.stringify(options);
 
   row.append(fieldSetWrapper);
 }
@@ -61,6 +47,10 @@ export default async function init(el) {
   el.classList.add('form-component');
   generateToolTip(el);
   const rows = [...el.querySelectorAll(':scope > div')];
+  const div = createTag('div', { class: 'agenda-group-container' });
+  div.append(rows[1]);
+  div.append(rows[2]);
+  el.append(div);
   decorateFields(rows[1]);
   decorateCheckBox(rows[2]);
 }

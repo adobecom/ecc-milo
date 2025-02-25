@@ -11,14 +11,12 @@ export default class AgendaFieldsetGroup extends LitElement {
   static properties = {
     agendaItems: { type: Array },
     timeslots: { type: Array },
-    options: { type: Object },
   };
 
   constructor() {
     super();
     this.agendaItems = this.agendaItems || [{}];
     this.timeslots = this.dataset.timeslots.split(',');
-    this.options = this.dataset.options ? JSON.parse(this.dataset.options) : {};
   }
 
   static styles = style;
@@ -54,17 +52,20 @@ export default class AgendaFieldsetGroup extends LitElement {
 
   render() {
     return html`
+      <div class="agenda-group-container">
       ${repeat(this.agendaItems, (agendaItem, index) => {
     const { hours, minutes, period } = agendaItem.startTime ? parse24HourFormat(agendaItem.startTime) : {};
     const agendaComponents = {
       startTime: agendaItem.startTime,
-      description: agendaItem.description,
+      title: agendaItem.title || '',
+      detail: agendaItem.description || '',
       startTimeValue: agendaItem.startTimeValue || ((hours && minutes) && `${hours}:${minutes}`) || '',
       startTimePeriod: agendaItem.startTimePeriod || period || '',
     };
 
+    const options = { timeslots: this.timeslots };
     return html`
-        <agenda-fieldset .agendas=${this.agendaItems} .agenda=${agendaComponents} .timeslots=${this.timeslots} .options=${this.options}
+        <agenda-fieldset .agenda=${agendaComponents} .options=${options}
           @update-agenda=${(event) => this.handleAgendaUpdate(event, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.agendaItems.length === 1 && this.hasOnlyEmptyAgendaLeft() ? nothing : html`
@@ -75,6 +76,7 @@ export default class AgendaFieldsetGroup extends LitElement {
       `;
   })}
       <repeater-element text="Add agenda time and details" @repeat=${this.addAgenda}></repeater-element>
+      </div>
     `;
   }
 }

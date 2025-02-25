@@ -24,9 +24,10 @@ profile-ui {
     width: 100%;
 }
 
-repeater-element {
-    margin: 24px;
-}
+  repeater-element {
+    margin-top: 16px;
+    margin-bottom: 24px;
+  }
 
 .form-component > div:first-of-type > div > h2,
 .form-component > div:first-of-type > div > h3 {
