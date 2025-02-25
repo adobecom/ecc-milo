@@ -4,11 +4,11 @@ import { style } from './agenda-fieldset.css.js';
 
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
 
-const placeholderTitle = "Add agenda title";
-const placeholderDetails = "Add agenda details";
+const placeholderTitle = 'Add agenda title';
+const placeholderDetails = 'Add agenda details';
 const titleMaxLength = 55;
 const detailsMaxLength = 160;
-const maxLengthSuffix = " characters max *";
+const maxLengthSuffix = ' characters max *';
 
 export default class AgendaFieldset extends LitElement {
   static properties = {
@@ -54,13 +54,13 @@ export default class AgendaFieldset extends LitElement {
             <p>Time</p>
             <div class="time-picker-wrapper">
               <sp-picker class="time-picker-input select-input" label="Pick agenda time" value=${this.parseAgendaTime()} @change=${(event) => {
-    this.updateValue('startTimeValue', event.target.value);
-  }}>
+  this.updateValue('startTimeValue', event.target.value);
+}}>
                 ${repeat(this.options.timeslots, (timeslot) => html`<sp-menu-item value=${timeslot}>${timeslot}</sp-menu-item>`)}
               </sp-picker>
               <sp-picker class="period-picker-input select-input" label="AM/PM" value=${this.parseAgendaPeriod()} @change=${(event) => {
-    this.updateValue('startTimePeriod', event.target.value);
-  }}>
+  this.updateValue('startTimePeriod', event.target.value);
+}}>
                 ${repeat(['AM', 'PM'], (p) => html`<sp-menu-item value=${p}>${p}</sp-menu-item>`)}
               </sp-picker>
             </div>
@@ -71,11 +71,11 @@ export default class AgendaFieldset extends LitElement {
           <sp-textfield class="text-input" placeholder=${placeholderTitle} value=${this.agenda.title} quiet size="xl" maxlength=${titleMaxLength} @change=${(event) => {
   this.updateValue('title', event.target.value);
 }}></sp-textfield>
-          <div class="attr-text">${titleMaxLength+maxLengthSuffix}</div>
-          <sp-textfield class="text-input" placeholder=${placeholderDetails} value=${this.agenda.detail} quiet size="l" maxlength=${detailsMaxLength} @change=${(event) => {
+          <div class="attr-text">${titleMaxLength + maxLengthSuffix}</div>
+          <sp-textfield class="text-input" placeholder=${placeholderDetails} value=${this.agenda.a} quiet size="l" maxlength=${detailsMaxLength} @change=${(event) => {
   this.updateValue('details', event.target.value);
 }} multiline=${true}></sp-textfield>
-          <div class="attr-text">${detailsMaxLength+maxLengthSuffix}</div>
+          <div class="attr-text">${detailsMaxLength + maxLengthSuffix}</div>
         </div>
       </div>
     `;
