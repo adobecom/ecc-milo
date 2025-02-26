@@ -42,7 +42,7 @@ function prefillFields(component, props) {
   const contactHostEl = component.querySelector('#registration-contact-host');
   const hostEmailEl = component.querySelector('#event-host-email-input');
   const attendeeLimitEl = component.querySelector('#attendee-count-input');
-  const allowWaitlistEl = component.querySelector('#registration-allow-waitlist');
+  const disbleWaitlistEl = component.querySelector('#registration-disable-waitlist');
   const allowGuestRegistrationEl = component.querySelector('#allow-guest-registration');
   const descriptionEl = component.querySelector('#rsvp-form-detail-description');
 
@@ -57,7 +57,7 @@ function prefillFields(component, props) {
     } = eventData;
 
     if (attendeeLimitEl && attendeeLimit) attendeeLimitEl.value = attendeeLimit;
-    if (allowWaitlistEl && allowWaitlisting) allowWaitlistEl.checked = allowWaitlisting;
+    if (disbleWaitlistEl) disbleWaitlistEl.checked = !allowWaitlisting;
     if (descriptionEl && rsvpDescription) descriptionEl.value = rsvpDescription;
     if (hostEmail) {
       if (contactHostEl) contactHostEl.checked = true;
@@ -186,14 +186,14 @@ export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const attendeeCountInput = component.querySelector('#attendee-count-input');
-  const allowWaitlistingInput = component.querySelector('#registration-disable-waitlist');
+  const disbleWaitlistingInput = component.querySelector('#registration-disable-waitlist');
   const contactHostInput = component.querySelector('#registration-contact-host');
   const hostEmailInput = component.querySelector('#event-host-email-input');
   const rsvpDescriptionInput = component.querySelector('#rsvp-form-detail-description');
   const guestRegistrationInput = component.querySelector('#allow-guest-registration');
 
   const attendeeLimitVal = attendeeCountInput ? attendeeCountInput.value?.trim() : null;
-  const allowWaitlisting = allowWaitlistingInput?.checked;
+  const allowWaitlisting = !disbleWaitlistingInput?.checked;
   const contactHost = contactHostInput?.checked;
   const hostEmail = hostEmailInput?.value?.trim();
   const rsvpDescription = rsvpDescriptionInput?.value || '';
