@@ -51,15 +51,16 @@ export function quickFilter(obj) {
   return output;
 }
 
-export function setPayloadCache(payload) {
+export function setPayloadCache(payload, loc) {
   if (!payload) return;
 
-  payloadCache = quickFilter(payload);
+  const localeData = payload.localization[loc] || payload;
+  payloadCache.localization[loc] = quickFilter(localeData);
 
-  const { pendingTopics } = payload;
+  const { pendingTopics } = localeData;
   if (pendingTopics) {
     const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
-    if (jointTopics.length) payloadCache.topics = jointTopics;
+    if (jointTopics.length) payloadCache.localization[loc].topics = jointTopics;
   }
 }
 
@@ -67,9 +68,11 @@ export function getFilteredCachedPayload() {
   return payloadCache;
 }
 
-export function setResponseCache(response) {
+export function setResponseCache(response, loc) {
   if (!response) return;
-  responseCache = quickFilter(response);
+
+  const localeData = response.localization[loc] || response;
+  responseCache.localization[loc] = quickFilter(localeData);
 }
 
 export function getFilteredCachedResponse() {
