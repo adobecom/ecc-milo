@@ -13,8 +13,6 @@ import {
   getEventPageHost,
   readBlockConfig,
   signIn,
-  getEventServiceEnv,
-  getLocalDevToken,
 } from '../../scripts/utils.js';
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
@@ -24,6 +22,7 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 export function cloneFilter(obj) {
   const wl = [
     'agenda',
+    'tags',
     'topics',
     'speakers',
     'sponsors',
@@ -46,6 +45,7 @@ export function cloneFilter(obj) {
     'attendeeLimit',
     'rsvpDescription',
     'allowWaitlisting',
+    'allowGuestRegistration',
     'hostEmail',
     'rsvpFormFields',
     'relatedProducts',
@@ -309,6 +309,7 @@ function initMoreOptions(props, config, eventObj, row) {
 
     const previewPre = buildTool(toolBox, 'Preview pre-event', 'preview-eye');
     const previewPost = buildTool(toolBox, 'Preview post-event', 'preview-eye');
+    const copyUrl = buildTool(toolBox, 'Copy URL', 'copy');
     const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
     const clone = buildTool(toolBox, 'Clone', 'clone');
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
@@ -351,9 +352,25 @@ function initMoreOptions(props, config, eventObj, row) {
         return '#';
       })();
       previewPost.target = '_blank';
+
+      copyUrl.addEventListener('click', (e) => {
+        let url;
+        try {
+          url = new URL(`${eventObj.detailPagePath}`);
+        } catch (err) {
+          url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+        }
+
+        if (url) {
+          e.preventDefault();
+          navigator.clipboard.writeText(url.href);
+          showToast(props, config['copy-url-toast-msg'] || 'The URL has been added to the clipboard', { variant: 'positive', timeout: 6000 });
+        }
+      });
     } else {
       previewPre.classList.add('disabled');
       previewPost.classList.add('disabled');
+      copyUrl.classList.add('disabled');
     }
 
     // edit
@@ -785,12 +802,6 @@ export default async function init(el) {
   const config = readBlockConfig(el);
   el.innerHTML = '';
   buildLoadingScreen(el);
-
-  const devToken = getLocalDevToken();
-  if (devToken && getEventServiceEnv() === 'dev') {
-    buildDashboard(el, config);
-    return;
-  }
 
   await initProfileLogicTree('ecc-dashboard', {
     noProfile: () => {
