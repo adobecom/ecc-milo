@@ -78,31 +78,7 @@ function updateAllFields(venueData, component) {
   changeInputValue(formattedAddressInput, 'value', venueData.formattedAddress);
   changeInputValue(additionalInformationInput, 'value', venueData.additionalInformation);
   if (venueRTE) {
-    venueRTE.content = `heading 1
-=========
-
-heading 2
----------
-
-  *   bullet 1
-      
-      *   nested bullet 1.1
-          
-  *   bullet 2
-      
-      *   nested bullet 2.1
-          
-      *   some [link.com](http://link.com)
-          
-
-  1.  order 1
-      
-  2.  order 2
-      
-      1.  nested order 2.1
-          
-      2.  **_<u>nested order 2.2 bold underline italic</u>_**`;
-    venueRTE.content = venueData.additionalInformation; // commment out for above sample data
+    venueRTE.content = venueData.additionalInformation;
   }
 }
 
