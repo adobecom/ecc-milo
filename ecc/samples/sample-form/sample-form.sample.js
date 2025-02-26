@@ -5,8 +5,6 @@ import {
   generateToolTip,
   camelToSentenceCase,
   signIn,
-  getEventServiceEnv,
-  getLocalDevToken,
 } from '../../scripts/utils.js';
 import {
   createSeries,
@@ -801,14 +799,6 @@ export default async function init(el) {
     import(`${miloLibs}/deps/lit-all.min.js`),
     ...promises,
   ]);
-
-  const devToken = getLocalDevToken();
-  if (devToken && getEventServiceEnv() === 'dev') {
-    buildForm(el).then(() => {
-      el.classList.remove('loading');
-    });
-    return;
-  }
 
   initProfileLogicTree('sample-form', {
     noProfile: () => {
