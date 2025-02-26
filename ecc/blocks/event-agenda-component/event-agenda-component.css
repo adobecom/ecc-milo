@@ -1,14 +1,18 @@
-.event-agenda-component .field-container {
+.event-agenda-component {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 35px;
+  flex-direction: column;
+  gap: 27px;
+}
+
+.event-agenda-component .agenda-group-container {
+  display: flex;
+  flex-direction: column;
+  gap: 42px;
 }
 
 .event-agenda-component .checkbox-wrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 12px;
 }
  
 .event-agenda-component .checkbox-input {
