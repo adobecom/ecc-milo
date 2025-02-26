@@ -3,8 +3,6 @@ import { getCaasTags, getClouds } from '../../scripts/esp-controller.js';
 import {
   buildNoAccessScreen,
   generateToolTip,
-  getLocalDevToken,
-  getEventServiceEnv,
   readBlockConfig,
   signIn,
 } from '../../scripts/utils.js';
@@ -97,13 +95,6 @@ export default async function init(el) {
   ]);
 
   const loadingScreen = buildLoadingScreen(el);
-
-  const devToken = getLocalDevToken();
-  if (devToken && getEventServiceEnv() === 'dev') {
-    buildCMC(el, blockConfig);
-    loadingScreen.remove();
-    return;
-  }
 
   await initProfileLogicTree('cmc', {
     noProfile: () => {

@@ -4,14 +4,6 @@ const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 let secretCache = [];
 
-export function getLocalDevToken() {
-  const sp = new URLSearchParams(window.location.search);
-  const sessionDevToken = sessionStorage.getItem('devToken');
-  const devToken = sessionDevToken || sp.get('devToken');
-
-  return devToken;
-}
-
 export function getEventServiceEnv() {
   const validEnvs = ['dev', 'stage', 'prod'];
   const { host, search } = window.location;
