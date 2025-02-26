@@ -27,7 +27,7 @@ export const style = css`
 .tiptap ul,
 .tiptap ol {
     padding: 0 1rem;
-    margin: 1rem 1rem 1rem .4rem
+    margin: 1rem 1rem 1rem .6rem
 }
 
 .tiptap ul ul,
@@ -39,10 +39,8 @@ export const style = css`
     margin-bottom: 0;
 }
 
-.tiptap ul li p,
-.tiptap ol li p {
-    margin-top: 0;
-    margin-bottom: 0;
+.tiptap li p {
+    margin: 0.5em 0;
 }
 
 .tiptap h1,
@@ -51,24 +49,46 @@ export const style = css`
 .tiptap h4,
 .tiptap h5,
 .tiptap h6 {
-    line-height: 1.1;
-    text-wrap: pretty
+    text-wrap: pretty;
 }
 
 .tiptap h1 {
-    font-size: 1.4rem
+  font-size: var(--type-heading-xl-size);
+  line-height: var(--type-heading-xl-lh);
 }
 
 .tiptap h2 {
-    font-size: 1.2rem
+  font-size: var(--type-heading-l-size);
+  line-height: var(--type-heading-l-lh);
 }
 
 .tiptap h3 {
-    font-size: 1.1rem
+  font-size: var(--type-heading-m-size);
+  line-height: var(--type-heading-m-lh);
 }
 
-.tiptap h4, .tiptap h5, .tiptap h6 {
-    font-size: 1rem
+.tiptap h4 {
+  font-size: var(--type-heading-s-size);
+  line-height: var(--type-heading-s-lh);
+}
+
+.tiptap h5 {
+  font-size: var(--type-heading-xs-size);
+  line-height: var(--type-heading-xs-lh);
+}
+
+.tiptap h6 {
+  font-size: var(--type-heading-xs-size);
+  line-height: var(--type-heading-xs-lh);
+}
+
+.tiptap a {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+.tiptap a:hover {
+  color: var(--link-hover-color);
 }
 
 .tiptap code {
@@ -97,7 +117,7 @@ export const style = css`
 
 .tiptap blockquote {
     border-left: 3px solid var(--spectrum-color-gray-300);
-    margin: 1.5rem 0;
+    margin: 0 0 var(--spacing-s) 0;
     padding-left: 1rem
 }
 `;
