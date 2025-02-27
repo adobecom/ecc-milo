@@ -1,5 +1,5 @@
 import { LIBS } from './scripts.js';
-import { getEventServiceEnv, getSecret } from './utils.js';
+import { getEventServiceEnv, getSecret, signIn } from './utils.js';
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
 import { API_CONFIG, ALLOWED_HOSTS } from './constants.js';
 
@@ -104,7 +104,8 @@ export async function constructRequestOptions(method, body = null) {
   const authToken = window.adobeIMS?.getAccessToken()?.token;
 
   if (!authToken) {
-    throw new Error('Missing authentication token');
+    signIn();
+    return null;
   }
 
   const sanitizedHeaders = {

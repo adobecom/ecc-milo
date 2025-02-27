@@ -63,15 +63,15 @@ export default class ProductSelectorGroup extends LitElement {
 
   getUniqueProducts() {
     const uniqueItems = {};
-    const uniqueProduts = [];
+    const uniqueProducts = [];
     this.products.forEach((item) => {
       if (!uniqueItems[item.name]) {
         uniqueItems[item.name] = true;
-        uniqueProduts.push(item);
+        uniqueProducts.push(item);
       }
     });
 
-    return uniqueProduts;
+    return uniqueProducts;
   }
 
   hasOnlyEmptyProductLeft() {
