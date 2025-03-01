@@ -169,6 +169,7 @@
   font-weight: 400;
   cursor: pointer;
   user-select: none;
+  text-decoration: none;
 }
 
 .event-info-component .calendar-header a.next-button:hover,
