@@ -13,8 +13,6 @@ import {
   getEventPageHost,
   readBlockConfig,
   signIn,
-  getEventServiceEnv,
-  getLocalDevToken,
 } from '../../scripts/utils.js';
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
@@ -806,12 +804,6 @@ export default async function init(el) {
   const config = readBlockConfig(el);
   el.innerHTML = '';
   buildLoadingScreen(el);
-
-  const devToken = getLocalDevToken();
-  if (devToken && getEventServiceEnv() === 'dev') {
-    buildDashboard(el, config);
-    return;
-  }
 
   await initProfileLogicTree('ecc-dashboard', {
     noProfile: () => {

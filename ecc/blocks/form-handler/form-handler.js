@@ -10,7 +10,6 @@ import {
   getEventPageHost,
   signIn,
   getEventServiceEnv,
-  getLocalDevToken,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -1116,14 +1115,6 @@ export default async function init(el) {
     import(`${miloLibs}/deps/lit-all.min.js`),
     ...promises,
   ]);
-
-  const devToken = getLocalDevToken();
-  if (devToken && getEventServiceEnv() === 'dev') {
-    buildECCForm(el).then(() => {
-      el.classList.remove('loading');
-    });
-    return;
-  }
 
   await initProfileLogicTree('event-creation-form', {
     noProfile: () => {
