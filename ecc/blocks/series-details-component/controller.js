@@ -1,4 +1,4 @@
-import { SUPPORTED_CLOUDS } from '../../constants/constants.js';
+import { getClouds } from '../../scripts/esp-controller.js';
 import { getUser, userHasAccessToBU } from '../../scripts/profile.js';
 import { LIBS } from '../../scripts/scripts.js';
 
@@ -35,10 +35,11 @@ export default async function init(component, props) {
   const seriesDescriptionEl = component.querySelector('#info-field-series-description');
 
   const user = await getUser();
-  const filteredClouds = Object.entries(SUPPORTED_CLOUDS)
-    .filter(([, val]) => userHasAccessToBU(user, val.id));
-  filteredClouds.forEach(([, val]) => {
-    const opt = createTag('sp-menu-item', { value: val.id }, val.name);
+  const clouds = await getClouds(user);
+
+  const filteredClouds = clouds.filter(({ cloudType }) => userHasAccessToBU(user, cloudType));
+  filteredClouds.forEach(({ cloudType, cloudName }) => {
+    const opt = createTag('sp-menu-item', { value: cloudType }, cloudName);
     cloudTypeEl.append(opt);
   });
 
