@@ -1002,6 +1002,7 @@ async function buildECCForm(el) {
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
     eventDataResp: {},
+    language: 'en',
   };
 
   const dataHandler = {

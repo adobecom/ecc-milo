@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 // FIXME: this whole data handler thing can be done better
-let responseCache = {};
-let payloadCache = {};
+const responseCache = { localization: {} };
+const payloadCache = { localization: {} };
 
 const submissionFilter = [
   'agenda',
@@ -51,16 +51,16 @@ export function quickFilter(obj) {
   return output;
 }
 
-export function setPayloadCache(payload, loc) {
+export function setPayloadCache(payload, lang = 'en') {
   if (!payload) return;
 
-  const localeData = payload.localization[loc] || payload;
-  payloadCache.localization[loc] = quickFilter(localeData);
+  const localeData = payload.localization?.[lang] || payload;
+  payloadCache.localization[lang] = quickFilter(localeData);
 
   const { pendingTopics } = localeData;
   if (pendingTopics) {
     const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
-    if (jointTopics.length) payloadCache.localization[loc].topics = jointTopics;
+    if (jointTopics.length) payloadCache.localization[lang].topics = jointTopics;
   }
 }
 
@@ -68,11 +68,11 @@ export function getFilteredCachedPayload() {
   return payloadCache;
 }
 
-export function setResponseCache(response, loc) {
+export function setResponseCache(response, lang = 'en') {
   if (!response) return;
 
-  const localeData = response.localization[loc] || response;
-  responseCache.localization[loc] = quickFilter(localeData);
+  const localeData = response.localization?.[lang] || response;
+  responseCache.localization[lang] = quickFilter(localeData);
 }
 
 export function getFilteredCachedResponse() {

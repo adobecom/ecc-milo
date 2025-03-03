@@ -313,8 +313,9 @@ function dateTimeStringToTimestamp(dateString, timeString) {
 
 async function updateLanguagePicker(component, props) {
   const languagePicker = component.querySelector('#language-picker');
+  const eventUrlInput = component.querySelector('#event-info-url-input');
 
-  if (!languagePicker) return;
+  if (!languagePicker || !eventUrlInput) return;
 
   const { cloudType } = component.dataset;
 
@@ -448,6 +449,7 @@ export default async function init(component, props) {
 
   const eventTitleInput = component.querySelector('#info-field-event-title');
   const eventDescriptionInput = component.querySelector('#info-field-event-description');
+  const languagePicker = component.querySelector('#language-picker');
   const eventUrlInput = component.querySelector('#event-info-url-input');
   const startTimeInput = component.querySelector('#time-picker-start-time');
   const allStartTimeOptions = startTimeInput.querySelectorAll('sp-menu-item');
@@ -668,6 +670,9 @@ export default async function init(component, props) {
     component.classList.add('prefilled');
 
     initTitleWatcher(component, props);
+    languagePicker.addEventListener('change', () => {
+      props.locale = languagePicker.value;
+    });
   }
 }
 

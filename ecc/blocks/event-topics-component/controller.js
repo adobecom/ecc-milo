@@ -22,6 +22,12 @@ async function buildTopicsCheckboxes(el, cloudType) {
 
   const { cloudTags } = currentCloudData;
 
+  if (!cloudTags) {
+    loadingCircle.remove();
+    cw.innerHTML = '<p class="error-message">No topics found</p>';
+    return;
+  }
+
   cloudTags.forEach((tag) => {
     const { name, caasId } = tag;
 
