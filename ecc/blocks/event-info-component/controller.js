@@ -327,26 +327,26 @@ async function updateLanguagePicker(component, props) {
   // const { cloudLangs } = cloud;
   // TODO: remove mock
   const cloudLangs = [
-    { ietf: 'en', language: 'English' },
-    { ietf: 'es', language: 'Spanish' },
-    { ietf: 'fr', language: 'French' },
-    { ietf: 'de', language: 'German' },
-    { ietf: 'it', language: 'Italian' },
-    { ietf: 'ja', language: 'Japanese' },
-    { ietf: 'ko', language: 'Korean' },
-    { ietf: 'pt', language: 'Portuguese' },
-    { ietf: 'ru', language: 'Russian' },
-    { ietf: 'zh', language: 'Chinese' },
+    { languageCode: 'en', language: 'English' },
+    { languageCode: 'es', language: 'Spanish' },
+    { languageCode: 'fr', language: 'French' },
+    { languageCode: 'de', language: 'German' },
+    { languageCode: 'it', language: 'Italian' },
+    { languageCode: 'ja', language: 'Japanese' },
+    { languageCode: 'ko', language: 'Korean' },
+    { languageCode: 'pt', language: 'Portuguese' },
+    { languageCode: 'ru', language: 'Russian' },
+    { languageCode: 'zh', language: 'Chinese' },
   ];
 
   cloudLangs.forEach((l, i) => {
-    const opt = createTag('sp-menu-item', { value: l.ietf }, l.language);
+    const opt = createTag('sp-menu-item', { value: l.languageCode }, l.language);
     languagePicker.append(opt);
 
-    if (props.eventDataResp?.defaultLang === l.ietf) {
-      languagePicker.value = l.ietf;
+    if (props.language === l.languageCode) {
+      languagePicker.value = l.languageCode;
     } else if (i === 0) {
-      languagePicker.value = l.ietf;
+      languagePicker.value = l.languageCode;
     }
   });
 
@@ -369,10 +369,8 @@ function initTitleWatcher(component, props) {
   BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: engTitle.value });
 
   titleInput.addEventListener('input', () => {
-    if (engTitle) {
-      if (engTitle.value === '' || engTitle.value === existingTitle) {
-        engTitle.value = titleInput.value;
-      }
+    if (engTitle.value === '' || engTitle.value === existingTitle) {
+      engTitle.value = titleInput.value;
     }
 
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: engTitle.value });
@@ -450,7 +448,6 @@ export default async function init(component, props) {
   const eventTitleInput = component.querySelector('#info-field-event-title');
   const eventDescriptionInput = component.querySelector('#info-field-event-description');
   const languagePicker = component.querySelector('#language-picker');
-  const eventUrlInput = component.querySelector('#event-info-url-input');
   const startTimeInput = component.querySelector('#time-picker-start-time');
   const allStartTimeOptions = startTimeInput.querySelectorAll('sp-menu-item');
   const startAmpmInput = component.querySelector('#ampm-picker-start-time');
@@ -668,12 +665,12 @@ export default async function init(component, props) {
     });
 
     component.classList.add('prefilled');
-
-    initTitleWatcher(component, props);
-    languagePicker.addEventListener('change', () => {
-      props.locale = languagePicker.value;
-    });
   }
+
+  initTitleWatcher(component, props);
+  languagePicker.addEventListener('change', () => {
+    props.locale = languagePicker.value;
+  });
 }
 
 export function onTargetUpdate(component, props) {
