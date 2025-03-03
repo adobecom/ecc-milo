@@ -13,8 +13,6 @@ import {
   buildNoAccessScreen,
   readBlockConfig,
   signIn,
-  getEventServiceEnv,
-  getDevToken,
 } from '../../scripts/utils.js';
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { quickFilter } from '../series-creation-form/data-handler.js';
@@ -628,12 +626,6 @@ export default async function init(el) {
   const config = readBlockConfig(el);
   el.innerHTML = '';
   buildLoadingScreen(el);
-
-  const devToken = getDevToken();
-  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
-    buildDashboard(el, config);
-    return;
-  }
 
   initProfileLogicTree('series-dashboard', {
     noProfile: () => {

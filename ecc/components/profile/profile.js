@@ -4,7 +4,7 @@ import { style } from './profile.css.js';
 import { createSpeaker, deleteSpeakerImage, updateSpeaker, uploadImage } from '../../scripts/esp-controller.js';
 import { getServiceName } from '../../scripts/utils.js';
 import { icons } from '../../icons/icons.svg.js';
-import { LINK_REGEX } from '../../constants/constants.js';
+import { LINK_REGEX } from '../../scripts/constants.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
