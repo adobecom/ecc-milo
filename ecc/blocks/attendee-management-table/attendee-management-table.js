@@ -12,7 +12,7 @@ import SearchablePicker from '../../components/searchable-picker/searchable-pick
 import FilterMenu from '../../components/filter-menu/filter-menu.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 const ATTENDEE_ATTR_MAP = [
   {
@@ -419,15 +419,29 @@ function calculatePercentage(part, total) {
   return `${percentage.toFixed(2)}%`;
 }
 
+const getLanguage = (ietfLocale) => {
+  if (!ietfLocale.length) return 'en';
+
+  const nonStandardLocaleMap = { 'no-NO': 'nb' };
+
+  if (nonStandardLocaleMap[ietfLocale]) {
+    return nonStandardLocaleMap[ietfLocale];
+  }
+
+  return ietfLocale.split('-')[0];
+};
+
 async function buildEventInfo(props) {
   const eventInfoContainer = props.el.querySelector('.dashboard-header-event-info');
   if (!eventInfoContainer) return;
 
   eventInfoContainer.innerHTML = '';
-  const eventInfo = props.events.find((e) => e.eventId === props.currentEventId);
+  const eventObj = props.events.find((e) => e.eventId === props.currentEventId);
 
-  if (!eventInfo) return;
+  if (!eventObj) return;
 
+  const currentLang = getConfig().locale?.ietf ? getLanguage(getConfig().locale?.ietf) : 'en';
+  const eventInfo = eventObj.localization?.[currentLang] || eventObj;
   const { photos } = eventInfo;
 
   if (!photos) {
