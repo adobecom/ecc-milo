@@ -440,7 +440,7 @@ async function buildEventInfo(props) {
 
   if (!eventObj) return;
 
-  const currentLang = getConfig().locale?.ietf ? getLanguage(getConfig().locale?.ietf) : 'en';
+  const currentLang = getConfig().locale?.ietf ? getLanguage(getConfig().locale.ietf) : 'en';
   const eventInfo = eventObj.localization?.[currentLang] || eventObj;
   const { photos } = eventInfo;
 
