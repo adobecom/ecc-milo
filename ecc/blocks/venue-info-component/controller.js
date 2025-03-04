@@ -4,6 +4,7 @@ import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler/form-handler.js';
+import { setResponseCache } from '../form-handler/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -401,7 +402,7 @@ export async function onTargetUpdate(component, props) {
         modificationTime,
       },
     );
-
+    setResponseCache(resp);
     if (resp.error) {
       buildErrorMessage(props, resp);
     }
