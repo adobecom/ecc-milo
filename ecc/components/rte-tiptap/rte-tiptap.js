@@ -10,10 +10,11 @@ import Link from 'https://esm.sh/@tiptap/extension-link';
 
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './rte-tiptap.css.js';
+import { LINK_REGEX } from '../../scripts/constants.js';
 
 const { loadScript } = await import(`${LIBS}/utils/utils.js`);
 
-const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 export default class RteTiptap extends LitElement {
   static properties = {
@@ -30,6 +31,13 @@ export default class RteTiptap extends LitElement {
     this.handleInput = this.handleInput || null;
     this.editorInitialized = false;
     this.markdownInitialized = false;
+    this.rteFormat = 'Format';
+    this.isBold = false;
+    this.isItalic = false;
+    this.isUnderline = false;
+    this.isBulletList = false;
+    this.isOrderedList = false;
+    this.isLink = false;
   }
 
   async firstUpdated() {
@@ -70,17 +78,52 @@ export default class RteTiptap extends LitElement {
 
         tiptap.handleInput(markdown);
       },
+      onSelectionUpdate: ({ editor }) => {
+        const currentNode = editor.state.selection.$anchor.parent;
+        let formatValue = 'Format';
+        if (currentNode.type.name === 'heading') {
+          formatValue = `H${currentNode.attrs.level}`;
+        } else if (currentNode.type.name === 'paragraph') {
+          formatValue = 'Paragraph';
+        }
+        this.rteFormat = formatValue;
+        // Update button states
+        this.isBold = editor.isActive('bold');
+        this.isItalic = editor.isActive('italic');
+        this.isUnderline = editor.isActive('underline');
+        this.isBulletList = editor.isActive('bulletList');
+        this.isOrderedList = editor.isActive('orderedList');
+        this.isLink = editor.isActive('link');
+        this.requestUpdate();
+      },
     });
     this.editorInitialized = true;
   }
 
   rteAddLink() {
     /* eslint-disable no-alert */
-    const url = prompt('Enter the URL:');
-    if (url) {
-      this.editor.chain().focus().setLink({ href: url }).run();
-    } else {
+    const attrs = this.editor.getAttributes('link');
+    const existingUrl = attrs.href || '';
+    let url = prompt('Enter the URL:', existingUrl || 'https://');
+    while (url !== null) {
+      if (url.match(LINK_REGEX)) {
+        this.editor.chain().focus().setLink({ href: url }).run();
+        break;
+      }
+      alert('Please enter a valid URL starting with https://');
+      url = prompt('Enter the URL:', url || 'https://');
+    }
+    if (url === null) {
       this.editor.chain().focus().unsetLink().run();
+    }
+  }
+
+  toggleFormat(format) {
+    if (format === 'Paragraph') {
+      this.editor.chain().focus().setParagraph().run();
+    } else {
+      const level = parseInt(format.replace('H', ''), 10);
+      this.editor.chain().focus().toggleHeading({ level }).run();
     }
   }
 
@@ -90,19 +133,27 @@ export default class RteTiptap extends LitElement {
     }
     return html`
             <div class="rte-tiptap-toolbar">
-              <button @click=${() => this.editor.chain().focus().setParagraph().run()}>Paragraph</button>
-              <button @click=${() => this.editor.chain().focus().toggleHeading({ level: 1 }).run()}>H1</button>
-              <button @click=${() => this.editor.chain().focus().toggleHeading({ level: 2 }).run()}>H2</button>
-              <button @click=${() => this.editor.chain().focus().toggleHeading({ level: 3 }).run()}>H3</button>
-              <button @click=${() => this.editor.chain().focus().toggleHeading({ level: 4 }).run()}>H4</button>
-              <button @click=${() => this.editor.chain().focus().toggleHeading({ level: 5 }).run()}>H5</button>
-              <button @click=${() => this.editor.chain().focus().toggleHeading({ level: 6 }).run()}>H6</button>
-              <button @click=${() => this.editor.chain().focus().toggleBold().run()}>Bold</button>
-              <button @click=${() => this.editor.chain().focus().toggleItalic().run()}>Italic</button>
-              <button @click=${() => this.editor.chain().focus().toggleUnderline().run()}>Underline</button>
-              <button @click=${() => this.editor.chain().focus().toggleBulletList().run()}>Bullet List</button>
-              <button @click=${() => this.editor.chain().focus().toggleOrderedList().run()}>Ordered List</button>
-              <button @click=${this.rteAddLink}>Link</button>
+              <sp-picker class="rte-format-input select-input" label="Format" value=${this.rteFormat} @change=${(event) => { this.toggleFormat(event.target.value); }}>
+                ${repeat(['Paragraph', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'], (p) => html`<sp-menu-item value=${p}>${p}</sp-menu-item>`)}
+              </sp-picker>
+              <button aria-label="Bold" class=${this.isBold ? 'active' : ''} @click=${() => this.editor.chain().focus().toggleBold().run()}>
+                <img class="icon icon-rte-bold" src="/ecc/icons/rte-bold.svg" alt="rte-bold" />
+              </button>
+              <button aria-label="Italic" class=${this.isItalic ? 'active' : ''} @click=${() => this.editor.chain().focus().toggleItalic().run()}>
+                <img class="icon icon-rte-italic" src="/ecc/icons/rte-italic.svg" alt="rte-italic" />
+              </button>
+              <button aria-label="Underline" class=${this.isUnderline ? 'active' : ''} @click=${() => this.editor.chain().focus().toggleUnderline().run()}>
+                <img class="icon icon-rte-underline" src="/ecc/icons/rte-underline.svg" alt="rte-underline" />
+              </button>
+              <button aria-label="Bullet List" class=${this.isBulletList ? 'active' : ''} @click=${() => this.editor.chain().focus().toggleBulletList().run()}>
+                <img class="icon icon-rte-bullet-list" src="/ecc/icons/rte-bullet-list.svg" alt="rte-bullet-list" />
+              </button>
+              <button aria-label="Ordered List" class=${this.isOrderedList ? 'active' : ''} @click=${() => this.editor.chain().focus().toggleOrderedList().run()}>
+                <img class="icon icon-rte-ordered-list" src="/ecc/icons/rte-ordered-list.svg" alt="rte-ordered-list" />
+              </button>
+              <button aria-label="Link" class=${this.isLink ? 'active' : ''} @click=${this.rteAddLink}>
+                <img class="icon icon-rte-link" src="/ecc/icons/rte-link.svg" alt="rte-link" />
+              </button>
             </div>
             <div class="rte-tiptap-editor"></div>
         `;

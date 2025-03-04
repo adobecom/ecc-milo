@@ -5,8 +5,25 @@ const { css } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
+.rte-tiptap-toolbar .rte-format-input {
+  margin-right: 2px;
+}
+
 .rte-tiptap-toolbar button {
-  margin: 2px;
+  margin: 0 2px;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 2px;
+  border-width: 1px;
+}
+
+.rte-tiptap-toolbar button.active {
+  background-color: var(--spectrum-color-gray-200);
+}
+
+.rte-tiptap-toolbar button img {
+  width: 100%;
 }
 
 .rte-tiptap-toolbar {
