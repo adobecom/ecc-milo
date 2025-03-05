@@ -58,10 +58,6 @@ export default class RteTiptap extends LitElement {
 
   initializeEditor() {
     const editorEl = this.shadowRoot.querySelector('.rte-tiptap-editor');
-    // const outputHtmlEl = this.shadowRoot.querySelector('.rte-tiptap-html');
-    // const outputHtmlToMarkdownEl = this.shadowRoot.querySelector('.rte-tiptap-html-to-markdown');
-    // const outputMarkdownToHtmlEl = this.shadowRoot.querySelector('.rte-tiptap-markdown-to-html');
-    // const turndownService = new TurndownService({ headingStyle: 'setText' });
     const turndownService = new TurndownService();
     turndownService.keep(['u']);
     const showdownService = new showdown.Converter();
