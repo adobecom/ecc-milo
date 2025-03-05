@@ -145,11 +145,14 @@ function buildThumbnail(data) {
     const heroImage = images.find((photo) => photo.imageKind === 'event-hero-image');
     const venueImage = images.find((photo) => photo.imageKind === 'venue-image');
 
-    const imgSrc = cardImage?.sharepointUrl
+    const imgSrc = (cardImage?.sharepointUrl
+      && `${getEventPageHost()}${cardImage?.sharepointUrl}`)
     || cardImage?.imageUrl
-    || heroImage?.sharepointUrl
+    || (heroImage?.sharepointUrl
+      && `${getEventPageHost()}${heroImage?.sharepointUrl}`)
     || heroImage?.imageUrl
-    || venueImage?.sharepointUrl
+    || (venueImage?.sharepointUrl
+      && `${getEventPageHost()}${venueImage?.sharepointUrl}`)
     || venueImage?.imageUrl
     || images[0]?.imageUrl;
 
