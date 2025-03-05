@@ -183,12 +183,10 @@ export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible')?.checked;
-  const showVenueAdditionalPostEvent = component.querySelector('#checkbox-venue-additional-info-visible')?.checked;
 
   props.payload = {
     ...props.payload,
     showVenuePostEvent,
-    showVenueAdditionalPostEvent,
   };
 }
 
