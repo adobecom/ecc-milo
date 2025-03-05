@@ -31,7 +31,7 @@ export default class RteTiptap extends LitElement {
     this.handleInput = this.handleInput || null;
     this.editorInitialized = false;
     this.markdownInitialized = false;
-    this.rteFormat = 'Format';
+    this.rteFormat = 'Paragraph';
     this.isBold = false;
     this.isItalic = false;
     this.isUnderline = false;
