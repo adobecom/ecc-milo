@@ -88,7 +88,7 @@ export default class RteTiptap extends LitElement {
         const currentNode = editor.state.selection.$anchor.parent;
         let formatValue = 'Paragraph';
         if (currentNode.type.name === 'heading') {
-          formatValue = `H${currentNode.attrs.level}`;
+          formatValue = `Heading ${currentNode.attrs.level}`;
         } else if (currentNode.type.name === 'paragraph') {
           formatValue = 'Paragraph';
         }
@@ -121,7 +121,7 @@ export default class RteTiptap extends LitElement {
     if (format === 'Paragraph') {
       this.editor.chain().focus().setParagraph().run();
     } else {
-      const level = parseInt(format.replace('H', ''), 10);
+      const level = parseInt(format.replace('Heading ', ''), 10);
       this.editor.chain().focus().toggleHeading({ level }).run();
     }
   }
@@ -133,7 +133,7 @@ export default class RteTiptap extends LitElement {
     return html`
             <div class="rte-tiptap-toolbar">
               <sp-picker class="rte-format-input select-input" label="Format" value=${this.rteFormat} @change=${(event) => { this.toggleFormat(event.target.value); }}>
-                ${repeat(['Paragraph', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'], (p) => html`<sp-menu-item value=${p}>${p}</sp-menu-item>`)}
+                ${repeat(['Paragraph', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6'], (p) => html`<sp-menu-item value=${p}>${p}</sp-menu-item>`)}
               </sp-picker>
               <button aria-label="Bold" class=${this.isBold ? 'active' : ''} @click=${() => { this.editor.chain().focus().toggleBold().run(); this.updateButtonStates(this.editor); }}>
                 <img class="icon icon-rte-bold" src="/ecc/icons/rte-bold.svg" alt="rte-bold" />
