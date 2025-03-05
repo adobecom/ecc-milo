@@ -469,16 +469,20 @@ function initMoreOptions(props, config, eventObj, row) {
   });
 }
 
-function getCountryName(eventObj) {
-  if (!eventObj.venue) return '';
+function getEventDefaultLanguage(eventObj) {
+  if (!eventObj.localization) return 'EN';
 
-  const { venue } = eventObj;
-  return venue.country || '';
+  const { localization } = eventObj;
+
+  return Object.keys(localization)[0] || 'EN';
 }
 
 function buildStatusTag(event) {
-  const dot = event.published ? getIcon('dot-purple') : getIcon('dot-green');
-  const text = event.published ? 'Published' : 'Draft';
+  const { localization } = event;
+
+  const eventPublished = localization?.published || event.published;
+  const dot = eventPublished ? getIcon('dot-purple') : getIcon('dot-green');
+  const text = eventPublished ? 'Published' : 'Draft';
 
   const statusTag = createTag('div', { class: 'event-status' });
   statusTag.append(dot, text);
@@ -524,7 +528,7 @@ async function populateRow(props, config, index) {
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
   const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(event)));
-  const geoCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getCountryName(event)));
+  const langCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getEventDefaultLanguage(event)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
@@ -535,7 +539,7 @@ async function populateRow(props, config, index) {
     startDateCell,
     modDateCell,
     venueCell,
-    geoCell,
+    langCell,
     externalEventId,
     moreOptionsCell,
   );
