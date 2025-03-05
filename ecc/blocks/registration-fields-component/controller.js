@@ -5,8 +5,8 @@ export function onSubmit(component, props) {
   const defaultFields = component.dataset.mandatedfields?.split(',');
 
   const rsvpFormFields = {
-    visible: [...defaultFields, ...Array.from(component.querySelectorAll('input[type="checkbox"].check-appear[checked]')).map((f) => f.name)],
-    required: [...defaultFields, ...Array.from(component.querySelectorAll('input[type="checkbox"].check-require[checked]')).map((f) => f.name)],
+    visible: [...defaultFields, ...Array.from(component.querySelectorAll('input[type="checkbox"].check-appear')).filter((f) => f.checked).map((f) => f.name)],
+    required: [...defaultFields, ...Array.from(component.querySelectorAll('input[type="checkbox"].check-require')).filter((f) => f.checked).map((f) => f.name)],
   };
 
   props.payload = { ...props.payload, rsvpFormFields };
