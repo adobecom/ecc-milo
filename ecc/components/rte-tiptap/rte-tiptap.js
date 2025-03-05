@@ -86,7 +86,7 @@ export default class RteTiptap extends LitElement {
       },
       onSelectionUpdate: ({ editor }) => {
         const currentNode = editor.state.selection.$anchor.parent;
-        let formatValue = 'Format';
+        let formatValue = 'Paragraph';
         if (currentNode.type.name === 'heading') {
           formatValue = `H${currentNode.attrs.level}`;
         } else if (currentNode.type.name === 'paragraph') {
