@@ -109,7 +109,7 @@ export default class RteTiptap extends LitElement {
         this.editor.chain().focus().setLink({ href: url }).run();
         break;
       }
-      alert('Please enter a valid URL starting with https://');
+      alert(`Link must match pattern "${LINK_REGEX}"`);
       url = prompt('Enter the URL:', url || 'https://');
     }
     if (url === null) {
