@@ -16,10 +16,14 @@ export const style = css`
   height: 32px;
   border-radius: 2px;
   border-width: 1px;
+  cursor: pointer;
+  background-color: var(--spectrum-color-gray-100);
 }
 
-.rte-tiptap-toolbar button.active {
-  background-color: var(--spectrum-color-gray-200);
+.rte-tiptap-toolbar button.active,
+.rte-tiptap-toolbar button:hover,
+.rte-tiptap-toolbar button:focus {
+  background-color: var(--spectrum-color-gray-300);
 }
 
 .rte-tiptap-toolbar button img {

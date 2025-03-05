@@ -202,12 +202,12 @@ export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible')?.checked;
-  const showVenueAdditionalPostEvent = component.querySelector('#checkbox-venue-additional-info-visible')?.checked;
+  const showVenueAdditionalInfoPostEvent = component.querySelector('#checkbox-venue-additional-info-visible')?.checked;
 
   props.payload = {
     ...props.payload,
     showVenuePostEvent,
-    showVenueAdditionalPostEvent,
+    showVenueAdditionalInfoPostEvent,
   };
 }
 
@@ -224,7 +224,7 @@ export default async function init(component, props) {
 
   await loadGoogleMapsAPI(() => initAutocomplete(component, props));
 
-  const { venue, showVenuePostEvent, showVenueAdditionalPostEvent } = eventData;
+  const { venue, showVenuePostEvent, showVenueAdditionalInfoPostEvent } = eventData;
 
   const venueNameInput = component.querySelector('#venue-info-venue-name');
   const venueRTE = component.querySelector('#venue-additional-info-rte');
@@ -371,8 +371,8 @@ export default async function init(component, props) {
     changeInputValue(component.querySelector('#checkbox-venue-info-visible'), 'checked', showVenuePostEvent);
   }
 
-  if (showVenueAdditionalPostEvent) {
-    changeInputValue(component.querySelector('#checkbox-venue-additional-info-visible'), 'checked', showVenueAdditionalPostEvent);
+  if (showVenueAdditionalInfoPostEvent) {
+    changeInputValue(component.querySelector('#checkbox-venue-additional-info-visible'), 'checked', showVenueAdditionalInfoPostEvent);
   }
 }
 
@@ -412,7 +412,7 @@ export async function onTargetUpdate(component, props) {
       props.payload = {
         ...props.payload,
         showVenuePostEvent: venueData.showVenuePostEvent,
-        showVenueAdditionalPostEvent: venueData.showVenueAdditionalPostEvent,
+        showVenueAdditionalInfoPostEvent: venueData.showVenueAdditionalInfoPostEvent,
       };
     }
   }

@@ -20,7 +20,7 @@ const submissionFilter = [
   'timezone',
   'showAgendaPostEvent',
   'showVenuePostEvent',
-  'showVenueAdditionalPostEvent',
+  'showVenueAdditionalInfoPostEvent',
   'showVenueImage',
   'showSponsors',
   'rsvpFormFields',
