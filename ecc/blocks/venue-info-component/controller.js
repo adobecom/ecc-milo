@@ -180,7 +180,16 @@ function initAutocomplete(el, props) {
 }
 
 export async function onSubmit(component, props) {
-  // do nothing. Depend on onTargetUpdate cb.
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+
+  const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible')?.checked;
+  const showVenueAdditionalPostEvent = component.querySelector('#checkbox-venue-additional-info-visible')?.checked;
+
+  props.payload = {
+    ...props.payload,
+    showVenuePostEvent,
+    showVenueAdditionalPostEvent,
+  };
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -253,13 +262,5 @@ export async function onTargetUpdate(component, props) {
     if (resp.error) {
       buildErrorMessage(props, resp);
     }
-  }
-
-  if (resp) {
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
-    props.payload = {
-      ...props.payload,
-      showVenuePostEvent: venueData.showVenuePostEvent,
-    };
   }
 }
