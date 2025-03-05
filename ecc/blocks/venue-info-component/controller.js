@@ -261,4 +261,12 @@ export async function onTargetUpdate(component, props) {
       buildErrorMessage(props, resp);
     }
   }
+
+  if (resp) {
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    props.payload = {
+      ...props.payload,
+      showVenuePostEvent: venueData.showVenuePostEvent,
+    };
+  }
 }
