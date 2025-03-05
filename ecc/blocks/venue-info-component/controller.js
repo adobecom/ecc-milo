@@ -180,7 +180,14 @@ function initAutocomplete(el, props) {
 }
 
 export async function onSubmit(component, props) {
-  // do nothing. Depend on onTargetUpdate cb.
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+
+  const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible')?.checked;
+
+  props.payload = {
+    ...props.payload,
+    showVenuePostEvent,
+  };
 }
 
 export async function onPayloadUpdate(component, props) {
