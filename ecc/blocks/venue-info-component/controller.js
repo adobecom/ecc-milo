@@ -402,9 +402,18 @@ export async function onTargetUpdate(component, props) {
         modificationTime,
       },
     );
-    setResponseCache(resp);
+
     if (resp.error) {
       buildErrorMessage(props, resp);
+    }
+
+    if (resp) {
+      props.eventDataResp = { ...props.eventDataResp, ...resp };
+      props.payload = {
+        ...props.payload,
+        showVenuePostEvent: venueData.showVenuePostEvent,
+        showVenueAdditionalPostEvent: venueData.showVenueAdditionalPostEvent,
+      };
     }
   }
 }
