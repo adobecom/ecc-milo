@@ -224,9 +224,13 @@ export default class CloudManagementConsole extends LitElement {
 
       <div class="tags-pool">
         <div class="tags">
-          ${repeat(this.selectedTags.values(), (tag) => html`
-            <a class="tag" >${tag.title}${this.buildDeleteBtn(tag)}</a>
-          `)}
+          ${repeat(this.selectedTags.values(), (tag) => {
+            const decodedTitle = new DOMParser().parseFromString(tag.title, 'text/html').body.textContent;
+
+            return html`
+              <a class="tag" >${decodedTitle}${this.buildDeleteBtn(tag)}</a>
+            `;
+          })}
         </div>
       </div>
       <h2>Manage tags</h2>
