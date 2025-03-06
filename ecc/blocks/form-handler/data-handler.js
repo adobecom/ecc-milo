@@ -14,8 +14,8 @@ export function quickFilter(obj) {
   const output = {};
 
   Object.keys(EVENT_DATA_FILTER).forEach((attr) => {
-    const { name } = EVENT_DATA_FILTER[attr];
-    if (isValidAttribute(obj[name])) {
+    const { name, submittable } = EVENT_DATA_FILTER[attr];
+    if (isValidAttribute(obj[name]) && submittable) {
       output[name] = obj[name];
     }
   });
@@ -147,6 +147,8 @@ export default function getJoinedData() {
   };
 
   Object.keys(filteredResponse).forEach((key) => {
+    if (!EVENT_DATA_FILTER[key]?.deletable) return;
+
     if (EVENT_DATA_FILTER[key].deletable && !filteredPayload[key]) {
       delete finalPayload[key];
     }
