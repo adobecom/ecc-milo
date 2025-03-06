@@ -1,4 +1,4 @@
-import { LINK_REGEX } from '../../constants/constants.js';
+import { LINK_REGEX } from '../../scripts/constants.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { generateToolTip } from '../../scripts/utils.js';
 

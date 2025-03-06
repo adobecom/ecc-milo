@@ -4,14 +4,6 @@ const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 let secretCache = [];
 
-export function getDevToken() {
-  const sp = new URLSearchParams(window.location.search);
-  const sessionDevToken = sessionStorage.getItem('devToken');
-  const devToken = sessionDevToken || sp.get('devToken');
-
-  return devToken;
-}
-
 export function getEventServiceEnv() {
   const validEnvs = ['dev', 'stage', 'prod'];
   const { host, search } = window.location;
@@ -28,8 +20,6 @@ export function getEventServiceEnv() {
     if (host.startsWith('main--')) return 'prod';
     return 'dev';
   }
-
-  if (host.includes('localhost')) return 'local';
 
   if (host.includes('stage.adobe')
     || host.includes('corp.adobe')
@@ -113,29 +103,46 @@ export function parse24HourFormat(timeStr) {
   };
 }
 
-export function getEventPageHost() {
+export function getEventPageHost(relativeDomain) {
   if (window.location.href.includes('.hlx.') || window.location.href.includes('.aem.')) {
     return window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.aem.page`);
   }
 
-  return window.location.origin;
+  if (relativeDomain) return relativeDomain;
+
+  if ([
+    'www.stage.adobe.com',
+    'www.adobe.com',
+  ].includes(window.location.hostname)) {
+    return window.location.origin;
+  }
+
+  if (window.location.hostname.includes('localhost')) {
+    return 'https://dev--events-milo--adobecom.hlx.page';
+  }
+
+  // fallback to a.com prod
+  return 'https://www.adobe.com';
 }
 
-export function addTooltipToHeading(em, heading) {
-  const tooltipText = em.textContent.trim();
+export function addTooltipToEl(tooltipText, appendee) {
+  if (!tooltipText || !appendee) return;
+
   const toolTipTrigger = createTag('sp-action-button', { size: 's' }, getIcon('info'));
   createTag('sp-tooltip', { 'self-managed': true, variant: 'info' }, tooltipText, { parent: toolTipTrigger });
 
-  heading.append(toolTipTrigger);
-  em.parentElement?.remove();
+  appendee.append(toolTipTrigger);
 }
 
 export function generateToolTip(el) {
   const heading = el.querySelector('h2, h3, h4');
   const em = el.querySelector('p > em');
 
-  if (heading && em) {
-    addTooltipToHeading(em, heading);
+  const tooltipText = em?.textContent.trim();
+
+  if (heading && tooltipText) {
+    addTooltipToEl(tooltipText, heading);
+    em.parentElement?.remove();
   }
 }
 
@@ -361,6 +368,19 @@ export function toClassName(name) {
   return name && typeof name === 'string'
     ? name.toLowerCase().replace(/[^0-9a-z]/gi, '-')
     : '';
+}
+
+export function decorateSwitchFieldset(attr, textContent) {
+  const fieldset = createTag('fieldset', { class: 'switch-wrapper' });
+  const checkbox = createTag('input', { ...attr, type: 'checkbox' });
+  const spLabel = createTag('sp-label', {}, textContent);
+  const switchLabel = createTag('label', { class: 'custom-switch' });
+
+  checkbox.classList.add('hidden');
+  switchLabel.append(checkbox);
+  fieldset.append(switchLabel, spLabel);
+
+  return fieldset;
 }
 
 export function readBlockConfig(block) {

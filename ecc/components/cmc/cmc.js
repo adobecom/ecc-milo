@@ -7,8 +7,8 @@ import { getCloud, updateCloud } from '../../scripts/esp-controller.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
-const traversalBase = '/content/cq:tags/caas/';
-const startingPath = 'events';
+const traversalBase = '/content/cq:tags/caas';
+const startingPath = '';
 
 export default class CloudManagementConsole extends LitElement {
   static styles = style;
@@ -127,7 +127,7 @@ export default class CloudManagementConsole extends LitElement {
     let currentTag = this.tags;
 
     pathArray.forEach((path, i) => {
-      if (i <= index) {
+      if (i <= index && path) {
         currentTag = currentTag.tags[path];
       }
     });
@@ -224,9 +224,13 @@ export default class CloudManagementConsole extends LitElement {
 
       <div class="tags-pool">
         <div class="tags">
-          ${repeat(this.selectedTags.values(), (tag) => html`
-            <a class="tag" >${tag.title}${this.buildDeleteBtn(tag)}</a>
-          `)}
+          ${repeat(this.selectedTags.values(), (tag) => {
+            const decodedTitle = new DOMParser().parseFromString(tag.title, 'text/html').body.textContent;
+
+            return html`
+              <a class="tag" >${decodedTitle}${this.buildDeleteBtn(tag)}</a>
+            `;
+          })}
         </div>
       </div>
       <h2>Manage tags</h2>
