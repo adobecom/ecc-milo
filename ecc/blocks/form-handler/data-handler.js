@@ -137,8 +137,6 @@ export function hasContentChanged(oldData, newData) {
 }
 
 export default function getJoinedData() {
-  const deletableKeys = ['hostEmail'];
-
   const filteredResponse = getFilteredCachedResponse();
   const filteredPayload = getFilteredCachedPayload();
 
@@ -148,9 +146,8 @@ export default function getJoinedData() {
     modificationTime: filteredResponse.modificationTime,
   };
 
-  deletableKeys.forEach((key) => {
-    // if key is present in filteredResponse but not in filteredPayload, delete it from finalPayload
-    if (filteredResponse[key] && !filteredPayload[key]) {
+  Object.keys(filteredResponse).forEach((key) => {
+    if (EVENT_DATA_FILTER[key].deletable && !filteredPayload[key]) {
       delete finalPayload[key];
     }
   });
