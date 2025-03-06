@@ -55,7 +55,7 @@ export const EVENT_DATA_FILTER = [
   { name: 'eventType', type: 'string', cloneable: true, submittable: true, deletable: false },
   { name: 'cloudType', type: 'string', cloneable: true, submittable: true, deletable: false },
   { name: 'seriesId', type: 'string', cloneable: true, submittable: true, deletable: false },
-  { name: 'communityTopicUrl', type: 'string', cloneable: true, submittable: true, deletable: false },
+  { name: 'communityTopicUrl', type: 'string', cloneable: true, submittable: true, deletable: true },
   { name: 'title', type: 'string', cloneable: true, submittable: true, deletable: false },
   { name: 'description', type: 'string', cloneable: true, submittable: true, deletable: false },
   { name: 'localStartDate', type: 'string', cloneable: true, submittable: true, deletable: false },

@@ -1,3 +1,5 @@
+import { setPropsPayload } from '../form-handler/data-handler.js';
+
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -14,7 +16,7 @@ export function onSubmit(component, props) {
     agenda,
   };
 
-  props.payload = { ...props.payload, ...agendaInfo };
+  setPropsPayload(props, agendaInfo);
 }
 
 export async function onPayloadUpdate(_component, _props) {
@@ -30,12 +32,13 @@ export default function init(component, props) {
   const agendaGroup = component.querySelector('agenda-fieldset-group');
   const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info');
 
-  if (eventData.agenda?.length) {
-    agendaGroup.agendaItems = eventData.agenda;
+  const localeEventData = eventData.localization?.[props.lang] || eventData;
+  if (localeEventData.agenda?.length) {
+    agendaGroup.agendaItems = localeEventData.agenda;
     component.classList.add('prefilled');
   }
 
-  showAgendaPostEvent.checked = eventData.showAgendaPostEvent;
+  showAgendaPostEvent.checked = localeEventData.showAgendaPostEvent;
 }
 
 export function onTargetUpdate(component, props) {

@@ -3,6 +3,8 @@ import { getEventServiceEnv, getSecret, signIn } from './utils.js';
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
 import { API_CONFIG, ALLOWED_HOSTS } from './constants.js';
 
+const nonInvasiveTest = true;
+
 export const getCaasTags = (() => {
   let cache;
   let promise;
@@ -72,6 +74,12 @@ function isValidUrl(urlString) {
 async function safeFetch(url, options) {
   if (!isValidUrl(url)) {
     throw new Error('Invalid or unauthorized URL');
+  }
+
+  if (nonInvasiveTest && ['PUT', 'POST', 'DELETE'].includes(options.method)) {
+    console.log('Non-invasive test mode. Skipping request:', url, options);
+    console.log('Payload:', JSON.parse(options.body));
+    return { ok: true, status: 200, json: () => Promise.resolve({}) };
   }
 
   try {

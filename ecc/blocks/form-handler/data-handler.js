@@ -23,6 +23,18 @@ export function quickFilter(obj) {
   return output;
 }
 
+export function setPropsPayload(props, newData, lang = 'en') {
+  const existingPayload = props.payload;
+  const localePayload = existingPayload.localization?.[lang] || existingPayload;
+
+  const updatedPayload = { ...localePayload, ...newData };
+
+  props.payload = {
+    ...props.payload,
+    ...{ localization: { [lang]: updatedPayload } },
+  };
+}
+
 export function setPayloadCache(payload, lang = 'en') {
   if (!payload) return;
 
