@@ -1,38 +1,10 @@
 /* eslint-disable no-use-before-define */
+
+import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
+
 // FIXME: this whole data handler thing can be done better
 let responseCache = {};
 let payloadCache = {};
-
-const submissionFilter = [
-  'agenda',
-  'topics',
-  'eventType',
-  'cloudType',
-  'seriesId',
-  'communityTopicUrl',
-  'title',
-  'tags',
-  'description',
-  'localStartDate',
-  'localEndDate',
-  'localStartTime',
-  'localEndTime',
-  'timezone',
-  'showAgendaPostEvent',
-  'showVenuePostEvent',
-  'showSponsors',
-  'rsvpFormFields',
-  'relatedProducts',
-  'rsvpDescription',
-  'attendeeLimit',
-  'allowWaitlisting',
-  'allowGuestRegistration',
-  'hostEmail',
-  'eventId',
-  'published',
-  'creationTime',
-  'modificationTime',
-];
 
 function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
@@ -41,9 +13,10 @@ function isValidAttribute(attr) {
 export function quickFilter(obj) {
   const output = {};
 
-  submissionFilter.forEach((attr) => {
-    if (isValidAttribute(obj[attr])) {
-      output[attr] = obj[attr];
+  Object.keys(EVENT_DATA_FILTER).forEach((attr) => {
+    const { name } = EVENT_DATA_FILTER[attr];
+    if (isValidAttribute(obj[name])) {
+      output[name] = obj[name];
     }
   });
 
