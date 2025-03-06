@@ -1,24 +1,6 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { handlize, generateToolTip } from '../../scripts/utils.js';
 
-function buildCheckbox(col, createTag) {
-  col.classList.add('venue-image-visible-toggle');
-  const fieldSet = createTag('fieldset', { class: 'checkboxes' });
-  const [inputLabel, comment] = [col.querySelector('li'), col.querySelector('p')];
-  const labelText = inputLabel.textContent.trim();
-  const checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-image-visible' }, labelText);
-  const wrapper = createTag('div', { class: 'checkbox-wrapper' });
-
-  wrapper.append(checkbox);
-  fieldSet.append(wrapper);
-
-  const additionalComment = createTag('div', { class: 'additional-comment' });
-  additionalComment.append(comment.textContent.trim());
-  col.innerHTML = '';
-  fieldSet.append(additionalComment);
-  return fieldSet;
-}
-
 function decorateImageDropzones(row, createTag) {
   row.classList.add('image-dropzones');
   const cols = row.querySelectorAll(':scope > div');
@@ -48,7 +30,8 @@ function decorateImageDropzones(row, createTag) {
     }
 
     if (i === 1) {
-      gridItems.push(buildCheckbox(c, createTag));
+      // TODO: Remove this once the authoring changes are published
+      c.remove();
     }
   });
 

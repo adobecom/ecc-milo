@@ -20,7 +20,6 @@ const submissionFilter = [
   'timezone',
   'showAgendaPostEvent',
   'showVenuePostEvent',
-  'showVenueImage',
   'showSponsors',
   'rsvpFormFields',
   'relatedProducts',
@@ -165,12 +164,23 @@ export function hasContentChanged(oldData, newData) {
 }
 
 export default function getJoinedData() {
+  const deletableKeys = ['hostEmail'];
+
   const filteredResponse = getFilteredCachedResponse();
   const filteredPayload = getFilteredCachedPayload();
 
-  return {
+  const finalPayload = {
     ...filteredResponse,
     ...filteredPayload,
     modificationTime: filteredResponse.modificationTime,
   };
+
+  deletableKeys.forEach((key) => {
+    // if key is present in filteredResponse but not in filteredPayload, delete it from finalPayload
+    if (filteredResponse[key] && !filteredPayload[key]) {
+      delete finalPayload[key];
+    }
+  });
+
+  return finalPayload;
 }
