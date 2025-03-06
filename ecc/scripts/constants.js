@@ -36,3 +36,46 @@ export const ALLOWED_HOSTS = {
     return acc;
   }, {}),
 };
+
+/**
+ * @typedef {Object} EventDataFilter
+ * @property {string} name - The name of the attribute.
+ * @property {string} type - The type of the attribute.
+ * @property {boolean} cloneable - Whether the attribute can be cloned.
+ * @property {boolean} submittable - Whether the attribute can be submitted.
+ * @property {boolean} deletable - Whether the attribute can be deleted.
+ */
+
+export const EVENT_DATA_FILTER = [
+  { name: 'agenda', type: 'string', cloneable: true, submittable: true, deletable: false },
+  { name: 'tags', type: 'array', cloneable: true, submittable: true, deletable: false },
+  { name: 'topics', type: 'array', cloneable: true, submittable: true, deletable: false },
+  { name: 'speakers', type: 'array', cloneable: true, submittable: false, deletable: false },
+  { name: 'sponsors', type: 'array', cloneable: true, submittable: false, deletable: false },
+  { name: 'eventType', type: 'string', cloneable: true, submittable: true, deletable: false },
+  { name: 'cloudType', type: 'string', cloneable: true, submittable: true, deletable: false },
+  { name: 'seriesId', type: 'string', cloneable: true, submittable: true, deletable: false },
+  { name: 'communityTopicUrl', type: 'string', cloneable: true, submittable: true, deletable: false },
+  { name: 'title', type: 'string', cloneable: true, submittable: true, deletable: false },
+  { name: 'description', type: 'string', cloneable: true, submittable: true, deletable: false },
+  { name: 'localStartDate', type: 'string', cloneable: true, submittable: true, deletable: false },
+  { name: 'localEndDate', type: 'string', cloneable: true, submittable: true, deletable: false },
+  { name: 'localStartTime', type: 'string', cloneable: true, submittable: true, deletable: false },
+  { name: 'localEndTime', type: 'string', cloneable: true, submittable: true, deletable: false },
+  { name: 'timezone', type: 'string', cloneable: true, submittable: true, deletable: false },
+  { name: 'showAgendaPostEvent', type: 'boolean', cloneable: true, submittable: true, deletable: false },
+  { name: 'showVenuePostEvent', type: 'boolean', cloneable: true, submittable: true, deletable: false },
+  { name: 'venue', type: 'string', cloneable: true, submittable: false, deletable: false },
+  { name: 'showSponsors', type: 'boolean', cloneable: false, submittable: true, deletable: false },
+  { name: 'rsvpFormFields', type: 'array', cloneable: true, submittable: true, deletable: false },
+  { name: 'relatedProducts', type: 'array', cloneable: true, submittable: true, deletable: false },
+  { name: 'rsvpDescription', type: 'string', cloneable: false, submittable: true, deletable: false },
+  { name: 'attendeeLimit', type: 'number', cloneable: false, submittable: true, deletable: false },
+  { name: 'allowWaitlisting', type: 'boolean', cloneable: false, submittable: true, deletable: false },
+  { name: 'allowGuestRegistration', type: 'boolean', cloneable: false, submittable: true, deletable: false },
+  { name: 'hostEmail', type: 'string', cloneable: false, submittable: true, deletable: true },
+  { name: 'eventId', type: 'string', cloneable: false, submittable: true, deletable: false },
+  { name: 'published', type: 'boolean', cloneable: false, submittable: true, deletable: false },
+  { name: 'creationTime', type: 'string', cloneable: false, submittable: true, deletable: false },
+  { name: 'modificationTime', type: 'string', cloneable: false, submittable: true, deletable: false },
+];
