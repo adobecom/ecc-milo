@@ -63,7 +63,7 @@ function prefillFields(component, props) {
       if (contactHostEl) contactHostEl.checked = true;
       if (hostEmailEl) hostEmailEl.value = hostEmail;
     }
-    if (allowGuestRegistrationEl) allowGuestRegistrationEl.checked = allowGuestRegistration;
+    if (allowGuestRegistrationEl) allowGuestRegistrationEl.checked = !!allowGuestRegistration;
 
     if (attendeeLimit
       || allowWaitlisting
@@ -197,19 +197,24 @@ export function onSubmit(component, props) {
   const contactHost = contactHostInput?.checked;
   const hostEmail = hostEmailInput?.value?.trim();
   const rsvpDescription = rsvpDescriptionInput?.value || '';
-  const allowGuestRegistration = guestRegistrationInput ? guestRegistrationInput.checked : true;
+  const allowGuestRegistration = guestRegistrationInput?.checked || false;
 
   const attendeeLimit = Number.isNaN(+attendeeLimitVal) ? null : +attendeeLimitVal;
-
-  const rsvpData = {};
+  const rsvpData = { ...props.payload };
 
   rsvpData.rsvpDescription = rsvpDescription;
   rsvpData.allowWaitlisting = !!allowWaitlisting;
   rsvpData.allowGuestRegistration = !!allowGuestRegistration;
-  if (contactHost && hostEmail) rsvpData.hostEmail = hostEmail;
+
+  if (contactHost && hostEmail) {
+    rsvpData.hostEmail = hostEmail;
+  } else {
+    delete rsvpData.hostEmail;
+  }
+
   if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
 
-  props.payload = { ...props.payload, ...rsvpData };
+  props.payload = rsvpData;
 }
 
 function updateHeadingTooltip(component) {
