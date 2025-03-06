@@ -22,25 +22,23 @@ async function buildTopicsCheckboxes(el, cloudType) {
 
   const { cloudTags } = currentCloudData;
 
-  if (!cloudTags) {
-    loadingCircle.remove();
-    cw.innerHTML = '<p class="error-message">No topics found</p>';
-    return;
-  }
+  if (cloudTags) {
+    cloudTags.forEach((tag) => {
+      const { name, caasId } = tag;
 
-  cloudTags.forEach((tag) => {
-    const { name, caasId } = tag;
+      if (!caasId || !name) return;
 
-    if (!caasId || !name) return;
+      const button = createTag('sp-action-button', { name, toggles: true, 'data-value': JSON.stringify(tag) }, name, { parent: cw });
+      const checkboxIcon = createTag('sp-icon', { size: 's', slot: 'icon' }, addSvg);
+      button.prepend(checkboxIcon);
 
-    const button = createTag('sp-action-button', { name, toggles: true, 'data-value': JSON.stringify(tag) }, name, { parent: cw });
-    const checkboxIcon = createTag('sp-icon', { size: 's', slot: 'icon' }, addSvg);
-    button.prepend(checkboxIcon);
-
-    button.addEventListener('change', () => {
-      checkboxIcon.innerHTML = button.selected ? checkSvg : addSvg;
+      button.addEventListener('change', () => {
+        checkboxIcon.innerHTML = button.selected ? checkSvg : addSvg;
+      });
     });
-  });
+  } else {
+    createTag('sp-label', { size: 'm' }, 'No tags found for this Cloud', { parent: cw });
+  }
 
   loadingCircle.remove();
 }
