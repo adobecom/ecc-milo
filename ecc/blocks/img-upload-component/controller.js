@@ -15,15 +15,7 @@ function getComponentImageType(component) {
 }
 
 export function onSubmit(component, props) {
-  if (component.closest('.fragment')?.classList.contains('hidden')) return;
-
-  if (component.classList.contains('venue')) {
-    const venueImgVisibleCheck = component.querySelector('#checkbox-venue-image-visible');
-
-    if (venueImgVisibleCheck) {
-      props.payload = { ...props.payload, ...{ showVenueImage: venueImgVisibleCheck.checked } };
-    }
-  }
+  // Do nothing
 }
 
 function updateImgUploadComponentConfigs(component, props) {
@@ -170,14 +162,6 @@ export default async function init(component, props) {
           dz.requestUpdate();
         });
       }
-    }
-  }
-
-  if (type === 'venue-image') {
-    const venueImgVisibleCheck = component.querySelector('#checkbox-venue-image-visible');
-
-    if (venueImgVisibleCheck) {
-      venueImgVisibleCheck.checked = eventData.showVenueImage;
     }
   }
 }

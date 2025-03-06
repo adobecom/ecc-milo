@@ -9,9 +9,9 @@ const submissionFilter = [
   'eventType',
   'cloudType',
   'seriesId',
-  'templateId',
   'communityTopicUrl',
   'title',
+  'tags',
   'description',
   'localStartDate',
   'localEndDate',
@@ -20,13 +20,13 @@ const submissionFilter = [
   'timezone',
   'showAgendaPostEvent',
   'showVenuePostEvent',
-  'showVenueImage',
   'showSponsors',
   'rsvpFormFields',
   'relatedProducts',
   'rsvpDescription',
   'attendeeLimit',
   'allowWaitlisting',
+  'allowGuestRegistration',
   'hostEmail',
   'eventId',
   'published',
@@ -52,16 +52,17 @@ export function quickFilter(obj) {
 
 export function setPayloadCache(payload) {
   if (!payload) return;
+
   payloadCache = quickFilter(payload);
+
+  const { pendingTopics } = payload;
+  if (pendingTopics) {
+    const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
+    if (jointTopics.length) payloadCache.topics = jointTopics;
+  }
 }
 
 export function getFilteredCachedPayload() {
-  const { topics } = payloadCache;
-
-  if (topics) {
-    payloadCache.topics = Object.values(topics).reduce((acc, val) => acc.concat(val), []);
-  }
-
   return payloadCache;
 }
 
@@ -163,12 +164,23 @@ export function hasContentChanged(oldData, newData) {
 }
 
 export default function getJoinedData() {
+  const deletableKeys = ['hostEmail'];
+
   const filteredResponse = getFilteredCachedResponse();
   const filteredPayload = getFilteredCachedPayload();
 
-  return {
+  const finalPayload = {
     ...filteredResponse,
     ...filteredPayload,
     modificationTime: filteredResponse.modificationTime,
   };
+
+  deletableKeys.forEach((key) => {
+    // if key is present in filteredResponse but not in filteredPayload, delete it from finalPayload
+    if (filteredResponse[key] && !filteredPayload[key]) {
+      delete finalPayload[key];
+    }
+  });
+
+  return finalPayload;
 }

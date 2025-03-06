@@ -5,8 +5,8 @@ export function onSubmit(component, props) {
   const defaultFields = component.dataset.mandatedfields?.split(',');
 
   const rsvpFormFields = {
-    visible: [...defaultFields, ...Array.from(component.querySelectorAll('sp-checkbox.check-appear[checked]')).map((f) => f.name)],
-    required: [...defaultFields, ...Array.from(component.querySelectorAll('sp-checkbox.check-require[checked]')).map((f) => f.name)],
+    visible: [...defaultFields, ...Array.from(component.querySelectorAll('input[type="checkbox"].check-appear')).filter((f) => f.checked).map((f) => f.name)],
+    required: [...defaultFields, ...Array.from(component.querySelectorAll('input[type="checkbox"].check-require')).filter((f) => f.checked).map((f) => f.name)],
   };
 
   props.payload = { ...props.payload, rsvpFormFields };
@@ -22,8 +22,8 @@ export async function onRespUpdate(_component, _props) {
 
 export default function init(component, props) {
   const eventData = props.eventDataResp;
-  const appearChecks = component.querySelectorAll('sp-checkbox.check-appear');
-  const requireChecks = component.querySelectorAll('sp-checkbox.check-require');
+  const appearChecks = component.querySelectorAll('input[type="checkbox"].check-appear');
+  const requireChecks = component.querySelectorAll('input[type="checkbox"].check-require');
 
   requireChecks.forEach((cb) => {
     cb.addEventListener('change', () => {

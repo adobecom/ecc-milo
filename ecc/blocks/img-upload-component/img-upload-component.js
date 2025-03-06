@@ -1,27 +1,7 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { handlize, generateToolTip } from '../../scripts/utils.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
-
-function buildCheckbox(col) {
-  col.classList.add('venue-image-visible-toggle');
-  const fieldSet = createTag('fieldset', { class: 'checkboxes' });
-  const [inputLabel, comment] = [col.querySelector('li'), col.querySelector('p')];
-  const labelText = inputLabel.textContent.trim();
-  const checkbox = createTag('sp-checkbox', { id: 'checkbox-venue-image-visible' }, labelText);
-  const wrapper = createTag('div', { class: 'checkbox-wrapper' });
-
-  wrapper.append(checkbox);
-  fieldSet.append(wrapper);
-
-  const additionalComment = createTag('div', { class: 'additional-comment' });
-  additionalComment.append(comment.textContent.trim());
-  col.innerHTML = '';
-  fieldSet.append(additionalComment);
-  return fieldSet;
-}
-
-function decorateImageDropzones(row) {
+function decorateImageDropzones(row, createTag) {
   row.classList.add('image-dropzones');
   const cols = row.querySelectorAll(':scope > div');
   const gridItems = [];
@@ -50,7 +30,8 @@ function decorateImageDropzones(row) {
     }
 
     if (i === 1) {
-      gridItems.push(buildCheckbox(c));
+      // TODO: Remove this once the authoring changes are published
+      c.remove();
     }
   });
 
@@ -60,12 +41,14 @@ function decorateImageDropzones(row) {
   });
 }
 
-export default function init(el) {
+export default async function init(el) {
+  // TODO: Import createTag at top level once Safari supports top-level await
+  const { createTag } = await import(`${LIBS}/utils/utils.js`);
   el.classList.add('form-component');
   generateToolTip(el);
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach((r, i) => {
-    if (i === 1) decorateImageDropzones(r);
+    if (i === 1) decorateImageDropzones(r, createTag);
   });
 }

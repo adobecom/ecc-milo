@@ -88,6 +88,7 @@
 
 .series-templates-component .picker-modal {
   position: relative;
+  width: 100%;
   max-width: 1000px;
   box-sizing: border-box;
   max-height: 72vh;

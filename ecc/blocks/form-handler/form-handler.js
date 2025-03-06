@@ -10,7 +10,6 @@ import {
   getEventPageHost,
   signIn,
   getEventServiceEnv,
-  getDevToken,
 } from '../../scripts/utils.js';
 import {
   createEvent,
@@ -30,7 +29,7 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, { getFilteredCachedResponse, setPayloadCache, setResponseCache } from './data-handler.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 import CustomSearch from '../../components/custom-search/custom-search.js';
 
@@ -461,7 +460,7 @@ async function saveEvent(props, toPublish = false) {
   };
 
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    resp = await createEvent(quickFilter(props.payload));
+    resp = await createEvent(getJoinedData());
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
     await onEventSave();
@@ -965,8 +964,8 @@ function updateStatusTag(props) {
 
   const headingSection = currentFragment.querySelector(':scope > .section:first-child');
 
-  const eixstingStatusTag = headingSection.querySelector('.event-status-tag');
-  if (eixstingStatusTag) eixstingStatusTag.remove();
+  const existingStatusTag = headingSection.querySelector('.event-status-tag');
+  if (existingStatusTag) existingStatusTag.remove();
 
   const heading = headingSection.querySelector('h2', 'h3', 'h3', 'h4');
   const headingWrapper = createTag('div', { class: 'step-heading-wrapper' });
@@ -977,6 +976,22 @@ function updateStatusTag(props) {
   statusTag.append(dot, text);
   heading.parentElement?.replaceChild(headingWrapper, heading);
   headingWrapper.append(heading, statusTag);
+}
+
+function toggleSections(props) {
+  const sections = props.el.querySelectorAll('.section:not(:first-child)');
+
+  sections.forEach((section) => {
+    const allComponentsHidden = Array.from(section.querySelectorAll('.form-component')).every((fc) => {
+      const hasHiddenClass = fc.classList.contains('hidden');
+      const isCloudMismatch = (fc.classList.contains('dx-only') && fc.dataset.cloudType === 'CreativeCloud')
+       || (fc.classList.contains('dme-only') && fc.dataset.cloudType === 'ExperienceCloud');
+
+      return hasHiddenClass || isCloudMismatch;
+    });
+
+    section.classList.toggle('hidden', allComponentsHidden);
+  });
 }
 
 async function buildECCForm(el) {
@@ -1017,6 +1032,7 @@ async function buildECCForm(el) {
           setPayloadCache(value);
           updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);
+          toggleSections(target);
           break;
         }
 
@@ -1024,6 +1040,7 @@ async function buildECCForm(el) {
           setResponseCache(value);
           updateComponentsOnRespChange(target);
           updateCtas(target);
+          toggleSections(target);
           if (value.error) {
             props.el.classList.add('show-error');
           } else {
@@ -1062,6 +1079,7 @@ async function buildECCForm(el) {
   enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
   updateStatusTag(proxyProps);
+  toggleSections(proxyProps);
 
   el.addEventListener('show-error-toast', (e) => {
     e.stopPropagation();
@@ -1095,14 +1113,6 @@ export default async function init(el) {
     import(`${miloLibs}/deps/lit-all.min.js`),
     ...promises,
   ]);
-
-  const devToken = getDevToken();
-  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
-    buildECCForm(el).then(() => {
-      el.classList.remove('loading');
-    });
-    return;
-  }
 
   await initProfileLogicTree('event-creation-form', {
     noProfile: () => {

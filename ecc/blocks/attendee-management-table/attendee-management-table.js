@@ -7,8 +7,6 @@ import {
   camelToSentenceCase,
   readBlockConfig,
   signIn,
-  getEventServiceEnv,
-  getDevToken,
 } from '../../scripts/utils.js';
 import SearchablePicker from '../../components/searchable-picker/searchable-picker.js';
 import FilterMenu from '../../components/filter-menu/filter-menu.js';
@@ -736,12 +734,6 @@ export default async function init(el) {
   const config = readBlockConfig(el);
   el.innerHTML = '';
   buildLoadingScreen(el);
-
-  const devToken = getDevToken();
-  if (devToken && ['local', 'dev'].includes(getEventServiceEnv())) {
-    buildDashboard(el, config);
-    return;
-  }
 
   await initProfileLogicTree('attendee-management-table', {
     noProfile: () => {
