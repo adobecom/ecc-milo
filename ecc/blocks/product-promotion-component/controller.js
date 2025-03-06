@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { getCaasTags } from '../../scripts/esp-controller.js';
 import { handlize } from '../../scripts/utils.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -16,9 +17,9 @@ export function onSubmit(component, props) {
         showProductBlade: !!p.showProductBlade,
       }));
 
-    props.payload = { ...props.payload, relatedProducts };
+    setPropsPayload(props, { relatedProducts });
   } else {
-    delete props.payload.relatedProducts;
+    setPropsPayload(props, { relatedProducts: null });
   }
 }
 
@@ -113,13 +114,14 @@ export async function onRespUpdate(_component, _props) {
 }
 
 export default async function init(component, props) {
-  const { cloudType } = props.payload || props.eventDataResp;
-  if (cloudType) component.dataset.cloudType = cloudType;
   const eventData = props.eventDataResp;
+  const localeEventData = eventData.localization?.[props.lang] || eventData;
+  const { cloudType } = props.payload || localeEventData;
+  if (cloudType) component.dataset.cloudType = cloudType;
   const productGroup = component.querySelector('product-selector-group');
 
-  if (eventData.relatedProducts?.length) {
-    const selectedProducts = eventData.relatedProducts.map((p) => ({
+  if (localeEventData.relatedProducts?.length) {
+    const selectedProducts = localeEventData.relatedProducts.map((p) => ({
       name: handlize(p.name),
       title: p.name,
       showProductBlade: !!p.showProductBlade,

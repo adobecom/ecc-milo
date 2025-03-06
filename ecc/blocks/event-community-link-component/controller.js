@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { changeInputValue } from '../../scripts/utils.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -8,11 +9,9 @@ export function onSubmit(component, props) {
 
   if (checkbox.checked) {
     const communityTopicUrl = component.querySelector('#community-url-details')?.value?.trim();
-    props.payload = { ...props.payload, communityTopicUrl };
+    setPropsPayload(props, { communityTopicUrl });
   } else {
-    const tempPayload = { ...props.payload };
-    delete tempPayload.communityTopicUrl;
-    props.payload = tempPayload;
+    setPropsPayload(props, { communityTopicUrl: null });
   }
 }
 
@@ -31,14 +30,15 @@ export async function onRespUpdate(_component, _props) {
 
 export default function init(component, props) {
   const eventData = props.eventDataResp;
+  const localeEventData = eventData.localization?.[props.lang] || eventData;
 
-  component.dataset.cloudType = props.payload.cloudType || eventData.cloudType;
+  component.dataset.cloudType = props.payload.cloudType || localeEventData.cloudType;
   const checkbox = component.querySelector('#checkbox-community');
   const input = component.querySelector('#community-url-details');
 
-  if (eventData.communityTopicUrl) {
-    changeInputValue(checkbox, 'checked', !!eventData.communityTopicUrl);
-    changeInputValue(input, 'value', eventData.communityTopicUrl || '');
+  if (localeEventData.communityTopicUrl) {
+    changeInputValue(checkbox, 'checked', !!localeEventData.communityTopicUrl);
+    changeInputValue(input, 'value', localeEventData.communityTopicUrl || '');
     component.classList.add('prefilled');
   }
 

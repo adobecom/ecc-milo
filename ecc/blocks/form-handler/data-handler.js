@@ -25,13 +25,18 @@ export function quickFilter(obj) {
 
 export function setPropsPayload(props, newData, lang = 'en') {
   const existingPayload = props.payload;
-  const localePayload = existingPayload.localization?.[lang] || existingPayload;
+  const localePayload = existingPayload.localization?.[lang] || {};
 
-  const updatedPayload = { ...localePayload, ...newData };
-
+  // Only update localization structure
   props.payload = {
-    ...props.payload,
-    ...{ localization: { [lang]: updatedPayload } },
+    ...existingPayload,
+    localization: {
+      ...existingPayload.localization,
+      [lang]: {
+        ...localePayload,
+        ...newData,
+      },
+    },
   };
 }
 
@@ -48,8 +53,11 @@ export function setPayloadCache(payload, lang = 'en') {
   }
 }
 
-export function getFilteredCachedPayload() {
-  return payloadCache;
+export function getFilteredCachedPayload(lang = 'en') {
+  const localePayload = payloadCache.localization[lang] || payloadCache;
+
+  // Only return localization structure
+  return { localization: { [lang]: localePayload } };
 }
 
 export function setResponseCache(response, lang = 'en') {
@@ -59,8 +67,11 @@ export function setResponseCache(response, lang = 'en') {
   responseCache.localization[lang] = quickFilter(localeData);
 }
 
-export function getFilteredCachedResponse() {
-  return responseCache;
+export function getFilteredCachedResponse(lang = 'en') {
+  const localeResponse = responseCache.localization[lang] || responseCache;
+
+  // Only return localization structure
+  return { localization: { [lang]: localeResponse } };
 }
 
 /**
@@ -151,23 +162,49 @@ export function hasContentChanged(oldData, newData) {
   );
 }
 
-export default function getJoinedData() {
-  const filteredResponse = getFilteredCachedResponse();
-  const filteredPayload = getFilteredCachedPayload();
+export default function getJoinedData(lang = 'en') {
+  const filteredResponse = getFilteredCachedResponse(lang);
+  const filteredPayload = getFilteredCachedPayload(lang);
 
+  const localeResponse = filteredResponse.localization?.[lang] || {};
+  const localePayload = filteredPayload.localization?.[lang] || {};
+
+  // Only use localization structure
   const finalPayload = {
-    ...filteredResponse,
-    ...filteredPayload,
-    modificationTime: filteredResponse.modificationTime,
+    localization: {
+      [lang]: {
+        ...localeResponse,
+        ...localePayload,
+      },
+    },
   };
 
-  Object.keys(filteredResponse).forEach((key) => {
+  Object.keys(localeResponse).forEach((key) => {
     if (!EVENT_DATA_FILTER[key]?.deletable) return;
 
-    if (EVENT_DATA_FILTER[key].deletable && !filteredPayload[key]) {
-      delete finalPayload[key];
+    if (EVENT_DATA_FILTER[key].deletable && !localePayload[key]) {
+      delete finalPayload.localization[lang][key];
     }
   });
 
-  return finalPayload;
+  // Add deprecation warning for accessing data at global level
+  return new Proxy(finalPayload, {
+    get(target, prop) {
+      if (prop !== 'localization') {
+        console.warn(`[Deprecation Warning] Accessing data at global level is deprecated. Please use the localization structure instead. Tried to access: ${String(prop)}`);
+        return target.localization[lang][prop];
+      }
+      return target[prop];
+    },
+  });
+}
+
+export function getLocalizedResponseData(props) {
+  const response = getFilteredCachedResponse(props.language);
+  return response.localization?.[props.language] || {};
+}
+
+export function getLocalizedPayloadData(props) {
+  const payload = getFilteredCachedPayload(props.language);
+  return payload.localization?.[props.language] || {};
 }

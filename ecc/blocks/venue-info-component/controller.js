@@ -3,6 +3,7 @@ import { createVenue, replaceVenue } from '../../scripts/esp-controller.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler/form-handler.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
 
 function togglePrefillableFieldsHiddenState(component) {
   const address = component.querySelector('#google-place-formatted-address');
@@ -184,10 +185,7 @@ export async function onSubmit(component, props) {
 
   const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible')?.checked;
 
-  props.payload = {
-    ...props.payload,
-    showVenuePostEvent,
-  };
+  setPropsPayload(props, { showVenuePostEvent });
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -200,10 +198,11 @@ export async function onRespUpdate(_component, _props) {
 
 export default async function init(component, props) {
   const eventData = props.eventDataResp;
+  const localeEventData = eventData.localization?.[props.lang] || eventData;
 
   await loadGoogleMapsAPI(() => initAutocomplete(component, props));
 
-  const { venue, showVenuePostEvent } = eventData;
+  const { venue, showVenuePostEvent } = localeEventData;
 
   const venueNameInput = component.querySelector('#venue-info-venue-name');
 

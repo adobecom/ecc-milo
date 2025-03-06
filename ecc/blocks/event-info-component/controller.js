@@ -4,6 +4,7 @@ import { getCloud, getEvents } from '../../scripts/esp-controller.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../../scripts/utils.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
@@ -408,7 +409,7 @@ export function onSubmit(component, props) {
     timezone,
   };
 
-  props.payload = { ...props.payload, ...eventInfo };
+  setPropsPayload(props, eventInfo);
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -439,9 +440,10 @@ export default async function init(component, props) {
   const allEventsResp = await getEvents();
   const allEvents = allEventsResp?.events;
   const eventData = props.eventDataResp;
+  const localeEventData = eventData.localization?.[props.lang] || eventData;
   const sameSeriesEvents = allEvents?.filter((e) => {
     const matchInPayload = e.seriesId === props.payload.seriesId;
-    const matchInResp = e.seriesId === eventData.seriesId;
+    const matchInResp = e.seriesId === localeEventData.seriesId;
     return matchInPayload || matchInResp;
   }) || [];
 
@@ -626,7 +628,7 @@ export default async function init(component, props) {
     localStartTime,
     localEndTime,
     timezone,
-  } = eventData;
+  } = localeEventData;
 
   if (title
     && description

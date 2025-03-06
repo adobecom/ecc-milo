@@ -29,7 +29,11 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
-import getJoinedData, { getFilteredCachedResponse, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, {
+  setPayloadCache,
+  setResponseCache,
+  getLocalizedResponseData,
+} from './data-handler.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 import CustomSearch from '../../components/custom-search/custom-search.js';
 
@@ -111,8 +115,9 @@ export function buildErrorMessage(props, resp) {
     } else if (errorMessage) {
       if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}') {
         const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'The event has been updated by a different session since your last save.', { parent: toastArea });
+        const localeData = getLocalizedResponseData(props);
         const url = new URL(window.location.href);
-        url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
+        url.searchParams.set('eventId', localeData.eventId);
 
         createTag('sp-button', {
           slot: 'action',
@@ -428,17 +433,16 @@ function showSaveSuccessMessage(props, detail = { message: 'Edits saved successf
 }
 
 function updateDashboardLink(props) {
-  // FIXME: presuming first link is dashboard link is not good.
-  if (!getFilteredCachedResponse().eventId) return;
   const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-
   if (!dashboardLink) return;
 
   const url = new URL(dashboardLink.href);
-
   if (url.searchParams.has('eventId')) return;
 
-  url.searchParams.set('newEventId', getFilteredCachedResponse().eventId);
+  const localeData = getLocalizedResponseData(props);
+  if (!localeData.eventId) return;
+
+  url.searchParams.set('newEventId', localeData.eventId);
   dashboardLink.href = url.toString();
 }
 
@@ -459,22 +463,25 @@ async function saveEvent(props, toPublish = false) {
     }
   };
 
-  if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    resp = await createEvent(getJoinedData());
+  const localeData = getLocalizedResponseData(props);
+  if (props.currentStep === 0 && !localeData.eventId) {
+    resp = await createEvent(getJoinedData(props.language));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
     await onEventSave();
   } else if (props.currentStep <= props.maxStep && !toPublish) {
+    const payload = getJoinedData(props.language);
     resp = await updateEvent(
-      getFilteredCachedResponse().eventId,
-      getJoinedData(),
+      payload.eventId,
+      payload,
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     await onEventSave();
   } else if (toPublish) {
+    const payload = getJoinedData(props.language);
     resp = await publishEvent(
-      getFilteredCachedResponse().eventId,
-      getJoinedData(),
+      payload.eventId,
+      payload,
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     if (resp?.eventId) await handleEventUpdate(props);
@@ -558,7 +565,7 @@ function buildPreviewLoadingDialog(props, targetHref, poll) {
   dialog.innerHTML = '';
 
   createTag('h1', { slot: 'heading' }, 'Generating your preview...', { parent: dialog });
-  createTag('p', {}, 'This usually takes less than a minute, but in rare cases it might take up to 10 minutes. Please wait, and the preview will open in a new tab when it’s ready.', { parent: dialog });
+  createTag('p', {}, 'This usually takes less than a minute, but in rare cases it might take up to 10 minutes. Please wait, and the preview will open in a new tab when it is ready.', { parent: dialog });
   createTag('p', {}, '<strong>Note: Please ensure pop-ups are allowed in your browser.</strong>', { parent: dialog });
 
   const style = createTag('style', {}, `
@@ -770,9 +777,17 @@ function initFormCtas(props) {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
 
+          const localeData = getLocalizedResponseData(props);
+
+          if (!localeData.eventId) {
+            buildErrorMessage(props, { error: { message: 'Event ID is not found' } });
+            toggleBtnsSubmittingState(false);
+            return;
+          }
+
           const resp = await previewEvent(
-            getFilteredCachedResponse().eventId,
-            getJoinedData(),
+            localeData.eventId,
+            getJoinedData(props.language),
           );
 
           props.eventDataResp = { ...props.eventDataResp, ...resp };
@@ -992,6 +1007,15 @@ function toggleSections(props) {
 
     section.classList.toggle('hidden', allComponentsHidden);
   });
+}
+
+export async function handleSubmit(props) {
+  const localeData = getLocalizedResponseData(props);
+  if (!localeData.eventId) return;
+
+  const url = new URL(window.location.href);
+  url.searchParams.set('newEventId', localeData.eventId);
+  window.location.href = url;
 }
 
 async function buildECCForm(el) {
