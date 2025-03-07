@@ -228,6 +228,8 @@ export default async function init(component, props) {
 
   const venueNameInput = component.querySelector('#venue-info-venue-name');
   const venueRTE = component.querySelector('#venue-additional-info-rte');
+  const venuePostEventCheckbox = component.querySelector('#checkbox-venue-info-visible');
+  const venueAdditionalInfoPostEventCheckbox = component.querySelector('#checkbox-venue-additional-info-visible');
   const dz = component.querySelector('image-dropzone');
   const type = 'venue-additional-image';
   const progressWrapper = component.querySelector('.progress-wrapper');
@@ -245,6 +247,21 @@ export default async function init(component, props) {
     }
   });
 
+  if (venuePostEventCheckbox && venueAdditionalInfoPostEventCheckbox) {
+    // When venue info checkbox is unchecked, uncheck additional info
+    venuePostEventCheckbox.addEventListener('change', (e) => {
+      if (!e.target.checked && venueAdditionalInfoPostEventCheckbox.checked) {
+        changeInputValue(venueAdditionalInfoPostEventCheckbox, 'checked', false);
+      }
+    });
+
+    // When additional info checkbox is checked, ensure venue info is also checked
+    venueAdditionalInfoPostEventCheckbox.addEventListener('change', (e) => {
+      if (e.target.checked && !venuePostEventCheckbox.checked) {
+        changeInputValue(venuePostEventCheckbox, 'checked', true);
+      }
+    });
+  }
   if (venueRTE) {
     venueRTE.handleInput = (output) => {
       changeInputValue(component.querySelector('#venue-additional-info-rte-output'), 'value', output);
@@ -367,11 +384,11 @@ export default async function init(component, props) {
     }
   }
 
-  if (showVenuePostEvent) {
+  if (venuePostEventCheckbox && showVenuePostEvent) {
     changeInputValue(component.querySelector('#checkbox-venue-info-visible'), 'checked', showVenuePostEvent);
   }
 
-  if (showVenueAdditionalInfoPostEvent) {
+  if (venueAdditionalInfoPostEventCheckbox && showVenueAdditionalInfoPostEvent) {
     changeInputValue(component.querySelector('#checkbox-venue-additional-info-visible'), 'checked', showVenueAdditionalInfoPostEvent);
   }
 }
