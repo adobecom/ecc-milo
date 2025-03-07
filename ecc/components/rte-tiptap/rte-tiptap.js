@@ -126,31 +126,78 @@ export default class RteTiptap extends LitElement {
     }
   }
 
+  // Helper method to select current word if no selection exists
+  selectWordAtCursor() {
+    const { editor } = this;
+    const { selection } = editor.state;
+    // If there's already a selection, keep it
+    if (!selection.empty) return;
+
+    // Get the position of cursor
+    const pos = selection.$anchor;
+    // Find the start of the current word
+    let start = pos.pos;
+    while (start > 0 && /\w/.test(editor.state.doc.textBetween(start - 1, start))) {
+      start -= 1;
+    }
+    // Find the end of the current word
+    let end = pos.pos;
+    while (end < editor.state.doc.content.size && /\w/.test(editor.state.doc.textBetween(end, end + 1))) {
+      end += 1;
+    }
+
+    // Set the new selection
+    editor.chain().focus().setTextSelection({ from: start, to: end }).run();
+  }
+
   render() {
     if (this.handleInput && this.markdownInitialized && !this.editorInitialized) {
       this.initializeEditor();
     }
+    /* eslint-disable indent */
     return html`
             <div class="rte-tiptap-toolbar">
               <sp-picker class="rte-format-input select-input" label="Format" value=${this.rteFormat} @change=${(event) => { this.toggleFormat(event.target.value); }}>
                 ${repeat(['Paragraph', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6'], (p) => html`<sp-menu-item value=${p}>${p}</sp-menu-item>`)}
               </sp-picker>
-              <button aria-label="Bold" class=${this.isBold ? 'active' : ''} @click=${() => { this.editor.chain().focus().toggleBold().run(); this.updateButtonStates(this.editor); }}>
+              <button aria-label="Bold" class=${this.isBold ? 'active' : ''} @click=${() => {
+                this.selectWordAtCursor();
+                this.editor.chain().focus().toggleBold().run();
+                this.updateButtonStates(this.editor);
+              }}>
                 <img class="icon icon-rte-bold" src="/ecc/icons/rte-bold.svg" alt="rte-bold" />
               </button>
-              <button aria-label="Italic" class=${this.isItalic ? 'active' : ''} @click=${() => { this.editor.chain().focus().toggleItalic().run(); this.updateButtonStates(this.editor); }}>
+              <button aria-label="Italic" class=${this.isItalic ? 'active' : ''} @click=${() => {
+                this.selectWordAtCursor();
+                this.editor.chain().focus().toggleItalic().run();
+                this.updateButtonStates(this.editor);
+              }}>
                 <img class="icon icon-rte-italic" src="/ecc/icons/rte-italic.svg" alt="rte-italic" />
               </button>
-              <button aria-label="Underline" class=${this.isUnderline ? 'active' : ''} @click=${() => { this.editor.chain().focus().toggleUnderline().run(); this.updateButtonStates(this.editor); }}>
+              <button aria-label="Underline" class=${this.isUnderline ? 'active' : ''} @click=${() => {
+                this.selectWordAtCursor();
+                this.editor.chain().focus().toggleUnderline().run();
+                this.updateButtonStates(this.editor);
+              }}>
                 <img class="icon icon-rte-underline" src="/ecc/icons/rte-underline.svg" alt="rte-underline" />
               </button>
-              <button aria-label="Bullet List" class=${this.isBulletList ? 'active' : ''} @click=${() => { this.editor.chain().focus().toggleBulletList().run(); this.updateButtonStates(this.editor); }}>
+              <button aria-label="Bullet List" class=${this.isBulletList ? 'active' : ''} @click=${() => {
+                this.editor.chain().focus().toggleBulletList().run();
+                this.updateButtonStates(this.editor);
+              }}>
                 <img class="icon icon-rte-bullet-list" src="/ecc/icons/rte-bullet-list.svg" alt="rte-bullet-list" />
               </button>
-              <button aria-label="Ordered List" class=${this.isOrderedList ? 'active' : ''} @click=${() => { this.editor.chain().focus().toggleOrderedList().run(); this.updateButtonStates(this.editor); }}>
+              <button aria-label="Ordered List" class=${this.isOrderedList ? 'active' : ''} @click=${() => {
+                this.editor.chain().focus().toggleOrderedList().run();
+                this.updateButtonStates(this.editor);
+              }}>
                 <img class="icon icon-rte-ordered-list" src="/ecc/icons/rte-ordered-list.svg" alt="rte-ordered-list" />
               </button>
-              <button aria-label="Link" class=${this.isLink ? 'active' : ''} @click=${() => { this.rteAddLink(); this.updateButtonStates(this.editor); }}>
+              <button aria-label="Link" class=${this.isLink ? 'active' : ''} @click=${() => {
+                this.selectWordAtCursor();
+                this.rteAddLink();
+                this.updateButtonStates(this.editor);
+              }}>
                 <img class="icon icon-rte-link" src="/ecc/icons/rte-link.svg" alt="rte-link" />
               </button>
             </div>
