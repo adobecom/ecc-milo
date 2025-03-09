@@ -270,7 +270,7 @@ export default class RteTiptap extends LitElement {
                   </sp-help-text>
                 ` : ''}
                 
-                <div slot="button" style="display: flex; gap: 8px;">
+                <div slot="button" class="rte-tiptap-dialog-buttons">
                   <sp-button 
                     variant="secondary"
                     @click=${this.handleLinkDialogCancel}

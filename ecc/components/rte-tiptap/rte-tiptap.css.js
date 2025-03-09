@@ -16,6 +16,11 @@ export const style = css`
   width: 480px;
 }
 
+.rte-tiptap-dialog-buttons {
+  display: flex;
+  gap: 8px;
+}
+
 .rte-tiptap-toolbar .rte-format-input {
   margin-right: 2px;
 }
