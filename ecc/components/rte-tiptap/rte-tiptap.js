@@ -38,6 +38,10 @@ export default class RteTiptap extends LitElement {
     this.isBulletList = false;
     this.isOrderedList = false;
     this.isLink = false;
+    this.showLinkDialog = false;
+    this.linkDialogUrl = 'https://';
+    this.linkDialogError = false;
+    this.isEditingLink = false;
   }
 
   updateButtonStates(editor) {
@@ -100,21 +104,42 @@ export default class RteTiptap extends LitElement {
   }
 
   rteAddLink() {
-    /* eslint-disable no-alert */
     const attrs = this.editor.getAttributes('link');
-    const existingUrl = attrs.href || '';
-    let url = prompt('Enter the URL:', existingUrl || 'https://');
-    while (url !== null) {
-      if (url.match(LINK_REGEX)) {
-        this.editor.chain().focus().setLink({ href: url }).run();
-        break;
-      }
-      alert(`Link must match pattern "${LINK_REGEX}"`);
-      url = prompt('Enter the URL:', url || 'https://');
-    }
-    if (url === null) {
+    this.linkDialogUrl = attrs.href || 'https://';
+    this.isEditingLink = !!attrs.href;
+    this.showLinkDialog = true;
+    this.requestUpdate();
+  }
+
+  handleLinkDialogCancel() {
+    this.showLinkDialog = false;
+    const attrs = this.editor.getAttributes('link');
+    if (!attrs.href) {
       this.editor.chain().focus().unsetLink().run();
     }
+    this.requestUpdate();
+  }
+
+  handleLinkDialogConfirm() {
+    if (this.linkDialogUrl.match(LINK_REGEX)) {
+      this.editor.chain().focus().setLink({ href: this.linkDialogUrl }).run();
+      this.showLinkDialog = false;
+    } else {
+      this.linkDialogError = true;
+    }
+    this.requestUpdate();
+  }
+
+  handleLinkDialogInput(e) {
+    this.linkDialogUrl = e.target.value;
+    this.linkDialogError = false;
+    this.requestUpdate();
+  }
+
+  handleLinkUnlink() {
+    this.editor.chain().focus().unsetLink().run();
+    this.showLinkDialog = false;
+    this.requestUpdate();
   }
 
   toggleFormat(format) {
@@ -148,6 +173,23 @@ export default class RteTiptap extends LitElement {
 
     // Set the new selection
     editor.chain().focus().setTextSelection({ from: start, to: end }).run();
+  }
+
+  selectLinkAtCursor() {
+    const { editor } = this;
+    const { selection } = editor.state;
+
+    // If there's already a selection, keep it
+    if (!selection.empty) return;
+
+    // If cursor is in a link, extend selection to entire link
+    if (editor.isActive('link')) {
+      editor.chain().focus().extendMarkRange('link').run();
+      return;
+    }
+
+    // If not in a link, fall back to selecting current word
+    this.selectWordAtCursor();
   }
 
   render() {
@@ -194,7 +236,7 @@ export default class RteTiptap extends LitElement {
                 <img class="icon icon-rte-ordered-list" src="/ecc/icons/rte-ordered-list.svg" alt="rte-ordered-list" />
               </button>
               <button aria-label="Link" class=${this.isLink ? 'active' : ''} @click=${() => {
-                this.selectWordAtCursor();
+                this.selectLinkAtCursor();
                 this.rteAddLink();
                 this.updateButtonStates(this.editor);
               }}>
@@ -202,6 +244,56 @@ export default class RteTiptap extends LitElement {
               </button>
             </div>
             <div class="rte-tiptap-editor"></div>
+            
+            <sp-underlay dir="ltr" ?open=${this.showLinkDialog}></sp-underlay>
+            ${this.showLinkDialog ? html`
+              <sp-dialog
+                class="rte-tiptap-dialog"
+                size="small" 
+                .open=${this.showLinkDialog}
+                @close=${() => {
+                  this.showLinkDialog = false;
+                  this.requestUpdate();
+                }}
+              >
+                <h1 slot="heading">${this.isEditingLink ? 'Edit Link' : 'Add Link'}</h1>
+                <sp-textfield
+                  label="URL"
+                  .value=${this.linkDialogUrl}
+                  .invalid=${this.linkDialogError}
+                  @input=${this.handleLinkDialogInput}
+                ></sp-textfield>
+                
+                ${this.linkDialogError ? html`
+                  <sp-help-text variant="negative">
+                    Link must match pattern "${LINK_REGEX}"
+                  </sp-help-text>
+                ` : ''}
+                
+                <div slot="button" style="display: flex; gap: 8px;">
+                  <sp-button 
+                    variant="secondary"
+                    @click=${this.handleLinkDialogCancel}
+                  >
+                    Cancel
+                  </sp-button>
+                  ${this.isEditingLink ? html`
+                    <sp-button 
+                      variant="negative"
+                      @click=${this.handleLinkUnlink}
+                    >
+                      Remove Link
+                    </sp-button>
+                  ` : ''}
+                  <sp-button 
+                    variant="cta"
+                    @click=${this.handleLinkDialogConfirm}
+                  >
+                    ${this.isEditingLink ? 'Update' : 'Add'} Link
+                  </sp-button>
+                </div>
+              </sp-dialog>
+            ` : ''}
         `;
   }
 }

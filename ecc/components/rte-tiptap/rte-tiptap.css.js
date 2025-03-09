@@ -5,6 +5,17 @@ const { css } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
+.rte-tiptap-dialog {
+  --mod-textfield-width: 100%;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  background: var(--spectrum-gray-100);
+  width: 480px;
+}
+
 .rte-tiptap-toolbar .rte-format-input {
   margin-right: 2px;
 }
