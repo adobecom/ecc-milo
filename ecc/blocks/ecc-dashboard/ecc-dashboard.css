@@ -9,6 +9,11 @@
   position: relative;
 }
 
+.ecc-dashboard .dropdown a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .ecc-dashboard .dropdown-content {
   position: absolute;
   display: flex;
@@ -27,7 +32,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px;
+  padding: 4px 12px;
   border-radius: 4px;
   cursor: pointer;
   text-decoration: none;
