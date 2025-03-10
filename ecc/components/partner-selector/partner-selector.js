@@ -65,7 +65,7 @@ export default class PartnerSelector extends LitElement {
   }
 
   async savePartner() {
-    if( !this.checkValidity() ) {
+    if (!this.checkValidity()) {
       this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please enter a valid website address starting with "https://". For example: https://www.example.com' } }, bubbles: true, composed: true }));
       return;
     }
