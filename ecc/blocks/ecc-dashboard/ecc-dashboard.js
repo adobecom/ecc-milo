@@ -696,7 +696,29 @@ function buildDashboardHeader(props, config) {
   const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
   searchInputWrapper.append(getIcon('search'));
-  createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
+  const dropdown = createTag('div', { class: 'dropdown' }, '', { parent: actionsContainer });
+  const createCta = createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: dropdown });
+  const dropdownContent = createTag('div', { class: 'dropdown-content hidden' }, '', { parent: dropdown });
+
+  createTag('a', { class: 'dropdown-item', href: config['webinar-form-url'] }, 'Online', { parent: dropdownContent });
+  createTag('a', { class: 'dropdown-item', href: config['create-form-url'] }, 'In-Person', { parent: dropdownContent });
+
+  createCta.addEventListener('click', (e) => {
+    e.preventDefault();
+  });
+
+  createCta.addEventListener('focus', (e) => {
+    e.preventDefault();
+
+    dropdownContent.classList.remove('hidden');
+  });
+
+  createCta.addEventListener('blur', (e) => {
+    e.preventDefault();
+
+    dropdownContent.classList.add('hidden');
+  });
+
   searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
 
   dashboardHeader.append(textContainer, actionsContainer);
