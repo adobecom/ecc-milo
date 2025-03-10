@@ -106,7 +106,7 @@ export default class Profile extends LitElement {
 
       if (correctSocialMedia.length < profile.socialMedia.length) {
         const dialogToastParent = edited ? this.shadowRoot.querySelector('.edit-profile-dialog') : null;
-        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Some of the social media links are not valid.' }, targetEl: dialogToastParent }, bubbles: true, composed: true }));
+        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please enter a valid website address starting with "https://". For example: https://www.example.com' }, targetEl: dialogToastParent }, bubbles: true, composed: true }));
         saveButton.pending = false;
         return false;
       }
