@@ -46,17 +46,28 @@ export function setPropsPayload(props, newData, locale = 'en-US') {
   if (newData.modificationTime) existingPayload.modificationTime = newData.modificationTime;
   if (newData.creationTime) existingPayload.creationTime = newData.creationTime;
 
-  // Update localization structure for other fields
-  props.payload = {
-    ...existingPayload,
-    localization: {
-      ...existingPayload.localization,
-      [locale]: {
-        ...localePayload,
-        ...newData,
+  // If newData has a localization object, merge it directly
+  if (newData.localization) {
+    props.payload = {
+      ...existingPayload,
+      localization: {
+        ...existingPayload.localization,
+        ...newData.localization,
       },
-    },
-  };
+    };
+  } else {
+    // Update localization structure for other fields
+    props.payload = {
+      ...existingPayload,
+      localization: {
+        ...existingPayload.localization,
+        [locale]: {
+          ...localePayload,
+          ...newData,
+        },
+      },
+    };
+  }
 }
 
 export function setPayloadCache(payload, locale = 'en-US') {
@@ -67,13 +78,21 @@ export function setPayloadCache(payload, locale = 'en-US') {
   if (payload.modificationTime) payloadCache.modificationTime = payload.modificationTime;
   if (payload.creationTime) payloadCache.creationTime = payload.creationTime;
 
-  const localeData = payload.localization?.[locale] || payload;
-  payloadCache.localization[locale] = quickFilter(localeData);
+  // If payload has a localization object, merge it directly
+  if (payload.localization) {
+    payloadCache.localization = {
+      ...payloadCache.localization,
+      ...payload.localization,
+    };
+  } else {
+    const localeData = payload;
+    payloadCache.localization[locale] = quickFilter(localeData);
 
-  const { pendingTopics } = localeData;
-  if (pendingTopics) {
-    const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
-    if (jointTopics.length) payloadCache.localization[locale].topics = jointTopics;
+    const { pendingTopics } = localeData;
+    if (pendingTopics) {
+      const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
+      if (jointTopics.length) payloadCache.localization[locale].topics = jointTopics;
+    }
   }
 }
 
@@ -97,8 +116,16 @@ export function setResponseCache(response, locale = 'en-US') {
   if (response.modificationTime) responseCache.modificationTime = response.modificationTime;
   if (response.creationTime) responseCache.creationTime = response.creationTime;
 
-  const localeData = response.localization?.[locale] || response;
-  responseCache.localization[locale] = quickFilter(localeData);
+  // If response has a localization object, merge it directly
+  if (response.localization) {
+    responseCache.localization = {
+      ...responseCache.localization,
+      ...response.localization,
+    };
+  } else {
+    const localeData = response;
+    responseCache.localization[locale] = quickFilter(localeData);
+  }
 }
 
 export function getFilteredCachedResponse(locale = 'en-US') {
