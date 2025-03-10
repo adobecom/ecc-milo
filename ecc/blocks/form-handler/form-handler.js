@@ -465,12 +465,12 @@ async function saveEvent(props, toPublish = false) {
 
   const localeData = getLocalizedResponseData(props);
   if (props.currentStep === 0 && !localeData.eventId) {
-    resp = await createEvent(getJoinedData(props.language));
+    resp = await createEvent(getJoinedData(props.locale));
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
     await onEventSave();
   } else if (props.currentStep <= props.maxStep && !toPublish) {
-    const payload = getJoinedData(props.language);
+    const payload = getJoinedData(props.locale);
     resp = await updateEvent(
       payload.eventId,
       payload,
@@ -478,7 +478,7 @@ async function saveEvent(props, toPublish = false) {
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     await onEventSave();
   } else if (toPublish) {
-    const payload = getJoinedData(props.language);
+    const payload = getJoinedData(props.locale);
     resp = await publishEvent(
       payload.eventId,
       payload,
@@ -787,7 +787,7 @@ function initFormCtas(props) {
 
           const resp = await previewEvent(
             localeData.eventId,
-            getJoinedData(props.language),
+            getJoinedData(props.locale),
           );
 
           props.eventDataResp = { ...props.eventDataResp, ...resp };
@@ -1026,7 +1026,7 @@ async function buildECCForm(el) {
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
     eventDataResp: {},
-    language: 'en',
+    locale: 'en-US',
   };
 
   const dataHandler = {

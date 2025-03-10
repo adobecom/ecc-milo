@@ -3,15 +3,29 @@
 import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
 
 // FIXME: this whole data handler thing can be done better
-const responseCache = { localization: {} };
-const payloadCache = { localization: {} };
+const responseCache = {
+  eventId: null,
+  modificationTime: null,
+  creationTime: null,
+  localization: {},
+};
+const payloadCache = {
+  eventId: null,
+  modificationTime: null,
+  creationTime: null,
+  localization: {},
+};
 
 function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
 }
 
 export function quickFilter(obj) {
-  const output = {};
+  const output = {
+    eventId: obj.eventId,
+    modificationTime: obj.modificationTime,
+    creationTime: obj.creationTime,
+  };
 
   Object.keys(EVENT_DATA_FILTER).forEach((attr) => {
     const { name, submittable } = EVENT_DATA_FILTER[attr];
@@ -23,16 +37,21 @@ export function quickFilter(obj) {
   return output;
 }
 
-export function setPropsPayload(props, newData, lang = 'en') {
+export function setPropsPayload(props, newData, locale = 'en-US') {
   const existingPayload = props.payload;
-  const localePayload = existingPayload.localization?.[lang] || {};
+  const localePayload = existingPayload.localization?.[locale] || {};
 
-  // Only update localization structure
+  // Update global fields if present
+  if (newData.eventId) existingPayload.eventId = newData.eventId;
+  if (newData.modificationTime) existingPayload.modificationTime = newData.modificationTime;
+  if (newData.creationTime) existingPayload.creationTime = newData.creationTime;
+
+  // Update localization structure for other fields
   props.payload = {
     ...existingPayload,
     localization: {
       ...existingPayload.localization,
-      [lang]: {
+      [locale]: {
         ...localePayload,
         ...newData,
       },
@@ -40,38 +59,58 @@ export function setPropsPayload(props, newData, lang = 'en') {
   };
 }
 
-export function setPayloadCache(payload, lang = 'en') {
+export function setPayloadCache(payload, locale = 'en-US') {
   if (!payload) return;
 
-  const localeData = payload.localization?.[lang] || payload;
-  payloadCache.localization[lang] = quickFilter(localeData);
+  // Update global fields
+  if (payload.eventId) payloadCache.eventId = payload.eventId;
+  if (payload.modificationTime) payloadCache.modificationTime = payload.modificationTime;
+  if (payload.creationTime) payloadCache.creationTime = payload.creationTime;
+
+  const localeData = payload.localization?.[locale] || payload;
+  payloadCache.localization[locale] = quickFilter(localeData);
 
   const { pendingTopics } = localeData;
   if (pendingTopics) {
     const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
-    if (jointTopics.length) payloadCache.localization[lang].topics = jointTopics;
+    if (jointTopics.length) payloadCache.localization[locale].topics = jointTopics;
   }
 }
 
-export function getFilteredCachedPayload(lang = 'en') {
-  const localePayload = payloadCache.localization[lang] || payloadCache;
+export function getFilteredCachedPayload(locale = 'en-US') {
+  const localePayload = payloadCache.localization[locale] || payloadCache;
 
-  // Only return localization structure
-  return { localization: { [lang]: localePayload } };
+  // Return both global and localized data
+  return {
+    eventId: payloadCache.eventId,
+    modificationTime: payloadCache.modificationTime,
+    creationTime: payloadCache.creationTime,
+    localization: { [locale]: localePayload },
+  };
 }
 
-export function setResponseCache(response, lang = 'en') {
+export function setResponseCache(response, locale = 'en-US') {
   if (!response) return;
 
-  const localeData = response.localization?.[lang] || response;
-  responseCache.localization[lang] = quickFilter(localeData);
+  // Update global fields
+  if (response.eventId) responseCache.eventId = response.eventId;
+  if (response.modificationTime) responseCache.modificationTime = response.modificationTime;
+  if (response.creationTime) responseCache.creationTime = response.creationTime;
+
+  const localeData = response.localization?.[locale] || response;
+  responseCache.localization[locale] = quickFilter(localeData);
 }
 
-export function getFilteredCachedResponse(lang = 'en') {
-  const localeResponse = responseCache.localization[lang] || responseCache;
+export function getFilteredCachedResponse(locale = 'en-US') {
+  const localeResponse = responseCache.localization[locale] || responseCache;
 
-  // Only return localization structure
-  return { localization: { [lang]: localeResponse } };
+  // Return both global and localized data
+  return {
+    eventId: responseCache.eventId,
+    modificationTime: responseCache.modificationTime,
+    creationTime: responseCache.creationTime,
+    localization: { [locale]: localeResponse },
+  };
 }
 
 /**
@@ -162,17 +201,40 @@ export function hasContentChanged(oldData, newData) {
   );
 }
 
-export default function getJoinedData(lang = 'en') {
-  const filteredResponse = getFilteredCachedResponse(lang);
-  const filteredPayload = getFilteredCachedPayload(lang);
+export function getLocalizedResponseData(props) {
+  const response = getFilteredCachedResponse(props.locale);
+  return {
+    eventId: response.eventId,
+    modificationTime: response.modificationTime,
+    creationTime: response.creationTime,
+    ...response.localization?.[props.locale] || {},
+  };
+}
 
-  const localeResponse = filteredResponse.localization?.[lang] || {};
-  const localePayload = filteredPayload.localization?.[lang] || {};
+export function getLocalizedPayloadData(props) {
+  const payload = getFilteredCachedPayload(props.locale);
+  return {
+    eventId: payload.eventId,
+    modificationTime: payload.modificationTime,
+    creationTime: payload.creationTime,
+    ...payload.localization?.[props.locale] || {},
+  };
+}
 
-  // Only use localization structure
+export default function getJoinedData(locale = 'en-US') {
+  const filteredResponse = getFilteredCachedResponse(locale);
+  const filteredPayload = getFilteredCachedPayload(locale);
+
+  const localeResponse = filteredResponse.localization?.[locale] || {};
+  const localePayload = filteredPayload.localization?.[locale] || {};
+
+  // Combine global and localized data
   const finalPayload = {
+    eventId: filteredResponse.eventId || filteredPayload.eventId,
+    modificationTime: filteredResponse.modificationTime || filteredPayload.modificationTime,
+    creationTime: filteredResponse.creationTime || filteredPayload.creationTime,
     localization: {
-      [lang]: {
+      [locale]: {
         ...localeResponse,
         ...localePayload,
       },
@@ -183,28 +245,18 @@ export default function getJoinedData(lang = 'en') {
     if (!EVENT_DATA_FILTER[key]?.deletable) return;
 
     if (EVENT_DATA_FILTER[key].deletable && !localePayload[key]) {
-      delete finalPayload.localization[lang][key];
+      delete finalPayload.localization[locale][key];
     }
   });
 
   // Add deprecation warning for accessing data at global level
   return new Proxy(finalPayload, {
     get(target, prop) {
-      if (prop !== 'localization') {
+      if (prop !== 'localization' && prop !== 'eventId' && prop !== 'modificationTime' && prop !== 'creationTime') {
         console.warn(`[Deprecation Warning] Accessing data at global level is deprecated. Please use the localization structure instead. Tried to access: ${String(prop)}`);
-        return target.localization[lang][prop];
+        return target.localization[locale][prop];
       }
       return target[prop];
     },
   });
-}
-
-export function getLocalizedResponseData(props) {
-  const response = getFilteredCachedResponse(props.language);
-  return response.localization?.[props.language] || {};
-}
-
-export function getLocalizedPayloadData(props) {
-  const payload = getFilteredCachedPayload(props.language);
-  return payload.localization?.[props.language] || {};
 }

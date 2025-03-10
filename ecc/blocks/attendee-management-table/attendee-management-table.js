@@ -420,7 +420,7 @@ function calculatePercentage(part, total) {
 }
 
 const getLanguage = (ietfLocale) => {
-  if (!ietfLocale.length) return 'en';
+  if (!ietfLocale.length) return 'en-US';
 
   const nonStandardLocaleMap = { 'no-NO': 'nb' };
 
@@ -440,7 +440,7 @@ async function buildEventInfo(props) {
 
   if (!eventObj) return;
 
-  const currentLang = getConfig().locale?.ietf ? getLanguage(getConfig().locale.ietf) : 'en';
+  const currentLang = getConfig().locale?.ietf ? getLanguage(getConfig().locale.ietf) : 'en-US';
   const eventInfo = eventObj.localization?.[currentLang] || eventObj;
   const { photos } = eventInfo;
 

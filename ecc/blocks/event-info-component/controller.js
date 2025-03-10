@@ -328,26 +328,26 @@ async function updateLanguagePicker(component, props) {
   // const { cloudLangs } = cloud;
   // TODO: remove mock
   const cloudLangs = [
-    { languageCode: 'en', language: 'English' },
-    { languageCode: 'es', language: 'Spanish' },
-    { languageCode: 'fr', language: 'French' },
-    { languageCode: 'de', language: 'German' },
-    { languageCode: 'it', language: 'Italian' },
-    { languageCode: 'ja', language: 'Japanese' },
-    { languageCode: 'ko', language: 'Korean' },
-    { languageCode: 'pt', language: 'Portuguese' },
-    { languageCode: 'ru', language: 'Russian' },
-    { languageCode: 'zh', language: 'Chinese' },
+    { ietf: 'en-US', language: 'English (United States)' },
+    { ietf: 'es-ES', language: 'Spanish (Spain)' },
+    { ietf: 'fr-FR', language: 'French (France)' },
+    { ietf: 'de-DE', language: 'German (Germany)' },
+    { ietf: 'it-IT', language: 'Italian (Italy)' },
+    { ietf: 'ja-JP', language: 'Japanese (Japan)' },
+    { ietf: 'ko-KR', language: 'Korean (South Korea)' },
+    { ietf: 'pt-BR', language: 'Portuguese (Brazil)' },
+    { ietf: 'ru-RU', language: 'Russian (Russia)' },
+    { ietf: 'zh-CN', language: 'Chinese (Simplified, China)' },
   ];
 
   cloudLangs.forEach((l, i) => {
-    const opt = createTag('sp-menu-item', { value: l.languageCode }, l.language);
+    const opt = createTag('sp-menu-item', { value: l.ietf }, l.language);
     languagePicker.append(opt);
 
-    if (props.language === l.languageCode) {
-      languagePicker.value = l.languageCode;
+    if (props.locale === l.ietf) {
+      languagePicker.value = l.ietf;
     } else if (i === 0) {
-      languagePicker.value = l.languageCode;
+      languagePicker.value = l.ietf;
     }
   });
 
