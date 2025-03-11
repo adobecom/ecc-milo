@@ -39,7 +39,6 @@ export const ALLOWED_HOSTS = {
 
 /**
  * @typedef {Object} EventDataFilter
- * @property {string} name - The name of the attribute.
  * @property {string} type - The type of the attribute.
  * @property {boolean} cloneable - Whether the attribute can be cloned.
  * @property {boolean} submittable - Whether the attribute can be submitted.
@@ -47,8 +46,8 @@ export const ALLOWED_HOSTS = {
  */
 
 export const EVENT_DATA_FILTER = {
-  agenda: { type: 'string', cloneable: true, submittable: true, deletable: false },
-  tags: { type: 'array', cloneable: true, submittable: true, deletable: false },
+  agenda: { type: 'array', cloneable: true, submittable: true, deletable: false },
+  tags: { type: 'string', cloneable: true, submittable: true, deletable: false },
   topics: { type: 'array', cloneable: true, submittable: true, deletable: false },
   speakers: { type: 'array', cloneable: true, submittable: false, deletable: false },
   sponsors: { type: 'array', cloneable: true, submittable: false, deletable: false },
@@ -65,9 +64,9 @@ export const EVENT_DATA_FILTER = {
   timezone: { type: 'string', cloneable: true, submittable: true, deletable: false },
   showAgendaPostEvent: { type: 'boolean', cloneable: true, submittable: true, deletable: false },
   showVenuePostEvent: { type: 'boolean', cloneable: true, submittable: true, deletable: false },
-  venue: { type: 'string', cloneable: true, submittable: false, deletable: false },
+  venue: { type: 'object', cloneable: true, submittable: false, deletable: false },
   showSponsors: { type: 'boolean', cloneable: false, submittable: true, deletable: false },
-  rsvpFormFields: { type: 'array', cloneable: true, submittable: true, deletable: false },
+  rsvpFormFields: { type: 'object', cloneable: true, submittable: true, deletable: false },
   relatedProducts: { type: 'array', cloneable: true, submittable: true, deletable: false },
   rsvpDescription: { type: 'string', cloneable: false, submittable: true, deletable: false },
   attendeeLimit: { type: 'number', cloneable: false, submittable: true, deletable: false },
