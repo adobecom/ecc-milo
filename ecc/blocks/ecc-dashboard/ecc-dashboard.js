@@ -23,9 +23,9 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 export function cloneFilter(obj) {
   const output = {};
 
-  EVENT_DATA_FILTER.forEach((attr) => {
+  Object.entries(EVENT_DATA_FILTER).forEach(([key, attr]) => {
     if (attr.cloneable) {
-      output[attr.name] = obj[attr.name];
+      output[key] = obj[key];
     }
   });
 
@@ -35,9 +35,9 @@ export function cloneFilter(obj) {
 function eventObjFilter(obj) {
   const output = {};
 
-  EVENT_DATA_FILTER.forEach((attr) => {
-    if (obj[attr.name] !== undefined && obj[attr.name] !== null) {
-      output[attr.name] = obj[attr.name];
+  Object.entries(EVENT_DATA_FILTER).forEach(([key]) => {
+    if (obj[key] !== undefined && obj[key] !== null) {
+      output[key] = obj[key];
     }
   });
 
