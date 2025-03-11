@@ -13,10 +13,9 @@ function isValidAttribute(attr) {
 export function quickFilter(obj) {
   const output = {};
 
-  Object.keys(EVENT_DATA_FILTER).forEach((attr) => {
-    const { name, submittable } = EVENT_DATA_FILTER[attr];
-    if (isValidAttribute(obj[name]) && submittable) {
-      output[name] = obj[name];
+  Object.entries(EVENT_DATA_FILTER).forEach(([key, attr]) => {
+    if (isValidAttribute(obj[key]) && attr.submittable) {
+      output[key] = obj[key];
     }
   });
 
