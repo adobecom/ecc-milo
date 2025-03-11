@@ -16,48 +16,16 @@ import {
 } from '../../scripts/utils.js';
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
+import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 export function cloneFilter(obj) {
-  const wl = [
-    'agenda',
-    'tags',
-    'topics',
-    'speakers',
-    'sponsors',
-    'eventType',
-    'cloudType',
-    'seriesId',
-    'communityTopicUrl',
-    'title',
-    'description',
-    'localStartDate',
-    'localEndDate',
-    'localStartTime',
-    'localEndTime',
-    'localStartTimeMillis',
-    'localEndTimeMillis',
-    'timezone',
-    'showAgendaPostEvent',
-    'showVenuePostEvent',
-    'showVenueAdditionalInfoPostEvent',
-    'showVenueImage',
-    'attendeeLimit',
-    'rsvpDescription',
-    'allowWaitlisting',
-    'allowGuestRegistration',
-    'hostEmail',
-    'rsvpFormFields',
-    'relatedProducts',
-    'venue',
-  ];
-
   const output = {};
 
-  wl.forEach((attr) => {
-    if (attr !== undefined && attr !== null) {
-      output[attr] = obj[attr];
+  Object.entries(EVENT_DATA_FILTER).forEach(([key, attr]) => {
+    if (attr.cloneable) {
+      output[key] = obj[key];
     }
   });
 
@@ -65,43 +33,11 @@ export function cloneFilter(obj) {
 }
 
 function eventObjFilter(obj) {
-  const submissionFilter = [
-    // from payload and response
-    'agenda',
-    'topics',
-    'eventType',
-    'cloudType',
-    'seriesId',
-    'communityTopicUrl',
-    'title',
-    'description',
-    'localStartDate',
-    'localEndDate',
-    'localStartTime',
-    'localEndTime',
-    'timezone',
-    'showAgendaPostEvent',
-    'showVenuePostEvent',
-    'showVenueAdditionalInfoPostEvent',
-    'showVenueImage',
-    'showSponsors',
-    'rsvpFormFields',
-    'relatedProducts',
-    'rsvpDescription',
-    'attendeeLimit',
-    'allowWaitlisting',
-    'hostEmail',
-    'eventId',
-    'published',
-    'creationTime',
-    'modificationTime',
-  ];
-
   const output = {};
 
-  submissionFilter.forEach((attr) => {
-    if (obj[attr] !== undefined && obj[attr] !== null) {
-      output[attr] = obj[attr];
+  Object.entries(EVENT_DATA_FILTER).forEach(([key]) => {
+    if (obj[key] !== undefined && obj[key] !== null) {
+      output[key] = obj[key];
     }
   });
 

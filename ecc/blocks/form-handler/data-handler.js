@@ -1,40 +1,10 @@
 /* eslint-disable no-use-before-define */
+
+import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
+
 // FIXME: this whole data handler thing can be done better
 let responseCache = {};
 let payloadCache = {};
-
-const submissionFilter = [
-  'agenda',
-  'topics',
-  'eventType',
-  'cloudType',
-  'seriesId',
-  'communityTopicUrl',
-  'title',
-  'tags',
-  'description',
-  'localStartDate',
-  'localEndDate',
-  'localStartTime',
-  'localEndTime',
-  'timezone',
-  'showAgendaPostEvent',
-  'showVenuePostEvent',
-  'showVenueAdditionalInfoPostEvent',
-  'showVenueImage',
-  'showSponsors',
-  'rsvpFormFields',
-  'relatedProducts',
-  'rsvpDescription',
-  'attendeeLimit',
-  'allowWaitlisting',
-  'allowGuestRegistration',
-  'hostEmail',
-  'eventId',
-  'published',
-  'creationTime',
-  'modificationTime',
-];
 
 function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
@@ -43,9 +13,9 @@ function isValidAttribute(attr) {
 export function quickFilter(obj) {
   const output = {};
 
-  submissionFilter.forEach((attr) => {
-    if (isValidAttribute(obj[attr])) {
-      output[attr] = obj[attr];
+  Object.entries(EVENT_DATA_FILTER).forEach(([key, attr]) => {
+    if (isValidAttribute(obj[key]) && attr.submittable) {
+      output[key] = obj[key];
     }
   });
 
@@ -166,8 +136,6 @@ export function hasContentChanged(oldData, newData) {
 }
 
 export default function getJoinedData() {
-  const deletableKeys = ['hostEmail'];
-
   const filteredResponse = getFilteredCachedResponse();
   const filteredPayload = getFilteredCachedPayload();
 
@@ -177,9 +145,10 @@ export default function getJoinedData() {
     modificationTime: filteredResponse.modificationTime,
   };
 
-  deletableKeys.forEach((key) => {
-    // if key is present in filteredResponse but not in filteredPayload, delete it from finalPayload
-    if (filteredResponse[key] && !filteredPayload[key]) {
+  Object.keys(filteredResponse).forEach((key) => {
+    if (!EVENT_DATA_FILTER[key]?.deletable) return;
+
+    if (EVENT_DATA_FILTER[key].deletable && !filteredPayload[key]) {
       delete finalPayload[key];
     }
   });
