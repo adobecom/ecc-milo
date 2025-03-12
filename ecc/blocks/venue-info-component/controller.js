@@ -5,8 +5,6 @@ import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler/form-handler.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
-
 function togglePrefillableFieldsHiddenState(component) {
   const address = component.querySelector('#google-place-formatted-address');
 
@@ -219,6 +217,8 @@ export async function onRespUpdate(_component, _props) {
 }
 
 export default async function init(component, props) {
+  // TODO: Import createTag at top level once Safari supports top-level await
+  const { createTag } = await import(`${LIBS}/utils/utils.js`);
   const eventData = props.eventDataResp;
 
   await loadGoogleMapsAPI(() => initAutocomplete(component, props));
