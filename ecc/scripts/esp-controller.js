@@ -42,7 +42,7 @@ async function safeFetch(url, options) {
     throw new Error('Invalid or unauthorized URL');
   }
 
-  const nonInvasiveTest = URLSearchParams(window.location.search).get('nonInvasiveTest') === 'true';
+  const nonInvasiveTest = new URLSearchParams(window.location.search).get('nonInvasiveTest') === 'true';
   if (nonInvasiveTest && ['PUT', 'POST', 'DELETE'].includes(options.method)) {
     console.log('Non-invasive test mode. Skipping request:', url, options);
     console.log('Payload:', JSON.parse(options.body));
