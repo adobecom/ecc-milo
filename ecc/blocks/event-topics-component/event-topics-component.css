@@ -2,10 +2,22 @@
   font-size: var(--type-heading-s-size);
 }
 
-.event-topics-component .checkbox-wrapper {
+.event-topics-component .tags-group {
+  width: 100%;
+  padding-bottom: 40px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid var(--stroke-color-divider);
+}
+
+.event-topics-component .tags-group .tags-group-wrapper {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.event-topics-component .tags-group:last-of-type {
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .event-topics-component sp-progress-circle {

@@ -4,6 +4,7 @@ import { LIBS } from '../../scripts/scripts.js';
 import style from './cmc.css.js';
 import { getIcon } from '../../scripts/utils.js';
 import { getCloud, updateCloud } from '../../scripts/esp-controller.js';
+import { deepGetTagByPath, deepGetTagByTagID } from '../../scripts/caas.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -123,29 +124,6 @@ export default class CloudManagementConsole extends LitElement {
     `;
   }
 
-  deepGetTagByPath(pathArray, index) {
-    let currentTag = this.tags;
-
-    pathArray.forEach((path, i) => {
-      if (i <= index && path) {
-        currentTag = currentTag.tags[path];
-      }
-    });
-
-    return currentTag;
-  }
-
-  deepGetTagByTagID(tagID) {
-    const tagIDs = tagID.replace('caas:', '').split('/');
-    let currentTag = this.tags;
-
-    tagIDs.forEach((tag) => {
-      currentTag = currentTag.tags[tag];
-    });
-
-    return currentTag;
-  }
-
   buildDeleteBtn(tag) {
     const crossIcon = getIcon('cross');
     const btnHTML = html`${crossIcon}`;
@@ -169,7 +147,7 @@ export default class CloudManagementConsole extends LitElement {
 
     this.currentCloud = cloudType;
     this.currentPath = startingPath;
-    this.selectedTags = new Set(savedCloudTags.map((tag) => this.deepGetTagByTagID(tag.tagID)));
+    this.selectedTags = new Set(savedCloudTags.map((tag) => deepGetTagByTagID(tag.tagID, this.tags)));
     this.pendingChanges = false;
     this.requestUpdate();
   }
@@ -224,16 +202,20 @@ export default class CloudManagementConsole extends LitElement {
 
       <div class="tags-pool">
         <div class="tags">
-          ${repeat(this.selectedTags.values(), (tag) => html`
-            <a class="tag" >${tag.title}${this.buildDeleteBtn(tag)}</a>
-          `)}
+          ${repeat(this.selectedTags.values(), (tag) => {
+            const decodedTitle = new DOMParser().parseFromString(tag.title, 'text/html').body.textContent;
+
+            return html`
+              <a class="tag" >${decodedTitle}${this.buildDeleteBtn(tag)}</a>
+            `;
+          })}
         </div>
       </div>
       <h2>Manage tags</h2>
       <div class="millar-menu">
         <div class="menu-breadcrumbs">
           ${this.currentPath.split('/').map((path, i, arr) => {
-            const tag = this.deepGetTagByPath(arr, i);
+            const tag = deepGetTagByPath(arr, i, this.tags);
 
             if (tag) {
               return html`
@@ -250,7 +232,7 @@ export default class CloudManagementConsole extends LitElement {
         ${this.currentCloud ? html`
         <div class="menu-group">
           ${this.currentPath.split('/').map((_p, i, arr) => {
-            const tag = this.deepGetTagByPath(arr, i);
+            const tag = deepGetTagByPath(arr, i, this.tags);
 
             if (tag && tag.tags && Object.keys(tag.tags).length) {
               return html`
@@ -268,7 +250,7 @@ export default class CloudManagementConsole extends LitElement {
     <div class="action-bar">
         <sp-toast variant="positive" size="m" timeout="6000">Changes saved</sp-toast>
         <sp-button variant="secondary" size="l" ?disabled=${!this.pendingChanges || !this.currentCloud} @click=${() => {
-          const fullSavedTags = this.savedTags[this.currentCloud]?.map((tag) => this.deepGetTagByTagID(tag.tagID)) || [];
+          const fullSavedTags = this.savedTags[this.currentCloud]?.map((tag) => deepGetTagByTagID(tag.tagID, this.tags)) || [];
           this.selectedTags = new Set(fullSavedTags); this.pendingChanges = false;
         }}>Cancel</sp-button>
         <sp-button variant="primary" size="l" ?disabled=${!this.pendingChanges || !this.currentCloud} @click=${this.save}>Save</sp-button>
