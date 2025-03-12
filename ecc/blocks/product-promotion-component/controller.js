@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { getCaasTags } from '../../scripts/esp-controller.js';
+import { getCaasTags } from '../../scripts/caas.js';
 import { handlize } from '../../scripts/utils.js';
 
 export function onSubmit(component, props) {
