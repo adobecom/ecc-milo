@@ -64,6 +64,7 @@ export const EVENT_DATA_FILTER = {
   timezone: { type: 'string', cloneable: true, submittable: true, deletable: false },
   showAgendaPostEvent: { type: 'boolean', cloneable: true, submittable: true, deletable: false },
   showVenuePostEvent: { type: 'boolean', cloneable: true, submittable: true, deletable: false },
+  showVenueAdditionalInfoPostEvent: { type: 'boolean', cloneable: true, submittable: true, deletable: false },
   venue: { type: 'object', cloneable: true, submittable: false, deletable: false },
   showSponsors: { type: 'boolean', cloneable: false, submittable: true, deletable: false },
   rsvpFormFields: { type: 'object', cloneable: true, submittable: true, deletable: false },

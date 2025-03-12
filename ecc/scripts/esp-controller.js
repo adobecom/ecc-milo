@@ -3,40 +3,6 @@ import { getEventServiceEnv, getSecret, signIn } from './utils.js';
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
 import { API_CONFIG, ALLOWED_HOSTS } from './constants.js';
 
-const nonInvasiveTest = true;
-
-export const getCaasTags = (() => {
-  let cache;
-  let promise;
-
-  return () => {
-    if (cache) {
-      return cache;
-    }
-
-    if (!promise) {
-      promise = fetch('https://www.adobe.com/chimera-api/tags')
-        .then((resp) => {
-          if (resp.ok) {
-            return resp.json();
-          }
-
-          throw new Error('Failed to load tags');
-        })
-        .then((data) => {
-          cache = data;
-          return data;
-        })
-        .catch((err) => {
-          window.lana?.log(`Failed to load products map JSON. Error: ${err}`);
-          throw err;
-        });
-    }
-
-    return promise;
-  };
-})();
-
 export function waitForAdobeIMS() {
   return new Promise((resolve) => {
     const checkIMS = () => {
@@ -76,6 +42,7 @@ async function safeFetch(url, options) {
     throw new Error('Invalid or unauthorized URL');
   }
 
+  const nonInvasiveTest = URLSearchParams(window.location.search).get('nonInvasiveTest') === 'true';
   if (nonInvasiveTest && ['PUT', 'POST', 'DELETE'].includes(options.method)) {
     console.log('Non-invasive test mode. Skipping request:', url, options);
     console.log('Payload:', JSON.parse(options.body));

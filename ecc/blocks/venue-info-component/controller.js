@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
-import { createVenue, replaceVenue } from '../../scripts/esp-controller.js';
+import { createVenue, deleteImage, getEventImages, replaceVenue, uploadImage } from '../../scripts/esp-controller.js';
+import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler/form-handler.js';
@@ -40,6 +41,8 @@ function resetAllFields(component) {
   const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
   const addressComponentsInput = component.querySelector('#google-place-address-components');
   const formattedAddressInput = component.querySelector('#google-place-formatted-address');
+  const venueAdditionalInfoInput = component.querySelector('#venue-additional-info-rte-output');
+  const venueRTE = component.querySelector('#venue-additional-info-rte');
 
   venueNameInput.value = '';
   changeInputValue(placeLatInput, 'value', '');
@@ -48,6 +51,10 @@ function resetAllFields(component) {
   changeInputValue(gmtoffsetInput, 'value', '');
   changeInputValue(addressComponentsInput, 'value', '');
   changeInputValue(formattedAddressInput, 'value', '');
+  changeInputValue(venueAdditionalInfoInput, 'value', '');
+  if (venueRTE) {
+    venueRTE.content = '';
+  }
 }
 
 function updateAllFields(venueData, component) {
@@ -58,6 +65,8 @@ function updateAllFields(venueData, component) {
   const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
   const addressComponentsInput = component.querySelector('#google-place-address-components');
   const formattedAddressInput = component.querySelector('#google-place-formatted-address');
+  const additionalInformationInput = component.querySelector('#venue-additional-info-rte-output');
+  const venueRTE = component.querySelector('#venue-additional-info-rte');
 
   changeInputValue(venueNameInput, 'value', venueData.venueName);
   changeInputValue(placeLatInput, 'value', venueData.coordinates?.lat);
@@ -66,6 +75,10 @@ function updateAllFields(venueData, component) {
   changeInputValue(gmtoffsetInput, 'value', venueData.gmtOffset);
   changeInputValue(addressComponentsInput, 'value', JSON.stringify(venueData.addressComponents));
   changeInputValue(formattedAddressInput, 'value', venueData.formattedAddress);
+  changeInputValue(additionalInformationInput, 'value', venueData.additionalInformation);
+  if (venueRTE) {
+    venueRTE.content = venueData.additionalInformation;
+  }
 }
 
 function getVenueDataInForm(component) {
@@ -76,6 +89,7 @@ function getVenueDataInForm(component) {
   const gmtoffsetInput = component.querySelector('#google-place-gmt-offset');
   const addressComponentsInput = component.querySelector('#google-place-address-components');
   const formattedAddressInput = component.querySelector('#google-place-formatted-address');
+  const additionalInformationInput = component.querySelector('#venue-additional-info-rte-output');
 
   const venueName = venueNameInput.value;
   const placeId = placeIdInput.value;
@@ -83,6 +97,7 @@ function getVenueDataInForm(component) {
   const lon = +placeLngInput.value;
   const gmtOffset = +gmtoffsetInput.value;
   const formattedAddress = formattedAddressInput.value;
+  const additionalInformation = additionalInformationInput?.value;
 
   let addressComponents;
 
@@ -102,6 +117,7 @@ function getVenueDataInForm(component) {
     gmtOffset,
     addressComponents,
     formattedAddress,
+    additionalInformation,
   };
 
   return venueData;
@@ -184,8 +200,9 @@ export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible')?.checked;
+  const showVenueAdditionalInfoPostEvent = component.querySelector('#checkbox-venue-additional-info-visible')?.checked;
 
-  setPropsPayload(props, { showVenuePostEvent });
+  setPropsPayload(props, { showVenuePostEvent, showVenueAdditionalInfoPostEvent });
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -197,14 +214,26 @@ export async function onRespUpdate(_component, _props) {
 }
 
 export default async function init(component, props) {
+  // TODO: Import createTag at top level once Safari supports top-level await
+  const { createTag } = await import(`${LIBS}/utils/utils.js`);
   const eventData = props.eventDataResp;
   const localeEventData = eventData.localization?.[props.lang] || eventData;
 
   await loadGoogleMapsAPI(() => initAutocomplete(component, props));
 
-  const { venue, showVenuePostEvent } = localeEventData;
+  const { venue, showVenuePostEvent, showVenueAdditionalInfoPostEvent } = localeEventData;
 
   const venueNameInput = component.querySelector('#venue-info-venue-name');
+  const venueRTE = component.querySelector('#venue-additional-info-rte');
+  const venuePostEventCheckbox = component.querySelector('#checkbox-venue-info-visible');
+  const venueAdditionalInfoPostEventCheckbox = component.querySelector('#checkbox-venue-additional-info-visible');
+  const dz = component.querySelector('image-dropzone');
+  const type = 'venue-additional-image';
+  const progressWrapper = component.querySelector('.progress-wrapper');
+  const progress = component.querySelector('sp-progress-circle');
+  let configs = null;
+  let imageId = null;
+  let file = null;
 
   togglePrefillableFieldsHiddenState(component);
 
@@ -215,6 +244,122 @@ export default async function init(component, props) {
     }
   });
 
+  if (venuePostEventCheckbox && venueAdditionalInfoPostEventCheckbox) {
+    // When venue info checkbox is unchecked, uncheck additional info
+    venuePostEventCheckbox.addEventListener('change', (e) => {
+      if (!e.target.checked && venueAdditionalInfoPostEventCheckbox.checked) {
+        changeInputValue(venueAdditionalInfoPostEventCheckbox, 'checked', false);
+      }
+    });
+
+    // When additional info checkbox is checked, ensure venue info is also checked
+    venueAdditionalInfoPostEventCheckbox.addEventListener('change', (e) => {
+      if (e.target.checked && !venuePostEventCheckbox.checked) {
+        changeInputValue(venuePostEventCheckbox, 'checked', true);
+      }
+    });
+  }
+
+  if (venueRTE) {
+    venueRTE.handleInput = (output) => {
+      changeInputValue(component.querySelector('#venue-additional-info-rte-output'), 'value', output);
+    };
+  }
+
+  if (eventData.eventId) {
+    configs = {
+      type,
+      targetUrl: `/v1/events/${eventData.eventId}/images`,
+    };
+  }
+
+  if (dz) {
+    dz.handleImage = async () => {
+      file = dz.getFile();
+
+      if (!file || !(file instanceof File) || !configs) return;
+
+      progressWrapper.classList.remove('hidden');
+
+      if (eventData.eventId) {
+        const eventImagesResp = await getEventImages(eventData.eventId);
+
+        if (eventImagesResp?.images) {
+          const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
+          if (photoObj) imageId = photoObj.imageId;
+        }
+      }
+
+      try {
+        const resp = await uploadImage(
+          file,
+          configs,
+          progress,
+          imageId,
+        );
+
+        if (resp?.imageId) imageId = resp.imageId;
+      } catch (error) {
+        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
+        dz.deleteImage();
+      } finally {
+        progressWrapper.classList.add('hidden');
+      }
+    };
+
+    dz.handleDelete = async () => {
+      if (eventData.eventId) {
+        const eventImagesResp = await getEventImages(eventData.eventId);
+
+        if (eventImagesResp?.images) {
+          const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
+          if (photoObj) imageId = photoObj.imageId;
+        }
+      }
+
+      if (!imageId || !configs) return;
+
+      const underlay = props.el.querySelector('sp-underlay');
+      const dialog = props.el.querySelector('sp-dialog');
+
+      dialog.innerHTML = '';
+
+      createTag('h1', { slot: 'heading' }, 'You are deleting this image.', { parent: dialog });
+      createTag('p', {}, 'Are you sure you want to do this? This cannot be undone.', { parent: dialog });
+      const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+      const dialogDeleteBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Yes, I want to delete this image', { parent: buttonContainer });
+      const dialogCancelBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Do not delete', { parent: buttonContainer });
+
+      underlay.open = true;
+
+      dialogDeleteBtn.addEventListener('click', async () => {
+        try {
+          dialogDeleteBtn.disabled = true;
+          dialogCancelBtn.disabled = true;
+          const resp = await deleteImage(configs, imageId);
+          if (resp.error) {
+            dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+          } else {
+            dz.file = null;
+            imageId = null;
+            dz.requestUpdate();
+          }
+        } catch (error) {
+          window.lana?.log('Failed to perform image DELETE operation. Error:', error);
+          dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+        }
+
+        underlay.open = false;
+        dialog.innerHTML = '';
+      });
+
+      dialogCancelBtn.addEventListener('click', () => {
+        underlay.open = false;
+        dialog.innerHTML = '';
+      });
+    };
+  }
+
   if (venue) {
     updateAllFields(venue, component);
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city: venue.city });
@@ -223,10 +368,26 @@ export default async function init(component, props) {
       component.classList.add('prefilled');
       togglePrefillableFieldsHiddenState(component);
     }
+
+    if (eventData.eventId) {
+      const { images } = await getEventImages(eventData.eventId);
+      if (images) {
+        const photoObj = images.find((p) => p.imageKind === type);
+
+        if (photoObj) {
+          dz.file = { ...photoObj, url: photoObj.imageUrl };
+          dz.requestUpdate();
+        }
+      }
+    }
   }
 
-  if (showVenuePostEvent) {
+  if (venuePostEventCheckbox && showVenuePostEvent) {
     changeInputValue(component.querySelector('#checkbox-venue-info-visible'), 'checked', showVenuePostEvent);
+  }
+
+  if (venueAdditionalInfoPostEventCheckbox && showVenueAdditionalInfoPostEvent) {
+    changeInputValue(component.querySelector('#checkbox-venue-additional-info-visible'), 'checked', showVenueAdditionalInfoPostEvent);
   }
 }
 
@@ -244,7 +405,8 @@ export async function onTargetUpdate(component, props) {
   let resp;
   if (!oldVenueData) {
     resp = await createVenue(props.eventDataResp.eventId, venueData);
-  } else if (oldVenueData.placeId !== venueData.placeId) {
+  } else if (oldVenueData.placeId !== venueData.placeId
+    || oldVenueData.additionalInformation !== venueData.additionalInformation) {
     const { creationTime, modificationTime } = oldVenueData;
     resp = await replaceVenue(
       props.eventDataResp.eventId,
@@ -259,13 +421,14 @@ export async function onTargetUpdate(component, props) {
     if (resp.error) {
       buildErrorMessage(props, resp);
     }
-  }
 
-  if (resp) {
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
-    props.payload = {
-      ...props.payload,
-      showVenuePostEvent: venueData.showVenuePostEvent,
-    };
+    if (resp) {
+      props.eventDataResp = { ...props.eventDataResp, ...resp };
+      props.payload = {
+        ...props.payload,
+        showVenuePostEvent: venueData.showVenuePostEvent,
+        showVenueAdditionalInfoPostEvent: venueData.showVenueAdditionalInfoPostEvent,
+      };
+    }
   }
 }

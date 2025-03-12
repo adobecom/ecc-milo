@@ -1,5 +1,6 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { getCaasTags, getClouds, getLocales } from '../../scripts/esp-controller.js';
+import { getClouds, getLocales } from '../../scripts/esp-controller.js';
+import { getCaasTags } from '../../scripts/caas.js';
 import {
   buildNoAccessScreen,
   generateToolTip,
