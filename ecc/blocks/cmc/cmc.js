@@ -64,7 +64,6 @@ async function buildCMC(el, blockConfig) {
   const savedLangs = {};
 
   const locales = await getLocales();
-
   console.log(locales);
 
   clouds.forEach((cloud) => {
