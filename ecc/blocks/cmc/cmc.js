@@ -1,5 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { getCaasTags, getClouds } from '../../scripts/esp-controller.js';
+import { getCaasTags, getClouds, getLocales } from '../../scripts/esp-controller.js';
 import {
   buildNoAccessScreen,
   generateToolTip,
@@ -62,6 +62,10 @@ async function buildCMC(el, blockConfig) {
 
   const savedTags = {};
   const savedLangs = {};
+
+  const locales = await getLocales();
+
+  console.log(locales);
 
   clouds.forEach((cloud) => {
     const { cloudType, cloudTags, cloudLangs } = cloud;

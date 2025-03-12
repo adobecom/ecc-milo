@@ -340,6 +340,10 @@ async function updateLanguagePicker(component, props) {
     { ietf: 'zh-CN', language: 'Chinese (Simplified, China)' },
   ];
 
+  languagePicker.querySelectorAll('sp-menu-item').forEach((option) => {
+    option.remove();
+  });
+
   cloudLangs.forEach((l, i) => {
     const opt = createTag('sp-menu-item', { value: l.ietf }, l.language);
     languagePicker.append(opt);
