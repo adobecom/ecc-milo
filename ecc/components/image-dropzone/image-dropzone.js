@@ -62,7 +62,6 @@ export default class ImageDropzone extends LitElement {
       await this.setFile(files);
       this.handleImage();
     }
-
     this.dispatchEvent(new CustomEvent('image-change', { detail: { file: this.file } }));
   }
 

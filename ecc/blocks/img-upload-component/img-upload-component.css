@@ -109,4 +109,8 @@
   .img-upload-component.hero .image-dropzones {
     grid-template-columns: 2fr 1fr;
   }
+
+  .img-upload-component.additional .image-dropzones {
+    grid-template-columns: 3fr;
+  }
 }
