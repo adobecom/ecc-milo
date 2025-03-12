@@ -1026,7 +1026,10 @@ async function buildECCForm(el) {
     currentStep: 0,
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
-    payload: {},
+    payload: {
+      eventType: 'InPerson',
+      localizations: {},
+    },
     eventDataResp: {},
     locale: 'en-US',
   };

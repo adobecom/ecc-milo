@@ -189,18 +189,12 @@ export default async function init(component, props) {
   const {
     cloudType,
     seriesId,
-    eventType,
   } = localeEventData;
 
-  if (cloudType && seriesId && eventType) {
+  if (cloudType && seriesId) {
     changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType);
     changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId);
-    changeInputValue(component.querySelector('#format-select-input'), 'value', eventType);
     component.classList.add('prefilled');
-  }
-
-  if (!eventType) {
-    changeInputValue(component.querySelector('#format-select-input'), 'value', 'InPerson');
   }
 }
 
@@ -209,10 +203,8 @@ export function onSubmit(component, props) {
 
   const cloudType = component.querySelector('#bu-select-input').value;
   const seriesId = component.querySelector('#series-select-input')?.value;
-  const eventType = component.querySelector('#format-select-input')?.value || 'InPerson';
 
   const eventFormat = {
-    eventType,
     cloudType,
     seriesId,
   };

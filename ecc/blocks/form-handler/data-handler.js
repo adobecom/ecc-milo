@@ -2,14 +2,9 @@
 
 import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
 
-// FIXME: this whole data handler thing can be done better
-const responseCache = {
-  localizations: {},
-};
+const responseCache = { localizations: {} };
 
-const payloadCache = {
-  localizations: {},
-};
+const payloadCache = { localizations: {} };
 
 function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
