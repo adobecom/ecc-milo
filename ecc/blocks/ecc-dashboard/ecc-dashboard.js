@@ -411,17 +411,17 @@ function initMoreOptions(props, config, eventObj, row) {
 }
 
 function getEventDefaultLanguage(eventObj) {
-  if (!eventObj.localization) return 'EN';
+  if (!eventObj.localizations) return 'EN';
 
-  const { localization } = eventObj;
+  const { localizations } = eventObj;
 
-  return Object.keys(localization)[0] || 'EN';
+  return Object.keys(localizations)[0] || 'EN';
 }
 
 function buildStatusTag(event) {
-  const { localization } = event;
+  const { localizations } = event;
 
-  const eventPublished = localization?.published || event.published;
+  const eventPublished = localizations?.published || event.published;
   const dot = eventPublished ? getIcon('dot-purple') : getIcon('dot-green');
   const text = eventPublished ? 'Published' : 'Draft';
 

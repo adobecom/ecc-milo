@@ -217,7 +217,7 @@ export default async function init(component, props) {
   // TODO: Import createTag at top level once Safari supports top-level await
   const { createTag } = await import(`${LIBS}/utils/utils.js`);
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localization?.[props.lang] || eventData;
+  const localeEventData = eventData.localizations?.[props.lang] || eventData;
 
   await loadGoogleMapsAPI(() => initAutocomplete(component, props));
 

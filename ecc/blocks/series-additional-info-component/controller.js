@@ -27,7 +27,7 @@ export async function onRespUpdate(_component, _props) {
 
 export default function init(component, props) {
   const data = props.response;
-  const localeData = data?.localization?.[props.lang] || data;
+  const localeData = data?.localizations?.[props.lang] || data;
 
   if (data) {
     const susiContextId = component.querySelector('#info-field-series-susi');

@@ -30,7 +30,7 @@ export async function onRespUpdate(_component, _props) {
 
 export default function init(component, props) {
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localization?.[props.lang] || eventData;
+  const localeEventData = eventData.localizations?.[props.lang] || eventData;
 
   component.dataset.cloudType = props.payload.cloudType || localeEventData.cloudType;
   const checkbox = component.querySelector('#checkbox-community');
