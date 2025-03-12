@@ -4,15 +4,10 @@ import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
 
 // FIXME: this whole data handler thing can be done better
 const responseCache = {
-  eventId: null,
-  modificationTime: null,
-  creationTime: null,
   localizations: {},
 };
+
 const payloadCache = {
-  eventId: null,
-  modificationTime: null,
-  creationTime: null,
   localizations: {},
 };
 
@@ -40,10 +35,17 @@ export function setPropsPayload(props, newData, locale = 'en-US') {
   const existingPayload = props.payload;
   const localePayload = existingPayload.localizations?.[locale] || {};
 
+  const globalFields = [
+    'eventId',
+    'modificationTime',
+    'creationTime',
+    'eventType',
+    'eventFormat',
+  ];
   // Update global fields if present
-  if (newData.eventId) existingPayload.eventId = newData.eventId;
-  if (newData.modificationTime) existingPayload.modificationTime = newData.modificationTime;
-  if (newData.creationTime) existingPayload.creationTime = newData.creationTime;
+  globalFields.forEach((field) => {
+    if (newData[field]) existingPayload[field] = newData[field];
+  });
 
   // If newData has a localizations object, merge it directly
   if (newData.localizations) {
