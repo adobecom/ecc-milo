@@ -24,8 +24,8 @@ export default class CloudManagementConsole extends LitElement {
     selectedTags: { type: Set },
     savedTags: { type: Object },
     langs: { type: Array },
-    selectedLangs: { type: Set },
-    savedLangs: { type: Object },
+    selectedLocales: { type: Set },
+    savedLocales: { type: Object },
     pendingChanges: { type: Boolean },
     toastState: { type: Object },
     config: { type: Object },
@@ -35,7 +35,7 @@ export default class CloudManagementConsole extends LitElement {
     super();
     this.currentCloud = '';
     this.tags = {};
-    this.langs = [
+    this.locales = [
       { language: 'Spanish (Argentina)', ietf: 'es-AR' },
       { language: 'Portuguese (Brazil)', ietf: 'pt-BR' },
       { language: 'English (Canada)', ietf: 'en-CA' },
@@ -118,9 +118,10 @@ export default class CloudManagementConsole extends LitElement {
       { language: 'Korean (South Korea)', ietf: 'ko-KR' },
       { language: 'Vietnamese (Vietnam)', ietf: 'vi-VN' },
     ];
+    this.savedLocales = {};
     this.currentPath = startingPath;
     this.selectedTags = new Set();
-    this.selectedLangs = new Set();
+    this.selectedLocales = new Set();
     this.pendingChanges = false;
     this.config = { 'series-dashboard-location': '/ecc/dashboard/t3/series' };
   }
@@ -146,9 +147,9 @@ export default class CloudManagementConsole extends LitElement {
 
   togglePendingChanges() {
     const hasTagChanges = JSON.stringify(Array.from(this.selectedTags.values())) !== JSON.stringify(this.savedTags[this.currentCloud]);
-    const hasLangChanges = JSON.stringify(Array.from(this.selectedLangs.values())) !== JSON.stringify(this.savedLangs[this.currentCloud]);
+    const hasLocaleChanges = JSON.stringify(Array.from(this.selectedLocales.values())) !== JSON.stringify(this.savedLocales[this.currentCloud]);
 
-    this.pendingChanges = hasTagChanges || hasLangChanges;
+    this.pendingChanges = hasTagChanges || hasLocaleChanges;
   }
 
   handleTagSelect(tag) {
@@ -238,9 +239,12 @@ export default class CloudManagementConsole extends LitElement {
   switchCloudType(cloudType) {
     if (cloudType === this.currentCloud) return;
     const savedCloudTags = this.savedTags[cloudType] || [];
+    const savedCloudLocales = this.savedLocales[cloudType] || [];
 
     this.currentCloud = cloudType;
     this.selectedTags = new Set(savedCloudTags.map((tag) => deepGetTagByTagID(tag.tagID, this.tags)));
+    this.selectedLocales = new Set(savedCloudLocales.map((locale) => this.locales.find((l) => l.ietf === locale)));
+
     this.togglePendingChanges();
 
     this.requestUpdate();
@@ -249,26 +253,27 @@ export default class CloudManagementConsole extends LitElement {
   resetForm() {
     const fullSavedTags = this.savedTags[this.currentCloud]?.map((tag) => deepGetTagByTagID(tag.tagID, this.tags)) || [];
     this.selectedTags = new Set(fullSavedTags);
-    this.selectedLangs = new Set(this.savedLangs[this.currentCloud] || []);
+    this.selectedLocales = new Set(this.savedLocales[this.currentCloud] || []);
 
     this.togglePendingChanges();
   }
 
   async save() {
     this.savedTags[this.currentCloud] = this.getSelectedTags();
-    this.savedLangs[this.currentCloud] = this.selectedLangs;
+    this.savedLocales[this.currentCloud] = this.selectedLocales;
 
     this.togglePendingChanges();
 
     const cloudData = await getCloud(this.currentCloud);
 
-    // translate tagID to caasId, and title to name, and save to cloudData
+    const locales = Array.from(this.selectedLocales).map((locale) => locale.ietf);
+
     const payload = {
       cloudTags: this.getSelectedTags().map((tag) => ({
         caasId: tag.tagID,
         name: tag.title,
       })),
-      cloudLangs: Array.from(this.selectedLangs),
+      locales,
     };
 
     const newCloudData = await updateCloud(this.currentCloud, { ...cloudData, ...payload });
@@ -362,18 +367,18 @@ export default class CloudManagementConsole extends LitElement {
 
         <div class="pool">
           <div class="langs">
-            ${repeat(this.langs, (lang) => html`
-              <sp-action-button class="lang-btn" toggles ?selected=${this.selectedLangs.has(lang)} @change=${() => {
-                if (this.selectedLangs.has(lang)) {
-                  this.selectedLangs.delete(lang);
+            ${repeat(this.locales, (lang) => html`
+              <sp-action-button class="lang-btn" toggles ?selected=${this.selectedLocales.has(lang)} @change=${() => {
+                if (this.selectedLocales.has(lang)) {
+                  this.selectedLocales.delete(lang);
                 } else {
-                  this.selectedLangs.add(lang);
+                  this.selectedLocales.add(lang);
                 }
 
                 this.togglePendingChanges();
                 this.requestUpdate();
               }}>
-                <sp-icon size="s" slot="icon">${this.selectedLangs.has(lang) ? checkSvg : addSvg}</sp-icon>
+                <sp-icon size="s" slot="icon">${this.selectedLocales.has(lang) ? checkSvg : addSvg}</sp-icon>
                 ${lang.language}
               </sp-action-button>
             `)}

@@ -1,5 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { getClouds, getLocales } from '../../scripts/esp-controller.js';
+import { getClouds } from '../../scripts/esp-controller.js';
 import { getCaasTags } from '../../scripts/caas.js';
 import {
   buildNoAccessScreen,
@@ -62,20 +62,17 @@ async function buildCMC(el, blockConfig) {
   const clouds = await getClouds();
 
   const savedTags = {};
-  const savedLangs = {};
-
-  const locales = await getLocales();
-  console.log(locales);
+  const savedLocales = {};
 
   clouds.forEach((cloud) => {
-    const { cloudType, cloudTags, cloudLangs } = cloud;
+    const { cloudType, cloudTags, locales } = cloud;
 
     if (!cloudTags) return;
 
     const fullTags = cloudTags.map((tag) => deepGetTagByTagID(caasTags, tag.caasId));
 
     savedTags[cloudType] = fullTags || [];
-    savedLangs[cloudType] = cloudLangs || [];
+    savedLocales[cloudType] = locales || [];
   });
 
   customElements.define('cloud-management-console', CloudManagementConsole);
@@ -83,7 +80,7 @@ async function buildCMC(el, blockConfig) {
   const tagManager = createTag('cloud-management-console', { class: 'cloud-management-console' }, '', { parent: el });
   tagManager.tags = caasTags;
   tagManager.savedTags = savedTags;
-  tagManager.savedLangs = savedLangs;
+  tagManager.savedLocales = savedLocales;
   tagManager.config = blockConfig;
   tagManager.clouds = clouds;
 }
