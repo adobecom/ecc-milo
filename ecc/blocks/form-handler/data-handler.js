@@ -40,7 +40,6 @@ export function setPropsPayload(props, newData, locale = 'en-US') {
     'modificationTime',
     'creationTime',
     'eventType',
-    'eventFormat',
   ];
   // Update global fields if present
   globalFields.forEach((field) => {
