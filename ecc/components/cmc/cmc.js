@@ -240,14 +240,14 @@ export default class CloudManagementConsole extends LitElement {
     const savedCloudTags = this.savedTags[cloudType] || [];
 
     this.currentCloud = cloudType;
-    this.selectedTags = new Set(savedCloudTags.map((tag) => this.deepGetTagByTagID(tag.tagID, this.tags)));
+    this.selectedTags = new Set(savedCloudTags.map((tag) => deepGetTagByTagID(tag.tagID, this.tags)));
     this.togglePendingChanges();
 
     this.requestUpdate();
   }
 
   resetForm() {
-    const fullSavedTags = this.savedTags[this.currentCloud]?.map((tag) => this.deepGetTagByTagID(tag.tagID, this.tags)) || [];
+    const fullSavedTags = this.savedTags[this.currentCloud]?.map((tag) => deepGetTagByTagID(tag.tagID, this.tags)) || [];
     this.selectedTags = new Set(fullSavedTags);
     this.selectedLangs = new Set(this.savedLangs[this.currentCloud] || []);
 
@@ -325,7 +325,7 @@ export default class CloudManagementConsole extends LitElement {
         <div class="millar-menu">
           <div class="menu-group">
             ${this.currentPath.split('/').map((_p, i, arr) => {
-            const tag = this.deepGetTagByPath(arr, i, this.tags);
+            const tag = deepGetTagByPath(arr, i, this.tags);
 
             if (tag && tag.tags && Object.keys(tag.tags).length) {
               return html`
@@ -340,7 +340,7 @@ export default class CloudManagementConsole extends LitElement {
           </div>
                     <div class="menu-breadcrumbs">
             ${this.currentPath.split('/').map((path, i, arr) => {
-            const tag = this.deepGetTagByPath(arr, i);
+            const tag = deepGetTagByPath(arr, i);
 
             if (tag) {
               return html`
