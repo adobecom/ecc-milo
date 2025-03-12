@@ -1,9 +1,10 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
-import { getEvents } from '../../scripts/esp-controller.js';
+import { getCloud, getEvents } from '../../scripts/esp-controller.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../../scripts/utils.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
@@ -311,6 +312,142 @@ function dateTimeStringToTimestamp(dateString, timeString) {
   return date.getTime();
 }
 
+async function updateLanguagePicker(component, props) {
+  const languagePicker = component.querySelector('#language-picker');
+  const eventUrlInput = component.querySelector('#event-info-url-input');
+
+  if (!languagePicker || !eventUrlInput) return;
+
+  const { cloudType } = component.dataset;
+
+  if (!cloudType) return;
+
+  const cloud = await getCloud(cloudType);
+
+  if (!cloud || cloud.error) return;
+  const { locales } = cloud;
+
+  // TODO: remove dictionary
+  const dictionary = {
+    'en-US': 'English (United States)',
+    'es-ES': 'Spanish (Spain)',
+    'fr-FR': 'French (France)',
+    'de-DE': 'German (Germany)',
+    'it-IT': 'Italian (Italy)',
+    'ja-JP': 'Japanese (Japan)',
+    'ko-KR': 'Korean (South Korea)',
+    'vi-VN': 'Vietnamese (Vietnam)',
+    'es-AR': 'Spanish (Argentina)',
+    'pt-BR': 'Portuguese (Brazil)',
+    'en-CA': 'English (Canada)',
+    'fr-CA': 'French (Canada)',
+    'es-CL': 'Spanish (Chile)',
+    'es-CO': 'Spanish (Colombia)',
+    'es-CR': 'Spanish (Costa Rica)',
+    'es-EC': 'Spanish (Ecuador)',
+    'es-EL': 'Spanish (El Salvador)',
+    'es-GT': 'Spanish (Guatemala)',
+    'es-LA': 'Spanish (Latin America)',
+    'es-MX': 'Spanish (Mexico)',
+    'es-PE': 'Spanish (Peru)',
+    'es-PR': 'Spanish (Puerto Rico)',
+    'en-africa': 'English (Africa)',
+    'fr-BE': 'French (Belgium)',
+    'en-BE': 'English (Belgium)',
+    'nl-BE': 'Dutch (Belgium)',
+    'en-CY': 'English (Cyprus)',
+    'da-DK': 'Danish (Denmark)',
+    'et-EE': 'Estonian (Estonia)',
+    'ar-EG': 'Arabic (Egypt)',
+    'en-GB': 'English (United Kingdom)',
+    'lv-LV': 'Latvian (Latvia)',
+    'lt-LT': 'Lithuanian (Lithuania)',
+    'de-LU': 'German (Luxembourg)',
+    'en-LU': 'English (Luxembourg)',
+    'fr-LU': 'French (Luxembourg)',
+    'hu-HU': 'Hungarian (Hungary)',
+    'en-MT': 'English (Malta)',
+    'en-mena': 'English (MENA)',
+    'ar-mena': 'Arabic (MENA)',
+    'en-NG': 'English (Nigeria)',
+    'nl-NL': 'Dutch (Netherlands)',
+    'no-NO': 'Norwegian (Norway)',
+    'pl-PL': 'Polish (Poland)',
+    'pt-PT': 'Portuguese (Portugal)',
+    'ar-QA': 'Arabic (Qatar)',
+    'ro-RO': 'Romanian (Romania)',
+    'en-sa': 'English (Saudi Arabia)',
+    'fr-CH': 'French (Switzerland)',
+    'de-CH': 'German (Switzerland)',
+    'it-CH': 'Italian (Switzerland)',
+    'sl-SI': 'Slovenian (Slovenia)',
+    'sk-SK': 'Slovak (Slovakia)',
+    'fi-FI': 'Finnish (Finland)',
+    'sv-SE': 'Swedish (Sweden)',
+    'tr-TR': 'Turkish (Turkey)',
+    'en-ae': 'English (United Arab Emirates)',
+    'de-AT': 'German (Austria)',
+    'cs-CZ': 'Czech (Czech Republic)',
+    'bg-BG': 'Bulgarian (Bulgaria)',
+    'ru-RU': 'Russian (Russia)',
+    'uk-UA': 'Ukrainian (Ukraine)',
+    'ar-ae': 'Arabic (United Arab Emirates)',
+    'ar-sa': 'Arabic (Saudi Arabia)',
+    'en-ZA': 'English (South Africa)',
+    'en-AU': 'English (Australia)',
+    'en-HK': 'English (Hong Kong)',
+    'en-IN': 'English (India)',
+    'hi-IN': 'Hindi (India)',
+    'zh-CN': 'Chinese (Simplified, China)',
+    'zh-HK': 'Chinese (Traditional, Hong Kong)',
+    'zh-TW': 'Chinese (Traditional, Taiwan)',
+  };
+
+  languagePicker.querySelectorAll('sp-menu-item').forEach((option) => {
+    option.remove();
+  });
+
+  locales.forEach((l, i) => {
+    const lang = dictionary[l];
+    const opt = createTag('sp-menu-item', { value: l }, lang);
+    languagePicker.append(opt);
+
+    if (props.locale === l) {
+      languagePicker.value = l;
+    } else if (i === 0) {
+      languagePicker.value = l;
+    }
+  });
+
+  languagePicker.disabled = false;
+}
+
+function initTitleWatcher(component, props) {
+  const titleInput = component.querySelector('#info-field-event-title');
+  const engTitle = component.querySelector('#event-info-url-input');
+
+  let existingTitle = titleInput.value;
+
+  if (!engTitle) return;
+
+  engTitle.value = props.eventDataResp?.engTitle;
+  if (!engTitle.value || engTitle.value === existingTitle) {
+    engTitle.value = titleInput.value;
+  }
+
+  BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: engTitle.value });
+
+  titleInput.addEventListener('input', () => {
+    if (engTitle.value === '' || engTitle.value === existingTitle) {
+      engTitle.value = titleInput.value;
+    }
+
+    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: engTitle.value });
+
+    existingTitle = titleInput.value;
+  });
+}
+
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -340,11 +477,17 @@ export function onSubmit(component, props) {
     timezone,
   };
 
-  props.payload = { ...props.payload, ...eventInfo };
+  setPropsPayload(props, eventInfo);
 }
 
 export async function onPayloadUpdate(component, props) {
-  // do nothing
+  const { cloudType } = props.payload;
+
+  if (cloudType && cloudType !== component.dataset.cloudType) {
+    component.dataset.cloudType = cloudType;
+  }
+
+  updateLanguagePicker(component, props);
 }
 
 export async function onRespUpdate(_component, _props) {
@@ -365,13 +508,16 @@ export default async function init(component, props) {
   const allEventsResp = await getEvents();
   const allEvents = allEventsResp?.events;
   const eventData = props.eventDataResp;
+  const localeEventData = eventData.localization?.[props.lang] || eventData;
   const sameSeriesEvents = allEvents?.filter((e) => {
     const matchInPayload = e.seriesId === props.payload.seriesId;
-    const matchInResp = e.seriesId === eventData.seriesId;
+    const matchInResp = e.seriesId === localeEventData.seriesId;
     return matchInPayload || matchInResp;
   }) || [];
 
   const eventTitleInput = component.querySelector('#info-field-event-title');
+  const eventDescriptionInput = component.querySelector('#info-field-event-description');
+  const languagePicker = component.querySelector('#language-picker');
   const startTimeInput = component.querySelector('#time-picker-start-time');
   const allStartTimeOptions = startTimeInput.querySelectorAll('sp-menu-item');
   const startAmpmInput = component.querySelector('#ampm-picker-start-time');
@@ -385,10 +531,6 @@ export default async function init(component, props) {
   const datePicker = component.querySelector('#event-info-date-picker');
 
   initCalendar(component);
-
-  eventTitleInput.addEventListener('input', () => {
-    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: eventTitleInput.value });
-  });
 
   const resetAllOptions = () => {
     [allEndTimeOptions, allStartTimeOptions, endAmpmOptions, startAmpmOptions]
@@ -554,7 +696,7 @@ export default async function init(component, props) {
     localStartTime,
     localEndTime,
     timezone,
-  } = eventData;
+  } = localeEventData;
 
   if (title
     && description
@@ -573,8 +715,8 @@ export default async function init(component, props) {
       selectedEndDate: parseFormatedDate(localEndDate),
     });
 
-    component.querySelector('#info-field-event-title').value = title || '';
-    component.querySelector('#info-field-event-description').value = description || '';
+    eventTitleInput.value = title || '';
+    eventDescriptionInput.value = description || '';
     changeInputValue(startTime, 'value', `${localStartTime}` || '');
     changeInputValue(endTime, 'value', `${localEndTime}` || '');
     changeInputValue(startTimeInput, 'value', `${startTimePieces.hours}:${startTimePieces.minutes}` || '');
@@ -594,6 +736,11 @@ export default async function init(component, props) {
 
     component.classList.add('prefilled');
   }
+
+  initTitleWatcher(component, props);
+  languagePicker.addEventListener('change', () => {
+    props.locale = languagePicker.value;
+  });
 }
 
 export function onTargetUpdate(component, props) {

@@ -1,5 +1,6 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { addTooltipToEl, decorateSwitchFieldset } from '../../scripts/utils.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -47,6 +48,8 @@ function prefillFields(component, props) {
   const descriptionEl = component.querySelector('#rsvp-form-detail-description');
 
   const eventData = props.eventDataResp;
+  const localeEventData = eventData.localization?.[props.lang] || eventData;
+
   if (eventData) {
     const {
       attendeeLimit,
@@ -54,7 +57,7 @@ function prefillFields(component, props) {
       hostEmail,
       rsvpDescription,
       allowGuestRegistration,
-    } = eventData;
+    } = localeEventData;
 
     if (attendeeLimitEl && attendeeLimit) attendeeLimitEl.value = attendeeLimit;
     if (disbleWaitlistEl) disbleWaitlistEl.checked = !allowWaitlisting;
@@ -200,7 +203,7 @@ export function onSubmit(component, props) {
   const allowGuestRegistration = guestRegistrationInput?.checked || false;
 
   const attendeeLimit = Number.isNaN(+attendeeLimitVal) ? null : +attendeeLimitVal;
-  const rsvpData = { ...props.payload };
+  const rsvpData = {};
 
   rsvpData.rsvpDescription = rsvpDescription;
   rsvpData.allowWaitlisting = !!allowWaitlisting;
@@ -208,13 +211,11 @@ export function onSubmit(component, props) {
 
   if (contactHost && hostEmail) {
     rsvpData.hostEmail = hostEmail;
-  } else {
-    delete rsvpData.hostEmail;
   }
 
   if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
 
-  props.payload = rsvpData;
+  setPropsPayload(props, rsvpData);
 }
 
 function updateHeadingTooltip(component) {

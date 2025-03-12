@@ -37,24 +37,6 @@ async function decorateSeriesSelect(column) {
   column.append(seriesSelectWrapper);
 }
 
-// function decorateFormatSelect(row) {
-//   const formatSelectWrapper = createTag('div', { class: 'format-picker-wrapper' });
-//   const label = createTag('sp-label', { for: 'format-select-input' }, 'Select format');
-//   const select = createTag('sp-picker', { id: 'format-select-input', class: 'select-input', size: 'm', label: 'Format' });
-//   const options = [
-//     { id: 'InPerson', name: 'In-Person' },
-//     { id: 'Webinar', name: 'Webinar' },
-//   ];
-
-//   options.forEach((o) => {
-//     const opt = createTag('sp-menu-item', { value: o.id }, o.name);
-//     select.append(opt);
-//   });
-
-//   formatSelectWrapper.append(label, select);
-//   row.append(formatSelectWrapper);
-// }
-
 function decorateTimeZoneSelect(column) {
   const tzWrapper = createTag('div', { class: 'time-zone-picker-wrapper' });
   const phText = column.querySelector('p')?.textContent.trim();

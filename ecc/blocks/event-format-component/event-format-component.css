@@ -2,6 +2,7 @@
   display: flex;
   gap: 32px;
   align-items: flex-end;
+  flex-wrap: wrap;
 }
 
 .event-format-component select,

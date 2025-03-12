@@ -3,6 +3,7 @@ import { getSeriesForUser } from '../../scripts/esp-controller.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { changeInputValue } from '../../scripts/utils.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -178,7 +179,8 @@ async function initDupCheck(props, component) {
 
 export default async function init(component, props) {
   const eventData = props.eventDataResp;
-  component.dataset.cloudType = props.payload.cloudType || eventData.cloudType;
+  const localeEventData = eventData.localization?.[props.lang] || eventData;
+  component.dataset.cloudType = props.payload.cloudType || localeEventData.cloudType;
   initCloudTypeSelect(props, component);
   prepopulateTimeZone(component);
   await initDupCheck(props, component);
@@ -188,7 +190,7 @@ export default async function init(component, props) {
     cloudType,
     seriesId,
     eventType,
-  } = eventData;
+  } = localeEventData;
 
   if (cloudType && seriesId && eventType) {
     changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType);
@@ -215,7 +217,7 @@ export function onSubmit(component, props) {
     seriesId,
   };
 
-  props.payload = { ...props.payload, ...eventFormat };
+  setPropsPayload(props, eventFormat);
 }
 
 export function onTargetUpdate(component, props) {

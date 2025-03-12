@@ -4,6 +4,7 @@ import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler/form-handler.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
 
 function togglePrefillableFieldsHiddenState(component) {
   const address = component.querySelector('#google-place-formatted-address');
@@ -201,11 +202,7 @@ export async function onSubmit(component, props) {
   const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible')?.checked;
   const showVenueAdditionalInfoPostEvent = component.querySelector('#checkbox-venue-additional-info-visible')?.checked;
 
-  props.payload = {
-    ...props.payload,
-    showVenuePostEvent,
-    showVenueAdditionalInfoPostEvent,
-  };
+  setPropsPayload(props, { showVenuePostEvent, showVenueAdditionalInfoPostEvent });
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -220,10 +217,11 @@ export default async function init(component, props) {
   // TODO: Import createTag at top level once Safari supports top-level await
   const { createTag } = await import(`${LIBS}/utils/utils.js`);
   const eventData = props.eventDataResp;
+  const localeEventData = eventData.localization?.[props.lang] || eventData;
 
   await loadGoogleMapsAPI(() => initAutocomplete(component, props));
 
-  const { venue, showVenuePostEvent, showVenueAdditionalInfoPostEvent } = eventData;
+  const { venue, showVenuePostEvent, showVenueAdditionalInfoPostEvent } = localeEventData;
 
   const venueNameInput = component.querySelector('#venue-info-venue-name');
   const venueRTE = component.querySelector('#venue-additional-info-rte');

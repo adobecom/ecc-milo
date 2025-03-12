@@ -42,6 +42,13 @@ async function safeFetch(url, options) {
     throw new Error('Invalid or unauthorized URL');
   }
 
+  const nonInvasiveTest = new URLSearchParams(window.location.search).get('nonInvasiveTest') === 'true';
+  if (nonInvasiveTest && ['PUT', 'POST', 'DELETE'].includes(options.method)) {
+    console.log('Non-invasive test mode. Skipping request:', url, options);
+    console.log('Payload:', JSON.parse(options.body));
+    return { ok: true, status: 200, json: () => Promise.resolve({}) };
+  }
+
   try {
     const response = await fetch(url, options);
 
@@ -216,6 +223,26 @@ function convertToSpeaker(speaker) {
     creationTime,
     modificationTime,
   };
+}
+
+export async function getLocales() {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/locales`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log('Failed to get locales. Status:', response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log('Failed to get locales. Error:', error);
+    return { status: 'Network Error', error: error.message };
+  }
 }
 
 export async function deleteImage(configs, imageId) {
