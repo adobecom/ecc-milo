@@ -48,7 +48,7 @@ function prefillFields(component, props) {
   const descriptionEl = component.querySelector('#rsvp-form-detail-description');
 
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localization?.[props.lang] || eventData;
+  const localeEventData = eventData.localizations?.[props.lang] || eventData;
 
   if (eventData) {
     const {

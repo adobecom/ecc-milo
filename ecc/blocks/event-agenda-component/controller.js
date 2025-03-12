@@ -32,7 +32,7 @@ export default function init(component, props) {
   const agendaGroup = component.querySelector('agenda-fieldset-group');
   const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info');
 
-  const localeEventData = eventData.localization?.[props.lang] || eventData;
+  const localeEventData = eventData.localizations?.[props.lang] || eventData;
   if (localeEventData.agenda?.length) {
     agendaGroup.agendaItems = localeEventData.agenda;
     component.classList.add('prefilled');

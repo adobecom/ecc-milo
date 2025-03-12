@@ -508,7 +508,7 @@ export default async function init(component, props) {
   const allEventsResp = await getEvents();
   const allEvents = allEventsResp?.events;
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localization?.[props.lang] || eventData;
+  const localeEventData = eventData.localizations?.[props.lang] || eventData;
   const sameSeriesEvents = allEvents?.filter((e) => {
     const matchInPayload = e.seriesId === props.payload.seriesId;
     const matchInResp = e.seriesId === localeEventData.seriesId;
