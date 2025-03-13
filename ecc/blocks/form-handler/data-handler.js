@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 
-import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
+import { EVENT_DATA_FILTER, SPEAKER_DATA_FILTER, SPONSOR_DATA_FILTER } from '../../scripts/constants.js';
 
 const responseCache = { localizations: {} };
 
@@ -8,6 +8,21 @@ const payloadCache = { localizations: {} };
 
 function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
+}
+
+function splitLocalizableFields(data, filter) {
+  const localizableFields = {};
+  const nonLocalizableFields = {};
+
+  Object.entries(data).forEach(([key, value]) => {
+    if (filter[key]?.localizable) {
+      localizableFields[key] = value;
+    } else if (isValidAttribute(value)) {
+      nonLocalizableFields[key] = value;
+    }
+  });
+
+  return { localizableFields, nonLocalizableFields };
 }
 
 export function quickFilter(obj) {
@@ -42,16 +57,10 @@ export function setPropsPayload(props, newData, locale = 'en-US') {
   }
 
   // Split newData into localizable and non-localizable fields
-  const localizableFields = {};
-  const nonLocalizableFields = {};
-
-  Object.entries(newData).forEach(([key, value]) => {
-    if (EVENT_DATA_FILTER[key]?.localizable) {
-      localizableFields[key] = value;
-    } else {
-      nonLocalizableFields[key] = value;
-    }
-  });
+  const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
+    newData,
+    EVENT_DATA_FILTER,
+  );
 
   // Update the payload
   props.payload = {
@@ -80,16 +89,10 @@ export function setPayloadCache(payload, locale = 'en-US') {
   }
 
   // Split payload into localizable and non-localizable fields
-  const localizableFields = {};
-  const nonLocalizableFields = {};
-
-  Object.entries(payload).forEach(([key, value]) => {
-    if (EVENT_DATA_FILTER[key]?.localizable) {
-      localizableFields[key] = value;
-    } else if (isValidAttribute(value)) {
-      nonLocalizableFields[key] = value;
-    }
-  });
+  const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
+    payload,
+    EVENT_DATA_FILTER,
+  );
 
   // Update payloadCache
   Object.assign(payloadCache, nonLocalizableFields);
@@ -104,6 +107,54 @@ export function setPayloadCache(payload, locale = 'en-US') {
     const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
     if (jointTopics.length) payloadCache.localizations[locale].topics = jointTopics;
   }
+}
+
+export function setSpeakerPayload(speakerData, locale = 'en-US') {
+  if (!speakerData) return speakerData;
+
+  // Split speaker data into localizable and non-localizable fields
+  const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
+    speakerData,
+    SPEAKER_DATA_FILTER,
+  );
+
+  return {
+    ...nonLocalizableFields,
+    localizations: { [locale]: localizableFields },
+  };
+}
+
+export function setSponsorPayload(sponsorData, locale = 'en-US') {
+  if (!sponsorData) return sponsorData;
+
+  // Split sponsor data into localizable and non-localizable fields
+  const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
+    sponsorData,
+    SPONSOR_DATA_FILTER,
+  );
+
+  return {
+    ...nonLocalizableFields,
+    localizations: { [locale]: localizableFields },
+  };
+}
+
+export function getLocalizedSpeakerData(speakerData, locale = 'en-US') {
+  if (!speakerData) return speakerData;
+
+  return {
+    ...speakerData,
+    ...speakerData.localizations?.[locale],
+  };
+}
+
+export function getLocalizedSponsorData(sponsorData, locale = 'en-US') {
+  if (!sponsorData) return sponsorData;
+
+  return {
+    ...sponsorData,
+    ...sponsorData.localizations?.[locale],
+  };
 }
 
 export function getFilteredCachedPayload(locale = 'en-US') {

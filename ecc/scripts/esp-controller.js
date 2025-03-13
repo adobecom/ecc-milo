@@ -2,6 +2,7 @@ import { LIBS } from './scripts.js';
 import { getEventServiceEnv, getSecret, signIn } from './utils.js';
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
 import { API_CONFIG, ALLOWED_HOSTS } from './constants.js';
+import { setSpeakerPayload, setSponsorPayload, getLocalizedSpeakerData, getLocalizedSponsorData } from '../blocks/form-handler/data-handler.js';
 
 export function waitForAdobeIMS() {
   return new Promise((resolve) => {
@@ -414,9 +415,10 @@ export async function createSpeaker(profile, seriesId) {
   if (!profile || typeof profile !== 'object') throw new Error('Invalid speaker profile');
 
   const nSpeaker = convertToNSpeaker(profile);
+  const localizedSpeaker = setSpeakerPayload(nSpeaker);
 
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(nSpeaker);
+  const raw = JSON.stringify(localizedSpeaker);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -428,7 +430,7 @@ export async function createSpeaker(profile, seriesId) {
       return { status: response.status, error: data };
     }
 
-    return data;
+    return getLocalizedSpeakerData(data);
   } catch (error) {
     window.lana?.log('Failed to create speaker. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -439,8 +441,9 @@ export async function createSponsor(sponsorData, seriesId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
+  const localizedSponsor = setSponsorPayload(sponsorData);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(sponsorData);
+  const raw = JSON.stringify(localizedSponsor);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -452,7 +455,7 @@ export async function createSponsor(sponsorData, seriesId) {
       return { status: response.status, error: data };
     }
 
-    return data;
+    return getLocalizedSponsorData(data);
   } catch (error) {
     window.lana?.log('Failed to create sponsor. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -464,8 +467,9 @@ export async function updateSponsor(sponsorData, sponsorId, seriesId) {
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
+  const localizedSponsor = setSponsorPayload(sponsorData);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(sponsorData);
+  const raw = JSON.stringify(localizedSponsor);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -477,7 +481,7 @@ export async function updateSponsor(sponsorData, sponsorId, seriesId) {
       return { status: response.status, error: data };
     }
 
-    return data;
+    return getLocalizedSponsorData(data);
   } catch (error) {
     window.lana?.log('Failed to update sponsor. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -488,8 +492,9 @@ export async function addSponsorToEvent(sponsorData, eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
+  const localizedSponsor = setSponsorPayload(sponsorData);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(sponsorData);
+  const raw = JSON.stringify(localizedSponsor);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -501,7 +506,7 @@ export async function addSponsorToEvent(sponsorData, eventId) {
       return { status: response.status, error: data };
     }
 
-    return data;
+    return getLocalizedSponsorData(data);
   } catch (error) {
     window.lana?.log('Failed to add sponsor to event. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -513,8 +518,9 @@ export async function updateSponsorInEvent(sponsorData, sponsorId, eventId) {
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
+  const localizedSponsor = setSponsorPayload(sponsorData);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(sponsorData);
+  const raw = JSON.stringify(localizedSponsor);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -526,7 +532,7 @@ export async function updateSponsorInEvent(sponsorData, sponsorId, eventId) {
       return { status: response.status, error: data };
     }
 
-    return data;
+    return getLocalizedSponsorData(data);
   } catch (error) {
     window.lana?.log('Failed to update sponsor in event. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -628,8 +634,9 @@ export async function addSpeakerToEvent(speakerData, eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!speakerData || typeof speakerData !== 'object') throw new Error('Invalid speaker data');
 
+  const localizedSpeaker = setSpeakerPayload(speakerData);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(speakerData);
+  const raw = JSON.stringify(localizedSpeaker);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -641,7 +648,7 @@ export async function addSpeakerToEvent(speakerData, eventId) {
       return { status: response.status, error: data };
     }
 
-    return data;
+    return getLocalizedSpeakerData(data);
   } catch (error) {
     window.lana?.log('Failed to add speaker to event. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -653,8 +660,9 @@ export async function updateSpeakerInEvent(speakerData, speakerId, eventId) {
   if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
   if (!speakerData || typeof speakerData !== 'object') throw new Error('Invalid speaker data');
 
+  const localizedSpeaker = setSpeakerPayload(speakerData);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(speakerData);
+  const raw = JSON.stringify(localizedSpeaker);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -666,7 +674,7 @@ export async function updateSpeakerInEvent(speakerData, speakerId, eventId) {
       return { status: response.status, error: data };
     }
 
-    return data;
+    return getLocalizedSpeakerData(data);
   } catch (error) {
     window.lana?.log('Failed to update speaker in event. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -712,7 +720,7 @@ export async function getSpeaker(seriesId, speakerId) {
       return { status: response.status, error: data };
     }
 
-    return convertToSpeaker(data);
+    return getLocalizedSpeakerData(convertToSpeaker(data));
   } catch (error) {
     window.lana?.log('Failed to get speaker details. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -755,8 +763,9 @@ export async function updateSpeaker(profile, seriesId) {
   if (!profile || typeof profile !== 'object') throw new Error('Invalid speaker profile');
 
   const nSpeaker = convertToNSpeaker(profile);
+  const localizedSpeaker = setSpeakerPayload(nSpeaker);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(nSpeaker);
+  const raw = JSON.stringify(localizedSpeaker);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -768,7 +777,7 @@ export async function updateSpeaker(profile, seriesId) {
       return { status: response.status, error: data };
     }
 
-    return data;
+    return getLocalizedSpeakerData(data);
   } catch (error) {
     window.lana?.log('Failed to update speaker. Error:', error);
     return { status: 'Network Error', error: error.message };

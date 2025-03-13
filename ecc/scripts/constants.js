@@ -80,3 +80,37 @@ export const EVENT_DATA_FILTER = {
   creationTime: { type: 'string', localizable: false, cloneable: true, submittable: true, deletable: false },
   modificationTime: { type: 'string', localizable: false, cloneable: true, submittable: true, deletable: false },
 };
+
+/**
+ * @typedef {Object} SpeakerDataFilter
+ * @property {string} type - The type of the attribute.
+ * @property {boolean} localizable - Whether the attr should be in payload or payload.localizations.
+ * @property {boolean} submittable - Whether the attribute can be submitted.
+ */
+
+export const SPEAKER_DATA_FILTER = {
+  speakerId: { type: 'string', localizable: false, submittable: true },
+  firstName: { type: 'string', localizable: false, submittable: true },
+  lastName: { type: 'string', localizable: false, submittable: true },
+  title: { type: 'string', localizable: true, submittable: true },
+  type: { type: 'string', localizable: false, submittable: true },
+  bio: { type: 'string', localizable: true, submittable: true },
+  socialMedia: { type: 'array', localizable: false, submittable: true },
+  creationTime: { type: 'string', localizable: false, submittable: false },
+  modificationTime: { type: 'string', localizable: false, submittable: false },
+};
+
+/**
+ * @typedef {Object} SponsorDataFilter
+ * @property {string} type - The type of the attribute.
+ * @property {boolean} localizable - Whether the attr should be in payload or payload.localizations.
+ * @property {boolean} submittable - Whether the attribute can be submitted.
+ */
+
+export const SPONSOR_DATA_FILTER = {
+  sponsorId: { type: 'string', localizable: false, submittable: true },
+  sponsorType: { type: 'string', localizable: false, submittable: true },
+  info: { type: 'string', localizable: true, submittable: true },
+  creationTime: { type: 'string', localizable: false, submittable: false },
+  modificationTime: { type: 'string', localizable: false, submittable: false },
+};
