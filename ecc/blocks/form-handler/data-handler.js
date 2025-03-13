@@ -28,18 +28,6 @@ export function quickFilter(obj) {
 
 export function setPropsPayload(props, newData, locale = 'en-US') {
   const existingPayload = props.payload;
-  const localePayload = existingPayload.localizations?.[locale] || {};
-
-  const globalFields = [
-    'eventId',
-    'modificationTime',
-    'creationTime',
-    'eventType',
-  ];
-  // Update global fields if present
-  globalFields.forEach((field) => {
-    if (newData[field]) existingPayload[field] = newData[field];
-  });
 
   // If newData has a localizations object, merge it directly
   if (newData.localizations) {
@@ -50,28 +38,37 @@ export function setPropsPayload(props, newData, locale = 'en-US') {
         ...newData.localizations,
       },
     };
-  } else {
-    // Update localizations structure for other fields
-    props.payload = {
-      ...existingPayload,
-      localizations: {
-        ...existingPayload.localizations,
-        [locale]: {
-          ...localePayload,
-          ...newData,
-        },
-      },
-    };
+    return;
   }
+
+  // Split newData into localizable and non-localizable fields
+  const localizableFields = {};
+  const nonLocalizableFields = {};
+
+  Object.entries(newData).forEach(([key, value]) => {
+    if (EVENT_DATA_FILTER[key]?.localizable) {
+      localizableFields[key] = value;
+    } else {
+      nonLocalizableFields[key] = value;
+    }
+  });
+
+  // Update the payload
+  props.payload = {
+    ...existingPayload,
+    ...nonLocalizableFields,
+    localizations: {
+      ...existingPayload.localizations,
+      [locale]: {
+        ...existingPayload.localizations?.[locale],
+        ...localizableFields,
+      },
+    },
+  };
 }
 
 export function setPayloadCache(payload, locale = 'en-US') {
   if (!payload) return;
-
-  // Update global fields
-  if (payload.eventId) payloadCache.eventId = payload.eventId;
-  if (payload.modificationTime) payloadCache.modificationTime = payload.modificationTime;
-  if (payload.creationTime) payloadCache.creationTime = payload.creationTime;
 
   // If payload has a localizations object, merge it directly
   if (payload.localizations) {
@@ -79,15 +76,33 @@ export function setPayloadCache(payload, locale = 'en-US') {
       ...payloadCache.localizations,
       ...payload.localizations,
     };
-  } else {
-    const localeData = payload;
-    payloadCache.localizations[locale] = quickFilter(localeData);
+    return;
+  }
 
-    const { pendingTopics } = localeData;
-    if (pendingTopics) {
-      const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
-      if (jointTopics.length) payloadCache.localizations[locale].topics = jointTopics;
+  // Split payload into localizable and non-localizable fields
+  const localizableFields = {};
+  const nonLocalizableFields = {};
+
+  Object.entries(payload).forEach(([key, value]) => {
+    if (EVENT_DATA_FILTER[key]?.localizable) {
+      localizableFields[key] = value;
+    } else if (isValidAttribute(value)) {
+      nonLocalizableFields[key] = value;
     }
+  });
+
+  // Update payloadCache
+  Object.assign(payloadCache, nonLocalizableFields);
+  payloadCache.localizations[locale] = {
+    ...payloadCache.localizations[locale],
+    ...localizableFields,
+  };
+
+  // Handle special case for pendingTopics
+  const { pendingTopics } = payload;
+  if (pendingTopics) {
+    const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
+    if (jointTopics.length) payloadCache.localizations[locale].topics = jointTopics;
   }
 }
 
