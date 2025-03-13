@@ -78,4 +78,5 @@ export const EVENT_DATA_FILTER = {
   published: { type: 'boolean', cloneable: false, submittable: true, deletable: false },
   creationTime: { type: 'string', cloneable: false, submittable: true, deletable: false },
   modificationTime: { type: 'string', cloneable: false, submittable: true, deletable: false },
+  isPrivate: { type: 'boolean', cloneable: false, submittable: true, deletable: false },
 };
