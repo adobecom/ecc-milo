@@ -3,7 +3,6 @@
 import { EVENT_DATA_FILTER, SPEAKER_DATA_FILTER, SPONSOR_DATA_FILTER } from '../../scripts/constants.js';
 
 const responseCache = { localizations: {} };
-
 const payloadCache = { localizations: {} };
 
 function isValidAttribute(attr) {
@@ -25,7 +24,7 @@ function splitLocalizableFields(data, filter) {
   return { localizableFields, nonLocalizableFields };
 }
 
-export function quickFilter(obj) {
+export function submitFilter(obj) {
   const output = {
     eventId: obj.eventId,
     modificationTime: obj.modificationTime,
@@ -94,7 +93,7 @@ export function setPayloadCache(payload, locale = 'en-US') {
     EVENT_DATA_FILTER,
   );
 
-  // Update payloadCache
+  // Update payloadCache with non-localizable fields
   Object.assign(payloadCache, nonLocalizableFields);
   payloadCache.localizations[locale] = {
     ...payloadCache.localizations[locale],
@@ -162,9 +161,7 @@ export function getFilteredCachedPayload(locale = 'en-US') {
 
   // Return both global and localized data
   return {
-    eventId: payloadCache.eventId,
-    modificationTime: payloadCache.modificationTime,
-    creationTime: payloadCache.creationTime,
+    ...payloadCache,
     localizations: { [locale]: localePayload },
   };
 }
@@ -172,21 +169,24 @@ export function getFilteredCachedPayload(locale = 'en-US') {
 export function setResponseCache(response, locale = 'en-US') {
   if (!response) return;
 
-  // Update global fields
-  if (response.eventId) responseCache.eventId = response.eventId;
-  if (response.modificationTime) responseCache.modificationTime = response.modificationTime;
-  if (response.creationTime) responseCache.creationTime = response.creationTime;
-
   // If response has a localizations object, merge it directly
   if (response.localizations) {
     responseCache.localizations = {
       ...responseCache.localizations,
       ...response.localizations,
     };
-  } else {
-    const localeData = response;
-    responseCache.localizations[locale] = quickFilter(localeData);
+    return;
   }
+
+  // Split response into localizable and non-localizable fields
+  const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
+    response,
+    EVENT_DATA_FILTER,
+  );
+
+  // Update responseCache with non-localizable fields
+  Object.assign(responseCache, nonLocalizableFields);
+  responseCache.localizations[locale] = submitFilter(localizableFields);
 }
 
 export function getFilteredCachedResponse(locale = 'en-US') {
@@ -194,107 +194,15 @@ export function getFilteredCachedResponse(locale = 'en-US') {
 
   // Return both global and localized data
   return {
-    eventId: responseCache.eventId,
-    modificationTime: responseCache.modificationTime,
-    creationTime: responseCache.creationTime,
+    ...responseCache,
     localizations: { [locale]: localeResponse },
   };
-}
-
-/**
- * Recursively compares two values to determine if they are different.
- *
- * @param {*} value1 - The first value to compare.
- * @param {*} value2 - The second value to compare.
- * @returns {boolean} - Returns true if the values are different, otherwise false.
- */
-export function compareObjects(value1, value2, lengthOnly = false) {
-  if (
-    typeof value1 === 'object'
-    && value1 !== null
-    && !Array.isArray(value1)
-    && typeof value2 === 'object'
-    && value2 !== null
-    && !Array.isArray(value2)
-  ) {
-    if (hasContentChanged(value1, value2)) {
-      return true;
-    }
-  } else if (Array.isArray(value1) && Array.isArray(value2)) {
-    if (value1.length !== value2.length) {
-      // Change detected due to different array lengths
-      return true;
-    }
-
-    if (!lengthOnly) {
-      for (let i = 0; i < value1.length; i += 1) {
-        if (compareObjects(value1[i], value2[i])) {
-          return true;
-        }
-      }
-    }
-  } else if (value1 !== value2) {
-    // Change detected
-    return true;
-  }
-  return false;
-}
-
-/**
- * Determines if the content of two objects has changed.
- *
- * @param {Object} oldData - The original object.
- * @param {Object} newData - The updated object.
- * @returns {boolean} - Returns true if content has changed, otherwise false.
- * @throws {TypeError} - Throws error if inputs are not objects.
- */
-export function hasContentChanged(oldData, newData) {
-  // Ensure both inputs are objects
-  if (
-    typeof oldData !== 'object'
-    || oldData === null
-    || typeof newData !== 'object'
-    || newData === null
-  ) {
-    throw new TypeError('Both oldData and newData must be objects');
-  }
-
-  const ignoreList = [
-    'modificationTime',
-    'status',
-    'platform',
-    'platformCode',
-    'liveUpdate',
-    'externalProvider',
-  ];
-
-  const lengthOnlyList = ['speakers'];
-
-  // Checking keys counts
-  const oldDataKeys = Object.keys(oldData).filter((key) => !ignoreList.includes(key));
-  const newDataKeys = Object.keys(newData).filter((key) => !ignoreList.includes(key));
-
-  if (oldDataKeys.length !== newDataKeys.length) {
-    // Change detected due to different key counts
-    return true;
-  }
-
-  // Check for differences in the actual values
-  return oldDataKeys.some(
-    (key) => {
-      const lengthOnly = lengthOnlyList.includes(key) && !oldData[key].ordinal;
-
-      return !ignoreList.includes(key) && compareObjects(oldData[key], newData[key], lengthOnly);
-    },
-  );
 }
 
 export function getLocalizedResponseData(props) {
   const response = getFilteredCachedResponse(props.locale);
   return {
-    eventId: response.eventId,
-    modificationTime: response.modificationTime,
-    creationTime: response.creationTime,
+    ...response,
     ...response.localizations?.[props.locale] || {},
   };
 }
@@ -302,9 +210,7 @@ export function getLocalizedResponseData(props) {
 export function getLocalizedPayloadData(props) {
   const payload = getFilteredCachedPayload(props.locale);
   return {
-    eventId: payload.eventId,
-    modificationTime: payload.modificationTime,
-    creationTime: payload.creationTime,
+    ...payload,
     ...payload.localizations?.[props.locale] || {},
   };
 }
@@ -318,9 +224,8 @@ export default function getJoinedData(locale = 'en-US') {
 
   // Combine global and localized data
   const finalPayload = {
-    eventId: filteredResponse.eventId || filteredPayload.eventId,
-    modificationTime: filteredResponse.modificationTime || filteredPayload.modificationTime,
-    creationTime: filteredResponse.creationTime || filteredPayload.creationTime,
+    ...filteredResponse,
+    ...filteredPayload,
     localizations: {
       [locale]: {
         ...localeResponse,
