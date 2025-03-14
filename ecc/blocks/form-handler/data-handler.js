@@ -1,7 +1,6 @@
 /* eslint-disable no-use-before-define */
 
-import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
-import { isValidAttribute, splitLocalizableFields } from '../../scripts/data-utils.js';
+import { EVENT_DATA_FILTER, isValidAttribute, splitLocalizableFields } from '../../scripts/data-utils.js';
 
 const responseCache = { localizations: {} };
 const payloadCache = { localizations: {} };
@@ -160,4 +159,17 @@ export default function getJoinedData(locale = 'en-US') {
   });
 
   return finalPayload;
+}
+
+export function getAttr(data, key, locale) {
+  if (EVENT_DATA_FILTER[key]?.localizable) {
+    const localizedData = data.localizations?.[locale];
+    if (localizedData?.[key]) {
+      return localizedData[key];
+    }
+
+    return data[key];
+  }
+
+  return data[key];
 }
