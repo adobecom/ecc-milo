@@ -291,8 +291,6 @@ export default class Profile extends LitElement {
       ...(this.fieldlabels ?? {}),
     };
 
-    console.log('fieldLabelsJSON', fieldLabelsJSON);
-
     const firstNameData = {
       value: shallow ? this.profileCopy?.firstName : this.profile?.firstName,
       placeholder: fieldLabelsJSON.firstName,
