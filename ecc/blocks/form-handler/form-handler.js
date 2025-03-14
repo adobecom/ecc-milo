@@ -1059,7 +1059,7 @@ async function buildECCForm(el) {
         }
 
         case 'payload': {
-          setPayloadCache(value);
+          setPayloadCache(value, props.locale);
           updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);
           toggleSections(target);
@@ -1067,7 +1067,7 @@ async function buildECCForm(el) {
         }
 
         case 'eventDataResp': {
-          setResponseCache(value);
+          setResponseCache(value, props.locale);
           updateComponentsOnRespChange(target);
           updateCtas(target);
           toggleSections(target);

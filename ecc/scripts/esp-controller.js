@@ -437,11 +437,11 @@ export async function createSpeaker(profile, seriesId) {
   }
 }
 
-export async function createSponsor(sponsorData, seriesId) {
+export async function createSponsor(sponsorData, seriesId, locale = 'en-US') {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
-  const localizedSponsor = setSponsorPayload(sponsorData);
+  const localizedSponsor = setSponsorPayload(sponsorData, locale);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(localizedSponsor);
   const options = await constructRequestOptions('POST', raw);
@@ -462,12 +462,12 @@ export async function createSponsor(sponsorData, seriesId) {
   }
 }
 
-export async function updateSponsor(sponsorData, sponsorId, seriesId) {
+export async function updateSponsor(sponsorData, sponsorId, seriesId, locale = 'en-US') {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
-  const localizedSponsor = setSponsorPayload(sponsorData);
+  const localizedSponsor = setSponsorPayload(sponsorData, locale);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(localizedSponsor);
   const options = await constructRequestOptions('PUT', raw);
@@ -488,11 +488,11 @@ export async function updateSponsor(sponsorData, sponsorId, seriesId) {
   }
 }
 
-export async function addSponsorToEvent(sponsorData, eventId) {
+export async function addSponsorToEvent(sponsorData, eventId, locale = 'en-US') {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
-  const localizedSponsor = setSponsorPayload(sponsorData);
+  const localizedSponsor = setSponsorPayload(sponsorData, locale);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(localizedSponsor);
   const options = await constructRequestOptions('POST', raw);
@@ -513,12 +513,12 @@ export async function addSponsorToEvent(sponsorData, eventId) {
   }
 }
 
-export async function updateSponsorInEvent(sponsorData, sponsorId, eventId) {
+export async function updateSponsorInEvent(sponsorData, sponsorId, eventId, locale = 'en-US') {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
-  const localizedSponsor = setSponsorPayload(sponsorData);
+  const localizedSponsor = setSponsorPayload(sponsorData, locale);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(localizedSponsor);
   const options = await constructRequestOptions('PUT', raw);
