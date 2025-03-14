@@ -83,13 +83,6 @@ export function setPayloadCache(payload, locale = 'en-US') {
     ...payloadCache.localizations[locale],
     ...splitNewPayload.localizableFields,
   };
-
-  // Handle special case for pendingTopics
-  const { pendingTopics } = payload;
-  if (pendingTopics) {
-    const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
-    if (jointTopics.length) payloadCache.localizations[locale].topics = jointTopics;
-  }
 }
 
 export function setResponseCache(response, locale = 'en-US') {
