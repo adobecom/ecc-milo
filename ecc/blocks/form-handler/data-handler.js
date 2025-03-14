@@ -18,14 +18,15 @@ export function submitFilter(obj) {
   return output;
 }
 
-export function setPropsPayload(props, newData, locale = 'en-US') {
+export function setPropsPayload(props, newData) {
+  const { locale } = props;
   const existingPayload = props.payload;
 
   // Split newData into localizable and non-localizable fields
   const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
     newData,
     EVENT_DATA_FILTER,
-    locale,
+    locale || 'en-US',
   );
 
   // Update the payload

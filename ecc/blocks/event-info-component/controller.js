@@ -476,7 +476,7 @@ export function onSubmit(component, props) {
     timezone,
   };
 
-  setPropsPayload(props, eventInfo, props.locale);
+  setPropsPayload(props, eventInfo);
 }
 
 export async function onPayloadUpdate(component, props) {
