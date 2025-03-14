@@ -109,12 +109,11 @@ export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const selectedButtons = component.querySelectorAll('sp-action-button[selected]');
-  const pendingTopics = Array.from(selectedButtons).map((cb) => cb.getAttribute('name'));
-  const topicType = SUPPORTED_TOPIC_TYPES.find((type) => component.classList.contains(type));
+  const topics = Array.from(selectedButtons).map((cb) => cb.getAttribute('name'));
   const tags = Array.from(selectedButtons).map((cb) => JSON.parse(cb.getAttribute('data-value')));
 
   const { payload } = props;
-  payload.pendingTopics = { ...payload.topics, [topicType]: pendingTopics };
+  payload.topics = { ...payload.topics, ...topics };
   const existingTags = payload.tags ? payload.tags.split(',') : [];
   const tagsToSubmit = [...new Set([...existingTags, ...tags.map((tag) => tag.caasId)])].join(',');
   if (tagsToSubmit) payload.tags = tagsToSubmit;
