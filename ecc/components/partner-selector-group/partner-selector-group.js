@@ -12,12 +12,14 @@ export default class PartnerSelectorGroup extends LitElement {
     partners: { type: Array },
     fieldlabels: { type: Object },
     seriesId: { type: String },
+    locale: { type: String },
   };
 
   constructor() {
     super();
     this.seriesSponsors = this.seriesSponsors || [];
     this.partners = this.partners || [defaultPartner];
+    this.locale = this.locale || 'en-US';
   }
 
   static styles = style;
@@ -104,7 +106,7 @@ export default class PartnerSelectorGroup extends LitElement {
       ${repeat(this.partners, (partner, index) => {
     const imgTag = imageTag.cloneNode(true);
     return html`
-        <partner-selector .seriesPartners=${this.getSeriesPartners()} .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
+        <partner-selector .locale=${this.locale} .seriesPartners=${this.getSeriesPartners()} .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
           @update-partner=${(event) => this.handlePartnerUpdate(event.detail.partner, index)} @select-partner=${(event) => this.handlePartnerSelect(event.detail.partner, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.hasOnlyOneUnsavedPartnerLeft() ? nothing : html`

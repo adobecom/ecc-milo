@@ -891,6 +891,14 @@ function initFormCtas(props) {
   });
 }
 
+function updateComponentsWithLocale(props) {
+  const localeSensitiveComponents = props.el.querySelectorAll('[data-locale-sensitive]');
+  localeSensitiveComponents.forEach((c) => {
+    c.setAttribute('locale', props.locale);
+    c.requestUpdate();
+  });
+}
+
 function updateCtas(props) {
   const formCtas = props.el.querySelectorAll('.form-handler-ctas-panel a');
   const { eventDataResp } = props;
@@ -1076,6 +1084,11 @@ async function buildECCForm(el) {
           } else {
             props.el.classList.remove('show-error');
           }
+          break;
+        }
+
+        case 'locale': {
+          updateComponentsWithLocale(target);
           break;
         }
 

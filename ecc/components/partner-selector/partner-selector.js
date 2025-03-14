@@ -2,6 +2,7 @@ import { LIBS } from '../../scripts/scripts.js';
 import { style } from './partner-selector.css.js';
 import { createSponsor, deleteImage, updateSponsor, uploadImage } from '../../scripts/esp-controller.js';
 import { LINK_REGEX } from '../../scripts/constants.js';
+import { getSponsorPayload } from '../../scripts/data-utils.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -12,6 +13,7 @@ export default class PartnerSelector extends LitElement {
     fieldLabels: { type: Object },
     seriesId: { type: String },
     buttonStatePending: { type: Boolean },
+    locale: { type: String },
   };
 
   constructor() {
@@ -23,6 +25,7 @@ export default class PartnerSelector extends LitElement {
       hasUnsavedChanges: false,
     };
     this.buttonStatePending = false;
+    this.locale = this.locale || 'en-US';
   }
 
   static styles = style;
@@ -79,10 +82,11 @@ export default class PartnerSelector extends LitElement {
       modificationTime: this.partner.modificationTime,
     };
 
+    const sponsorPayload = getSponsorPayload(payload, this.locale);
     if (!this.partner.sponsorId) {
-      respJson = await createSponsor(payload, this.seriesId);
+      respJson = await createSponsor(sponsorPayload, this.seriesId);
     } else {
-      respJson = await updateSponsor(payload, this.partner.sponsorId, this.seriesId);
+      respJson = await updateSponsor(sponsorPayload, this.partner.sponsorId, this.seriesId);
     }
 
     if (respJson.error) {

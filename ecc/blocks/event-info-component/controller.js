@@ -412,7 +412,10 @@ async function updateLanguagePicker(component, props) {
     const opt = createTag('sp-menu-item', { value: l }, lang);
     languagePicker.append(opt);
 
-    if (props.locale === l || props.locale === 'en-US') languagePicker.value = l;
+    if (props.locale === l || props.locale === 'en-US') {
+      languagePicker.value = l;
+      languagePicker.dispatchEvent(new Event('change'));
+    }
   });
 
   languagePicker.disabled = false;
@@ -481,9 +484,8 @@ export async function onPayloadUpdate(component, props) {
 
   if (cloudType && cloudType !== component.dataset.cloudType) {
     component.dataset.cloudType = cloudType;
+    updateLanguagePicker(component, props);
   }
-
-  updateLanguagePicker(component, props);
 }
 
 export async function onRespUpdate(_component, _props) {

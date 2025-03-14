@@ -2,7 +2,7 @@ import { LIBS } from './scripts.js';
 import { getEventServiceEnv, getSecret, signIn } from './utils.js';
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
 import { API_CONFIG, ALLOWED_HOSTS } from './constants.js';
-import { setSpeakerPayload, setSponsorPayload, getLocalizedSpeakerData, getLocalizedSponsorData } from '../blocks/form-handler/data-handler.js';
+import { getSpeakerPayload, getSponsorPayload } from './data-utils.js';
 
 export function waitForAdobeIMS() {
   return new Promise((resolve) => {
@@ -185,45 +185,6 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
 
     xhr.send(file);
   });
-}
-
-function convertToNSpeaker(profile) {
-  const {
-    // eslint-disable-next-line max-len
-    speakerId, firstName, lastName, title, type, bio, socialMedia, creationTime, modificationTime,
-  } = profile;
-
-  return {
-    speakerId,
-    firstName,
-    lastName,
-    title,
-    type,
-    bio,
-    socialLinks: socialMedia,
-    creationTime,
-    modificationTime,
-  };
-}
-
-function convertToSpeaker(speaker) {
-  const {
-    // eslint-disable-next-line max-len
-    speakerId, firstName, lastName, title, type, bio, socialLinks, creationTime, modificationTime, photo,
-  } = speaker;
-
-  return {
-    speakerId,
-    firstName,
-    lastName,
-    title,
-    type,
-    bio,
-    photo,
-    socialMedia: socialLinks || [],
-    creationTime,
-    modificationTime,
-  };
 }
 
 export async function getLocales() {
@@ -414,11 +375,8 @@ export async function createSpeaker(profile, seriesId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!profile || typeof profile !== 'object') throw new Error('Invalid speaker profile');
 
-  const nSpeaker = convertToNSpeaker(profile);
-  const localizedSpeaker = setSpeakerPayload(nSpeaker);
-
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(localizedSpeaker);
+  const raw = JSON.stringify(profile);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -430,7 +388,7 @@ export async function createSpeaker(profile, seriesId) {
       return { status: response.status, error: data };
     }
 
-    return getLocalizedSpeakerData(data);
+    return data;
   } catch (error) {
     window.lana?.log('Failed to create speaker. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -440,8 +398,9 @@ export async function createSpeaker(profile, seriesId) {
 export async function createSponsor(sponsorData, seriesId, locale = 'en-US') {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
+  if (!locale || typeof locale !== 'string') throw new Error('Invalid locale');
 
-  const localizedSponsor = setSponsorPayload(sponsorData, locale);
+  const localizedSponsor = getSponsorPayload(sponsorData, locale);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(localizedSponsor);
   const options = await constructRequestOptions('POST', raw);
@@ -455,7 +414,7 @@ export async function createSponsor(sponsorData, seriesId, locale = 'en-US') {
       return { status: response.status, error: data };
     }
 
-    return getLocalizedSponsorData(data);
+    return data;
   } catch (error) {
     window.lana?.log('Failed to create sponsor. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -466,10 +425,10 @@ export async function updateSponsor(sponsorData, sponsorId, seriesId, locale = '
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
+  if (!locale || typeof locale !== 'string') throw new Error('Invalid locale');
 
-  const localizedSponsor = setSponsorPayload(sponsorData, locale);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(localizedSponsor);
+  const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -481,20 +440,19 @@ export async function updateSponsor(sponsorData, sponsorId, seriesId, locale = '
       return { status: response.status, error: data };
     }
 
-    return getLocalizedSponsorData(data);
+    return data;
   } catch (error) {
     window.lana?.log('Failed to update sponsor. Error:', error);
     return { status: 'Network Error', error: error.message };
   }
 }
 
-export async function addSponsorToEvent(sponsorData, eventId, locale = 'en-US') {
+export async function addSponsorToEvent(sponsorData, eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
-  const localizedSponsor = setSponsorPayload(sponsorData, locale);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(localizedSponsor);
+  const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -506,21 +464,20 @@ export async function addSponsorToEvent(sponsorData, eventId, locale = 'en-US') 
       return { status: response.status, error: data };
     }
 
-    return getLocalizedSponsorData(data);
+    return data;
   } catch (error) {
     window.lana?.log('Failed to add sponsor to event. Error:', error);
     return { status: 'Network Error', error: error.message };
   }
 }
 
-export async function updateSponsorInEvent(sponsorData, sponsorId, eventId, locale = 'en-US') {
+export async function updateSponsorInEvent(sponsorData, sponsorId, eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
-  const localizedSponsor = setSponsorPayload(sponsorData, locale);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(localizedSponsor);
+  const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -532,7 +489,7 @@ export async function updateSponsorInEvent(sponsorData, sponsorId, eventId, loca
       return { status: response.status, error: data };
     }
 
-    return getLocalizedSponsorData(data);
+    return data;
   } catch (error) {
     window.lana?.log('Failed to update sponsor in event. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -634,7 +591,7 @@ export async function addSpeakerToEvent(speakerData, eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!speakerData || typeof speakerData !== 'object') throw new Error('Invalid speaker data');
 
-  const localizedSpeaker = setSpeakerPayload(speakerData);
+  const localizedSpeaker = getSpeakerPayload(speakerData);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(localizedSpeaker);
   const options = await constructRequestOptions('POST', raw);
@@ -648,7 +605,7 @@ export async function addSpeakerToEvent(speakerData, eventId) {
       return { status: response.status, error: data };
     }
 
-    return getLocalizedSpeakerData(data);
+    return data;
   } catch (error) {
     window.lana?.log('Failed to add speaker to event. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -660,7 +617,7 @@ export async function updateSpeakerInEvent(speakerData, speakerId, eventId) {
   if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
   if (!speakerData || typeof speakerData !== 'object') throw new Error('Invalid speaker data');
 
-  const localizedSpeaker = setSpeakerPayload(speakerData);
+  const localizedSpeaker = getSpeakerPayload(speakerData);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(localizedSpeaker);
   const options = await constructRequestOptions('PUT', raw);
@@ -674,7 +631,7 @@ export async function updateSpeakerInEvent(speakerData, speakerId, eventId) {
       return { status: response.status, error: data };
     }
 
-    return getLocalizedSpeakerData(data);
+    return data;
   } catch (error) {
     window.lana?.log('Failed to update speaker in event. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -720,7 +677,7 @@ export async function getSpeaker(seriesId, speakerId) {
       return { status: response.status, error: data };
     }
 
-    return getLocalizedSpeakerData(convertToSpeaker(data));
+    return data;
   } catch (error) {
     window.lana?.log('Failed to get speaker details. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -762,10 +719,8 @@ export async function updateSpeaker(profile, seriesId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!profile || typeof profile !== 'object') throw new Error('Invalid speaker profile');
 
-  const nSpeaker = convertToNSpeaker(profile);
-  const localizedSpeaker = setSpeakerPayload(nSpeaker);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(localizedSpeaker);
+  const raw = JSON.stringify(profile);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -777,7 +732,7 @@ export async function updateSpeaker(profile, seriesId) {
       return { status: response.status, error: data };
     }
 
-    return getLocalizedSpeakerData(data);
+    return data;
   } catch (error) {
     window.lana?.log('Failed to update speaker. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -1388,7 +1343,7 @@ export async function getSpeakers(seriesId) {
       return { status: response.status, error: data };
     }
 
-    return { speakers: data.speakers.map(convertToSpeaker) };
+    return data;
   } catch (error) {
     window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error:`, error);
     return { status: 'Network Error', error: error.message };

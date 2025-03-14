@@ -1,32 +1,10 @@
 /* eslint-disable no-use-before-define */
 
-import { EVENT_DATA_FILTER, SPEAKER_DATA_FILTER, SPONSOR_DATA_FILTER } from '../../scripts/constants.js';
+import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
+import { isValidAttribute, splitLocalizableFields } from '../../scripts/data-utils.js';
 
 const responseCache = { localizations: {} };
 const payloadCache = { localizations: {} };
-
-function isValidAttribute(attr) {
-  return attr !== undefined && attr !== null;
-}
-
-function splitLocalizableFields(data, filter, locale = 'en-US') {
-  const localizableFields = {};
-  const nonLocalizableFields = {};
-
-  Object.entries(data).forEach(([key, value]) => {
-    if (filter[key]?.localizable) {
-      if (data.localizations?.[locale]?.[key]) {
-        localizableFields[key] = data.localizations[locale][key];
-      } else {
-        localizableFields[key] = value;
-      }
-    } else if (isValidAttribute(value)) {
-      nonLocalizableFields[key] = value;
-    }
-  });
-
-  return { localizableFields, nonLocalizableFields };
-}
 
 export function submitFilter(obj) {
   const output = {};
@@ -103,56 +81,6 @@ export function setResponseCache(response, locale = 'en-US') {
   responseCache.localizations[locale] = {
     ...responseCache.localizations[locale],
     ...splitNewResponse.localizableFields[locale],
-  };
-}
-
-export function setSpeakerPayload(speakerData, locale = 'en-US') {
-  if (!speakerData) return speakerData;
-
-  // Split speaker data into localizable and non-localizable fields
-  const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
-    speakerData,
-    SPEAKER_DATA_FILTER,
-    locale,
-  );
-
-  return {
-    ...nonLocalizableFields,
-    localizations: { [locale]: localizableFields },
-  };
-}
-
-export function setSponsorPayload(sponsorData, locale = 'en-US') {
-  if (!sponsorData) return sponsorData;
-
-  // Split sponsor data into localizable and non-localizable fields
-  const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
-    sponsorData,
-    SPONSOR_DATA_FILTER,
-    locale,
-  );
-
-  return {
-    ...nonLocalizableFields,
-    localizations: { [locale]: localizableFields },
-  };
-}
-
-export function getLocalizedSpeakerData(speakerData, locale = 'en-US') {
-  if (!speakerData) return speakerData;
-
-  return {
-    ...speakerData,
-    ...speakerData.localizations?.[locale],
-  };
-}
-
-export function getLocalizedSponsorData(sponsorData, locale = 'en-US') {
-  if (!sponsorData) return sponsorData;
-
-  return {
-    ...sponsorData,
-    ...sponsorData.localizations?.[locale],
   };
 }
 

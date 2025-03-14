@@ -96,7 +96,7 @@ export const SPEAKER_DATA_FILTER = {
   title: { type: 'string', localizable: true, submittable: true },
   type: { type: 'string', localizable: false, submittable: true },
   bio: { type: 'string', localizable: true, submittable: true },
-  socialMedia: { type: 'array', localizable: false, submittable: true },
+  socialLinks: { type: 'array', localizable: false, submittable: true },
   creationTime: { type: 'string', localizable: false, submittable: false },
   modificationTime: { type: 'string', localizable: false, submittable: false },
 };

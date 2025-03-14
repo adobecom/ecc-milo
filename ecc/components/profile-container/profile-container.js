@@ -6,7 +6,7 @@ import { style } from './profile-container.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
-const defaultProfile = { socialMedia: [{ link: '' }], isPlaceholder: true };
+const defaultProfile = { socialLinks: [{ link: '' }], isPlaceholder: true };
 
 export default class ProfileContainer extends LitElement {
   static properties = {
@@ -14,6 +14,7 @@ export default class ProfileContainer extends LitElement {
     profiles: { type: Array, reflect: true },
     seriesId: { type: String },
     searchdata: { type: Array },
+    locale: { type: String },
   };
 
   static styles = style;
@@ -100,11 +101,10 @@ export default class ProfileContainer extends LitElement {
 
     return html`${
       repeat(this.profiles, (profile, index) => {
-        const fieldlabels = { ...this.fieldlabels };
         const imgTag = imageTag.cloneNode(true);
         return html`
         <div class="profile-container">
-        <profile-ui seriesId=${this.seriesId} profile=${JSON.stringify(profile)} fieldlabels=${JSON.stringify(fieldlabels)} class="form-component" firstnamesearch=${JSON.stringify(firstNameSearch)} lastnamesearch=${JSON.stringify(lastNameSearch)} @update-profile=${(event) => this.updateProfile(index, event.detail.profile)} @select-profile=${(event) => this.setProfile(index, event.detail.profile)}>${imgTag}</profile-ui>
+        <profile-ui .locale=${this.locale} seriesId=${this.seriesId} profile=${JSON.stringify(profile)} fieldlabels=${JSON.stringify(this.fieldlabels)} class="form-component" firstnamesearch=${JSON.stringify(firstNameSearch)} lastnamesearch=${JSON.stringify(lastNameSearch)} @update-profile=${(event) => this.updateProfile(index, event.detail.profile)} @select-profile=${(event) => this.setProfile(index, event.detail.profile)}>${imgTag}</profile-ui>
         ${this.profiles?.length > 1 || !this.profiles[0].isPlaceholder ? html`<img class="icon-remove-circle" src="${this.profiles.length === 1 ? '/ecc/icons/delete.svg' : '/ecc/icons/remove-circle.svg'}" alt="remove-repeater" @click=${() => {
     if (this.profiles.length === 1) {
       this.profiles = [defaultProfile];
