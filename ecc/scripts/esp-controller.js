@@ -363,7 +363,7 @@ export async function createEvent(payload) {
   if (!payload || typeof payload !== 'object') throw new Error('Invalid event payload');
 
   const { host } = API_CONFIG.esl[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...payload, liveUpdate: false });
+  const raw = JSON.stringify({ ...payload, liveUpdate: false, published: false });
   const options = await constructRequestOptions('POST', raw);
 
   try {
