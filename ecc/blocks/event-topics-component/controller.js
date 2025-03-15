@@ -126,6 +126,7 @@ export async function onPayloadUpdate(component, props) {
   const eventData = props.eventDataResp;
 
   if (cloudType && cloudType !== component.dataset.cloudType) {
+    component.dataset.cloudType = cloudType;
     await buildTopicsCheckboxes(component, cloudType);
 
     const prefilledTopics = prefillTopics(component, eventData);
@@ -136,7 +137,6 @@ export async function onPayloadUpdate(component, props) {
     props.payload = payload;
 
     if (prefilledTopics.length) component.classList.add('prefilled');
-    component.dataset.cloudType = cloudType;
   }
 }
 
