@@ -55,7 +55,7 @@ export default class RteTiptap extends LitElement {
   }
 
   async firstUpdated() {
-    await Promise.all([loadScript('https://unpkg.com/turndown/dist/turndown.js'), loadScript('https://unpkg.com/showdown/dist/showdown.min.js')]);
+    await Promise.all([loadScript('https://unpkg.com/turndown@7.2.0/dist/turndown.js'), loadScript('https://unpkg.com/showdown@2.1.0/dist/showdown.min.js')]);
     this.markdownInitialized = true;
     this.requestUpdate();
   }
