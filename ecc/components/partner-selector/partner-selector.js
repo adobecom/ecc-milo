@@ -158,6 +158,7 @@ export default class PartnerSelector extends LitElement {
 
   render() {
     const { nameFieldData } = this.getRequiredProps();
+
     return html`
       <fieldset class="partner-field-wrapper">
       <div>

@@ -116,6 +116,7 @@ export default class ProfileContainer extends LitElement {
     return html`${
       repeat(this.profiles, (profile, index) => {
         const profileJSON = JSON.stringify({
+          ...profile,
           firstName: this.getProfileAttr(profile, 'firstName'),
           lastName: this.getProfileAttr(profile, 'lastName'),
           title: this.getProfileAttr(profile, 'title'),

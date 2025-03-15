@@ -2,7 +2,6 @@ import { LIBS } from './scripts.js';
 import { getEventServiceEnv, getSecret, signIn } from './utils.js';
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
 import { API_CONFIG, ALLOWED_HOSTS } from './constants.js';
-import { getSpeakerPayload, getSponsorPayload } from './data-utils.js';
 
 export function waitForAdobeIMS() {
   return new Promise((resolve) => {
@@ -400,9 +399,8 @@ export async function createSponsor(sponsorData, seriesId, locale = 'en-US') {
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
   if (!locale || typeof locale !== 'string') throw new Error('Invalid locale');
 
-  const localizedSponsor = getSponsorPayload(sponsorData, locale);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(localizedSponsor);
+  const raw = JSON.stringify(sponsorData);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -591,9 +589,8 @@ export async function addSpeakerToEvent(speakerData, eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!speakerData || typeof speakerData !== 'object') throw new Error('Invalid speaker data');
 
-  const localizedSpeaker = getSpeakerPayload(speakerData);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(localizedSpeaker);
+  const raw = JSON.stringify(speakerData);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -617,9 +614,8 @@ export async function updateSpeakerInEvent(speakerData, speakerId, eventId) {
   if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
   if (!speakerData || typeof speakerData !== 'object') throw new Error('Invalid speaker data');
 
-  const localizedSpeaker = getSpeakerPayload(speakerData);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(localizedSpeaker);
+  const raw = JSON.stringify(speakerData);
   const options = await constructRequestOptions('PUT', raw);
 
   try {

@@ -117,11 +117,9 @@ export default class PartnerSelectorGroup extends LitElement {
     return html`
       ${repeat(this.partners, (partner, index) => {
     const partnerData = {
+      ...partner,
       name: this.getPartnerAttr(partner, 'name'),
       info: this.getPartnerAttr(partner, 'info'),
-      link: this.getPartnerAttr(partner, 'link'),
-      sponsorId: this.getPartnerAttr(partner, 'sponsorId'),
-      sponsorType: this.getPartnerAttr(partner, 'sponsorType'),
     };
 
     const imgTag = imageTag.cloneNode(true);
