@@ -120,7 +120,6 @@ export default class PartnerSelectorGroup extends LitElement {
       name: this.getPartnerAttr(partner, 'name'),
       info: this.getPartnerAttr(partner, 'info'),
       link: this.getPartnerAttr(partner, 'link'),
-      localizations: this.getPartnerAttr(partner, 'localizations'),
       sponsorId: this.getPartnerAttr(partner, 'sponsorId'),
       sponsorType: this.getPartnerAttr(partner, 'sponsorType'),
     };
@@ -128,7 +127,7 @@ export default class PartnerSelectorGroup extends LitElement {
     const imgTag = imageTag.cloneNode(true);
 
     return html`
-        <partner-selector .locale=${this.locale} .seriesPartners=${this.getSeriesPartners()} .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
+        <partner-selector .locale=${this.locale} .seriesPartners=${this.getSeriesPartners()} .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partnerData}
           @update-partner=${(event) => this.handlePartnerUpdate(event.detail.partner, index)} @select-partner=${(event) => this.handlePartnerSelect(event.detail.partner, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.hasOnlyOneUnsavedPartnerLeft() ? nothing : html`
