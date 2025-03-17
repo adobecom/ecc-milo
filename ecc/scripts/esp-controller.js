@@ -186,45 +186,6 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
   });
 }
 
-function convertToNSpeaker(profile) {
-  const {
-    // eslint-disable-next-line max-len
-    speakerId, firstName, lastName, title, type, bio, socialMedia, creationTime, modificationTime,
-  } = profile;
-
-  return {
-    speakerId,
-    firstName,
-    lastName,
-    title,
-    type,
-    bio,
-    socialLinks: socialMedia,
-    creationTime,
-    modificationTime,
-  };
-}
-
-function convertToSpeaker(speaker) {
-  const {
-    // eslint-disable-next-line max-len
-    speakerId, firstName, lastName, title, type, bio, socialLinks, creationTime, modificationTime, photo,
-  } = speaker;
-
-  return {
-    speakerId,
-    firstName,
-    lastName,
-    title,
-    type,
-    bio,
-    photo,
-    socialMedia: socialLinks || [],
-    creationTime,
-    modificationTime,
-  };
-}
-
 export async function getLocales() {
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
@@ -413,10 +374,8 @@ export async function createSpeaker(profile, seriesId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!profile || typeof profile !== 'object') throw new Error('Invalid speaker profile');
 
-  const nSpeaker = convertToNSpeaker(profile);
-
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(nSpeaker);
+  const raw = JSON.stringify(profile);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -435,9 +394,10 @@ export async function createSpeaker(profile, seriesId) {
   }
 }
 
-export async function createSponsor(sponsorData, seriesId) {
+export async function createSponsor(sponsorData, seriesId, locale = 'en-US') {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
+  if (!locale || typeof locale !== 'string') throw new Error('Invalid locale');
 
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(sponsorData);
@@ -459,10 +419,11 @@ export async function createSponsor(sponsorData, seriesId) {
   }
 }
 
-export async function updateSponsor(sponsorData, sponsorId, seriesId) {
+export async function updateSponsor(sponsorData, sponsorId, seriesId, locale = 'en-US') {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
+  if (!locale || typeof locale !== 'string') throw new Error('Invalid locale');
 
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(sponsorData);
@@ -712,7 +673,7 @@ export async function getSpeaker(seriesId, speakerId) {
       return { status: response.status, error: data };
     }
 
-    return convertToSpeaker(data);
+    return data;
   } catch (error) {
     window.lana?.log('Failed to get speaker details. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -754,9 +715,8 @@ export async function updateSpeaker(profile, seriesId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!profile || typeof profile !== 'object') throw new Error('Invalid speaker profile');
 
-  const nSpeaker = convertToNSpeaker(profile);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(nSpeaker);
+  const raw = JSON.stringify(profile);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -1379,7 +1339,7 @@ export async function getSpeakers(seriesId) {
       return { status: response.status, error: data };
     }
 
-    return { speakers: data.speakers.map(convertToSpeaker) };
+    return data;
   } catch (error) {
     window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error:`, error);
     return { status: 'Network Error', error: error.message };

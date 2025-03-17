@@ -1,6 +1,6 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { addTooltipToEl, decorateSwitchFieldset } from '../../scripts/utils.js';
-import { setPropsPayload } from '../form-handler/data-handler.js';
+import { getAttr, setPropsPayload } from '../form-handler/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -48,16 +48,13 @@ function prefillFields(component, props) {
   const descriptionEl = component.querySelector('#rsvp-form-detail-description');
 
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localizations?.[props.lang] || eventData;
 
   if (eventData) {
-    const {
-      attendeeLimit,
-      allowWaitlisting,
-      hostEmail,
-      rsvpDescription,
-      allowGuestRegistration,
-    } = localeEventData;
+    const attendeeLimit = getAttr(eventData, 'attendeeLimit', props.locale);
+    const allowWaitlisting = getAttr(eventData, 'allowWaitlisting', props.locale);
+    const rsvpDescription = getAttr(eventData, 'rsvpDescription', props.locale);
+    const hostEmail = getAttr(eventData, 'hostEmail', props.locale);
+    const allowGuestRegistration = getAttr(eventData, 'allowGuestRegistration', props.locale);
 
     if (attendeeLimitEl && attendeeLimit) attendeeLimitEl.value = attendeeLimit;
     if (disbleWaitlistEl) disbleWaitlistEl.checked = !allowWaitlisting;

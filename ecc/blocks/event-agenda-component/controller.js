@@ -1,4 +1,4 @@
-import { setPropsPayload } from '../form-handler/data-handler.js';
+import { getAttr, setPropsPayload } from '../form-handler/data-handler.js';
 
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
@@ -30,15 +30,16 @@ export async function onRespUpdate(_component, _props) {
 export default function init(component, props) {
   const eventData = props.eventDataResp;
   const agendaGroup = component.querySelector('agenda-fieldset-group');
-  const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info');
+  const showAgendaPostEventElement = component.querySelector('#checkbox-agenda-info');
 
-  const localeEventData = eventData.localizations?.[props.lang] || eventData;
-  if (localeEventData.agenda?.length) {
-    agendaGroup.agendaItems = localeEventData.agenda;
+  const agenda = getAttr(eventData, 'agenda', props.locale);
+  const showAgendaPostEvent = getAttr(eventData, 'showAgendaPostEvent', props.locale);
+  if (agenda?.length) {
+    agendaGroup.agendaItems = agenda;
     component.classList.add('prefilled');
   }
 
-  showAgendaPostEvent.checked = localeEventData.showAgendaPostEvent;
+  showAgendaPostEventElement.checked = showAgendaPostEvent;
 }
 
 export function onTargetUpdate(component, props) {
