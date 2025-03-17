@@ -412,7 +412,7 @@ async function updateLanguagePicker(component, props) {
     const opt = createTag('sp-menu-item', { value: l }, lang);
     languagePicker.append(opt);
 
-    if (props.locale === l || props.locale === 'en-US') {
+    if (props.locale === l) {
       languagePicker.value = l;
       languagePicker.dispatchEvent(new Event('change'));
     }
