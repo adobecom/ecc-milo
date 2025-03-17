@@ -467,7 +467,7 @@ async function saveEvent(props, toPublish = false) {
 
   const localeData = getLocalizedResponseData(props);
   if (props.currentStep === 0 && !localeData.eventId) {
-    resp = await createEvent(getJoinedData(props.locale));
+    resp = await createEvent(getJoinedData(props.locale), props.locale);
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
     await onEventSave();

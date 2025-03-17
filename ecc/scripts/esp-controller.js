@@ -347,11 +347,15 @@ export async function updateCloud(cloudType, cloudData) {
   }
 }
 
-export async function createEvent(payload) {
+export async function createEvent(payload, locale = 'en-US') {
   if (!payload || typeof payload !== 'object') throw new Error('Invalid event payload');
 
   const { host } = API_CONFIG.esl[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...payload, liveUpdate: false });
+  const raw = JSON.stringify({
+    ...payload,
+    liveUpdate: false,
+    defaultLocale: locale,
+  });
   const options = await constructRequestOptions('POST', raw);
 
   try {
