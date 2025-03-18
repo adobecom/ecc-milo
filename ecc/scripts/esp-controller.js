@@ -354,6 +354,7 @@ export async function createEvent(payload, locale = 'en-US') {
   const raw = JSON.stringify({
     ...payload,
     liveUpdate: false,
+    published: false,
     defaultLocale: locale,
   });
   const options = await constructRequestOptions('POST', raw);

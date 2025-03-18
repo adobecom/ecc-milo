@@ -421,14 +421,14 @@ export async function onTargetUpdate(component, props) {
     if (resp.error) {
       buildErrorMessage(props, resp);
     }
+  }
 
-    if (resp) {
-      props.eventDataResp = { ...props.eventDataResp, ...resp };
-      props.payload = {
-        ...props.payload,
-        showVenuePostEvent: venueData.showVenuePostEvent,
-        showVenueAdditionalInfoPostEvent: venueData.showVenueAdditionalInfoPostEvent,
-      };
-    }
+  if (resp) {
+    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    props.payload = {
+      ...props.payload,
+      showVenuePostEvent: venueData.showVenuePostEvent,
+      showVenueAdditionalInfoPostEvent: venueData.showVenueAdditionalInfoPostEvent,
+    };
   }
 }

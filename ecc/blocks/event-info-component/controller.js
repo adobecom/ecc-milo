@@ -450,6 +450,7 @@ function initTitleWatcher(component, props) {
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
+  const isPrivate = component.querySelector('#private-event').checked;
   const title = component.querySelector('#info-field-event-title').value;
   const description = component.querySelector('#info-field-event-description').value;
   const datePicker = component.querySelector('#event-info-date-picker');
@@ -474,6 +475,7 @@ export function onSubmit(component, props) {
     localStartTimeMillis,
     localEndTimeMillis,
     timezone,
+    isPrivate,
   };
 
   setPropsPayload(props, eventInfo);
@@ -512,6 +514,8 @@ function prefillFields(component, props, eventData) {
   const startTime = component.querySelector('#time-picker-start-time-value');
   const endTime = component.querySelector('#time-picker-end-time-value');
   const datePicker = component.querySelector('#event-info-date-picker');
+  const isPrivateCheckbox = component.querySelector('#private-event');
+  const languagePicker = component.querySelector('#language-picker');
 
   const title = getAttr(eventData, 'title', props.locale);
   const description = getAttr(eventData, 'description', props.locale);
@@ -520,6 +524,8 @@ function prefillFields(component, props, eventData) {
   const localStartTime = getAttr(eventData, 'localStartTime', props.locale);
   const localEndTime = getAttr(eventData, 'localEndTime', props.locale);
   const timezone = getAttr(eventData, 'timezone', props.locale);
+  const isPrivate = getAttr(eventData, 'isPrivate', props.locale);
+  const defaultLocale = eventData.defaultLocale || 'en-US';
 
   if (title
     && description
@@ -540,6 +546,7 @@ function prefillFields(component, props, eventData) {
 
     eventTitleInput.value = title || '';
     eventDescriptionInput.value = description || '';
+    isPrivateCheckbox.checked = isPrivate || false;
     changeInputValue(startTime, 'value', `${localStartTime}` || '');
     changeInputValue(endTime, 'value', `${localEndTime}` || '');
     changeInputValue(startTimeInput, 'value', `${startTimePieces.hours}:${startTimePieces.minutes}` || '');
@@ -547,6 +554,7 @@ function prefillFields(component, props, eventData) {
     changeInputValue(endTimeInput, 'value', `${endTimePieces.hours}:${endTimePieces.minutes}` || '');
     changeInputValue(endAmpmInput, 'value', endTimePieces.period || '');
     changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
+    changeInputValue(languagePicker, 'value', defaultLocale || props.locale);
 
     BlockMediator.set('eventDupMetrics', {
       ...BlockMediator.get('eventDupMetrics'),

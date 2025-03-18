@@ -87,6 +87,7 @@ const SPECTRUM_COMPONENTS = [
   'icon',
   'action-button',
   'progress-circle',
+  'switch',
 ];
 
 export function buildErrorMessage(props, resp) {
