@@ -326,7 +326,7 @@ async function updateLanguagePicker(component, props) {
 
   if (!cloud || cloud.error) return;
   const { locales } = cloud;
-  const allLocales = localesResp.locales;
+  const allLocales = localesResp.localeNames;
 
   languagePicker.querySelectorAll('sp-menu-item').forEach((option) => {
     option.remove();
@@ -415,8 +415,17 @@ export async function onPayloadUpdate(component, props) {
   }
 }
 
-export async function onRespUpdate(_component, _props) {
-  // Do nothing
+export async function onRespUpdate(component, props) {
+  // lock language picker on defaultLocale given and is not en-US
+
+  if (props.eventDataResp) {
+    const { defaultLocale } = props.eventDataResp;
+    const languagePicker = component.querySelector('#language-picker');
+
+    if (defaultLocale && defaultLocale !== 'en-US') {
+      languagePicker.disabled = true;
+    }
+  }
 }
 
 function checkEventDuplication(event, compareMetrics) {

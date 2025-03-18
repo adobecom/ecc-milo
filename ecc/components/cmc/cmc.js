@@ -161,8 +161,10 @@ export default class CloudManagementConsole extends LitElement {
 
     this.currentCloud = cloudType;
     this.selectedTags = new Set(savedCloudTags.map((tag) => deepGetTagByTagID(tag.tagID, this.tags)));
-    this.selectedLocales = new Set(savedCloudLocales.map((locale) => Object.entries(this.locales).find(([key]) => key === locale)));
-
+    this.selectedLocales = new Set(savedCloudLocales.filter((locale) => {
+      const [key] = Object.entries(this.locales).find(([ietf]) => ietf === locale);
+      return key;
+    }));
     this.togglePendingChanges();
 
     this.requestUpdate();
@@ -172,11 +174,11 @@ export default class CloudManagementConsole extends LitElement {
     const fullSavedTags = this.savedTags[this.currentCloud]?.map((tag) => deepGetTagByTagID(tag.tagID, this.tags)) || [];
     this.selectedTags = new Set(fullSavedTags);
     this.selectedLocales = new Set(this.savedLocales[this.currentCloud] || []);
-
     this.togglePendingChanges();
   }
 
   async save() {
+    console.log('this.selectedLocales', this.selectedLocales);
     this.savedTags[this.currentCloud] = this.getSelectedTags();
     this.savedLocales[this.currentCloud] = this.selectedLocales;
 
@@ -184,7 +186,7 @@ export default class CloudManagementConsole extends LitElement {
 
     const cloudData = await getCloud(this.currentCloud);
 
-    const locales = Array.from(this.selectedLocales).map((locale) => locale.ietf);
+    const locales = Array.from(this.selectedLocales).map((locale) => locale);
 
     const payload = {
       cloudTags: this.getSelectedTags().map((tag) => ({
