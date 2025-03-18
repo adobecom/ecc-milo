@@ -35,89 +35,7 @@ export default class CloudManagementConsole extends LitElement {
     super();
     this.currentCloud = '';
     this.tags = {};
-    this.locales = [
-      { language: 'Spanish (Argentina)', ietf: 'es-AR' },
-      { language: 'Portuguese (Brazil)', ietf: 'pt-BR' },
-      { language: 'English (Canada)', ietf: 'en-CA' },
-      { language: 'French (Canada)', ietf: 'fr-CA' },
-      { language: 'Spanish (Chile)', ietf: 'es-CL' },
-      { language: 'Spanish (Colombia)', ietf: 'es-CO' },
-      { language: 'Spanish (Costa Rica)', ietf: 'es-CR' },
-      { language: 'Spanish (Ecuador)', ietf: 'es-EC' },
-      { language: 'Spanish (El Salvador)', ietf: 'es-EL' },
-      { language: 'Spanish (Guatemala)', ietf: 'es-GT' },
-      { language: 'Spanish (Latin America)', ietf: 'es-LA' },
-      { language: 'Spanish (Mexico)', ietf: 'es-MX' },
-      { language: 'Spanish (Peru)', ietf: 'es-PE' },
-      { language: 'Spanish (Puerto Rico)', ietf: 'es-PR' },
-      { language: 'English (United States)', ietf: 'en-US' },
-      { language: 'English (Africa)', ietf: 'en-africa' },
-      { language: 'French (Belgium)', ietf: 'fr-BE' },
-      { language: 'English (Belgium)', ietf: 'en-BE' },
-      { language: 'Dutch (Belgium)', ietf: 'nl-BE' },
-      { language: 'English (Cyprus)', ietf: 'en-CY' },
-      { language: 'Danish (Denmark)', ietf: 'da-DK' },
-      { language: 'German (Germany)', ietf: 'de-DE' },
-      { language: 'Estonian (Estonia)', ietf: 'et-EE' },
-      { language: 'Arabic (Egypt)', ietf: 'ar-EG' },
-      { language: 'English (Egypt)', ietf: 'en-GB' },
-      { language: 'Spanish (Spain)', ietf: 'es-ES' },
-      { language: 'French (France)', ietf: 'fr-FR' },
-      { language: 'English (Greece)', ietf: 'en-GR' },
-      { language: 'Greek (Greece)', ietf: 'el-GR' },
-      { language: 'English (Ireland)', ietf: 'en-IE' },
-      { language: 'English (Israel)', ietf: 'en-IL' },
-      { language: 'Hebrew (Israel)', ietf: 'he-IL' },
-      { language: 'Italian (Italy)', ietf: 'it-IT' },
-      { language: 'Arabic (Kuwait)', ietf: 'ar-KW' },
-      { language: 'English (Kuwait)', ietf: 'en-GB' },
-      { language: 'Latvian (Latvia)', ietf: 'lv-LV' },
-      { language: 'Lithuanian (Lithuania)', ietf: 'lt-LT' },
-      { language: 'German (Luxembourg)', ietf: 'de-LU' },
-      { language: 'English (Luxembourg)', ietf: 'en-LU' },
-      { language: 'French (Luxembourg)', ietf: 'fr-LU' },
-      { language: 'Hungarian (Hungary)', ietf: 'hu-HU' },
-      { language: 'English (Malta)', ietf: 'en-MT' },
-      { language: 'English (MENA)', ietf: 'en-mena' },
-      { language: 'Arabic (MENA)', ietf: 'ar-mena' },
-      { language: 'English (Nigeria)', ietf: 'en-NG' },
-      { language: 'Dutch (Netherlands)', ietf: 'nl-NL' },
-      { language: 'Norwegian (Norway)', ietf: 'no-NO' },
-      { language: 'Polish (Poland)', ietf: 'pl-PL' },
-      { language: 'Portuguese (Portugal)', ietf: 'pt-PT' },
-      { language: 'Arabic (Qatar)', ietf: 'ar-QA' },
-      { language: 'English (Qatar)', ietf: 'en-GB' },
-      { language: 'Romanian (Romania)', ietf: 'ro-RO' },
-      { language: 'English (Saudi Arabia)', ietf: 'en-sa' },
-      { language: 'French (Switzerland)', ietf: 'fr-CH' },
-      { language: 'German (Switzerland)', ietf: 'de-CH' },
-      { language: 'Italian (Switzerland)', ietf: 'it-CH' },
-      { language: 'Slovenian (Slovenia)', ietf: 'sl-SI' },
-      { language: 'Slovak (Slovakia)', ietf: 'sk-SK' },
-      { language: 'Finnish (Finland)', ietf: 'fi-FI' },
-      { language: 'Swedish (Sweden)', ietf: 'sv-SE' },
-      { language: 'Turkish (Turkey)', ietf: 'tr-TR' },
-      { language: 'English (United Arab Emirates)', ietf: 'en-ae' },
-      { language: 'English (United Kingdom)', ietf: 'en-GB' },
-      { language: 'German (Austria)', ietf: 'de-AT' },
-      { language: 'Czech (Czech Republic)', ietf: 'cs-CZ' },
-      { language: 'Bulgarian (Bulgaria)', ietf: 'bg-BG' },
-      { language: 'Russian (Russia)', ietf: 'ru-RU' },
-      { language: 'Ukrainian (Ukraine)', ietf: 'uk-UA' },
-      { language: 'Arabic (United Arab Emirates)', ietf: 'ar-ae' },
-      { language: 'Arabic (Saudi Arabia)', ietf: 'ar-sa' },
-      { language: 'English (South Africa)', ietf: 'en-ZA' },
-      { language: 'English (Australia)', ietf: 'en-AU' },
-      { language: 'English (Hong Kong)', ietf: 'en-HK' },
-      { language: 'English (India)', ietf: 'en-IN' },
-      { language: 'Hindi (India)', ietf: 'hi-IN' },
-      { language: 'Chinese (China)', ietf: 'zh-CN' },
-      { language: 'Chinese (Hong Kong)', ietf: 'zh-HK' },
-      { language: 'Chinese (Taiwan)', ietf: 'zh-TW' },
-      { language: 'Japanese (Japan)', ietf: 'ja-JP' },
-      { language: 'Korean (South Korea)', ietf: 'ko-KR' },
-      { language: 'Vietnamese (Vietnam)', ietf: 'vi-VN' },
-    ];
+    this.locales = {};
     this.savedLocales = {};
     this.currentPath = startingPath;
     this.selectedTags = new Set();
@@ -243,7 +161,7 @@ export default class CloudManagementConsole extends LitElement {
 
     this.currentCloud = cloudType;
     this.selectedTags = new Set(savedCloudTags.map((tag) => deepGetTagByTagID(tag.tagID, this.tags)));
-    this.selectedLocales = new Set(savedCloudLocales.map((locale) => this.locales.find((l) => l.ietf === locale)));
+    this.selectedLocales = new Set(savedCloudLocales.map((locale) => Object.entries(this.locales).find(([key]) => key === locale)));
 
     this.togglePendingChanges();
 
@@ -367,19 +285,19 @@ export default class CloudManagementConsole extends LitElement {
 
         <div class="pool">
           <div class="langs">
-            ${repeat(this.locales, (lang) => html`
-              <sp-action-button class="lang-btn" toggles ?selected=${this.selectedLocales.has(lang)} @change=${() => {
-                if (this.selectedLocales.has(lang)) {
-                  this.selectedLocales.delete(lang);
+            ${repeat(Object.entries(this.locales), ([key, value]) => html`
+              <sp-action-button class="lang-btn" toggles ?selected=${this.selectedLocales.has(key)} @change=${() => {
+                if (this.selectedLocales.has(key)) {
+                  this.selectedLocales.delete(key);
                 } else {
-                  this.selectedLocales.add(lang);
+                  this.selectedLocales.add(key);
                 }
 
                 this.togglePendingChanges();
                 this.requestUpdate();
               }}>
-                <sp-icon size="s" slot="icon">${this.selectedLocales.has(lang) ? checkSvg : addSvg}</sp-icon>
-                ${lang.language}
+                <sp-icon size="s" slot="icon">${this.selectedLocales.has(key) ? checkSvg : addSvg}</sp-icon>
+                ${value}
               </sp-action-button>
             `)}
           </div>

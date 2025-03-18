@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
-import { getCloud, getEvents } from '../../scripts/esp-controller.js';
+import { getCloud, getEvents, getLocales } from '../../scripts/esp-controller.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../../scripts/utils.js';
@@ -322,93 +322,18 @@ async function updateLanguagePicker(component, props) {
 
   if (!cloudType) return;
 
-  const cloud = await getCloud(cloudType);
+  const [cloud, localesResp] = await Promise.all([getCloud(cloudType), getLocales()]);
 
   if (!cloud || cloud.error) return;
   const { locales } = cloud;
-
-  // TODO: remove dictionary
-  const dictionary = {
-    'en-US': 'English (United States)',
-    'es-ES': 'Spanish (Spain)',
-    'fr-FR': 'French (France)',
-    'de-DE': 'German (Germany)',
-    'it-IT': 'Italian (Italy)',
-    'ja-JP': 'Japanese (Japan)',
-    'ko-KR': 'Korean (South Korea)',
-    'vi-VN': 'Vietnamese (Vietnam)',
-    'es-AR': 'Spanish (Argentina)',
-    'pt-BR': 'Portuguese (Brazil)',
-    'en-CA': 'English (Canada)',
-    'fr-CA': 'French (Canada)',
-    'es-CL': 'Spanish (Chile)',
-    'es-CO': 'Spanish (Colombia)',
-    'es-CR': 'Spanish (Costa Rica)',
-    'es-EC': 'Spanish (Ecuador)',
-    'es-EL': 'Spanish (El Salvador)',
-    'es-GT': 'Spanish (Guatemala)',
-    'es-LA': 'Spanish (Latin America)',
-    'es-MX': 'Spanish (Mexico)',
-    'es-PE': 'Spanish (Peru)',
-    'es-PR': 'Spanish (Puerto Rico)',
-    'en-africa': 'English (Africa)',
-    'fr-BE': 'French (Belgium)',
-    'en-BE': 'English (Belgium)',
-    'nl-BE': 'Dutch (Belgium)',
-    'en-CY': 'English (Cyprus)',
-    'da-DK': 'Danish (Denmark)',
-    'et-EE': 'Estonian (Estonia)',
-    'ar-EG': 'Arabic (Egypt)',
-    'en-GB': 'English (United Kingdom)',
-    'lv-LV': 'Latvian (Latvia)',
-    'lt-LT': 'Lithuanian (Lithuania)',
-    'de-LU': 'German (Luxembourg)',
-    'en-LU': 'English (Luxembourg)',
-    'fr-LU': 'French (Luxembourg)',
-    'hu-HU': 'Hungarian (Hungary)',
-    'en-MT': 'English (Malta)',
-    'en-mena': 'English (MENA)',
-    'ar-mena': 'Arabic (MENA)',
-    'en-NG': 'English (Nigeria)',
-    'nl-NL': 'Dutch (Netherlands)',
-    'no-NO': 'Norwegian (Norway)',
-    'pl-PL': 'Polish (Poland)',
-    'pt-PT': 'Portuguese (Portugal)',
-    'ar-QA': 'Arabic (Qatar)',
-    'ro-RO': 'Romanian (Romania)',
-    'en-sa': 'English (Saudi Arabia)',
-    'fr-CH': 'French (Switzerland)',
-    'de-CH': 'German (Switzerland)',
-    'it-CH': 'Italian (Switzerland)',
-    'sl-SI': 'Slovenian (Slovenia)',
-    'sk-SK': 'Slovak (Slovakia)',
-    'fi-FI': 'Finnish (Finland)',
-    'sv-SE': 'Swedish (Sweden)',
-    'tr-TR': 'Turkish (Turkey)',
-    'en-ae': 'English (United Arab Emirates)',
-    'de-AT': 'German (Austria)',
-    'cs-CZ': 'Czech (Czech Republic)',
-    'bg-BG': 'Bulgarian (Bulgaria)',
-    'ru-RU': 'Russian (Russia)',
-    'uk-UA': 'Ukrainian (Ukraine)',
-    'ar-ae': 'Arabic (United Arab Emirates)',
-    'ar-sa': 'Arabic (Saudi Arabia)',
-    'en-ZA': 'English (South Africa)',
-    'en-AU': 'English (Australia)',
-    'en-HK': 'English (Hong Kong)',
-    'en-IN': 'English (India)',
-    'hi-IN': 'Hindi (India)',
-    'zh-CN': 'Chinese (Simplified, China)',
-    'zh-HK': 'Chinese (Traditional, Hong Kong)',
-    'zh-TW': 'Chinese (Traditional, Taiwan)',
-  };
+  const allLocales = localesResp.locales;
 
   languagePicker.querySelectorAll('sp-menu-item').forEach((option) => {
     option.remove();
   });
 
   locales.forEach((l, i) => {
-    const lang = dictionary[l];
+    const lang = allLocales[l];
     const opt = createTag('sp-menu-item', { value: l }, lang);
     languagePicker.append(opt);
 
