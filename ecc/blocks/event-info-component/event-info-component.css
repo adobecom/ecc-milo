@@ -326,6 +326,18 @@
   margin-right: 8px;
 }
 
+.event-info-component .private-event-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.event-info-component .title-container {
+  display: flex;
+  gap: 16px;
+  flex-direction: column;
+}
+
 @media screen and (min-width: 900px) {
   .event-info-component .date-time-row > p {
     margin-left: 24px;

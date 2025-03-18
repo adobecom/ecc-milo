@@ -285,6 +285,10 @@
   flex-direction: row-reverse;
 }
 
+.form-handler .form-component > div:first-of-type {
+  margin-bottom: 32px;
+}
+
 .form-handler .form-component > div:first-of-type > div > h2 {
   font-size: var(--type-heading-xl-size);
   line-height: var(--type-heading-xl-lh);
@@ -296,7 +300,6 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  margin-bottom: 32px;
 }
 
 .form-handler .main-frame .section:first-of-type h2 {

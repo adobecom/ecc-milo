@@ -1,5 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { getClouds } from '../../scripts/esp-controller.js';
+import { getClouds, getLocales } from '../../scripts/esp-controller.js';
 import { getCaasTags } from '../../scripts/caas.js';
 import {
   buildNoAccessScreen,
@@ -59,8 +59,9 @@ async function buildCMC(el, blockConfig) {
 
   if (!caasTags) return;
 
-  const clouds = await getClouds();
+  const [clouds, localesResp] = await Promise.all([getClouds(), getLocales()]);
 
+  const allLocales = localesResp.localeNames;
   const savedTags = {};
   const savedLocales = {};
 
@@ -83,6 +84,7 @@ async function buildCMC(el, blockConfig) {
   tagManager.savedLocales = savedLocales;
   tagManager.config = blockConfig;
   tagManager.clouds = clouds;
+  tagManager.locales = allLocales;
 }
 
 export default async function init(el) {
