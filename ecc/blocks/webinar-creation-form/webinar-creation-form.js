@@ -460,7 +460,7 @@ async function saveEvent(props, toPublish = false) {
   };
 
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    resp = await createEvent(getJoinedData());
+    resp = await createEvent({ ...getJoinedData(), eventType: 'Online' });
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
     await onEventSave();
