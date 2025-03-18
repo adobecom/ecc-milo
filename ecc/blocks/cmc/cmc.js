@@ -51,11 +51,21 @@ async function buildCMC(el, blockConfig) {
 
   spTheme.appendChild(el);
 
-  const caasResp = await getCaasTags();
+  let caasTags;
 
-  if (!caasResp) return;
+  try {
+    const caasResp = await getCaasTags();
+    caasTags = caasResp.namespaces.caas;
+  } catch (err) {
+    console.log(err);
 
-  const caasTags = caasResp.namespaces.caas;
+    if (window.location.hostname === 'localhost') {
+      const fbTags = await fetch('/ecc/fallbacks/caas-tags.json').then((res) => res.json());
+      caasTags = fbTags.namespaces.caas;
+    } else {
+      return;
+    }
+  }
 
   if (!caasTags) return;
 
