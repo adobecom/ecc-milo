@@ -26,12 +26,6 @@ export function setPayloadCache(payload) {
   if (!payload) return;
 
   payloadCache = quickFilter(payload);
-
-  const { pendingTopics } = payload;
-  if (pendingTopics) {
-    const jointTopics = Object.values(pendingTopics).reduce((acc, val) => acc.concat(val), []);
-    if (jointTopics.length) payloadCache.topics = jointTopics;
-  }
 }
 
 export function getFilteredCachedPayload() {
