@@ -422,7 +422,7 @@ export async function onRespUpdate(component, props) {
     const { defaultLocale } = props.eventDataResp;
     const languagePicker = component.querySelector('#language-picker');
 
-    if (defaultLocale && defaultLocale !== 'en-US') {
+    if (defaultLocale) {
       languagePicker.disabled = true;
     }
   }
