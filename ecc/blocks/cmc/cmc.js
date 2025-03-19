@@ -57,14 +57,8 @@ async function buildCMC(el, blockConfig) {
     const caasResp = await getCaasTags();
     caasTags = caasResp.namespaces.caas;
   } catch (err) {
-    console.log(err);
-
-    if (window.location.hostname === 'localhost') {
-      const fbTags = await fetch('/ecc/fallbacks/caas-tags.json').then((res) => res.json());
-      caasTags = fbTags.namespaces.caas;
-    } else {
-      return;
-    }
+    window.lana?.log('error', err);
+    return;
   }
 
   if (!caasTags) return;
