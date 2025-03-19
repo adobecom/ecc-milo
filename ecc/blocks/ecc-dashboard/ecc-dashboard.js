@@ -35,8 +35,8 @@ export function cloneFilter(obj) {
 function eventObjFilter(obj) {
   const output = {};
 
-  Object.entries(EVENT_DATA_FILTER).forEach(([key]) => {
-    if (obj[key] !== undefined && obj[key] !== null) {
+  Object.entries(EVENT_DATA_FILTER).forEach(([key, attr]) => {
+    if (obj[key] !== undefined && obj[key] !== null && attr.submittable) {
       output[key] = obj[key];
     }
   });
@@ -226,6 +226,13 @@ function initMoreOptions(props, config, eventObj, row) {
         toolBox.remove();
         row.classList.add('pending');
         const resp = await unpublishEvent(eventObj.eventId, eventObjFilter(eventObj));
+
+        if (resp.error) {
+          row.classList.remove('pending');
+          showToast(props, 'Failed to unpublish event. Please try again later.', { variant: 'negative' });
+          return;
+        }
+
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
@@ -240,6 +247,13 @@ function initMoreOptions(props, config, eventObj, row) {
         toolBox.remove();
         row.classList.add('pending');
         const resp = await publishEvent(eventObj.eventId, eventObjFilter(eventObj));
+
+        if (resp.error) {
+          row.classList.remove('pending');
+          showToast(props, 'Failed to publish event. Please try again later.', { variant: 'negative' });
+          return;
+        }
+
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
