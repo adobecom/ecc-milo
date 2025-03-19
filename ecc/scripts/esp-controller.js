@@ -939,19 +939,25 @@ export async function getEvent(eventId) {
   const url = `${host}/v1/events/${encodeURIComponent(eventId)}`;
 
   try {
-    const response = await safeFetch(url, options);
-    const data = await response.json();
+    const [eventResp, speakersResp, sponsorsResp] = await Promise.all([
+      safeFetch(url, options),
+      safeFetch(`${url}/speakers`, options),
+      safeFetch(`${url}/sponsors`, options),
+    ]);
 
-    if (!response.ok) {
-      window.lana?.log(`Failed to get details for event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { status: response.status, error: data };
+    if (!eventResp.ok || !speakersResp.ok || !sponsorsResp.ok) {
+      window.lana?.log(`Failed to get details for event ${eventId}. Status:`, eventResp.status, 'Error:', eventResp.error);
+      return { status: eventResp.status, error: eventResp.error };
     }
 
-    if (data.speakers) {
-      const promises = data.speakers.map((spkr) => getSpeaker(data.seriesId, spkr.speakerId));
-      const speakers = await Promise.all(promises);
-      data.speakers = speakers;
-    }
+    const [eventData, speakersData, sponsorsData] = await Promise.all([
+      eventResp.json(),
+      speakersResp.json(),
+      sponsorsResp.json(),
+    ]);
+
+    const data = { ...eventData, ...speakersData, ...sponsorsData };
+
     return data;
   } catch (error) {
     window.lana?.log(`Failed to get details for event ${eventId}. Error:`, error);
