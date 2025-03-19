@@ -56,7 +56,6 @@ export const SPEAKER_DATA_FILTER = {
   firstName: { type: 'string', localizable: false, submittable: true },
   lastName: { type: 'string', localizable: false, submittable: true },
   title: { type: 'string', localizable: true, submittable: true },
-  type: { type: 'string', localizable: false, submittable: true },
   bio: { type: 'string', localizable: true, submittable: true },
   socialLinks: { type: 'array', localizable: false, submittable: true },
   creationTime: { type: 'string', localizable: false, submittable: false },
@@ -72,7 +71,6 @@ export const SPEAKER_DATA_FILTER = {
 
 export const SPONSOR_DATA_FILTER = {
   sponsorId: { type: 'string', localizable: false, submittable: true },
-  sponsorType: { type: 'string', localizable: false, submittable: true },
   name: { type: 'string', localizable: true, submittable: true },
   info: { type: 'string', localizable: true, submittable: true },
   link: { type: 'string', localizable: false, submittable: true },
