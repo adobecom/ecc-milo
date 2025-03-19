@@ -7,6 +7,7 @@ import { buildErrorMessage } from '../form-handler/form-handler.js';
 
 function togglePrefillableFieldsHiddenState(component) {
   const address = component.querySelector('#google-place-formatted-address');
+
   address.classList.toggle('hidden', !address.value);
 }
 
