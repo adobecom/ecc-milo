@@ -7,6 +7,7 @@ import { buildErrorMessage } from '../form-handler/form-handler.js';
 
 const imageType = 'venue-additional-image';
 let imageFile = null;
+let respImageId = null;
 
 function togglePrefillableFieldsHiddenState(component) {
   const address = component.querySelector('#google-place-formatted-address');
@@ -233,7 +234,7 @@ async function uploadVenueAdditionalImage(component, props) {
       progress,
       imageId,
     );
-    if (resp?.imageId) imageId = resp.imageId;
+    if (resp?.imageId) respImageId = resp.imageId;
   } catch (error) {
     dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
     dz.deleteImage();
@@ -321,7 +322,7 @@ export default async function init(component, props) {
 
     dz.handleDelete = async () => {
       let imageConfigs = null;
-      let imageId = null;
+      let imageId = respImageId;
 
       if (eventData.eventId) {
         const eventImagesResp = await getEventImages(eventData.eventId);
@@ -362,7 +363,7 @@ export default async function init(component, props) {
           } else {
             dz.file = null;
             imageFile = null;
-            imageId = null;
+            respImageId = null;
             dz.requestUpdate();
           }
         } catch (error) {
