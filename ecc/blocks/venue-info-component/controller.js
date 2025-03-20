@@ -238,18 +238,11 @@ async function uploadVenueAdditionalImage(component, props) {
     dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
     dz.deleteImage();
     dz.file = null;
-    imageFile = null;
   } finally {
     progressWrapper.classList.add('hidden');
   }
-
-  if (eventData.eventId) {
-    const eventImagesResp = await getEventImages(eventData.eventId);
-    if (eventImagesResp?.images) {
-      const photoObj = eventImagesResp.images.find((p) => p.imageKind === imageType);
-      if (photoObj) imageId = photoObj.imageId;
-    }
-  }
+  // Reset image file after upload
+  imageFile = null;
 }
 
 export async function onSubmit(component, props) {
