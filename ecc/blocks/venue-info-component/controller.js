@@ -14,7 +14,7 @@ function togglePrefillableFieldsHiddenState(component) {
 async function loadGoogleMapsAPI(callback) {
   const ALLOWED_ENVS = new Set(['dev', 'stage', 'prod']);
 
-  const currentEnv = getEventServiceEnv();
+  const currentEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
 
   if (!ALLOWED_ENVS.has(currentEnv)) {
     throw new Error('Invalid environment detected.');
