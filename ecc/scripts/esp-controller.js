@@ -937,6 +937,7 @@ export async function getEvent(eventId) {
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
   const url = `${host}/v1/events/${encodeURIComponent(eventId)}`;
+  let data = {};
 
   try {
     const [eventResp, speakersResp, sponsorsResp, venuesResp] = await Promise.all([
@@ -946,21 +947,46 @@ export async function getEvent(eventId) {
       safeFetch(`${url}/venues`, options),
     ]);
 
-    if (!eventResp.ok || !speakersResp.ok || !sponsorsResp.ok || !venuesResp.ok) {
+    if (!eventResp.ok) {
+      window.lana?.log(`Failed to get details for event ${eventId}. Status:`, eventResp.status, 'Error:', eventResp.error);
+    }
+
+    if (!speakersResp.ok) {
+      window.lana?.log(`Failed to get speakers for event ${eventId}. Status:`, speakersResp.status, 'Error:', speakersResp.error);
+    }
+
+    if (!sponsorsResp.ok) {
+      window.lana?.log(`Failed to get sponsors for event ${eventId}. Status:`, sponsorsResp.status, 'Error:', sponsorsResp.error);
+    }
+
+    if (!venuesResp.ok) {
+      window.lana?.log(`Failed to get venues for event ${eventId}. Status:`, venuesResp.status, 'Error:', venuesResp.error);
+    }
+
+    if (eventResp.ok) {
+      const eventData = await eventResp.json();
+      data = eventData;
+    }
+
+    if (speakersResp.ok) {
+      const speakersData = await speakersResp.json();
+      data.speakers = speakersData.speakers;
+    }
+
+    if (sponsorsResp.ok) {
+      const sponsorsData = await sponsorsResp.json();
+      data.sponsors = sponsorsData.sponsors;
+    }
+
+    if (venuesResp.ok) {
+      const venuesData = await venuesResp.json();
+      data.venue = venuesData.venues?.[0];
+    }
+
+    if (!data) {
       window.lana?.log(`Failed to get details for event ${eventId}. Status:`, eventResp.status, 'Error:', eventResp.error);
       return { status: eventResp.status, error: eventResp.error };
     }
-
-    const [eventData, speakersData, sponsorsData, venuesData] = await Promise.all([
-      eventResp.json(),
-      speakersResp.json(),
-      sponsorsResp.json(),
-      venuesResp.json(),
-    ]);
-
-    const [venue] = venuesData.venues;
-
-    const data = { ...eventData, ...speakersData, ...sponsorsData, venue };
 
     return data;
   } catch (error) {
