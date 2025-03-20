@@ -8,7 +8,7 @@ import { buildErrorMessage } from '../form-handler/form-handler.js';
 const imageType = 'venue-additional-image';
 let imageFile = null;
 let respImageId = null;
-
+let respImageConfigs = null;
 function togglePrefillableFieldsHiddenState(component) {
   const address = component.querySelector('#google-place-formatted-address');
 
@@ -234,7 +234,10 @@ async function uploadVenueAdditionalImage(component, props) {
       progress,
       imageId,
     );
-    if (resp?.imageId) respImageId = resp.imageId;
+    if (resp?.imageId) {
+      respImageId = resp.imageId;
+      respImageConfigs = imageConfigs;
+    }
   } catch (error) {
     dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
     dz.deleteImage();
@@ -321,9 +324,10 @@ export default async function init(component, props) {
     };
 
     dz.handleDelete = async () => {
-      let imageConfigs = null;
       let imageId = respImageId;
-      console.log('imageId1', imageId);
+      let imageConfigs = respImageConfigs;
+      console.log('imageId', imageId);
+      console.log('imageConfigs', imageConfigs);
 
       if (eventData.eventId) {
         const eventImagesResp = await getEventImages(eventData.eventId);
@@ -338,9 +342,6 @@ export default async function init(component, props) {
           targetUrl: `/v1/events/${eventData.eventId}/images`,
         };
       }
-
-      console.log('imageConfigs', imageConfigs);
-      console.log('imageId2', imageId);
 
       if (!imageConfigs || !imageId) return;
 
@@ -368,6 +369,7 @@ export default async function init(component, props) {
             dz.file = null;
             imageFile = null;
             respImageId = null;
+            respImageConfigs = null;
             dz.requestUpdate();
           }
         } catch (error) {
