@@ -220,9 +220,10 @@
   width: 90px;
   height: 90px;
   position: absolute;
-  top: 16px;
-  left: 16px;
+  top: 50%;
+  left: 50%;
   z-index: 1;
+  transform: translate(-50%, -50%);
 }
 
 .ecc-dashboard table .event-row .thumbnail-container img {
