@@ -323,6 +323,7 @@ export default async function init(component, props) {
     dz.handleDelete = async () => {
       let imageConfigs = null;
       let imageId = respImageId;
+      console.log('imageId1', imageId);
 
       if (eventData.eventId) {
         const eventImagesResp = await getEventImages(eventData.eventId);
@@ -337,6 +338,9 @@ export default async function init(component, props) {
           targetUrl: `/v1/events/${eventData.eventId}/images`,
         };
       }
+
+      console.log('imageConfigs', imageConfigs);
+      console.log('imageId2', imageId);
 
       if (!imageConfigs || !imageId) return;
 
