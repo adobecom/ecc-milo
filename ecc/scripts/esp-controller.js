@@ -58,7 +58,7 @@ async function safeFetch(url, options) {
 }
 
 export async function constructRequestOptions(method, body = null) {
-  const secretEnv = getEventServiceEnv();
+  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
@@ -117,7 +117,7 @@ export async function constructRequestOptions(method, body = null) {
 }
 
 export async function uploadImage(file, configs, tracker, imageId = null) {
-  const secretEnv = getEventServiceEnv();
+  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
@@ -939,24 +939,28 @@ export async function getEvent(eventId) {
   const url = `${host}/v1/events/${encodeURIComponent(eventId)}`;
 
   try {
-    const [eventResp, speakersResp, sponsorsResp] = await Promise.all([
+    const [eventResp, speakersResp, sponsorsResp, venuesResp] = await Promise.all([
       safeFetch(url, options),
       safeFetch(`${url}/speakers`, options),
       safeFetch(`${url}/sponsors`, options),
+      safeFetch(`${url}/venues`, options),
     ]);
 
-    if (!eventResp.ok || !speakersResp.ok || !sponsorsResp.ok) {
+    if (!eventResp.ok || !speakersResp.ok || !sponsorsResp.ok || !venuesResp.ok) {
       window.lana?.log(`Failed to get details for event ${eventId}. Status:`, eventResp.status, 'Error:', eventResp.error);
       return { status: eventResp.status, error: eventResp.error };
     }
 
-    const [eventData, speakersData, sponsorsData] = await Promise.all([
+    const [eventData, speakersData, sponsorsData, venuesData] = await Promise.all([
       eventResp.json(),
       speakersResp.json(),
       sponsorsResp.json(),
+      venuesResp.json(),
     ]);
 
-    const data = { ...eventData, ...speakersData, ...sponsorsData };
+    const [venue] = venuesData.venues;
+
+    const data = { ...eventData, ...speakersData, ...sponsorsData, venue };
 
     return data;
   } catch (error) {
@@ -965,7 +969,7 @@ export async function getEvent(eventId) {
   }
 }
 
-export async function getVenue(eventId) {
+export async function getEventVenue(eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid eventId');
 
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
@@ -980,7 +984,7 @@ export async function getVenue(eventId) {
       return { status: response.status, error: data };
     }
 
-    return data;
+    return data.venues?.[0] || null;
   } catch (error) {
     window.lana?.log('Failed to get venue details. Error:', error);
     return { status: 'Network Error', error: error.message };
