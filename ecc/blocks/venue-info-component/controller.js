@@ -325,6 +325,7 @@ export default async function init(component, props) {
     };
 
     dz.handleDelete = async () => {
+      // default to respImageId and respImageConfigs from the previous upload
       let imageId = respImageId;
       let imageConfigs = respImageConfigs;
 
