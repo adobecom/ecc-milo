@@ -5,13 +5,9 @@ import {
   decorateTextfield,
   decorateTextarea,
   miloReplaceKey,
-  addTooltipToEl,
 } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
-
-const privateEventString = 'Set as a private event';
-const privateEventToolTip = 'By setting this to private, your event won\'t be publicly found online or published to the events hub.';
 
 function buildDatePicker(column) {
   column.classList.add('date-picker');
@@ -106,13 +102,6 @@ function decorateDateTimeFields(row) {
   });
 }
 
-function addPrivateEventToggle(el) {
-  el.classList.add('title-container');
-  const div = createTag('div', { class: 'private-event-toggle-wrapper' }, '', { parent: el });
-  createTag('sp-switch', { id: 'private-event', checked: false, size: 'xl' }, privateEventString, { parent: div });
-  addTooltipToEl(privateEventToolTip, div);
-}
-
 export default function init(el) {
   el.classList.add('form-component');
 
@@ -121,7 +110,6 @@ export default function init(el) {
     switch (i) {
       case 0:
         generateToolTip(r);
-        addPrivateEventToggle(r);
         break;
       case 1:
         await decorateTextfield(r, { id: 'info-field-event-title' }, await miloReplaceKey('duplicate-event-title-error'));
