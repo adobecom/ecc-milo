@@ -17,33 +17,9 @@ import {
 } from '../../scripts/utils.js';
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
-import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
+import { eventObjFilter } from './dashboard-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
-
-export function cloneFilter(obj) {
-  const output = {};
-
-  Object.entries(EVENT_DATA_FILTER).forEach(([key, attr]) => {
-    if (attr.cloneable) {
-      output[key] = obj[key];
-    }
-  });
-
-  return output;
-}
-
-function eventObjFilter(obj) {
-  const output = {};
-
-  Object.entries(EVENT_DATA_FILTER).forEach(([key, attr]) => {
-    if (obj[key] !== undefined && obj[key] !== null && attr.submittable) {
-      output[key] = obj[key];
-    }
-  });
-
-  return output;
-}
 
 function showToast(props, msg, options = {}) {
   const toastArea = props.el.querySelector('sp-theme.toast-area');
@@ -373,7 +349,7 @@ function initMoreOptions(props, config, eventObj, row) {
       payload.title = `${eventObj.title} - copy`;
       toolBox.remove();
       row.classList.add('pending');
-      const newEventJSON = await createEvent(cloneFilter(payload));
+      const newEventJSON = await createEvent(eventObjFilter(payload));
 
       if (newEventJSON.error) {
         row.classList.remove('pending');
