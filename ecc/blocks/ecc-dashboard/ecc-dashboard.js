@@ -17,7 +17,7 @@ import {
 } from '../../scripts/utils.js';
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
-import { eventObjFilter } from './dashboard-utils.js';
+import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -349,7 +349,7 @@ function initMoreOptions(props, config, eventObj, row) {
       payload.title = `${eventObj.title} - copy`;
       toolBox.remove();
       row.classList.add('pending');
-      const newEventJSON = await createEvent(eventObjFilter(payload));
+      const newEventJSON = await createEvent(cloneFilter(payload));
 
       if (newEventJSON.error) {
         row.classList.remove('pending');
