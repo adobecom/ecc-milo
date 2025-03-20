@@ -9,6 +9,7 @@ const imageType = 'venue-additional-image';
 let imageFile = null;
 let respImageId = null;
 let respImageConfigs = null;
+
 function togglePrefillableFieldsHiddenState(component) {
   const address = component.querySelector('#google-place-formatted-address');
 
@@ -326,8 +327,6 @@ export default async function init(component, props) {
     dz.handleDelete = async () => {
       let imageId = respImageId;
       let imageConfigs = respImageConfigs;
-      console.log('imageId', imageId);
-      console.log('imageConfigs', imageConfigs);
 
       if (eventData.eventId) {
         const eventImagesResp = await getEventImages(eventData.eventId);
