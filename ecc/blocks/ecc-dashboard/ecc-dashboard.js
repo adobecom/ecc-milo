@@ -3,6 +3,7 @@ import {
   deleteEvent,
   getEventImages,
   getEventsForUser,
+  getEventVenue,
   publishEvent,
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
@@ -16,93 +17,9 @@ import {
 } from '../../scripts/utils.js';
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
+import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
-
-export function cloneFilter(obj) {
-  const wl = [
-    'agenda',
-    'tags',
-    'topics',
-    'speakers',
-    'sponsors',
-    'eventType',
-    'cloudType',
-    'seriesId',
-    'communityTopicUrl',
-    'title',
-    'description',
-    'localStartDate',
-    'localEndDate',
-    'localStartTime',
-    'localEndTime',
-    'localStartTimeMillis',
-    'localEndTimeMillis',
-    'timezone',
-    'showAgendaPostEvent',
-    'showVenuePostEvent',
-    'attendeeLimit',
-    'rsvpDescription',
-    'allowWaitlisting',
-    'allowGuestRegistration',
-    'hostEmail',
-    'rsvpFormFields',
-    'relatedProducts',
-    'venue',
-  ];
-
-  const output = {};
-
-  wl.forEach((attr) => {
-    if (attr !== undefined && attr !== null) {
-      output[attr] = obj[attr];
-    }
-  });
-
-  return output;
-}
-
-function eventObjFilter(obj) {
-  const submissionFilter = [
-    // from payload and response
-    'agenda',
-    'topics',
-    'eventType',
-    'cloudType',
-    'seriesId',
-    'communityTopicUrl',
-    'title',
-    'description',
-    'localStartDate',
-    'localEndDate',
-    'localStartTime',
-    'localEndTime',
-    'timezone',
-    'showAgendaPostEvent',
-    'showVenuePostEvent',
-    'showSponsors',
-    'rsvpFormFields',
-    'relatedProducts',
-    'rsvpDescription',
-    'attendeeLimit',
-    'allowWaitlisting',
-    'hostEmail',
-    'eventId',
-    'published',
-    'creationTime',
-    'modificationTime',
-  ];
-
-  const output = {};
-
-  submissionFilter.forEach((attr) => {
-    if (obj[attr] !== undefined && obj[attr] !== null) {
-      output[attr] = obj[attr];
-    }
-  });
-
-  return output;
-}
 
 function showToast(props, msg, options = {}) {
   const toastArea = props.el.querySelector('sp-theme.toast-area');
@@ -133,8 +50,20 @@ function highlightRow(row) {
   }, 1000);
 }
 
+function createSwipingLoader(extraClass = '') {
+  const loader = createTag('div', { class: `swiping-loader ${extraClass}` });
+
+  requestAnimationFrame(() => {
+    loader.classList.add('animate');
+  });
+
+  return loader;
+}
+
 function buildThumbnail(data) {
   const container = createTag('td', { class: 'thumbnail-container' });
+  const thumbnailLoader = createSwipingLoader('thumbnail-loader');
+  container.append(thumbnailLoader);
 
   const buildThumbnailContainer = (images) => {
     const cardImage = images.find((photo) => photo.imageKind === 'event-card-image');
@@ -152,18 +81,38 @@ function buildThumbnail(data) {
     || venueImage?.imageUrl
     || images[0]?.imageUrl;
 
-    const img = createTag('img', { class: 'event-thumbnail-img' });
+    const img = createTag('img', { class: 'event-thumbnail-img hidden' });
 
-    if (imgSrc) img.src = imgSrc;
+    if (imgSrc) {
+      img.src = imgSrc;
+    } else {
+      thumbnailLoader.remove();
+      img.classList.remove('hidden');
+    }
+
     container.append(img);
+
+    return img;
   };
 
   if (data.photos) {
-    buildThumbnailContainer(data.photos);
+    const img = buildThumbnailContainer(data.photos);
+    img.addEventListener('load', () => {
+      img.classList.remove('hidden');
+      thumbnailLoader.remove();
+    });
   } else {
     getEventImages(data.eventId).then(({ images }) => {
-      if (!images) return;
-      buildThumbnailContainer(images);
+      if (!images) {
+        thumbnailLoader.remove();
+        return;
+      }
+
+      const img = buildThumbnailContainer(images);
+      img.addEventListener('load', () => {
+        img.classList.remove('hidden');
+        thumbnailLoader.remove();
+      });
     });
   }
 
@@ -286,6 +235,13 @@ function initMoreOptions(props, config, eventObj, row) {
         toolBox.remove();
         row.classList.add('pending');
         const resp = await unpublishEvent(eventObj.eventId, eventObjFilter(eventObj));
+
+        if (resp.error) {
+          row.classList.remove('pending');
+          showToast(props, 'Failed to unpublish event. Please try again later.', { variant: 'negative' });
+          return;
+        }
+
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
@@ -300,6 +256,13 @@ function initMoreOptions(props, config, eventObj, row) {
         toolBox.remove();
         row.classList.add('pending');
         const resp = await publishEvent(eventObj.eventId, eventObjFilter(eventObj));
+
+        if (resp.error) {
+          row.classList.remove('pending');
+          showToast(props, 'Failed to publish event. Please try again later.', { variant: 'negative' });
+          return;
+        }
+
         updateDashboardData(resp, props);
 
         sortData(props, config, { resort: true });
@@ -493,13 +456,13 @@ function buildEventTitleTag(config, eventObj) {
   return eventTitleTag;
 }
 
-// TODO: to retire
 function buildVenueTag(eventObj) {
-  const { venue } = eventObj;
-  if (!venue) return null;
+  return getEventVenue(eventObj.eventId).then((venue) => {
+    if (!venue) return 'N/A';
 
-  const venueTag = createTag('span', { class: 'vanue-name' }, venue.venueName);
-  return venueTag;
+    const venueTag = createTag('span', { class: 'vanue-name' }, venue.venueName);
+    return venueTag;
+  });
 }
 
 function buildRSVPTag(config, eventObj) {
@@ -516,6 +479,7 @@ async function populateRow(props, config, index) {
   const event = props.paginatedData[index];
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   const sp = new URLSearchParams(window.location.search);
+  const venueLoader = createSwipingLoader('venue-loader');
 
   // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'event-row', 'data-event-id': event.eventId }, '', { parent: tBody });
@@ -524,10 +488,14 @@ async function populateRow(props, config, index) {
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildVenueTag(event)));
+  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, venueLoader));
   const geoCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getCountryName(event)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
+
+  buildVenueTag(event).then((venueTag) => {
+    venueLoader.replaceWith(venueTag);
+  });
 
   row.append(
     thumbnailCell,
@@ -628,7 +596,7 @@ function initSorting(props, config) {
     const thText = createTag('span', {}, val);
     const th = createTag('th', {}, thText, { parent: thRow });
 
-    if (['thumbnail', 'manage'].includes(key)) return;
+    if (['thumbnail', 'manage', 'venueName'].includes(key)) return;
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
     th.classList.add('sortable', key);

@@ -5,6 +5,7 @@ import {
   updateSpeakerInEvent,
   removeSpeakerFromEvent,
   getEventSpeaker,
+  getEvent,
 } from '../../scripts/esp-controller.js';
 
 export async function onSubmit(component, props) {
@@ -46,7 +47,8 @@ export async function onSubmit(component, props) {
           return;
         }
 
-        props.eventDataResp = { ...props.eventDataResp, ...resp };
+        const updatedEventData = await getEvent(eventId);
+        props.eventDataResp = { ...props.eventDataResp, ...updatedEventData };
       } else {
         const existingSpeaker = props.eventDataResp.speakers.find((profile) => {
           const idMatch = profile.speakerId === speakerId;
@@ -77,7 +79,8 @@ export async function onSubmit(component, props) {
               profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message } } }));
             }
 
-            props.eventDataResp = { ...props.eventDataResp, ...resp };
+            const updatedEventData = await getEvent(eventId);
+            props.eventDataResp = { ...props.eventDataResp, ...updatedEventData };
           }
         }
       }
