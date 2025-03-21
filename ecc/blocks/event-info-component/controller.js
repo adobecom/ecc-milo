@@ -314,7 +314,6 @@ function dateTimeStringToTimestamp(dateString, timeString) {
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const isPrivate = component.querySelector('#private-event').checked;
   const title = component.querySelector('#info-field-event-title').value;
   const description = component.querySelector('#info-field-event-description').value;
   const datePicker = component.querySelector('#event-info-date-picker');
@@ -339,7 +338,6 @@ export function onSubmit(component, props) {
     localStartTimeMillis,
     localEndTimeMillis,
     timezone,
-    isPrivate,
   };
 
   props.payload = { ...props.payload, ...eventInfo };
@@ -556,7 +554,6 @@ export default async function init(component, props) {
     localStartTime,
     localEndTime,
     timezone,
-    isPrivate,
   } = eventData;
 
   if (title
@@ -576,7 +573,6 @@ export default async function init(component, props) {
       selectedEndDate: parseFormatedDate(localEndDate),
     });
 
-    component.querySelector('#private-event').checked = isPrivate || false;
     component.querySelector('#info-field-event-title').value = title || '';
     component.querySelector('#info-field-event-description').value = description || '';
     changeInputValue(startTime, 'value', `${localStartTime}` || '');

@@ -12,8 +12,6 @@ import { LIBS } from '../../scripts/scripts.js';
 import { style } from './rte-tiptap.css.js';
 import { LINK_REGEX } from '../../scripts/constants.js';
 
-const { loadScript } = await import(`${LIBS}/utils/utils.js`);
-
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 export default class RteTiptap extends LitElement {
@@ -30,7 +28,6 @@ export default class RteTiptap extends LitElement {
     this.content = this.content ?? '';
     this.handleInput = this.handleInput || null;
     this.editorInitialized = false;
-    this.markdownInitialized = false;
     this.rteFormat = 'Paragraph';
     this.isBold = false;
     this.isItalic = false;
@@ -54,28 +51,18 @@ export default class RteTiptap extends LitElement {
     this.requestUpdate();
   }
 
-  async firstUpdated() {
-    await Promise.all([loadScript('https://unpkg.com/turndown@7.2.0/dist/turndown.js'), loadScript('https://unpkg.com/showdown@2.1.0/dist/showdown.min.js')]);
-    this.markdownInitialized = true;
-    this.requestUpdate();
-  }
-
   initializeEditor() {
     const editorEl = this.shadowRoot.querySelector('.rte-tiptap-editor');
-    const turndownService = new TurndownService();
-    turndownService.keep(['u']);
-    const showdownService = new showdown.Converter();
-    const content = this.content ? showdownService.makeHtml(this.content) : '';
     const tiptap = this;
     this.editor = new Editor({
-      content: content,
+      content: this.content,
       element: editorEl,
       extensions: [
         StarterKit,
         Underline,
         Link.configure({
-          openOnClick: false, // avoid opening links immediately when clicked
-          autolink: true, // auto-detects links
+          openOnClick: false,
+          autolink: true,
           HTMLAttributes: {
             rel: 'noopener noreferrer',
             target: '_blank',
@@ -84,9 +71,7 @@ export default class RteTiptap extends LitElement {
       ],
       onUpdate({ editor }) {
         const outputHtml = editor.getHTML();
-        const markdown = turndownService.turndown(outputHtml);
-
-        tiptap.handleInput(markdown);
+        tiptap.handleInput(outputHtml);
       },
       onSelectionUpdate: ({ editor }) => {
         const currentNode = editor.state.selection.$anchor.parent;
@@ -193,7 +178,7 @@ export default class RteTiptap extends LitElement {
   }
 
   render() {
-    if (this.handleInput && this.markdownInitialized && !this.editorInitialized) {
+    if (this.handleInput && !this.editorInitialized) {
       this.initializeEditor();
     }
     /* eslint-disable indent */

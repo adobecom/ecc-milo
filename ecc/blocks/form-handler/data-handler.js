@@ -51,13 +51,5 @@ export default function getJoinedData() {
     modificationTime: filteredResponse.modificationTime,
   };
 
-  Object.keys(filteredResponse).forEach((key) => {
-    if (!EVENT_DATA_FILTER[key]?.deletable) return;
-
-    if (EVENT_DATA_FILTER[key].deletable && !filteredPayload[key]) {
-      delete finalPayload[key];
-    }
-  });
-
   return finalPayload;
 }
