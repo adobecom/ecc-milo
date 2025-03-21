@@ -85,6 +85,8 @@ const SPECTRUM_COMPONENTS = [
   'progress-circle',
 ];
 
+const SUPPORTED_EVENT_TYPES = ['InPerson', 'Hybrid', 'Online'];
+
 export function buildErrorMessage(props, resp) {
   if (!resp) return;
 
@@ -445,6 +447,9 @@ function updateDashboardLink(props) {
 }
 
 async function saveEvent(props, toPublish = false) {
+  const eventType = Array
+    .from(props.el.classList)
+    .find((c) => SUPPORTED_EVENT_TYPES.includes(c));
   try {
     await gatherValues(props);
   } catch (e) {
@@ -462,7 +467,7 @@ async function saveEvent(props, toPublish = false) {
   };
 
   if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    resp = await createEvent({ ...getJoinedData(), eventType: 'InPerson' });
+    resp = await createEvent({ ...getJoinedData(), eventType });
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     updateDashboardLink(props);
     await onEventSave();
