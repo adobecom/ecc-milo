@@ -112,8 +112,7 @@ export function onSubmit(component, props) {
   const tags = Array.from(selectedButtons).map((cb) => JSON.parse(cb.getAttribute('data-value')));
 
   const { payload } = props;
-  const existingTopics = payload.topics || [];
-  payload.topics = [...existingTopics, ...topics];
+  payload.topics = topics;
   const existingTags = payload.tags ? payload.tags.split(',') : [];
   const tagsToSubmit = [...new Set([...existingTags, ...tags.map((tag) => tag.caasId)])].join(',');
   if (tagsToSubmit) payload.tags = tagsToSubmit;
