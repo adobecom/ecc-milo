@@ -143,17 +143,13 @@ export default function getJoinedData(locale = 'en-US') {
   };
 
   Object.keys(filteredResponse).forEach((key) => {
-    if (!EVENT_DATA_FILTER[key]?.deletable) return;
-
-    if (EVENT_DATA_FILTER[key].deletable && !filteredPayload[key]) {
+    if (filteredPayload[key] === '<DELETE>') {
       delete finalPayload[key];
     }
   });
 
   Object.keys(localeResponse).forEach((key) => {
-    if (!EVENT_DATA_FILTER[key]?.deletable) return;
-
-    if (EVENT_DATA_FILTER[key].deletable && !localePayload[key]) {
+    if (localePayload[key] === '<DELETE>') {
       delete finalPayload.localizations[locale][key];
     }
   });

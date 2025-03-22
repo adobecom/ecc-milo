@@ -208,6 +208,8 @@ export function onSubmit(component, props) {
 
   if (contactHost && hostEmail) {
     rsvpData.hostEmail = hostEmail;
+  } else {
+    rsvpData.hostEmail = '<DELETE>';
   }
 
   if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;

@@ -375,7 +375,6 @@ function initTitleWatcher(component, props) {
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const isPrivate = component.querySelector('#private-event').checked;
   const title = component.querySelector('#info-field-event-title').value;
   const description = component.querySelector('#info-field-event-description').value;
   const datePicker = component.querySelector('#event-info-date-picker');
@@ -400,7 +399,6 @@ export function onSubmit(component, props) {
     localStartTimeMillis,
     localEndTimeMillis,
     timezone,
-    isPrivate,
   };
 
   setPropsPayload(props, eventInfo);

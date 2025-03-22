@@ -10,9 +10,6 @@ import {
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
-const privateEventString = 'Set as a private event';
-const privateEventToolTip = 'By setting this to private, your event won\'t be publicly found online or published to the events hub.';
-
 function buildDatePicker(column) {
   column.classList.add('date-picker');
   const datePicker = createTag('input', { id: 'event-info-date-picker', name: 'event-date', class: 'date-input', required: true, placeholder: column.textContent.trim() });
@@ -134,18 +131,6 @@ function buildUrlInput(el) {
   el.append(inputWrapper);
 }
 
-function addPrivateEventToggle(row) {
-  const titleContainer = createTag('div', { class: 'title-container' });
-  titleContainer.innerHTML = row.innerHTML;
-
-  row.innerHTML = '';
-  row.append(titleContainer);
-
-  const div = createTag('div', { class: 'private-event-toggle-wrapper' }, '', { parent: titleContainer });
-  createTag('sp-switch', { id: 'private-event', checked: false, size: 'xl' }, privateEventString, { parent: div });
-  addTooltipToEl(privateEventToolTip, div);
-}
-
 export default function init(el) {
   el.classList.add('form-component');
 
@@ -154,7 +139,6 @@ export default function init(el) {
     switch (i) {
       case 0:
         generateToolTip(r);
-        addPrivateEventToggle(r);
         addLanguagePicker(r);
         break;
       case 1:
