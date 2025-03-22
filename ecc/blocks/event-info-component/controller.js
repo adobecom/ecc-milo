@@ -446,7 +446,6 @@ function prefillFields(component, props, eventData) {
   const startTime = component.querySelector('#time-picker-start-time-value');
   const endTime = component.querySelector('#time-picker-end-time-value');
   const datePicker = component.querySelector('#event-info-date-picker');
-  const isPrivateCheckbox = component.querySelector('#private-event');
   const languagePicker = component.querySelector('#language-picker');
 
   const title = getAttr(eventData, 'title', props.locale);
@@ -456,7 +455,6 @@ function prefillFields(component, props, eventData) {
   const localStartTime = getAttr(eventData, 'localStartTime', props.locale);
   const localEndTime = getAttr(eventData, 'localEndTime', props.locale);
   const timezone = getAttr(eventData, 'timezone', props.locale);
-  const isPrivate = getAttr(eventData, 'isPrivate', props.locale);
   const defaultLocale = eventData.defaultLocale || 'en-US';
 
   if (title
@@ -478,7 +476,6 @@ function prefillFields(component, props, eventData) {
 
     eventTitleInput.value = title || '';
     eventDescriptionInput.value = description || '';
-    isPrivateCheckbox.checked = isPrivate || false;
     changeInputValue(startTime, 'value', `${localStartTime}` || '');
     changeInputValue(endTime, 'value', `${localEndTime}` || '');
     changeInputValue(startTimeInput, 'value', `${startTimePieces.hours}:${startTimePieces.minutes}` || '');
