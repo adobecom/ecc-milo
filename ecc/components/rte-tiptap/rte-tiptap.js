@@ -251,7 +251,7 @@ export default class RteTiptap extends LitElement {
                 
                 ${this.linkDialogError ? html`
                   <sp-help-text variant="negative">
-                    Link must match pattern "${LINK_REGEX}"
+                    Please enter a valid website address starting with "https://". For example: https://www.example.com
                   </sp-help-text>
                 ` : ''}
                 
