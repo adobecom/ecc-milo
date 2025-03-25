@@ -4,6 +4,7 @@ import {
   getEventImages,
   getEventsForUser,
   getEventVenue,
+  getLocales,
   publishEvent,
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
@@ -433,12 +434,15 @@ function initMoreOptions(props, config, eventObj, row) {
   });
 }
 
-function getEventDefaultLanguage(eventObj) {
-  if (!eventObj.localizations) return 'EN';
+function getEventDefaultLanguage(eventObj, locales) {
+  if (!eventObj.localizations) return locales['en-US'] || 'English, United States';
 
-  const { localizations } = eventObj;
+  const { defaultLocale, localizations } = eventObj;
+  const defaultLocaleKey = defaultLocale || Object.keys(localizations)[0];
 
-  return Object.keys(localizations)[0] || 'EN';
+  if (!defaultLocaleKey) return locales['en-US'] || 'English, United States';
+  const firstKeyLocale = locales[defaultLocaleKey];
+  return firstKeyLocale || 'English, United States';
 }
 
 function buildStatusTag(event) {
@@ -493,7 +497,7 @@ async function populateRow(props, config, index) {
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
   const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, venueLoader));
-  const langCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getEventDefaultLanguage(event)));
+  const langCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getEventDefaultLanguage(event, config.locales)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
@@ -591,7 +595,7 @@ function initSorting(props, config) {
     startDate: 'DATE RUN',
     modificationTime: 'LAST MODIFIED',
     venueName: 'VENUE NAME',
-    timezone: 'GEO',
+    language: 'LANGUAGE',
     attendeeCount: 'RSVP DATA',
     manage: 'MANAGE',
   };
@@ -727,6 +731,7 @@ async function buildDashboard(el, config) {
   if (!data?.length) {
     buildNoEventScreen(el, config);
   } else {
+    const locales = await getLocales().then((resp) => resp.localeNames) || {};
     props.data = data;
     props.filteredData = [...data];
     props.paginatedData = [...data];
@@ -735,7 +740,7 @@ async function buildDashboard(el, config) {
       set(target, prop, value, receiver) {
         target[prop] = value;
 
-        populateTable(receiver, config);
+        populateTable(receiver, { ...config, locales });
         updateEventsCount(receiver);
 
         return true;
@@ -743,7 +748,7 @@ async function buildDashboard(el, config) {
     };
     const proxyProps = new Proxy(props, dataHandler);
     buildDashboardHeader(proxyProps, config);
-    buildDashboardTable(proxyProps, config);
+    buildDashboardTable(proxyProps, { ...config, locales });
   }
 
   setTimeout(() => {
