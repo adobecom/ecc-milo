@@ -201,6 +201,14 @@ function initAutocomplete(el, props) {
   });
 }
 
+function resetImageState(dz) {
+  dz.file = null;
+  imageFile = null;
+  respImageId = null;
+  respImageConfigs = null;
+  dz.requestUpdate();
+}
+
 async function uploadVenueAdditionalImage(component, props) {
   const eventData = props.eventDataResp;
   const dz = component.querySelector('image-dropzone');
@@ -341,8 +349,6 @@ export default async function init(component, props) {
         };
       }
 
-      if (!imageConfigs || !imageId) return;
-
       const underlay = props.el.querySelector('sp-underlay');
       const dialog = props.el.querySelector('sp-dialog');
 
@@ -357,26 +363,30 @@ export default async function init(component, props) {
       underlay.open = true;
 
       dialogDeleteBtn.addEventListener('click', async () => {
+        dialogDeleteBtn.disabled = true;
+        dialogCancelBtn.disabled = true;
+
+        if (!imageConfigs || !imageId) {
+          resetImageState(dz);
+          underlay.open = false;
+          dialog.innerHTML = '';
+          return;
+        }
+
         try {
-          dialogDeleteBtn.disabled = true;
-          dialogCancelBtn.disabled = true;
           const resp = await deleteImage(imageConfigs, imageId);
           if (resp.error) {
             dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
           } else {
-            dz.file = null;
-            imageFile = null;
-            respImageId = null;
-            respImageConfigs = null;
-            dz.requestUpdate();
+            resetImageState(dz);
           }
         } catch (error) {
           window.lana?.log('Failed to perform image DELETE operation. Error:', error);
           dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+        } finally {
+          underlay.open = false;
+          dialog.innerHTML = '';
         }
-
-        underlay.open = false;
-        dialog.innerHTML = '';
       });
 
       dialogCancelBtn.addEventListener('click', () => {
