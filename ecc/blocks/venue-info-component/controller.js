@@ -6,6 +6,11 @@ import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/u
 import { buildErrorMessage } from '../form-handler/form-handler.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 
+const imageType = 'venue-additional-image';
+let imageFile = null;
+let respImageId = null;
+let respImageConfigs = null;
+
 function togglePrefillableFieldsHiddenState(component) {
   const address = component.querySelector('#google-place-formatted-address');
 
@@ -15,7 +20,7 @@ function togglePrefillableFieldsHiddenState(component) {
 async function loadGoogleMapsAPI(callback) {
   const ALLOWED_ENVS = new Set(['dev', 'stage', 'prod']);
 
-  const currentEnv = getEventServiceEnv();
+  const currentEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
 
   if (!ALLOWED_ENVS.has(currentEnv)) {
     throw new Error('Invalid environment detected.');
@@ -196,6 +201,64 @@ function initAutocomplete(el, props) {
   });
 }
 
+function resetImageState(dz) {
+  dz.file = null;
+  imageFile = null;
+  respImageId = null;
+  respImageConfigs = null;
+  dz.requestUpdate();
+}
+
+async function uploadVenueAdditionalImage(component, props) {
+  const eventData = props.eventDataResp;
+  const dz = component.querySelector('image-dropzone');
+  const progressWrapper = component.querySelector('.progress-wrapper');
+  const progress = component.querySelector('sp-progress-circle');
+  let imageConfigs = null;
+  let imageId = null;
+
+  if (eventData.eventId) {
+    imageConfigs = {
+      type: imageType,
+      targetUrl: `/v1/events/${eventData.eventId}/images`,
+    };
+  }
+
+  if (!imageConfigs || !imageFile || !(imageFile instanceof File)) return;
+
+  progressWrapper.classList.remove('hidden');
+
+  if (eventData.eventId) {
+    const eventImagesResp = await getEventImages(eventData.eventId);
+
+    if (eventImagesResp?.images) {
+      const photoObj = eventImagesResp.images.find((p) => p.imageKind === imageType);
+      if (photoObj) imageId = photoObj.imageId;
+    }
+  }
+
+  try {
+    const resp = await uploadImage(
+      imageFile,
+      imageConfigs,
+      progress,
+      imageId,
+    );
+    if (resp?.imageId) {
+      respImageId = resp.imageId;
+      respImageConfigs = imageConfigs;
+    }
+  } catch (error) {
+    dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
+    dz.deleteImage();
+    dz.file = null;
+  } finally {
+    progressWrapper.classList.add('hidden');
+  }
+  // Reset image file after upload
+  imageFile = null;
+}
+
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -209,8 +272,10 @@ export async function onPayloadUpdate(component, props) {
   // do nothing
 }
 
-export async function onRespUpdate(_component, _props) {
-  // Do nothing
+export async function onRespUpdate(component, props) {
+  if (!props.eventDataResp) return;
+
+  uploadVenueAdditionalImage(component, props);
 }
 
 export default async function init(component, props) {
@@ -228,12 +293,6 @@ export default async function init(component, props) {
   const venuePostEventCheckbox = component.querySelector('#checkbox-venue-info-visible');
   const venueAdditionalInfoPostEventCheckbox = component.querySelector('#checkbox-venue-additional-info-visible');
   const dz = component.querySelector('image-dropzone');
-  const type = 'venue-additional-image';
-  const progressWrapper = component.querySelector('.progress-wrapper');
-  const progress = component.querySelector('sp-progress-circle');
-  let configs = null;
-  let imageId = null;
-  let file = null;
 
   togglePrefillableFieldsHiddenState(component);
 
@@ -266,58 +325,29 @@ export default async function init(component, props) {
     };
   }
 
-  if (eventData.eventId) {
-    configs = {
-      type,
-      targetUrl: `/v1/events/${eventData.eventId}/images`,
-    };
-  }
-
   if (dz) {
-    dz.handleImage = async () => {
-      file = dz.getFile();
-
-      if (!file || !(file instanceof File) || !configs) return;
-
-      progressWrapper.classList.remove('hidden');
-
-      if (eventData.eventId) {
-        const eventImagesResp = await getEventImages(eventData.eventId);
-
-        if (eventImagesResp?.images) {
-          const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
-          if (photoObj) imageId = photoObj.imageId;
-        }
-      }
-
-      try {
-        const resp = await uploadImage(
-          file,
-          configs,
-          progress,
-          imageId,
-        );
-
-        if (resp?.imageId) imageId = resp.imageId;
-      } catch (error) {
-        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
-        dz.deleteImage();
-      } finally {
-        progressWrapper.classList.add('hidden');
-      }
+    dz.handleImage = () => {
+      imageFile = dz.getFile();
     };
 
     dz.handleDelete = async () => {
+      // default to respImageId and respImageConfigs from the previous upload
+      let imageId = respImageId;
+      let imageConfigs = respImageConfigs;
+
       if (eventData.eventId) {
         const eventImagesResp = await getEventImages(eventData.eventId);
 
         if (eventImagesResp?.images) {
-          const photoObj = eventImagesResp.images.find((p) => p.imageKind === type);
+          const photoObj = eventImagesResp.images.find((p) => p.imageKind === imageType);
           if (photoObj) imageId = photoObj.imageId;
         }
-      }
 
-      if (!imageId || !configs) return;
+        imageConfigs = {
+          type: imageType,
+          targetUrl: `/v1/events/${eventData.eventId}/images`,
+        };
+      }
 
       const underlay = props.el.querySelector('sp-underlay');
       const dialog = props.el.querySelector('sp-dialog');
@@ -333,24 +363,30 @@ export default async function init(component, props) {
       underlay.open = true;
 
       dialogDeleteBtn.addEventListener('click', async () => {
+        dialogDeleteBtn.disabled = true;
+        dialogCancelBtn.disabled = true;
+
+        if (!imageConfigs || !imageId) {
+          resetImageState(dz);
+          underlay.open = false;
+          dialog.innerHTML = '';
+          return;
+        }
+
         try {
-          dialogDeleteBtn.disabled = true;
-          dialogCancelBtn.disabled = true;
-          const resp = await deleteImage(configs, imageId);
+          const resp = await deleteImage(imageConfigs, imageId);
           if (resp.error) {
             dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
           } else {
-            dz.file = null;
-            imageId = null;
-            dz.requestUpdate();
+            resetImageState(dz);
           }
         } catch (error) {
           window.lana?.log('Failed to perform image DELETE operation. Error:', error);
           dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+        } finally {
+          underlay.open = false;
+          dialog.innerHTML = '';
         }
-
-        underlay.open = false;
-        dialog.innerHTML = '';
       });
 
       dialogCancelBtn.addEventListener('click', () => {
@@ -372,7 +408,7 @@ export default async function init(component, props) {
     if (eventData.eventId) {
       const { images } = await getEventImages(eventData.eventId);
       if (images) {
-        const photoObj = images.find((p) => p.imageKind === type);
+        const photoObj = images.find((p) => p.imageKind === imageType);
 
         if (photoObj) {
           dz.file = { ...photoObj, url: photoObj.imageUrl };

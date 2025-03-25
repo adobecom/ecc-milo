@@ -7,6 +7,7 @@ import {
   camelToSentenceCase,
   readBlockConfig,
   signIn,
+  getEventPageHost,
 } from '../../scripts/utils.js';
 import SearchablePicker from '../../components/searchable-picker/searchable-picker.js';
 import FilterMenu from '../../components/filter-menu/filter-menu.js';
@@ -450,20 +451,31 @@ async function buildEventInfo(props) {
 
       const heroImgObj = images?.find((p) => p.imageKind === 'event-hero-image');
 
+      const imgSrc = (heroImgObj?.sharepointUrl
+        && `${getEventPageHost()}${heroImgObj?.sharepointUrl}`)
+      || heroImgObj?.imageUrl
+      || '';
+
       const eventImage = createTag(
         'div',
         { class: 'event-image-container' },
-        createTag('img', { class: 'event-image', src: heroImgObj ? heroImgObj.sharepointUrl || heroImgObj.imageUrl : '' }),
+        createTag('img', { class: 'event-image', src: imgSrc }),
       );
 
       eventInfoContainer.prepend(eventImage);
     });
   } else {
     const heroImgObj = photos?.find((p) => p.imageKind === 'event-hero-image');
+
+    const imgSrc = (heroImgObj?.sharepointUrl
+      && `${getEventPageHost()}${heroImgObj?.sharepointUrl}`)
+    || heroImgObj?.imageUrl
+    || '';
+
     createTag(
       'div',
       { class: 'event-image-container' },
-      createTag('img', { class: 'event-image', src: heroImgObj ? heroImgObj.sharepointUrl || heroImgObj.imageUrl : '' }),
+      createTag('img', { class: 'event-image', src: imgSrc }),
     );
   }
 

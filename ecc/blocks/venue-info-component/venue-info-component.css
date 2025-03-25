@@ -93,3 +93,23 @@
   margin-top: 32px;
   padding-top: 32px;
 }
+
+.venue-info-component .img-dropzone-wrapper {
+  position: relative;
+}
+
+.venue-info-component .progress-wrapper {
+  z-index: 1;
+  position: absolute;
+  height: calc(100% + 4px);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--highlight-background-color);
+  top: 0;
+}
+
+.venue-info-component .progress-wrapper.hidden {
+  display: none;
+}
