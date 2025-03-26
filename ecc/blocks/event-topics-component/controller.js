@@ -113,8 +113,7 @@ export function onSubmit(component, props) {
 
   const { payload } = props;
   payload.topics = topics;
-  const existingTags = payload.tags ? payload.tags.split(',') : [];
-  const tagsToSubmit = [...new Set([...existingTags, ...tags.map((tag) => tag.caasId)])].join(',');
+  const tagsToSubmit = [...new Set(tags.map((tag) => tag.caasId))].join(',');
   if (tagsToSubmit) payload.tags = tagsToSubmit;
   props.payload = payload;
 }
