@@ -5,6 +5,7 @@ import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler/form-handler.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
+import { getVenuePayload } from '../../scripts/data-utils.js';
 
 const imageType = 'venue-additional-image';
 let imageFile = null;
@@ -430,8 +431,8 @@ export default async function init(component, props) {
 export async function onTargetUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const venueData = getVenueDataInForm(component);
-
+  const venueDataInForm = getVenueDataInForm(component);
+  const venueData = getVenuePayload(venueDataInForm, props.lang);
   if (!venueData.placeId) {
     component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please select a valid venue.' } }, bubbles: true, composed: true }));
     return;

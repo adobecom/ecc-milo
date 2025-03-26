@@ -77,6 +77,25 @@ export const SPONSOR_DATA_FILTER = {
   modificationTime: { type: 'string', localizable: false, submittable: false },
 };
 
+/**
+ * @typedef {Object} VenueDataFilter
+ * @property {string} type - The type of the attribute.
+ * @property {boolean} localizable - Whether the attr should be in payload or payload.localizations.
+ * @property {boolean} submittable - Whether the attribute can be submitted.
+ */
+
+export const VENUE_DATA_FILTER = {
+  venueName: { type: 'string', localizable: false, submittable: true },
+  placeId: { type: 'string', localizable: false, submittable: true },
+  coordinates: { type: 'object', localizable: false, submittable: true },
+  gmtOffset: { type: 'number', localizable: false, submittable: true },
+  addressComponents: { type: 'array', localizable: false, submittable: true },
+  formattedAddress: { type: 'string', localizable: false, submittable: true },
+  additionalInformation: { type: 'string', localizable: true, submittable: true },
+  creationTime: { type: 'string', localizable: false, submittable: false },
+  modificationTime: { type: 'string', localizable: false, submittable: true },
+};
+
 export function isValidAttribute(attr) {
   return attr !== undefined && attr !== null;
 }
@@ -149,6 +168,36 @@ export function getSponsorPayload(sponsorData, locale = 'en-US') {
 
   const filteredLocalePayload = Object.entries(localizableFields).reduce((acc, [key, value]) => {
     if (SPONSOR_DATA_FILTER[key]?.submittable) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+
+  return {
+    ...filteredGlobalPayload,
+    localizations: { [locale]: filteredLocalePayload },
+  };
+}
+
+export function getVenuePayload(venueData, locale = 'en-US') {
+  if (!venueData) return venueData;
+
+  // Split venue data into localizable and non-localizable fields
+  const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
+    venueData,
+    VENUE_DATA_FILTER,
+    locale,
+  );
+
+  const filteredGlobalPayload = Object.entries(nonLocalizableFields).reduce((acc, [key, value]) => {
+    if (VENUE_DATA_FILTER[key]?.submittable) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+
+  const filteredLocalePayload = Object.entries(localizableFields).reduce((acc, [key, value]) => {
+    if (VENUE_DATA_FILTER[key]?.submittable) {
       acc[key] = value;
     }
     return acc;
