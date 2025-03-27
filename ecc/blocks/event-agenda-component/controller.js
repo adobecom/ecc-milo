@@ -1,3 +1,5 @@
+import { getAttr, setPropsPayload } from '../form-handler/data-handler.js';
+
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -14,7 +16,7 @@ export function onSubmit(component, props) {
     agenda,
   };
 
-  props.payload = { ...props.payload, ...agendaInfo };
+  setPropsPayload(props, agendaInfo);
 }
 
 export async function onPayloadUpdate(_component, _props) {
@@ -28,14 +30,16 @@ export async function onRespUpdate(_component, _props) {
 export default function init(component, props) {
   const eventData = props.eventDataResp;
   const agendaGroup = component.querySelector('agenda-fieldset-group');
-  const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info');
+  const showAgendaPostEventElement = component.querySelector('#checkbox-agenda-info');
 
-  if (eventData.agenda?.length) {
-    agendaGroup.agendaItems = eventData.agenda;
+  const agenda = getAttr(eventData, 'agenda', props.locale);
+  const showAgendaPostEvent = getAttr(eventData, 'showAgendaPostEvent', props.locale);
+  if (agenda?.length) {
+    agendaGroup.agendaItems = agenda;
     component.classList.add('prefilled');
   }
 
-  showAgendaPostEvent.checked = eventData.showAgendaPostEvent;
+  showAgendaPostEventElement.checked = showAgendaPostEvent;
 }
 
 export function onTargetUpdate(component, props) {

@@ -1,4 +1,4 @@
-import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
+import { EVENT_DATA_FILTER } from '../../scripts/data-utils.js';
 
 export function cloneFilter(obj) {
   const output = {};

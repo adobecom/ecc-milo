@@ -1,3 +1,5 @@
+import { setPropsPayload } from '../form-handler/data-handler.js';
+
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -12,7 +14,7 @@ export function onSubmit(component, props) {
   if (relatedDomain.value) seriesInfo.relatedDomain = relatedDomain.value;
   if (externalThemeId.value) seriesInfo.externalThemeId = externalThemeId.value;
 
-  props.payload = { ...props.payload, ...seriesInfo };
+  setPropsPayload(props, seriesInfo);
 }
 
 export async function onPayloadUpdate(_component, _props) {
@@ -25,15 +27,16 @@ export async function onRespUpdate(_component, _props) {
 
 export default function init(component, props) {
   const data = props.response;
+  const localeData = data?.localizations?.[props.lang] || data;
 
   if (data) {
     const susiContextId = component.querySelector('#info-field-series-susi');
     const relatedDomain = component.querySelector('#info-field-series-related-domain');
     const externalThemeId = component.querySelector('#info-field-series-ext-id');
 
-    susiContextId.value = data.susiContextId || '';
-    relatedDomain.value = data.relatedDomain || '';
-    externalThemeId.value = data.externalThemeId || '';
+    susiContextId.value = localeData.susiContextId || '';
+    relatedDomain.value = localeData.relatedDomain || '';
+    externalThemeId.value = localeData.externalThemeId || '';
 
     component.classList.add('prefilled');
   }
