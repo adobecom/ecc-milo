@@ -79,3 +79,37 @@
   line-height: 0.1;
   padding-left: 24px;
 }
+
+.venue-info-component > div > div > h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  margin-bottom: 32px;
+}
+
+.venue-info-component .venue-additional-info {
+  border-top: 3px solid var(--stroke-color-divider);
+  margin-top: 32px;
+  padding-top: 32px;
+}
+
+.venue-info-component .img-dropzone-wrapper {
+  position: relative;
+}
+
+.venue-info-component .progress-wrapper {
+  z-index: 1;
+  position: absolute;
+  height: calc(100% + 4px);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--highlight-background-color);
+  top: 0;
+}
+
+.venue-info-component .progress-wrapper.hidden {
+  display: none;
+}

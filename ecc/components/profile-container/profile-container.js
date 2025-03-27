@@ -76,12 +76,15 @@ export default class ProfileContainer extends LitElement {
     imageTag.setAttribute('slot', 'img-label');
     imageTag.classList.add('img-upload-text');
 
-    const searchDataReduced = this.searchdata.filter((speaker) => {
-      if (this.profiles.find((p) => p.speakerId === speaker.speakerId) !== undefined) {
-        return false;
-      }
-      return true;
-    });
+    let searchDataReduced = [];
+    if (this.searchdata) {
+      searchDataReduced = this.searchdata.filter((speaker) => {
+        if (this.profiles.find((p) => p.speakerId === speaker.speakerId) !== undefined) {
+          return false;
+        }
+        return true;
+      });
+    }
     const firstNameSearch = searchDataReduced.map((speaker) => ({
       id: speaker.speakerId,
       displayValue: `${speaker.firstName} ${speaker.lastName}`,

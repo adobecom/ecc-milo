@@ -65,6 +65,11 @@ export default class PartnerSelector extends LitElement {
   }
 
   async savePartner() {
+    if (!this.checkValidity()) {
+      this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please enter a valid website address starting with "https://". For example: https://www.example.com' } }, bubbles: true, composed: true }));
+      return;
+    }
+
     let respJson;
     this.buttonStatePending = true;
     const payload = {
@@ -169,7 +174,7 @@ export default class PartnerSelector extends LitElement {
         </div>
       </div>
       <div class="action-area">
-        <sp-button variant="primary" ?pending=${this.buttonStatePending} ?disabled=${!this.checkValidity() || !this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>
+        <sp-button variant="primary" ?pending=${this.buttonStatePending} ?disabled=${!this.partner.hasUnsavedChanges} class="save-partner-button" @click=${this.savePartner}>
         ${this.isSaved() ? 'Saved' : 'Save partner'}</sp-button>
         <slot name="delete-btn"></slot>
         </div>

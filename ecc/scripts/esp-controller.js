@@ -3,38 +3,6 @@ import { getEventServiceEnv, getSecret, signIn } from './utils.js';
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
 import { API_CONFIG, ALLOWED_HOSTS } from './constants.js';
 
-export const getCaasTags = (() => {
-  let cache;
-  let promise;
-
-  return () => {
-    if (cache) {
-      return cache;
-    }
-
-    if (!promise) {
-      promise = fetch('https://www.adobe.com/chimera-api/tags')
-        .then((resp) => {
-          if (resp.ok) {
-            return resp.json();
-          }
-
-          throw new Error('Failed to load tags');
-        })
-        .then((data) => {
-          cache = data;
-          return data;
-        })
-        .catch((err) => {
-          window.lana?.log(`Failed to load products map JSON. Error: ${err}`);
-          throw err;
-        });
-    }
-
-    return promise;
-  };
-})();
-
 export function waitForAdobeIMS() {
   return new Promise((resolve) => {
     const checkIMS = () => {
@@ -90,7 +58,7 @@ async function safeFetch(url, options) {
 }
 
 export async function constructRequestOptions(method, body = null) {
-  const secretEnv = getEventServiceEnv();
+  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
@@ -149,7 +117,7 @@ export async function constructRequestOptions(method, body = null) {
 }
 
 export async function uploadImage(file, configs, tracker, imageId = null) {
-  const secretEnv = getEventServiceEnv();
+  const secretEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
   const [
     { default: getUuid },
     clientIdentity,
@@ -395,7 +363,7 @@ export async function createEvent(payload) {
   if (!payload || typeof payload !== 'object') throw new Error('Invalid event payload');
 
   const { host } = API_CONFIG.esl[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...payload, liveUpdate: false });
+  const raw = JSON.stringify({ ...payload, liveUpdate: false, published: false });
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -969,21 +937,57 @@ export async function getEvent(eventId) {
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
   const url = `${host}/v1/events/${encodeURIComponent(eventId)}`;
+  let data = {};
 
   try {
-    const response = await safeFetch(url, options);
-    const data = await response.json();
+    const [eventResp, speakersResp, sponsorsResp, venuesResp] = await Promise.all([
+      safeFetch(url, options),
+      safeFetch(`${url}/speakers`, options),
+      safeFetch(`${url}/sponsors`, options),
+      safeFetch(`${url}/venues`, options),
+    ]);
 
-    if (!response.ok) {
-      window.lana?.log(`Failed to get details for event ${eventId}. Status:`, response.status, 'Error:', data);
-      return { status: response.status, error: data };
+    if (!eventResp.ok) {
+      window.lana?.log(`Failed to get details for event ${eventId}. Status:`, eventResp.status, 'Error:', eventResp.error);
     }
 
-    if (data.speakers) {
-      const promises = data.speakers.map((spkr) => getSpeaker(data.seriesId, spkr.speakerId));
-      const speakers = await Promise.all(promises);
-      data.speakers = speakers;
+    if (!speakersResp.ok) {
+      window.lana?.log(`Failed to get speakers for event ${eventId}. Status:`, speakersResp.status, 'Error:', speakersResp.error);
     }
+
+    if (!sponsorsResp.ok) {
+      window.lana?.log(`Failed to get sponsors for event ${eventId}. Status:`, sponsorsResp.status, 'Error:', sponsorsResp.error);
+    }
+
+    if (!venuesResp.ok) {
+      window.lana?.log(`Failed to get venues for event ${eventId}. Status:`, venuesResp.status, 'Error:', venuesResp.error);
+    }
+
+    if (eventResp.ok) {
+      const eventData = await eventResp.json();
+      data = eventData;
+    }
+
+    if (speakersResp.ok) {
+      const speakersData = await speakersResp.json();
+      data.speakers = speakersData.speakers;
+    }
+
+    if (sponsorsResp.ok) {
+      const sponsorsData = await sponsorsResp.json();
+      data.sponsors = sponsorsData.sponsors;
+    }
+
+    if (venuesResp.ok) {
+      const venuesData = await venuesResp.json();
+      data.venue = venuesData.venues?.[0];
+    }
+
+    if (!data) {
+      window.lana?.log(`Failed to get details for event ${eventId}. Status:`, eventResp.status, 'Error:', eventResp.error);
+      return { status: eventResp.status, error: eventResp.error };
+    }
+
     return data;
   } catch (error) {
     window.lana?.log(`Failed to get details for event ${eventId}. Error:`, error);
@@ -991,7 +995,7 @@ export async function getEvent(eventId) {
   }
 }
 
-export async function getVenue(eventId) {
+export async function getEventVenue(eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid eventId');
 
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
@@ -1006,7 +1010,7 @@ export async function getVenue(eventId) {
       return { status: response.status, error: data };
     }
 
-    return data;
+    return data.venues?.[0] || null;
   } catch (error) {
     window.lana?.log('Failed to get venue details. Error:', error);
     return { status: 'Network Error', error: error.message };
