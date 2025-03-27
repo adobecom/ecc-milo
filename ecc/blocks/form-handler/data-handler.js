@@ -28,6 +28,39 @@ export function setPropsPayload(props, newData) {
     locale || 'en-US',
   );
 
+  // apply nested ref filters
+  Object.entries(nonLocalizableFields).forEach(([key, value]) => {
+    const attr = EVENT_DATA_FILTER[key];
+    if (!attr) return;
+
+    if (attr.ref && attr.type === 'array') {
+      const refFilter = attr.ref;
+      const refData = value.map((item) => Object.keys(refFilter).reduce((acc, refKey) => {
+        if (refFilter[refKey].submittable) {
+          acc[refKey] = item[refKey];
+        }
+        return acc;
+      }, {}));
+      nonLocalizableFields[key] = refData;
+    }
+  });
+
+  Object.entries(localizableFields).forEach(([key, value]) => {
+    const attr = EVENT_DATA_FILTER[key];
+    if (!attr) return;
+
+    if (attr.ref && attr.type === 'array') {
+      const refFilter = attr.ref;
+      const refData = value.map((item) => Object.keys(refFilter).reduce((acc, refKey) => {
+        if (refFilter[refKey].submittable) {
+          acc[refKey] = item[refKey];
+        }
+        return acc;
+      }, {}));
+      localizableFields[key] = refData;
+    }
+  });
+
   // Update the payload
   props.payload = {
     ...existingPayload,
@@ -143,13 +176,13 @@ export default function getJoinedData(locale = 'en-US') {
   };
 
   Object.keys(filteredResponse).forEach((key) => {
-    if (filteredPayload[key] === '<DELETE>') {
+    if (!filteredPayload[key]) {
       delete finalPayload[key];
     }
   });
 
   Object.keys(localeResponse).forEach((key) => {
-    if (localePayload[key] === '<DELETE>') {
+    if (!localePayload[key]) {
       delete finalPayload.localizations[locale][key];
     }
   });

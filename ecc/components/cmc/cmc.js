@@ -178,7 +178,6 @@ export default class CloudManagementConsole extends LitElement {
   }
 
   async save() {
-    console.log('this.selectedLocales', this.selectedLocales);
     this.savedTags[this.currentCloud] = this.getSelectedTags();
     this.savedLocales[this.currentCloud] = this.selectedLocales;
 

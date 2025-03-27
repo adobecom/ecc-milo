@@ -37,6 +37,7 @@ import getJoinedData, {
 } from './data-handler.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 import CustomSearch from '../../components/custom-search/custom-search.js';
+import { getEventPayload } from '../../scripts/data-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -262,6 +263,7 @@ async function loadEventData(props) {
       props.el.classList.add('disabled');
       const eventData = await getEvent(eventId);
       props.eventDataResp = { ...props.eventDataResp, ...eventData };
+      props.payload = getEventPayload(eventData);
       props.el.classList.remove('disabled');
     } else {
       buildNoAccessScreen(props.el);

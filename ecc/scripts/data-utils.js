@@ -1,4 +1,16 @@
 /**
+ * @typedef {Object} AgendaDataRefFilter
+ * @property {string} type - The type of the attribute.
+ * @property {boolean} submittable - Whether the attribute can be submitted.
+ */
+
+export const AGENDA_DATA_REF_FILTER = {
+  startTime: { type: 'string', submittable: true },
+  description: { type: 'string', submittable: true },
+  title: { type: 'string', submittable: true },
+};
+
+/**
  * @typedef {Object} EventDataFilter
  * @property {string} type - The type of the attribute.
  * @property {boolean} localizable - Whether the attr should be in payload or payload.localizations.
@@ -7,7 +19,7 @@
  */
 
 export const EVENT_DATA_FILTER = {
-  agenda: { type: 'array', localizable: true, cloneable: true, submittable: true },
+  agenda: { type: 'array', localizable: true, cloneable: true, submittable: true, ref: AGENDA_DATA_REF_FILTER },
   tags: { type: 'string', localizable: false, cloneable: true, submittable: true },
   topics: { type: 'array', localizable: false, cloneable: true, submittable: true },
   speakers: { type: 'array', localizable: false, cloneable: false, submittable: false },
@@ -200,6 +212,36 @@ export function getVenuePayload(venueData, locale = 'en-US') {
 
   const filteredLocalePayload = Object.entries(localizableFields).reduce((acc, [key, value]) => {
     if (VENUE_DATA_FILTER[key]?.submittable) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+
+  return {
+    ...filteredGlobalPayload,
+    localizations: { [locale]: filteredLocalePayload },
+  };
+}
+
+export function getEventPayload(eventData, locale = 'en-US') {
+  if (!eventData) return eventData;
+
+  const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
+    eventData,
+    EVENT_DATA_FILTER,
+    locale,
+  );
+
+  const filteredGlobalPayload = Object.entries(nonLocalizableFields).reduce((acc, [key, value]) => {
+    if (EVENT_DATA_FILTER[key]?.submittable) {
+      acc[key] = value;
+    }
+
+    return acc;
+  }, {});
+
+  const filteredLocalePayload = Object.entries(localizableFields).reduce((acc, [key, value]) => {
+    if (EVENT_DATA_FILTER[key]?.submittable) {
       acc[key] = value;
     }
     return acc;

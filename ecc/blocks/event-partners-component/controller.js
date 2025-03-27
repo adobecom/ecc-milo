@@ -7,7 +7,6 @@ import {
   removeSponsorFromEvent,
   updateSponsorInEvent,
 } from '../../scripts/esp-controller.js';
-import { setPropsPayload } from '../form-handler/data-handler.js';
 
 let PARTNERS_SERIES_ID;
 
@@ -33,10 +32,8 @@ export async function onSubmit(component, props) {
         }, eventId);
 
         if (resp.error) {
-          return;
+          component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
         }
-
-        props.eventDataResp = { ...props.eventDataResp, ...resp };
       } else {
         const existingPartner = props.eventDataResp.sponsors.find((sponsor) => {
           const idMatch = sponsor.sponsorId === sponsorId;
@@ -51,10 +48,8 @@ export async function onSubmit(component, props) {
           }, eventId);
 
           if (resp.error) {
-            return;
+            component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
           }
-
-          props.eventDataResp = { ...props.eventDataResp, ...resp };
         } else if (partner.hasUnsavedChanges) {
           // If there are unsaved changes, do nothing
         } else {
@@ -92,7 +87,7 @@ export async function onSubmit(component, props) {
     }
   }
 
-  setPropsPayload(props, { showSponsors });
+  props.payload = { ...props.payload, showSponsors };
 }
 
 export async function onPayloadUpdate(component, props) {

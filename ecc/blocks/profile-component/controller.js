@@ -44,11 +44,8 @@ export async function onSubmit(component, props) {
         const resp = await addSpeakerToEvent(speaker, eventId);
 
         if (resp.error) {
-          return;
+          component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
         }
-
-        const updatedEventData = await getEvent(eventId);
-        props.eventDataResp = { ...props.eventDataResp, ...updatedEventData };
       } else {
         const existingSpeaker = props.eventDataResp.speakers.find((profile) => {
           const idMatch = profile.speakerId === speakerId;
