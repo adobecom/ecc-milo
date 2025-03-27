@@ -5,13 +5,12 @@ const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 let secretCache = [];
 
 export function getEventServiceEnv() {
-  const validEnvs = ['dev', 'stage', 'prod'];
   const { host, search } = window.location;
   const SLD = host.includes('.aem.') ? 'aem' : 'hlx';
   const usp = new URLSearchParams(search);
-  const eccEnv = usp.get('eccEnv');
+  const localTest = usp.get('localTest');
 
-  if (validEnvs.includes(eccEnv)) return eccEnv;
+  if (window.location.hostname.includes('localhost') && localTest) return 'local';
 
   if ((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`))) {
     if (host.startsWith('dev02--') || host.startsWith('main02--')) return 'dev02';
