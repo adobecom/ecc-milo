@@ -56,6 +56,7 @@ export const SPEAKER_DATA_FILTER = {
   title: { type: 'string', localizable: true, submittable: true },
   bio: { type: 'string', localizable: true, submittable: true },
   socialLinks: { type: 'array', localizable: false, submittable: true },
+  localizations: { type: 'object', localizable: false, submittable: true },
   creationTime: { type: 'string', localizable: false, submittable: false },
   modificationTime: { type: 'string', localizable: false, submittable: false },
 };
@@ -91,6 +92,7 @@ export const VENUE_DATA_FILTER = {
   gmtOffset: { type: 'number', localizable: false, submittable: true },
   addressComponents: { type: 'array', localizable: false, submittable: true },
   formattedAddress: { type: 'string', localizable: false, submittable: true },
+  localizations: { type: 'object', localizable: false, submittable: true },
   additionalInformation: { type: 'string', localizable: true, submittable: true },
   creationTime: { type: 'string', localizable: false, submittable: false },
   modificationTime: { type: 'string', localizable: false, submittable: true },
