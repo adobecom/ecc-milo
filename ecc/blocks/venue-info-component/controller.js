@@ -1,5 +1,7 @@
 /* eslint-disable no-unused-vars */
-import { createVenue, deleteImage, getEvent, getEventImages, replaceVenue, uploadImage } from '../../scripts/esp-controller.js';
+import {
+  createVenue, deleteImage, getEvent, getEventImages, replaceVenue, uploadImage,
+} from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
