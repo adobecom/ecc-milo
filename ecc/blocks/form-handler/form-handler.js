@@ -30,7 +30,7 @@ import ProductSelectorGroup from '../../components/product-selector-group/produc
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import RTETiptap from '../../components/rte-tiptap/rte-tiptap.js';
-import getJoinedData, { getFilteredCachedResponse, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 import CustomSearch from '../../components/custom-search/custom-search.js';
 
@@ -257,6 +257,7 @@ async function loadEventData(props) {
       props.el.classList.add('disabled');
       const eventData = await getEvent(eventId);
       props.eventDataResp = { ...props.eventDataResp, ...eventData };
+      props.payload = { ...quickFilter(eventData), ...props.payload };
       props.el.classList.remove('disabled');
     } else {
       buildNoAccessScreen(props.el);
