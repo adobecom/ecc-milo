@@ -3,7 +3,7 @@ import { createVenue, deleteImage, getEventImages, replaceVenue, uploadImage } f
 import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
-import { buildErrorMessage } from '../form-handler/form-handler.js';
+import { buildErrorMessage } from '../form-handler/form-handler-helper.js';
 
 function togglePrefillableFieldsHiddenState(component) {
   const address = component.querySelector('#google-place-formatted-address');

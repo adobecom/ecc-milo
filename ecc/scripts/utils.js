@@ -443,3 +443,20 @@ export const fetchThrottledMemoizedText = (() => {
 
   return (url, options = {}, { ttl = 3000 } = {}) => memoize(url, options, fetch, ttl);
 })();
+
+export function replaceAnchorWithButton(anchor) {
+  if (!anchor || anchor.tagName !== 'A') {
+    return null;
+  }
+
+  const attributes = {};
+  for (let i = 0; i < anchor.attributes.length; i += 1) {
+    const attr = anchor.attributes[i];
+    attributes[attr.name] = attr.value;
+  }
+
+  const button = createTag('button', attributes, anchor.innerHTML);
+
+  anchor.parentNode.replaceChild(button, anchor);
+  return button;
+}
