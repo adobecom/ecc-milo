@@ -109,7 +109,7 @@ function decorateDateTimeFields(row) {
 function addPrivateEventToggle(el) {
   el.classList.add('title-container');
   const div = createTag('div', { class: 'private-event-toggle-wrapper' }, '', { parent: el });
-  createTag('sp-switch', { id: 'private-event', checked: false, size: 'xl' }, privateEventString, { parent: div });
+  createTag('sp-checkbox', { id: 'private-event', size: 'xl' }, privateEventString, { parent: div });
   addTooltipToEl(privateEventToolTip, div);
 }
 
