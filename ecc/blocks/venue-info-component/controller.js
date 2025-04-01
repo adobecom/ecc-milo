@@ -451,6 +451,7 @@ export async function onTargetUpdate(component, props) {
       oldVenueData.venueId,
       {
         ...venueData,
+        venueId: oldVenueData.venueId,
         creationTime,
         modificationTime,
       },
