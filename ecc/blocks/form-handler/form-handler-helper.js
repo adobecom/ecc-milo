@@ -655,9 +655,11 @@ async function validatePreview(props, cta) {
       while (!cancelled && retryCount < 60) {
         retryCount += 1;
         const delay = Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000;
+        // eslint-disable-next-line no-await-in-loop, no-promise-executor-return
         await new Promise((r) => setTimeout(r, delay));
         if (cancelled) break;
         try {
+          // eslint-disable-next-line no-await-in-loop
           const metadataJson = await getNonProdPreviewDataById(props);
           if (metadataJson && modificationTimeMatch(metadataJson)) {
             closeDialog(props);
