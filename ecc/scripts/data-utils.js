@@ -29,6 +29,7 @@ export const EVENT_DATA_FILTER = {
   seriesId: { type: 'string', localizable: false, cloneable: true, submittable: true },
   communityTopicUrl: { type: 'string', localizable: false, cloneable: true, submittable: true },
   title: { type: 'string', localizable: true, cloneable: true, submittable: true },
+  enTitle: { type: 'string', localizable: false, cloneable: true, submittable: true },
   description: { type: 'string', localizable: true, cloneable: true, submittable: true },
   localStartDate: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localEndDate: { type: 'string', localizable: false, cloneable: true, submittable: true },

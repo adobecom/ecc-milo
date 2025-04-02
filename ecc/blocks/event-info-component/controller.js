@@ -378,6 +378,7 @@ export function onSubmit(component, props) {
   const title = component.querySelector('#info-field-event-title').value;
   const description = component.querySelector('#info-field-event-description').value;
   const datePicker = component.querySelector('#event-info-date-picker');
+  const enTitle = component.querySelector('#event-info-url-input').value;
   const localStartDate = datePicker.dataset.startDate;
   const localEndDate = datePicker.dataset.endDate;
 
@@ -399,6 +400,7 @@ export function onSubmit(component, props) {
     localStartTimeMillis,
     localEndTimeMillis,
     timezone,
+    enTitle,
   };
 
   setPropsPayload(props, eventInfo);
@@ -447,6 +449,7 @@ function prefillFields(component, props, eventData) {
   const endTime = component.querySelector('#time-picker-end-time-value');
   const datePicker = component.querySelector('#event-info-date-picker');
   const languagePicker = component.querySelector('#language-picker');
+  const enTitleInput = component.querySelector('#event-info-url-input');
 
   const title = getAttr(eventData, 'title', props.locale);
   const description = getAttr(eventData, 'description', props.locale);
@@ -455,6 +458,7 @@ function prefillFields(component, props, eventData) {
   const localStartTime = getAttr(eventData, 'localStartTime', props.locale);
   const localEndTime = getAttr(eventData, 'localEndTime', props.locale);
   const timezone = getAttr(eventData, 'timezone', props.locale);
+  const enTitle = getAttr(eventData, 'enTitle', props.locale);
   const defaultLocale = eventData.defaultLocale || 'en-US';
 
   if (title
@@ -463,7 +467,8 @@ function prefillFields(component, props, eventData) {
     && localEndDate
     && localStartTime
     && localEndTime
-    && timezone) {
+    && timezone
+    && enTitle) {
     const startTimePieces = parse24HourFormat(localStartTime);
     const endTimePieces = parse24HourFormat(localEndTime);
 
@@ -484,6 +489,7 @@ function prefillFields(component, props, eventData) {
     changeInputValue(endAmpmInput, 'value', endTimePieces.period || '');
     changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
     changeInputValue(languagePicker, 'value', defaultLocale || props.locale);
+    changeInputValue(enTitleInput, 'value', enTitle || '');
 
     BlockMediator.set('eventDupMetrics', {
       ...BlockMediator.get('eventDupMetrics'),
