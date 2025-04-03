@@ -1,5 +1,7 @@
 /* eslint-disable no-unused-vars */
-import { createVenue, deleteImage, getEventImages, replaceVenue, uploadImage } from '../../scripts/esp-controller.js';
+import {
+  createVenue, deleteImage, getEvent, getEventImages, replaceVenue, uploadImage,
+} from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
@@ -451,6 +453,7 @@ export async function onTargetUpdate(component, props) {
       oldVenueData.venueId,
       {
         ...venueData,
+        venueId: oldVenueData.venueId,
         creationTime,
         modificationTime,
       },
@@ -462,7 +465,9 @@ export async function onTargetUpdate(component, props) {
   }
 
   if (resp) {
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    const updatedEventData = await getEvent(props.eventDataResp.eventId);
+
+    props.eventDataResp = { ...props.eventDataResp, ...updatedEventData };
     props.payload = {
       ...props.payload,
       showVenuePostEvent: venueData.showVenuePostEvent,
