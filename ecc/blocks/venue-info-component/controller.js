@@ -19,7 +19,7 @@ function togglePrefillableFieldsHiddenState(component) {
 }
 
 async function loadGoogleMapsAPI(callback) {
-  const ALLOWED_ENVS = new Set(['dev', 'stage', 'prod']);
+  const ALLOWED_ENVS = new Set(['dev', 'dev02', 'stage', 'stage02', 'prod']);
 
   const currentEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
 
