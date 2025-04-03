@@ -163,13 +163,11 @@ export default class Profile extends LitElement {
             lastPhoto.imageId,
           );
 
-          if (resp.error) {
+          if (!resp.ok) {
             imageDropzone.file = { url: lastPhoto.imageUrl };
             profile.photo = lastPhoto;
             this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
           }
-
-          if (resp.modificationTime) profile.modificationTime = resp.modificationTime;
         }
 
         this.updateProfile(profile);

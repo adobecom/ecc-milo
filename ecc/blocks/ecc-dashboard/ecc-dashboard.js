@@ -397,9 +397,9 @@ function initMoreOptions(props, config, eventObj, row) {
         row.classList.add('pending');
         const resp = await deleteEvent(eventObj.eventId);
 
-        if (resp.error) {
+        if (!resp.ok) {
           row.classList.remove('pending');
-          showToast(props, resp.error, { variant: 'negative' });
+          showToast(props, 'Failed to delete event. Please try again later.', { variant: 'negative' });
           return;
         }
 
