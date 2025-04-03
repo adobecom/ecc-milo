@@ -515,14 +515,13 @@ export async function removeSponsorFromEvent(sponsorId, eventId) {
 
   try {
     const response = await safeFetch(`${host}/v1/events/${eventId}/sponsors/${sponsorId}`, options);
-    const data = await response.json();
 
     if (!response.ok) {
-      window.lana?.log('Failed to delete sponsor from event. Status:', response.status, 'Error:', data);
-      return { status: response.status, error: data };
+      window.lana?.log('Failed to delete sponsor from event. Status:', response.status, 'Error:', 'Failed to delete sponsor from event');
+      return { status: response.status, error: 'Failed to delete sponsor from event' };
     }
 
-    return data;
+    return { ok: true };
   } catch (error) {
     window.lana?.log('Failed to delete sponsor from event. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -655,14 +654,13 @@ export async function removeSpeakerFromEvent(speakerId, eventId) {
 
   try {
     const response = await safeFetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options);
-    const data = await response.json();
 
-    if (!response.ok) {
-      window.lana?.log('Failed to delete speaker from event. Status:', response.status, 'Error:', data);
-      return { status: response.status, error: data };
+    if (!response.ok || response.status !== 204) {
+      window.lana?.log('Failed to delete speaker from event. Status:', response.status, 'Error:', 'Failed to delete speaker from event');
+      return { status: response.status, error: 'Failed to delete speaker from event' };
     }
 
-    return data;
+    return { ok: true };
   } catch (error) {
     window.lana?.log('Failed to delete speaker from event. Error:', error);
     return { status: 'Network Error', error: error.message };
