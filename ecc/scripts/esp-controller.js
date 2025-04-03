@@ -516,7 +516,7 @@ export async function removeSponsorFromEvent(sponsorId, eventId) {
   try {
     const response = await safeFetch(`${host}/v1/events/${eventId}/sponsors/${sponsorId}`, options);
 
-    if (!response.ok) {
+    if (!response.ok || response.status !== 204) {
       window.lana?.log('Failed to delete sponsor from event. Status:', response.status, 'Error:', 'Failed to delete sponsor from event');
       return { status: response.status, error: 'Failed to delete sponsor from event' };
     }
