@@ -34,7 +34,7 @@ async function loadGoogleMapsAPI(callback) {
   script.defer = true;
   window.onGoogleMapsApiLoaded = callback;
   script.onerror = () => {
-    window.lana?.log('Failed to load the Google Maps script!');
+    window.lana?.log('Failed to load the Google Maps script');
   };
   document.head.appendChild(script);
 }
@@ -385,7 +385,7 @@ export default async function init(component, props) {
             resetImageState(dz);
           }
         } catch (error) {
-          window.lana?.log('Failed to perform image DELETE operation. Error:', error);
+          window.lana?.log(`Failed to perform image DELETE operation:\n${JSON.stringify(error, null, 2)}`);
           dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
         } finally {
           underlay.open = false;

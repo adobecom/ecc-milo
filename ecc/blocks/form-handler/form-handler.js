@@ -560,7 +560,7 @@ function buildPreviewLoadingDialog(props, targetHref, poll) {
   dialog.innerHTML = '';
 
   createTag('h1', { slot: 'heading' }, 'Generating your preview...', { parent: dialog });
-  createTag('p', {}, 'This usually takes less than a minute, but in rare cases it might take up to 10 minutes. Please wait, and the preview will open in a new tab when it’s ready.', { parent: dialog });
+  createTag('p', {}, 'This usually takes less than a minute, but in rare cases it might take up to 10 minutes. Please wait, and the preview will open in a new tab when it's ready.', { parent: dialog });
   createTag('p', {}, '<strong>Note: Please ensure pop-ups are allowed in your browser.</strong>', { parent: dialog });
 
   const style = createTag('style', {}, `
@@ -678,7 +678,7 @@ async function getNonProdPreviewDataById(props) {
     return null;
   }
 
-  window.lana?.log('Failed to fetch non-prod metadata:', resp);
+  window.lana?.log(`Failed to fetch non-prod metadata:\n${JSON.stringify(resp, null, 2)}`);
   return null;
 }
 
@@ -721,14 +721,14 @@ async function validatePreview(props, cta) {
             return;
           }
         } catch (error) {
-          window.lana?.log('Error in sequential poll:', error);
+          window.lana?.log(`Error in sequential poll:\n${JSON.stringify(error, null, 2)}`);
           break;
         }
       }
 
       if (!cancelled) {
         buildPreviewLoadingFailedDialog(props, previewHref);
-        window.lana?.log('Error: Failed to fetch metadata');
+        window.lana?.log('Failed to fetch metadata');
       }
       poll.cancel();
     }());
