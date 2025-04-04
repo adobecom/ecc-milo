@@ -30,6 +30,7 @@ export const EVENT_DATA_FILTER = {
   communityTopicUrl: { type: 'string', localizable: false, cloneable: true, submittable: true },
   title: { type: 'string', localizable: true, cloneable: true, submittable: true },
   enTitle: { type: 'string', localizable: false, cloneable: true, submittable: true },
+  defaultLocale: { type: 'string', localizable: false, cloneable: true, submittable: true },
   description: { type: 'string', localizable: true, cloneable: true, submittable: true },
   localStartDate: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localEndDate: { type: 'string', localizable: false, cloneable: true, submittable: true },
@@ -112,7 +113,7 @@ export const VENUE_DATA_FILTER = {
 };
 
 export function isValidAttribute(attr) {
-  return attr !== undefined && attr !== null;
+  return (attr !== undefined && attr !== null && attr !== '') || attr === false;
 }
 
 export function splitLocalizableFields(data, filter, locale = 'en-US') {

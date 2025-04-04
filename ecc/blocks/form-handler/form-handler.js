@@ -478,6 +478,7 @@ async function saveEvent(props, toPublish = false) {
     resp = await updateEvent(
       payload.eventId,
       payload,
+      props.locale,
     );
     props.eventDataResp = { ...props.eventDataResp, ...resp };
     await onEventSave();

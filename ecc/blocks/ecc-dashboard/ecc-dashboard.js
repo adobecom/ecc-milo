@@ -458,9 +458,11 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(config, eventObj) {
+  const defaultLocale = eventObj.defaultLocale || Object.keys(eventObj.localizations)[0] || 'en-US';
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+  const eventTitle = eventObj.localizations?.[defaultLocale]?.title || eventObj.title;
   url.searchParams.set('eventId', eventObj.eventId);
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventObj.title);
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventTitle);
   return eventTitleTag;
 }
 

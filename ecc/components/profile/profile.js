@@ -122,8 +122,7 @@ export default class Profile extends LitElement {
       let respJson;
       const profilePayload = getSpeakerPayload(sProfile, this.locale);
       if (this.profile.speakerId) {
-        const combinedProfile = { ...sProfile, ...profilePayload };
-        respJson = await updateSpeaker(combinedProfile, this.seriesId);
+        respJson = await updateSpeaker(profilePayload, this.seriesId);
       } else {
         respJson = await createSpeaker(profilePayload, this.seriesId);
       }

@@ -123,7 +123,7 @@ export function getFilteredCachedPayload() {
     .map(([key]) => key);
 
   const filteredPayload = submittableFields.reduce((acc, key) => {
-    if (payloadCache[key]) {
+    if (isValidAttribute(payloadCache[key])) {
       acc[key] = payloadCache[key];
     }
     return acc;
@@ -138,7 +138,7 @@ export function getFilteredCachedResponse() {
     .map(([key]) => key);
 
   const filteredResponse = submittableFields.reduce((acc, key) => {
-    if (responseCache[key]) {
+    if (isValidAttribute(responseCache[key])) {
       acc[key] = responseCache[key];
     }
     return acc;
@@ -173,16 +173,17 @@ export default function getJoinedData(locale = 'en-US') {
   const finalPayload = {
     ...filteredResponse,
     ...filteredPayload,
+    modificationTime: filteredResponse.modificationTime,
   };
 
   Object.keys(filteredResponse).forEach((key) => {
-    if (!filteredPayload[key]) {
+    if (!isValidAttribute(filteredPayload[key])) {
       delete finalPayload[key];
     }
   });
 
   Object.keys(localeResponse).forEach((key) => {
-    if (!localePayload[key]) {
+    if (!isValidAttribute(localePayload[key])) {
       delete finalPayload.localizations[locale][key];
     }
   });

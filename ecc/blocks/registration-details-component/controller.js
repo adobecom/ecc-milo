@@ -269,30 +269,7 @@ export async function onRespUpdate(component, props) {
 }
 
 export default function init(component, props) {
-  component.dataset.cloudType = props.payload.cloudType || props.eventDataResp.cloudType;
-  component.dataset.eventType = props.payload.eventType || props.eventDataResp.eventType;
-
-  switch (component.dataset.cloudType) {
-    case 'CreativeCloud':
-      buildCreativeCloudFields(component);
-      break;
-    case 'ExperienceCloud':
-      switch (component.dataset.eventType) {
-        case 'InPerson':
-          buildExperienceCloudInPersonFields(component);
-          break;
-        case 'webinar':
-          buildExperienceCloudWebinarFields(component);
-          break;
-        default:
-          break;
-      }
-      break;
-    default:
-      break;
-  }
-
-  prefillFields(component, props);
+  // Do nothing. We don't know what to init without the payload..
 }
 
 export function onTargetUpdate(component, props) {
