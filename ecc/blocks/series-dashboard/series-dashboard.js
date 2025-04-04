@@ -65,7 +65,7 @@ function updateDashboardData(newPayload, props) {
 function paginateData(props, config, page) {
   const ps = +config['page-size'];
   if (Number.isNaN(ps) || ps <= 0) {
-    window.lana?.log('error', 'Invalid page size');
+    window.lana?.log('Invalid page size');
   }
   const start = (page - 1) * ps;
   const end = Math.min(page * ps, props.filteredData.length);

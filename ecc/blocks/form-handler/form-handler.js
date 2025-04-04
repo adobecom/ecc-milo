@@ -689,7 +689,7 @@ async function getNonProdPreviewDataById(props) {
     return null;
   }
 
-  window.lana?.log('Failed to fetch non-prod metadata:', resp);
+  window.lana?.log(`Failed to fetch non-prod metadata:\n${JSON.stringify(resp, null, 2)}`);
   return null;
 }
 
@@ -732,14 +732,14 @@ async function validatePreview(props, cta) {
             return;
           }
         } catch (error) {
-          window.lana?.log('Error in sequential poll:', error);
+          window.lana?.log(`Error in sequential poll:\n${JSON.stringify(error, null, 2)}`);
           break;
         }
       }
 
       if (!cancelled) {
         buildPreviewLoadingFailedDialog(props, previewHref);
-        window.lana?.log('Error: Failed to fetch metadata');
+        window.lana?.log('Failed to fetch metadata');
       }
       poll.cancel();
     }());

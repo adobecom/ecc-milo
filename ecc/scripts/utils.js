@@ -344,7 +344,7 @@ export function getServiceName(link) {
     const { hostname } = url;
     return hostname.replace('.com', '').replace('www.', '');
   } catch (error) {
-    window.lana?.log('Error trying to get service name:', error);
+    window.lana?.log(`Error trying to get service name:\n${JSON.stringify(error, null, 2)}`);
     return '';
   }
 }
@@ -358,7 +358,7 @@ export async function miloReplaceKey(key) {
 
     return await replaceKey(key, config);
   } catch (error) {
-    window.lana?.log('Error trying to replace placeholder:', error);
+    window.lana?.log(`Error trying to replace placeholder:\n${JSON.stringify(error, null, 2)}`);
     return 'RSVP';
   }
 }

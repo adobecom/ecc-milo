@@ -48,7 +48,7 @@ export async function onSubmit(component, props) {
 
           if (resp.error) {
             component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
-            window.lana?.log(`Failed to add sponsor to event: ${resp.error}`);
+            window.lana?.log(`Failed to add sponsor to event:\n${JSON.stringify(resp, null, 2)}`);
           }
         } else if (partner.hasUnsavedChanges) {
           // If there are unsaved changes, do nothing
@@ -60,7 +60,7 @@ export async function onSubmit(component, props) {
           const resp = await updateSponsorInEvent(updatableData, partner.sponsorId, eventId);
 
           if (resp.error) {
-            window.lana?.log('Failed to update sponsor in event', resp);
+            window.lana?.log(`Failed to update sponsor in event:\n${JSON.stringify(resp, null, 2)}`);
           }
         }
       }
@@ -75,7 +75,7 @@ export async function onSubmit(component, props) {
         if (!stillNeeded) {
           const resp = await removeSponsorFromEvent(sponsorId, eventId);
           if (!resp.ok) {
-            window.lana?.log('Failed to remove sponsor from event', resp);
+            window.lana?.log(`Failed to remove sponsor from event:\n${JSON.stringify(resp, null, 2)}`);
           }
         }
       }));

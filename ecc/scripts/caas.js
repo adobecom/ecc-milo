@@ -21,7 +21,7 @@ export const getCaasTags = (() => {
           return data;
         })
         .catch((err) => {
-          window.lana?.log(`Failed to load products map JSON. Error: ${err}`);
+          window.lana?.log(`Failed to load products map JSON: ${err}`);
           throw err;
         });
     }
