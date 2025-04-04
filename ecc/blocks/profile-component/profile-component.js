@@ -20,9 +20,9 @@ function extractFieldLabels(element) {
     titleSubText: rows[4].querySelector('div > div:nth-of-type(2)')?.textContent?.trim(),
     bio: rows[5].querySelector('div')?.textContent?.trim(),
     bioSubText: rows[5].querySelector('div > div:nth-of-type(2)')?.textContent?.trim(),
-    socialMedia: rows[6].querySelector('div')?.textContent?.trim(),
-    addSocialMedia: rows[7].querySelector('div')?.textContent?.trim(),
-    addSocialMediaRepeater: rows[8].querySelector('div')?.textContent?.trim(),
+    socialLink: rows[6].querySelector('div')?.textContent?.trim(),
+    addSocialLink: rows[7].querySelector('div')?.textContent?.trim(),
+    addSocialLinkRepeater: rows[8].querySelector('div')?.textContent?.trim(),
     addProfileRepeater: rows[9].querySelector('div')?.textContent?.trim(),
   };
 
@@ -34,9 +34,9 @@ async function decorateProfile(element) {
   const fieldlabels = extractFieldLabels(element);
   element.innerHTML = '';
 
-  const profileContainer = createTag('profile-container', { class: 'profile-component' });
+  const profileContainer = createTag('profile-container', { class: 'profile-component', 'data-locale-sensitive': true });
   profileContainer.fieldlabels = fieldlabels;
-  profileContainer.profiles = [{ socialMedia: [{ link: '' }], isPlaceholder: true }];
+  profileContainer.profiles = [{ socialLinks: [{ link: '' }], isPlaceholder: true }];
   element.append(profileContainer);
 }
 

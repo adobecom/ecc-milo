@@ -1,6 +1,7 @@
 import { getClouds } from '../../scripts/esp-controller.js';
 import { getUser, userHasAccessToBU } from '../../scripts/profile.js';
 import { LIBS } from '../../scripts/scripts.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -18,7 +19,7 @@ export function onSubmit(component, props) {
   if (seriesName.value) seriesInfo.seriesName = seriesName.value;
   if (seriesDescription.value) seriesInfo.seriesDescription = seriesDescription.value;
 
-  props.payload = { ...props.payload, ...seriesInfo };
+  setPropsPayload(props, seriesInfo);
 }
 
 export async function onPayloadUpdate(_component, _props) {
@@ -46,13 +47,14 @@ export default async function init(component, props) {
   if (cloudTypeEl) cloudTypeEl.removeAttribute('pending');
 
   const data = props.response;
+  const localeData = data?.localizations?.[props.lang] || data;
 
   if (data) {
     const {
       cloudType,
       seriesName,
       seriesDescription,
-    } = data;
+    } = localeData;
 
     if (cloudType) {
       cloudTypeEl.value = cloudType;

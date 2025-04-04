@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-vars */
+import { setPropsPayload } from '../form-handler/data-handler.js';
+
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
@@ -9,7 +11,7 @@ export function onSubmit(component, props) {
     required: [...defaultFields, ...Array.from(component.querySelectorAll('input[type="checkbox"].check-require')).filter((f) => f.checked).map((f) => f.name)],
   };
 
-  props.payload = { ...props.payload, rsvpFormFields };
+  setPropsPayload(props, { rsvpFormFields });
 }
 
 export async function onPayloadUpdate(_component, _props) {
@@ -22,6 +24,7 @@ export async function onRespUpdate(_component, _props) {
 
 export default function init(component, props) {
   const eventData = props.eventDataResp;
+  const localeEventData = eventData.localizations?.[props.lang] || eventData;
   const appearChecks = component.querySelectorAll('input[type="checkbox"].check-appear');
   const requireChecks = component.querySelectorAll('input[type="checkbox"].check-require');
 
@@ -45,14 +48,14 @@ export default function init(component, props) {
     });
   });
 
-  if (!eventData.rsvpFormFields) return;
+  if (!localeEventData.rsvpFormFields) return;
 
   appearChecks.forEach((cb) => {
-    if (eventData.rsvpFormFields?.visible?.includes(cb.name)) cb.checked = true;
+    if (localeEventData.rsvpFormFields?.visible?.includes(cb.name)) cb.checked = true;
   });
 
   requireChecks.forEach((cb) => {
-    if (eventData.rsvpFormFields?.required?.includes(cb.name)) cb.checked = true;
+    if (localeEventData.rsvpFormFields?.required?.includes(cb.name)) cb.checked = true;
   });
 }
 
