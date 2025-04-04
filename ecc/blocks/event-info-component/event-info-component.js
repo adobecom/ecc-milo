@@ -127,6 +127,7 @@ function buildUrlInput(el) {
     size: 'xl',
     quiet: true,
     required: true,
+    pattern: '^[a-zA-Z0-9_-]+$',
   }, '', { parent: inputWrapper });
   el.append(inputWrapper);
 }
