@@ -54,6 +54,7 @@ export const EVENT_DATA_FILTER = {
   published: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
   creationTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
   modificationTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
+  isPrivate: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
 };
 
 /**
