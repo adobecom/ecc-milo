@@ -1,5 +1,7 @@
 /* eslint-disable no-unused-vars */
-import { createVenue, deleteImage, getEventImages, replaceVenue, uploadImage } from '../../scripts/esp-controller.js';
+import {
+  createVenue, deleteImage, getEvent, getEventImages, replaceVenue, uploadImage,
+} from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
@@ -17,7 +19,7 @@ function togglePrefillableFieldsHiddenState(component) {
 }
 
 async function loadGoogleMapsAPI(callback) {
-  const ALLOWED_ENVS = new Set(['dev', 'dev02', 'stage', 'stage02', 'prod']);
+  const ALLOWED_ENVS = new Set(['dev', 'stage', 'prod']);
 
   const currentEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
 
@@ -451,6 +453,7 @@ export async function onTargetUpdate(component, props) {
       oldVenueData.venueId,
       {
         ...venueData,
+        venueId: oldVenueData.venueId,
         creationTime,
         modificationTime,
       },
@@ -462,7 +465,9 @@ export async function onTargetUpdate(component, props) {
   }
 
   if (resp) {
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    const updatedEventData = await getEvent(props.eventDataResp.eventId);
+
+    props.eventDataResp = { ...props.eventDataResp, ...updatedEventData };
     props.payload = {
       ...props.payload,
       showVenuePostEvent: venueData.showVenuePostEvent,

@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 import {
   addSponsorToEvent,
+  getEvent,
   getSponsor,
   getSponsorImages,
   getSponsors,
@@ -20,9 +21,7 @@ export async function onSubmit(component, props) {
 
   if (partnerSelectorGroup && eventId) {
     const partners = partnerSelectorGroup.getSavedPartners();
-    await partners.reduce(async (promise, partner) => {
-      await promise;
-
+    await Promise.all(partners.map(async (partner) => {
       const { sponsorId, sponsorType } = partner;
 
       if (!props.eventDataResp.sponsors) {
@@ -50,10 +49,8 @@ export async function onSubmit(component, props) {
           }, eventId);
 
           if (resp.error) {
-            return;
+            window.lana?.log('Failed to add sponsor to event', resp);
           }
-
-          props.eventDataResp = { ...props.eventDataResp, ...resp };
         } else if (partner.hasUnsavedChanges) {
           // If there are unsaved changes, do nothing
         } else {
@@ -64,31 +61,29 @@ export async function onSubmit(component, props) {
           const resp = await updateSponsorInEvent(updatableData, partner.sponsorId, eventId);
 
           if (resp.error) {
-            return;
+            window.lana?.log('Failed to update sponsor in event', resp);
           }
-
-          props.eventDataResp = { ...props.eventDataResp, ...resp };
         }
       }
-    }, Promise.resolve());
+    }));
 
     if (props.eventDataResp.sponsors) {
       const savedPartners = props.eventDataResp.sponsors.filter((sponsor) => sponsor.sponsorType === 'Partner');
-      await savedPartners.reduce(async (promise, partner) => {
-        await promise;
+      await Promise.all(savedPartners.map(async (partner) => {
         const { sponsorId } = partner;
         const stillNeeded = partners.find((p) => p.sponsorId === sponsorId);
 
         if (!stillNeeded) {
           const resp = await removeSponsorFromEvent(sponsorId, eventId);
-          if (resp.error) {
-            return;
+          if (!resp.ok) {
+            window.lana?.log('Failed to remove sponsor from event', resp);
           }
-
-          props.eventDataResp = { ...props.eventDataResp, ...resp };
         }
-      }, Promise.resolve());
+      }));
     }
+
+    const updatedEventData = await getEvent(eventId);
+    props.eventDataResp = { ...props.eventDataResp, ...updatedEventData };
   }
 
   props.payload = { ...props.payload, showSponsors };
