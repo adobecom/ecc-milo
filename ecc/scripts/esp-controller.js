@@ -223,8 +223,8 @@ export async function deleteImage(configs, imageId) {
       return { status: response.status, error: data };
     }
 
-    // 204 no content. Return true if no error.
-    return true;
+    // 204 no content. Return OK if no error.
+    return { ok: true };
   } catch (error) {
     window.lana?.log('Failed to delete image. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -864,7 +864,7 @@ export async function deleteEvent(eventId) {
     }
 
     // 204 no content. Return true if no error.
-    return true;
+    return { ok: true };
   } catch (error) {
     window.lana?.log(`Failed to delete event ${eventId}. Error:`, error);
     return { status: 'Network Error', error: error.message };
@@ -1424,7 +1424,8 @@ export async function deleteSpeakerImage(speakerId, seriesId, imageId) {
       return { status: response.status, error: data };
     }
 
-    return data;
+    // 204 no content. Return OK if no error.
+    return { ok: true };
   } catch (error) {
     window.lana?.log(`Failed to delete speaker images for speaker ${speakerId}. Error:`, error);
     return { status: 'Network Error', error: error.message };
