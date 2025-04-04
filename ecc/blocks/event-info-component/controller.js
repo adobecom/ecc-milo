@@ -5,6 +5,7 @@ import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../../scripts/utils.js';
 import { getAttr, setPropsPayload } from '../form-handler/data-handler.js';
+import { isValidAttribute } from '../../scripts/data-utils.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
@@ -375,6 +376,7 @@ function initTitleWatcher(component, props) {
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
+  const isPrivate = component.querySelector('#private-event').checked;
   const title = component.querySelector('#info-field-event-title').value;
   const description = component.querySelector('#info-field-event-description').value;
   const datePicker = component.querySelector('#event-info-date-picker');
@@ -401,6 +403,7 @@ export function onSubmit(component, props) {
     localEndTimeMillis,
     timezone,
     enTitle,
+    isPrivate,
   };
 
   setPropsPayload(props, eventInfo);
@@ -450,6 +453,7 @@ function prefillFields(component, props, eventData) {
   const datePicker = component.querySelector('#event-info-date-picker');
   const languagePicker = component.querySelector('#language-picker');
   const enTitleInput = component.querySelector('#event-info-url-input');
+  const isPrivateInput = component.querySelector('#private-event');
 
   const title = getAttr(eventData, 'title', props.locale);
   const description = getAttr(eventData, 'description', props.locale);
@@ -460,37 +464,30 @@ function prefillFields(component, props, eventData) {
   const timezone = getAttr(eventData, 'timezone', props.locale);
   const enTitle = getAttr(eventData, 'enTitle', props.locale);
   const defaultLocale = eventData.defaultLocale || 'en-US';
+  const isPrivate = getAttr(eventData, 'isPrivate', props.locale);
 
-  if (title
-    && description
-    && localStartDate
-    && localEndDate
-    && localStartTime
-    && localEndTime
-    && timezone
-    && enTitle) {
+  if (isValidAttribute(title)) eventTitleInput.value = title;
+  if (isValidAttribute(description)) eventDescriptionInput.value = description;
+  if (isValidAttribute(localStartDate)) datePicker.dataset.startDate = localStartDate;
+  if (isValidAttribute(localEndDate)) datePicker.dataset.endDate = localEndDate;
+  if (isValidAttribute(localStartTime)) {
     const startTimePieces = parse24HourFormat(localStartTime);
-    const endTimePieces = parse24HourFormat(localEndTime);
-
-    datePicker.dataset.startDate = localStartDate || '';
-    datePicker.dataset.endDate = localEndDate || '';
-    updateInput(component, {
-      selectedStartDate: parseFormatedDate(localStartDate),
-      selectedEndDate: parseFormatedDate(localEndDate),
-    });
-
-    eventTitleInput.value = title || '';
-    eventDescriptionInput.value = description || '';
     changeInputValue(startTime, 'value', `${localStartTime}` || '');
-    changeInputValue(endTime, 'value', `${localEndTime}` || '');
     changeInputValue(startTimeInput, 'value', `${startTimePieces.hours}:${startTimePieces.minutes}` || '');
     changeInputValue(startAmpmInput, 'value', startTimePieces.period || '');
+  }
+  if (isValidAttribute(localEndTime)) {
+    const endTimePieces = parse24HourFormat(localEndTime);
+    changeInputValue(endTime, 'value', `${localEndTime}` || '');
     changeInputValue(endTimeInput, 'value', `${endTimePieces.hours}:${endTimePieces.minutes}` || '');
     changeInputValue(endAmpmInput, 'value', endTimePieces.period || '');
-    changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
-    changeInputValue(languagePicker, 'value', defaultLocale || props.locale);
-    changeInputValue(enTitleInput, 'value', enTitle || '');
+  }
+  if (isValidAttribute(timezone)) changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
+  if (isValidAttribute(defaultLocale)) changeInputValue(languagePicker, 'value', defaultLocale || props.locale);
+  if (isValidAttribute(enTitle)) changeInputValue(enTitleInput, 'value', enTitle || '');
+  if (isValidAttribute(isPrivate)) changeInputValue(isPrivateInput, 'checked', isPrivate || false);
 
+  if (title && localStartDate && eventData.eventId) {
     BlockMediator.set('eventDupMetrics', {
       ...BlockMediator.get('eventDupMetrics'),
       ...{
@@ -499,7 +496,9 @@ function prefillFields(component, props, eventData) {
         eventId: eventData.eventId,
       },
     });
+  }
 
+  if (eventData.eventId) {
     component.classList.add('prefilled');
   }
 }
