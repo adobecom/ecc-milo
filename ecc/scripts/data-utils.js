@@ -116,6 +116,13 @@ export function isValidAttribute(attr) {
   return (attr !== undefined && attr !== null && attr !== '') || attr === false;
 }
 
+export function getAttribute(data, key, locale = 'en-US') {
+  if (data.localizations?.[locale]?.[key]) {
+    return data.localizations[locale][key];
+  }
+  return data[key];
+}
+
 export function splitLocalizableFields(data, filter, locale = 'en-US') {
   const localizableFields = {};
   const nonLocalizableFields = {};

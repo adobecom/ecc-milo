@@ -19,6 +19,7 @@ import {
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
+import { getAttribute } from '../../scripts/data-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -460,7 +461,7 @@ function buildStatusTag(event) {
 function buildEventTitleTag(config, eventObj) {
   const defaultLocale = eventObj.defaultLocale || Object.keys(eventObj.localizations)[0] || 'en-US';
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
-  const eventTitle = eventObj.localizations?.[defaultLocale]?.title || eventObj.title;
+  const eventTitle = getAttribute(eventObj, 'title', defaultLocale);
   url.searchParams.set('eventId', eventObj.eventId);
   const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventTitle);
   return eventTitleTag;
@@ -491,7 +492,6 @@ async function populateRow(props, config, index) {
   const sp = new URLSearchParams(window.location.search);
   const venueLoader = createSwipingLoader('venue-loader');
 
-  // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'event-row', 'data-event-id': event.eventId }, '', { parent: tBody });
   const thumbnailCell = buildThumbnail(event);
   const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(config, event)));
@@ -523,7 +523,9 @@ async function populateRow(props, config, index) {
 
   if (event.eventId === sp.get('newEventId')) {
     if (!props.el.classList.contains('toast-shown')) {
-      showToast(props, buildToastMsgWithEventTitle(event.title, config['new-event-toast-msg']), { variant: 'positive' });
+      const defaultLocale = event.defaultLocale || Object.keys(event.localizations)[0] || 'en-US';
+      const eventTitle = getAttribute(event, 'title', defaultLocale);
+      showToast(props, buildToastMsgWithEventTitle(eventTitle, config['new-event-toast-msg']), { variant: 'positive' });
 
       props.el.classList.add('toast-shown');
     }
