@@ -85,7 +85,7 @@ export const SPEAKER_DATA_FILTER = {
 
 export const SPONSOR_DATA_FILTER = {
   sponsorId: { type: 'string', localizable: false, submittable: true },
-  name: { type: 'string', localizable: true, submittable: true },
+  name: { type: 'string', localizable: false, submittable: true },
   info: { type: 'string', localizable: true, submittable: true },
   link: { type: 'string', localizable: false, submittable: true },
   localizations: { type: 'object', localizable: false, submittable: true },
