@@ -129,7 +129,7 @@ export default class Profile extends LitElement {
 
       if (respJson.error) {
         const { errors, message } = respJson.error;
-        window.lana?.log(`error occured while saving profile ${errors ?? message}`);
+        window.lana?.log(`Error occurred while saving profile: ${errors ?? message}`);
         saveButton.pending = false;
         const dialogToastParent = edited ? this.shadowRoot.querySelector('.edit-profile-dialog') : null;
         this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message }, targetEl: dialogToastParent }, bubbles: true, composed: true }));
@@ -180,7 +180,7 @@ export default class Profile extends LitElement {
         return true;
       }
     } catch (error) {
-      window.lana?.log(`error occured while saving profile ${error}`);
+      window.lana?.log(`Error occurred while saving profile: ${error}`);
     }
 
     saveButton.pending = false;

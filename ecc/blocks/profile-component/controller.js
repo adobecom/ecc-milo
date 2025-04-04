@@ -24,7 +24,7 @@ export async function onSubmit(component, props) {
           const resp = await removeSpeakerFromEvent(speakerId, eventId);
 
           if (!resp.ok) {
-            window.lana?.log('Failed to remove speaker from event', resp);
+            window.lana?.log(`Failed to remove speaker from event:\n${JSON.stringify(resp, null, 2)}`);
           }
         }));
       }
@@ -45,7 +45,7 @@ export async function onSubmit(component, props) {
 
         if (resp.error) {
           component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
-          window.lana?.log(`Failed to add speaker to event: ${resp.error}`);
+          window.lana?.log(`Failed to add speaker to event:\n${JSON.stringify(resp, null, 2)}`);
         }
       } else {
         const existingSpeaker = props.eventDataResp.speakers.find((profile) => {
@@ -64,12 +64,12 @@ export async function onSubmit(component, props) {
             const resp = await updateSpeakerInEvent(speaker, speakerId, eventId);
 
             if (resp.error) {
-              window.lana?.log('Failed to update speaker in event', resp);
+              window.lana?.log(`Failed to update speaker in event:\n${JSON.stringify(resp, null, 2)}`);
             }
           } else {
             const resp = await addSpeakerToEvent(speaker, eventId);
             if (resp.error) {
-              window.lana?.log('Failed to add speaker to event', resp);
+              window.lana?.log(`Failed to add speaker to event:\n${JSON.stringify(resp, null, 2)}`);
             }
           }
         }
@@ -86,7 +86,7 @@ export async function onSubmit(component, props) {
           const resp = await removeSpeakerFromEvent(speakerId, eventId);
 
           if (!resp.ok) {
-            window.lana?.log('Failed to remove speaker from event', resp);
+            window.lana?.log(`Failed to remove speaker from event:\n${JSON.stringify(resp, null, 2)}`);
           }
         }
       }));
@@ -128,7 +128,7 @@ async function prefillProfiles(props) {
 
       props.eventDataResp = { ...props.eventDataResp, ...d };
     } catch (e) {
-      window.lana?.log('Error fetching speaker data: ', e);
+      window.lana?.log(`Error fetching speaker data:\n${JSON.stringify(e, null, 2)}`);
     }
   }
 }
