@@ -135,11 +135,23 @@ function buildUrlInput(el) {
   el.append(inputWrapper);
 }
 
-function addPrivateEventToggle(el) {
-  el.classList.add('title-container');
-  const div = createTag('div', { class: 'private-event-toggle-wrapper' }, '', { parent: el });
+function addPrivateEventToggle(row) {
+  const div = createTag('div', { class: 'private-event-toggle-wrapper' }, '', { parent: row });
   createTag('sp-checkbox', { id: 'private-event', size: 'xl' }, privateEventString, { parent: div });
   addTooltipToEl(privateEventToolTip, div);
+}
+
+function buildTitleContainer(row) {
+  row.classList.add('title-container');
+  const leftWrapper = createTag('div', { class: 'left-wrapper' }, '');
+  const rightWrapper = createTag('div', { class: 'right-wrapper' }, '');
+
+  leftWrapper.innerHTML = row.innerHTML;
+  row.innerHTML = '';
+  row.append(leftWrapper, rightWrapper);
+
+  addPrivateEventToggle(leftWrapper);
+  addLanguagePicker(rightWrapper);
 }
 
 export default function init(el) {
@@ -150,8 +162,7 @@ export default function init(el) {
     switch (i) {
       case 0:
         generateToolTip(r);
-        addLanguagePicker(r);
-        addPrivateEventToggle(r);
+        buildTitleContainer(r);
         break;
       case 1:
         await decorateTextfield(r, { id: 'info-field-event-title' }, await miloReplaceKey('duplicate-event-title-error'));

@@ -164,11 +164,11 @@ function selectDate(component, state, date) {
   }
 
   updateSelectedDates(state);
-  updateInput(component, state);
+  updateCalendarInput(component, state);
   input.dispatchEvent(new Event('change'));
 }
 
-function updateInput(component, state) {
+function updateCalendarInput(component, state) {
   const dateInput = component.querySelector('#event-info-date-picker');
 
   if (dateInput) {
@@ -481,6 +481,12 @@ function prefillFields(component, props, eventData) {
     changeInputValue(endTime, 'value', `${localEndTime}` || '');
     changeInputValue(endTimeInput, 'value', `${endTimePieces.hours}:${endTimePieces.minutes}` || '');
     changeInputValue(endAmpmInput, 'value', endTimePieces.period || '');
+  }
+  if (isValidAttribute(localStartDate) && isValidAttribute(localEndDate)) {
+    updateCalendarInput(component, {
+      selectedStartDate: parseFormatedDate(localStartDate),
+      selectedEndDate: parseFormatedDate(localEndDate),
+    });
   }
   if (isValidAttribute(timezone)) changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
   if (isValidAttribute(defaultLocale)) changeInputValue(languagePicker, 'value', defaultLocale || props.locale);
