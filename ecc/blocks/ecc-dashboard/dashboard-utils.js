@@ -1,10 +1,10 @@
-import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
+import { EVENT_DATA_FILTER, isValidAttribute } from '../../scripts/data-utils.js';
 
 export function cloneFilter(obj) {
   const output = {};
 
   Object.entries(EVENT_DATA_FILTER).forEach(([key, attr]) => {
-    if (attr.cloneable) {
+    if (isValidAttribute(obj[key]) && attr.cloneable) {
       output[key] = obj[key];
     }
   });
@@ -16,7 +16,7 @@ export function eventObjFilter(obj) {
   const output = {};
 
   Object.entries(EVENT_DATA_FILTER).forEach(([key, attr]) => {
-    if (obj[key] !== undefined && obj[key] !== null && attr.submittable) {
+    if (isValidAttribute(obj[key]) && attr.submittable) {
       output[key] = obj[key];
     }
   });

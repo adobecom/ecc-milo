@@ -13,6 +13,16 @@ const style = css`
     --color-red: #EB1000;
   }
 
+  .form-container {
+    max-width: 1440px;
+    margin: 0 auto 10px;
+    padding: 32px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    align-items: stretch;
+  }
+
   .header {
     box-sizing: border-box;
     display: flex;
@@ -20,13 +30,12 @@ const style = css`
     align-items: center;
     gap: 16px;
     padding: 0 20px;
-    max-width: 1440px;
-    margin: 0 auto 10px;
   }
 
   .header h1 {
     color: var(--color-red);
     font-weight: 900;
+    margin: 0;
   }
 
   .header .status {
@@ -51,9 +60,7 @@ const style = css`
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--color-red);
-    font-size: 24px;
-    font-weight: 900;
+    color: var(--color-black);
     text-decoration: none;
   }
 
@@ -63,7 +70,7 @@ const style = css`
     display: block;
   }
 
-  .tag-manager {
+  .form-section {
     background-color: var(--color-white);
     padding: 44px 67px;
     box-shadow: 0px 4px 4px 0px rgb(0 0 0 / 25%);
@@ -71,26 +78,32 @@ const style = css`
     margin: 0 auto;
     box-sizing: border-box;
     max-width: 1400px;
+    width: 100%;
   }
 
-  .cloud-type-picker {
-    margin-bottom: 18px;
+  .picker-container {
+    padding: 0 20px;
   }
 
-  .tag-manager h2 {
-    color: var(--color-gray-600)
+  .form-section h1,
+  .form-section h2,
+  .form-section h3 {
+    margin-top: 0;
+    margin-bottom: 32px;
   }
 
-  .tags-pool {
+  .pool {
     min-height: 189px;
     padding: 10px;
     border: 1px solid var(--color-gray-300);
     border-radius: 10px;
     width: 100%;
     margin-bottom: 36px;
+    box-sizing: border-box;
   }
 
-  .tags {
+  .tags,
+  .langs {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;

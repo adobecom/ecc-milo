@@ -42,6 +42,13 @@ async function safeFetch(url, options) {
     throw new Error('Invalid or unauthorized URL');
   }
 
+  const nonInvasiveTest = new URLSearchParams(window.location.search).get('nonInvasiveTest') === 'true';
+  if (nonInvasiveTest && ['PUT', 'POST', 'DELETE'].includes(options.method)) {
+    console.log('Non-invasive test mode. Skipping request:', url, options);
+    console.log('Payload:', JSON.parse(options.body));
+    return { ok: true, status: 200, json: () => Promise.resolve({}) };
+  }
+
   try {
     const response = await fetch(url, options);
 
@@ -179,43 +186,24 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
   });
 }
 
-function convertToNSpeaker(profile) {
-  const {
-    // eslint-disable-next-line max-len
-    speakerId, firstName, lastName, title, type, bio, socialMedia, creationTime, modificationTime,
-  } = profile;
+export async function getLocales() {
+  const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  const options = await constructRequestOptions('GET');
 
-  return {
-    speakerId,
-    firstName,
-    lastName,
-    title,
-    type,
-    bio,
-    socialLinks: socialMedia,
-    creationTime,
-    modificationTime,
-  };
-}
+  try {
+    const response = await safeFetch(`${host}/v1/locales`, options);
+    const data = await response.json();
 
-function convertToSpeaker(speaker) {
-  const {
-    // eslint-disable-next-line max-len
-    speakerId, firstName, lastName, title, type, bio, socialLinks, creationTime, modificationTime, photo,
-  } = speaker;
+    if (!response.ok) {
+      window.lana?.log('Failed to get locales. Status:', response.status, 'Error:', data);
+      return { status: response.status, error: data };
+    }
 
-  return {
-    speakerId,
-    firstName,
-    lastName,
-    title,
-    type,
-    bio,
-    photo,
-    socialMedia: socialLinks || [],
-    creationTime,
-    modificationTime,
-  };
+    return data;
+  } catch (error) {
+    window.lana?.log('Failed to get locales. Error:', error);
+    return { status: 'Network Error', error: error.message };
+  }
 }
 
 export async function deleteImage(configs, imageId) {
@@ -359,11 +347,16 @@ export async function updateCloud(cloudType, cloudData) {
   }
 }
 
-export async function createEvent(payload) {
+export async function createEvent(payload, locale = 'en-US') {
   if (!payload || typeof payload !== 'object') throw new Error('Invalid event payload');
 
   const { host } = API_CONFIG.esl[getEventServiceEnv()];
-  const raw = JSON.stringify({ ...payload, liveUpdate: false, published: false });
+  const raw = JSON.stringify({
+    ...payload,
+    liveUpdate: false,
+    published: false,
+    defaultLocale: locale,
+  });
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -386,10 +379,8 @@ export async function createSpeaker(profile, seriesId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!profile || typeof profile !== 'object') throw new Error('Invalid speaker profile');
 
-  const nSpeaker = convertToNSpeaker(profile);
-
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(nSpeaker);
+  const raw = JSON.stringify(profile);
   const options = await constructRequestOptions('POST', raw);
 
   try {
@@ -408,9 +399,10 @@ export async function createSpeaker(profile, seriesId) {
   }
 }
 
-export async function createSponsor(sponsorData, seriesId) {
+export async function createSponsor(sponsorData, seriesId, locale = 'en-US') {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
+  if (!locale || typeof locale !== 'string') throw new Error('Invalid locale');
 
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(sponsorData);
@@ -432,10 +424,11 @@ export async function createSponsor(sponsorData, seriesId) {
   }
 }
 
-export async function updateSponsor(sponsorData, sponsorId, seriesId) {
+export async function updateSponsor(sponsorData, sponsorId, seriesId, locale = 'en-US') {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
+  if (!locale || typeof locale !== 'string') throw new Error('Invalid locale');
 
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const raw = JSON.stringify(sponsorData);
@@ -683,7 +676,7 @@ export async function getSpeaker(seriesId, speakerId) {
       return { status: response.status, error: data };
     }
 
-    return convertToSpeaker(data);
+    return data;
   } catch (error) {
     window.lana?.log('Failed to get speaker details. Error:', error);
     return { status: 'Network Error', error: error.message };
@@ -725,9 +718,8 @@ export async function updateSpeaker(profile, seriesId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!profile || typeof profile !== 'object') throw new Error('Invalid speaker profile');
 
-  const nSpeaker = convertToNSpeaker(profile);
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
-  const raw = JSON.stringify(nSpeaker);
+  const raw = JSON.stringify(profile);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -1386,7 +1378,7 @@ export async function getSpeakers(seriesId) {
       return { status: response.status, error: data };
     }
 
-    return { speakers: data.speakers.map(convertToSpeaker) };
+    return data;
   } catch (error) {
     window.lana?.log(`Failed to get details of speakers for series ${seriesId}. Error:`, error);
     return { status: 'Network Error', error: error.message };
