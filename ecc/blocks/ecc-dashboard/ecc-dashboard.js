@@ -172,8 +172,11 @@ function sortData(props, config, options = {}) {
     let valB;
 
     if ((field === 'title')) {
-      valA = a[field]?.toLowerCase() || '';
-      valB = b[field]?.toLowerCase() || '';
+      const defaultLocale = a.defaultLocale || Object.keys(a.localizations)[0] || 'en-US';
+      const eventTitleA = getAttribute(a, 'title', defaultLocale);
+      const eventTitleB = getAttribute(b, 'title', defaultLocale);
+      valA = eventTitleA?.toLowerCase() || '';
+      valB = eventTitleB?.toLowerCase() || '';
       return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
     }
 
@@ -212,8 +215,11 @@ function sortData(props, config, options = {}) {
   el?.classList.add('active');
 }
 
-function buildToastMsgWithEventTitle(eventTitle, configValue) {
+function buildToastMsgWithEventTitle(event, configValue) {
+  const defaultLocale = event.defaultLocale || Object.keys(event.localizations)[0] || 'en-US';
+  const eventTitle = getAttribute(event, 'title', defaultLocale);
   const msgTemplate = configValue instanceof Array ? configValue.join('<br/>') : configValue;
+
   return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
 }
 
@@ -248,7 +254,7 @@ function initMoreOptions(props, config, eventObj, row) {
 
         sortData(props, config, { resort: true });
 
-        showToast(props, buildToastMsgWithEventTitle(eventObj.title, config['event-unpublished-msg']), { variant: 'positive' });
+        showToast(props, buildToastMsgWithEventTitle(eventObj, config['event-unpublished-msg']), { variant: 'positive' });
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
@@ -269,7 +275,7 @@ function initMoreOptions(props, config, eventObj, row) {
 
         sortData(props, config, { resort: true });
 
-        showToast(props, buildToastMsgWithEventTitle(eventObj.title, config['event-published-msg']), { variant: 'positive' });
+        showToast(props, buildToastMsgWithEventTitle(eventObj, config['event-published-msg']), { variant: 'positive' });
       });
     }
 
@@ -372,7 +378,7 @@ function initMoreOptions(props, config, eventObj, row) {
 
       const newRow = props.el.querySelector(`tr[data-event-id="${newEventJSON.eventId}"]`);
       highlightRow(newRow);
-      showToast(props, buildToastMsgWithEventTitle(newEventJSON.title, config['clone-event-toast-msg']), { variant: 'info' });
+      showToast(props, buildToastMsgWithEventTitle(newEventJSON, config['clone-event-toast-msg']), { variant: 'info' });
     });
 
     // delete
@@ -523,9 +529,7 @@ async function populateRow(props, config, index) {
 
   if (event.eventId === sp.get('newEventId')) {
     if (!props.el.classList.contains('toast-shown')) {
-      const defaultLocale = event.defaultLocale || Object.keys(event.localizations)[0] || 'en-US';
-      const eventTitle = getAttribute(event, 'title', defaultLocale);
-      showToast(props, buildToastMsgWithEventTitle(eventTitle, config['new-event-toast-msg']), { variant: 'positive' });
+      showToast(props, buildToastMsgWithEventTitle(event, config['new-event-toast-msg']), { variant: 'positive' });
 
       props.el.classList.add('toast-shown');
     }
@@ -659,7 +663,11 @@ function populateTable(props, config) {
 
 function filterData(props, config, query) {
   const q = query.toLowerCase();
-  props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
+  props.filteredData = props.data.filter((e) => {
+    const defaultLocale = e.defaultLocale || Object.keys(e.localizations)[0] || 'en-US';
+    const eventTitle = getAttribute(e, 'title', defaultLocale);
+    return eventTitle.toLowerCase().includes(q);
+  });
   props.currentPage = 1;
   paginateData(props, config, 1);
   sortData(props, config, { resort: true });
