@@ -44,6 +44,7 @@ export async function onSubmit(component, props) {
         const resp = await addSpeakerToEvent(speaker, eventId);
 
         if (resp.error) {
+          component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
           window.lana?.log(`Failed to add speaker to event:\n${JSON.stringify(resp, null, 2)}`);
         }
       } else {

@@ -12,8 +12,9 @@ import {
 import SearchablePicker from '../../components/searchable-picker/searchable-picker.js';
 import FilterMenu from '../../components/filter-menu/filter-menu.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
+import { getAttribute } from '../../scripts/data-utils.js';
 
-const { createTag } = await import(`${LIBS}/utils/utils.js`);
+const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 const ATTENDEE_ATTR_MAP = [
   {
@@ -420,15 +421,29 @@ function calculatePercentage(part, total) {
   return `${percentage.toFixed(2)}%`;
 }
 
+const getLanguage = (ietfLocale) => {
+  if (!ietfLocale.length) return 'en-US';
+
+  const nonStandardLocaleMap = { 'no-NO': 'nb' };
+
+  if (nonStandardLocaleMap[ietfLocale]) {
+    return nonStandardLocaleMap[ietfLocale];
+  }
+
+  return ietfLocale.split('-')[0];
+};
+
 async function buildEventInfo(props) {
   const eventInfoContainer = props.el.querySelector('.dashboard-header-event-info');
   if (!eventInfoContainer) return;
 
   eventInfoContainer.innerHTML = '';
-  const eventInfo = props.events.find((e) => e.eventId === props.currentEventId);
+  const eventObj = props.events.find((e) => e.eventId === props.currentEventId);
 
-  if (!eventInfo) return;
+  if (!eventObj) return;
 
+  const currentLang = getConfig().locale?.ietf ? getLanguage(getConfig().locale.ietf) : 'en-US';
+  const eventInfo = eventObj.localizations?.[currentLang] || eventObj;
   const { photos } = eventInfo;
 
   if (!photos) {
@@ -469,10 +484,13 @@ async function buildEventInfo(props) {
   const infoRow = createTag('div', { class: 'event-info-row' }, '', { parent: infoContainer });
   const statsRow = createTag('div', { class: 'event-stats-row' }, '', { parent: infoContainer });
 
+  const defaultLocale = eventInfo.defaultLocale || Object.keys(eventInfo.localizations)[0] || 'en-US';
+  const eventTitle = getAttribute(eventInfo, 'title', defaultLocale);
+
   [
     {
       label: 'EVENT:',
-      value: eventInfo.title,
+      value: eventTitle,
     },
     {
       label: 'WHEN:',
@@ -575,10 +593,16 @@ function buildEventPicker(props) {
     eventsPicker.value = props.currentEventId;
     const event = props.events.find((e) => e.eventId === props.currentEventId);
 
-    if (event) eventsPicker.displayValue = event.title;
+    const defaultLocale = event.defaultLocale || Object.keys(event.localizations)[0] || 'en-US';
+    const eventTitle = getAttribute(event, 'title', defaultLocale);
+    if (event) eventsPicker.displayValue = eventTitle;
   }
 
-  eventsPicker.items = events.map((e) => ({ label: e.title, value: e.eventId }));
+  eventsPicker.items = events.map((e) => {
+    const defaultLocale = e.defaultLocale || Object.keys(e.localizations)[0] || 'en-US';
+    const eventTitle = getAttribute(e, 'title', defaultLocale);
+    return { label: eventTitle, value: e.eventId };
+  });
   eventsPicker.filteredItems = eventsPicker.items;
 
   eventsPicker.addEventListener('picker-change', (e) => {

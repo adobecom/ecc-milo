@@ -11,6 +11,17 @@
   width: 100%;
 }
 
+.event-info-component > div:nth-child(1) {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.event-info-component > div:nth-child(1) .language-picker-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
 .event-info-component sp-textfield#info-field-event-title sp-help-text {
   position: absolute;
   display: none;
@@ -34,7 +45,7 @@
 .event-info-component .date-time-row {
   display: flex;
   align-items: flex-start;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 24px;
   margin-bottom: 24px;
 }
@@ -72,12 +83,20 @@
   cursor: pointer;
 }
 
-.event-info-component .date-time-row > p {
-  font-size: var(--type-heading-m-size);
-  font-weight: 700;
+.event-info-component .date-time-row > .time-picker-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.event-info-component .date-time-row > p::before {
+.event-info-component .date-time-row > .time-picker-container > p {
+  font-size: var(--type-heading-m-size);
+  font-weight: 700;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.event-info-component .date-time-row > .time-picker-container > p::before {
   content: '';
   display: inline-block;
   background-image: url('../../icons/clock.svg');
@@ -100,7 +119,7 @@
 }
 
 .event-info-component .time-pickers .time-picker-wrapper {
-  flex: 1 1 0;
+  width: 100%;
 }
 
 .event-info-component .time-pickers .time-picker-wrapper .select-wrapper {
@@ -116,10 +135,6 @@
   height: 32px;
   width: 100%;
   box-sizing: border-box;
-}
-
-.event-info-component .time-pickers .time-picker-wrapper .select-wrapper sp-picker:last-of-type {
-  width: max-content;
 }
 
 .event-info-component .time-pickers .time-picker-wrapper label {
@@ -297,15 +312,43 @@
   z-index: -1;
 }
 
+.event-info-component .url-input-wrapper {
+  border-top: 1px solid var(--stroke-color-divider);
+}
+
+.event-info-component .url-input-wrapper sp-label {
+  margin: 32px 0 16px;
+  font-size: var(--type-body-s-size);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 700;
+  margin-right: 8px;
+}
+
+.event-info-component .private-event-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.event-info-component .title-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.event-info-component .title-container .left-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-info-component .title-container .left-wrapper h2 {
+  margin-top: 0;
+}
+
 @media screen and (min-width: 900px) {
-  .event-info-component .date-time-row {
-    flex-direction: row;
-  }
-
-  .event-info-component .time-inputs-wrapper {
-    width: auto;
-  }
-
   .event-info-component .date-time-row > p {
     margin-left: 24px;
   }
