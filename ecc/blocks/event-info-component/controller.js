@@ -344,7 +344,7 @@ async function updateLanguagePicker(component, props) {
     }
   });
 
-  languagePicker.disabled = false;
+  if (!props.eventDataResp?.defaultLocale) languagePicker.disabled = false;
 }
 
 function initTitleWatcher(component, props) {

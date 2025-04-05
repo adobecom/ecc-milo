@@ -201,6 +201,7 @@ export function onSubmit(component, props) {
 
   const attendeeLimit = Number.isNaN(+attendeeLimitVal) ? null : +attendeeLimitVal;
   const rsvpData = {};
+  const removeData = [];
 
   rsvpData.rsvpDescription = rsvpDescription;
   rsvpData.allowWaitlisting = !!allowWaitlisting;
@@ -209,12 +210,15 @@ export function onSubmit(component, props) {
   if (contactHost && hostEmail) {
     rsvpData.hostEmail = hostEmail;
   } else {
-    delete rsvpData.hostEmail;
+    removeData.push({
+      key: 'hostEmail',
+      path: '',
+    });
   }
 
   if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
 
-  setPropsPayload(props, rsvpData);
+  setPropsPayload(props, rsvpData, removeData);
 }
 
 function updateHeadingTooltip(component) {
