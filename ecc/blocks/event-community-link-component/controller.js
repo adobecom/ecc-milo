@@ -7,12 +7,20 @@ export function onSubmit(component, props) {
 
   const checkbox = component.querySelector('#checkbox-community');
 
+  const data = {};
+  const removeData = [];
+
   if (checkbox.checked) {
     const communityTopicUrl = component.querySelector('#community-url-details')?.value?.trim();
-    setPropsPayload(props, { communityTopicUrl });
+    data.communityTopicUrl = communityTopicUrl;
   } else {
-    setPropsPayload(props, { communityTopicUrl: null });
+    removeData.push({
+      key: 'communityTopicUrl',
+      path: '',
+    });
   }
+
+  setPropsPayload(props, data, removeData);
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -45,6 +53,7 @@ export default function init(component, props) {
   const updateInputState = () => {
     input.required = checkbox.checked;
     if (!checkbox.checked) input.value = '';
+    input.disabled = !checkbox.checked;
   };
 
   if (checkbox && input) {

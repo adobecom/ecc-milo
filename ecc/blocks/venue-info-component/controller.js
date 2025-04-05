@@ -131,7 +131,7 @@ function getVenueDataInForm(component) {
   return venueData;
 }
 
-function initAutocomplete(el, props) {
+function initAutocomplete(el) {
   const venueName = el.querySelector('#venue-info-venue-name');
   // eslint-disable-next-line no-undef
   if (!google) return;
@@ -287,7 +287,7 @@ export default async function init(component, props) {
   const eventData = props.eventDataResp;
   const localeEventData = eventData.localizations?.[props.lang] || eventData;
 
-  await loadGoogleMapsAPI(() => initAutocomplete(component, props));
+  await loadGoogleMapsAPI(() => initAutocomplete(component));
 
   const { venue, showVenuePostEvent, showVenueAdditionalInfoPostEvent } = localeEventData;
 
@@ -466,7 +466,12 @@ export async function onTargetUpdate(component, props) {
   if (resp) {
     const updatedEventData = await getEvent(props.eventDataResp.eventId);
 
-    props.eventDataResp = { ...props.eventDataResp, ...updatedEventData };
+    if (!updatedEventData.error && updatedEventData) {
+      props.eventDataResp = updatedEventData;
+    } else {
+      component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: updatedEventData.error } }));
+    }
+
     props.payload = {
       ...props.payload,
       showVenuePostEvent: venueData.showVenuePostEvent,

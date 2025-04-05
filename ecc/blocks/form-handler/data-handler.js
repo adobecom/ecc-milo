@@ -4,6 +4,15 @@ import { EVENT_DATA_FILTER, isValidAttribute, splitLocalizableFields } from '../
 
 const responseCache = { localizations: {} };
 const payloadCache = { localizations: {} };
+let removeFromPayload = [];
+
+export function setRemoveCache(data) {
+  removeFromPayload.push(...data);
+}
+
+export function clearRemoveCache() {
+  removeFromPayload = [];
+}
 
 export function submitFilter(obj) {
   const output = {};
@@ -17,7 +26,7 @@ export function submitFilter(obj) {
   return output;
 }
 
-export function setPropsPayload(props, newData) {
+export function setPropsPayload(props, newData, removeData = []) {
   const { locale } = props;
   const existingPayload = props.payload;
 
@@ -61,8 +70,7 @@ export function setPropsPayload(props, newData) {
     }
   });
 
-  // Update the payload
-  props.payload = {
+  const payload = {
     ...existingPayload,
     ...nonLocalizableFields,
     localizations: {
@@ -73,6 +81,10 @@ export function setPropsPayload(props, newData) {
       },
     },
   };
+
+  // Update the payload
+  props.payload = payload;
+  props.removeFromPayload = removeData;
 }
 
 export function setPayloadCache(payload, locale = 'en-US') {
@@ -166,8 +178,6 @@ export function getLocalizedPayloadData(props) {
 export default function getJoinedData(locale = 'en-US') {
   const filteredResponse = getFilteredCachedResponse(locale);
   const filteredPayload = getFilteredCachedPayload(locale);
-  const localeResponse = getLocalizedResponseData(locale);
-  const localePayload = getLocalizedPayloadData(locale);
 
   // Combine global and localized data
   const finalPayload = {
@@ -176,17 +186,17 @@ export default function getJoinedData(locale = 'en-US') {
     modificationTime: filteredResponse.modificationTime,
   };
 
-  Object.keys(filteredResponse).forEach((key) => {
-    if (!isValidAttribute(filteredPayload[key])) {
-      delete finalPayload[key];
+  removeFromPayload.forEach((item) => {
+    if (item.path) {
+      const path = item.path.split('.');
+      const target = path.reduce((acc, subKey) => acc[subKey], finalPayload);
+      delete target[item.key];
+    } else {
+      delete finalPayload[item.key];
     }
   });
 
-  Object.keys(localeResponse).forEach((key) => {
-    if (!isValidAttribute(localePayload[key])) {
-      delete finalPayload.localizations[locale][key];
-    }
-  });
+  clearRemoveCache();
 
   return finalPayload;
 }

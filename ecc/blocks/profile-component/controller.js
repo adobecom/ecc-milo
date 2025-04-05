@@ -93,7 +93,11 @@ export async function onSubmit(component, props) {
     }
 
     const updatedEventData = await getEvent(eventId);
-    props.eventDataResp = { ...props.eventDataResp, ...updatedEventData };
+    if (!updatedEventData.error && updatedEventData) {
+      props.eventDataResp = updatedEventData;
+    } else {
+      component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: updatedEventData.error } }));
+    }
   }
 }
 
@@ -113,7 +117,7 @@ export async function onRespUpdate(_component, _props) {
   // Do nothing
 }
 
-async function prefillProfiles(props) {
+async function prefillProfiles(component, props) {
   const d = props.eventDataResp;
 
   if (d?.eventId && d.seriesId) {
@@ -126,7 +130,11 @@ async function prefillProfiles(props) {
         d.speakers[idx] = { ...d.speakers[idx], type: d.speakers[idx].speakerType, ...speakers[idx] };
       }
 
-      props.eventDataResp = { ...props.eventDataResp, ...d };
+      if (!d.error && d) {
+        props.eventDataResp = d;
+      } else {
+        component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: d.error } }));
+      }
     } catch (e) {
       window.lana?.log(`Error fetching speaker data:\n${JSON.stringify(e, null, 2)}`);
     }
@@ -134,7 +142,7 @@ async function prefillProfiles(props) {
 }
 
 export default async function init(component, props) {
-  await prefillProfiles(props);
+  await prefillProfiles(component, props);
   const eventData = props.eventDataResp;
   const { speakers } = eventData;
   const profileContainer = component.querySelector('profile-container');
