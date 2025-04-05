@@ -466,7 +466,12 @@ export async function onTargetUpdate(component, props) {
   if (resp) {
     const updatedEventData = await getEvent(props.eventDataResp.eventId);
 
-    props.eventDataResp = { ...props.eventDataResp, ...updatedEventData };
+    if (!updatedEventData.error && updatedEventData) {
+      props.eventDataResp = updatedEventData;
+    } else {
+      component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: updatedEventData.error } }));
+    }
+
     props.payload = {
       ...props.payload,
       showVenuePostEvent: venueData.showVenuePostEvent,

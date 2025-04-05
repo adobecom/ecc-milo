@@ -82,7 +82,12 @@ export async function onSubmit(component, props) {
     }
 
     const updatedEventData = await getEvent(eventId);
-    props.eventDataResp = { ...props.eventDataResp, ...updatedEventData };
+
+    if (!updatedEventData.error && updatedEventData) {
+      props.eventDataResp = updatedEventData;
+    } else {
+      component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: updatedEventData.error } }));
+    }
   }
 
   props.payload = { ...props.payload, showSponsors };

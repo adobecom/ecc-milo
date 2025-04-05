@@ -34,10 +34,10 @@ import getJoinedData, {
   setPayloadCache,
   setResponseCache,
   getLocalizedResponseData,
+  setRemoveCache,
 } from './data-handler.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 import CustomSearch from '../../components/custom-search/custom-search.js';
-import { getEventPayload } from '../../scripts/data-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -263,8 +263,11 @@ async function loadEventData(props) {
 
       props.el.classList.add('disabled');
       const eventData = await getEvent(eventId);
-      props.eventDataResp = { ...props.eventDataResp, ...eventData };
-      props.payload = getEventPayload(eventData);
+      if (!eventData.error && eventData) {
+        props.eventDataResp = eventData;
+      } else {
+        props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: eventData.error } }));
+      }
       props.el.classList.remove('disabled');
     } else {
       buildNoAccessScreen(props.el);
@@ -471,7 +474,11 @@ async function saveEvent(props, toPublish = false) {
   const localeData = getLocalizedResponseData(props);
   if (props.currentStep === 0 && !localeData.eventId) {
     resp = await createEvent(getJoinedData(props.locale), props.locale);
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    if (!resp.error && resp) {
+      props.eventDataResp = resp;
+    } else {
+      props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+    }
     updateDashboardLink(props);
     await onEventSave();
   } else if (props.currentStep <= props.maxStep && !toPublish) {
@@ -480,7 +487,11 @@ async function saveEvent(props, toPublish = false) {
       payload.eventId,
       payload,
     );
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    if (!resp.error && resp) {
+      props.eventDataResp = resp;
+    } else {
+      props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+    }
     await onEventSave();
   } else if (toPublish) {
     const payload = getJoinedData(props.locale);
@@ -488,7 +499,11 @@ async function saveEvent(props, toPublish = false) {
       payload.eventId,
       payload,
     );
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    if (!resp.error && resp) {
+      props.eventDataResp = resp;
+    } else {
+      props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+    }
     if (resp?.eventId) await handleEventUpdate(props);
   }
 
@@ -795,7 +810,11 @@ function initFormCtas(props) {
             getJoinedData(props.locale),
           );
 
-          props.eventDataResp = { ...props.eventDataResp, ...resp };
+          if (!resp.error && resp) {
+            props.eventDataResp = resp;
+          } else {
+            props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+          }
 
           if (resp?.eventId) await handleEventUpdate(props);
 
@@ -1043,6 +1062,7 @@ async function buildECCForm(el) {
     },
     eventDataResp: {},
     locale: 'en-US',
+    removeFromPayload: {},
   };
 
   const dataHandler = {
@@ -1082,6 +1102,7 @@ async function buildECCForm(el) {
           updateComponentsOnRespChange(target);
           updateCtas(target);
           toggleSections(target);
+          props.removeFromPayload = [];
           if (value.error) {
             props.el.classList.add('show-error');
           } else {
@@ -1092,6 +1113,11 @@ async function buildECCForm(el) {
 
         case 'locale': {
           updateComponentsWithLocale(target);
+          break;
+        }
+
+        case 'removeFromPayload': {
+          setRemoveCache(value);
           break;
         }
 
