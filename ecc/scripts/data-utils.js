@@ -73,7 +73,7 @@ export const SPEAKER_DATA_FILTER = {
   socialLinks: { type: 'array', localizable: false, submittable: true },
   localizations: { type: 'object', localizable: false, submittable: true },
   creationTime: { type: 'string', localizable: false, submittable: false },
-  modificationTime: { type: 'string', localizable: false, submittable: false },
+  modificationTime: { type: 'string', localizable: false, submittable: true },
 };
 
 /**
@@ -90,7 +90,7 @@ export const SPONSOR_DATA_FILTER = {
   link: { type: 'string', localizable: false, submittable: true },
   localizations: { type: 'object', localizable: false, submittable: true },
   creationTime: { type: 'string', localizable: false, submittable: false },
-  modificationTime: { type: 'string', localizable: false, submittable: false },
+  modificationTime: { type: 'string', localizable: false, submittable: true },
 };
 
 /**
