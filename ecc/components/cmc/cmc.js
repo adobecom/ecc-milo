@@ -264,7 +264,7 @@ export default class CloudManagementConsole extends LitElement {
           </div>
                     <div class="menu-breadcrumbs">
             ${this.currentPath.split('/').map((path, i, arr) => {
-            const tag = deepGetTagByPath(arr, i);
+            const tag = deepGetTagByPath(arr, i, this.tags);
 
             if (tag) {
               return html`
