@@ -68,14 +68,10 @@ export default function init(el) {
     if (ri === 1) {
       r.classList.add('series-fields-wrapper');
 
-      cols.forEach((c, ci) => {
-        if (ci === 0) decorateCloudTagSelect(c);
+      cols.forEach(async (c, ci) => {
+        if (ci === 0) await decorateCloudTagSelect(c);
         if (ci === 1) decorateSeriesSelect(c);
-        // if (ci === 2) decorateFormatSelect(c);
       });
-
-      // FIXME: remove after authored
-      // if (!el.querySelector('.format-picker-wrapper')) decorateFormatSelect(r);
     }
 
     if (ri === 2) {
