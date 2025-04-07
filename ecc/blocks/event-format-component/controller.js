@@ -4,6 +4,7 @@ import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { changeInputValue } from '../../scripts/utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
+import { getAttribute } from '../../scripts/data-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -179,17 +180,19 @@ async function initDupCheck(props, component) {
 
 export default async function init(component, props) {
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localizations?.[props.locale] || eventData;
-  component.dataset.cloudType = props.payload.cloudType || localeEventData.cloudType;
+  const [
+    cloudType,
+    seriesId,
+  ] = [
+    getAttribute(eventData, 'cloudType', props.locale),
+    getAttribute(eventData, 'seriesId', props.locale),
+  ];
+
+  component.dataset.cloudType = cloudType;
   initCloudTypeSelect(props, component);
   prepopulateTimeZone(component);
   await initDupCheck(props, component);
   initStepLock(component);
-
-  const {
-    cloudType,
-    seriesId,
-  } = localeEventData;
 
   if (cloudType && seriesId) {
     changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType);
