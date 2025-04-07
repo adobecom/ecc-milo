@@ -433,11 +433,17 @@ async function buildEventInfo(props) {
   getEventImages(eventObj.eventId).then(({ images }) => {
     if (!images) return;
 
+    console.log('images', images);
+
     const heroImgObj = images?.find((p) => p.imageKind === 'event-hero-image');
+    const thumbnailImgObj = images?.find((p) => p.imageKind === 'event-thumbnail-image');
+    const firstImageObj = images?.[0];
 
     const imgSrc = (heroImgObj?.sharepointUrl
       && `${getEventPageHost()}${heroImgObj?.sharepointUrl}`)
+    || thumbnailImgObj?.imageUrl
     || heroImgObj?.imageUrl
+    || firstImageObj?.imageUrl
     || '';
 
     const eventImage = createTag(
