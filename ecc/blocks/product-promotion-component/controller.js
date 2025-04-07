@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { getCaasTags } from '../../scripts/caas.js';
+import { getAttribute } from '../../scripts/data-utils.js';
 import { handlize } from '../../scripts/utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 
@@ -115,13 +116,20 @@ export async function onRespUpdate(_component, _props) {
 
 export default async function init(component, props) {
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localizations?.[props.lang] || eventData;
-  const { cloudType } = props.payload || localeEventData;
+
+  const [
+    cloudType,
+    relatedProducts,
+  ] = [
+    getAttribute(eventData, 'cloudType', props.locale),
+    getAttribute(eventData, 'relatedProducts', props.locale),
+  ];
+
   if (cloudType) component.dataset.cloudType = cloudType;
   const productGroup = component.querySelector('product-selector-group');
 
-  if (localeEventData.relatedProducts?.length) {
-    const selectedProducts = localeEventData.relatedProducts.map((p) => ({
+  if (relatedProducts?.length) {
+    const selectedProducts = relatedProducts.map((p) => ({
       name: handlize(p.name),
       title: p.name,
       showProductBlade: !!p.showProductBlade,

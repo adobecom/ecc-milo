@@ -3,6 +3,7 @@ import buildCarousel from '../../scripts/features/carousel.js';
 import initPreviewFrame, { resetPreviewFrame } from './utils.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
+import { getAttribute } from '../../scripts/data-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -160,7 +161,6 @@ function initPicker(component) {
 export default async function init(component, props) {
   const picker = component.querySelector('.picker');
   const data = props.response;
-  const localeData = data?.localizations?.[props.lang] || data;
 
   if (!picker) return;
 
@@ -169,7 +169,7 @@ export default async function init(component, props) {
   initPicker(component);
 
   if (data) {
-    const { templateId } = localeData;
+    const templateId = getAttribute(data, 'templateId', props.locale);
 
     if (templateId) {
       const selectedRadio = component.querySelector(`input[type='radio'][value="${templateId}"]`);

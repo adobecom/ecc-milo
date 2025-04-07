@@ -7,7 +7,7 @@ import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler/form-handler.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
-import { getVenuePayload } from '../../scripts/data-utils.js';
+import { getAttribute, getVenuePayload } from '../../scripts/data-utils.js';
 
 const imageType = 'venue-additional-image';
 let imageFile = null;
@@ -285,11 +285,18 @@ export default async function init(component, props) {
   // TODO: Import createTag at top level once Safari supports top-level await
   const { createTag } = await import(`${LIBS}/utils/utils.js`);
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localizations?.[props.lang] || eventData;
 
   await loadGoogleMapsAPI(() => initAutocomplete(component));
 
-  const { venue, showVenuePostEvent, showVenueAdditionalInfoPostEvent } = localeEventData;
+  const [
+    venue,
+    showVenuePostEvent,
+    showVenueAdditionalInfoPostEvent,
+  ] = [
+    getAttribute(eventData, 'venue', props.locale),
+    getAttribute(eventData, 'showVenuePostEvent', props.locale),
+    getAttribute(eventData, 'showVenueAdditionalInfoPostEvent', props.locale),
+  ];
 
   const venueNameInput = component.querySelector('#venue-info-venue-name');
   const venueRTE = component.querySelector('#venue-additional-info-rte');
@@ -434,7 +441,7 @@ export async function onTargetUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const venueDataInForm = getVenueDataInForm(component);
-  const venueData = getVenuePayload(venueDataInForm, props.lang);
+  const venueData = getVenuePayload(venueDataInForm, props.locale);
   if (!venueData.placeId) {
     component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please select a valid venue.' } }, bubbles: true, composed: true }));
     return;
@@ -442,21 +449,27 @@ export async function onTargetUpdate(component, props) {
 
   const oldVenueData = props.eventDataResp.venue;
   let resp;
+
   if (!oldVenueData) {
     resp = await createVenue(props.eventDataResp.eventId, venueData);
-  } else if (oldVenueData.placeId !== venueData.placeId
-    || oldVenueData.additionalInformation !== venueData.additionalInformation) {
-    const { creationTime, modificationTime } = oldVenueData;
-    resp = await replaceVenue(
-      props.eventDataResp.eventId,
-      oldVenueData.venueId,
-      {
-        ...venueData,
-        venueId: oldVenueData.venueId,
-        creationTime,
-        modificationTime,
-      },
-    );
+  } else {
+    const { placeId } = venueData;
+    const additionalInformation = getAttribute(venueData, 'additionalInformation', props.locale);
+    const { placeId: oldPlaceId, venueId, creationTime, modificationTime } = oldVenueData;
+    const oldAdditionalInformation = getAttribute(oldVenueData, 'additionalInformation', props.locale);
+
+    if (placeId !== oldPlaceId || additionalInformation !== oldAdditionalInformation) {
+      resp = await replaceVenue(
+        props.eventDataResp.eventId,
+        venueId,
+        {
+          ...venueData,
+          venueId,
+          creationTime,
+          modificationTime,
+        },
+      );
+    }
 
     if (resp.error) {
       buildErrorMessage(props, resp);
