@@ -1,9 +1,13 @@
 /* eslint-disable no-unused-vars */
-import { createVenue, deleteImage, getEventImages, replaceVenue, uploadImage } from '../../scripts/esp-controller.js';
+import {
+  createVenue, deleteImage, getEvent, getEventImages, replaceVenue, uploadImage,
+} from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
 import { buildErrorMessage } from '../form-handler/form-handler.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
+import { getVenuePayload } from '../../scripts/data-utils.js';
 
 const imageType = 'venue-additional-image';
 let imageFile = null;
@@ -17,7 +21,7 @@ function togglePrefillableFieldsHiddenState(component) {
 }
 
 async function loadGoogleMapsAPI(callback) {
-  const ALLOWED_ENVS = new Set(['dev', 'stage', 'prod']);
+  const ALLOWED_ENVS = new Set(['dev', 'dev02', 'stage', 'stage02', 'prod']);
 
   const currentEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
 
@@ -32,7 +36,7 @@ async function loadGoogleMapsAPI(callback) {
   script.defer = true;
   window.onGoogleMapsApiLoaded = callback;
   script.onerror = () => {
-    window.lana?.log('Failed to load the Google Maps script!');
+    window.lana?.log('Failed to load the Google Maps script');
   };
   document.head.appendChild(script);
 }
@@ -127,7 +131,7 @@ function getVenueDataInForm(component) {
   return venueData;
 }
 
-function initAutocomplete(el, props) {
+function initAutocomplete(el) {
   const venueName = el.querySelector('#venue-info-venue-name');
   // eslint-disable-next-line no-undef
   if (!google) return;
@@ -264,11 +268,7 @@ export async function onSubmit(component, props) {
   const showVenuePostEvent = component.querySelector('#checkbox-venue-info-visible')?.checked;
   const showVenueAdditionalInfoPostEvent = component.querySelector('#checkbox-venue-additional-info-visible')?.checked;
 
-  props.payload = {
-    ...props.payload,
-    showVenuePostEvent,
-    showVenueAdditionalInfoPostEvent,
-  };
+  setPropsPayload(props, { showVenuePostEvent, showVenueAdditionalInfoPostEvent });
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -285,10 +285,11 @@ export default async function init(component, props) {
   // TODO: Import createTag at top level once Safari supports top-level await
   const { createTag } = await import(`${LIBS}/utils/utils.js`);
   const eventData = props.eventDataResp;
+  const localeEventData = eventData.localizations?.[props.lang] || eventData;
 
-  await loadGoogleMapsAPI(() => initAutocomplete(component, props));
+  await loadGoogleMapsAPI(() => initAutocomplete(component));
 
-  const { venue, showVenuePostEvent, showVenueAdditionalInfoPostEvent } = eventData;
+  const { venue, showVenuePostEvent, showVenueAdditionalInfoPostEvent } = localeEventData;
 
   const venueNameInput = component.querySelector('#venue-info-venue-name');
   const venueRTE = component.querySelector('#venue-additional-info-rte');
@@ -383,7 +384,7 @@ export default async function init(component, props) {
             resetImageState(dz);
           }
         } catch (error) {
-          window.lana?.log('Failed to perform image DELETE operation. Error:', error);
+          window.lana?.log(`Failed to perform image DELETE operation:\n${JSON.stringify(error, null, 2)}`);
           dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
         } finally {
           underlay.open = false;
@@ -432,8 +433,8 @@ export default async function init(component, props) {
 export async function onTargetUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const venueData = getVenueDataInForm(component);
-
+  const venueDataInForm = getVenueDataInForm(component);
+  const venueData = getVenuePayload(venueDataInForm, props.lang);
   if (!venueData.placeId) {
     component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please select a valid venue.' } }, bubbles: true, composed: true }));
     return;
@@ -451,6 +452,7 @@ export async function onTargetUpdate(component, props) {
       oldVenueData.venueId,
       {
         ...venueData,
+        venueId: oldVenueData.venueId,
         creationTime,
         modificationTime,
       },
@@ -462,7 +464,14 @@ export async function onTargetUpdate(component, props) {
   }
 
   if (resp) {
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    const updatedEventData = await getEvent(props.eventDataResp.eventId);
+
+    if (!updatedEventData.error && updatedEventData) {
+      props.eventDataResp = updatedEventData;
+    } else {
+      component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: updatedEventData.error } }));
+    }
+
     props.payload = {
       ...props.payload,
       showVenuePostEvent: venueData.showVenuePostEvent,

@@ -113,8 +113,7 @@ export function onSubmit(component, props) {
 
   const { payload } = props;
   payload.topics = topics;
-  const existingTags = payload.tags ? payload.tags.split(',') : [];
-  const tagsToSubmit = [...new Set([...existingTags, ...tags.map((tag) => tag.caasId)])].join(',');
+  const tagsToSubmit = [...new Set(tags.map((tag) => tag.caasId))].join(',');
   if (tagsToSubmit) payload.tags = tagsToSubmit;
   props.payload = payload;
 }
@@ -138,15 +137,8 @@ export async function onRespUpdate(_component, _props) {
 }
 
 export default async function init(component, props) {
-  component.dataset.cloudType = props.payload.cloudType;
-  const eventData = props.eventDataResp;
-
-  if (props.payload.cloudType) {
-    await buildTopicsCheckboxes(component, props.payload.cloudType);
-    const prefilledTopics = prefillTopics(component, eventData);
-
-    if (prefilledTopics.length) component.classList.add('prefilled');
-  }
+  // Do nothing
+  // Let payload update handle the cloud type
 }
 
 export function onTargetUpdate(component, props) {
