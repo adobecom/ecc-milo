@@ -1,3 +1,4 @@
+import { getAttribute } from '../../scripts/data-utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 
 /* eslint-disable no-unused-vars */
@@ -27,16 +28,21 @@ export async function onRespUpdate(_component, _props) {
 
 export default function init(component, props) {
   const data = props.response;
-  const localeData = data?.localizations?.[props.locale] || data;
 
   if (data) {
-    const susiContextId = component.querySelector('#info-field-series-susi');
-    const relatedDomain = component.querySelector('#info-field-series-related-domain');
-    const externalThemeId = component.querySelector('#info-field-series-ext-id');
+    const [
+      susiContextId,
+      relatedDomain,
+      externalThemeId,
+    ] = [
+      getAttribute(data, 'susiContextId', props.locale),
+      getAttribute(data, 'relatedDomain', props.locale),
+      getAttribute(data, 'externalThemeId', props.locale),
+    ];
 
-    susiContextId.value = localeData.susiContextId || '';
-    relatedDomain.value = localeData.relatedDomain || '';
-    externalThemeId.value = localeData.externalThemeId || '';
+    susiContextId.value = susiContextId || '';
+    relatedDomain.value = relatedDomain || '';
+    externalThemeId.value = externalThemeId || '';
 
     component.classList.add('prefilled');
   }

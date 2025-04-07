@@ -14,7 +14,7 @@ import FilterMenu from '../../components/filter-menu/filter-menu.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 import { getAttribute } from '../../scripts/data-utils.js';
 
-const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 const ATTENDEE_ATTR_MAP = [
   {
@@ -421,18 +421,6 @@ function calculatePercentage(part, total) {
   return `${percentage.toFixed(2)}%`;
 }
 
-const getLanguage = (ietfLocale) => {
-  if (!ietfLocale.length) return 'en-US';
-
-  const nonStandardLocaleMap = { 'no-NO': 'nb' };
-
-  if (nonStandardLocaleMap[ietfLocale]) {
-    return nonStandardLocaleMap[ietfLocale];
-  }
-
-  return ietfLocale.split('-')[0];
-};
-
 async function buildEventInfo(props) {
   const eventInfoContainer = props.el.querySelector('.dashboard-header-event-info');
   if (!eventInfoContainer) return;
@@ -442,50 +430,47 @@ async function buildEventInfo(props) {
 
   if (!eventObj) return;
 
-  const currentLang = getConfig().locale?.ietf ? getLanguage(getConfig().locale.ietf) : 'en-US';
-  const eventInfo = eventObj.localizations?.[currentLang] || eventObj;
-  const { photos } = eventInfo;
+  getEventImages(eventObj.eventId).then(({ images }) => {
+    if (!images) return;
 
-  if (!photos) {
-    getEventImages(eventInfo.eventId).then(({ images }) => {
-      if (!images) return;
+    console.log('images', images);
 
-      const heroImgObj = images?.find((p) => p.imageKind === 'event-hero-image');
-
-      const imgSrc = (heroImgObj?.sharepointUrl
-        && `${getEventPageHost()}${heroImgObj?.sharepointUrl}`)
-      || heroImgObj?.imageUrl
-      || '';
-
-      const eventImage = createTag(
-        'div',
-        { class: 'event-image-container' },
-        createTag('img', { class: 'event-image', src: imgSrc }),
-      );
-
-      eventInfoContainer.prepend(eventImage);
-    });
-  } else {
-    const heroImgObj = photos?.find((p) => p.imageKind === 'event-hero-image');
+    const heroImgObj = images?.find((p) => p.imageKind === 'event-hero-image');
+    const thumbnailImgObj = images?.find((p) => p.imageKind === 'event-thumbnail-image');
+    const firstImageObj = images?.[0];
 
     const imgSrc = (heroImgObj?.sharepointUrl
       && `${getEventPageHost()}${heroImgObj?.sharepointUrl}`)
+    || thumbnailImgObj?.imageUrl
     || heroImgObj?.imageUrl
+    || firstImageObj?.imageUrl
     || '';
 
-    createTag(
+    const eventImage = createTag(
       'div',
       { class: 'event-image-container' },
       createTag('img', { class: 'event-image', src: imgSrc }),
     );
-  }
 
+    eventInfoContainer.prepend(eventImage);
+  });
+
+  const [
+    defaultLocale,
+    eventType,
+    attendeeCount,
+    attendeeLimit,
+  ] = [
+    getAttribute(eventObj, 'defaultLocale', props.locale),
+    getAttribute(eventObj, 'eventType', props.locale),
+    getAttribute(eventObj, 'attendeeCount', props.locale),
+    getAttribute(eventObj, 'attendeeLimit', props.locale),
+  ];
   const infoContainer = createTag('div', { class: 'event-info-container' }, '', { parent: eventInfoContainer });
   const infoRow = createTag('div', { class: 'event-info-row' }, '', { parent: infoContainer });
   const statsRow = createTag('div', { class: 'event-stats-row' }, '', { parent: infoContainer });
 
-  const defaultLocale = eventInfo.defaultLocale || Object.keys(eventInfo.localizations)[0] || 'en-US';
-  const eventTitle = getAttribute(eventInfo, 'title', defaultLocale);
+  const eventTitle = getAttribute(eventObj, 'title', defaultLocale);
 
   [
     {
@@ -494,11 +479,11 @@ async function buildEventInfo(props) {
     },
     {
       label: 'WHEN:',
-      value: new Date(eventInfo.localStartTimeMillis).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      value: new Date(eventObj.localStartTimeMillis).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
     },
     {
       label: 'TYPE:',
-      value: eventInfo.eventType,
+      value: eventType,
     },
   ].forEach(({ label, value }) => {
     const infoColWrapper = createTag('div', { class: 'event-stats-col-wrapper' }, '', { parent: infoRow });
@@ -509,8 +494,8 @@ async function buildEventInfo(props) {
   [
     {
       label: 'RSVPs',
-      value: eventInfo.attendeeCount || '0',
-      subText: calculatePercentage(+eventInfo.attendeeCount, +eventInfo.attendeeLimit),
+      value: attendeeCount || '0',
+      subText: calculatePercentage(+attendeeCount, +attendeeLimit),
     },
   ].forEach(({ label, value, subText }) => {
     const statsColWrapper = createTag('div', { class: 'event-stats-col-wrapper' }, '', { parent: statsRow });
