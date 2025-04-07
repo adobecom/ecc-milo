@@ -28,7 +28,7 @@ async function decorateCloudTagSelect(column) {
   select.pending = false;
 }
 
-async function decorateSeriesSelect(column) {
+function decorateSeriesSelect(column) {
   const seriesSelectWrapper = createTag('div', { class: 'series-picker-wrapper' });
   const select = createTag('sp-picker', { id: 'series-select-input', class: 'select-input', pending: true, size: 'm', label: column.textContent.trim() });
   seriesSelectWrapper.append(select);
@@ -68,7 +68,7 @@ export default function init(el) {
     if (ri === 1) {
       r.classList.add('series-fields-wrapper');
 
-      cols.forEach(async (c, ci) => {
+      cols.forEach((c, ci) => {
         if (ci === 0) decorateCloudTagSelect(c);
         if (ci === 1) decorateSeriesSelect(c);
         // if (ci === 2) decorateFormatSelect(c);
