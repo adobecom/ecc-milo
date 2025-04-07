@@ -25,7 +25,7 @@ function buildCheckbox(el) {
 async function buildFields(el) {
   const imgLabelRow = el.querySelector(':scope > div:last-of-type');
 
-  const partnerFieldset = createTag('partner-selector-group');
+  const partnerFieldset = createTag('partner-selector-group', { 'data-locale-sensitive': true });
 
   partnerFieldset.fieldlabels = {
     image: imgLabelRow.querySelector(':scope > div:first-of-type'),

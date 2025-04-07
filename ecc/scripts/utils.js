@@ -5,13 +5,12 @@ const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 let secretCache = [];
 
 export function getEventServiceEnv() {
-  const validEnvs = ['dev', 'stage', 'prod'];
   const { host, search } = window.location;
   const SLD = host.includes('.aem.') ? 'aem' : 'hlx';
   const usp = new URLSearchParams(search);
-  const eccEnv = usp.get('eccEnv');
+  const localTest = usp.get('localTest');
 
-  if (validEnvs.includes(eccEnv)) return eccEnv;
+  if (window.location.hostname.includes('localhost') && localTest) return 'local';
 
   if ((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`))) {
     if (host.startsWith('dev02--') || host.startsWith('main02--')) return 'dev02';
@@ -345,7 +344,7 @@ export function getServiceName(link) {
     const { hostname } = url;
     return hostname.replace('.com', '').replace('www.', '');
   } catch (error) {
-    window.lana?.log('Error trying to get service name:', error);
+    window.lana?.log(`Error trying to get service name:\n${JSON.stringify(error, null, 2)}`);
     return '';
   }
 }
@@ -359,7 +358,7 @@ export async function miloReplaceKey(key) {
 
     return await replaceKey(key, config);
   } catch (error) {
-    window.lana?.log('Error trying to replace placeholder:', error);
+    window.lana?.log(`Error trying to replace placeholder:\n${JSON.stringify(error, null, 2)}`);
     return 'RSVP';
   }
 }
