@@ -24,7 +24,7 @@ export async function onRespUpdate(_component, _props) {
 
 export default function init(component, props) {
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localizations?.[props.lang] || eventData;
+  const localeEventData = eventData.localizations?.[props.locale] || eventData;
   const appearChecks = component.querySelectorAll('input[type="checkbox"].check-appear');
   const requireChecks = component.querySelectorAll('input[type="checkbox"].check-require');
 

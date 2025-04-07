@@ -160,7 +160,7 @@ function initPicker(component) {
 export default async function init(component, props) {
   const picker = component.querySelector('.picker');
   const data = props.response;
-  const localeData = data?.localizations?.[props.lang] || data;
+  const localeData = data?.localizations?.[props.locale] || data;
 
   if (!picker) return;
 

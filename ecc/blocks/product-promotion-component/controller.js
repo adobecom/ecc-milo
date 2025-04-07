@@ -115,7 +115,7 @@ export async function onRespUpdate(_component, _props) {
 
 export default async function init(component, props) {
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localizations?.[props.lang] || eventData;
+  const localeEventData = eventData.localizations?.[props.locale] || eventData;
   const { cloudType } = props.payload || localeEventData;
   if (cloudType) component.dataset.cloudType = cloudType;
   const productGroup = component.querySelector('product-selector-group');
