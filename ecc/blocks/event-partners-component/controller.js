@@ -114,18 +114,20 @@ export async function onRespUpdate(_component, _props) {
 export default async function init(component, props) {
   const eventData = props.eventDataResp;
   const [
-    localeEventData,
+    seriesId,
+    sponsors,
     showSponsors,
   ] = [
-    getAttribute(eventData, 'localizations', props.locale),
+    getAttribute(eventData, 'seriesId', props.locale),
+    getAttribute(eventData, 'sponsors', props.locale),
     getAttribute(eventData, 'showSponsors', props.locale),
   ];
   const partnersGroup = component.querySelector('partner-selector-group');
 
-  if (localeEventData.sponsors) {
-    const partners = await Promise.all(localeEventData.sponsors.map(async (sponsor, index) => {
+  if (sponsors) {
+    const partners = await Promise.all(sponsors.map(async (sponsor, index) => {
       if (sponsor.sponsorType === 'Partner') {
-        const partnerData = await getSponsor(localeEventData.seriesId, sponsor.sponsorId);
+        const partnerData = await getSponsor(seriesId, sponsor.sponsorId);
 
         if (partnerData) {
           let photo;
@@ -133,7 +135,7 @@ export default async function init(component, props) {
           if (partnerData.image) {
             photo = { ...partnerData.image, url: partnerData.image.imageUrl };
           } else {
-            const resp = await getSponsorImages(localeEventData.seriesId, sponsorId);
+            const resp = await getSponsorImages(seriesId, sponsorId);
 
             if (resp?.images) {
               const sponsorImage = resp?.images.find((image) => image.imageKind === 'sponsor-image');
