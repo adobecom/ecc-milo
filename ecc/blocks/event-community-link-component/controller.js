@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { getAttribute } from '../../scripts/data-utils.js';
 import { changeInputValue } from '../../scripts/utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 
@@ -38,15 +39,20 @@ export async function onRespUpdate(_component, _props) {
 
 export default function init(component, props) {
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localizations?.[props.locale] || eventData;
-
-  component.dataset.cloudType = props.payload.cloudType || localeEventData.cloudType;
+  const [
+    communityTopicUrl,
+    cloudType,
+  ] = [
+    getAttribute(eventData, 'communityTopicUrl', props.locale),
+    getAttribute(eventData, 'cloudType', props.locale),
+  ];
+  component.dataset.cloudType = cloudType;
   const checkbox = component.querySelector('#checkbox-community');
   const input = component.querySelector('#community-url-details');
 
-  if (localeEventData.communityTopicUrl) {
-    changeInputValue(checkbox, 'checked', !!localeEventData.communityTopicUrl);
-    changeInputValue(input, 'value', localeEventData.communityTopicUrl || '');
+  if (communityTopicUrl) {
+    changeInputValue(checkbox, 'checked', !!communityTopicUrl);
+    changeInputValue(input, 'value', communityTopicUrl || '');
     component.classList.add('prefilled');
   }
 

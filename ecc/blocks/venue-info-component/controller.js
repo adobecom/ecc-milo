@@ -285,11 +285,18 @@ export default async function init(component, props) {
   // TODO: Import createTag at top level once Safari supports top-level await
   const { createTag } = await import(`${LIBS}/utils/utils.js`);
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localizations?.[props.locale] || eventData;
 
   await loadGoogleMapsAPI(() => initAutocomplete(component));
 
-  const { venue, showVenuePostEvent, showVenueAdditionalInfoPostEvent } = localeEventData;
+  const [
+    venue,
+    showVenuePostEvent,
+    showVenueAdditionalInfoPostEvent,
+  ] = [
+    getAttribute(eventData, 'venue', props.locale),
+    getAttribute(eventData, 'showVenuePostEvent', props.locale),
+    getAttribute(eventData, 'showVenueAdditionalInfoPostEvent', props.locale),
+  ];
 
   const venueNameInput = component.querySelector('#venue-info-venue-name');
   const venueRTE = component.querySelector('#venue-additional-info-rte');
@@ -400,6 +407,7 @@ export default async function init(component, props) {
   }
 
   if (venue) {
+    console.log('venue', venue);
     updateAllFields(venue, component);
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city: venue.city });
 

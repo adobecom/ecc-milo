@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax */
+import { getAttribute } from '../../scripts/data-utils.js';
 import {
   addSponsorToEvent,
   getEvent,
@@ -112,7 +113,13 @@ export async function onRespUpdate(_component, _props) {
 
 export default async function init(component, props) {
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localizations?.[props.locale] || eventData;
+  const [
+    localeEventData,
+    showSponsors,
+  ] = [
+    getAttribute(eventData, 'localizations', props.locale),
+    getAttribute(eventData, 'showSponsors', props.locale),
+  ];
   const partnersGroup = component.querySelector('partner-selector-group');
 
   if (localeEventData.sponsors) {
@@ -174,7 +181,7 @@ export default async function init(component, props) {
   }
 
   const partnerVisible = component.querySelector('#partners-visible');
-  partnerVisible.checked = localeEventData.showSponsors;
+  partnerVisible.checked = showSponsors;
 }
 
 export function onTargetUpdate(component, props) {
