@@ -407,7 +407,6 @@ export default async function init(component, props) {
   }
 
   if (venue) {
-    console.log('venue', venue);
     updateAllFields(venue, component);
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city: venue.city });
 

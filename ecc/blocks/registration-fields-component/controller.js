@@ -52,11 +52,11 @@ export default function init(component, props) {
   if (!rsvpFormFields) return;
 
   appearChecks.forEach((cb) => {
-    if (rsvpFormFields?.visible?.includes(cb.name)) cb.checked = true;
+    if (rsvpFormFields.visible?.includes(cb.name)) cb.checked = true;
   });
 
   requireChecks.forEach((cb) => {
-    if (rsvpFormFields?.required?.includes(cb.name)) cb.checked = true;
+    if (rsvpFormFields.required?.includes(cb.name)) cb.checked = true;
   });
 }
 
