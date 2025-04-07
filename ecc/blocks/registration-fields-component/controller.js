@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { getAttribute } from '../../scripts/data-utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 
 export function onSubmit(component, props) {
@@ -24,7 +25,7 @@ export async function onRespUpdate(_component, _props) {
 
 export default function init(component, props) {
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localizations?.[props.locale] || eventData;
+  const rsvpFormFields = getAttribute(eventData, 'rsvpFormFields', props.locale);
   const appearChecks = component.querySelectorAll('input[type="checkbox"].check-appear');
   const requireChecks = component.querySelectorAll('input[type="checkbox"].check-require');
 
@@ -48,14 +49,14 @@ export default function init(component, props) {
     });
   });
 
-  if (!localeEventData.rsvpFormFields) return;
+  if (!rsvpFormFields) return;
 
   appearChecks.forEach((cb) => {
-    if (localeEventData.rsvpFormFields?.visible?.includes(cb.name)) cb.checked = true;
+    if (rsvpFormFields?.visible?.includes(cb.name)) cb.checked = true;
   });
 
   requireChecks.forEach((cb) => {
-    if (localeEventData.rsvpFormFields?.required?.includes(cb.name)) cb.checked = true;
+    if (rsvpFormFields?.required?.includes(cb.name)) cb.checked = true;
   });
 }
 

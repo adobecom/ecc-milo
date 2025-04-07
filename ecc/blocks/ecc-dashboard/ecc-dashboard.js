@@ -453,9 +453,7 @@ function getEventDefaultLanguage(eventObj, locales) {
 }
 
 function buildStatusTag(event) {
-  const { localizations } = event;
-
-  const eventPublished = localizations?.published || event.published;
+  const eventPublished = event.published;
   const dot = eventPublished ? getIcon('dot-purple') : getIcon('dot-green');
   const text = eventPublished ? 'Published' : 'Draft';
 
