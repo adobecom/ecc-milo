@@ -179,7 +179,7 @@ async function initDupCheck(props, component) {
 
 export default async function init(component, props) {
   const eventData = props.eventDataResp;
-  const localeEventData = eventData.localizations?.[props.lang] || eventData;
+  const localeEventData = eventData.localizations?.[props.locale] || eventData;
   component.dataset.cloudType = props.payload.cloudType || localeEventData.cloudType;
   initCloudTypeSelect(props, component);
   prepopulateTimeZone(component);
