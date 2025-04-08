@@ -458,7 +458,9 @@ async function saveEvent(props, toPublish = false) {
   try {
     await gatherValues(props);
   } catch (e) {
-    return { error: { message: e.message } };
+    const errorObj = { error: { message: e.message } };
+    buildErrorMessage(props, errorObj);
+    return errorObj;
   }
 
   let resp;

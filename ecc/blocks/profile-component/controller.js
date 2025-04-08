@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { getAttribute } from '../../scripts/data-utils.js';
 import {
   addSpeakerToEvent,
   getSpeakers,
@@ -12,22 +13,21 @@ export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const profileContainer = component.querySelector('profile-container');
+
   if (profileContainer) {
-    const { eventId } = props.eventDataResp;
+    const savedSpeakers = getAttribute(props.eventDataResp, 'speakers', props.locale);
+    const eventId = getAttribute(props.eventDataResp, 'eventId', props.locale);
     const speakers = profileContainer.getProfiles();
 
-    if (speakers.length === 0) {
-      if (props.eventDataResp.speakers) {
-        const savedSpeakers = props.eventDataResp.speakers;
-        await Promise.all(savedSpeakers.map(async (speaker) => {
-          const { speakerId } = speaker;
-          const resp = await removeSpeakerFromEvent(speakerId, eventId);
+    if (speakers.length === 0 && (savedSpeakers && savedSpeakers.length > 0)) {
+      await Promise.all(savedSpeakers.map(async (speaker) => {
+        const { speakerId } = speaker;
+        const resp = await removeSpeakerFromEvent(speakerId, eventId);
 
-          if (!resp.ok) {
-            window.lana?.log(`Failed to remove speaker from event:\n${JSON.stringify(resp, null, 2)}`);
-          }
-        }));
-      }
+        if (!resp.ok) {
+          window.lana?.log(`Failed to remove speaker from event:\n${JSON.stringify(resp, null, 2)}`);
+        }
+      }));
 
       return;
     }
@@ -39,8 +39,7 @@ export async function onSubmit(component, props) {
     // Process all speakers in parallel
     await Promise.all(speakers.map(async (speaker) => {
       const { speakerId, speakerType, ordinal } = speaker;
-
-      if (!props.eventDataResp.speakers) {
+      if (!savedSpeakers || savedSpeakers.length === 0) {
         const resp = await addSpeakerToEvent(speaker, eventId);
 
         if (resp.error) {
@@ -48,7 +47,7 @@ export async function onSubmit(component, props) {
           window.lana?.log(`Failed to add speaker to event:\n${JSON.stringify(resp, null, 2)}`);
         }
       } else {
-        const existingSpeaker = props.eventDataResp.speakers.find((profile) => {
+        const existingSpeaker = savedSpeakers.find((profile) => {
           const idMatch = profile.speakerId === speakerId;
           const typeMatch = profile.speakerType === speakerType;
           const ordinalMatch = profile.ordinal === ordinal;
@@ -58,8 +57,7 @@ export async function onSubmit(component, props) {
         if (existingSpeaker) {
           // do nothing
         } else {
-          // eslint-disable-next-line max-len
-          const updateSpeaker = props.eventDataResp.speakers.find((profile) => profile.speakerId === speakerId);
+          const updateSpeaker = savedSpeakers.find((profile) => profile.speakerId === speakerId);
           if (updateSpeaker) {
             const resp = await updateSpeakerInEvent(speaker, speakerId, eventId);
 
@@ -76,8 +74,7 @@ export async function onSubmit(component, props) {
       }
     }));
 
-    if (props.eventDataResp.speakers) {
-      const savedSpeakers = props.eventDataResp.speakers;
+    if (savedSpeakers && savedSpeakers.length > 0) {
       await Promise.all(savedSpeakers.map(async (speaker) => {
         const { speakerId } = speaker;
         const stillNeeded = speakers.find((profile) => profile.speakerId === speakerId);
@@ -109,6 +106,11 @@ export async function onPayloadUpdate(component, props) {
       const { speakers } = await getSpeakers(props.payload.seriesId);
       container.searchdata = speakers ?? [];
     }
+
+    if (props.locale) {
+      container.locale = props.locale;
+    }
+
     container.requestUpdate();
   });
 }
@@ -144,7 +146,7 @@ async function prefillProfiles(component, props) {
 export default async function init(component, props) {
   await prefillProfiles(component, props);
   const eventData = props.eventDataResp;
-  const { speakers } = eventData;
+  const speakers = getAttribute(eventData, 'speakers', props.locale);
   const profileContainer = component.querySelector('profile-container');
   if (!speakers || !speakers.length || !profileContainer) return;
   profileContainer.profiles = [...speakers];
