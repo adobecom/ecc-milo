@@ -10,6 +10,16 @@ import ProductSelector from '../../components/product-selector/product-selector.
 import ProfileContainer from '../../components/profile-container/profile-container.js';
 import Profile from '../../components/profile/profile.js';
 import Repeater from '../../components/repeater/repeater.js';
+import RTETiptap from '../../components/rte-tiptap/rte-tiptap.js';
+
+import getJoinedData, {
+  setPayloadCache,
+  setResponseCache,
+  getLocalizedResponseData,
+  setRemoveCache,
+} from './data-handler.js';
+
+import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
 import { LIBS } from '../../scripts/scripts.js';
 
 import {
@@ -21,8 +31,7 @@ import {
   getEventServiceEnv,
   replaceAnchorWithButton,
 } from '../../scripts/utils.js';
-import getJoinedData, { getFilteredCachedResponse, setPayloadCache, setResponseCache } from './data-handler.js';
-import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
+
 import {
   createEvent,
   updateEvent,
@@ -47,6 +56,7 @@ function initCustomLitComponents() {
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
   customElements.define('custom-search', CustomSearch);
+  customElements.define('rte-tiptap', RTETiptap);
 }
 
 export const SPECTRUM_COMPONENTS = [
@@ -158,8 +168,10 @@ export function buildErrorMessage(props, resp) {
     } else if (errorMessage) {
       if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}') {
         const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'The event has been updated by a different session since your last save.', { parent: toastArea });
+
+        const localeData = getLocalizedResponseData(props);
         const url = new URL(window.location.href);
-        url.searchParams.set('eventId', getFilteredCachedResponse().eventId);
+        url.searchParams.set('eventId', localeData.eventId);
 
         createTag('sp-button', {
           slot: 'action',
@@ -301,7 +313,11 @@ async function loadEventData(props) {
 
       props.el.classList.add('disabled');
       const eventData = await getEvent(eventId);
-      props.eventDataResp = { ...props.eventDataResp, ...eventData };
+      if (!eventData.error && eventData) {
+        props.eventDataResp = eventData;
+      } else {
+        props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: eventData.error } }));
+      }
       props.el.classList.remove('disabled');
     } else {
       buildNoAccessScreen(props.el);
@@ -393,8 +409,6 @@ function showSaveSuccessMessage(props, detail = { message: 'Edits saved successf
 }
 
 function updateDashboardLink(props) {
-  // FIXME: presuming first link is dashboard link is not good.
-  if (!getFilteredCachedResponse().eventId) return;
   const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
   if (!dashboardLink) return;
@@ -403,7 +417,10 @@ function updateDashboardLink(props) {
 
   if (url.searchParams.has('eventId')) return;
 
-  url.searchParams.set('newEventId', getFilteredCachedResponse().eventId);
+  const localeData = getLocalizedResponseData(props);
+  if (!localeData.eventId) return;
+
+  url.searchParams.set('newEventId', localeData.eventId);
   dashboardLink.href = url.toString();
 }
 
@@ -424,24 +441,39 @@ async function saveEvent(props, toPublish = false) {
     }
   };
 
-  if (props.currentStep === 0 && !getFilteredCachedResponse().eventId) {
-    resp = await createEvent({ ...getJoinedData(), eventType: 'Online' });
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
+  const localeData = getLocalizedResponseData(props);
+  if (props.currentStep === 0 && !localeData.eventId) {
+    resp = await createEvent(getJoinedData(props.locale), props.locale);
+    if (!resp.error && resp) {
+      props.eventDataResp = resp;
+    } else {
+      props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+    }
     updateDashboardLink(props);
     await onEventSave();
   } else if (props.currentStep <= props.maxStep && !toPublish) {
+    const payload = getJoinedData(props.locale);
     resp = await updateEvent(
-      getFilteredCachedResponse().eventId,
-      getJoinedData(),
+      payload.eventId,
+      payload,
     );
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    if (!resp.error && resp) {
+      props.eventDataResp = resp;
+    } else {
+      props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+    }
     await onEventSave();
   } else if (toPublish) {
+    const payload = getJoinedData(props.locale);
     resp = await publishEvent(
-      getFilteredCachedResponse().eventId,
-      getJoinedData(),
+      payload.eventId,
+      payload,
     );
-    props.eventDataResp = { ...props.eventDataResp, ...resp };
+    if (!resp.error && resp) {
+      props.eventDataResp = resp;
+    } else {
+      props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+    }
     if (resp?.eventId) await handleEventUpdate(props);
   }
 
@@ -505,7 +537,7 @@ function buildPreviewLoadingDialog(props, targetHref, poll) {
   dialog.innerHTML = '';
 
   createTag('h1', { slot: 'heading' }, 'Generating your preview...', { parent: dialog });
-  createTag('p', {}, 'This usually takes less than a minute, but in rare cases it might take up to 10 minutes. Please wait, and the preview will open in a new tab when it’s ready.', { parent: dialog });
+  createTag('p', {}, 'This usually takes less than a minute, but in rare cases it might take up to 10 minutes. Please wait, and the preview will open in a new tab when it is ready.', { parent: dialog });
   createTag('p', {}, '<strong>Note: Please ensure pop-ups are allowed in your browser.</strong>', { parent: dialog });
 
   const style = createTag('style', {}, `
@@ -719,12 +751,24 @@ function initFormCtas(props) {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
 
+          const localeData = getLocalizedResponseData(props);
+
+          if (!localeData.eventId) {
+            buildErrorMessage(props, { error: { message: 'Event ID is not found' } });
+            toggleBtnsSubmittingState(false);
+            return;
+          }
+
           const resp = await previewEvent(
-            getFilteredCachedResponse().eventId,
-            getJoinedData(),
+            localeData.eventId,
+            getJoinedData(props.locale),
           );
 
-          props.eventDataResp = { ...props.eventDataResp, ...resp };
+          if (!resp.error && resp) {
+            props.eventDataResp = resp;
+          } else {
+            props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+          }
 
           if (resp?.eventId) await handleEventUpdate(props);
 
@@ -820,6 +864,14 @@ function initFormCtas(props) {
     }
 
     toggleBtnsSubmittingState(false);
+  });
+}
+
+function updateComponentsWithLocale(props) {
+  const localeSensitiveComponents = props.el.querySelectorAll('[data-locale-sensitive]');
+  localeSensitiveComponents.forEach((c) => {
+    c.setAttribute('locale', props.locale);
+    c.requestUpdate();
   });
 }
 
@@ -993,14 +1045,28 @@ function decorateForm(el) {
   });
 }
 
+export async function handleSubmit(props) {
+  const localeData = getLocalizedResponseData(props);
+  if (!localeData.eventId) return;
+
+  const url = new URL(window.location.href);
+  url.searchParams.set('newEventId', localeData.eventId);
+  window.location.href = url;
+}
+
 export async function buildECCForm(el) {
   const props = {
     el,
     currentStep: 0,
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
-    payload: {},
+    payload: {
+      eventType: 'InPerson',
+      localizations: {},
+    },
     eventDataResp: {},
+    locale: 'en-US',
+    removeFromPayload: {},
   };
 
   const dataHandler = {
@@ -1028,7 +1094,7 @@ export async function buildECCForm(el) {
         }
 
         case 'payload': {
-          setPayloadCache(value);
+          setPayloadCache(value, props.locale);
           updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);
           toggleSections(target);
@@ -1036,15 +1102,26 @@ export async function buildECCForm(el) {
         }
 
         case 'eventDataResp': {
-          setResponseCache(value);
+          setResponseCache(value, props.locale);
           updateComponentsOnRespChange(target);
           updateCtas(target);
           toggleSections(target);
+          props.removeFromPayload = [];
           if (value.error) {
             props.el.classList.add('show-error');
           } else {
             props.el.classList.remove('show-error');
           }
+          break;
+        }
+
+        case 'locale': {
+          updateComponentsWithLocale(target);
+          break;
+        }
+
+        case 'removeFromPayload': {
+          setRemoveCache(value);
           break;
         }
 
