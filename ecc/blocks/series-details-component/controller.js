@@ -1,3 +1,4 @@
+import { getAttribute } from '../../scripts/data-utils.js';
 import { getClouds } from '../../scripts/esp-controller.js';
 import { getUser, userHasAccessToBU } from '../../scripts/profile.js';
 import { LIBS } from '../../scripts/scripts.js';
@@ -47,14 +48,17 @@ export default async function init(component, props) {
   if (cloudTypeEl) cloudTypeEl.removeAttribute('pending');
 
   const data = props.response;
-  const localeData = data?.localizations?.[props.lang] || data;
 
   if (data) {
-    const {
+    const [
       cloudType,
       seriesName,
       seriesDescription,
-    } = localeData;
+    ] = [
+      getAttribute(data, 'cloudType', props.locale),
+      getAttribute(data, 'seriesName', props.locale),
+      getAttribute(data, 'seriesDescription', props.locale),
+    ];
 
     if (cloudType) {
       cloudTypeEl.value = cloudType;
