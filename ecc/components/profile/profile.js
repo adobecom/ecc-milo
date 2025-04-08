@@ -5,7 +5,7 @@ import { createSpeaker, deleteSpeakerImage, updateSpeaker, uploadImage } from '.
 import { getServiceName } from '../../scripts/utils.js';
 import { icons } from '../../icons/icons.svg.js';
 import { LINK_REGEX } from '../../scripts/constants.js';
-import { getProfileAttr, getSpeakerPayload } from '../../scripts/data-utils.js';
+import { getSpeakerPayload } from '../../scripts/data-utils.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -48,8 +48,8 @@ export default class Profile extends LitElement {
 
   addSocialLink(shallow = false) {
     const socialLink = { link: '' };
-    const profile = shallow ? getProfileAttr(this.profileCopy, 'socialLinks') : getProfileAttr(this.profile, 'socialLinks');
-    if (profile?.socialLinks) {
+    const profile = shallow ? this.profileCopy : this.profile;
+    if (profile.socialLinks) {
       profile.socialLinks.push(socialLink);
     } else {
       profile.socialLinks = [socialLink];
@@ -121,7 +121,7 @@ export default class Profile extends LitElement {
       delete sProfile.type;
       let respJson;
       const profilePayload = getSpeakerPayload(sProfile, this.locale);
-      if (getProfileAttr(profile, 'speakerId')) {
+      if (profile.speakerId) {
         respJson = await updateSpeaker(profilePayload, this.seriesId);
       } else {
         respJson = await createSpeaker(profilePayload, this.seriesId);
@@ -289,25 +289,25 @@ export default class Profile extends LitElement {
     };
 
     const firstNameData = {
-      value: shallow ? getProfileAttr(this.profileCopy, 'firstName') : getProfileAttr(this.profile, 'firstName'),
+      value: shallow ? this.profileCopy.firstName : this.profile.firstName,
       placeholder: fieldLabelsJSON.firstName,
       helperText: fieldLabelsJSON.firstNameSubText,
     };
 
     const lastNameData = {
-      value: shallow ? getProfileAttr(this.profileCopy, 'lastName') : getProfileAttr(this.profile, 'lastName'),
+      value: shallow ? this.profileCopy.lastName : this.profile.lastName,
       placeholder: fieldLabelsJSON.lastName,
       helperText: fieldLabelsJSON.lastNameSubText,
     };
 
     const bioData = {
-      value: shallow ? getProfileAttr(this.profileCopy, 'bio') : getProfileAttr(this.profile, 'bio') || '',
+      value: shallow ? this.profileCopy.bio : this.profile.bio || '',
       placeholder: fieldLabelsJSON.bio,
       helperText: fieldLabelsJSON.bioSubText,
     };
 
     const titleData = {
-      value: shallow ? getProfileAttr(this.profileCopy, 'title') : getProfileAttr(this.profile, 'title'),
+      value: shallow ? this.profileCopy.title : this.profile.title,
       placeholder: fieldLabelsJSON.title,
       helperText: fieldLabelsJSON.titleSubText,
     };
@@ -417,10 +417,7 @@ export default class Profile extends LitElement {
       ...(this.fieldlabels ?? {}),
     };
 
-    const firstName = getProfileAttr(this.profile, 'firstName');
-    const lastName = getProfileAttr(this.profile, 'lastName');
-    const title = getProfileAttr(this.profile, 'title');
-    const bio = getProfileAttr(this.profile, 'bio');
+    const { firstName, lastName, title, bio } = this.profile;
 
     return html`
     <div class="profile-view">

@@ -960,7 +960,8 @@ export async function getEvent(eventId) {
 
     if (speakersResp.ok) {
       const speakersData = await speakersResp.json();
-      data.speakers = speakersData.speakers;
+      const sortedSpeakers = speakersData.speakers.sort((a, b) => a.ordinal - b.ordinal);
+      data.speakers = sortedSpeakers;
     }
 
     if (sponsorsResp.ok) {
