@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import { SPEAKER_DATA_FILTER } from '../../scripts/data-utils.js';
+import { getProfileAttr } from '../../scripts/data-utils.js';
 import { getSpeakers } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { isEmptyObject } from '../../scripts/utils.js';
@@ -28,19 +28,6 @@ export default class ProfileContainer extends LitElement {
     this.searchdata = this.searchdata ?? [];
   }
 
-  getProfileAttr(data, key) {
-    if (SPEAKER_DATA_FILTER[key]?.localizable) {
-      const localizedData = data.localizations?.[this.locale];
-      if (localizedData?.[key]) {
-        return localizedData[key];
-      }
-
-      return data[key];
-    }
-
-    return data[key];
-  }
-
   addProfile() {
     const profile = { ...defaultProfile };
     this.profiles.push(profile);
@@ -59,7 +46,11 @@ export default class ProfileContainer extends LitElement {
   }
 
   isValidSpeaker(profile) {
-    return profile.firstName && profile.lastName && profile.title;
+    const firstName = getProfileAttr(profile, 'firstName');
+    const lastName = getProfileAttr(profile, 'lastName');
+    const title = getProfileAttr(profile, 'title');
+
+    return firstName && lastName && title;
   }
 
   getProfiles() {
@@ -117,19 +108,19 @@ export default class ProfileContainer extends LitElement {
       repeat(this.profiles, (profile, index) => {
         const profileJSON = JSON.stringify({
           ...profile,
-          firstName: this.getProfileAttr(profile, 'firstName'),
-          lastName: this.getProfileAttr(profile, 'lastName'),
-          title: this.getProfileAttr(profile, 'title'),
-          bio: this.getProfileAttr(profile, 'bio'),
-          socialLinks: this.getProfileAttr(profile, 'socialLinks'),
-          photo: this.getProfileAttr(profile, 'photo'),
-          speakerId: this.getProfileAttr(profile, 'speakerId'),
+          firstName: getProfileAttr(profile, 'firstName'),
+          lastName: getProfileAttr(profile, 'lastName'),
+          title: getProfileAttr(profile, 'title'),
+          bio: getProfileAttr(profile, 'bio'),
+          socialLinks: getProfileAttr(profile, 'socialLinks'),
+          photo: getProfileAttr(profile, 'photo'),
+          speakerId: getProfileAttr(profile, 'speakerId'),
         });
         const imgTag = imageTag.cloneNode(true);
 
         return html`
         <div class="profile-container">
-        <profile-ui .locale=${this.locale} seriesId=${this.seriesId} profile=${profileJSON} fieldlabels=${JSON.stringify(this.fieldlabels)} class="form-component" firstnamesearch=${JSON.stringify(firstNameSearch)} lastnamesearch=${JSON.stringify(lastNameSearch)} @update-profile=${(event) => this.updateProfile(index, event.detail.profile)} @select-profile=${(event) => this.setProfile(index, event.detail.profile)}>${imgTag}</profile-ui>
+        <profile-ui locale=${this.locale} seriesId=${this.seriesId} profile=${profileJSON} fieldlabels=${JSON.stringify(this.fieldlabels)} class="form-component" firstnamesearch=${JSON.stringify(firstNameSearch)} lastnamesearch=${JSON.stringify(lastNameSearch)} @update-profile=${(event) => this.updateProfile(index, event.detail.profile)} @select-profile=${(event) => this.setProfile(index, event.detail.profile)}>${imgTag}</profile-ui>
         ${this.profiles?.length > 1 || !this.profiles[0].isPlaceholder ? html`<img class="icon-remove-circle" src="${this.profiles.length === 1 ? '/ecc/icons/delete.svg' : '/ecc/icons/remove-circle.svg'}" alt="remove-repeater" @click=${() => {
     if (this.profiles.length === 1) {
       this.profiles = [defaultProfile];

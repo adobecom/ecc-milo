@@ -124,6 +124,27 @@ export function getAttribute(data, key, locale = 'en-US') {
   return data[key];
 }
 
+export function getProfileAttr(data, key, locale = 'en-US') {
+  if (SPEAKER_DATA_FILTER[key]?.localizable) {
+    const localizedData = data.localizations?.[locale];
+    if (localizedData?.[key]) {
+      return localizedData[key];
+    }
+
+    return data[key];
+  }
+
+  return data[key];
+}
+
+export function setProfileAttr(data, key, value, locale = 'en-US') {
+  if (SPEAKER_DATA_FILTER[key]?.localizable) {
+    data.localizations[locale][key] = value;
+  } else {
+    data[key] = value;
+  }
+}
+
 export function splitLocalizableFields(data, filter, locale = 'en-US') {
   const localizableFields = {};
   const nonLocalizableFields = {};

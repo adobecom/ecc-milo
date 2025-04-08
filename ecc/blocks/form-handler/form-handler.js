@@ -458,7 +458,9 @@ async function saveEvent(props, toPublish = false) {
   try {
     await gatherValues(props);
   } catch (e) {
-    return { error: { message: e.message } };
+    const errorObj = { error: { message: e.message } };
+    buildErrorMessage(props, errorObj);
+    return errorObj;
   }
 
   let resp;
@@ -703,11 +705,11 @@ async function getNonProdPreviewDataById(props) {
     if (pageData) return pageData;
 
     window.lana?.log('Failed to find non-prod metadata for current page');
-    return null;
+    return { error: { message: 'Failed to find non-prod metadata for current page' } };
   }
 
   window.lana?.log(`Failed to fetch non-prod metadata:\n${JSON.stringify(resp, null, 2)}`);
-  return null;
+  return { error: { message: 'Failed to fetch non-prod metadata' } };
 }
 
 async function validatePreview(props, cta) {
@@ -745,6 +747,13 @@ async function validatePreview(props, cta) {
           if (metadataJson && modificationTimeMatch(metadataJson)) {
             closeDialog(props);
             window.open(previewHref);
+            poll.cancel();
+            return;
+          }
+
+          if (metadataJson?.error) {
+            buildErrorMessage(props, metadataJson.error);
+            buildPreviewLoadingFailedDialog(props, previewHref);
             poll.cancel();
             return;
           }

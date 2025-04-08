@@ -49,7 +49,7 @@ export default class Profile extends LitElement {
   addSocialLink(shallow = false) {
     const socialLink = { link: '' };
     const profile = shallow ? this.profileCopy : this.profile;
-    if (profile?.socialLinks) {
+    if (profile.socialLinks) {
       profile.socialLinks.push(socialLink);
     } else {
       profile.socialLinks = [socialLink];
@@ -121,7 +121,7 @@ export default class Profile extends LitElement {
       delete sProfile.type;
       let respJson;
       const profilePayload = getSpeakerPayload(sProfile, this.locale);
-      if (this.profile.speakerId) {
+      if (profile.speakerId) {
         respJson = await updateSpeaker(profilePayload, this.seriesId);
       } else {
         respJson = await createSpeaker(profilePayload, this.seriesId);
@@ -289,25 +289,25 @@ export default class Profile extends LitElement {
     };
 
     const firstNameData = {
-      value: shallow ? this.profileCopy?.firstName : this.profile?.firstName,
+      value: shallow ? this.profileCopy.firstName : this.profile.firstName,
       placeholder: fieldLabelsJSON.firstName,
       helperText: fieldLabelsJSON.firstNameSubText,
     };
 
     const lastNameData = {
-      value: shallow ? this.profileCopy?.lastName : this.profile?.lastName,
+      value: shallow ? this.profileCopy.lastName : this.profile.lastName,
       placeholder: fieldLabelsJSON.lastName,
       helperText: fieldLabelsJSON.lastNameSubText,
     };
 
     const bioData = {
-      value: shallow ? this.profileCopy?.bio : this.profile?.bio || '',
+      value: shallow ? this.profileCopy.bio : this.profile.bio || '',
       placeholder: fieldLabelsJSON.bio,
       helperText: fieldLabelsJSON.bioSubText,
     };
 
     const titleData = {
-      value: shallow ? this.profileCopy?.title : this.profile?.title,
+      value: shallow ? this.profileCopy.title : this.profile.title,
       placeholder: fieldLabelsJSON.title,
       helperText: fieldLabelsJSON.titleSubText,
     };
@@ -417,6 +417,8 @@ export default class Profile extends LitElement {
       ...(this.fieldlabels ?? {}),
     };
 
+    const { firstName, lastName, title, bio } = this.profile;
+
     return html`
     <div class="profile-view">
     <div class="profile-header">
@@ -429,7 +431,7 @@ export default class Profile extends LitElement {
     </overlay-trigger>
     </div> 
     ${this.renderProfileTypePicker()}
-    <h3>${this.profile.firstName} ${this.profile.lastName}</h3>
+    <h3>${firstName} ${lastName}</h3>
     ${this.profile.photo?.imageUrl ? html`
     <div class="img-file-input-wrapper">
       <div class="preview-wrapper">
@@ -440,16 +442,16 @@ export default class Profile extends LitElement {
     </div>`
     : nothing}
     <div>
-        <h5>${this.profile.title}</h5>
-        ${this.profile.bio ? html`<p>${this.profile.bio}</p>` : nothing}
+        <h5>${title}</h5>
+        ${bio ? html`<p>${bio}</p>` : nothing}
     </div>
-    ${this.profile?.socialLinks?.length ? html`
+    ${this.profile.socialLinks?.length ? html`
     <div class="social-media">
         <h3>${fieldLabelsJSON.socialLinks}</h3>
         <div class="feds-footer-icons">
         ${icons}
         </div>
-        ${this.profile?.socialLinks ? repeat(this.profile?.socialLinks, (socialLinks) => this.renderSocialLinksLink(socialLinks)) : nothing}
+        ${this.profile.socialLinks ? repeat(this.profile.socialLinks, (socialLink) => this.renderSocialLinksLink(socialLink)) : nothing}
     </div>
     ` : nothing} 
     <sp-divider></sp-divider>
