@@ -853,9 +853,9 @@ function initFormCtas(props) {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
 
-          let resp;
-
           if (ctaUrl.hash === '#next') {
+            let resp;
+
             if (props.currentStep === props.maxStep) {
               resp = await saveEvent(props, true);
             } else {
