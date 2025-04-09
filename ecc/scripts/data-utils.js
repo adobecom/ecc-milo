@@ -218,10 +218,15 @@ export function getSponsorPayload(sponsorData, locale) {
     return acc;
   }, {});
 
-  return {
+  const payload = {
     ...filteredGlobalPayload,
-    localizations: { [locale]: filteredLocalePayload },
   };
+
+  if (Object.keys(filteredLocalePayload).length > 0) {
+    payload.localizations = { [locale]: filteredLocalePayload };
+  }
+
+  return payload;
 }
 
 export function getVenuePayload(venueData, locale) {
@@ -248,10 +253,15 @@ export function getVenuePayload(venueData, locale) {
     return acc;
   }, {});
 
-  return {
+  const payload = {
     ...filteredGlobalPayload,
-    localizations: { [locale]: filteredLocalePayload },
   };
+
+  if (Object.keys(filteredLocalePayload).length > 0) {
+    payload.localizations = { [locale]: filteredLocalePayload };
+  }
+
+  return payload;
 }
 
 export function getEventPayload(eventData, locale) {
@@ -278,8 +288,13 @@ export function getEventPayload(eventData, locale) {
     return acc;
   }, {});
 
-  return {
+  const payload = {
     ...filteredGlobalPayload,
-    localizations: { [locale]: filteredLocalePayload },
   };
+
+  if (Object.keys(filteredLocalePayload).length > 0) {
+    payload.localizations = { [locale]: filteredLocalePayload };
+  }
+
+  return payload;
 }
