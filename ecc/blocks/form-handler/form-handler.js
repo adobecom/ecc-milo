@@ -1068,7 +1068,6 @@ async function buildECCForm(el) {
       localizations: {},
     },
     eventDataResp: {},
-    locale: 'en-US',
     removeFromPayload: {},
   };
 
@@ -1097,6 +1096,7 @@ async function buildECCForm(el) {
         }
 
         case 'payload': {
+          console.log('payload', value);
           setPayloadCache(value, props.locale);
           updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);

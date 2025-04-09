@@ -117,14 +117,14 @@ export function isValidAttribute(attr) {
   return (attr !== undefined && attr !== null && attr !== '') || attr === false;
 }
 
-export function getAttribute(data, key, locale = 'en-US') {
+export function getAttribute(data, key, locale) {
   if (data.localizations?.[locale]?.[key]) {
     return data.localizations[locale][key];
   }
   return data[key];
 }
 
-export function getProfileAttr(data, key, locale = 'en-US') {
+export function getProfileAttr(data, key, locale) {
   if (SPEAKER_DATA_FILTER[key]?.localizable) {
     const localizedData = data.localizations?.[locale];
     if (localizedData?.[key]) {
@@ -137,7 +137,7 @@ export function getProfileAttr(data, key, locale = 'en-US') {
   return data[key];
 }
 
-export function setProfileAttr(data, key, value, locale = 'en-US') {
+export function setProfileAttr(data, key, value, locale) {
   if (SPEAKER_DATA_FILTER[key]?.localizable) {
     data.localizations[locale][key] = value;
   } else {
@@ -145,7 +145,7 @@ export function setProfileAttr(data, key, value, locale = 'en-US') {
   }
 }
 
-export function splitLocalizableFields(data, filter, locale = 'en-US') {
+export function splitLocalizableFields(data, filter, locale) {
   const localizableFields = {};
   const nonLocalizableFields = {};
 
@@ -164,7 +164,7 @@ export function splitLocalizableFields(data, filter, locale = 'en-US') {
   return { localizableFields, nonLocalizableFields };
 }
 
-export function getSpeakerPayload(speakerData, locale = 'en-US') {
+export function getSpeakerPayload(speakerData, locale) {
   if (!speakerData) return speakerData;
 
   // Split speaker data into localizable and non-localizable fields
@@ -194,7 +194,7 @@ export function getSpeakerPayload(speakerData, locale = 'en-US') {
   };
 }
 
-export function getSponsorPayload(sponsorData, locale = 'en-US') {
+export function getSponsorPayload(sponsorData, locale) {
   if (!sponsorData) return sponsorData;
 
   // Split sponsor data into localizable and non-localizable fields
@@ -218,13 +218,18 @@ export function getSponsorPayload(sponsorData, locale = 'en-US') {
     return acc;
   }, {});
 
-  return {
+  const payload = {
     ...filteredGlobalPayload,
-    localizations: { [locale]: filteredLocalePayload },
   };
+
+  if (Object.keys(filteredLocalePayload).length > 0) {
+    payload.localizations = { [locale]: filteredLocalePayload };
+  }
+
+  return payload;
 }
 
-export function getVenuePayload(venueData, locale = 'en-US') {
+export function getVenuePayload(venueData, locale) {
   if (!venueData) return venueData;
 
   // Split venue data into localizable and non-localizable fields
@@ -248,13 +253,18 @@ export function getVenuePayload(venueData, locale = 'en-US') {
     return acc;
   }, {});
 
-  return {
+  const payload = {
     ...filteredGlobalPayload,
-    localizations: { [locale]: filteredLocalePayload },
   };
+
+  if (Object.keys(filteredLocalePayload).length > 0) {
+    payload.localizations = { [locale]: filteredLocalePayload };
+  }
+
+  return payload;
 }
 
-export function getEventPayload(eventData, locale = 'en-US') {
+export function getEventPayload(eventData, locale) {
   if (!eventData) return eventData;
 
   const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
@@ -278,8 +288,13 @@ export function getEventPayload(eventData, locale = 'en-US') {
     return acc;
   }, {});
 
-  return {
+  const payload = {
     ...filteredGlobalPayload,
-    localizations: { [locale]: filteredLocalePayload },
   };
+
+  if (Object.keys(filteredLocalePayload).length > 0) {
+    payload.localizations = { [locale]: filteredLocalePayload };
+  }
+
+  return payload;
 }
