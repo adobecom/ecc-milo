@@ -200,16 +200,3 @@ export default function getJoinedData(locale) {
 
   return finalPayload;
 }
-
-export function getAttr(data, key, locale) {
-  if (EVENT_DATA_FILTER[key]?.localizable) {
-    const localizedData = data.localizations?.[locale];
-    if (localizedData?.[key]) {
-      return localizedData[key];
-    }
-
-    return data[key];
-  }
-
-  return data[key];
-}

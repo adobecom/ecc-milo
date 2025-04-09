@@ -1,6 +1,7 @@
+import { getAttribute } from '../../scripts/data-utils.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { addTooltipToEl, decorateSwitchFieldset } from '../../scripts/utils.js';
-import { getAttr, setPropsPayload } from '../form-handler/data-handler.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -50,11 +51,11 @@ function prefillFields(component, props) {
   const eventData = props.eventDataResp;
 
   if (eventData) {
-    const attendeeLimit = getAttr(eventData, 'attendeeLimit', props.locale);
-    const allowWaitlisting = getAttr(eventData, 'allowWaitlisting', props.locale);
-    const rsvpDescription = getAttr(eventData, 'rsvpDescription', props.locale);
-    const hostEmail = getAttr(eventData, 'hostEmail', props.locale);
-    const allowGuestRegistration = getAttr(eventData, 'allowGuestRegistration', props.locale);
+    const attendeeLimit = getAttribute(eventData, 'attendeeLimit', props.locale);
+    const allowWaitlisting = getAttribute(eventData, 'allowWaitlisting', props.locale);
+    const rsvpDescription = getAttribute(eventData, 'rsvpDescription', props.locale);
+    const hostEmail = getAttribute(eventData, 'hostEmail', props.locale);
+    const allowGuestRegistration = getAttribute(eventData, 'allowGuestRegistration', props.locale);
 
     if (attendeeLimitEl && attendeeLimit) attendeeLimitEl.value = attendeeLimit;
     if (disbleWaitlistEl) disbleWaitlistEl.checked = !allowWaitlisting;

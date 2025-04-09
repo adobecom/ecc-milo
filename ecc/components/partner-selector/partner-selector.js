@@ -25,7 +25,6 @@ export default class PartnerSelector extends LitElement {
       hasUnsavedChanges: false,
     };
     this.buttonStatePending = false;
-    this.locale = this.locale || 'en-US';
   }
 
   static styles = style;
