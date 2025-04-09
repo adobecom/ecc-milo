@@ -4,8 +4,8 @@ import { getCloud, getEvents, getLocales } from '../../scripts/esp-controller.js
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../../scripts/utils.js';
-import { getAttr, setPropsPayload } from '../form-handler/data-handler.js';
-import { isValidAttribute } from '../../scripts/data-utils.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
+import { getAttribute, isValidAttribute } from '../../scripts/data-utils.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
@@ -455,16 +455,16 @@ function prefillFields(component, props, eventData) {
   const enTitleInput = component.querySelector('#event-info-url-input');
   const isPrivateInput = component.querySelector('#private-event');
 
-  const title = getAttr(eventData, 'title', props.locale);
-  const description = getAttr(eventData, 'description', props.locale);
-  const localStartDate = getAttr(eventData, 'localStartDate', props.locale);
-  const localEndDate = getAttr(eventData, 'localEndDate', props.locale);
-  const localStartTime = getAttr(eventData, 'localStartTime', props.locale);
-  const localEndTime = getAttr(eventData, 'localEndTime', props.locale);
-  const timezone = getAttr(eventData, 'timezone', props.locale);
-  const enTitle = getAttr(eventData, 'enTitle', props.locale);
-  const defaultLocale = eventData.defaultLocale || 'en-US';
-  const isPrivate = getAttr(eventData, 'isPrivate', props.locale);
+  const title = getAttribute(eventData, 'title', props.locale);
+  const description = getAttribute(eventData, 'description', props.locale);
+  const localStartDate = getAttribute(eventData, 'localStartDate', props.locale);
+  const localEndDate = getAttribute(eventData, 'localEndDate', props.locale);
+  const localStartTime = getAttribute(eventData, 'localStartTime', props.locale);
+  const localEndTime = getAttribute(eventData, 'localEndTime', props.locale);
+  const timezone = getAttribute(eventData, 'timezone', props.locale);
+  const enTitle = getAttribute(eventData, 'enTitle', props.locale);
+  const defaultLocale = getAttribute(eventData, 'defaultLocale', props.locale);
+  const isPrivate = getAttribute(eventData, 'isPrivate', props.locale);
 
   if (isValidAttribute(title)) eventTitleInput.value = title;
   if (isValidAttribute(description)) eventDescriptionInput.value = description;

@@ -43,7 +43,6 @@ export default class Profile extends LitElement {
 
     this.profile = this.profile ?? { socialLinks: [{ link: '' }], isPlaceholder: true };
     this.profileCopy = {};
-    this.locale = this.locale ?? 'en-US';
   }
 
   addSocialLink(shallow = false) {

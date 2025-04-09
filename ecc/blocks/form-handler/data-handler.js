@@ -34,7 +34,7 @@ export function setPropsPayload(props, newData, removeData = []) {
   const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
     newData,
     EVENT_DATA_FILTER,
-    locale || 'en-US',
+    locale,
   );
 
   // apply nested ref filters
@@ -87,8 +87,8 @@ export function setPropsPayload(props, newData, removeData = []) {
   props.removeFromPayload = removeData;
 }
 
-export function setPayloadCache(payload, locale = 'en-US') {
-  if (!payload) return;
+export function setPayloadCache(payload, locale) {
+  if (!payload || !locale) return;
 
   // Split payload into localizable and non-localizable fields
   const splitNewPayload = splitLocalizableFields(
@@ -108,8 +108,8 @@ export function setPayloadCache(payload, locale = 'en-US') {
   };
 }
 
-export function setResponseCache(response, locale = 'en-US') {
-  if (!response) return;
+export function setResponseCache(response, locale) {
+  if (!response || !locale) return;
 
   // Split response into localizable and non-localizable fields
   const splitNewResponse = splitLocalizableFields(
@@ -175,7 +175,7 @@ export function getLocalizedPayloadData(props) {
   };
 }
 
-export default function getJoinedData(locale = 'en-US') {
+export default function getJoinedData(locale) {
   const filteredResponse = getFilteredCachedResponse(locale);
   const filteredPayload = getFilteredCachedPayload(locale);
 
@@ -199,17 +199,4 @@ export default function getJoinedData(locale = 'en-US') {
   clearRemoveCache();
 
   return finalPayload;
-}
-
-export function getAttr(data, key, locale) {
-  if (EVENT_DATA_FILTER[key]?.localizable) {
-    const localizedData = data.localizations?.[locale];
-    if (localizedData?.[key]) {
-      return localizedData[key];
-    }
-
-    return data[key];
-  }
-
-  return data[key];
 }
