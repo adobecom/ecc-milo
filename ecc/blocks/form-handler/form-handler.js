@@ -1068,7 +1068,6 @@ async function buildECCForm(el) {
       localizations: {},
     },
     eventDataResp: {},
-    locale: 'en-US',
     removeFromPayload: {},
   };
 

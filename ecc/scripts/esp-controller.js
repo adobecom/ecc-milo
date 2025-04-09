@@ -347,8 +347,9 @@ export async function updateCloud(cloudType, cloudData) {
   }
 }
 
-export async function createEvent(payload, locale = 'en-US') {
+export async function createEvent(payload, locale) {
   if (!payload || typeof payload !== 'object') throw new Error('Invalid event payload');
+  if (!locale || typeof locale !== 'string') throw new Error('Invalid locale');
 
   const { host } = API_CONFIG.esl[getEventServiceEnv()];
   const raw = JSON.stringify({
@@ -399,7 +400,7 @@ export async function createSpeaker(profile, seriesId) {
   }
 }
 
-export async function createSponsor(sponsorData, seriesId, locale = 'en-US') {
+export async function createSponsor(sponsorData, seriesId, locale) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
   if (!locale || typeof locale !== 'string') throw new Error('Invalid locale');
@@ -424,7 +425,7 @@ export async function createSponsor(sponsorData, seriesId, locale = 'en-US') {
   }
 }
 
-export async function updateSponsor(sponsorData, sponsorId, seriesId, locale = 'en-US') {
+export async function updateSponsor(sponsorData, sponsorId, seriesId, locale) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
