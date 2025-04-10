@@ -50,7 +50,7 @@ export const EVENT_DATA_FILTER = {
   allowWaitlisting: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
   allowGuestRegistration: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
   hostEmail: { type: 'string', localizable: false, cloneable: true, submittable: true },
-  eventId: { type: 'string', localizable: false, cloneable: true, submittable: true },
+  eventId: { type: 'string', localizable: false, cloneable: false, submittable: true },
   published: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
   creationTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
   modificationTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
