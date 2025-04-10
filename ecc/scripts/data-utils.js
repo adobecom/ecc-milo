@@ -36,7 +36,7 @@ export const EVENT_DATA_FILTER = {
   localEndDate: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localStartTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localEndTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
-  localizations: { type: 'object', localizable: false, cloneable: false, submittable: true },
+  localizations: { type: 'object', localizable: false, cloneable: true, submittable: true },
   timezone: { type: 'string', localizable: false, cloneable: true, submittable: true },
   showAgendaPostEvent: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
   showVenuePostEvent: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
@@ -51,9 +51,9 @@ export const EVENT_DATA_FILTER = {
   allowGuestRegistration: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
   hostEmail: { type: 'string', localizable: false, cloneable: true, submittable: true },
   eventId: { type: 'string', localizable: false, cloneable: false, submittable: true },
-  published: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
-  creationTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
-  modificationTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
+  published: { type: 'boolean', localizable: false, cloneable: false, submittable: true },
+  creationTime: { type: 'string', localizable: false, cloneable: false, submittable: true },
+  modificationTime: { type: 'string', localizable: false, cloneable: false, submittable: true },
   isPrivate: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
 };
 
@@ -115,6 +115,14 @@ export const VENUE_DATA_FILTER = {
 
 export function isValidAttribute(attr) {
   return (attr !== undefined && attr !== null && attr !== '') || attr === false;
+}
+
+export function setEventAttribute(data, key, value, locale) {
+  if (EVENT_DATA_FILTER[key]?.localizable) {
+    data.localizations[locale][key] = value;
+  } else {
+    data[key] = value;
+  }
 }
 
 export function getAttribute(data, key, locale) {
