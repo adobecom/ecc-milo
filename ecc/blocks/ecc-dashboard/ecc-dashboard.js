@@ -357,7 +357,7 @@ function initMoreOptions(props, config, eventObj, row) {
       payload.title = `${eventObj.title} - copy`;
       toolBox.remove();
       row.classList.add('pending');
-      const newEventJSON = await createEvent(cloneFilter(payload));
+      const newEventJSON = await createEvent(cloneFilter(payload), payload.defaultLocale || 'en-US');
 
       if (newEventJSON.error) {
         row.classList.remove('pending');
