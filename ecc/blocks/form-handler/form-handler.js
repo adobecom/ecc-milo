@@ -1104,6 +1104,8 @@ async function buildECCForm(el) {
         }
 
         case 'eventDataResp': {
+          // TODO: supports defaultLocale only for LOC P1
+          if (value.defaultLocale) props.locale = value.defaultLocale;
           setResponseCache(value, props.locale);
           updateComponentsOnRespChange(target);
           updateCtas(target);
