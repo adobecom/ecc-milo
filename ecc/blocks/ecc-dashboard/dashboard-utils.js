@@ -9,10 +9,6 @@ export function cloneFilter(obj) {
     }
   });
 
-  const defaultLocale = obj.defaultLocale || 'en-US';
-  // keep only localizations[defaultLocale] to avoid cloning every localization row
-  output.localizations = { [defaultLocale]: obj.localizations[defaultLocale] };
-
   return output;
 }
 
