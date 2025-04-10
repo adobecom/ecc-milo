@@ -218,9 +218,7 @@ export function getSponsorPayload(sponsorData, locale) {
     return acc;
   }, {});
 
-  const payload = {
-    ...filteredGlobalPayload,
-  };
+  const payload = { ...filteredGlobalPayload };
 
   if (Object.keys(filteredLocalePayload).length > 0) {
     payload.localizations = { [locale]: filteredLocalePayload };
@@ -253,9 +251,7 @@ export function getVenuePayload(venueData, locale) {
     return acc;
   }, {});
 
-  const payload = {
-    ...filteredGlobalPayload,
-  };
+  const payload = { ...filteredGlobalPayload };
 
   if (Object.keys(filteredLocalePayload).length > 0) {
     payload.localizations = { [locale]: filteredLocalePayload };
@@ -288,9 +284,7 @@ export function getEventPayload(eventData, locale) {
     return acc;
   }, {});
 
-  const payload = {
-    ...filteredGlobalPayload,
-  };
+  const payload = { ...filteredGlobalPayload };
 
   if (Object.keys(filteredLocalePayload).length > 0) {
     payload.localizations = { [locale]: filteredLocalePayload };
