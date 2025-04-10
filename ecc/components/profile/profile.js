@@ -20,7 +20,7 @@ const DEFAULT_FIELD_LABELS = {
   addSocialLinkRepeater: 'Add Social Link',
 };
 
-const SPEAKER_TYPE = ['Host', 'Presenter', 'Speaker', 'Keynote', 'Judge', 'PortfolioReviewer', 'CareerAdvisor'];
+const SPEAKER_TYPE = ['Host', 'Presenter', 'Speaker', 'Keynote', 'Judge', 'PortfolioReviewer', 'CareerAdvisor', 'ProductDemonstrator'];
 const SUPPORTED_SOCIAL = ['YouTube', 'LinkedIn', 'Web', 'Twitter', 'X', 'TikTok', 'Instagram', 'Facebook', 'Pinterest'];
 
 export default class Profile extends LitElement {
