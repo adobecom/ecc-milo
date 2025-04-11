@@ -7,7 +7,7 @@ import { style } from './profile-container.css.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
-const defaultProfile = { socialLinks: [{ link: '' }], isPlaceholder: true };
+const defaultProfile = { socialLinks: [{ link: '' }], localizations: {}, isPlaceholder: true };
 
 export default class ProfileContainer extends LitElement {
   static properties = {

@@ -42,7 +42,7 @@ export default class Profile extends LitElement {
     this.attachShadow({ mode: 'open' });
     this.fieldlabels = this.fieldlabels ?? DEFAULT_FIELD_LABELS;
 
-    this.profile = this.profile ?? { socialLinks: [{ link: '' }], isPlaceholder: true };
+    this.profile = this.profile ?? { socialLinks: [{ link: '' }], localizations: {}, isPlaceholder: true };
     this.profileCopy = {};
   }
 
