@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable class-methods-use-this */
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './profile.css.js';
@@ -45,9 +46,9 @@ export default class Profile extends LitElement {
     this.profileCopy = {};
   }
 
-  addSocialLink(shallow = false) {
+  addSocialLink(edited = false) {
     const socialLink = { link: '' };
-    const profile = shallow ? this.profileCopy : this.profile;
+    const profile = edited ? this.profileCopy : this.profile;
     if (profile.socialLinks) {
       profile.socialLinks.push(socialLink);
     } else {
@@ -56,8 +57,19 @@ export default class Profile extends LitElement {
     this.requestUpdate();
   }
 
-  updateProfile(profile, shallow = false) {
-    if (shallow) {
+  updateLocalizedProfileField(localizedField, edited = false) {
+    let localizations = {};
+    if (edited) {
+      // eslint-disable-next-line max-len
+      localizations = { [this.locale]: { ...(this.profileCopy.localizations[this.locale]), ...localizedField } };
+    } else {
+      localizations = { [this.locale]: { ...(this.profile.localizations[this.locale]), ...localizedField } };
+    }
+    this.updateProfile({ localizations }, edited);
+  }
+
+  updateProfile(profile, edited = false) {
+    if (edited) {
       this.profileCopy = { ...this.profileCopy, ...profile };
     } else {
       const updatedProfile = { ...this.profile, ...profile };
@@ -65,7 +77,7 @@ export default class Profile extends LitElement {
     }
   }
 
-  updateSocialLink(index, value, shallow = false) {
+  updateSocialLink(index, value, edited = false) {
     const tempServiceName = getServiceName(value);
     // eslint-disable-next-line max-len
     let serviceName = SUPPORTED_SOCIAL.find((service) => service.toLowerCase() === tempServiceName.toLowerCase());
@@ -73,7 +85,7 @@ export default class Profile extends LitElement {
       serviceName = 'Web';
     }
     // eslint-disable-next-line max-len
-    if (shallow) {
+    if (edited) {
       this.profileCopy.socialLinks[index] = { link: value, serviceName };
       return;
     }
@@ -82,13 +94,13 @@ export default class Profile extends LitElement {
     this.requestUpdate();
   }
 
-  renderProfileTypePicker(shallow = false) {
+  renderProfileTypePicker(edited = false) {
     // eslint-disable-next-line max-len
-    const fieldLabel = this.getRequiredProps(shallow).fieldLabelsJSON.chooseType ?? DEFAULT_FIELD_LABELS.chooseType;
+    const fieldLabel = this.getRequiredProps(edited).fieldLabelsJSON.chooseType ?? DEFAULT_FIELD_LABELS.chooseType;
     return html`
     <div>
     <div><sp-field-label size="l" required>${fieldLabel} *</sp-field-label></div>
-    <sp-picker label=${fieldLabel} value=${shallow ? this.profileCopy?.type : this.profile?.type} size="l" @change=${(event) => this.updateProfile({ type: event.target.value }, shallow)}>
+    <sp-picker label=${fieldLabel} value=${edited ? this.profileCopy?.type : this.profile?.type} size="l" @change=${(event) => this.updateProfile({ type: event.target.value }, edited)}>
         ${repeat(SPEAKER_TYPE, (type) => html`
             <sp-menu-item value="${type}">${type.replace(/([a-z])([A-Z])/g, '$1 $2')}</sp-menu-item>
         `)}
@@ -196,24 +208,24 @@ export default class Profile extends LitElement {
     return !this.profile.firstName || !this.profile.lastName || !this.profile.title;
   }
 
-  renderNameFieldWithSearchIntegrated(shallow = false) {
+  renderNameFieldWithSearchIntegrated(edited = false) {
     const {
       firstNameData,
       quietTextfieldConfig,
       lastNameData,
       firstNameSearchMap,
       lastNameSearchMap,
-    } = this.getRequiredProps(shallow);
+    } = this.getRequiredProps(edited);
 
     const searchFieldConfig = { ...quietTextfieldConfig, showImage: true, thumbnailType: 'circle' };
 
     return html`
-    <custom-search searchMap=${JSON.stringify(firstNameSearchMap)} fielddata=${JSON.stringify(firstNameData)} config=${JSON.stringify(searchFieldConfig)} @change-custom-search=${(event) => this.updateProfile({ firstName: event.detail.value }, shallow)} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.firstnamesearch)} identifier='speakerId'></custom-search>
-    <custom-search searchMap=${JSON.stringify(lastNameSearchMap)} fielddata=${JSON.stringify(lastNameData)} config=${JSON.stringify(searchFieldConfig)} @change-custom-search=${(event) => this.updateProfile({ lastName: event.detail.value }, shallow)} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.lastnamesearch)} identifier='speakerId'></custom-search>
+    <custom-search searchMap=${JSON.stringify(firstNameSearchMap)} fielddata=${JSON.stringify(firstNameData)} config=${JSON.stringify(searchFieldConfig)} @change-custom-search=${(event) => this.updateProfile({ firstName: event.detail.value }, edited)} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.firstnamesearch)} identifier='speakerId'></custom-search>
+    <custom-search searchMap=${JSON.stringify(lastNameSearchMap)} fielddata=${JSON.stringify(lastNameData)} config=${JSON.stringify(searchFieldConfig)} @change-custom-search=${(event) => this.updateProfile({ lastName: event.detail.value }, edited)} @entry-selected=${this.handleProfileSelection} searchdata=${JSON.stringify(this.lastnamesearch)} identifier='speakerId'></custom-search>
     `;
   }
 
-  renderRemainingFormBody(shallow = false) {
+  renderRemainingFormBody(edited = false) {
     const {
       fieldLabelsJSON,
       quietTextfieldConfig,
@@ -222,9 +234,9 @@ export default class Profile extends LitElement {
       textareaConfig,
       socialLinksData,
       socialLinksConfig,
-    } = this.getRequiredProps(shallow);
+    } = this.getRequiredProps(edited);
 
-    const profile = shallow ? this.profileCopy : this.profile;
+    const profile = edited ? this.profileCopy : this.profile;
 
     // eslint-disable-next-line max-len
     const imagefile = profile?.photo ? { ...profile.photo, url: profile.photo.imageUrl } : {};
@@ -237,15 +249,15 @@ export default class Profile extends LitElement {
   })} file=${JSON.stringify(imagefile)}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
-    <custom-textfield fielddata=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ title: event.detail.value }, shallow)}></custom-textfield>
-    <custom-textfield fielddata=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @change-custom=${(event) => this.updateProfile({ bio: event.detail.value }, shallow)}></custom-textfield>
+    <custom-textfield fielddata=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateLocalizedProfileField({ title: event.detail.value }, edited)}></custom-textfield>
+    <custom-textfield fielddata=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @change-custom=${(event) => this.updateLocalizedProfileField({ bio: event.detail.value }, edited)}></custom-textfield>
     <div class="social-media">
     <h3>${fieldLabelsJSON.socialLinks}</h3>
     ${profile?.socialLinks ? repeat(
     profile.socialLinks,
     (socialLink, index) => html`
     <div class="social-media-row">
-    <custom-textfield class="social-media-input" fielddata=${JSON.stringify({ ...socialLinksData, value: socialLink.link ?? undefined })} config=${JSON.stringify(socialLinksConfig)} @change-custom=${(event) => this.updateSocialLink(index, event.detail.value?.trim(), shallow)}></custom-textfield>
+    <custom-textfield class="social-media-input" fielddata=${JSON.stringify({ ...socialLinksData, value: socialLink.link ?? undefined })} config=${JSON.stringify(socialLinksConfig)} @change-custom=${(event) => this.updateSocialLink(index, event.detail.value?.trim(), edited)}></custom-textfield>
         ${profile.socialLinks?.length > 1 ? html`<img class="icon icon-remove-circle" src="/ecc/icons/remove-circle.svg" alt="remove-repeater" @click=${() => {
     profile.socialLinks.splice(index, 1);
     this.requestUpdate();
@@ -253,7 +265,7 @@ export default class Profile extends LitElement {
         </div>`,
   ) : nothing}
     </div>
-    <repeater-element text=${fieldLabelsJSON.addSocialLinkRepeater} @repeat=${() => { this.addSocialLink(shallow); }}></repeater-element>
+    <repeater-element text=${fieldLabelsJSON.addSocialLinkRepeater} @repeat=${() => { this.addSocialLink(edited); }}></repeater-element>
     <sp-divider size='s'></sp-divider>`;
   }
 
@@ -264,12 +276,12 @@ export default class Profile extends LitElement {
     ${this.renderRemainingFormBody()}`;
   }
 
-  renderNameFields(shallow = false) {
-    const { firstNameData, quietTextfieldConfig, lastNameData } = this.getRequiredProps(shallow);
+  renderNameFields(edited = false) {
+    const { firstNameData, quietTextfieldConfig, lastNameData } = this.getRequiredProps(edited);
 
     return html`    
-    <custom-textfield fielddata=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ firstName: event.detail.value }, shallow)}></custom-textfield>
-    <custom-textfield fielddata=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ lastName: event.detail.value }, shallow)}></custom-textfield>
+    <custom-textfield fielddata=${JSON.stringify(firstNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ firstName: event.detail.value }, edited)}></custom-textfield>
+    <custom-textfield fielddata=${JSON.stringify(lastNameData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ lastName: event.detail.value }, edited)}></custom-textfield>
     `;
   }
 
@@ -281,32 +293,32 @@ export default class Profile extends LitElement {
     `;
   }
 
-  getRequiredProps(shallow = false) {
+  getRequiredProps(edited = false) {
     const fieldLabelsJSON = {
       ...DEFAULT_FIELD_LABELS,
       ...(this.fieldlabels ?? {}),
     };
 
     const firstNameData = {
-      value: shallow ? this.profileCopy.firstName : this.profile.firstName,
+      value: edited ? this.profileCopy.firstName : this.profile.firstName,
       placeholder: fieldLabelsJSON.firstName,
       helperText: fieldLabelsJSON.firstNameSubText,
     };
 
     const lastNameData = {
-      value: shallow ? this.profileCopy.lastName : this.profile.lastName,
+      value: edited ? this.profileCopy.lastName : this.profile.lastName,
       placeholder: fieldLabelsJSON.lastName,
       helperText: fieldLabelsJSON.lastNameSubText,
     };
 
     const bioData = {
-      value: shallow ? this.profileCopy.bio : this.profile.bio || '',
+      value: edited ? this.profileCopy.bio : this.profile.bio || '',
       placeholder: fieldLabelsJSON.bio,
       helperText: fieldLabelsJSON.bioSubText,
     };
 
     const titleData = {
-      value: shallow ? this.profileCopy.title : this.profile.title,
+      value: edited ? this.profileCopy.title : this.profile.title,
       placeholder: fieldLabelsJSON.title,
       helperText: fieldLabelsJSON.titleSubText,
     };
