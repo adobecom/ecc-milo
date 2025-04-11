@@ -491,12 +491,7 @@ function prefillFields(component, props, eventData) {
   if (isValidAttribute(timezone)) changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
   if (isValidAttribute(defaultLocale)) changeInputValue(languagePicker, 'value', defaultLocale || props.locale);
   if (isValidAttribute(enTitle)) changeInputValue(enTitleInput, 'value', enTitle || '');
-  if (isValidAttribute(isPrivate)) {
-    changeInputValue(isPrivateInput, 'checked', isPrivate || false);
-    if (isPrivate) {
-      isPrivateInput.setAttribute('disabled', 'true');
-    }
-  }
+  if (isValidAttribute(isPrivate)) changeInputValue(isPrivateInput, 'checked', isPrivate || false);
 
   if (title && localStartDate && eventData.eventId) {
     BlockMediator.set('eventDupMetrics', {
