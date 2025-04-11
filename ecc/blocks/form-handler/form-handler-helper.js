@@ -11,6 +11,7 @@ import ProfileContainer from '../../components/profile-container/profile-contain
 import Profile from '../../components/profile/profile.js';
 import Repeater from '../../components/repeater/repeater.js';
 import RTETiptap from '../../components/rte-tiptap/rte-tiptap.js';
+import RsvpForm from '../../components/rsvp-form/rsvp-form.js';
 
 import getJoinedData, {
   setPayloadCache,
@@ -57,6 +58,7 @@ function initCustomLitComponents() {
   customElements.define('custom-textfield', CustomTextfield);
   customElements.define('custom-search', CustomSearch);
   customElements.define('rte-tiptap', RTETiptap);
+  customElements.define('rsvp-form', RsvpForm);
 }
 
 export const SPECTRUM_COMPONENTS = [
