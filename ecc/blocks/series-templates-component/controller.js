@@ -2,8 +2,6 @@
 import buildCarousel from '../../scripts/features/carousel.js';
 import initPreviewFrame, { resetPreviewFrame } from './utils.js';
 import { LIBS } from '../../scripts/scripts.js';
-import { setPropsPayload } from '../form-handler/data-handler.js';
-import { getAttribute } from '../../scripts/data-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -12,7 +10,10 @@ export function onSubmit(component, props) {
 
   const eventTemplateInput = component.querySelector('input[name="series-template-input"]');
 
-  setPropsPayload(props, { templateId: eventTemplateInput.value });
+  props.payload = {
+    ...props.payload,
+    templateId: eventTemplateInput.value,
+  };
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -169,7 +170,7 @@ export default async function init(component, props) {
   initPicker(component);
 
   if (data) {
-    const templateId = getAttribute(data, 'templateId', props.locale);
+    const { templateId } = data;
 
     if (templateId) {
       const selectedRadio = component.querySelector(`input[type='radio'][value="${templateId}"]`);
