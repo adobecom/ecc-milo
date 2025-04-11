@@ -4,6 +4,7 @@ import {
   getEventImages,
   getEventsForUser,
   getEventVenue,
+  getLocales,
   publishEvent,
   unpublishEvent,
 } from '../../scripts/esp-controller.js';
@@ -18,6 +19,7 @@ import {
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
+import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -136,7 +138,7 @@ function updateDashboardData(newPayload, props) {
 function paginateData(props, config, page) {
   const ps = +config['page-size'];
   if (Number.isNaN(ps) || ps <= 0) {
-    window.lana?.log('error', 'Invalid page size');
+    window.lana?.log('Invalid page size');
   }
   const start = (page - 1) * ps;
   const end = Math.min(page * ps, props.filteredData.length);
@@ -170,8 +172,11 @@ function sortData(props, config, options = {}) {
     let valB;
 
     if ((field === 'title')) {
-      valA = a[field]?.toLowerCase() || '';
-      valB = b[field]?.toLowerCase() || '';
+      const defaultLocale = a.defaultLocale || Object.keys(a.localizations)[0] || 'en-US';
+      const eventTitleA = getAttribute(a, 'title', defaultLocale);
+      const eventTitleB = getAttribute(b, 'title', defaultLocale);
+      valA = eventTitleA?.toLowerCase() || '';
+      valB = eventTitleB?.toLowerCase() || '';
       return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
     }
 
@@ -210,8 +215,11 @@ function sortData(props, config, options = {}) {
   el?.classList.add('active');
 }
 
-function buildToastMsgWithEventTitle(eventTitle, configValue) {
+function buildToastMsgWithEventTitle(event, configValue) {
+  const defaultLocale = event.defaultLocale || Object.keys(event.localizations)[0] || 'en-US';
+  const eventTitle = getAttribute(event, 'title', defaultLocale);
   const msgTemplate = configValue instanceof Array ? configValue.join('<br/>') : configValue;
+
   return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
 }
 
@@ -246,7 +254,7 @@ function initMoreOptions(props, config, eventObj, row) {
 
         sortData(props, config, { resort: true });
 
-        showToast(props, buildToastMsgWithEventTitle(eventObj.title, config['event-unpublished-msg']), { variant: 'positive' });
+        showToast(props, buildToastMsgWithEventTitle(eventObj, config['event-unpublished-msg']), { variant: 'positive' });
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
@@ -267,7 +275,7 @@ function initMoreOptions(props, config, eventObj, row) {
 
         sortData(props, config, { resort: true });
 
-        showToast(props, buildToastMsgWithEventTitle(eventObj.title, config['event-published-msg']), { variant: 'positive' });
+        showToast(props, buildToastMsgWithEventTitle(eventObj, config['event-published-msg']), { variant: 'positive' });
       });
     }
 
@@ -346,10 +354,11 @@ function initMoreOptions(props, config, eventObj, row) {
     clone.addEventListener('click', async (e) => {
       e.preventDefault();
       const payload = { ...eventObj };
-      payload.title = `${eventObj.title} - copy`;
+      const cloneTitle = `${getAttribute(eventObj, 'title', payload.defaultLocale || 'en-US')} - copy`;
+      setEventAttribute(payload, 'title', cloneTitle, payload.defaultLocale || 'en-US');
       toolBox.remove();
       row.classList.add('pending');
-      const newEventJSON = await createEvent(cloneFilter(payload));
+      const newEventJSON = await createEvent({ ...cloneFilter(payload), published: false }, payload.defaultLocale || 'en-US');
 
       if (newEventJSON.error) {
         row.classList.remove('pending');
@@ -370,7 +379,7 @@ function initMoreOptions(props, config, eventObj, row) {
 
       const newRow = props.el.querySelector(`tr[data-event-id="${newEventJSON.eventId}"]`);
       highlightRow(newRow);
-      showToast(props, buildToastMsgWithEventTitle(newEventJSON.title, config['clone-event-toast-msg']), { variant: 'info' });
+      showToast(props, buildToastMsgWithEventTitle(newEventJSON, config['clone-event-toast-msg']), { variant: 'info' });
     });
 
     // delete
@@ -397,9 +406,9 @@ function initMoreOptions(props, config, eventObj, row) {
         row.classList.add('pending');
         const resp = await deleteEvent(eventObj.eventId);
 
-        if (resp.error) {
+        if (!resp.ok) {
           row.classList.remove('pending');
-          showToast(props, resp.error, { variant: 'negative' });
+          showToast(props, 'Failed to delete event. Please try again later.', { variant: 'negative' });
           return;
         }
 
@@ -433,16 +442,21 @@ function initMoreOptions(props, config, eventObj, row) {
   });
 }
 
-function getCountryName(eventObj) {
-  if (!eventObj.venue) return '';
+function getEventDefaultLanguage(eventObj, locales) {
+  if (!eventObj.localizations) return locales['en-US'] || 'English, United States';
 
-  const { venue } = eventObj;
-  return venue.country || '';
+  const { defaultLocale, localizations } = eventObj;
+  const defaultLocaleKey = defaultLocale || Object.keys(localizations)[0];
+
+  if (!defaultLocaleKey) return locales['en-US'] || 'English, United States';
+  const firstKeyLocale = locales[defaultLocaleKey];
+  return firstKeyLocale || 'English, United States';
 }
 
 function buildStatusTag(event) {
-  const dot = event.published ? getIcon('dot-purple') : getIcon('dot-green');
-  const text = event.published ? 'Published' : 'Draft';
+  const eventPublished = event.published;
+  const dot = eventPublished ? getIcon('dot-purple') : getIcon('dot-green');
+  const text = eventPublished ? 'Published' : 'Draft';
 
   const statusTag = createTag('div', { class: 'event-status' });
   statusTag.append(dot, text);
@@ -450,9 +464,11 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(config, eventObj) {
+  const defaultLocale = eventObj.defaultLocale || Object.keys(eventObj.localizations)[0] || 'en-US';
   const url = new URL(`${window.location.origin}${config['create-form-url']}`);
+  const eventTitle = getAttribute(eventObj, 'title', defaultLocale);
   url.searchParams.set('eventId', eventObj.eventId);
-  const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventObj.title);
+  const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventTitle);
   return eventTitleTag;
 }
 
@@ -481,7 +497,6 @@ async function populateRow(props, config, index) {
   const sp = new URLSearchParams(window.location.search);
   const venueLoader = createSwipingLoader('venue-loader');
 
-  // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'event-row', 'data-event-id': event.eventId }, '', { parent: tBody });
   const thumbnailCell = buildThumbnail(event);
   const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(config, event)));
@@ -489,7 +504,7 @@ async function populateRow(props, config, index) {
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
   const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, venueLoader));
-  const geoCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getCountryName(event)));
+  const langCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getEventDefaultLanguage(event, config.locales)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
@@ -504,7 +519,7 @@ async function populateRow(props, config, index) {
     startDateCell,
     modDateCell,
     venueCell,
-    geoCell,
+    langCell,
     externalEventId,
     moreOptionsCell,
   );
@@ -513,7 +528,7 @@ async function populateRow(props, config, index) {
 
   if (event.eventId === sp.get('newEventId')) {
     if (!props.el.classList.contains('toast-shown')) {
-      showToast(props, buildToastMsgWithEventTitle(event.title, config['new-event-toast-msg']), { variant: 'positive' });
+      showToast(props, buildToastMsgWithEventTitle(event, config['new-event-toast-msg']), { variant: 'positive' });
 
       props.el.classList.add('toast-shown');
     }
@@ -587,7 +602,7 @@ function initSorting(props, config) {
     startDate: 'DATE RUN',
     modificationTime: 'LAST MODIFIED',
     venueName: 'VENUE NAME',
-    timezone: 'GEO',
+    language: 'LANGUAGE',
     attendeeCount: 'RSVP DATA',
     manage: 'MANAGE',
   };
@@ -647,7 +662,11 @@ function populateTable(props, config) {
 
 function filterData(props, config, query) {
   const q = query.toLowerCase();
-  props.filteredData = props.data.filter((e) => e.title.toLowerCase().includes(q));
+  props.filteredData = props.data.filter((e) => {
+    const defaultLocale = e.defaultLocale || Object.keys(e.localizations)[0] || 'en-US';
+    const eventTitle = getAttribute(e, 'title', defaultLocale);
+    return eventTitle.toLowerCase().includes(q);
+  });
   props.currentPage = 1;
   paginateData(props, config, 1);
   sortData(props, config, { resort: true });
@@ -723,6 +742,7 @@ async function buildDashboard(el, config) {
   if (!data?.length) {
     buildNoEventScreen(el, config);
   } else {
+    const locales = await getLocales().then((resp) => resp.localeNames) || {};
     props.data = data;
     props.filteredData = [...data];
     props.paginatedData = [...data];
@@ -731,7 +751,7 @@ async function buildDashboard(el, config) {
       set(target, prop, value, receiver) {
         target[prop] = value;
 
-        populateTable(receiver, config);
+        populateTable(receiver, { ...config, locales });
         updateEventsCount(receiver);
 
         return true;
@@ -739,7 +759,7 @@ async function buildDashboard(el, config) {
     };
     const proxyProps = new Proxy(props, dataHandler);
     buildDashboardHeader(proxyProps, config);
-    buildDashboardTable(proxyProps, config);
+    buildDashboardTable(proxyProps, { ...config, locales });
   }
 
   setTimeout(() => {

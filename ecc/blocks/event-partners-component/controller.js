@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax */
+import { getAttribute } from '../../scripts/data-utils.js';
 import {
   addSponsorToEvent,
   getEvent,
@@ -15,7 +16,7 @@ let PARTNERS_SERIES_ID;
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const showSponsors = component.querySelector('#partners-visible')?.checked;
+  const showSponsors = component.querySelector('#checkbox-sponsors')?.checked;
   const partnerSelectorGroup = component.querySelector('partner-selector-group');
   const { eventId } = props.eventDataResp;
 
@@ -31,10 +32,8 @@ export async function onSubmit(component, props) {
         }, eventId);
 
         if (resp.error) {
-          return;
+          component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
         }
-
-        props.eventDataResp = { ...props.eventDataResp, ...resp };
       } else {
         const existingPartner = props.eventDataResp.sponsors.find((sponsor) => {
           const idMatch = sponsor.sponsorId === sponsorId;
@@ -49,7 +48,8 @@ export async function onSubmit(component, props) {
           }, eventId);
 
           if (resp.error) {
-            window.lana?.log('Failed to add sponsor to event', resp);
+            component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+            window.lana?.log(`Failed to add sponsor to event:\n${JSON.stringify(resp, null, 2)}`);
           }
         } else if (partner.hasUnsavedChanges) {
           // If there are unsaved changes, do nothing
@@ -61,7 +61,7 @@ export async function onSubmit(component, props) {
           const resp = await updateSponsorInEvent(updatableData, partner.sponsorId, eventId);
 
           if (resp.error) {
-            window.lana?.log('Failed to update sponsor in event', resp);
+            window.lana?.log(`Failed to update sponsor in event:\n${JSON.stringify(resp, null, 2)}`);
           }
         }
       }
@@ -76,14 +76,19 @@ export async function onSubmit(component, props) {
         if (!stillNeeded) {
           const resp = await removeSponsorFromEvent(sponsorId, eventId);
           if (!resp.ok) {
-            window.lana?.log('Failed to remove sponsor from event', resp);
+            window.lana?.log(`Failed to remove sponsor from event:\n${JSON.stringify(resp, null, 2)}`);
           }
         }
       }));
     }
 
     const updatedEventData = await getEvent(eventId);
-    props.eventDataResp = { ...props.eventDataResp, ...updatedEventData };
+
+    if (!updatedEventData.error && updatedEventData) {
+      props.eventDataResp = updatedEventData;
+    } else {
+      component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: updatedEventData.error } }));
+    }
   }
 
   props.payload = { ...props.payload, showSponsors };
@@ -108,12 +113,21 @@ export async function onRespUpdate(_component, _props) {
 
 export default async function init(component, props) {
   const eventData = props.eventDataResp;
+  const [
+    seriesId,
+    sponsors,
+    showSponsors,
+  ] = [
+    getAttribute(eventData, 'seriesId', props.locale),
+    getAttribute(eventData, 'sponsors', props.locale),
+    getAttribute(eventData, 'showSponsors', props.locale),
+  ];
   const partnersGroup = component.querySelector('partner-selector-group');
 
-  if (eventData.sponsors) {
-    const partners = await Promise.all(eventData.sponsors.map(async (sponsor, index) => {
+  if (sponsors) {
+    const partners = await Promise.all(sponsors.map(async (sponsor, index) => {
       if (sponsor.sponsorType === 'Partner') {
-        const partnerData = await getSponsor(eventData.seriesId, sponsor.sponsorId);
+        const partnerData = await getSponsor(seriesId, sponsor.sponsorId);
 
         if (partnerData) {
           let photo;
@@ -121,7 +135,7 @@ export default async function init(component, props) {
           if (partnerData.image) {
             photo = { ...partnerData.image, url: partnerData.image.imageUrl };
           } else {
-            const resp = await getSponsorImages(eventData.seriesId, sponsorId);
+            const resp = await getSponsorImages(seriesId, sponsorId);
 
             if (resp?.images) {
               const sponsorImage = resp?.images.find((image) => image.imageKind === 'sponsor-image');
@@ -169,7 +183,7 @@ export default async function init(component, props) {
   }
 
   const partnerVisible = component.querySelector('#partners-visible');
-  partnerVisible.checked = eventData.showSponsors;
+  partnerVisible.checked = showSponsors;
 }
 
 export function onTargetUpdate(component, props) {
