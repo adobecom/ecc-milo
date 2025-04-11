@@ -205,7 +205,7 @@ export default class Profile extends LitElement {
 
   saveDisabled() {
     // eslint-disable-next-line max-len
-    return !this.profile.firstName || !this.profile.lastName || !this.profile.title;
+    return !this.profile.firstName || !this.profile.lastName || !this.profile.localizations[this.locale].title;
   }
 
   renderNameFieldWithSearchIntegrated(edited = false) {
