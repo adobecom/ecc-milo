@@ -36,7 +36,9 @@ export default class ProfileContainer extends LitElement {
 
   reloadSearchData = async () => {
     const spResp = await getSpeakers(this.seriesId);
-    if (spResp) this.searchdata = spResp.speakers;
+    // eslint-disable-next-line max-len
+    const filterdSpeakers = spResp.speakers.filter((speaker) => speaker.localizations && typeof speaker.localizations === 'object' && this.locale in speaker.localizations);
+    if (filterdSpeakers) this.searchdata = filterdSpeakers;
   };
 
   updateProfile(index, profile) {
@@ -46,9 +48,9 @@ export default class ProfileContainer extends LitElement {
   }
 
   isValidSpeaker(profile) {
-    const firstName = getProfileAttr(profile, 'firstName');
-    const lastName = getProfileAttr(profile, 'lastName');
-    const title = getProfileAttr(profile, 'title');
+    const firstName = getProfileAttr(profile, 'firstName', this.locale);
+    const lastName = getProfileAttr(profile, 'lastName', this.locale);
+    const title = getProfileAttr(profile, 'title', this.locale);
 
     return firstName && lastName && title;
   }
@@ -108,13 +110,13 @@ export default class ProfileContainer extends LitElement {
       repeat(this.profiles, (profile, index) => {
         const profileJSON = JSON.stringify({
           ...profile,
-          firstName: getProfileAttr(profile, 'firstName'),
-          lastName: getProfileAttr(profile, 'lastName'),
-          title: getProfileAttr(profile, 'title'),
-          bio: getProfileAttr(profile, 'bio'),
-          socialLinks: getProfileAttr(profile, 'socialLinks'),
-          photo: getProfileAttr(profile, 'photo'),
-          speakerId: getProfileAttr(profile, 'speakerId'),
+          firstName: getProfileAttr(profile, 'firstName', this.locale),
+          lastName: getProfileAttr(profile, 'lastName', this.locale),
+          title: getProfileAttr(profile, 'title', this.locale),
+          bio: getProfileAttr(profile, 'bio', this.locale),
+          socialLinks: getProfileAttr(profile, 'socialLinks', this.locale),
+          photo: getProfileAttr(profile, 'photo', this.locale),
+          speakerId: getProfileAttr(profile, 'speakerId', this.locale),
         });
         const imgTag = imageTag.cloneNode(true);
 
