@@ -57,17 +57,6 @@ export default class Profile extends LitElement {
     this.requestUpdate();
   }
 
-  updateLocalizedProfileField(localizedField, edited = false) {
-    let localizations = {};
-    if (edited) {
-      // eslint-disable-next-line max-len
-      localizations = { [this.locale]: { ...(this.profileCopy.localizations[this.locale]), ...localizedField } };
-    } else {
-      localizations = { [this.locale]: { ...(this.profile.localizations[this.locale]), ...localizedField } };
-    }
-    this.updateProfile({ localizations }, edited);
-  }
-
   updateProfile(profile, edited = false) {
     if (edited) {
       this.profileCopy = { ...this.profileCopy, ...profile };
@@ -204,7 +193,6 @@ export default class Profile extends LitElement {
   }
 
   saveDisabled() {
-    // eslint-disable-next-line max-len
     return !this.profile.firstName || !this.profile.lastName || !this.profile.title;
   }
 
@@ -249,8 +237,8 @@ export default class Profile extends LitElement {
   })} file=${JSON.stringify(imagefile)}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
-    <custom-textfield fielddata=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateLocalizedProfileField({ title: event.detail.value }, edited)}></custom-textfield>
-    <custom-textfield fielddata=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @change-custom=${(event) => this.updateLocalizedProfileField({ bio: event.detail.value }, edited)}></custom-textfield>
+    <custom-textfield fielddata=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ title: event.detail.value }, edited)}></custom-textfield>
+    <custom-textfield fielddata=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @change-custom=${(event) => this.updateProfile({ bio: event.detail.value }, edited)}></custom-textfield>
     <div class="social-media">
     <h3>${fieldLabelsJSON.socialLinks}</h3>
     ${profile?.socialLinks ? repeat(
