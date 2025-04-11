@@ -1,16 +1,20 @@
 /* eslint-disable no-use-before-define */
 
-import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
+import { EVENT_DATA_FILTER, isValidAttribute, splitLocalizableFields } from '../../scripts/data-utils.js';
 
-// FIXME: this whole data handler thing can be done better
-let responseCache = {};
-let payloadCache = {};
+const responseCache = { localizations: {} };
+const payloadCache = { localizations: {} };
+let removeFromPayload = [];
 
-function isValidAttribute(attr) {
-  return attr !== undefined && attr !== null;
+export function setRemoveCache(data) {
+  removeFromPayload.push(...data);
 }
 
-export function quickFilter(obj) {
+export function clearRemoveCache() {
+  removeFromPayload = [];
+}
+
+export function submitFilter(obj) {
   const output = {};
 
   Object.entries(EVENT_DATA_FILTER).forEach(([key, attr]) => {
@@ -22,122 +26,177 @@ export function quickFilter(obj) {
   return output;
 }
 
-export function setPayloadCache(payload) {
-  if (!payload) return;
+export function setPropsPayload(props, newData, removeData = []) {
+  const { locale } = props;
+  const existingPayload = props.payload;
 
-  payloadCache = quickFilter(payload);
+  // Split newData into localizable and non-localizable fields
+  const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
+    newData,
+    EVENT_DATA_FILTER,
+    locale,
+  );
+
+  // apply nested ref filters
+  Object.entries(nonLocalizableFields).forEach(([key, value]) => {
+    const attr = EVENT_DATA_FILTER[key];
+    if (!attr) return;
+
+    if (attr.ref && attr.type === 'array') {
+      const refFilter = attr.ref;
+      const refData = value.map((item) => Object.keys(refFilter).reduce((acc, refKey) => {
+        if (refFilter[refKey].submittable) {
+          acc[refKey] = item[refKey];
+        }
+        return acc;
+      }, {}));
+      nonLocalizableFields[key] = refData;
+    }
+  });
+
+  Object.entries(localizableFields).forEach(([key, value]) => {
+    const attr = EVENT_DATA_FILTER[key];
+    if (!attr) return;
+
+    if (attr.ref && attr.type === 'array') {
+      const refFilter = attr.ref;
+      const refData = value.map((item) => Object.keys(refFilter).reduce((acc, refKey) => {
+        if (refFilter[refKey].submittable) {
+          acc[refKey] = item[refKey];
+        }
+        return acc;
+      }, {}));
+      localizableFields[key] = refData;
+    }
+  });
+
+  const payload = {
+    ...existingPayload,
+    ...nonLocalizableFields,
+    localizations: {
+      ...existingPayload.localizations,
+      [locale]: {
+        ...existingPayload.localizations?.[locale],
+        ...localizableFields,
+      },
+    },
+  };
+
+  // Update the payload
+  props.payload = payload;
+  props.removeFromPayload = removeData;
+}
+
+export function setPayloadCache(payload, locale) {
+  if (!payload || !locale) return;
+
+  // Split payload into localizable and non-localizable fields
+  const splitNewPayload = splitLocalizableFields(
+    payload,
+    EVENT_DATA_FILTER,
+    locale,
+  );
+
+  Object.assign(payloadCache, {
+    ...payloadCache,
+    ...splitNewPayload.nonLocalizableFields,
+  });
+
+  payloadCache.localizations[locale] = {
+    ...payloadCache.localizations[locale],
+    ...splitNewPayload.localizableFields,
+  };
+}
+
+export function setResponseCache(response, locale) {
+  if (!response || !locale) return;
+
+  // Split response into localizable and non-localizable fields
+  const splitNewResponse = splitLocalizableFields(
+    response,
+    EVENT_DATA_FILTER,
+    locale,
+  );
+
+  Object.assign(responseCache, {
+    ...responseCache,
+    ...splitNewResponse.nonLocalizableFields,
+  });
+
+  responseCache.localizations[locale] = {
+    ...responseCache.localizations[locale],
+    ...splitNewResponse.localizableFields[locale],
+  };
 }
 
 export function getFilteredCachedPayload() {
-  return payloadCache;
-}
+  const submittableFields = Object.entries(EVENT_DATA_FILTER)
+    .filter(([, attr]) => attr.submittable)
+    .map(([key]) => key);
 
-export function setResponseCache(response) {
-  if (!response) return;
-  responseCache = quickFilter(response);
+  const filteredPayload = submittableFields.reduce((acc, key) => {
+    if (isValidAttribute(payloadCache[key])) {
+      acc[key] = payloadCache[key];
+    }
+    return acc;
+  }, {});
+
+  return filteredPayload;
 }
 
 export function getFilteredCachedResponse() {
-  return responseCache;
+  const submittableFields = Object.entries(EVENT_DATA_FILTER)
+    .filter(([, attr]) => attr.submittable)
+    .map(([key]) => key);
+
+  const filteredResponse = submittableFields.reduce((acc, key) => {
+    if (isValidAttribute(responseCache[key])) {
+      acc[key] = responseCache[key];
+    }
+    return acc;
+  }, {});
+
+  return filteredResponse;
 }
 
-/**
- * Recursively compares two values to determine if they are different.
- *
- * @param {*} value1 - The first value to compare.
- * @param {*} value2 - The second value to compare.
- * @returns {boolean} - Returns true if the values are different, otherwise false.
- */
-export function compareObjects(value1, value2, lengthOnly = false) {
-  if (
-    typeof value1 === 'object'
-    && value1 !== null
-    && !Array.isArray(value1)
-    && typeof value2 === 'object'
-    && value2 !== null
-    && !Array.isArray(value2)
-  ) {
-    if (hasContentChanged(value1, value2)) {
-      return true;
-    }
-  } else if (Array.isArray(value1) && Array.isArray(value2)) {
-    if (value1.length !== value2.length) {
-      // Change detected due to different array lengths
-      return true;
-    }
-
-    if (!lengthOnly) {
-      for (let i = 0; i < value1.length; i += 1) {
-        if (compareObjects(value1[i], value2[i])) {
-          return true;
-        }
-      }
-    }
-  } else if (value1 !== value2) {
-    // Change detected
-    return true;
-  }
-  return false;
+export function getLocalizedResponseData(props) {
+  const response = getFilteredCachedResponse(props.locale);
+  return {
+    ...response,
+    ...response.localizations?.[props.locale] || {},
+  };
 }
 
-/**
- * Determines if the content of two objects has changed.
- *
- * @param {Object} oldData - The original object.
- * @param {Object} newData - The updated object.
- * @returns {boolean} - Returns true if content has changed, otherwise false.
- * @throws {TypeError} - Throws error if inputs are not objects.
- */
-export function hasContentChanged(oldData, newData) {
-  // Ensure both inputs are objects
-  if (
-    typeof oldData !== 'object'
-    || oldData === null
-    || typeof newData !== 'object'
-    || newData === null
-  ) {
-    throw new TypeError('Both oldData and newData must be objects');
-  }
-
-  const ignoreList = [
-    'modificationTime',
-    'status',
-    'platform',
-    'platformCode',
-    'liveUpdate',
-    'externalProvider',
-  ];
-
-  const lengthOnlyList = ['speakers'];
-
-  // Checking keys counts
-  const oldDataKeys = Object.keys(oldData).filter((key) => !ignoreList.includes(key));
-  const newDataKeys = Object.keys(newData).filter((key) => !ignoreList.includes(key));
-
-  if (oldDataKeys.length !== newDataKeys.length) {
-    // Change detected due to different key counts
-    return true;
-  }
-
-  // Check for differences in the actual values
-  return oldDataKeys.some(
-    (key) => {
-      const lengthOnly = lengthOnlyList.includes(key) && !oldData[key].ordinal;
-
-      return !ignoreList.includes(key) && compareObjects(oldData[key], newData[key], lengthOnly);
-    },
-  );
+export function getLocalizedPayloadData(props) {
+  const payload = getFilteredCachedPayload(props.locale);
+  return {
+    ...payload,
+    ...payload.localizations?.[props.locale] || {},
+  };
 }
 
-export default function getJoinedData() {
-  const filteredResponse = getFilteredCachedResponse();
-  const filteredPayload = getFilteredCachedPayload();
+export default function getJoinedData(locale) {
+  const filteredResponse = getFilteredCachedResponse(locale);
+  const filteredPayload = getFilteredCachedPayload(locale);
 
+  // Combine global and localized data
   const finalPayload = {
     ...filteredResponse,
     ...filteredPayload,
     modificationTime: filteredResponse.modificationTime,
   };
+
+  removeFromPayload.forEach((item) => {
+    if (item.path) {
+      const path = item.path.split('.');
+      const target = path.reduce((acc, subKey) => acc[subKey], finalPayload);
+      delete target[item.key];
+    } else {
+      delete finalPayload[item.key];
+    }
+  });
+
+  clearRemoveCache();
 
   return finalPayload;
 }

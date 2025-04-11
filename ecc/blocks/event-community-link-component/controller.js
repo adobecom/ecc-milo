@@ -1,19 +1,27 @@
 /* eslint-disable no-unused-vars */
+import { getAttribute } from '../../scripts/data-utils.js';
 import { changeInputValue } from '../../scripts/utils.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const checkbox = component.querySelector('#checkbox-community');
 
+  const data = {};
+  const removeData = [];
+
   if (checkbox.checked) {
     const communityTopicUrl = component.querySelector('#community-url-details')?.value?.trim();
-    props.payload = { ...props.payload, communityTopicUrl };
+    data.communityTopicUrl = communityTopicUrl;
   } else {
-    const tempPayload = { ...props.payload };
-    delete tempPayload.communityTopicUrl;
-    props.payload = tempPayload;
+    removeData.push({
+      key: 'communityTopicUrl',
+      path: '',
+    });
   }
+
+  setPropsPayload(props, data, removeData);
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -31,20 +39,27 @@ export async function onRespUpdate(_component, _props) {
 
 export default function init(component, props) {
   const eventData = props.eventDataResp;
-
-  component.dataset.cloudType = props.payload.cloudType || eventData.cloudType;
+  const [
+    communityTopicUrl,
+    cloudType,
+  ] = [
+    getAttribute(eventData, 'communityTopicUrl', props.locale),
+    getAttribute(eventData, 'cloudType', props.locale),
+  ];
+  component.dataset.cloudType = cloudType;
   const checkbox = component.querySelector('#checkbox-community');
   const input = component.querySelector('#community-url-details');
 
-  if (eventData.communityTopicUrl) {
-    changeInputValue(checkbox, 'checked', !!eventData.communityTopicUrl);
-    changeInputValue(input, 'value', eventData.communityTopicUrl || '');
+  if (communityTopicUrl) {
+    changeInputValue(checkbox, 'checked', !!communityTopicUrl);
+    changeInputValue(input, 'value', communityTopicUrl || '');
     component.classList.add('prefilled');
   }
 
   const updateInputState = () => {
     input.required = checkbox.checked;
     if (!checkbox.checked) input.value = '';
+    input.disabled = !checkbox.checked;
   };
 
   if (checkbox && input) {

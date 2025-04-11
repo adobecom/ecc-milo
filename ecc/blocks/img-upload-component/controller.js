@@ -126,7 +126,7 @@ export default async function init(component, props) {
             dz.requestUpdate();
           }
         } catch (error) {
-          window.lana?.log('Failed to perform image DELETE operation. Error:', error);
+          window.lana?.log(`Failed to perform image DELETE operation:\n${JSON.stringify(error, null, 2)}`);
           dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
         }
 

@@ -22,7 +22,7 @@ export async function getProfile() {
 
   if (profile) return profile;
 
-  window.lana?.log('Failed to get user profile data.');
+  window.lana?.log('Failed to get user profile data');
   return {};
 }
 

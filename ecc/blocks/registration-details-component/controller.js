@@ -1,5 +1,7 @@
+import { getAttribute } from '../../scripts/data-utils.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { addTooltipToEl, decorateSwitchFieldset } from '../../scripts/utils.js';
+import { setPropsPayload } from '../form-handler/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -47,14 +49,13 @@ function prefillFields(component, props) {
   const descriptionEl = component.querySelector('#rsvp-form-detail-description');
 
   const eventData = props.eventDataResp;
+
   if (eventData) {
-    const {
-      attendeeLimit,
-      allowWaitlisting,
-      hostEmail,
-      rsvpDescription,
-      allowGuestRegistration,
-    } = eventData;
+    const attendeeLimit = getAttribute(eventData, 'attendeeLimit', props.locale);
+    const allowWaitlisting = getAttribute(eventData, 'allowWaitlisting', props.locale);
+    const rsvpDescription = getAttribute(eventData, 'rsvpDescription', props.locale);
+    const hostEmail = getAttribute(eventData, 'hostEmail', props.locale);
+    const allowGuestRegistration = getAttribute(eventData, 'allowGuestRegistration', props.locale);
 
     if (attendeeLimitEl && attendeeLimit) attendeeLimitEl.value = attendeeLimit;
     if (disbleWaitlistEl) disbleWaitlistEl.checked = !allowWaitlisting;
@@ -200,7 +201,8 @@ export function onSubmit(component, props) {
   const allowGuestRegistration = guestRegistrationInput?.checked || false;
 
   const attendeeLimit = Number.isNaN(+attendeeLimitVal) ? null : +attendeeLimitVal;
-  const rsvpData = { ...props.payload };
+  const rsvpData = {};
+  const removeData = [];
 
   rsvpData.rsvpDescription = rsvpDescription;
   rsvpData.allowWaitlisting = !!allowWaitlisting;
@@ -209,12 +211,15 @@ export function onSubmit(component, props) {
   if (contactHost && hostEmail) {
     rsvpData.hostEmail = hostEmail;
   } else {
-    rsvpData.hostEmail = null;
+    removeData.push({
+      key: 'hostEmail',
+      path: '',
+    });
   }
 
   if (attendeeLimit) rsvpData.attendeeLimit = attendeeLimit;
 
-  props.payload = rsvpData;
+  setPropsPayload(props, rsvpData, removeData);
 }
 
 function updateHeadingTooltip(component) {
@@ -269,30 +274,7 @@ export async function onRespUpdate(component, props) {
 }
 
 export default function init(component, props) {
-  component.dataset.cloudType = props.payload.cloudType || props.eventDataResp.cloudType;
-  component.dataset.eventType = props.payload.eventType || props.eventDataResp.eventType;
-
-  switch (component.dataset.cloudType) {
-    case 'CreativeCloud':
-      buildCreativeCloudFields(component);
-      break;
-    case 'ExperienceCloud':
-      switch (component.dataset.eventType) {
-        case 'InPerson':
-          buildExperienceCloudInPersonFields(component);
-          break;
-        case 'webinar':
-          buildExperienceCloudWebinarFields(component);
-          break;
-        default:
-          break;
-      }
-      break;
-    default:
-      break;
-  }
-
-  prefillFields(component, props);
+  // Do nothing. We don't know what to init without the payload..
 }
 
 export function onTargetUpdate(component, props) {
