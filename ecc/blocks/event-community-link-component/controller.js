@@ -6,17 +6,25 @@ import { setPropsPayload } from '../form-handler/data-handler.js';
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const checkbox = component.querySelector('#checkbox-community');
+  const checkbox = component.querySelector('#checkbox-secondary-url');
 
   const data = {};
   const removeData = [];
 
   if (checkbox.checked) {
-    const communityTopicUrl = component.querySelector('#community-url-details')?.value?.trim();
-    data.communityTopicUrl = communityTopicUrl;
+    const secondaryUrlTitle = component.querySelector('#secondary-url-title')?.value?.trim();
+    data.secondaryUrlTitle = secondaryUrlTitle;
+
+    const secondaryUrlUrl = component.querySelector('#secondary-url-url')?.value?.trim();
+    data.secondaryUrlUrl = secondaryUrlUrl;
   } else {
     removeData.push({
-      key: 'communityTopicUrl',
+      key: 'secondaryUrlTitle',
+      path: '',
+    });
+
+    removeData.push({
+      key: 'secondaryUrlUrl',
       path: '',
     });
   }
@@ -25,12 +33,7 @@ export function onSubmit(component, props) {
 }
 
 export async function onPayloadUpdate(component, props) {
-  const { cloudType } = props.payload;
-
-  if (cloudType && cloudType !== component.dataset.cloudType) {
-    component.classList.toggle('hidden', cloudType !== 'CreativeCloud');
-    component.dataset.cloudType = cloudType;
-  }
+  // Do nothing
 }
 
 export async function onRespUpdate(_component, _props) {
@@ -55,10 +58,15 @@ export default function init(component, props) {
   const titleInput = component.querySelector('#secondary-url-title');
   const urlInput = component.querySelector('#secondary-url-url');
 
-  if (communityTopicUrl) {
+  if (secondaryUrlTitle && secondaryUrlUrl) {
+    changeInputValue(checkbox, 'checked', true);
+    changeInputValue(titleInput, 'value', secondaryUrlTitle);
+    changeInputValue(urlInput, 'value', secondaryUrlUrl);
+    component.classList.add('prefilled');
+  } else if (communityTopicUrl) {
     changeInputValue(checkbox, 'checked', !!communityTopicUrl);
-    changeInputValue(titleInput, 'value', secondaryUrlTitle || '');
-    changeInputValue(urlInput, 'value', secondaryUrlUrl || '');
+    titleInput.required = false;
+    changeInputValue(urlInput, 'value', communityTopicUrl);
     component.classList.add('prefilled');
   }
 
