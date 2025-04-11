@@ -41,29 +41,44 @@ export default function init(component, props) {
   const eventData = props.eventDataResp;
   const [
     communityTopicUrl,
+    secondaryUrlTitle,
+    secondaryUrlUrl,
     cloudType,
   ] = [
     getAttribute(eventData, 'communityTopicUrl', props.locale),
+    getAttribute(eventData, 'secondaryUrlTitle', props.locale),
+    getAttribute(eventData, 'secondaryUrlUrl', props.locale),
     getAttribute(eventData, 'cloudType', props.locale),
   ];
   component.dataset.cloudType = cloudType;
-  const checkbox = component.querySelector('#checkbox-community');
-  const input = component.querySelector('#community-url-details');
+  const checkbox = component.querySelector('#checkbox-secondary-url');
+  const titleInput = component.querySelector('#secondary-url-title');
+  const urlInput = component.querySelector('#secondary-url-url');
 
   if (communityTopicUrl) {
     changeInputValue(checkbox, 'checked', !!communityTopicUrl);
-    changeInputValue(input, 'value', communityTopicUrl || '');
+    changeInputValue(titleInput, 'value', secondaryUrlTitle || '');
+    changeInputValue(urlInput, 'value', secondaryUrlUrl || '');
     component.classList.add('prefilled');
   }
 
   const updateInputState = () => {
-    input.required = checkbox.checked;
-    if (!checkbox.checked) input.value = '';
-    input.disabled = !checkbox.checked;
+    titleInput.required = checkbox.checked;
+    titleInput.disabled = !checkbox.checked;
+
+    urlInput.required = checkbox.checked;
+    urlInput.disabled = !checkbox.checked;
+
+    if (!checkbox.checked) {
+      titleInput.value = '';
+      urlInput.value = '';
+    }
   };
 
-  if (checkbox && input) {
+  if (checkbox && titleInput && urlInput) {
     checkbox.addEventListener('change', updateInputState);
+    titleInput.addEventListener('input', updateInputState);
+    urlInput.addEventListener('input', updateInputState);
   }
 
   updateInputState();

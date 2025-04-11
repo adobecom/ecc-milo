@@ -9,20 +9,38 @@ async function decorateFields(row) {
   const cols = row.querySelectorAll(':scope > div');
   if (!cols.length) return null;
   const [checkboxText, placeholderCol] = cols;
-  const text = placeholderCol.textContent.trim();
+  const [title, url] = placeholderCol.textContent.trim().split('\n');
 
-  const input = createTag('sp-textfield', {
-    id: 'community-url-details',
-    class: 'text-input',
-    placeholder: text,
-    pattern: LINK_REGEX,
-    size: 'xl',
-  });
+  const inputsWrapper = createTag('div', { class: 'inputs-wrapper' });
+  createTag(
+    'sp-textfield',
+    {
+      id: 'secondary-url-title',
+      class: 'text-input',
+      placeholder: title.trim(),
+      size: 'xl',
+    },
+    '',
+    { parent: inputsWrapper },
+  );
+
+  createTag(
+    'sp-textfield',
+    {
+      id: 'secondary-url-url',
+      class: 'text-input',
+      placeholder: url.trim(),
+      pattern: LINK_REGEX,
+      size: 'xl',
+    },
+    '',
+    { parent: inputsWrapper },
+  );
 
   const cn = checkboxText.textContent.trim();
   const checkbox = createTag('sp-checkbox', {
-    id: 'checkbox-community',
-    name: 'checkbox-community',
+    id: 'checkbox-secondary-url',
+    name: 'checkbox-secondary-url',
     value: cn,
   });
 
@@ -40,7 +58,7 @@ async function decorateFields(row) {
   }
 
   const wrapper = createTag('div', { class: 'field-container' });
-  wrapper.append(checkbox, input);
+  wrapper.append(checkbox, inputsWrapper);
 
   row.innerHTML = '';
   row.append(wrapper);
