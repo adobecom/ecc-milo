@@ -422,11 +422,16 @@ export async function onRespUpdate(component, props) {
   // lock language picker on defaultLocale given and is not en-US
 
   if (props.eventDataResp) {
-    const { defaultLocale } = props.eventDataResp;
+    const { defaultLocale, isPrivate } = props.eventDataResp;
     const languagePicker = component.querySelector('#language-picker');
 
     if (defaultLocale) {
       languagePicker.disabled = true;
+    }
+
+    if (isPrivate) {
+      const isPrivateInput = component.querySelector('#private-event');
+      isPrivateInput.setAttribute('disabled', 'true');
     }
   }
 }
@@ -466,6 +471,8 @@ function prefillFields(component, props, eventData) {
   const defaultLocale = getAttribute(eventData, 'defaultLocale', props.locale);
   const isPrivate = getAttribute(eventData, 'isPrivate', props.locale);
 
+  // FIXME: extract response required field validation to datahandler layer. 
+  // so such validation are not repeated at each component level.
   if (isValidAttribute(title)) eventTitleInput.value = title;
   if (isValidAttribute(description)) eventDescriptionInput.value = description;
   if (isValidAttribute(localStartDate)) datePicker.dataset.startDate = localStartDate;
