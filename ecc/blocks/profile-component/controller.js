@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { getAttribute } from '../../scripts/data-utils.js';
 import {
   addSpeakerToEvent,
   getSpeakers,
@@ -12,21 +13,21 @@ export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const profileContainer = component.querySelector('profile-container');
+
   if (profileContainer) {
-    const { eventId } = props.eventDataResp;
+    const savedSpeakers = getAttribute(props.eventDataResp, 'speakers', props.locale);
+    const eventId = getAttribute(props.eventDataResp, 'eventId', props.locale);
     const speakers = profileContainer.getProfiles();
 
-    if (speakers.length === 0) {
-      if (props.eventDataResp.speakers) {
-        const savedSpeakers = props.eventDataResp.speakers;
-        await savedSpeakers.reduce(async (promise, speaker) => {
-          await promise;
-          const { speakerId } = speaker;
-          const resp = await removeSpeakerFromEvent(speakerId, eventId);
-          if (resp.error) return;
-          props.eventDataResp = { ...props.eventDataResp, ...resp };
-        }, Promise.resolve());
-      }
+    if (speakers.length === 0 && (savedSpeakers && savedSpeakers.length > 0)) {
+      await Promise.all(savedSpeakers.map(async (speaker) => {
+        const { speakerId } = speaker;
+        const resp = await removeSpeakerFromEvent(speakerId, eventId);
+
+        if (!resp.ok) {
+          window.lana?.log(`Failed to remove speaker from event:\n${JSON.stringify(resp, null, 2)}`);
+        }
+      }));
 
       return;
     }
@@ -35,22 +36,18 @@ export async function onSubmit(component, props) {
       throw new Error('Please select a speaker type for the speakers');
     }
 
-    await speakers.reduce(async (promise, speaker) => {
-      await promise;
-
+    // Process all speakers in parallel
+    await Promise.all(speakers.map(async (speaker) => {
       const { speakerId, speakerType, ordinal } = speaker;
-
-      if (!props.eventDataResp.speakers) {
+      if (!savedSpeakers || savedSpeakers.length === 0) {
         const resp = await addSpeakerToEvent(speaker, eventId);
 
         if (resp.error) {
-          return;
+          component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+          window.lana?.log(`Failed to add speaker to event:\n${JSON.stringify(resp, null, 2)}`);
         }
-
-        const updatedEventData = await getEvent(eventId);
-        props.eventDataResp = { ...props.eventDataResp, ...updatedEventData };
       } else {
-        const existingSpeaker = props.eventDataResp.speakers.find((profile) => {
+        const existingSpeaker = savedSpeakers.find((profile) => {
           const idMatch = profile.speakerId === speakerId;
           const typeMatch = profile.speakerType === speakerType;
           const ordinalMatch = profile.ordinal === ordinal;
@@ -60,45 +57,43 @@ export async function onSubmit(component, props) {
         if (existingSpeaker) {
           // do nothing
         } else {
-          // eslint-disable-next-line max-len
-          const updateSpeaker = props.eventDataResp.speakers.find((profile) => profile.speakerId === speakerId);
+          const updateSpeaker = savedSpeakers.find((profile) => profile.speakerId === speakerId);
           if (updateSpeaker) {
             const resp = await updateSpeakerInEvent(speaker, speakerId, eventId);
 
             if (resp.error) {
-              const { errors, message } = resp.error;
-              profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message } } }));
+              window.lana?.log(`Failed to update speaker in event:\n${JSON.stringify(resp, null, 2)}`);
             }
-
-            props.eventDataResp = { ...props.eventDataResp, ...resp };
           } else {
             const resp = await addSpeakerToEvent(speaker, eventId);
-
             if (resp.error) {
-              const { errors, message } = resp.error;
-              profileContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message } } }));
+              window.lana?.log(`Failed to add speaker to event:\n${JSON.stringify(resp, null, 2)}`);
             }
-
-            const updatedEventData = await getEvent(eventId);
-            props.eventDataResp = { ...props.eventDataResp, ...updatedEventData };
           }
         }
       }
-    }, Promise.resolve());
+    }));
 
-    if (props.eventDataResp.speakers) {
-      const savedSpeakers = props.eventDataResp.speakers;
-      await savedSpeakers.reduce(async (promise, speaker) => {
-        await promise;
+    if (savedSpeakers && savedSpeakers.length > 0) {
+      await Promise.all(savedSpeakers.map(async (speaker) => {
         const { speakerId } = speaker;
         const stillNeeded = speakers.find((profile) => profile.speakerId === speakerId);
 
         if (!stillNeeded) {
           const resp = await removeSpeakerFromEvent(speakerId, eventId);
-          if (resp.error) return;
-          props.eventDataResp = { ...props.eventDataResp, ...resp };
+
+          if (!resp.ok) {
+            window.lana?.log(`Failed to remove speaker from event:\n${JSON.stringify(resp, null, 2)}`);
+          }
         }
-      }, Promise.resolve());
+      }));
+    }
+
+    const updatedEventData = await getEvent(eventId);
+    if (!updatedEventData.error && updatedEventData) {
+      props.eventDataResp = updatedEventData;
+    } else {
+      component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: updatedEventData.error } }));
     }
   }
 }
@@ -109,8 +104,14 @@ export async function onPayloadUpdate(component, props) {
     if (props.payload.seriesId && props.payload.seriesId !== container.seriesId) {
       container.setAttribute('seriesId', props.payload.seriesId);
       const { speakers } = await getSpeakers(props.payload.seriesId);
-      container.searchdata = speakers ?? [];
+      const filterdSpeakers = speakers.filter((speaker) => speaker.localizations && typeof speaker.localizations === 'object' && props.locale in speaker.localizations);
+      container.searchdata = filterdSpeakers ?? [];
     }
+
+    if (props.locale) {
+      container.locale = props.locale;
+    }
+
     container.requestUpdate();
   });
 }
@@ -119,8 +120,9 @@ export async function onRespUpdate(_component, _props) {
   // Do nothing
 }
 
-async function prefillProfiles(props) {
-  const d = await props.eventDataResp;
+async function prefillProfiles(component, props) {
+  const d = props.eventDataResp;
+
   if (d?.eventId && d.seriesId) {
     const { eventId, seriesId } = d;
     try {
@@ -130,20 +132,25 @@ async function prefillProfiles(props) {
         // eslint-disable-next-line max-len
         d.speakers[idx] = { ...d.speakers[idx], type: d.speakers[idx].speakerType, ...speakers[idx] };
       }
-      props.eventDataResp = { ...props.eventDataResp, ...d };
+
+      if (!d.error && d) {
+        props.eventDataResp = d;
+      } else {
+        component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: d.error } }));
+      }
     } catch (e) {
-      window.lana?.log('Error fetching speaker data: ', e);
+      window.lana?.log(`Error fetching speaker data:\n${JSON.stringify(e, null, 2)}`);
     }
   }
 }
 
 export default async function init(component, props) {
-  await prefillProfiles(props);
+  await prefillProfiles(component, props);
   const eventData = props.eventDataResp;
-  const { speakers } = eventData;
+  const speakers = getAttribute(eventData, 'speakers', props.locale);
   const profileContainer = component.querySelector('profile-container');
   if (!speakers || !speakers.length || !profileContainer) return;
-  profileContainer.profiles = speakers;
+  profileContainer.profiles = [...speakers];
   profileContainer.requestUpdate();
   component.classList.add('prefilled');
 }
