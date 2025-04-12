@@ -105,16 +105,7 @@ function getVenueDataInForm(component) {
   const lon = +placeLngInput.value;
   const gmtOffset = +gmtoffsetInput.value;
   const formattedAddress = formattedAddressInput.value;
-
-  let additionalInformation;
-  const additionalInfoHolder = document.createElement('div');
-  additionalInfoHolder.innerHTML = additionalInformationInput?.value;
-
-  if (additionalInfoHolder.textContent.trim() === '') {
-    additionalInformation = '';
-  } else {
-    additionalInformation = additionalInfoHolder.innerHTML;
-  }
+  const additionalInformation = additionalInformationInput.value;
 
   let addressComponents;
 
