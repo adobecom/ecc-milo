@@ -300,6 +300,7 @@ export default async function init(component, props) {
 
   const venueNameInput = component.querySelector('#venue-info-venue-name');
   const venueRTE = component.querySelector('#venue-additional-info-rte');
+  const venueRTEOutput = component.querySelector('#venue-additional-info-rte-output');
   const venuePostEventCheckbox = component.querySelector('#checkbox-venue-info-visible');
   const venueAdditionalInfoPostEventCheckbox = component.querySelector('#checkbox-venue-additional-info-visible');
   const dz = component.querySelector('image-dropzone');
@@ -331,7 +332,7 @@ export default async function init(component, props) {
 
   if (venueRTE) {
     venueRTE.handleInput = (output) => {
-      changeInputValue(component.querySelector('#venue-additional-info-rte-output'), 'value', output);
+      changeInputValue(venueRTEOutput, 'value', output);
     };
   }
 

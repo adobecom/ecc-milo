@@ -378,7 +378,7 @@ export function onSubmit(component, props) {
 
   const isPrivate = component.querySelector('#private-event').checked;
   const title = component.querySelector('#info-field-event-title').value;
-  const description = component.querySelector('#info-field-event-description').value;
+  const description = component.querySelector('#event-info-description-rte-output').value;
   const datePicker = component.querySelector('#event-info-date-picker');
   const enTitle = component.querySelector('#event-info-url-input').value;
   const localStartDate = datePicker.dataset.startDate;
@@ -443,7 +443,7 @@ function checkEventDuplication(event, compareMetrics) {
 
 function prefillFields(component, props, eventData) {
   const eventTitleInput = component.querySelector('#info-field-event-title');
-  const eventDescriptionInput = component.querySelector('#info-field-event-description');
+  const eventDescriptionRTE = component.querySelector('#event-info-description-rte');
   const startTimeInput = component.querySelector('#time-picker-start-time');
   const startAmpmInput = component.querySelector('#ampm-picker-start-time');
   const endTimeInput = component.querySelector('#time-picker-end-time');
@@ -467,7 +467,7 @@ function prefillFields(component, props, eventData) {
   const isPrivate = getAttribute(eventData, 'isPrivate', props.locale);
 
   if (isValidAttribute(title)) eventTitleInput.value = title;
-  if (isValidAttribute(description)) eventDescriptionInput.value = description;
+  if (isValidAttribute(description)) eventDescriptionRTE.content = description;
   if (isValidAttribute(localStartDate)) datePicker.dataset.startDate = localStartDate;
   if (isValidAttribute(localEndDate)) datePicker.dataset.endDate = localEndDate;
   if (isValidAttribute(localStartTime)) {
@@ -532,6 +532,8 @@ export default async function init(component, props) {
   const startTime = component.querySelector('#time-picker-start-time-value');
   const endTime = component.querySelector('#time-picker-end-time-value');
   const datePicker = component.querySelector('#event-info-date-picker');
+  const descriptionRTE = component.querySelector('#event-info-description-rte');
+  const descriptionRTEOutput = component.querySelector('#event-info-description-rte-output');
 
   initCalendar(component);
 
@@ -670,6 +672,12 @@ export default async function init(component, props) {
     updateTimeOptionsBasedOnDate(e);
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), startDate: datePicker.dataset.startDate });
   });
+
+  if (descriptionRTE) {
+    descriptionRTE.handleInput = (output) => {
+      changeInputValue(descriptionRTEOutput, 'value', output);
+    };
+  }
 
   BlockMediator.subscribe('eventDupMetrics', (store) => {
     const metrics = store.newValue;
