@@ -3,34 +3,27 @@ import { generateToolTip } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
-function decorateSWCTextField(row, options) {
-  row.classList.add('text-field-row');
-
+function decorateRTETiptap(row) {
+  row.classList.add('rte-tiptap-row');
   const cols = row.querySelectorAll(':scope > div');
+
   if (!cols.length) return;
-  const [placeholderCol, maxLengthCol] = cols;
-  const text = placeholderCol.textContent.trim();
+  if (cols.length < 2) return;
+  const maxLengthCol = cols[1];
+  const isRequired = maxLengthCol?.textContent.trim().endsWith('*');
+  const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
 
-  let maxCharNum; let
-    attrTextEl;
-  if (maxLengthCol) {
-    attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
-    maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
-  }
+  const rteProps = {
+    id: 'rsvp-description-rte',
+    ...(isRequired && { required: true }),
+    ...(maxCharNum && { characterLimit: maxCharNum }),
+  };
+  const rte = createTag('rte-tiptap', rteProps);
+  const rteOutput = createTag('input', { id: 'rsvp-description-rte-output', type: 'hidden' });
 
-  const isRequired = attrTextEl?.textContent.trim().endsWith('*');
-
-  const inputOptions = { ...options, class: 'text-input', placeholder: text };
-  if (isRequired) inputOptions.required = true;
-  if (maxCharNum) inputOptions.maxlength = maxCharNum;
-
-  const input = createTag('sp-textfield', inputOptions);
-
-  const wrapper = createTag('div', { class: 'rsvp-field-wrapper' });
   row.innerHTML = '';
-  wrapper.append(input);
-  if (attrTextEl) wrapper.append(attrTextEl);
-  row.append(wrapper);
+  row.append(rteOutput);
+  row.append(rte);
 }
 
 export default async function init(el) {
@@ -38,11 +31,19 @@ export default async function init(el) {
 
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach((r, i) => {
-    if (i === 0) generateToolTip(r);
-    if (i === 1) {
-      r.classList.add('registration-configs-wrapper');
-      r.innerHTML = '';
+    switch (i) {
+      case 0:
+        generateToolTip(r);
+        break;
+      case 1:
+        r.classList.add('registration-configs-wrapper');
+        r.innerHTML = '';
+        break;
+      case 2:
+        decorateRTETiptap(r);
+        break;
+      default:
+        break;
     }
-    if (i === 2) decorateSWCTextField(r, { quiet: true, size: 'xl', id: 'rsvp-form-detail-description' });
   });
 }
