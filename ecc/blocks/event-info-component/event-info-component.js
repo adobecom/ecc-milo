@@ -3,7 +3,6 @@ import {
   getIcon,
   generateToolTip,
   decorateTextfield,
-  decorateTextarea,
   miloReplaceKey,
   addTooltipToEl,
 } from '../../scripts/utils.js';
@@ -153,6 +152,30 @@ function buildTitleContainer(row) {
   addLanguagePicker(rightWrapper);
 }
 
+function decorateRTETiptap(row) {
+  row.classList.add('rte-tiptap-row');
+  const cols = row.querySelectorAll(':scope > div');
+
+  if (!cols.length) return;
+  if (cols.length < 2) return;
+  const maxLengthCol = cols[1];
+  const isRequired = maxLengthCol?.textContent.trim().endsWith('*');
+  const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
+
+  const rteProps = {
+    id: 'event-info-description-rte',
+    ...(isRequired && { required: true }),
+    ...(maxCharNum && { characterLimit: maxCharNum }),
+  };
+
+  const rte = createTag('rte-tiptap', rteProps);
+  const rteOutput = createTag('input', { id: 'event-info-description-rte-output', type: 'hidden' });
+
+  row.innerHTML = '';
+  row.append(rteOutput);
+  row.append(rte);
+}
+
 export default function init(el) {
   el.classList.add('form-component');
 
@@ -167,7 +190,7 @@ export default function init(el) {
         await decorateTextfield(r, { id: 'info-field-event-title' }, await miloReplaceKey('duplicate-event-title-error'));
         break;
       case 2:
-        await decorateTextarea(r, { id: 'info-field-event-description', grows: true, quiet: true });
+        decorateRTETiptap(r);
         break;
       case 3:
         decorateDateTimeFields(r);

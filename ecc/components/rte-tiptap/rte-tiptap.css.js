@@ -46,12 +46,18 @@ export const style = css`
   width: 100%;
 }
 
-.rte-tiptap-toolbar {
-  margin-top: 24px;
+.rte-tiptap-toolbar-bottom-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: top;
+  margin-top: 6px;
+  margin-bottom: 24px;
 }
 
 .tiptap {
   min-height: 200px;
+  overflow-y: auto;
+  resize: vertical;
   margin-top: 5px;
   padding: 0 10px;
   font-size: 1rem;
