@@ -59,7 +59,7 @@ export default class RteTiptap extends LitElement {
     htmlHolder.innerHTML = this.editor.getHTML();
 
     let value = htmlHolder.textContent.trim();
-    if (value.trim() === '') {
+    if (value === '') {
       value = '';
     } else {
       value = htmlHolder.innerHTML;
