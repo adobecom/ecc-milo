@@ -59,24 +59,43 @@ export default class ProfileContainer extends LitElement {
     return this.profiles
       .filter((p) => !p.isPlaceholder && !isEmptyObject(p) && this.isValidSpeaker(p))
       .map((profile, index) => {
-        const { speakerId, type } = profile;
+        const { speakerId, speakerType } = profile;
 
         return {
           speakerId,
           ordinal: index,
-          speakerType: type,
+          speakerType,
         };
       });
   }
 
   enableRepeater() {
-    return this.profiles.every((profile) => !profile.isPlaceholder && profile.type);
+    return this.profiles.every((profile) => !profile.isPlaceholder && profile.speakerType);
   }
 
   setProfile(index, profile) {
     const selectedProfile = this.searchdata.find((speaker) => speaker.speakerId === profile.id);
-    const updatedProfile = { ...selectedProfile, type: profile.type, isPlaceholder: false };
+    const updatedProfile = {
+      ...this.getFlatLocaleProfile(selectedProfile),
+      speakerType: profile.speakerType,
+      isPlaceholder: false,
+    };
     this.updateProfile(index, updatedProfile);
+  }
+
+  getFlatLocaleProfile(profile) {
+    const flatProfile = {
+      firstName: getProfileAttr(profile, 'firstName', this.locale),
+      lastName: getProfileAttr(profile, 'lastName', this.locale),
+      title: getProfileAttr(profile, 'title', this.locale),
+      bio: getProfileAttr(profile, 'bio', this.locale),
+      socialLinks: getProfileAttr(profile, 'socialLinks', this.locale),
+      photo: getProfileAttr(profile, 'photo', this.locale),
+      speakerId: getProfileAttr(profile, 'speakerId', this.locale),
+      modificationTime: getProfileAttr(profile, 'modificationTime', this.locale),
+    };
+
+    return flatProfile;
   }
 
   render() {
@@ -109,20 +128,14 @@ export default class ProfileContainer extends LitElement {
     return html`${
       repeat(this.profiles, (profile, index) => {
         const profileJSON = JSON.stringify({
-          ...profile,
-          firstName: getProfileAttr(profile, 'firstName', this.locale),
-          lastName: getProfileAttr(profile, 'lastName', this.locale),
-          title: getProfileAttr(profile, 'title', this.locale),
-          bio: getProfileAttr(profile, 'bio', this.locale),
-          socialLinks: getProfileAttr(profile, 'socialLinks', this.locale),
-          photo: getProfileAttr(profile, 'photo', this.locale),
-          speakerId: getProfileAttr(profile, 'speakerId', this.locale),
+          ...this.getFlatLocaleProfile(profile),
+          speakerType: profile.speakerType,
         });
         const imgTag = imageTag.cloneNode(true);
 
         return html`
         <div class="profile-container">
-        <profile-ui locale=${this.locale} seriesId=${this.seriesId} profile=${profileJSON} fieldlabels=${JSON.stringify(this.fieldlabels)} class="form-component" firstnamesearch=${JSON.stringify(firstNameSearch)} lastnamesearch=${JSON.stringify(lastNameSearch)} @update-profile=${(event) => this.updateProfile(index, event.detail.profile)} @select-profile=${(event) => this.setProfile(index, event.detail.profile)}>${imgTag}</profile-ui>
+        <profile-ui locale=${this.locale} seriesId=${this.seriesId} profile=${profileJSON} fieldlabels=${JSON.stringify(this.fieldlabels)} class="form-component" firstnamesearch=${JSON.stringify(firstNameSearch)} lastnamesearch=${JSON.stringify(lastNameSearch)} @update-profile=${(event) => this.updateProfile(index, { ...this.getFlatLocaleProfile(event.detail.profile), speakerType: event.detail.profile.speakerType })} @select-profile=${(event) => this.setProfile(index, event.detail.profile)}>${imgTag}</profile-ui>
         ${this.profiles?.length > 1 || !this.profiles[0].isPlaceholder ? html`<img class="icon-remove-circle" src="${this.profiles.length === 1 ? '/ecc/icons/delete.svg' : '/ecc/icons/remove-circle.svg'}" alt="remove-repeater" @click=${() => {
     if (this.profiles.length === 1) {
       this.profiles = [defaultProfile];
