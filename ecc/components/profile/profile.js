@@ -6,7 +6,7 @@ import { createSpeaker, deleteSpeakerImage, updateSpeaker, uploadImage } from '.
 import { getServiceName } from '../../scripts/utils.js';
 import { icons } from '../../icons/icons.svg.js';
 import { LINK_REGEX } from '../../scripts/constants.js';
-import { getProfileAttr, getSpeakerPayload } from '../../scripts/data-utils.js';
+import { getSpeakerPayload } from '../../scripts/data-utils.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -193,10 +193,7 @@ export default class Profile extends LitElement {
   }
 
   isValidSpeaker(profile) {
-    const firstName = getProfileAttr(profile, 'firstName', this.locale);
-    const lastName = getProfileAttr(profile, 'lastName', this.locale);
-    const title = getProfileAttr(profile, 'title', this.locale);
-
+    const { firstName, lastName, title } = profile;
     return firstName && lastName && title;
   }
 
