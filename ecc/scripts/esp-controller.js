@@ -708,7 +708,7 @@ export async function getEventSpeaker(seriesId, eventId, speakerId) {
       return { status: response.status, error: data };
     }
 
-    return { ...seriesSpeaker, type: data.speakerType };
+    return seriesSpeaker;
   } catch (error) {
     window.lana?.log(`Failed to get event speaker details:\n${JSON.stringify(error, null, 2)}`);
     return { status: 'Network Error', error: error.message };

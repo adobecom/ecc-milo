@@ -89,7 +89,7 @@ export default class Profile extends LitElement {
     return html`
     <div>
     <div><sp-field-label size="l" required>${fieldLabel} *</sp-field-label></div>
-    <sp-picker label=${fieldLabel} value=${edited ? this.profileCopy?.type : this.profile?.type} size="l" @change=${(event) => this.updateProfile({ type: event.target.value }, edited)}>
+    <sp-picker label=${fieldLabel} value=${edited ? this.profileCopy?.speakerType : this.profile?.speakerType} size="l" @change=${(event) => this.updateProfile({ speakerType: event.target.value }, edited)}>
         ${repeat(SPEAKER_TYPE, (type) => html`
             <sp-menu-item value="${type}">${type.replace(/([a-z])([A-Z])/g, '$1 $2')}</sp-menu-item>
         `)}
@@ -118,7 +118,7 @@ export default class Profile extends LitElement {
       profile.socialLinks = profile.socialLinks.filter((sm) => sm.link !== '');
 
       const sProfile = { ...profile };
-      delete sProfile.type;
+      delete sProfile.speakerType;
       let respJson;
       const profilePayload = getSpeakerPayload(sProfile, this.locale);
       if (profile.speakerId) {
@@ -188,12 +188,17 @@ export default class Profile extends LitElement {
   }
 
   handleProfileSelection(e) {
-    const profile = { ...e.detail.entryData, isPlaceholder: false, type: this.profile.type };
+    const profile = { ...e.detail.entryData, isPlaceholder: false, speakerType: this.profile.speakerType };
     this.dispatchEvent(new CustomEvent('select-profile', { detail: { profile } }));
   }
 
+  isValidSpeaker(profile) {
+    const { firstName, lastName, title } = profile;
+    return firstName && lastName && title;
+  }
+
   saveDisabled() {
-    return !this.profile.firstName || !this.profile.lastName || !this.profile.title;
+    return !this.isValidSpeaker(this.profile);
   }
 
   renderNameFieldWithSearchIntegrated(edited = false) {
