@@ -72,14 +72,15 @@ function buildThumbnail(data) {
     const heroImage = images.find((photo) => photo.imageKind === 'event-hero-image');
     const venueImage = images.find((photo) => photo.imageKind === 'venue-image');
 
+    // TODO: Remember to remove the replace('https://www.adobe.com', '') once the images are returned with relative paths
     const imgSrc = (cardImage?.sharepointUrl
-      && `${getEventPageHost()}${cardImage?.sharepointUrl}`)
+    && `${getEventPageHost()}${cardImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
     || cardImage?.imageUrl
     || (heroImage?.sharepointUrl
-      && `${getEventPageHost()}${heroImage?.sharepointUrl}`)
+    && `${getEventPageHost()}${heroImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
     || heroImage?.imageUrl
     || (venueImage?.sharepointUrl
-      && `${getEventPageHost()}${venueImage?.sharepointUrl}`)
+    && `${getEventPageHost()}${venueImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
     || venueImage?.imageUrl
     || images[0]?.imageUrl;
 

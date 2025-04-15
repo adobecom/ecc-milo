@@ -143,6 +143,8 @@ const INPUT_TYPES = [
   'sp-picker[required]',
 ];
 
+const SUPPORTED_EVENT_TYPES = ['InPerson', 'Hybrid', 'Online'];
+
 export function buildErrorMessage(props, resp) {
   if (!resp) return;
 
@@ -427,6 +429,9 @@ function updateDashboardLink(props) {
 }
 
 async function saveEvent(props, toPublish = false) {
+  const eventType = Array
+    .from(props.el.classList)
+    .find((c) => SUPPORTED_EVENT_TYPES.includes(c));
   try {
     await gatherValues(props);
   } catch (e) {
@@ -447,7 +452,7 @@ async function saveEvent(props, toPublish = false) {
 
   const localeData = getLocalizedResponseData(props);
   if (props.currentStep === 0 && !localeData.eventId) {
-    resp = await createEvent(getJoinedData(props.locale), props.locale);
+    resp = await createEvent({ ...getJoinedData(props.locale), eventType }, props.locale);
     if (!resp.error && resp) {
       const newEventData = await getEvent(resp.eventId);
       props.eventDataResp = newEventData;
