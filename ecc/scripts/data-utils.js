@@ -36,7 +36,7 @@ export const EVENT_DATA_FILTER = {
   localEndDate: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localStartTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localEndTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
-  localizations: { type: 'object', localizable: false, cloneable: false, submittable: true },
+  localizations: { type: 'object', localizable: false, cloneable: true, submittable: true },
   timezone: { type: 'string', localizable: false, cloneable: true, submittable: true },
   showAgendaPostEvent: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
   showVenuePostEvent: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
@@ -50,10 +50,10 @@ export const EVENT_DATA_FILTER = {
   allowWaitlisting: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
   allowGuestRegistration: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
   hostEmail: { type: 'string', localizable: false, cloneable: true, submittable: true },
-  eventId: { type: 'string', localizable: false, cloneable: true, submittable: true },
-  published: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
-  creationTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
-  modificationTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
+  eventId: { type: 'string', localizable: false, cloneable: false, submittable: true },
+  published: { type: 'boolean', localizable: false, cloneable: false, submittable: true },
+  creationTime: { type: 'string', localizable: false, cloneable: false, submittable: true },
+  modificationTime: { type: 'string', localizable: false, cloneable: false, submittable: true },
   isPrivate: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
 };
 
@@ -117,14 +117,43 @@ export function isValidAttribute(attr) {
   return (attr !== undefined && attr !== null && attr !== '') || attr === false;
 }
 
-export function getAttribute(data, key, locale = 'en-US') {
+export function setEventAttribute(data, key, value, locale) {
+  if (EVENT_DATA_FILTER[key]?.localizable) {
+    data.localizations[locale][key] = value;
+  } else {
+    data[key] = value;
+  }
+}
+
+export function getAttribute(data, key, locale) {
   if (data.localizations?.[locale]?.[key]) {
     return data.localizations[locale][key];
   }
   return data[key];
 }
 
-export function splitLocalizableFields(data, filter, locale = 'en-US') {
+export function getProfileAttr(data, key, locale) {
+  if (SPEAKER_DATA_FILTER[key]?.localizable) {
+    const localizedData = data.localizations?.[locale];
+    if (localizedData?.[key]) {
+      return localizedData[key];
+    }
+
+    return data[key];
+  }
+
+  return data[key];
+}
+
+export function setProfileAttr(data, key, value, locale) {
+  if (SPEAKER_DATA_FILTER[key]?.localizable) {
+    data.localizations[locale][key] = value;
+  } else {
+    data[key] = value;
+  }
+}
+
+export function splitLocalizableFields(data, filter, locale) {
   const localizableFields = {};
   const nonLocalizableFields = {};
 
@@ -143,7 +172,7 @@ export function splitLocalizableFields(data, filter, locale = 'en-US') {
   return { localizableFields, nonLocalizableFields };
 }
 
-export function getSpeakerPayload(speakerData, locale = 'en-US') {
+export function getSpeakerPayload(speakerData, locale) {
   if (!speakerData) return speakerData;
 
   // Split speaker data into localizable and non-localizable fields
@@ -173,7 +202,7 @@ export function getSpeakerPayload(speakerData, locale = 'en-US') {
   };
 }
 
-export function getSponsorPayload(sponsorData, locale = 'en-US') {
+export function getSponsorPayload(sponsorData, locale) {
   if (!sponsorData) return sponsorData;
 
   // Split sponsor data into localizable and non-localizable fields
@@ -197,13 +226,16 @@ export function getSponsorPayload(sponsorData, locale = 'en-US') {
     return acc;
   }, {});
 
-  return {
-    ...filteredGlobalPayload,
-    localizations: { [locale]: filteredLocalePayload },
-  };
+  const payload = { ...filteredGlobalPayload };
+
+  if (Object.keys(filteredLocalePayload).length > 0) {
+    payload.localizations = { [locale]: filteredLocalePayload };
+  }
+
+  return payload;
 }
 
-export function getVenuePayload(venueData, locale = 'en-US') {
+export function getVenuePayload(venueData, locale) {
   if (!venueData) return venueData;
 
   // Split venue data into localizable and non-localizable fields
@@ -227,13 +259,16 @@ export function getVenuePayload(venueData, locale = 'en-US') {
     return acc;
   }, {});
 
-  return {
-    ...filteredGlobalPayload,
-    localizations: { [locale]: filteredLocalePayload },
-  };
+  const payload = { ...filteredGlobalPayload };
+
+  if (Object.keys(filteredLocalePayload).length > 0) {
+    payload.localizations = { [locale]: filteredLocalePayload };
+  }
+
+  return payload;
 }
 
-export function getEventPayload(eventData, locale = 'en-US') {
+export function getEventPayload(eventData, locale) {
   if (!eventData) return eventData;
 
   const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
@@ -257,8 +292,11 @@ export function getEventPayload(eventData, locale = 'en-US') {
     return acc;
   }, {});
 
-  return {
-    ...filteredGlobalPayload,
-    localizations: { [locale]: filteredLocalePayload },
-  };
+  const payload = { ...filteredGlobalPayload };
+
+  if (Object.keys(filteredLocalePayload).length > 0) {
+    payload.localizations = { [locale]: filteredLocalePayload };
+  }
+
+  return payload;
 }

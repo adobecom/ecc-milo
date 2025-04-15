@@ -19,7 +19,7 @@ import {
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
-import { getAttribute } from '../../scripts/data-utils.js';
+import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -354,10 +354,11 @@ function initMoreOptions(props, config, eventObj, row) {
     clone.addEventListener('click', async (e) => {
       e.preventDefault();
       const payload = { ...eventObj };
-      payload.title = `${eventObj.title} - copy`;
+      const cloneTitle = `${getAttribute(eventObj, 'title', payload.defaultLocale || 'en-US')} - copy`;
+      setEventAttribute(payload, 'title', cloneTitle, payload.defaultLocale || 'en-US');
       toolBox.remove();
       row.classList.add('pending');
-      const newEventJSON = await createEvent(cloneFilter(payload));
+      const newEventJSON = await createEvent({ ...cloneFilter(payload), published: false }, payload.defaultLocale || 'en-US');
 
       if (newEventJSON.error) {
         row.classList.remove('pending');
