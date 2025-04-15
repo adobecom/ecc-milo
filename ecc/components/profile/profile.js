@@ -57,17 +57,6 @@ export default class Profile extends LitElement {
     this.requestUpdate();
   }
 
-  updateLocalizedProfileField(localizedField, edited = false) {
-    let localizations = {};
-    if (edited) {
-      // eslint-disable-next-line max-len
-      localizations = { [this.locale]: { ...(this.profileCopy.localizations[this.locale]), ...localizedField } };
-    } else {
-      localizations = { [this.locale]: { ...(this.profile.localizations[this.locale]), ...localizedField } };
-    }
-    this.updateProfile({ localizations }, edited);
-  }
-
   updateProfile(profile, edited = false) {
     if (edited) {
       this.profileCopy = { ...this.profileCopy, ...profile };
@@ -100,7 +89,7 @@ export default class Profile extends LitElement {
     return html`
     <div>
     <div><sp-field-label size="l" required>${fieldLabel} *</sp-field-label></div>
-    <sp-picker label=${fieldLabel} value=${edited ? this.profileCopy?.type : this.profile?.type} size="l" @change=${(event) => this.updateProfile({ type: event.target.value }, edited)}>
+    <sp-picker label=${fieldLabel} value=${edited ? this.profileCopy?.speakerType : this.profile?.speakerType} size="l" @change=${(event) => this.updateProfile({ speakerType: event.target.value }, edited)}>
         ${repeat(SPEAKER_TYPE, (type) => html`
             <sp-menu-item value="${type}">${type.replace(/([a-z])([A-Z])/g, '$1 $2')}</sp-menu-item>
         `)}
@@ -129,7 +118,7 @@ export default class Profile extends LitElement {
       profile.socialLinks = profile.socialLinks.filter((sm) => sm.link !== '');
 
       const sProfile = { ...profile };
-      delete sProfile.type;
+      delete sProfile.speakerType;
       let respJson;
       const profilePayload = getSpeakerPayload(sProfile, this.locale);
       if (profile.speakerId) {
@@ -199,13 +188,17 @@ export default class Profile extends LitElement {
   }
 
   handleProfileSelection(e) {
-    const profile = { ...e.detail.entryData, isPlaceholder: false, type: this.profile.type };
+    const profile = { ...e.detail.entryData, isPlaceholder: false, speakerType: this.profile.speakerType };
     this.dispatchEvent(new CustomEvent('select-profile', { detail: { profile } }));
   }
 
+  isValidSpeaker(profile) {
+    const { firstName, lastName, title } = profile;
+    return firstName && lastName && title;
+  }
+
   saveDisabled() {
-    // eslint-disable-next-line max-len
-    return !this.profile.firstName || !this.profile.lastName || !this.profile.title;
+    return !this.isValidSpeaker(this.profile);
   }
 
   renderNameFieldWithSearchIntegrated(edited = false) {
@@ -249,8 +242,8 @@ export default class Profile extends LitElement {
   })} file=${JSON.stringify(imagefile)}>
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
-    <custom-textfield fielddata=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateLocalizedProfileField({ title: event.detail.value }, edited)}></custom-textfield>
-    <custom-textfield fielddata=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @change-custom=${(event) => this.updateLocalizedProfileField({ bio: event.detail.value }, edited)}></custom-textfield>
+    <custom-textfield fielddata=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ title: event.detail.value }, edited)}></custom-textfield>
+    <custom-textfield fielddata=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @change-custom=${(event) => this.updateProfile({ bio: event.detail.value }, edited)}></custom-textfield>
     <div class="social-media">
     <h3>${fieldLabelsJSON.socialLinks}</h3>
     ${profile?.socialLinks ? repeat(

@@ -74,13 +74,13 @@ function buildThumbnail(data) {
 
     // TODO: Remember to remove the replace('https://www.adobe.com', '') once the images are returned with relative paths
     const imgSrc = (cardImage?.sharepointUrl
-    && `${getEventPageHost()}${cardImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+      && `${getEventPageHost()}${cardImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
     || cardImage?.imageUrl
     || (heroImage?.sharepointUrl
-    && `${getEventPageHost()}${heroImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+      && `${getEventPageHost()}${heroImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
     || heroImage?.imageUrl
     || (venueImage?.sharepointUrl
-    && `${getEventPageHost()}${venueImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+      && `${getEventPageHost()}${venueImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
     || venueImage?.imageUrl
     || images[0]?.imageUrl;
 
