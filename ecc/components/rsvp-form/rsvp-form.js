@@ -56,8 +56,8 @@ export default class RsvpForm extends LitElement {
   renderMarketoForm() {
     return html`
         <div class="rsvp-checkboxes">
-        <sp-field-label size="xl">Campaign ID *</sp-field-label>
-        <sp-textfield @change=${(event) => {console.log(event)}} ></sp-textfield>
+        <sp-field-label size="xl" class="field-label">SFDC ID *</sp-field-label>
+        <sp-textfield @change=${(event) => {console.log(event)}} class="field-label"></sp-textfield>
         </div>
         `;
   }

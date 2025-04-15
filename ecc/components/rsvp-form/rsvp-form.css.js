@@ -30,5 +30,10 @@ export const style = css`
  .form-type {
     margin-inline: 0px;
     border-width: 0px;
-    padding-inline: 0px;}
+    padding-inline: 0px;
+  }
+  
+  .field-label {
+    width: 520px;
+  }
 `;
