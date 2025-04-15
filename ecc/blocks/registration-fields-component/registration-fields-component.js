@@ -63,7 +63,8 @@ async function decorateRSVPFields(el) {
     .catch((err) => window.lana?.log(`Failed to load RSVP fields config: ${err}`));
 
   row.innerHTML = '';
-  createTag('rsvp-form', { class: 'rsvp-form', data: JSON.stringify(config.data) }, '', { parent: row });
+  createTag('rsvp-form', { class: 'rsvp-form', data: JSON.stringify(config.data) },
+  '', { parent: row });
 
   el.dataset.mandatedfields = config.data.filter((f) => f.Required === 'x').map((f) => f.Field);
 }

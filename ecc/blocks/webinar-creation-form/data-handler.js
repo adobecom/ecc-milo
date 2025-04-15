@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 
-import { EVENT_DATA_FILTER } from '../../scripts/constants.js';
+import { EVENT_DATA_FILTER } from '../../scripts/data-utils.js';
 
 let responseCache = {};
 let payloadCache = {};

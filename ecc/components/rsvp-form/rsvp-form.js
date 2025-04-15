@@ -88,11 +88,12 @@ export default class RsvpForm extends LitElement {
     `;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   renderMarketoForm() {
     return html`
         <div class="rsvp-checkboxes">
         <sp-field-label size="xl" class="field-label">SFDC ID *</sp-field-label>
-        <sp-textfield @change=${(event) => { console.log(event); }} class="field-label"></sp-textfield>
+        <sp-textfield class="field-label"></sp-textfield>
         </div>
         `;
   }
