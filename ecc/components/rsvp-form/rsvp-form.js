@@ -14,15 +14,50 @@ export default class RsvpForm extends LitElement {
   static properties = {
     data: { type: Array },
     formType: { type: String },
+    visible: { type: Set },
+    required: { type: Set },
   };
 
   constructor() {
     super();
     this.data = [];
     this.formType = 'basic';
+    this.visible = new Set();
+    this.required = new Set();
   }
 
   static styles = style;
+
+  toggleVisible(event) {
+    const { name, checked } = event.target;
+    if (checked) {
+      this.visible.add(name);
+    } else {
+      this.visible.delete(name);
+      this.required.delete(name);
+    }
+    this.requestUpdate();
+  }
+
+  toggleRequired(event) {
+    const { name, checked } = event.target;
+    if (checked) {
+      this.visible.add(name);
+      this.required.add(name);
+    } else {
+      this.required.delete(name);
+    }
+    this.requestUpdate();
+  }
+
+  getRsvpFormFields() {
+    const visible = Array.from(this.visible);
+    const required = Array.from(this.required);
+    return {
+      visible,
+      required,
+    };
+  }
 
   renderBasicForm() {
     const data = this.data.filter((f) => f.Required !== 'x' && f.Type !== 'submit');
@@ -41,10 +76,10 @@ export default class RsvpForm extends LitElement {
             ${repeat(data, (item) => item.Field, (item) => html`<tr class="field-row">
               <td><div class="cat-text">${convertString(item.Field)}</div></td>
               <td>
-                <sp-switch class="check-appear" name=${item.Field}>Appears on form</sp-switch>
+                <sp-switch class="check-appear" name=${item.Field} ?checked=${(this.visible.has(item.Field))} @change=${this.toggleVisible}>Appears on form</sp-switch>
               </td>
               <td>
-                <sp-switch class="check-require" name=${item.Field}>Required field</sp-switch>
+                <sp-switch class="check-require" name=${item.Field} ?checked=${(this.required.has(item.Field))} @change=${this.toggleRequired}>Required field</sp-switch>
               </td>
             </tr>`)}
           </tbody>
@@ -57,7 +92,7 @@ export default class RsvpForm extends LitElement {
     return html`
         <div class="rsvp-checkboxes">
         <sp-field-label size="xl" class="field-label">SFDC ID *</sp-field-label>
-        <sp-textfield @change=${(event) => {console.log(event)}} class="field-label"></sp-textfield>
+        <sp-textfield @change=${(event) => { console.log(event); }} class="field-label"></sp-textfield>
         </div>
         `;
   }
@@ -83,58 +118,3 @@ export default class RsvpForm extends LitElement {
     `;
   }
 }
-
-/* <tr class="field-row">
-              <td><div class="cat-text">MOBILE PHONE</div></td>
-              <td>
-                <sp-switch class="check-appear" name="mobilePhone">Appears on form</sp-switch>
-              </td>
-              <td>
-                <sp-switch class="check-require" name="mobilePhone">Required field</sp-switch>
-              </td>
-            </tr>
-            <tr class="field-row">
-              <td><div class="cat-text">INDUSTRY</div></td>
-              <td>
-                <sp-switch class="check-appear" name="industry">Appears on form</sp-switch>
-              </td>
-              <td>
-                <sp-switch class="check-require" name="industry">Required field</sp-switch>
-              </td>
-            </tr>
-            <tr class="field-row">
-              <td><div class="cat-text">PRODUCTS OF INTEREST</div></td>
-              <td>
-                <sp-switch class="check-appear" name="productsOfInterest">Appears on form</sp-switch>
-              </td>
-              <td>
-                <sp-switch class="check-require" name="productsOfInterest">Required field</sp-switch>
-              </td>
-            </tr>
-            <tr class="field-row">
-              <td><div class="cat-text">COMPANY SIZE</div></td>
-              <td>
-                <sp-switch class="check-appear" name="companySize">Appears on form</sp-switch>
-              </td>
-              <td>
-                <sp-switch class="check-require" name="companySize">Required field</sp-switch>
-              </td>
-            </tr>
-            <tr class="field-row">
-              <td><div class="cat-text">AGE</div></td>
-              <td>
-                <sp-switch class="check-appear" name="age">Appears on form</sp-switch>
-              </td>
-              <td>
-                <sp-switch class="check-require" name="age">Required field</sp-switch>
-              </td>
-            </tr>
-            <tr class="field-row">
-              <td><div class="cat-text">JOB LEVEL</div></td>
-              <td>
-                <sp-switch class="check-appear" name="jobLevel">Appears on form</sp-switch>
-              </td>
-              <td>
-                <sp-switch class="check-require" name="jobLevel">Required field</sp-switch>
-              </td>
-            </tr> */
