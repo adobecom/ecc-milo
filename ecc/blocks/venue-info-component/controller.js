@@ -65,7 +65,7 @@ function resetAllFields(component) {
   }
 }
 
-function updateAllFields(venueData, component) {
+function updateAllFields(venueData, component, props) {
   const venueNameInput = component.querySelector('#venue-info-venue-name');
   const placeLatInput = component.querySelector('#google-place-lat');
   const placeLngInput = component.querySelector('#google-place-lng');
@@ -76,16 +76,16 @@ function updateAllFields(venueData, component) {
   const additionalInformationInput = component.querySelector('#venue-additional-info-rte-output');
   const venueRTE = component.querySelector('#venue-additional-info-rte');
 
-  changeInputValue(venueNameInput, 'value', venueData.venueName);
-  changeInputValue(placeLatInput, 'value', venueData.coordinates?.lat);
-  changeInputValue(placeLngInput, 'value', venueData.coordinates?.lon);
-  changeInputValue(placeIdInput, 'value', venueData.placeId);
-  changeInputValue(gmtoffsetInput, 'value', venueData.gmtOffset);
-  changeInputValue(addressComponentsInput, 'value', JSON.stringify(venueData.addressComponents));
-  changeInputValue(formattedAddressInput, 'value', venueData.formattedAddress);
-  changeInputValue(additionalInformationInput, 'value', venueData.additionalInformation);
+  changeInputValue(venueNameInput, 'value', getAttribute(venueData, 'venueName', props.locale));
+  changeInputValue(placeLatInput, 'value', getAttribute(venueData, 'coordinates', props.locale)?.lat);
+  changeInputValue(placeLngInput, 'value', getAttribute(venueData, 'coordinates', props.locale)?.lon);
+  changeInputValue(placeIdInput, 'value', getAttribute(venueData, 'placeId', props.locale));
+  changeInputValue(gmtoffsetInput, 'value', getAttribute(venueData, 'gmtOffset', props.locale));
+  changeInputValue(addressComponentsInput, 'value', JSON.stringify(getAttribute(venueData, 'addressComponents', props.locale)));
+  changeInputValue(formattedAddressInput, 'value', getAttribute(venueData, 'formattedAddress', props.locale));
+  changeInputValue(additionalInformationInput, 'value', getAttribute(venueData, 'additionalInformation', props.locale));
   if (venueRTE) {
-    venueRTE.content = venueData.additionalInformation;
+    venueRTE.content = getAttribute(venueData, 'additionalInformation', props.locale);
   }
 }
 
@@ -105,7 +105,7 @@ function getVenueDataInForm(component) {
   const lon = +placeLngInput.value;
   const gmtOffset = +gmtoffsetInput.value;
   const formattedAddress = formattedAddressInput.value;
-  const additionalInformation = additionalInformationInput?.value;
+  const additionalInformation = additionalInformationInput.value;
 
   let addressComponents;
 
@@ -407,7 +407,7 @@ export default async function init(component, props) {
   }
 
   if (venue) {
-    updateAllFields(venue, component);
+    updateAllFields(venue, component, props);
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city: venue.city });
 
     if (venue.venueName) {
@@ -471,7 +471,7 @@ export async function onTargetUpdate(component, props) {
       );
     }
 
-    if (resp.error) {
+    if (resp?.error) {
       buildErrorMessage(props, resp);
     }
   }

@@ -20,7 +20,6 @@ export default class PartnerSelectorGroup extends LitElement {
     super();
     this.seriesSponsors = this.seriesSponsors || [];
     this.partners = this.partners || [defaultPartner];
-    this.locale = this.locale || 'en-US';
   }
 
   static styles = style;

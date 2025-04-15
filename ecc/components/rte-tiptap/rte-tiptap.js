@@ -51,9 +51,22 @@ export default class RteTiptap extends LitElement {
     this.requestUpdate();
   }
 
+  getValue() {
+    const htmlHolder = document.createElement('div');
+    htmlHolder.innerHTML = this.editor.getHTML();
+
+    let value = htmlHolder.textContent.trim();
+    if (value.trim() === '') {
+      value = '';
+    } else {
+      value = htmlHolder.innerHTML;
+    }
+
+    return value;
+  }
+
   initializeEditor() {
     const editorEl = this.shadowRoot.querySelector('.rte-tiptap-editor');
-    const tiptap = this;
     this.editor = new Editor({
       content: this.content,
       element: editorEl,
@@ -69,9 +82,9 @@ export default class RteTiptap extends LitElement {
           },
         }),
       ],
-      onUpdate({ editor }) {
-        const outputHtml = editor.getHTML();
-        tiptap.handleInput(outputHtml);
+      onUpdate: () => {
+        const outputHtml = this.getValue();
+        this.handleInput(outputHtml);
       },
       onSelectionUpdate: ({ editor }) => {
         const currentNode = editor.state.selection.$anchor.parent;

@@ -463,7 +463,9 @@ async function saveEvent(props, toPublish = false) {
   try {
     await gatherValues(props);
   } catch (e) {
-    return { error: { message: e.message } };
+    const errorObj = { error: { message: e.message } };
+    buildErrorMessage(props, errorObj);
+    return errorObj;
   }
 
   let resp;
@@ -480,7 +482,8 @@ async function saveEvent(props, toPublish = false) {
   if (props.currentStep === 0 && !localeData.eventId) {
     resp = await createEvent({ ...getJoinedData(props.locale), eventType }, props.locale);
     if (!resp.error && resp) {
-      props.eventDataResp = resp;
+      const newEventData = await getEvent(resp.eventId);
+      props.eventDataResp = newEventData;
     } else {
       props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
     }
@@ -493,7 +496,8 @@ async function saveEvent(props, toPublish = false) {
       payload,
     );
     if (!resp.error && resp) {
-      props.eventDataResp = resp;
+      const newEventData = await getEvent(resp.eventId);
+      props.eventDataResp = newEventData;
     } else {
       props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
     }
@@ -505,7 +509,8 @@ async function saveEvent(props, toPublish = false) {
       payload,
     );
     if (!resp.error && resp) {
-      props.eventDataResp = resp;
+      const newEventData = await getEvent(resp.eventId);
+      props.eventDataResp = newEventData;
     } else {
       props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
     }
@@ -705,11 +710,11 @@ async function getNonProdPreviewDataById(props) {
     if (pageData) return pageData;
 
     window.lana?.log('Failed to find non-prod metadata for current page');
-    return null;
+    return { error: { message: 'Failed to find non-prod metadata for current page' } };
   }
 
   window.lana?.log(`Failed to fetch non-prod metadata:\n${JSON.stringify(resp, null, 2)}`);
-  return null;
+  return { error: { message: 'Failed to fetch non-prod metadata' } };
 }
 
 async function validatePreview(props, cta) {
@@ -747,6 +752,13 @@ async function validatePreview(props, cta) {
           if (metadataJson && modificationTimeMatch(metadataJson)) {
             closeDialog(props);
             window.open(previewHref);
+            poll.cancel();
+            return;
+          }
+
+          if (metadataJson?.error) {
+            buildErrorMessage(props, metadataJson.error);
+            buildPreviewLoadingFailedDialog(props, previewHref);
             poll.cancel();
             return;
           }
@@ -816,7 +828,8 @@ function initFormCtas(props) {
           );
 
           if (!resp.error && resp) {
-            props.eventDataResp = resp;
+            const newEventData = await getEvent(resp.eventId);
+            props.eventDataResp = newEventData;
           } else {
             props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
           }
@@ -856,47 +869,45 @@ function initFormCtas(props) {
 
           if (ctaUrl.hash === '#next') {
             let resp;
+
             if (props.currentStep === props.maxStep) {
               resp = await saveEvent(props, true);
             } else {
               resp = await saveEvent(props);
             }
 
-            if (resp?.error) {
-              buildErrorMessage(props, resp);
-            } else if (props.currentStep === props.maxStep) {
-              const toastArea = props.el.querySelector('.toast-area');
-              cta.textContent = cta.dataset.doneStateText;
-              cta.classList.add('disabled');
+            if (resp && !resp.error) {
+              if (props.currentStep === props.maxStep) {
+                const toastArea = props.el.querySelector('.toast-area');
+                cta.textContent = cta.dataset.doneStateText;
+                cta.classList.add('disabled');
 
-              if (toastArea) {
-                const toast = createTag('sp-toast', { open: true, variant: 'positive' }, 'Success! This event has been published.', { parent: toastArea });
-                const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+                if (toastArea) {
+                  const toast = createTag('sp-toast', { open: true, variant: 'positive' }, 'Success! This event has been published.', { parent: toastArea });
+                  const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
 
-                createTag(
-                  'sp-button',
-                  {
-                    slot: 'action',
-                    variant: 'overBackground',
-                    treatment: 'outline',
-                    href: dashboardLink.href,
-                  },
-                  'Go to dashboard',
-                  { parent: toast },
-                );
+                  createTag(
+                    'sp-button',
+                    {
+                      slot: 'action',
+                      variant: 'overBackground',
+                      treatment: 'outline',
+                      href: dashboardLink.href,
+                    },
+                    'Go to dashboard',
+                    { parent: toast },
+                  );
 
-                toast.addEventListener('close', () => {
-                  toast.remove();
-                });
+                  toast.addEventListener('close', () => {
+                    toast.remove();
+                  });
+                }
+              } else {
+                navigateForm(props);
               }
-            } else {
-              navigateForm(props);
             }
           } else {
-            const resp = await saveEvent(props);
-            if (resp?.error) {
-              buildErrorMessage(props, resp);
-            }
+            await saveEvent(props);
           }
 
           toggleBtnsSubmittingState(false);
@@ -908,9 +919,7 @@ function initFormCtas(props) {
   backBtn.addEventListener('click', async () => {
     toggleBtnsSubmittingState(true);
     const resp = await saveEvent(props);
-    if (resp?.error) {
-      buildErrorMessage(props, resp);
-    } else {
+    if (resp && !resp.error) {
       props.currentStep -= 1;
     }
 
@@ -981,9 +990,7 @@ function initNavigation(props) {
         sideMenu.classList.add('disabled');
 
         const resp = await saveEvent(props);
-        if (resp?.error) {
-          buildErrorMessage(props, resp);
-        } else {
+        if (resp && !resp.error) {
           navigateForm(props, i);
         }
 
@@ -1066,7 +1073,6 @@ async function buildECCForm(el) {
       localizations: {},
     },
     eventDataResp: {},
-    locale: 'en-US',
     removeFromPayload: {},
   };
 
@@ -1103,6 +1109,8 @@ async function buildECCForm(el) {
         }
 
         case 'eventDataResp': {
+          // TODO: supports defaultLocale only for LOC P1
+          if (value.defaultLocale) props.locale = value.defaultLocale;
           setResponseCache(value, props.locale);
           updateComponentsOnRespChange(target);
           updateCtas(target);
