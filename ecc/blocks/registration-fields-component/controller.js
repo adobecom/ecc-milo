@@ -12,15 +12,15 @@ export function onSubmit(component, props) {
     required: [...defaultFields, ...Array.from(component.querySelectorAll('input[type="checkbox"].check-require')).filter((f) => f.checked).map((f) => f.name)],
   };
 
-// TODO - Uncomment this when rsvp-form is available
-// const rsvpform = component.querySelector('div > rsvp-form');
+  // TODO - Uncomment this when rsvp-form is available
+  // const rsvpform = component.querySelector('div > rsvp-form');
 
-// const rsvpFormData = rsvpform.getRsvpFormFields();
+  // const rsvpFormData = rsvpform.getRsvpFormFields();
 
-// const rsvpFormFields = {
-//   visible: [...defaultFields, ...rsvpFormData.visible],
-//   required: [...defaultFields, ...rsvpFormData.required],
-// };
+  // const rsvpFormFields = {
+  //   visible: [...defaultFields, ...rsvpFormData.visible],
+  //   required: [...defaultFields, ...rsvpFormData.required],
+  // };
 
   setPropsPayload(props, { rsvpFormFields });
 }
