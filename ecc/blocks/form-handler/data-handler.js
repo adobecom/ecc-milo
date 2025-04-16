@@ -159,22 +159,6 @@ export function getFilteredCachedResponse() {
   return filteredResponse;
 }
 
-export function getLocalizedResponseData(props) {
-  const response = getFilteredCachedResponse(props.locale);
-  return {
-    ...response,
-    ...response.localizations?.[props.locale] || {},
-  };
-}
-
-export function getLocalizedPayloadData(props) {
-  const payload = getFilteredCachedPayload(props.locale);
-  return {
-    ...payload,
-    ...payload.localizations?.[props.locale] || {},
-  };
-}
-
 export default function getJoinedData(locale) {
   const filteredResponse = getFilteredCachedResponse(locale);
   const filteredPayload = getFilteredCachedPayload(locale);
