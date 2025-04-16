@@ -12,6 +12,7 @@ import {
 import SearchablePicker from '../../components/searchable-picker/searchable-picker.js';
 import FilterMenu from '../../components/filter-menu/filter-menu.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
+import { getAttribute } from '../../scripts/data-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -191,7 +192,7 @@ function updateFilterMap(props) {
 function paginateData(props, config, page) {
   const ps = +config['page-size'];
   if (Number.isNaN(ps) || ps <= 0) {
-    window.lana?.log('error', 'Invalid page size');
+    window.lana?.log('Invalid page size');
   }
   const start = (page - 1) * ps;
   const end = Math.min(page * ps, props.filteredData.length);
@@ -425,62 +426,62 @@ async function buildEventInfo(props) {
   if (!eventInfoContainer) return;
 
   eventInfoContainer.innerHTML = '';
-  const eventInfo = props.events.find((e) => e.eventId === props.currentEventId);
+  const eventObj = props.events.find((e) => e.eventId === props.currentEventId);
 
-  if (!eventInfo) return;
+  if (!eventObj) return;
 
-  const { photos } = eventInfo;
+  getEventImages(eventObj.eventId).then(({ images }) => {
+    if (!images) return;
 
-  if (!photos) {
-    getEventImages(eventInfo.eventId).then(({ images }) => {
-      if (!images) return;
-
-      const heroImgObj = images?.find((p) => p.imageKind === 'event-hero-image');
-
-      const imgSrc = (heroImgObj?.sharepointUrl
-        && `${getEventPageHost()}${heroImgObj?.sharepointUrl}`)
-      || heroImgObj?.imageUrl
-      || '';
-
-      const eventImage = createTag(
-        'div',
-        { class: 'event-image-container' },
-        createTag('img', { class: 'event-image', src: imgSrc }),
-      );
-
-      eventInfoContainer.prepend(eventImage);
-    });
-  } else {
-    const heroImgObj = photos?.find((p) => p.imageKind === 'event-hero-image');
+    const heroImgObj = images?.find((p) => p.imageKind === 'event-hero-image');
+    const thumbnailImgObj = images?.find((p) => p.imageKind === 'event-thumbnail-image');
+    const firstImageObj = images?.[0];
 
     const imgSrc = (heroImgObj?.sharepointUrl
       && `${getEventPageHost()}${heroImgObj?.sharepointUrl}`)
+    || thumbnailImgObj?.imageUrl
     || heroImgObj?.imageUrl
+    || firstImageObj?.imageUrl
     || '';
 
-    createTag(
+    const eventImage = createTag(
       'div',
       { class: 'event-image-container' },
       createTag('img', { class: 'event-image', src: imgSrc }),
     );
-  }
 
+    eventInfoContainer.prepend(eventImage);
+  });
+
+  const [
+    defaultLocale,
+    eventType,
+    attendeeCount,
+    attendeeLimit,
+  ] = [
+    getAttribute(eventObj, 'defaultLocale', props.locale),
+    getAttribute(eventObj, 'eventType', props.locale),
+    getAttribute(eventObj, 'attendeeCount', props.locale),
+    getAttribute(eventObj, 'attendeeLimit', props.locale),
+  ];
   const infoContainer = createTag('div', { class: 'event-info-container' }, '', { parent: eventInfoContainer });
   const infoRow = createTag('div', { class: 'event-info-row' }, '', { parent: infoContainer });
   const statsRow = createTag('div', { class: 'event-stats-row' }, '', { parent: infoContainer });
 
+  const eventTitle = getAttribute(eventObj, 'title', defaultLocale);
+
   [
     {
       label: 'EVENT:',
-      value: eventInfo.title,
+      value: eventTitle,
     },
     {
       label: 'WHEN:',
-      value: new Date(eventInfo.localStartTimeMillis).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      value: new Date(eventObj.localStartTimeMillis).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
     },
     {
       label: 'TYPE:',
-      value: eventInfo.eventType,
+      value: eventType,
     },
   ].forEach(({ label, value }) => {
     const infoColWrapper = createTag('div', { class: 'event-stats-col-wrapper' }, '', { parent: infoRow });
@@ -491,8 +492,8 @@ async function buildEventInfo(props) {
   [
     {
       label: 'RSVPs',
-      value: eventInfo.attendeeCount || '0',
-      subText: calculatePercentage(+eventInfo.attendeeCount, +eventInfo.attendeeLimit),
+      value: attendeeCount || '0',
+      subText: calculatePercentage(+attendeeCount, +attendeeLimit),
     },
   ].forEach(({ label, value, subText }) => {
     const statsColWrapper = createTag('div', { class: 'event-stats-col-wrapper' }, '', { parent: statsRow });
@@ -575,10 +576,16 @@ function buildEventPicker(props) {
     eventsPicker.value = props.currentEventId;
     const event = props.events.find((e) => e.eventId === props.currentEventId);
 
-    if (event) eventsPicker.displayValue = event.title;
+    const defaultLocale = event.defaultLocale || Object.keys(event.localizations)[0] || 'en-US';
+    const eventTitle = getAttribute(event, 'title', defaultLocale);
+    if (event) eventsPicker.displayValue = eventTitle;
   }
 
-  eventsPicker.items = events.map((e) => ({ label: e.title, value: e.eventId }));
+  eventsPicker.items = events.map((e) => {
+    const defaultLocale = e.defaultLocale || Object.keys(e.localizations)[0] || 'en-US';
+    const eventTitle = getAttribute(e, 'title', defaultLocale);
+    return { label: eventTitle, value: e.eventId };
+  });
   eventsPicker.filteredItems = eventsPicker.items;
 
   eventsPicker.addEventListener('picker-change', (e) => {

@@ -1,3 +1,4 @@
+import { SPONSOR_DATA_FILTER } from '../../scripts/data-utils.js';
 import { getSponsors } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './partner-selector-group.css.js';
@@ -12,6 +13,7 @@ export default class PartnerSelectorGroup extends LitElement {
     partners: { type: Array },
     fieldlabels: { type: Object },
     seriesId: { type: String },
+    locale: { type: String },
   };
 
   constructor() {
@@ -44,6 +46,17 @@ export default class PartnerSelectorGroup extends LitElement {
       .map((partner, i) => (i === index ? updatedPartner : partner));
     this.reloadSeriesSponsors();
     this.requestUpdate();
+  }
+
+  getPartnerAttr(data, key) {
+    if (SPONSOR_DATA_FILTER[key]?.localizable) {
+      const localizedData = data.localizations?.[this.locale];
+      if (localizedData?.[key]) {
+        return localizedData[key];
+      }
+    }
+
+    return data[key];
   }
 
   getSavedPartners() {
@@ -102,9 +115,16 @@ export default class PartnerSelectorGroup extends LitElement {
 
     return html`
       ${repeat(this.partners, (partner, index) => {
+    const partnerData = {
+      ...partner,
+      name: this.getPartnerAttr(partner, 'name'),
+      info: this.getPartnerAttr(partner, 'info'),
+    };
+
     const imgTag = imageTag.cloneNode(true);
+
     return html`
-        <partner-selector .seriesPartners=${this.getSeriesPartners()} .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partner}
+        <partner-selector .locale=${this.locale} .seriesPartners=${this.getSeriesPartners()} .seriesId=${this.seriesId} .fieldLabels=${this.fieldlabels} .partner=${partnerData}
           @update-partner=${(event) => this.handlePartnerUpdate(event.detail.partner, index)} @select-partner=${(event) => this.handlePartnerSelect(event.detail.partner, index)}>
           <div slot="delete-btn" class="delete-btn">
             ${this.hasOnlyOneUnsavedPartnerLeft() ? nothing : html`
