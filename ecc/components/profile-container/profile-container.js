@@ -36,9 +36,7 @@ export default class ProfileContainer extends LitElement {
 
   reloadSearchData = async () => {
     const spResp = await getSpeakers(this.seriesId);
-    // eslint-disable-next-line max-len
-    const filterdSpeakers = spResp.speakers.filter((speaker) => speaker.localizations && typeof speaker.localizations === 'object' && this.locale in speaker.localizations);
-    if (filterdSpeakers) this.searchdata = filterdSpeakers;
+    if (spResp) this.searchdata = spResp.speakers ?? [];
   };
 
   updateProfile(index, profile) {
@@ -135,7 +133,7 @@ export default class ProfileContainer extends LitElement {
 
         return html`
         <div class="profile-container">
-        <profile-ui locale=${this.locale} seriesId=${this.seriesId} profile=${profileJSON} fieldlabels=${JSON.stringify(this.fieldlabels)} class="form-component" firstnamesearch=${JSON.stringify(firstNameSearch)} lastnamesearch=${JSON.stringify(lastNameSearch)} @update-profile=${(event) => this.updateProfile(index, { ...this.getFlatLocaleProfile(event.detail.profile), speakerType: event.detail.profile.speakerType })} @select-profile=${(event) => this.setProfile(index, event.detail.profile)}>${imgTag}</profile-ui>
+        <profile-ui locale=${this.locale} seriesId=${this.seriesId} profile=${profileJSON} fieldlabels=${JSON.stringify(this.fieldlabels)} class="form-component" firstnamesearch=${JSON.stringify(firstNameSearch)} lastnamesearch=${JSON.stringify(lastNameSearch)} @update-profile=${(event) => (this.profiles[index] = { ...this.getFlatLocaleProfile(event.detail.profile), speakerType: event.detail.profile.speakerType })} @select-profile=${(event) => this.setProfile(index, event.detail.profile)}>${imgTag}</profile-ui>
         ${this.profiles?.length > 1 || !this.profiles[0].isPlaceholder ? html`<img class="icon-remove-circle" src="${this.profiles.length === 1 ? '/ecc/icons/delete.svg' : '/ecc/icons/remove-circle.svg'}" alt="remove-repeater" @click=${() => {
     if (this.profiles.length === 1) {
       this.profiles = [defaultProfile];
