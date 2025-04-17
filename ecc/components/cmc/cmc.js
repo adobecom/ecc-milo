@@ -154,6 +154,10 @@ export default class CloudManagementConsole extends LitElement {
     return Array.from(this.selectedTags);
   }
 
+  getSelectedLocales() {
+    return Array.from(this.selectedLocales);
+  }
+
   switchCloudType(cloudType) {
     if (cloudType === this.currentCloud) return;
     const savedCloudTags = this.savedTags[cloudType] || [];
@@ -179,7 +183,7 @@ export default class CloudManagementConsole extends LitElement {
 
   async save() {
     this.savedTags[this.currentCloud] = this.getSelectedTags();
-    this.savedLocales[this.currentCloud] = this.selectedLocales;
+    this.savedLocales[this.currentCloud] = this.getSelectedLocales();
 
     this.togglePendingChanges();
 
