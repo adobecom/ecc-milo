@@ -36,9 +36,7 @@ export default class ProfileContainer extends LitElement {
 
   reloadSearchData = async () => {
     const spResp = await getSpeakers(this.seriesId);
-    // eslint-disable-next-line max-len
-    const filterdSpeakers = spResp.speakers.filter((speaker) => speaker.localizations && typeof speaker.localizations === 'object' && this.locale in speaker.localizations);
-    if (filterdSpeakers) this.searchdata = filterdSpeakers;
+    if (spResp) this.searchdata = spResp.speakers ?? [];
   };
 
   updateProfile(index, profile) {
