@@ -84,17 +84,6 @@ export const SPECTRUM_COMPONENTS = [
   'switch',
 ];
 
-async function initSpectrumComponents() {
-  const miloLibs = LIBS;
-  const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
-    await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
-  });
-  await Promise.all([
-    import(`${miloLibs}/deps/lit-all.min.js`),
-    ...promises,
-  ]);
-}
-
 // list of controllers for the handler to load
 export const VANILLA_COMPONENTS = [
   'event-format',
@@ -130,7 +119,6 @@ async function initVanillaComponents(props) {
 
 export async function initComponents(props) {
   initCustomLitComponents();
-  await initSpectrumComponents();
   await initVanillaComponents(props);
 }
 
@@ -778,12 +766,14 @@ function initFormCtas(props) {
             getJoinedData(props.locale),
           );
 
-          if (!resp.error && resp) {
-            const newEventData = await getEvent(resp.eventId);
-            props.eventDataResp = newEventData;
-          } else {
-            props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+          if (resp.error) {
+            buildErrorMessage(props, resp.error);
+            toggleBtnsSubmittingState(false);
+            return;
           }
+
+          const newEventData = await getEvent(resp.eventId);
+          props.eventDataResp = newEventData;
 
           if (resp?.eventId) await handleEventUpdate(props);
 
