@@ -120,7 +120,7 @@ export default class Profile extends LitElement {
       const sProfile = { ...profile };
       delete sProfile.speakerType;
       let respJson;
-      const profilePayload = getSpeakerPayload(sProfile, this.locale);
+      const profilePayload = await getSpeakerPayload(sProfile, this.locale, this.seriesId);
       if (profile.speakerId) {
         respJson = await updateSpeaker(profilePayload, this.seriesId);
       } else {
@@ -194,11 +194,12 @@ export default class Profile extends LitElement {
 
   isValidSpeaker(profile) {
     const { firstName, lastName, title } = profile;
+
     return firstName && lastName && title;
   }
 
-  saveDisabled() {
-    return !this.isValidSpeaker(this.profile);
+  saveDisabled(profile) {
+    return !this.isValidSpeaker(profile);
   }
 
   renderNameFieldWithSearchIntegrated(edited = false) {
@@ -361,7 +362,7 @@ export default class Profile extends LitElement {
     <div class="profile-save-footer">
       <sp-button variant="primary" class="save-profile-button" @click=${async (e) => {
     this.saveProfile(e);
-  }} ?disabled=${this.saveDisabled()}>
+  }} ?disabled=${this.saveDisabled(this.profile)}>
   <img src="/ecc/icons/user-add.svg" slot="icon"></img>
   Save Profile</sp-button>
     </div>
@@ -398,7 +399,7 @@ export default class Profile extends LitElement {
         dialog?.dispatchEvent(new Event('close', { bubbles: true, composed: true }));
       }
     });
-  }} ?disabled=${this.saveDisabled()}>
+  }} ?disabled=${this.saveDisabled(this.profileCopy)}>
   <img src="/ecc/icons/user-edit.svg" slot="icon"></img>
   Confirm update</sp-button>
   </sp-button-group>
