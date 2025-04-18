@@ -1,6 +1,3 @@
-/* eslint-disable no-async-promise-executor */
-/* eslint-disable no-promise-executor-return */
-/* eslint-disable no-await-in-loop */
 import {
   buildNoAccessScreen,
   signIn,
