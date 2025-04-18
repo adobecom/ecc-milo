@@ -5,6 +5,62 @@
   margin: auto;
 }
 
+.ecc-dashboard .dropdown {
+  position: relative;
+}
+
+.ecc-dashboard .dropdown a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ecc-dashboard .dropdown-content {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  top: calc(100% + 12px);
+  width: 100%;
+  left: 0;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-300);
+  border-radius: 4px;
+  padding: 20px 24px 20px 16px;
+  z-index: 1;
+}
+
+.ecc-dashboard .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-black);
+  font-size: var(--type-body-xs-size);
+}
+
+.ecc-dashboard .dropdown-item::before {
+  content: '';  
+  display: block;  
+  opacity: 0;
+  width: 16px;
+  height: 16px;
+  background-image: url('../../icons/check-blue.svg');
+}
+
+.ecc-dashboard .dropdown-item:hover {
+  background-color: var(--color-gray-100);
+}
+
+.ecc-dashboard .dropdown-item:hover::before {
+  opacity: 1;
+}
+
+.ecc-dashboard .hidden {
+  display: none;
+}
+
 .ecc-dashboard .loading-screen {
   position: fixed;
   display: flex;

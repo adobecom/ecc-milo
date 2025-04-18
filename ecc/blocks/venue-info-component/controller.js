@@ -5,7 +5,7 @@ import {
 import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
-import { buildErrorMessage } from '../form-handler/form-handler.js';
+import { buildErrorMessage } from '../form-handler/form-handler-helper.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { getAttribute, getVenuePayload } from '../../scripts/data-utils.js';
 

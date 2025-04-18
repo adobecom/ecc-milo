@@ -51,6 +51,25 @@ async function decorateRSVPFields(el) {
   });
 }
 
+/* TODO - Uncomment this when rsvp-form is available
+ async function decorateRSVPFields(el) {
+  const row = el.querySelector(':scope > div:last-of-type');
+
+  if (!row) return;
+
+  const configSheetLocation = row.querySelector('a')?.href;
+  const config = await fetch(configSheetLocation)
+    .then((resp) => (resp.ok ? resp.json() : null))
+    .catch((err) => window.lana?.log(`Failed to load RSVP fields config: ${err}`));
+
+  row.innerHTML = '';
+  createTag('rsvp-form', { class: 'rsvp-form', data: JSON.stringify(config.data) },
+  '', { parent: row });
+
+  el.dataset.mandatedfields = config.data.filter((f) => f.Required === 'x').map((f) => f.Field);
+}
+*/
+
 export default async function init(el) {
   el.classList.add('form-component');
   generateToolTip(el.querySelector(':scope > div:first-of-type'));
