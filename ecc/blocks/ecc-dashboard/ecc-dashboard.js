@@ -666,6 +666,10 @@ function filterData(props, config, query) {
   props.filteredData = props.data.filter((e) => {
     const defaultLocale = e.defaultLocale || Object.keys(e.localizations)[0] || 'en-US';
     const eventTitle = getAttribute(e, 'title', defaultLocale);
+    if (!eventTitle) {
+      window.lana?.log(`event Title is not defined ${e.eventId}`);
+      return false;
+    }
     return eventTitle.toLowerCase().includes(q);
   });
   props.currentPage = 1;

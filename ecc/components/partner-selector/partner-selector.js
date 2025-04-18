@@ -81,7 +81,7 @@ export default class PartnerSelector extends LitElement {
       modificationTime: this.partner.modificationTime,
     };
 
-    const sponsorPayload = getSponsorPayload(payload, this.locale);
+    const sponsorPayload = await getSponsorPayload(payload, this.locale, this.seriesId);
     if (!this.partner.sponsorId) {
       respJson = await createSponsor(sponsorPayload, this.seriesId, this.locale);
     } else {
