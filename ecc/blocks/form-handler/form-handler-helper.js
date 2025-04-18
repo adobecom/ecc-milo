@@ -16,7 +16,6 @@ import RsvpForm from '../../components/rsvp-form/rsvp-form.js';
 import getJoinedData, {
   setPayloadCache,
   setResponseCache,
-  getLocalizedResponseData,
   setRemoveCache,
 } from './data-handler.js';
 
@@ -40,6 +39,7 @@ import {
   getEvent,
   previewEvent,
 } from '../../scripts/esp-controller.js';
+import { getAttribute } from '../../scripts/data-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -172,10 +172,8 @@ export function buildErrorMessage(props, resp) {
     } else if (errorMessage) {
       if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}') {
         const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'The event has been updated by a different session since your last save.', { parent: toastArea });
-
-        const localeData = getLocalizedResponseData(props);
         const url = new URL(window.location.href);
-        url.searchParams.set('eventId', localeData.eventId);
+        url.searchParams.set('eventId', getAttribute(props.eventDataResp, 'eventId', props.locale));
 
         createTag('sp-button', {
           slot: 'action',
@@ -421,10 +419,10 @@ function updateDashboardLink(props) {
 
   if (url.searchParams.has('eventId')) return;
 
-  const localeData = getLocalizedResponseData(props);
-  if (!localeData.eventId) return;
+  const eventId = getAttribute(props.eventDataResp, 'eventId', props.locale);
+  if (!eventId) return;
 
-  url.searchParams.set('newEventId', localeData.eventId);
+  url.searchParams.set('newEventId', eventId);
   dashboardLink.href = url.toString();
 }
 
@@ -450,8 +448,7 @@ async function saveEvent(props, toPublish = false) {
     }
   };
 
-  const localeData = getLocalizedResponseData(props);
-  if (props.currentStep === 0 && !localeData.eventId) {
+  if (props.currentStep === 0 && !getAttribute(props.eventDataResp, 'eventId', props.locale)) {
     resp = await createEvent({ ...getJoinedData(props.locale), eventType }, props.locale);
     if (!resp.error && resp) {
       const newEventData = await getEvent(resp.eventId);
@@ -769,16 +766,15 @@ function initFormCtas(props) {
           e.preventDefault();
           toggleBtnsSubmittingState(true);
 
-          const localeData = getLocalizedResponseData(props);
-
-          if (!localeData.eventId) {
+          const eventId = getAttribute(props.eventDataResp, 'eventId', props.locale);
+          if (!eventId) {
             buildErrorMessage(props, { error: { message: 'Event ID is not found' } });
             toggleBtnsSubmittingState(false);
             return;
           }
 
           const resp = await previewEvent(
-            localeData.eventId,
+            eventId,
             getJoinedData(props.locale),
           );
 
@@ -824,6 +820,7 @@ function initFormCtas(props) {
 
           if (ctaUrl.hash === '#next') {
             let resp;
+
             if (props.currentStep === props.maxStep) {
               resp = await saveEvent(props, true);
             } else {
@@ -1058,11 +1055,11 @@ function decorateForm(el) {
 }
 
 export async function handleSubmit(props) {
-  const localeData = getLocalizedResponseData(props);
-  if (!localeData.eventId) return;
+  const eventId = getAttribute(props.eventDataResp, 'eventId', props.locale);
+  if (!eventId) return;
 
   const url = new URL(window.location.href);
-  url.searchParams.set('newEventId', localeData.eventId);
+  url.searchParams.set('newEventId', eventId);
   window.location.href = url;
 }
 
