@@ -1,4 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
+import { EVENT_TYPES } from '../../types/EventTypes.js';
 import { style } from './rsvp-form.css.js';
 
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
@@ -16,6 +17,7 @@ export default class RsvpForm extends LitElement {
     formType: { type: String },
     visible: { type: Set },
     required: { type: Set },
+    eventType: { type: String },
   };
 
   constructor() {
@@ -105,7 +107,7 @@ export default class RsvpForm extends LitElement {
     return this.renderMarketoForm();
   }
 
-  render() {
+  renderWebinarForm() {
     return html`
       <div class="rsvp-form">
       <fieldset class="form-type" @change=${(e) => { this.formType = e.target.value; }} >
@@ -114,8 +116,16 @@ export default class RsvpForm extends LitElement {
     <input type="radio" id="marketo" name="drone" value="marketo" ?checked=${this.formType === 'marketo'} />
     <label for="marketo">Marketo</label>
 </fieldset>
-      </div>
       ${this.renderForm()}
+      </div>
     `;
+  }
+
+  render() {
+    if (this.eventType === EVENT_TYPES.ONLINE) {
+      return this.renderWebinarForm();
+    }
+
+    return this.renderBasicForm();
   }
 }

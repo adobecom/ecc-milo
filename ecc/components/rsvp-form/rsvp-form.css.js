@@ -9,6 +9,8 @@ export const style = css`
   background-color: #f8f8f8;
   border-radius: 6px;
   margin: 0 auto 40px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
  .field-config-table {
@@ -36,4 +38,9 @@ export const style = css`
   .field-label {
     width: 520px;
   }
+  
+  .rsvp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
 `;
