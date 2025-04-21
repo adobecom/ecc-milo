@@ -216,6 +216,12 @@ function sortData(props, config, options = {}) {
   el?.classList.add('active');
 }
 
+function getEventEditUrl(config, eventObj) {
+  const url = new URL(`${window.location.origin}${eventObj.eventType === 'Online' ? config['webinar-form-url'] : config['create-form-url']}`);
+  url.searchParams.set('eventId', eventObj.eventId);
+  return url;
+}
+
 function buildToastMsgWithEventTitle(event, configValue) {
   const defaultLocale = event.defaultLocale || Object.keys(event.localizations)[0] || 'en-US';
   const eventTitle = getAttribute(event, 'title', defaultLocale);
@@ -347,8 +353,7 @@ function initMoreOptions(props, config, eventObj, row) {
     }
 
     // edit
-    const url = new URL(`${window.location.origin}${config['create-form-url']}`);
-    url.searchParams.set('eventId', eventObj.eventId);
+    const url = getEventEditUrl(config, eventObj);
     edit.href = url.toString();
 
     // clone
@@ -465,10 +470,10 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(config, eventObj) {
+  const url = getEventEditUrl(config, eventObj);
+
   const defaultLocale = eventObj.defaultLocale || Object.keys(eventObj.localizations)[0] || 'en-US';
-  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
   const eventTitle = getAttribute(eventObj, 'title', defaultLocale);
-  url.searchParams.set('eventId', eventObj.eventId);
   const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventTitle);
   return eventTitleTag;
 }

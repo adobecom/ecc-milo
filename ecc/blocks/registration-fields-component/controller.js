@@ -24,14 +24,19 @@ export async function onPayloadUpdate(_component, _props) {
   // Do nothing
 }
 
-export async function onRespUpdate(_component, _props) {
-  // Do nothing
+export async function onRespUpdate(component, props) {
+  const eventData = props.eventDataResp;
+  const eventType = getAttribute(eventData, 'eventType', props.locale);
+
+  const rsvpForm = component.querySelector('div > rsvp-form');
+  rsvpForm.setAttribute('eventType', eventType);
 }
 
 export default function init(component, props) {
   const eventData = props.eventDataResp;
-  const rsvpForm = component.querySelector('div > rsvp-form');
   const eventType = getAttribute(eventData, 'eventType', props.locale);
+
+  const rsvpForm = component.querySelector('div > rsvp-form');
   rsvpForm.setAttribute('eventType', eventType);
 }
 
