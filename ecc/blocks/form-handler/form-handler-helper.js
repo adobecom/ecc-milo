@@ -142,7 +142,11 @@ const INPUT_TYPES = [
   'sp-picker[required]',
 ];
 
-const SUPPORTED_EVENT_TYPES = ['InPerson', 'Hybrid', 'Online'];
+const SUPPORTED_EVENT_TYPES = {
+  IN_PERSON: 'InPerson',
+  ONLINE: 'Online',
+  HYBRID: 'Hybrid',
+};
 
 export function buildErrorMessage(props, resp) {
   if (!resp) return;
@@ -426,9 +430,6 @@ function updateDashboardLink(props) {
 }
 
 async function saveEvent(props, toPublish = false) {
-  const eventType = Array
-    .from(props.el.classList)
-    .find((c) => SUPPORTED_EVENT_TYPES.includes(c));
   try {
     await gatherValues(props);
   } catch (e) {
@@ -448,7 +449,7 @@ async function saveEvent(props, toPublish = false) {
   };
 
   if (props.currentStep === 0 && !getAttribute(props.eventDataResp, 'eventId', props.locale)) {
-    resp = await createEvent({ ...getJoinedData(props.locale), eventType }, props.locale);
+    resp = await createEvent(getJoinedData(props.locale), props.locale);
     if (!resp.error && resp) {
       const newEventData = await getEvent(resp.eventId);
       props.eventDataResp = newEventData;
@@ -1064,14 +1065,21 @@ export async function handleSubmit(props) {
   window.location.href = url;
 }
 
+function getEventType(classList) {
+  // eslint-disable-next-line max-len
+  return Object.values(SUPPORTED_EVENT_TYPES).find((type) => Array.from(classList).includes(type.toLowerCase())) ?? SUPPORTED_EVENT_TYPES.IN_PERSON;
+}
+
 export async function buildECCForm(el) {
+  const eventType = getEventType(el.classList);
+
   const props = {
     el,
     currentStep: 0,
     farthestStep: 0,
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {
-      eventType: 'InPerson',
+      eventType,
       localizations: {},
     },
     eventDataResp: {},

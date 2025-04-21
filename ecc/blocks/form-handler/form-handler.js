@@ -18,7 +18,7 @@ export default async function init(el) {
       el.classList.remove('loading');
     },
     validProfile: () => {
-      buildECCForm(el).then(() => {
+      buildECCForm(el, 'InPerson').then(() => {
         el.classList.remove('loading');
       });
     },
