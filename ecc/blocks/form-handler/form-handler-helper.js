@@ -1067,7 +1067,7 @@ export async function handleSubmit(props) {
 
 function getEventType(classList) {
   // eslint-disable-next-line max-len
-  return Object.values(SUPPORTED_EVENT_TYPES).find((type) => Array.from(classList).includes(type.toLowerCase())) ?? SUPPORTED_EVENT_TYPES.IN_PERSON;
+  return Object.values(SUPPORTED_EVENT_TYPES).find((type) => classList.contains(type.toLowerCase())) ?? SUPPORTED_EVENT_TYPES.IN_PERSON;
 }
 
 export async function buildECCForm(el) {
