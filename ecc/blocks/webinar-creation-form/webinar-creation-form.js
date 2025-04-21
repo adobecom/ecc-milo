@@ -7,7 +7,7 @@ import { buildLoadingScreen, buildECCForm } from '../form-handler/form-handler-h
 
 export default async function init(el) {
   buildLoadingScreen(el);
-
+  await initSpectrumComponents();
   await initProfileLogicTree('webinar-creation-form', {
     noProfile: () => {
       signIn();

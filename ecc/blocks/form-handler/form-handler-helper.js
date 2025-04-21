@@ -84,6 +84,17 @@ export const SPECTRUM_COMPONENTS = [
   'switch',
 ];
 
+export async function initSpectrumComponents() {
+  const miloLibs = LIBS;
+  const promises = Array.from(SPECTRUM_COMPONENTS).map(async (component) => {
+    await import(`${miloLibs}/features/spectrum-web-components/dist/${component}.js`);
+  });
+  await Promise.all([
+    import(`${miloLibs}/deps/lit-all.min.js`),
+    ...promises,
+  ]);
+}
+
 // list of controllers for the handler to load
 export const VANILLA_COMPONENTS = [
   'event-format',
