@@ -40,6 +40,7 @@ import {
   previewEvent,
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
+import { EVENT_TYPES } from '../../types/EventTypes.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -141,12 +142,6 @@ const INPUT_TYPES = [
   'sp-checkbox[required]',
   'sp-picker[required]',
 ];
-
-const SUPPORTED_EVENT_TYPES = {
-  IN_PERSON: 'InPerson',
-  ONLINE: 'Online',
-  HYBRID: 'Hybrid',
-};
 
 export function buildErrorMessage(props, resp) {
   if (!resp) return;
@@ -1067,7 +1062,7 @@ export async function handleSubmit(props) {
 
 function getEventType(classList) {
   // eslint-disable-next-line max-len
-  return Object.values(SUPPORTED_EVENT_TYPES).find((type) => classList.contains(type.toLowerCase())) ?? SUPPORTED_EVENT_TYPES.IN_PERSON;
+  return Object.values(EVENT_TYPES).find((type) => classList.contains(type.toLowerCase())) ?? EVENT_TYPES.IN_PERSON;
 }
 
 export async function buildECCForm(el) {

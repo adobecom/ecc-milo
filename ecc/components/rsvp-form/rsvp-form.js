@@ -1,4 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
+import { EVENT_TYPES } from '../../types/EventTypes.js';
 import { style } from './rsvp-form.css.js';
 
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
@@ -121,7 +122,7 @@ export default class RsvpForm extends LitElement {
   }
 
   render() {
-    if (this.eventType === 'Online') {
+    if (this.eventType === EVENT_TYPES.ONLINE) {
       return this.renderWebinarForm();
     }
 

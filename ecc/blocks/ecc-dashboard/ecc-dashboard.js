@@ -20,6 +20,7 @@ import {
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
+import { EVENT_TYPES } from '../../types/EventTypes.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -217,7 +218,7 @@ function sortData(props, config, options = {}) {
 }
 
 function getEventEditUrl(config, eventObj) {
-  const url = new URL(`${window.location.origin}${eventObj.eventType === 'Online' ? config['webinar-form-url'] : config['create-form-url']}`);
+  const url = new URL(`${window.location.origin}${eventObj.eventType === EVENT_TYPES.ONLINE ? config['webinar-form-url'] : config['create-form-url']}`);
   url.searchParams.set('eventId', eventObj.eventId);
   return url;
 }
