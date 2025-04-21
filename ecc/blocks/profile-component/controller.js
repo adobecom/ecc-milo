@@ -104,8 +104,7 @@ export async function onPayloadUpdate(component, props) {
     if (props.payload.seriesId && props.payload.seriesId !== container.seriesId) {
       container.setAttribute('seriesId', props.payload.seriesId);
       const { speakers } = await getSpeakers(props.payload.seriesId);
-      const filterdSpeakers = speakers.filter((speaker) => speaker.localizations && typeof speaker.localizations === 'object' && props.locale in speaker.localizations);
-      container.searchdata = filterdSpeakers ?? [];
+      container.searchdata = speakers ?? [];
     }
 
     if (props.locale) {

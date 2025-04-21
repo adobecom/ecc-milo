@@ -72,14 +72,15 @@ function buildThumbnail(data) {
     const heroImage = images.find((photo) => photo.imageKind === 'event-hero-image');
     const venueImage = images.find((photo) => photo.imageKind === 'venue-image');
 
+    // TODO: Remember to remove the replace('https://www.adobe.com', '') once the images are returned with relative paths
     const imgSrc = (cardImage?.sharepointUrl
-      && `${getEventPageHost()}${cardImage?.sharepointUrl}`)
+      && `${getEventPageHost()}${cardImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
     || cardImage?.imageUrl
     || (heroImage?.sharepointUrl
-      && `${getEventPageHost()}${heroImage?.sharepointUrl}`)
+      && `${getEventPageHost()}${heroImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
     || heroImage?.imageUrl
     || (venueImage?.sharepointUrl
-      && `${getEventPageHost()}${venueImage?.sharepointUrl}`)
+      && `${getEventPageHost()}${venueImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
     || venueImage?.imageUrl
     || images[0]?.imageUrl;
 
@@ -665,6 +666,10 @@ function filterData(props, config, query) {
   props.filteredData = props.data.filter((e) => {
     const defaultLocale = e.defaultLocale || Object.keys(e.localizations)[0] || 'en-US';
     const eventTitle = getAttribute(e, 'title', defaultLocale);
+    if (!eventTitle) {
+      window.lana?.log(`event Title is not defined ${e.eventId}`);
+      return false;
+    }
     return eventTitle.toLowerCase().includes(q);
   });
   props.currentPage = 1;
