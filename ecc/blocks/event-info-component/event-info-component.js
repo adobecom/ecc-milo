@@ -5,6 +5,7 @@ import {
   decorateTextfield,
   miloReplaceKey,
   addTooltipToEl,
+  decorateTextarea,
 } from '../../scripts/utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -168,10 +169,12 @@ function decorateRTETiptap(row) {
     ...(maxCharNum && { characterLimit: maxCharNum }),
   };
 
+  const rteLabel = createTag('sp-label', { for: 'event-info-description-rte' }, 'Rich Event Description', { parent: row });
   const rte = createTag('rte-tiptap', rteProps);
   const rteOutput = createTag('input', { id: 'event-info-description-rte-output', type: 'hidden' });
 
   row.innerHTML = '';
+  row.append(rteLabel);
   row.append(rteOutput);
   row.append(rte);
 }
@@ -189,9 +192,13 @@ export default function init(el) {
       case 1:
         await decorateTextfield(r, { id: 'info-field-event-title' }, await miloReplaceKey('duplicate-event-title-error'));
         break;
-      case 2:
-        decorateRTETiptap(r);
+      case 2: {
+        const clonedRow = r.cloneNode(true);
+        await decorateTextarea(r, { id: 'info-field-event-description', grows: true, quiet: true });
+        decorateRTETiptap(clonedRow);
+        r.append(clonedRow);
         break;
+      }
       case 3:
         decorateDateTimeFields(r);
         break;

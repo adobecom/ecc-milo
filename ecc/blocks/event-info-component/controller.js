@@ -378,7 +378,8 @@ export function onSubmit(component, props) {
 
   const isPrivate = component.querySelector('#private-event').checked;
   const title = component.querySelector('#info-field-event-title').value;
-  const description = component.querySelector('#event-info-description-rte-output').value;
+  const description = component.querySelector('#info-field-event-description').value;
+  const richDescription = component.querySelector('#event-info-description-rte-output').value;
   const datePicker = component.querySelector('#event-info-date-picker');
   const enTitle = component.querySelector('#event-info-url-input').value;
   const localStartDate = datePicker.dataset.startDate;
@@ -395,6 +396,7 @@ export function onSubmit(component, props) {
   const eventInfo = {
     title,
     description,
+    richDescription,
     localStartDate,
     localEndDate,
     localStartTime,
@@ -443,6 +445,7 @@ function checkEventDuplication(event, compareMetrics) {
 
 function prefillFields(component, props, eventData) {
   const eventTitleInput = component.querySelector('#info-field-event-title');
+  const eventDescription = component.querySelector('#info-field-event-description');
   const eventDescriptionRTE = component.querySelector('#event-info-description-rte');
   const startTimeInput = component.querySelector('#time-picker-start-time');
   const startAmpmInput = component.querySelector('#ampm-picker-start-time');
@@ -457,6 +460,7 @@ function prefillFields(component, props, eventData) {
 
   const title = getAttribute(eventData, 'title', props.locale);
   const description = getAttribute(eventData, 'description', props.locale);
+  const richDescription = getAttribute(eventData, 'richDescription', props.locale);
   const localStartDate = getAttribute(eventData, 'localStartDate', props.locale);
   const localEndDate = getAttribute(eventData, 'localEndDate', props.locale);
   const localStartTime = getAttribute(eventData, 'localStartTime', props.locale);
@@ -467,7 +471,8 @@ function prefillFields(component, props, eventData) {
   const isPrivate = getAttribute(eventData, 'isPrivate', props.locale);
 
   if (isValidAttribute(title)) eventTitleInput.value = title;
-  if (isValidAttribute(description)) eventDescriptionRTE.content = description;
+  if (isValidAttribute(description)) eventDescription.value = description;
+  if (isValidAttribute(richDescription)) eventDescriptionRTE.content = richDescription;
   if (isValidAttribute(localStartDate)) datePicker.dataset.startDate = localStartDate;
   if (isValidAttribute(localEndDate)) datePicker.dataset.endDate = localEndDate;
   if (isValidAttribute(localStartTime)) {
