@@ -57,6 +57,7 @@ const VANILLA_COMPONENTS = [
   'event-topics',
   'registration-details',
   'registration-fields',
+  'secondary-cta',
 ];
 
 const INPUT_TYPES = [

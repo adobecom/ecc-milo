@@ -9,16 +9,29 @@ async function decorateFields(row) {
   const cols = row.querySelectorAll(':scope > div');
   if (!cols.length) return null;
   const [checkboxText, placeholderCol] = cols;
-  const [title, url] = placeholderCol.textContent.trim().split('\n');
+
+  const placeholderText = placeholderCol.textContent.trim();
+  if (!placeholderText) {
+    window.lana?.log('Missing placeholder text for secondary CTA fields');
+    return null;
+  }
+
+  const [label, url] = placeholderText.split('\n');
+  if (!label || !url) {
+    window.lana?.log('Invalid format for secondary CTA fields. Expected label and URL separated by newline');
+    return null;
+  }
 
   const inputsWrapper = createTag('div', { class: 'inputs-wrapper' });
   createTag(
     'sp-textfield',
     {
-      id: 'secondary-url-title',
+      id: 'secondary-cta-label',
       class: 'text-input',
-      placeholder: title.trim(),
+      placeholder: label.trim(),
       size: 'xl',
+      'aria-label': 'Secondary CTA Label',
+      required: true,
     },
     '',
     { parent: inputsWrapper },
@@ -27,13 +40,28 @@ async function decorateFields(row) {
   createTag(
     'sp-textfield',
     {
-      id: 'secondary-url-url',
+      id: 'secondary-cta-url',
       class: 'text-input',
       placeholder: url.trim(),
       pattern: LINK_REGEX,
       size: 'xl',
+      'aria-label': 'Secondary CTA URL',
+      required: true,
+      'aria-describedby': 'url-error-message',
     },
     '',
+    { parent: inputsWrapper },
+  );
+
+  // Add error message element for URL validation
+  createTag(
+    'div',
+    {
+      id: 'url-error-message',
+      class: 'error-message',
+      'aria-live': 'polite',
+    },
+    'Please enter a valid URL',
     { parent: inputsWrapper },
   );
 
@@ -42,6 +70,7 @@ async function decorateFields(row) {
     id: 'checkbox-secondary-url',
     name: 'checkbox-secondary-url',
     value: cn,
+    'aria-label': 'Enable Secondary CTA',
   });
 
   checkbox.textContent = '';
@@ -70,5 +99,9 @@ export default async function init(el) {
   el.classList.add('form-component');
   generateToolTip(el);
   const rows = [...el.querySelectorAll(':scope > div')];
+  if (rows.length < 2) {
+    window.lana?.log('Secondary CTA component requires at least 2 rows');
+    return;
+  }
   decorateFields(rows[1]);
 }

@@ -1,6 +1,7 @@
 .secondary-cta-component {
   .field-container {
     display: flex;
+    align-items: flex-start;
     gap: 100px; 
   }
 
@@ -17,5 +18,16 @@
   
   .text-field-row sp-checkbox {
     margin-left: 10px; 
-  } 
+  }
+
+  .error-message {
+    color: var(--color-red);
+    font-size: var(--type-body-xs-size);
+    margin-top: -16px;
+    display: none;
+  }
+
+  .text-input:invalid + .error-message {
+    display: block;
+  }
 }
