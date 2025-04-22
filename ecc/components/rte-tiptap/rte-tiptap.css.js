@@ -49,7 +49,6 @@ export const style = css`
 .rte-tiptap-toolbar-bottom-wrapper {
   display: flex;
   justify-content: space-between;
-  align-items: top;
   margin-top: 6px;
   margin-bottom: 24px;
 }
@@ -65,6 +64,10 @@ export const style = css`
   color: var(--spectrum-color-text);
   border: 1px solid var(--spectrum-color-gray-500);
   border-radius: 4px;
+}
+
+:root(.sm) .tiptap {
+  min-height: 40px;
 }
 
 .tiptap ul,

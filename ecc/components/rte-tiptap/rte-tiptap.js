@@ -54,6 +54,23 @@ export default class RteTiptap extends LitElement {
     this.requestUpdate();
   }
 
+  firstUpdated() {
+    if (!this.editorInitialized) {
+      this.initializeEditor();
+    }
+  }
+
+  updated(changedProps) {
+    if (changedProps.has('content') && this.editor && this.editor.commands && !this.editor.isDestroyed) {
+      const newContent = this.content ?? '';
+      const currentContent = this.editor.getHTML();
+
+      if (newContent !== currentContent) {
+        this.editor.commands.setContent(newContent, false); // false = don't emit new update event
+      }
+    }
+  }
+
   getValue() {
     const htmlHolder = document.createElement('div');
     htmlHolder.innerHTML = this.editor.getHTML();
@@ -88,7 +105,7 @@ export default class RteTiptap extends LitElement {
       ],
       onUpdate: () => {
         const outputHtml = this.getValue();
-        this.handleInput(outputHtml);
+        this.handleInput?.(outputHtml);
       },
       onSelectionUpdate: ({ editor }) => {
         const currentNode = editor.state.selection.$anchor.parent;
@@ -102,6 +119,7 @@ export default class RteTiptap extends LitElement {
         this.updateButtonStates(editor);
       },
     });
+
     this.editorInitialized = true;
   }
 
@@ -195,9 +213,6 @@ export default class RteTiptap extends LitElement {
   }
 
   render() {
-    if (this.handleInput && !this.editorInitialized) {
-      this.initializeEditor();
-    }
     /* eslint-disable indent */
     return html`
             <div class="rte-tiptap-editor"></div>

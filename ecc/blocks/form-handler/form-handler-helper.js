@@ -44,7 +44,7 @@ import { getAttribute } from '../../scripts/data-utils.js';
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
 
-function initCustomLitComponents() {
+export function initCustomLitComponents() {
   customElements.define('image-dropzone', ImageDropzone);
   customElements.define('profile-ui', Profile);
   customElements.define('repeater-element', Repeater);
@@ -129,7 +129,6 @@ async function initVanillaComponents(props) {
 }
 
 export async function initComponents(props) {
-  initCustomLitComponents();
   await initVanillaComponents(props);
 }
 
