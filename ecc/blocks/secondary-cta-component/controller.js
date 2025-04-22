@@ -12,19 +12,19 @@ export function onSubmit(component, props) {
   const removeData = [];
 
   if (checkbox.checked) {
-    const secondaryUrlTitle = component.querySelector('#secondary-url-title')?.value?.trim();
-    data.secondaryUrlTitle = secondaryUrlTitle;
+    const secondaryCtaTitle = component.querySelector('#secondary-cta-title')?.value?.trim();
+    data.secondaryCtaTitle = secondaryCtaTitle;
 
-    const secondaryUrlUrl = component.querySelector('#secondary-url-url')?.value?.trim();
-    data.secondaryUrlUrl = secondaryUrlUrl;
+    const secondaryCtaUrl = component.querySelector('#secondary-cta-url')?.value?.trim();
+    data.secondaryCtaUrl = secondaryCtaUrl;
   } else {
     removeData.push({
-      key: 'secondaryUrlTitle',
+      key: 'secondaryCtaTitle',
       path: '',
     });
 
     removeData.push({
-      key: 'secondaryUrlUrl',
+      key: 'secondaryCtaUrl',
       path: '',
     });
   }
@@ -41,27 +41,29 @@ export async function onRespUpdate(_component, _props) {
 }
 
 export default function init(component, props) {
+  // TODO: remove communityTopicUrl after backward compaitbility is removed
   const eventData = props.eventDataResp;
   const [
     communityTopicUrl,
-    secondaryUrlTitle,
-    secondaryUrlUrl,
+    secondaryCtaTitle,
+    secondaryCtaUrl,
     cloudType,
   ] = [
     getAttribute(eventData, 'communityTopicUrl', props.locale),
-    getAttribute(eventData, 'secondaryUrlTitle', props.locale),
-    getAttribute(eventData, 'secondaryUrlUrl', props.locale),
+    getAttribute(eventData, 'secondaryCtaTitle', props.locale),
+    getAttribute(eventData, 'secondaryCtaUrl', props.locale),
     getAttribute(eventData, 'cloudType', props.locale),
   ];
+
   component.dataset.cloudType = cloudType;
   const checkbox = component.querySelector('#checkbox-secondary-url');
-  const titleInput = component.querySelector('#secondary-url-title');
-  const urlInput = component.querySelector('#secondary-url-url');
+  const titleInput = component.querySelector('#secondary-cta-title');
+  const urlInput = component.querySelector('#secondary-cta-url');
 
-  if (secondaryUrlTitle && secondaryUrlUrl) {
+  if (secondaryCtaTitle && secondaryCtaUrl) {
     changeInputValue(checkbox, 'checked', true);
-    changeInputValue(titleInput, 'value', secondaryUrlTitle);
-    changeInputValue(urlInput, 'value', secondaryUrlUrl);
+    changeInputValue(titleInput, 'value', secondaryCtaTitle);
+    changeInputValue(urlInput, 'value', secondaryCtaUrl);
     component.classList.add('prefilled');
   } else if (communityTopicUrl) {
     changeInputValue(checkbox, 'checked', !!communityTopicUrl);
