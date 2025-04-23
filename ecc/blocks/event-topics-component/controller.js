@@ -107,9 +107,8 @@ function prefillTopics(component, eventData) {
   return selectedButtons;
 }
 
-export async function onSubmit(component, props) {
+export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
-  const caasTags = await getCaasTags();
   const eventType = getAttribute(props.eventDataResp, 'eventType', props.locale);
 
   const selectedButtons = component.querySelectorAll('sp-action-button[selected]');
