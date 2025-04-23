@@ -111,6 +111,7 @@ export const VANILLA_COMPONENTS = [
   'event-topics',
   'registration-details',
   'registration-fields',
+  'video-content',
 ];
 
 async function initVanillaComponents(props) {
