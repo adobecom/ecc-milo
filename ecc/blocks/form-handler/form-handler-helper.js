@@ -40,7 +40,7 @@ import {
   previewEvent,
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
-import { EVENT_TYPES } from '../../types/EventTypes.js';
+import { EVENT_TYPES } from '../../scripts/constants.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);

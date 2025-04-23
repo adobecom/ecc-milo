@@ -1,8 +1,11 @@
+/* eslint-disable max-len */
 /* eslint-disable no-unused-vars */
 
 import { LIBS } from '../../scripts/scripts.js';
 import { getCloud } from '../../scripts/esp-controller.js';
 import { deepGetTagByTagID, getCaasTags } from '../../scripts/caas.js';
+import { getAttribute } from '../../scripts/data-utils.js';
+import { CONTENT_TYPE_TAGS } from '../../scripts/constants.js';
 
 const addSvg = '<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18"><defs><style>.fill-shaded {fill: #464646;}</style></defs><title>S Add 18 N</title><rect id="Canvas" fill="#ff13dc" opacity="0" width="18" height="18" /><path class="fill-shaded" d="M14.5,8H10V3.5A.5.5,0,0,0,9.5,3h-1a.5.5,0,0,0-.5.5V8H3.5a.5.5,0,0,0-.5.5v1a.5.5,0,0,0,.5.5H8v4.5a.5.5,0,0,0,.5.5h1a.5.5,0,0,0,.5-.5V10h4.5a.5.5,0,0,0,.5-.5v-1A.5.5,0,0,0,14.5,8Z" /></svg>';
 const checkSvg = '<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18"><defs><style>.fill-white {fill: #ffffff;}</style></defs><title>S Checkmark 18 N</title><rect id="Canvas" fill="#ffffff" opacity="0" width="18" height="18" /><path class="fill-white" d="M15.656,3.8625l-.7275-.5665a.5.5,0,0,0-.7.0875L7.411,12.1415,4.0875,8.8355a.5.5,0,0,0-.707,0L2.718,9.5a.5.5,0,0,0,0,.707l4.463,4.45a.5.5,0,0,0,.75-.0465L15.7435,4.564A.5.5,0,0,0,15.656,3.8625Z" /></svg>';
@@ -106,14 +109,27 @@ function prefillTopics(component, eventData) {
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
+  const eventType = getAttribute(props.eventDataResp, 'eventType', props.locale);
 
   const selectedButtons = component.querySelectorAll('sp-action-button[selected]');
   const topics = Array.from(selectedButtons).map((cb) => cb.getAttribute('name'));
-  const tags = Array.from(selectedButtons).map((cb) => JSON.parse(cb.getAttribute('data-value')));
+  const contentTypeTag = eventType ? CONTENT_TYPE_TAGS[eventType] : null;
+
+  let tags = [];
+  if (contentTypeTag) {
+    const transformedContentTypeTag = {
+      name: contentTypeTag.title,
+      caasId: contentTypeTag.caasId,
+    };
+
+    tags = [...Array.from(selectedButtons).map((cb) => JSON.parse(cb.getAttribute('data-value'))), transformedContentTypeTag];
+  } else {
+    tags = Array.from(selectedButtons).map((cb) => JSON.parse(cb.getAttribute('data-value')));
+  }
 
   const { payload } = props;
   payload.topics = topics;
-  const tagsToSubmit = [...new Set(tags.map((tag) => tag.caasId))].join(',');
+  const tagsToSubmit = [...new Set([...tags, contentTypeTag].filter((tag) => tag).map((tag) => tag.caasId))].join(',');
   if (tagsToSubmit) payload.tags = tagsToSubmit;
   props.payload = payload;
 }
