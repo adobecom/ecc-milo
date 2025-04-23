@@ -5,7 +5,7 @@ import {
 import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
-import { buildErrorMessage } from '../form-handler/form-handler.js';
+import { buildErrorMessage } from '../form-handler/form-handler-helper.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { getAttribute, getVenuePayload } from '../../scripts/data-utils.js';
 
@@ -105,7 +105,7 @@ function getVenueDataInForm(component) {
   const lon = +placeLngInput.value;
   const gmtOffset = +gmtoffsetInput.value;
   const formattedAddress = formattedAddressInput.value;
-  const additionalInformation = additionalInformationInput?.value;
+  const additionalInformation = additionalInformationInput.value;
 
   let addressComponents;
 
@@ -300,6 +300,7 @@ export default async function init(component, props) {
 
   const venueNameInput = component.querySelector('#venue-info-venue-name');
   const venueRTE = component.querySelector('#venue-additional-info-rte');
+  const venueRTEOutput = component.querySelector('#venue-additional-info-rte-output');
   const venuePostEventCheckbox = component.querySelector('#checkbox-venue-info-visible');
   const venueAdditionalInfoPostEventCheckbox = component.querySelector('#checkbox-venue-additional-info-visible');
   const dz = component.querySelector('image-dropzone');
@@ -331,7 +332,7 @@ export default async function init(component, props) {
 
   if (venueRTE) {
     venueRTE.handleInput = (output) => {
-      changeInputValue(component.querySelector('#venue-additional-info-rte-output'), 'value', output);
+      changeInputValue(venueRTEOutput, 'value', output);
     };
   }
 

@@ -20,6 +20,7 @@ import {
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
+import { EVENT_TYPES } from '../../types/EventTypes.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -72,14 +73,15 @@ function buildThumbnail(data) {
     const heroImage = images.find((photo) => photo.imageKind === 'event-hero-image');
     const venueImage = images.find((photo) => photo.imageKind === 'venue-image');
 
+    // TODO: Remember to remove the replace('https://www.adobe.com', '') once the images are returned with relative paths
     const imgSrc = (cardImage?.sharepointUrl
-      && `${getEventPageHost()}${cardImage?.sharepointUrl}`)
+      && `${getEventPageHost()}${cardImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
     || cardImage?.imageUrl
     || (heroImage?.sharepointUrl
-      && `${getEventPageHost()}${heroImage?.sharepointUrl}`)
+      && `${getEventPageHost()}${heroImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
     || heroImage?.imageUrl
     || (venueImage?.sharepointUrl
-      && `${getEventPageHost()}${venueImage?.sharepointUrl}`)
+      && `${getEventPageHost()}${venueImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
     || venueImage?.imageUrl
     || images[0]?.imageUrl;
 
@@ -215,6 +217,12 @@ function sortData(props, config, options = {}) {
   el?.classList.add('active');
 }
 
+function getEventEditUrl(config, eventObj) {
+  const url = new URL(`${window.location.origin}${eventObj.eventType === EVENT_TYPES.ONLINE ? config['webinar-form-url'] : config['create-form-url']}`);
+  url.searchParams.set('eventId', eventObj.eventId);
+  return url;
+}
+
 function buildToastMsgWithEventTitle(event, configValue) {
   const defaultLocale = event.defaultLocale || Object.keys(event.localizations)[0] || 'en-US';
   const eventTitle = getAttribute(event, 'title', defaultLocale);
@@ -346,8 +354,7 @@ function initMoreOptions(props, config, eventObj, row) {
     }
 
     // edit
-    const url = new URL(`${window.location.origin}${config['create-form-url']}`);
-    url.searchParams.set('eventId', eventObj.eventId);
+    const url = getEventEditUrl(config, eventObj);
     edit.href = url.toString();
 
     // clone
@@ -464,10 +471,10 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(config, eventObj) {
+  const url = getEventEditUrl(config, eventObj);
+
   const defaultLocale = eventObj.defaultLocale || Object.keys(eventObj.localizations)[0] || 'en-US';
-  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
   const eventTitle = getAttribute(eventObj, 'title', defaultLocale);
-  url.searchParams.set('eventId', eventObj.eventId);
   const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventTitle);
   return eventTitleTag;
 }
@@ -665,6 +672,10 @@ function filterData(props, config, query) {
   props.filteredData = props.data.filter((e) => {
     const defaultLocale = e.defaultLocale || Object.keys(e.localizations)[0] || 'en-US';
     const eventTitle = getAttribute(e, 'title', defaultLocale);
+    if (!eventTitle) {
+      window.lana?.log(`event Title is not defined ${e.eventId}`);
+      return false;
+    }
     return eventTitle.toLowerCase().includes(q);
   });
   props.currentPage = 1;
@@ -683,7 +694,25 @@ function buildDashboardHeader(props, config) {
   const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
   searchInputWrapper.append(getIcon('search'));
-  createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
+  const dropdown = createTag('div', { class: 'dropdown' }, '', { parent: actionsContainer });
+  const createCta = createTag('a', { class: 'con-button blue' }, config['create-event-cta-text'], { parent: dropdown });
+  const dropdownContent = createTag('div', { class: 'dropdown-content hidden' }, '', { parent: dropdown });
+
+  createTag('a', { class: 'dropdown-item', href: config['webinar-form-url'] }, 'Online', { parent: dropdownContent });
+  createTag('a', { class: 'dropdown-item', href: config['create-form-url'] }, 'In-Person', { parent: dropdownContent });
+
+  createCta.addEventListener('click', (e) => {
+    e.preventDefault();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target) && !createCta.contains(e.target)) {
+      dropdownContent.classList.add('hidden');
+    } else {
+      dropdownContent.classList.remove('hidden');
+    }
+  });
+
   searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
 
   dashboardHeader.append(textContainer, actionsContainer);

@@ -1,3 +1,5 @@
+import { getSpeaker, getSponsor } from './esp-controller.js';
+
 /**
  * @typedef {Object} AgendaDataRefFilter
  * @property {string} type - The type of the attribute.
@@ -34,6 +36,7 @@ export const EVENT_DATA_FILTER = {
   enTitle: { type: 'string', localizable: false, cloneable: true, submittable: true },
   defaultLocale: { type: 'string', localizable: false, cloneable: true, submittable: true },
   description: { type: 'string', localizable: true, cloneable: true, submittable: true },
+  richDescription: { type: 'string', localizable: true, cloneable: true, submittable: true },
   localStartDate: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localEndDate: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localStartTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
@@ -174,8 +177,13 @@ export function splitLocalizableFields(data, filter, locale) {
   return { localizableFields, nonLocalizableFields };
 }
 
-export function getSpeakerPayload(speakerData, locale) {
+export async function getSpeakerPayload(speakerData, locale, seriesId) {
   if (!speakerData) return speakerData;
+
+  let existingSpeakerPayload = {};
+  if (speakerData.speakerId) {
+    existingSpeakerPayload = await getSpeaker(seriesId, speakerData.speakerId);
+  }
 
   // Split speaker data into localizable and non-localizable fields
   const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
@@ -200,12 +208,17 @@ export function getSpeakerPayload(speakerData, locale) {
 
   return {
     ...filteredGlobalPayload,
-    localizations: { [locale]: filteredLocalePayload },
+    localizations: { ...existingSpeakerPayload.localizations, [locale]: filteredLocalePayload },
   };
 }
 
-export function getSponsorPayload(sponsorData, locale) {
+export async function getSponsorPayload(sponsorData, locale, seriesId) {
   if (!sponsorData) return sponsorData;
+
+  let existingSponsorPayload = {};
+  if (sponsorData.sponsorId) {
+    existingSponsorPayload = await getSponsor(seriesId, sponsorData.sponsorId);
+  }
 
   // Split sponsor data into localizable and non-localizable fields
   const { localizableFields, nonLocalizableFields } = splitLocalizableFields(
@@ -228,13 +241,10 @@ export function getSponsorPayload(sponsorData, locale) {
     return acc;
   }, {});
 
-  const payload = { ...filteredGlobalPayload };
-
-  if (Object.keys(filteredLocalePayload).length > 0) {
-    payload.localizations = { [locale]: filteredLocalePayload };
-  }
-
-  return payload;
+  return {
+    ...filteredGlobalPayload,
+    localizations: { ...existingSponsorPayload.localizations, [locale]: filteredLocalePayload },
+  };
 }
 
 export function getVenuePayload(venueData, locale) {
