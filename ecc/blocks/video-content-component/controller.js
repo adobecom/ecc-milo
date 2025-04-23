@@ -1,7 +1,11 @@
 /* eslint-disable no-unused-vars */
+import { setPropsPayload } from '../form-handler/data-handler.js';
 
-export function onSubmit(_component, _props) {
-  // Do nothing
+export function onSubmit(component, props) {
+  const videoField = component.querySelector('div.video-content > sp-textfield');
+  const videoLink = videoField.value;
+
+  setPropsPayload(props, { videoLink }); // To be updated.
 }
 
 export async function onPayloadUpdate(component, props) {
