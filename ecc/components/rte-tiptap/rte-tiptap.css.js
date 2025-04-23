@@ -46,12 +46,17 @@ export const style = css`
   width: 100%;
 }
 
-.rte-tiptap-toolbar {
-  margin-top: 24px;
+.rte-tiptap-toolbar-bottom-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  margin-bottom: 24px;
 }
 
 .tiptap {
   min-height: 200px;
+  overflow-y: auto;
+  resize: vertical;
   margin-top: 5px;
   padding: 0 10px;
   font-size: 1rem;
@@ -59,6 +64,10 @@ export const style = css`
   color: var(--spectrum-color-text);
   border: 1px solid var(--spectrum-color-gray-500);
   border-radius: 4px;
+}
+
+:root(.sm) .tiptap {
+  min-height: 40px;
 }
 
 .tiptap ul,
