@@ -30,6 +30,8 @@ export const EVENT_DATA_FILTER = {
   cloudType: { type: 'string', localizable: false, cloneable: true, submittable: true },
   seriesId: { type: 'string', localizable: false, cloneable: true, submittable: true },
   communityTopicUrl: { type: 'string', localizable: false, cloneable: true, submittable: true },
+  secondaryCtaUrl: { type: 'string', localizable: false, cloneable: true, submittable: true },
+  secondaryCtaLabel: { type: 'string', localizable: true, cloneable: true, submittable: true },
   title: { type: 'string', localizable: true, cloneable: true, submittable: true },
   enTitle: { type: 'string', localizable: false, cloneable: true, submittable: true },
   defaultLocale: { type: 'string', localizable: false, cloneable: true, submittable: true },

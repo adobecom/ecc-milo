@@ -169,12 +169,14 @@ function decorateRTETiptap(row) {
     ...(maxCharNum && { characterLimit: maxCharNum }),
   };
 
-  const rteLabel = createTag('sp-label', { for: 'event-info-description-rte' }, 'Rich Event Description', { parent: row });
+  const rteHeading = createTag('sp-label', { for: 'event-info-description-rte' }, 'Rich Event Description', { parent: row });
   const rte = createTag('rte-tiptap', rteProps);
   const rteOutput = createTag('input', { id: 'event-info-description-rte-output', type: 'hidden' });
 
+  addTooltipToEl('Add rich text to your event description. This will be the copy displayed on the event page.', rteHeading);
+
   row.innerHTML = '';
-  row.append(rteLabel);
+  row.append(rteHeading);
   row.append(rteOutput);
   row.append(rte);
 }
