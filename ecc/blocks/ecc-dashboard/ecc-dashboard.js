@@ -20,7 +20,7 @@ import {
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
-import { EVENT_TYPES } from '../../types/EventTypes.js';
+import { EVENT_TYPES } from '../../scripts/constants.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 

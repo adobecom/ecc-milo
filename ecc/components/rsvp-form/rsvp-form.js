@@ -1,5 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { EVENT_TYPES } from '../../types/EventTypes.js';
+import { EVENT_TYPES } from '../../scripts/constants.js';
 import { style } from './rsvp-form.css.js';
 
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
