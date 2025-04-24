@@ -20,7 +20,7 @@ export function onSubmit(component, props) {
     const secondaryCtaUrl = urlInput?.value?.trim();
     const secondaryCtaLabel = labelInput?.value?.trim();
 
-    if (!secondaryCtaUrl) return; // Don't proceed if URL is empty when checkbox is checked
+    if (!secondaryCtaUrl) return;
 
     data.secondaryCtaUrl = secondaryCtaUrl;
     data.secondaryCtaLabel = secondaryCtaLabel || secondaryCtaUrl;
@@ -102,7 +102,6 @@ function initializeInputs(component, props) {
 
   const updateInputState = () => {
     labelInput.disabled = !checkbox.checked;
-    urlInput.required = checkbox.checked;
     urlInput.disabled = !checkbox.checked;
 
     if (!checkbox.checked) {
