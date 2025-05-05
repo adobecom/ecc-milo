@@ -47,7 +47,7 @@ function prefillFields(component, props) {
   const disbleWaitlistEl = component.querySelector('#registration-disable-waitlist');
   const allowGuestRegistrationEl = component.querySelector('#allow-guest-registration');
   const descriptionEl = component.querySelector('#rsvp-description-rte');
-
+  const descriptionRTEOutput = component.querySelector('#rsvp-description-rte-output');
   const eventData = props.eventDataResp;
 
   if (eventData) {
@@ -59,7 +59,10 @@ function prefillFields(component, props) {
 
     if (attendeeLimitEl && attendeeLimit) attendeeLimitEl.value = attendeeLimit;
     if (disbleWaitlistEl) disbleWaitlistEl.checked = !allowWaitlisting;
-    if (descriptionEl && rsvpDescription) descriptionEl.content = rsvpDescription;
+    if (descriptionEl && rsvpDescription) {
+      descriptionEl.content = rsvpDescription;
+      descriptionRTEOutput.value = rsvpDescription;
+    }
     if (hostEmail) {
       if (contactHostEl) contactHostEl.checked = true;
       if (hostEmailEl) hostEmailEl.value = hostEmail;
