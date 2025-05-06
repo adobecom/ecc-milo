@@ -1,6 +1,7 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { EVENT_TYPES } from '../../types/EventTypes.js';
 import { style } from './rsvp-form.css.js';
+import { getIcon } from '../../scripts/utils.js';
 
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -18,6 +19,7 @@ export default class RsvpForm extends LitElement {
     visible: { type: Set },
     required: { type: Set },
     eventType: { type: String },
+    formUrl: { type: String },
   };
 
   constructor() {
@@ -26,6 +28,7 @@ export default class RsvpForm extends LitElement {
     this.formType = 'basic';
     this.visible = new Set();
     this.required = new Set();
+    this.formUrl = '';
   }
 
   static styles = style;
@@ -52,13 +55,34 @@ export default class RsvpForm extends LitElement {
     this.requestUpdate();
   }
 
-  getRsvpFormFields() {
-    const visible = Array.from(this.visible);
-    const required = Array.from(this.required);
-    return {
-      visible,
-      required,
-    };
+  updateMarketoFormUrl(value) {
+    this.formUrl = value;
+    this.requestUpdate();
+  }
+
+  getRegistrationPayload() {
+    const registration = { type: this.formType === 'basic' ? 'ESP' : 'Marketo' };
+
+    if (this.formType === 'basic') {
+      const visible = Array.from(this.visible);
+      const required = Array.from(this.required);
+      const mandatedfields = this.data.filter((f) => f.Required === 'x').map((f) => f.Field);
+
+      return {
+        rsvpFormFields:
+        {
+          visible: [...mandatedfields, ...visible],
+          required: [...mandatedfields, ...required],
+        },
+        // registration, // TODO :: uncomment this line when the backend is ready
+      };
+    }
+
+    if (this.formType === 'marketo') {
+      registration.formUrl = this.formUrl;
+      return { registration };
+    }
+    return {};
   }
 
   renderBasicForm() {
@@ -93,11 +117,18 @@ export default class RsvpForm extends LitElement {
   // eslint-disable-next-line class-methods-use-this
   renderMarketoForm() {
     return html`
-        <div class="rsvp-checkboxes">
-        <sp-field-label size="l" class="field-label">SFDC ID *</sp-field-label>
-        <sp-textfield class="field-label"></sp-textfield>
-        </div>
-        `;
+      <div class="rsvp-checkboxes">
+      <sp-field-label size="l" class="field-label">Marketo form URL
+      <sp-action-button size="s" class="tooltip-trigger">
+        ${getIcon('info')}
+      </sp-action-button>
+      <sp-tooltip self-managed variant="info" class="tooltip-content">
+        "Tool tip text"
+      </sp-tooltip>
+      </sp-field-label>
+      <sp-textfield class="field-label" @change="${(event) => this.updateMarketoFormUrl(event.target.value)}"></sp-textfield>
+      </div>
+      `;
   }
 
   renderForm() {
@@ -110,12 +141,12 @@ export default class RsvpForm extends LitElement {
   renderWebinarForm() {
     return html`
       <div class="rsvp-form">
-      <fieldset class="form-type" @change=${(e) => { this.formType = e.target.value; }} >
-    <input type="radio" id="basic" name="drone" value="basic" ?checked=${this.formType === 'basic'}/>
-    <label for="basic">Basic form</label>
-    <input type="radio" id="marketo" name="drone" value="marketo" ?checked=${this.formType === 'marketo'} />
-    <label for="marketo">Marketo</label>
-</fieldset>
+      <fieldset class="form-type" @change=${(e) => { this.formType = e.target.value; this.requestUpdate(); }} >
+        <input type="radio" id="basic" name="drone" value="basic" ?checked=${this.formType === 'basic'}/>
+        <label for="basic">Basic form</label>
+        <input type="radio" id="marketo" name="drone" value="marketo" ?checked=${this.formType === 'marketo'} />
+        <label for="marketo">Marketo</label>
+      </fieldset>
       ${this.renderForm()}
       </div>
     `;

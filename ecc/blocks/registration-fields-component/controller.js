@@ -9,15 +9,21 @@ export function onSubmit(component, props) {
 
   const rsvpform = component.querySelector('div > rsvp-form');
 
-  let rsvpFormFields = {};
-  const rsvpFormData = rsvpform.getRsvpFormFields();
+  const registrationPayload = rsvpform.getRegistrationPayload();
 
-  rsvpFormFields = {
-    visible: [...defaultFields, ...rsvpFormData.visible],
-    required: [...defaultFields, ...rsvpFormData.required],
-  };
+  const removeData = [];
+  if (registrationPayload.registration?.type === 'Marketo') {
+    removeData.push({
+      key: 'rsvpFormFields',
+      path: '',
+    });
+  }
 
-  setPropsPayload(props, { rsvpFormFields });
+  setPropsPayload(
+    props,
+    registrationPayload,
+    removeData,
+  );
 }
 
 export async function onPayloadUpdate(_component, _props) {

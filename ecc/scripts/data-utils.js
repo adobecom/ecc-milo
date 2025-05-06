@@ -57,6 +57,8 @@ export const EVENT_DATA_FILTER = {
   creationTime: { type: 'string', localizable: false, cloneable: false, submittable: true },
   modificationTime: { type: 'string', localizable: false, cloneable: false, submittable: true },
   isPrivate: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
+  video: { type: 'object', localizable: false, cloneable: true, submittable: true },
+  registration: { type: 'object', localizable: false, cloneable: true, submittable: true },
 };
 
 /**
@@ -114,6 +116,8 @@ export const VENUE_DATA_FILTER = {
   creationTime: { type: 'string', localizable: false, submittable: false },
   modificationTime: { type: 'string', localizable: false, submittable: true },
 };
+
+export const VIDEO_DATA_FILTER = { url: { type: 'string', localizable: false, submittable: true } };
 
 export function isValidAttribute(attr) {
   return (attr !== undefined && attr !== null && attr !== '') || attr === false;
