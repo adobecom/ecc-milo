@@ -1,5 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { EVENT_TYPES } from '../../types/EventTypes.js';
+import { EVENT_TYPES } from '../../scripts/constants.js';
 import { style } from './rsvp-form.css.js';
 import { getIcon } from '../../scripts/utils.js';
 
