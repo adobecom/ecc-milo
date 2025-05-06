@@ -16,7 +16,7 @@ export default class RsvpForm extends LitElement {
   static properties = {
     data: { type: Array },
     formType: { type: String },
-    visible: { type: Set },
+    visible: { type: Set, attribute: false },
     required: { type: Set },
     eventType: { type: String },
     formUrl: { type: String },
