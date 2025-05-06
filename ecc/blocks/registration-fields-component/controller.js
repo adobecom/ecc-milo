@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { getAttribute } from '../../scripts/data-utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
-import { EVENT_TYPES } from '../../types/EventTypes.js';
+import { EVENT_TYPES } from '../../scripts/constants.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
