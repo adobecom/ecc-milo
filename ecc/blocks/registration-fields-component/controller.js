@@ -26,9 +26,9 @@ export function onSubmit(component, props) {
 }
 
 function setMarketoAttributes(rsvpForm, registration) {
-  const { formUrl } = registration;
+  const { formData } = registration;
   rsvpForm.setAttribute('formType', 'marketo');
-  rsvpForm.setAttribute('formUrl', formUrl);
+  rsvpForm.setAttribute('formUrl', formData);
 }
 
 function setBasicFormAttributes(rsvpForm, eventData, locale) {

@@ -119,7 +119,7 @@ export default class RsvpForm extends LitElement {
     }
 
     if (this.formType === 'marketo') {
-      registration.formUrl = this.formUrl;
+      registration.formData = this.formUrl;
       return { registration };
     }
     return {};
