@@ -112,7 +112,10 @@ export default class RsvpForm extends LitElement {
     const registration = { type: this.formType === 'basic' ? 'ESP' : 'Marketo' };
 
     if (this.formType === 'basic') {
-      return this.getRsvpFormFields();
+      return {
+        registration,
+        ...this.getRsvpFormFields(),
+      };
     }
 
     if (this.formType === 'marketo') {

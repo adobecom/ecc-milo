@@ -120,8 +120,6 @@ export const VENUE_DATA_FILTER = {
   modificationTime: { type: 'string', localizable: false, submittable: true },
 };
 
-export const VIDEO_DATA_FILTER = { url: { type: 'string', localizable: false, submittable: true } };
-
 export function isValidAttribute(attr) {
   return (attr !== undefined && attr !== null && attr !== '') || attr === false;
 }

@@ -6,8 +6,6 @@ import { EVENT_TYPES } from '../../scripts/constants.js';
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const defaultFields = component.dataset.mandatedfields?.split(',');
-
   const rsvpform = component.querySelector('div > rsvp-form');
 
   const registrationPayload = rsvpform.getRegistrationPayload();
