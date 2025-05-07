@@ -5,6 +5,12 @@ import { getIcon } from '../../scripts/utils.js';
 
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
 
+/**
+ * Converts a camelCase or PascalCase string into an uppercase string with spaces between words.
+ *
+ * @param {string} input - The input string to be converted.
+ * @returns {string} The converted string in uppercase with spaces between words.
+ */
 function convertString(input) {
   const parts = input.replace(/([a-z])([A-Z])/g, '$1 $2');
   const result = parts.toUpperCase();
@@ -16,7 +22,7 @@ export default class RsvpForm extends LitElement {
   static properties = {
     data: { type: Array },
     formType: { type: String },
-    visible: { type: Set, attribute: false },
+    visible: { type: Set },
     required: { type: Set },
     eventType: { type: String },
     formUrl: { type: String },
@@ -55,34 +61,22 @@ export default class RsvpForm extends LitElement {
     this.requestUpdate();
   }
 
+  getRsvpFormFields() {
+    const visible = Array.from(this.visible);
+    const required = Array.from(this.required);
+    const mandatedfields = this.data.filter((f) => f.Required === 'x').map((f) => f.Field);
+
+    return {
+      rsvpFormFields: {
+        visible: [...mandatedfields, ...visible],
+        required: [...mandatedfields, ...required],
+      },
+    };
+  }
+
   updateMarketoFormUrl(value) {
     this.formUrl = value;
     this.requestUpdate();
-  }
-
-  getRegistrationPayload() {
-    const registration = { type: this.formType === 'basic' ? 'ESP' : 'Marketo' };
-
-    if (this.formType === 'basic') {
-      const visible = Array.from(this.visible);
-      const required = Array.from(this.required);
-      const mandatedfields = this.data.filter((f) => f.Required === 'x').map((f) => f.Field);
-
-      return {
-        rsvpFormFields:
-        {
-          visible: [...mandatedfields, ...visible],
-          required: [...mandatedfields, ...required],
-        },
-        // registration, // TODO :: uncomment this line when the backend is ready
-      };
-    }
-
-    if (this.formType === 'marketo') {
-      registration.formUrl = this.formUrl;
-      return { registration };
-    }
-    return {};
   }
 
   renderBasicForm() {
@@ -112,6 +106,20 @@ export default class RsvpForm extends LitElement {
         </table>
       </div>
     `;
+  }
+
+  getRegistrationPayload() {
+    const registration = { type: this.formType === 'basic' ? 'ESP' : 'Marketo' };
+
+    if (this.formType === 'basic') {
+      return this.getRsvpFormFields();
+    }
+
+    if (this.formType === 'marketo') {
+      registration.formUrl = this.formUrl;
+      return { registration };
+    }
+    return {};
   }
 
   // eslint-disable-next-line class-methods-use-this

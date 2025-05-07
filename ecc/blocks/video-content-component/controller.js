@@ -6,7 +6,7 @@ export function onSubmit(component, props) {
   const videoField = component.querySelector('div.video-content > sp-textfield');
   const video = { url: videoField.value };
   if (videoField.value) {
-    setPropsPayload(props, { video }); // To be updated.
+    setPropsPayload(props, { video });
   }
 }
 
