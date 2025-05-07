@@ -36,7 +36,7 @@ export const EVENT_DATA_FILTER = {
   enTitle: { type: 'string', localizable: false, cloneable: true, submittable: true },
   defaultLocale: { type: 'string', localizable: false, cloneable: true, submittable: true },
   description: { type: 'string', localizable: true, cloneable: true, submittable: true },
-  richDescription: { type: 'string', localizable: true, cloneable: true, submittable: true },
+  eventDetails: { type: 'string', localizable: true, cloneable: true, submittable: true },
   localStartDate: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localEndDate: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localStartTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
