@@ -379,7 +379,7 @@ export function onSubmit(component, props) {
   const isPrivate = component.querySelector('#private-event').checked;
   const title = component.querySelector('#info-field-event-title').value;
   const description = component.querySelector('#info-field-event-description').value;
-  const richDescription = component.querySelector('#event-info-description-rte-output').value;
+  const eventDetails = component.querySelector('#event-info-details-rte-output').value;
   const datePicker = component.querySelector('#event-info-date-picker');
   const enTitle = component.querySelector('#event-info-url-input').value;
   const localStartDate = datePicker.dataset.startDate;
@@ -396,7 +396,7 @@ export function onSubmit(component, props) {
   const eventInfo = {
     title,
     description,
-    richDescription,
+    eventDetails,
     localStartDate,
     localEndDate,
     localStartTime,
@@ -446,8 +446,8 @@ function checkEventDuplication(event, compareMetrics) {
 function prefillFields(component, props, eventData) {
   const eventTitleInput = component.querySelector('#info-field-event-title');
   const eventDescription = component.querySelector('#info-field-event-description');
-  const eventDescriptionRTE = component.querySelector('#event-info-description-rte');
-  const eventDescriptionRTEOutput = component.querySelector('#event-info-description-rte-output');
+  const eventDescriptionRTE = component.querySelector('#event-info-details-rte');
+  const eventDescriptionRTEOutput = component.querySelector('#event-info-details-rte-output');
   const startTimeInput = component.querySelector('#time-picker-start-time');
   const startAmpmInput = component.querySelector('#ampm-picker-start-time');
   const endTimeInput = component.querySelector('#time-picker-end-time');
@@ -461,7 +461,7 @@ function prefillFields(component, props, eventData) {
 
   const title = getAttribute(eventData, 'title', props.locale);
   const description = getAttribute(eventData, 'description', props.locale);
-  const richDescription = getAttribute(eventData, 'richDescription', props.locale);
+  const eventDetails = getAttribute(eventData, 'eventDetails', props.locale);
   const localStartDate = getAttribute(eventData, 'localStartDate', props.locale);
   const localEndDate = getAttribute(eventData, 'localEndDate', props.locale);
   const localStartTime = getAttribute(eventData, 'localStartTime', props.locale);
@@ -473,9 +473,9 @@ function prefillFields(component, props, eventData) {
 
   if (isValidAttribute(title)) eventTitleInput.value = title;
   if (isValidAttribute(description)) eventDescription.value = description;
-  if (isValidAttribute(richDescription)) {
-    eventDescriptionRTE.content = richDescription;
-    eventDescriptionRTEOutput.value = richDescription;
+  if (isValidAttribute(eventDetails)) {
+    eventDescriptionRTE.content = eventDetails;
+    eventDescriptionRTEOutput.value = eventDetails;
   }
   if (isValidAttribute(localStartDate)) datePicker.dataset.startDate = localStartDate;
   if (isValidAttribute(localEndDate)) datePicker.dataset.endDate = localEndDate;
@@ -541,8 +541,8 @@ export default async function init(component, props) {
   const startTime = component.querySelector('#time-picker-start-time-value');
   const endTime = component.querySelector('#time-picker-end-time-value');
   const datePicker = component.querySelector('#event-info-date-picker');
-  const descriptionRTE = component.querySelector('#event-info-description-rte');
-  const descriptionRTEOutput = component.querySelector('#event-info-description-rte-output');
+  const descriptionRTE = component.querySelector('#event-info-details-rte');
+  const descriptionRTEOutput = component.querySelector('#event-info-details-rte-output');
 
   initCalendar(component);
 
