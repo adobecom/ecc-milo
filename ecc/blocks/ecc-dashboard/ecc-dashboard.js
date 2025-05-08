@@ -120,6 +120,11 @@ function buildThumbnail(data) {
     });
   }
 
+  if (data.isPrivate) {
+    const privateIcon = getIcon('invisible-eye');
+    container.append(privateIcon);
+  }
+
   return container;
 }
 
