@@ -447,6 +447,7 @@ function prefillFields(component, props, eventData) {
   const eventTitleInput = component.querySelector('#info-field-event-title');
   const eventDescription = component.querySelector('#info-field-event-description');
   const eventDescriptionRTE = component.querySelector('#event-info-description-rte');
+  const eventDescriptionRTEOutput = component.querySelector('#event-info-description-rte-output');
   const startTimeInput = component.querySelector('#time-picker-start-time');
   const startAmpmInput = component.querySelector('#ampm-picker-start-time');
   const endTimeInput = component.querySelector('#time-picker-end-time');
@@ -472,7 +473,10 @@ function prefillFields(component, props, eventData) {
 
   if (isValidAttribute(title)) eventTitleInput.value = title;
   if (isValidAttribute(description)) eventDescription.value = description;
-  if (isValidAttribute(richDescription)) eventDescriptionRTE.content = richDescription;
+  if (isValidAttribute(richDescription)) {
+    eventDescriptionRTE.content = richDescription;
+    eventDescriptionRTEOutput.value = richDescription;
+  }
   if (isValidAttribute(localStartDate)) datePicker.dataset.startDate = localStartDate;
   if (isValidAttribute(localEndDate)) datePicker.dataset.endDate = localEndDate;
   if (isValidAttribute(localStartTime)) {

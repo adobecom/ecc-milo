@@ -13,30 +13,20 @@ export function onSubmit(component, props) {
 
   if (!checkbox || !urlInput || !labelInput) return;
 
-  const data = {};
-  const removeData = [];
+  let cta = [];
 
   if (checkbox.checked) {
-    const secondaryCtaUrl = urlInput?.value?.trim();
-    const secondaryCtaLabel = labelInput?.value?.trim();
+    const url = urlInput?.value?.trim();
+    const label = labelInput?.value?.trim();
 
-    if (!secondaryCtaUrl) return; // Don't proceed if URL is empty when checkbox is checked
+    if (!url) return;
 
-    data.secondaryCtaUrl = secondaryCtaUrl;
-    data.secondaryCtaLabel = secondaryCtaLabel || secondaryCtaUrl;
+    cta = [{ url, label }];
   } else {
-    removeData.push({
-      key: 'secondaryCtaLabel',
-      path: '',
-    });
-
-    removeData.push({
-      key: 'secondaryCtaUrl',
-      path: '',
-    });
+    cta = [];
   }
 
-  setPropsPayload(props, data, removeData);
+  setPropsPayload(props, { cta });
 }
 
 function prefillInputs(component, props) {
@@ -45,13 +35,11 @@ function prefillInputs(component, props) {
   if (!eventData || !props.locale) return;
   const [
     communityTopicUrl,
-    secondaryCtaLabel,
-    secondaryCtaUrl,
+    cta,
     cloudType,
   ] = [
     getAttribute(eventData, 'communityTopicUrl', props.locale),
-    getAttribute(eventData, 'secondaryCtaLabel', props.locale),
-    getAttribute(eventData, 'secondaryCtaUrl', props.locale),
+    getAttribute(eventData, 'ctas', props.locale),
     getAttribute(eventData, 'cloudType', props.locale),
   ];
 
@@ -65,10 +53,12 @@ function prefillInputs(component, props) {
 
   if (!checkbox || !labelInput || !urlInput) return;
 
-  if (secondaryCtaLabel && secondaryCtaUrl) {
+  if (cta && cta.length > 0) {
+    const firstAdditionalCta = cta[0];
+
     changeInputValue(checkbox, 'checked', true);
-    changeInputValue(labelInput, 'value', secondaryCtaLabel);
-    changeInputValue(urlInput, 'value', secondaryCtaUrl);
+    changeInputValue(labelInput, 'value', firstAdditionalCta.label);
+    changeInputValue(urlInput, 'value', firstAdditionalCta.url);
     component.classList.add('prefilled');
   } else if (communityTopicUrl) {
     changeInputValue(checkbox, 'checked', !!communityTopicUrl);
@@ -102,7 +92,6 @@ function initializeInputs(component, props) {
 
   const updateInputState = () => {
     labelInput.disabled = !checkbox.checked;
-    urlInput.required = checkbox.checked;
     urlInput.disabled = !checkbox.checked;
 
     if (!checkbox.checked) {
