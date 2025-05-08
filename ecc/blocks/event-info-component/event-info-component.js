@@ -161,15 +161,13 @@ function decorateRTETiptap(row) {
   if (cols.length < 2) return;
   const maxLengthCol = cols[1];
   const isRequired = maxLengthCol?.textContent.trim().endsWith('*');
-  const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
 
   const rteProps = {
     id: 'event-info-details-rte',
     ...(isRequired && { required: true }),
-    ...(maxCharNum && { characterLimit: maxCharNum }),
   };
 
-  const rteHeading = createTag('sp-label', { for: 'event-info-details-rte' }, 'Rich Event Description', { parent: row });
+  const rteHeading = createTag('sp-label', { for: 'event-info-details-rte' }, 'Event Details', { parent: row });
   const rte = createTag('rte-tiptap', rteProps);
   const rteOutput = createTag('input', { id: 'event-info-details-rte-output', type: 'hidden' });
 

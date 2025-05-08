@@ -54,7 +54,6 @@ export const style = css`
 }
 
 .tiptap {
-  min-height: 200px;
   overflow-y: auto;
   resize: vertical;
   margin-top: 5px;
@@ -66,8 +65,16 @@ export const style = css`
   border-radius: 4px;
 }
 
-:root(.sm) .tiptap {
-  min-height: 40px;
+.rte-tiptap-editor.size-l .tiptap {
+  min-height: 320px;
+}
+
+.rte-tiptap-editor.size-m .tiptap {
+  min-height: 200px;
+}
+
+.rte-tiptap-editor.size-s .tiptap {
+  min-height: 100px;
 }
 
 .tiptap ul,
