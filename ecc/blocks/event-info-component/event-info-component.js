@@ -164,14 +164,14 @@ function decorateRTETiptap(row) {
   const maxCharNum = maxLengthCol?.querySelector('strong')?.textContent.trim();
 
   const rteProps = {
-    id: 'event-info-description-rte',
+    id: 'event-info-details-rte',
     ...(isRequired && { required: true }),
     ...(maxCharNum && { characterLimit: maxCharNum }),
   };
 
-  const rteHeading = createTag('sp-label', { for: 'event-info-description-rte' }, 'Rich Event Description', { parent: row });
+  const rteHeading = createTag('sp-label', { for: 'event-info-details-rte' }, 'Rich Event Description', { parent: row });
   const rte = createTag('rte-tiptap', rteProps);
-  const rteOutput = createTag('input', { id: 'event-info-description-rte-output', type: 'hidden' });
+  const rteOutput = createTag('input', { id: 'event-info-details-rte-output', type: 'hidden' });
 
   addTooltipToEl('Add rich text to your event description. This will be the copy displayed on the event page.', rteHeading);
 
