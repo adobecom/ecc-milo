@@ -179,6 +179,9 @@ export function splitLocalizableFields(data, filter, locale) {
 export async function getSpeakerPayload(speakerData, locale, seriesId) {
   if (!speakerData) return speakerData;
 
+  // Remove empty social links
+  speakerData.socialLinks = speakerData.socialLinks.filter((sm) => sm.link !== '');
+
   let existingSpeakerPayload = {};
   if (speakerData.speakerId) {
     existingSpeakerPayload = await getSpeaker(seriesId, speakerData.speakerId);

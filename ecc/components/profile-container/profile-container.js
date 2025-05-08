@@ -58,6 +58,17 @@ export default class ProfileContainer extends LitElement {
     return firstName && lastName && title;
   }
 
+  async saveAllProfiles() {
+    const profileComponents = this.shadowRoot.querySelectorAll('profile-ui');
+    await Promise.all(Array.from(profileComponents).map(async (profileComponent) => {
+      const { profile } = profileComponent;
+      if (!profile.speakerId) {
+        return profileComponent.saveProfile();
+      }
+      return null;
+    }));
+  }
+
   getProfiles() {
     return this.profiles
       .filter((p) => !p.isPlaceholder && !isEmptyObject(p) && this.isValidSpeaker(p))
