@@ -7,7 +7,6 @@ const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`)
 const titlePlaceholder = 'Add agenda title';
 const titleMaxLength = 55;
 const descriptionPlaceholder = 'Add agenda details';
-const descriptionMaxLength = 160;
 const maxLengthSuffix = ' characters max *';
 
 export default class AgendaFieldset extends LitElement {
@@ -72,7 +71,7 @@ export default class AgendaFieldset extends LitElement {
   this.updateValue('title', event.target.value);
 }}></sp-textfield>
           <div class="attr-text">${titleMaxLength + maxLengthSuffix}</div>
-          <rte-tiptap placeholder=${descriptionPlaceholder} content=${this.agenda.description} characterLimit=${descriptionMaxLength} .handleInput=${(value) => {
+          <rte-tiptap placeholder=${descriptionPlaceholder} content=${this.agenda.description} size="s" .handleInput=${(value) => {
   this.updateValue('description', value);
 }}></rte-tiptap>
         </div>

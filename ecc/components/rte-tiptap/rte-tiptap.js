@@ -21,6 +21,7 @@ export default class RteTiptap extends LitElement {
     handleInput: { type: Function },
     characterLimit: { type: Number },
     required: { type: Boolean },
+    size: { type: String },
   };
 
   static styles = style;
@@ -42,6 +43,7 @@ export default class RteTiptap extends LitElement {
     this.linkDialogUrl = 'https://';
     this.linkDialogError = false;
     this.isEditingLink = false;
+    this.size = this.size ?? 'm';
   }
 
   updateButtonStates(editor) {
@@ -215,7 +217,7 @@ export default class RteTiptap extends LitElement {
   render() {
     /* eslint-disable indent */
     return html`
-            <div class="rte-tiptap-editor"></div>
+            <div class="rte-tiptap-editor size-${this.size}"></div>
             <div class="rte-tiptap-toolbar-bottom-wrapper">
               <div class="rte-tiptap-toolbar">
                 <sp-picker class="rte-format-input select-input" label="Format" value=${this.rteFormat} @change=${(event) => { this.toggleFormat(event.target.value); }}>
