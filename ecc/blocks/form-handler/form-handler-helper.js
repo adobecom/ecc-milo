@@ -769,6 +769,8 @@ function initFormCtas(props) {
             return;
           }
 
+          await gatherValues(props);
+
           const resp = await previewEvent(
             eventId,
             getJoinedData(props.locale),
