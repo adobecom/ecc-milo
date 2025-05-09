@@ -1,9 +1,16 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
 import { style } from './rsvp-form.css.js';
+import { getIcon } from '../../scripts/utils.js';
 
 const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
 
+/**
+ * Converts a camelCase or PascalCase string into an uppercase string with spaces between words.
+ *
+ * @param {string} input - The input string to be converted.
+ * @returns {string} The converted string in uppercase with spaces between words.
+ */
 function convertString(input) {
   const parts = input.replace(/([a-z])([A-Z])/g, '$1 $2');
   const result = parts.toUpperCase();
@@ -18,6 +25,7 @@ export default class RsvpForm extends LitElement {
     visible: { type: Set },
     required: { type: Set },
     eventType: { type: String },
+    formUrl: { type: String },
   };
 
   constructor() {
@@ -26,6 +34,7 @@ export default class RsvpForm extends LitElement {
     this.formType = 'basic';
     this.visible = new Set();
     this.required = new Set();
+    this.formUrl = '';
   }
 
   static styles = style;
@@ -55,10 +64,19 @@ export default class RsvpForm extends LitElement {
   getRsvpFormFields() {
     const visible = Array.from(this.visible);
     const required = Array.from(this.required);
+    const mandatedfields = this.data.filter((f) => f.Required === 'x').map((f) => f.Field);
+
     return {
-      visible,
-      required,
+      rsvpFormFields: {
+        visible: [...mandatedfields, ...visible],
+        required: [...mandatedfields, ...required],
+      },
     };
+  }
+
+  updateMarketoFormUrl(value) {
+    this.formUrl = value;
+    this.requestUpdate();
   }
 
   renderBasicForm() {
@@ -90,14 +108,39 @@ export default class RsvpForm extends LitElement {
     `;
   }
 
+  getRegistrationPayload() {
+    const registration = { type: this.formType === 'basic' ? 'ESP' : 'Marketo' };
+
+    if (this.formType === 'basic') {
+      registration.formData = 'v1';
+      return {
+        registration,
+        ...this.getRsvpFormFields(),
+      };
+    }
+
+    if (this.formType === 'marketo') {
+      registration.formData = this.formUrl;
+      return { registration };
+    }
+    return {};
+  }
+
   // eslint-disable-next-line class-methods-use-this
   renderMarketoForm() {
     return html`
-        <div class="rsvp-checkboxes">
-        <sp-field-label size="xl" class="field-label">SFDC ID *</sp-field-label>
-        <sp-textfield class="field-label"></sp-textfield>
-        </div>
-        `;
+      <div class="rsvp-checkboxes">
+      <sp-field-label size="l" class="field-label">Marketo form URL
+      <sp-action-button size="s" class="tooltip-trigger">
+        ${getIcon('info')}
+      </sp-action-button>
+      <sp-tooltip self-managed variant="info" class="tooltip-content">
+        "Tool tip text"
+      </sp-tooltip>
+      </sp-field-label>
+      <sp-textfield class="field-label" @change="${(event) => this.updateMarketoFormUrl(event.target.value)}"></sp-textfield>
+      </div>
+      `;
   }
 
   renderForm() {
@@ -110,12 +153,12 @@ export default class RsvpForm extends LitElement {
   renderWebinarForm() {
     return html`
       <div class="rsvp-form">
-      <fieldset class="form-type" @change=${(e) => { this.formType = e.target.value; }} >
-    <input type="radio" id="basic" name="drone" value="basic" ?checked=${this.formType === 'basic'}/>
-    <label for="basic">Basic form</label>
-    <input type="radio" id="marketo" name="drone" value="marketo" ?checked=${this.formType === 'marketo'} />
-    <label for="marketo">Marketo</label>
-</fieldset>
+      <fieldset class="form-type" @change=${(e) => { this.formType = e.target.value; this.requestUpdate(); }} >
+        <input type="radio" id="basic" name="drone" value="basic" ?checked=${this.formType === 'basic'}/>
+        <label for="basic">Basic form</label>
+        <input type="radio" id="marketo" name="drone" value="marketo" ?checked=${this.formType === 'marketo'} />
+        <label for="marketo">Marketo</label>
+      </fieldset>
       ${this.renderForm()}
       </div>
     `;

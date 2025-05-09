@@ -52,6 +52,17 @@ export function setPropsPayload(props, newData, removeData = []) {
       }, {}));
       nonLocalizableFields[key] = refData;
     }
+
+    if (attr.ref && attr.type === 'object') {
+      const refFilter = attr.ref;
+      const refData = Object.keys(refFilter).reduce((acc, refKey) => {
+        if (refFilter[refKey].submittable) {
+          acc[refKey] = value[refKey];
+        }
+        return acc;
+      }, {});
+      nonLocalizableFields[key] = refData;
+    }
   });
 
   Object.entries(localizableFields).forEach(([key, value]) => {
