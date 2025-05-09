@@ -5,30 +5,40 @@ import { getAttribute } from '../../scripts/data-utils.js';
 export function onSubmit(component, props) {
   const videoField = component.querySelector('div.video-content > sp-textfield');
   const video = { url: videoField.value };
-  if (videoField.value) {
-    setPropsPayload(props, { video });
+  const removeData = [];
+
+  if (!videoField.value) {
+    removeData.push({
+      key: 'video',
+      path: '',
+    });
   }
+
+  setPropsPayload(props, { video }, removeData);
 }
 
-function setVideoUrl(props, component) {
-  const eventData = props.payload;
-  const video = getAttribute(eventData, 'video', props.locale);
+function setVideoUrl(data, component, locale) {
+  const video = getAttribute(data, 'video', locale);
+
+  if (!video) return;
 
   const videoField = component.querySelector('div.video-content > sp-textfield');
-  if (!videoField || !videoField.url) return;
+
+  if (!videoField || !video.url) return;
+
   videoField.setAttribute('value', video?.url);
 }
 
 export async function onPayloadUpdate(component, props) {
-  setVideoUrl(props, component);
+  setVideoUrl(props.payload, component, props.locale);
 }
 
 export async function onRespUpdate(component, props) {
-  setVideoUrl(props, component);
+  setVideoUrl(props.eventDataResp, component, props.locale);
 }
 
 export default function init(component, props) {
-  setVideoUrl(props, component);
+  setVideoUrl(props.eventDataResp, component, props.locale);
 }
 
 export function onTargetUpdate(_component, _props) {
