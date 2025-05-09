@@ -15,8 +15,6 @@ async function decorateRSVPFields(el) {
 
   row.innerHTML = '';
 
-  el.dataset.mandatedfields = config.data.filter((f) => f.Required === 'x').map((f) => f.Field);
-
   createTag(
     'rsvp-form',
     { class: 'rsvp-form', data: JSON.stringify(config.data) },

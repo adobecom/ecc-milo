@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { getAttribute } from '../../scripts/data-utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
-import { EVENT_TYPES } from '../../scripts/constants.js';
+import { EVENT_TYPES, LINK_REGEX } from '../../scripts/constants.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -12,6 +12,16 @@ export function onSubmit(component, props) {
 
   const removeData = [];
   if (registrationPayload.registration?.type === 'Marketo') {
+    if (!registrationPayload.registration?.formData.match(LINK_REGEX)) {
+      setPropsPayload(
+        props,
+        registrationPayload,
+        removeData,
+      );
+      throw new Error('Please enter a valid website address starting with "https://". For example: https://www.example.com');
+    }
+
+    // Remove the rsvpFormFields from the payload only when formUrl is valid
     removeData.push({
       key: 'rsvpFormFields',
       path: '',
@@ -41,8 +51,7 @@ function setBasicFormAttributes(rsvpForm, eventData, locale) {
   rsvpForm.required = requiredFields;
 }
 
-function setRsvpFormAttributes(props, component) {
-  const eventData = props.eventDataResp;
+function setRsvpFormAttributes(props, eventData, component) {
   const eventType = getAttribute(eventData, 'eventType', props.locale);
   const registration = getAttribute(eventData, 'registration', props.locale);
 
@@ -57,15 +66,15 @@ function setRsvpFormAttributes(props, component) {
 }
 
 export async function onPayloadUpdate(component, props) {
-  setRsvpFormAttributes(props, component);
+  setRsvpFormAttributes(props, props.payload, component);
 }
 
 export async function onRespUpdate(component, props) {
-  setRsvpFormAttributes(props, component);
+  setRsvpFormAttributes(props, props.eventDataResp, component);
 }
 
 export default function init(component, props) {
-  setRsvpFormAttributes(props, component);
+  setRsvpFormAttributes(props, props.eventDataResp, component);
 }
 
 export function onTargetUpdate(component, props) {
