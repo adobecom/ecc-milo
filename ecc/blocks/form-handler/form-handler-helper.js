@@ -112,6 +112,7 @@ export const VANILLA_COMPONENTS = [
   'registration-details',
   'registration-fields',
   'secondary-cta',
+  'video-content',
 ];
 
 async function initVanillaComponents(props) {

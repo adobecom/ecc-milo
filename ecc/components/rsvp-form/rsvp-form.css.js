@@ -43,4 +43,12 @@ export const style = css`
     display: flex;
     flex-direction: column;
     gap: 28px;
+  }
+
+  .tooltip-trigger {
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: help;
+  }
 `;
