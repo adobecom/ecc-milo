@@ -1,5 +1,6 @@
 {
   "project": "ECC",
+  "trustedHosts": ["milo.adobe.com", "main--milo--adobecom.aem.page"],
   "plugins": [
     {
       "id": "library",

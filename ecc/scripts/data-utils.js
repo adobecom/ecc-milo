@@ -13,6 +13,25 @@ export const AGENDA_DATA_REF_FILTER = {
 };
 
 /**
+ * @typedef {Object} VideoDataRefFilter
+ * @property {string} type - The type of the attribute.
+ * @property {boolean} submittable - Whether the attribute can be submitted.
+ */
+
+export const VIDEO_DATA_REF_FILTER = { url: { type: 'string', submittable: true } };
+
+/**
+ * @typedef {Object} RegistrationDataRefFilter
+ * @property {string} type - The type of the attribute.
+ * @property {boolean} submittable - Whether the attribute can be submitted.
+ */
+
+export const REGISTRATION_DATA_REF_FILTER = {
+  type: { type: 'string', submittable: true },
+  formData: { type: 'string', submittable: true },
+};
+
+/**
  * @typedef {Object} EventDataFilter
  * @property {string} type - The type of the attribute.
  * @property {boolean} localizable - Whether the attr should be in payload or payload.localizations.
@@ -30,10 +49,12 @@ export const EVENT_DATA_FILTER = {
   cloudType: { type: 'string', localizable: false, cloneable: true, submittable: true },
   seriesId: { type: 'string', localizable: false, cloneable: true, submittable: true },
   communityTopicUrl: { type: 'string', localizable: false, cloneable: true, submittable: true },
+  cta: { type: 'array', localizable: true, cloneable: true, submittable: true },
   title: { type: 'string', localizable: true, cloneable: true, submittable: true },
   enTitle: { type: 'string', localizable: false, cloneable: true, submittable: true },
   defaultLocale: { type: 'string', localizable: false, cloneable: true, submittable: true },
   description: { type: 'string', localizable: true, cloneable: true, submittable: true },
+  eventDetails: { type: 'string', localizable: true, cloneable: true, submittable: true },
   localStartDate: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localEndDate: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localStartTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
@@ -57,6 +78,8 @@ export const EVENT_DATA_FILTER = {
   creationTime: { type: 'string', localizable: false, cloneable: false, submittable: true },
   modificationTime: { type: 'string', localizable: false, cloneable: false, submittable: true },
   isPrivate: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
+  video: { type: 'object', localizable: false, cloneable: true, submittable: true, ref: VIDEO_DATA_REF_FILTER },
+  registration: { type: 'object', localizable: false, cloneable: true, submittable: true, ref: REGISTRATION_DATA_REF_FILTER },
 };
 
 /**
@@ -176,6 +199,9 @@ export function splitLocalizableFields(data, filter, locale) {
 
 export async function getSpeakerPayload(speakerData, locale, seriesId) {
   if (!speakerData) return speakerData;
+
+  // Remove empty social links
+  speakerData.socialLinks = speakerData.socialLinks.filter((sm) => sm.link !== '');
 
   let existingSpeakerPayload = {};
   if (speakerData.speakerId) {

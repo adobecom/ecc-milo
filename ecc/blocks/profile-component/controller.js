@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { getAttribute } from '../../scripts/data-utils.js';
+import { getAttribute, getSpeakerPayload } from '../../scripts/data-utils.js';
 import {
   addSpeakerToEvent,
   getSpeakers,
@@ -15,9 +15,14 @@ export async function onSubmit(component, props) {
   const profileContainer = component.querySelector('profile-container');
 
   if (profileContainer) {
+    await profileContainer.saveAllProfiles();
     const savedSpeakers = getAttribute(props.eventDataResp, 'speakers', props.locale);
     const eventId = getAttribute(props.eventDataResp, 'eventId', props.locale);
     const speakers = profileContainer.getProfiles();
+
+    if (speakers.filter((speaker) => !speaker.speakerType).length > 0) {
+      throw new Error('Please make sure to pick a speaker type for each speaker.');
+    }
 
     if (speakers.length === 0 && (savedSpeakers && savedSpeakers.length > 0)) {
       await Promise.all(savedSpeakers.map(async (speaker) => {
@@ -32,15 +37,11 @@ export async function onSubmit(component, props) {
       return;
     }
 
-    if (speakers.filter((speaker) => !speaker.speakerType).length > 0) {
-      throw new Error('Please select a speaker type for the speakers');
-    }
-
     // Process all speakers in parallel
-    await Promise.all(speakers.map(async (speaker) => {
-      const { speakerId, speakerType, ordinal } = speaker;
+    await Promise.all(speakers.map(async (eventSpeaker) => {
+      if (!eventSpeaker.speakerId) return;
       if (!savedSpeakers || savedSpeakers.length === 0) {
-        const resp = await addSpeakerToEvent(speaker, eventId);
+        const resp = await addSpeakerToEvent(eventSpeaker, eventId);
 
         if (resp.error) {
           component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
@@ -48,24 +49,24 @@ export async function onSubmit(component, props) {
         }
       } else {
         const existingSpeaker = savedSpeakers.find((profile) => {
-          const idMatch = profile.speakerId === speakerId;
-          const typeMatch = profile.speakerType === speakerType;
-          const ordinalMatch = profile.ordinal === ordinal;
+          const idMatch = profile.speakerId === eventSpeaker.speakerId;
+          const typeMatch = profile.speakerType === eventSpeaker.speakerType;
+          const ordinalMatch = profile.ordinal === eventSpeaker.ordinal;
           return idMatch && typeMatch && ordinalMatch;
         });
 
         if (existingSpeaker) {
           // do nothing
         } else {
-          const updateSpeaker = savedSpeakers.find((profile) => profile.speakerId === speakerId);
+          const updateSpeaker = savedSpeakers.find((p) => p.speakerId === eventSpeaker.speakerId);
           if (updateSpeaker) {
-            const resp = await updateSpeakerInEvent(speaker, speakerId, eventId);
+            const resp = await updateSpeakerInEvent(eventSpeaker, eventSpeaker.speakerId, eventId);
 
             if (resp.error) {
               window.lana?.log(`Failed to update speaker in event:\n${JSON.stringify(resp, null, 2)}`);
             }
           } else {
-            const resp = await addSpeakerToEvent(speaker, eventId);
+            const resp = await addSpeakerToEvent(eventSpeaker, eventId);
             if (resp.error) {
               window.lana?.log(`Failed to add speaker to event:\n${JSON.stringify(resp, null, 2)}`);
             }
@@ -75,12 +76,11 @@ export async function onSubmit(component, props) {
     }));
 
     if (savedSpeakers && savedSpeakers.length > 0) {
-      await Promise.all(savedSpeakers.map(async (speaker) => {
-        const { speakerId } = speaker;
-        const stillNeeded = speakers.find((profile) => profile.speakerId === speakerId);
+      await Promise.all(savedSpeakers.map(async (eventSpeaker) => {
+        const stillNeeded = speakers.find((p) => p.speakerId === eventSpeaker.speakerId);
 
         if (!stillNeeded) {
-          const resp = await removeSpeakerFromEvent(speakerId, eventId);
+          const resp = await removeSpeakerFromEvent(eventSpeaker.speakerId, eventId);
 
           if (!resp.ok) {
             window.lana?.log(`Failed to remove speaker from event:\n${JSON.stringify(resp, null, 2)}`);

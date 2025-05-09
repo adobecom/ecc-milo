@@ -7,6 +7,7 @@ import { Editor } from 'https://esm.sh/@tiptap/core';
 import StarterKit from 'https://esm.sh/@tiptap/starter-kit';
 import Underline from 'https://esm.sh/@tiptap/extension-underline';
 import Link from 'https://esm.sh/@tiptap/extension-link';
+import CharacterCount from 'https://esm.sh/@tiptap/extension-character-count';
 
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './rte-tiptap.css.js';
@@ -18,6 +19,9 @@ export default class RteTiptap extends LitElement {
   static properties = {
     content: { type: String },
     handleInput: { type: Function },
+    characterLimit: { type: Number },
+    required: { type: Boolean },
+    size: { type: String },
   };
 
   static styles = style;
@@ -39,6 +43,7 @@ export default class RteTiptap extends LitElement {
     this.linkDialogUrl = 'https://';
     this.linkDialogError = false;
     this.isEditingLink = false;
+    this.size = this.size ?? 'm';
   }
 
   updateButtonStates(editor) {
@@ -49,6 +54,23 @@ export default class RteTiptap extends LitElement {
     this.isOrderedList = editor.isActive('orderedList');
     this.isLink = editor.isActive('link');
     this.requestUpdate();
+  }
+
+  firstUpdated() {
+    if (!this.editorInitialized) {
+      this.initializeEditor();
+    }
+  }
+
+  updated(changedProps) {
+    if (changedProps.has('content') && this.editor && this.editor.commands && !this.editor.isDestroyed) {
+      const newContent = this.content ?? '';
+      const currentContent = this.editor.getHTML();
+
+      if (newContent !== currentContent) {
+        this.editor.commands.setContent(newContent, false); // false = don't emit new update event
+      }
+    }
   }
 
   getValue() {
@@ -81,10 +103,11 @@ export default class RteTiptap extends LitElement {
             target: '_blank',
           },
         }),
+        ...(this.characterLimit ? [CharacterCount.configure({ limit: this.characterLimit })] : []),
       ],
       onUpdate: () => {
         const outputHtml = this.getValue();
-        this.handleInput(outputHtml);
+        this.handleInput?.(outputHtml);
       },
       onSelectionUpdate: ({ editor }) => {
         const currentNode = editor.state.selection.$anchor.parent;
@@ -98,6 +121,7 @@ export default class RteTiptap extends LitElement {
         this.updateButtonStates(editor);
       },
     });
+
     this.editorInitialized = true;
   }
 
@@ -191,57 +215,59 @@ export default class RteTiptap extends LitElement {
   }
 
   render() {
-    if (this.handleInput && !this.editorInitialized) {
-      this.initializeEditor();
-    }
     /* eslint-disable indent */
     return html`
-            <div class="rte-tiptap-toolbar">
-              <sp-picker class="rte-format-input select-input" label="Format" value=${this.rteFormat} @change=${(event) => { this.toggleFormat(event.target.value); }}>
-                ${repeat(['Paragraph', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6'], (p) => html`<sp-menu-item value=${p}>${p}</sp-menu-item>`)}
-              </sp-picker>
-              <button aria-label="Bold" class=${this.isBold ? 'active' : ''} @click=${() => {
-                this.selectWordAtCursor();
-                this.editor.chain().focus().toggleBold().run();
-                this.updateButtonStates(this.editor);
-              }}>
-                <img class="icon icon-rte-bold" src="/ecc/icons/rte-bold.svg" alt="rte-bold" />
-              </button>
-              <button aria-label="Italic" class=${this.isItalic ? 'active' : ''} @click=${() => {
-                this.selectWordAtCursor();
-                this.editor.chain().focus().toggleItalic().run();
-                this.updateButtonStates(this.editor);
-              }}>
-                <img class="icon icon-rte-italic" src="/ecc/icons/rte-italic.svg" alt="rte-italic" />
-              </button>
-              <button aria-label="Underline" class=${this.isUnderline ? 'active' : ''} @click=${() => {
-                this.selectWordAtCursor();
-                this.editor.chain().focus().toggleUnderline().run();
-                this.updateButtonStates(this.editor);
-              }}>
-                <img class="icon icon-rte-underline" src="/ecc/icons/rte-underline.svg" alt="rte-underline" />
-              </button>
-              <button aria-label="Bullet List" class=${this.isBulletList ? 'active' : ''} @click=${() => {
-                this.editor.chain().focus().toggleBulletList().run();
-                this.updateButtonStates(this.editor);
-              }}>
-                <img class="icon icon-rte-bullet-list" src="/ecc/icons/rte-bullet-list.svg" alt="rte-bullet-list" />
-              </button>
-              <button aria-label="Ordered List" class=${this.isOrderedList ? 'active' : ''} @click=${() => {
-                this.editor.chain().focus().toggleOrderedList().run();
-                this.updateButtonStates(this.editor);
-              }}>
-                <img class="icon icon-rte-ordered-list" src="/ecc/icons/rte-ordered-list.svg" alt="rte-ordered-list" />
-              </button>
-              <button aria-label="Link" class=${this.isLink ? 'active' : ''} @click=${() => {
-                this.selectLinkAtCursor();
-                this.rteAddLink();
-                this.updateButtonStates(this.editor);
-              }}>
-                <img class="icon icon-rte-link" src="/ecc/icons/rte-link.svg" alt="rte-link" />
-              </button>
+            <div class="rte-tiptap-editor size-${this.size}"></div>
+            <div class="rte-tiptap-toolbar-bottom-wrapper">
+              <div class="rte-tiptap-toolbar">
+                <sp-picker class="rte-format-input select-input" label="Format" value=${this.rteFormat} @change=${(event) => { this.toggleFormat(event.target.value); }}>
+                  ${repeat(['Paragraph', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6'], (p) => html`<sp-menu-item value=${p}>${p}</sp-menu-item>`)}
+                </sp-picker>
+                <button aria-label="Bold" class=${this.isBold ? 'active' : ''} @click=${() => {
+                  this.selectWordAtCursor();
+                  this.editor.chain().focus().toggleBold().run();
+                  this.updateButtonStates(this.editor);
+                }}>
+                  <img class="icon icon-rte-bold" src="/ecc/icons/rte-bold.svg" alt="rte-bold" />
+                </button>
+                <button aria-label="Italic" class=${this.isItalic ? 'active' : ''} @click=${() => {
+                  this.selectWordAtCursor();
+                  this.editor.chain().focus().toggleItalic().run();
+                  this.updateButtonStates(this.editor);
+                }}>
+                  <img class="icon icon-rte-italic" src="/ecc/icons/rte-italic.svg" alt="rte-italic" />
+                </button>
+                <button aria-label="Underline" class=${this.isUnderline ? 'active' : ''} @click=${() => {
+                  this.selectWordAtCursor();
+                  this.editor.chain().focus().toggleUnderline().run();
+                  this.updateButtonStates(this.editor);
+                }}>
+                  <img class="icon icon-rte-underline" src="/ecc/icons/rte-underline.svg" alt="rte-underline" />
+                </button>
+                <button aria-label="Bullet List" class=${this.isBulletList ? 'active' : ''} @click=${() => {
+                  this.editor.chain().focus().toggleBulletList().run();
+                  this.updateButtonStates(this.editor);
+                }}>
+                  <img class="icon icon-rte-bullet-list" src="/ecc/icons/rte-bullet-list.svg" alt="rte-bullet-list" />
+                </button>
+                <button aria-label="Ordered List" class=${this.isOrderedList ? 'active' : ''} @click=${() => {
+                  this.editor.chain().focus().toggleOrderedList().run();
+                  this.updateButtonStates(this.editor);
+                }}>
+                  <img class="icon icon-rte-ordered-list" src="/ecc/icons/rte-ordered-list.svg" alt="rte-ordered-list" />
+                </button>
+                <button aria-label="Link" class=${this.isLink ? 'active' : ''} @click=${() => {
+                  this.selectLinkAtCursor();
+                  this.rteAddLink();
+                  this.updateButtonStates(this.editor);
+                }}>
+                  <img class="icon icon-rte-link" src="/ecc/icons/rte-link.svg" alt="rte-link" />
+                </button>
+              </div>
+              ${this.editor && this.editor.storage && this.editor.storage.characterCount ? html`
+                <span class="rte-tiptap-character-count">${this.editor.storage.characterCount.characters()} / ${this.characterLimit} characters max${this.required ? ' *' : ''}</span>
+              ` : ''}
             </div>
-            <div class="rte-tiptap-editor"></div>
             
             <sp-underlay dir="ltr" ?open=${this.showLinkDialog}></sp-underlay>
             ${this.showLinkDialog ? html`

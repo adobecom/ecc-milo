@@ -20,6 +20,7 @@ import {
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
+import { EVENT_TYPES } from '../../scripts/constants.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -119,6 +120,11 @@ function buildThumbnail(data) {
     });
   }
 
+  if (data.isPrivate) {
+    const privateIcon = getIcon('invisible-eye');
+    container.append(privateIcon);
+  }
+
   return container;
 }
 
@@ -214,6 +220,12 @@ function sortData(props, config, options = {}) {
   props.currentPage = 1;
   paginateData(props, config, 1);
   el?.classList.add('active');
+}
+
+function getEventEditUrl(config, eventObj) {
+  const url = new URL(`${window.location.origin}${eventObj.eventType === EVENT_TYPES.ONLINE ? config['webinar-form-url'] : config['create-form-url']}`);
+  url.searchParams.set('eventId', eventObj.eventId);
+  return url;
 }
 
 function buildToastMsgWithEventTitle(event, configValue) {
@@ -347,8 +359,7 @@ function initMoreOptions(props, config, eventObj, row) {
     }
 
     // edit
-    const url = new URL(`${window.location.origin}${config['create-form-url']}`);
-    url.searchParams.set('eventId', eventObj.eventId);
+    const url = getEventEditUrl(config, eventObj);
     edit.href = url.toString();
 
     // clone
@@ -465,10 +476,10 @@ function buildStatusTag(event) {
 }
 
 function buildEventTitleTag(config, eventObj) {
+  const url = getEventEditUrl(config, eventObj);
+
   const defaultLocale = eventObj.defaultLocale || Object.keys(eventObj.localizations)[0] || 'en-US';
-  const url = new URL(`${window.location.origin}${config['create-form-url']}`);
   const eventTitle = getAttribute(eventObj, 'title', defaultLocale);
-  url.searchParams.set('eventId', eventObj.eventId);
   const eventTitleTag = createTag('a', { class: 'event-title-link', href: url.toString() }, eventTitle);
   return eventTitleTag;
 }
@@ -688,7 +699,25 @@ function buildDashboardHeader(props, config) {
   const searchInputWrapper = createTag('div', { class: 'search-input-wrapper' }, '', { parent: actionsContainer });
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
   searchInputWrapper.append(getIcon('search'));
-  createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-event-cta-text'], { parent: actionsContainer });
+  const dropdown = createTag('div', { class: 'dropdown' }, '', { parent: actionsContainer });
+  const createCta = createTag('a', { class: 'con-button blue' }, config['create-event-cta-text'], { parent: dropdown });
+  const dropdownContent = createTag('div', { class: 'dropdown-content hidden' }, '', { parent: dropdown });
+
+  createTag('a', { class: 'dropdown-item', href: config['webinar-form-url'] }, 'Online', { parent: dropdownContent });
+  createTag('a', { class: 'dropdown-item', href: config['create-form-url'] }, 'In-Person', { parent: dropdownContent });
+
+  createCta.addEventListener('click', (e) => {
+    e.preventDefault();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target) && !createCta.contains(e.target)) {
+      dropdownContent.classList.add('hidden');
+    } else {
+      dropdownContent.classList.remove('hidden');
+    }
+  });
+
   searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
 
   dashboardHeader.append(textContainer, actionsContainer);

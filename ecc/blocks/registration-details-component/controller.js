@@ -1,6 +1,6 @@
 import { getAttribute } from '../../scripts/data-utils.js';
 import { LIBS } from '../../scripts/scripts.js';
-import { addTooltipToEl, decorateSwitchFieldset } from '../../scripts/utils.js';
+import { addTooltipToEl, changeInputValue, decorateSwitchFieldset } from '../../scripts/utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -46,8 +46,8 @@ function prefillFields(component, props) {
   const attendeeLimitEl = component.querySelector('#attendee-count-input');
   const disbleWaitlistEl = component.querySelector('#registration-disable-waitlist');
   const allowGuestRegistrationEl = component.querySelector('#allow-guest-registration');
-  const descriptionEl = component.querySelector('#rsvp-form-detail-description');
-
+  const descriptionEl = component.querySelector('#rsvp-description-rte');
+  const descriptionRTEOutput = component.querySelector('#rsvp-description-rte-output');
   const eventData = props.eventDataResp;
 
   if (eventData) {
@@ -59,7 +59,10 @@ function prefillFields(component, props) {
 
     if (attendeeLimitEl && attendeeLimit) attendeeLimitEl.value = attendeeLimit;
     if (disbleWaitlistEl) disbleWaitlistEl.checked = !allowWaitlisting;
-    if (descriptionEl && rsvpDescription) descriptionEl.value = rsvpDescription;
+    if (descriptionEl && rsvpDescription) {
+      descriptionEl.content = rsvpDescription;
+      descriptionRTEOutput.value = rsvpDescription;
+    }
     if (hostEmail) {
       if (contactHostEl) contactHostEl.checked = true;
       if (hostEmailEl) hostEmailEl.value = hostEmail;
@@ -190,7 +193,7 @@ export function onSubmit(component, props) {
   const disbleWaitlistingInput = component.querySelector('#registration-disable-waitlist');
   const contactHostInput = component.querySelector('#registration-contact-host');
   const hostEmailInput = component.querySelector('#event-host-email-input');
-  const rsvpDescriptionInput = component.querySelector('#rsvp-form-detail-description');
+  const rsvpDescriptionInput = component.querySelector('#rsvp-description-rte-output');
   const guestRegistrationInput = component.querySelector('#allow-guest-registration');
 
   const attendeeLimitVal = attendeeCountInput ? attendeeCountInput.value?.trim() : null;
@@ -274,7 +277,14 @@ export async function onRespUpdate(component, props) {
 }
 
 export default function init(component, props) {
-  // Do nothing. We don't know what to init without the payload..
+  const descriptionRTE = component.querySelector('#rsvp-description-rte');
+  const descriptionRTEOutput = component.querySelector('#rsvp-description-rte-output');
+
+  if (descriptionRTE) {
+    descriptionRTE.handleInput = (output) => {
+      changeInputValue(descriptionRTEOutput, 'value', output);
+    };
+  }
 }
 
 export function onTargetUpdate(component, props) {
