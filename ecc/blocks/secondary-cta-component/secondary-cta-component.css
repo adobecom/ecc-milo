@@ -1,0 +1,33 @@
+.secondary-cta-component {
+  .field-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 100px; 
+  }
+
+  .inputs-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .text-field-row .text-input {
+    flex-grow: 1;
+    width: 363px;
+  }
+  
+  .text-field-row sp-checkbox {
+    margin-left: 10px; 
+  }
+
+  .error-message {
+    color: var(--color-red);
+    font-size: var(--type-body-xs-size);
+    margin-top: -16px;
+    display: none;
+  }
+
+  .text-input:invalid + .error-message {
+    display: block;
+  }
+}
