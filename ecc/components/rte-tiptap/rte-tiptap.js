@@ -5,6 +5,7 @@
 /* eslint-disable object-shorthand */
 import { Editor } from 'https://esm.sh/@tiptap/core';
 import StarterKit from 'https://esm.sh/@tiptap/starter-kit';
+import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder';
 import Underline from 'https://esm.sh/@tiptap/extension-underline';
 import Link from 'https://esm.sh/@tiptap/extension-link';
 import CharacterCount from 'https://esm.sh/@tiptap/extension-character-count';
@@ -18,6 +19,7 @@ const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`)
 export default class RteTiptap extends LitElement {
   static properties = {
     content: { type: String },
+    placeholder: { type: String, reflect: true },
     handleInput: { type: Function },
     characterLimit: { type: Number },
     required: { type: Boolean },
@@ -31,6 +33,7 @@ export default class RteTiptap extends LitElement {
     this.editor = () => {};
     this.content = this.content ?? '';
     this.handleInput = this.handleInput || null;
+    this.placeholder = this.placeholder ?? '';
     this.editorInitialized = false;
     this.rteFormat = 'Paragraph';
     this.isBold = false;
@@ -94,6 +97,7 @@ export default class RteTiptap extends LitElement {
       element: editorEl,
       extensions: [
         StarterKit,
+        Placeholder.configure({ placeholder: this.placeholder }),
         Underline,
         Link.configure({
           openOnClick: false,
