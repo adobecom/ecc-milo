@@ -39,7 +39,7 @@ function prefillInputs(component, props) {
     cloudType,
   ] = [
     getAttribute(eventData, 'communityTopicUrl', props.locale),
-    getAttribute(eventData, 'ctas', props.locale),
+    getAttribute(eventData, 'cta', props.locale),
     getAttribute(eventData, 'cloudType', props.locale),
   ];
 
