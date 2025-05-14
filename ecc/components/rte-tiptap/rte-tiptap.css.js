@@ -46,12 +46,16 @@ export const style = css`
   width: 100%;
 }
 
-.rte-tiptap-toolbar {
-  margin-top: 24px;
+.rte-tiptap-toolbar-bottom-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  margin-bottom: 24px;
 }
 
 .tiptap {
-  min-height: 200px;
+  overflow-y: auto;
+  resize: vertical;
   margin-top: 5px;
   padding: 0 10px;
   font-size: 1rem;
@@ -59,6 +63,18 @@ export const style = css`
   color: var(--spectrum-color-text);
   border: 1px solid var(--spectrum-color-gray-500);
   border-radius: 4px;
+}
+
+.rte-tiptap-editor.size-l .tiptap {
+  min-height: 320px;
+}
+
+.rte-tiptap-editor.size-m .tiptap {
+  min-height: 200px;
+}
+
+.rte-tiptap-editor.size-s .tiptap {
+  min-height: 100px;
 }
 
 .tiptap ul,
@@ -156,5 +172,13 @@ export const style = css`
     border-left: 3px solid var(--spectrum-color-gray-300);
     margin: 0 0 var(--spacing-s) 0;
     padding-left: 1rem
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
 }
 `;

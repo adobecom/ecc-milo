@@ -38,3 +38,18 @@ export const ALLOWED_HOSTS = {
     return acc;
   }, {}),
 };
+export const EVENT_TYPES = {
+  IN_PERSON: 'InPerson',
+  ONLINE: 'Online',
+  HYBRID: 'Hybrid',
+};
+export const CONTENT_TYPE_TAGS = {
+  [EVENT_TYPES.ONLINE]: {
+    title: 'Webinar',
+    caasId: 'caas:content-type/webinar',
+  },
+  [EVENT_TYPES.IN_PERSON]: {
+    title: 'In-Person Event',
+    caasId: 'caas:content-type/in-person-event',
+  },
+};
