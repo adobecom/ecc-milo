@@ -170,9 +170,9 @@ export function getFilteredCachedResponse() {
   return filteredResponse;
 }
 
-export default function getJoinedData(locale) {
-  const filteredResponse = getFilteredCachedResponse(locale);
-  const filteredPayload = getFilteredCachedPayload(locale);
+export default function getJoinedData() {
+  const filteredResponse = getFilteredCachedResponse();
+  const filteredPayload = getFilteredCachedPayload();
 
   // Combine global and localized data
   const finalPayload = {

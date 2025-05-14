@@ -445,7 +445,7 @@ async function saveEvent(props, toPublish = false) {
   };
 
   if (props.currentStep === 0 && !getAttribute(props.eventDataResp, 'eventId', props.locale)) {
-    resp = await createEvent(getJoinedData(props.locale), props.locale);
+    resp = await createEvent(getJoinedData(), props.locale);
     if (!resp.error && resp) {
       const newEventData = await getEvent(resp.eventId);
       props.eventDataResp = newEventData;
@@ -455,7 +455,7 @@ async function saveEvent(props, toPublish = false) {
     updateDashboardLink(props);
     await onEventSave();
   } else if (props.currentStep <= props.maxStep && !toPublish) {
-    const payload = getJoinedData(props.locale);
+    const payload = getJoinedData();
     resp = await updateEvent(
       payload.eventId,
       payload,
@@ -468,7 +468,7 @@ async function saveEvent(props, toPublish = false) {
     }
     await onEventSave();
   } else if (toPublish) {
-    const payload = getJoinedData(props.locale);
+    const payload = getJoinedData();
     resp = await publishEvent(
       payload.eventId,
       payload,
@@ -773,7 +773,7 @@ function initFormCtas(props) {
 
           const resp = await previewEvent(
             eventId,
-            getJoinedData(props.locale),
+            getJoinedData(),
           );
 
           if (resp.error) {
