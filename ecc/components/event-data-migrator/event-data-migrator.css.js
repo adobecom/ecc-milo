@@ -211,4 +211,22 @@ export const style = css`
     justify-content: flex-end;
     gap: 16px;
   }
+
+  .status-badge {
+    padding: 0 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .status-badge.published {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .status-badge.draft {
+    background-color: #fff3e0;
+    color: #ef6c00;
+  }
 `;

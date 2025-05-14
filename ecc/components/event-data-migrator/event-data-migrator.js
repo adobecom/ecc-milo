@@ -213,6 +213,14 @@ export default class EventDataMigrator extends LitElement {
     }
   }
 
+  static getStatusBadge(published) {
+    return html`
+      <span class="status-badge ${published ? 'published' : 'draft'}">
+        ${published ? 'Published' : 'Draft'}
+      </span>
+    `;
+  }
+
   render() {
     return html`
       <div class="form-container">
@@ -286,6 +294,7 @@ export default class EventDataMigrator extends LitElement {
                           @change=${() => this.handleEventSelect(event.eventId)}
                         ></sp-checkbox>
                         <span class="event-title">${getAttribute(event, 'title', this.selectedLocale)}</span>
+                        ${EventDataMigrator.getStatusBadge(getAttribute(event, 'published', this.selectedLocale))}
                         ${EventDataMigrator.getStatusIcon(event.migrationStatus)}
                       </div>
                       ${event.migrationStatus === 'error' ? html`
