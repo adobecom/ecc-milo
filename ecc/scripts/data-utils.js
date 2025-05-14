@@ -78,6 +78,7 @@ export const EVENT_DATA_FILTER = {
   creationTime: { type: 'string', localizable: false, cloneable: false, submittable: true },
   modificationTime: { type: 'string', localizable: false, cloneable: false, submittable: true },
   isPrivate: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
+  useLegacyDetailPagePath: { type: 'boolean', localizable: false, cloneable: false, submittable: true },
   video: { type: 'object', localizable: false, cloneable: true, submittable: true, ref: VIDEO_DATA_REF_FILTER },
   registration: { type: 'object', localizable: false, cloneable: true, submittable: true, ref: REGISTRATION_DATA_REF_FILTER },
 };
