@@ -192,4 +192,23 @@ export const style = css`
   sp-picker {
     width: 100%;
   }
+
+  sp-underlay:not([open]) + sp-dialog {
+    display: none;
+  }
+
+  sp-underlay + sp-dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      background: var(--spectrum-gray-100);
+  }
+
+  sp-underlay + sp-dialog .button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+  }
 `;

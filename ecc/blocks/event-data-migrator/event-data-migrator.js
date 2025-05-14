@@ -15,6 +15,8 @@ const SPECTRUM_COMPONENTS = [
   'button',
   'progress-circle',
   'action-button',
+  'underlay',
+  'dialog',
 ];
 
 function buildLoadingScreen(el) {

@@ -26,6 +26,7 @@ export default class EventDataMigrator extends LitElement {
     isLoadingEvents: { type: Boolean },
     isMigrating: { type: Boolean },
     selectedEvents: { type: Set },
+    showWarningDialog: { type: Boolean },
   };
 
   constructor() {
@@ -41,6 +42,7 @@ export default class EventDataMigrator extends LitElement {
     this.isLoadingEvents = false;
     this.isMigrating = false;
     this.selectedEvents = new Set();
+    this.showWarningDialog = false;
   }
 
   async firstUpdated() {
@@ -118,6 +120,11 @@ export default class EventDataMigrator extends LitElement {
   }
 
   async handleMigrate() {
+    this.showWarningDialog = true;
+  }
+
+  async handleConfirmMigration() {
+    this.showWarningDialog = false;
     if (this.selectedEvents.size === 0) return;
 
     this.isMigrating = true;
@@ -376,6 +383,41 @@ export default class EventDataMigrator extends LitElement {
           ${this.isMigrating ? 'Migrating...' : 'Run Migration'}
         </sp-button>
       </div>
+
+      <sp-underlay ?open=${this.showWarningDialog}></sp-underlay>
+      <sp-dialog
+        ?open=${this.showWarningDialog}
+        mode="warning"
+        size="m"
+        dismissable
+        @close=${() => { this.showWarningDialog = false; }}
+      >
+        <h2 slot="heading">Warning: Irreversible Action</h2>
+        <div class="warning-content">
+          <p>This migration will modify event data and cannot be undone. Please ensure you understand the following:</p>
+          <ul>
+            <li>Changes cannot be automatically reversed</li>
+            <li>Incorrect migrations can break event data</li>
+            <li>If the data is accidentally published, it will be visible to users</li>
+            <li>Migration between incompatible data types can break EMC functionality</li>
+          </ul>
+          <p>Are you sure you want to proceed with the migration?</p>
+        </div>
+        <div class="button-container">
+          <sp-button
+            variant="secondary"
+            @click=${() => { this.showWarningDialog = false; }}
+          >
+            Cancel
+          </sp-button>
+          <sp-button
+            variant="warning"
+            @click=${this.handleConfirmMigration}
+          >
+            Proceed with Migration
+          </sp-button>
+        </div>
+      </sp-dialog>
     `;
   }
 }
