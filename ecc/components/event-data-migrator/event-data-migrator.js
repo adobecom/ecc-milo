@@ -27,6 +27,8 @@ export default class EventDataMigrator extends LitElement {
     isMigrating: { type: Boolean },
     selectedEvents: { type: Set },
     showWarningDialog: { type: Boolean },
+    sortField: { type: String },
+    sortDirection: { type: String },
   };
 
   constructor() {
@@ -43,6 +45,8 @@ export default class EventDataMigrator extends LitElement {
     this.isMigrating = false;
     this.selectedEvents = new Set();
     this.showWarningDialog = false;
+    this.sortField = 'modificationTime';
+    this.sortDirection = 'desc';
   }
 
   async firstUpdated() {
@@ -200,6 +204,42 @@ export default class EventDataMigrator extends LitElement {
     if (this.toast) this.toast.open = true;
   }
 
+  handleSort(field) {
+    if (this.sortField === field) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortField = field;
+      this.sortDirection = 'asc';
+    }
+    this.sortEvents();
+  }
+
+  sortEvents() {
+    this.events.sort((a, b) => {
+      let valueA;
+      let valueB;
+
+      if (this.sortField === 'title') {
+        valueA = getAttribute(a, 'title', this.selectedLocale)?.toLowerCase() || '';
+        valueB = getAttribute(b, 'title', this.selectedLocale)?.toLowerCase() || '';
+      } else {
+        valueA = getAttribute(a, this.sortField, this.selectedLocale);
+        valueB = getAttribute(b, this.sortField, this.selectedLocale);
+      }
+
+      if (valueA === valueB) return 0;
+
+      const comparison = valueA < valueB ? -1 : 1;
+      return this.sortDirection === 'asc' ? comparison : -comparison;
+    });
+    this.requestUpdate();
+  }
+
+  static getSortIcon(field, currentField, direction) {
+    if (field !== currentField) return nothing;
+    return html`<sp-icon size="s">${getIcon(direction === 'asc' ? 'chev-up' : 'chev-down')}</sp-icon>`;
+  }
+
   static getStatusIcon(status) {
     switch (status) {
       case 'success':
@@ -278,6 +318,24 @@ export default class EventDataMigrator extends LitElement {
                 >
                   Select All
                 </sp-checkbox>
+              </div>
+              <div class="sort-controls">
+                <button class="sort-button ${this.sortField === 'modificationTime' ? 'active' : ''}" @click=${() => this.handleSort('modificationTime')}>
+                  Last Modified
+                  ${EventDataMigrator.getSortIcon('modificationTime', this.sortField, this.sortDirection)}
+                </button>
+                <button class="sort-button ${this.sortField === 'creationTime' ? 'active' : ''}" @click=${() => this.handleSort('creationTime')}>
+                  Created
+                  ${EventDataMigrator.getSortIcon('creationTime', this.sortField, this.sortDirection)}
+                </button>
+                <button class="sort-button ${this.sortField === 'published' ? 'active' : ''}" @click=${() => this.handleSort('published')}>
+                  Status
+                  ${EventDataMigrator.getSortIcon('published', this.sortField, this.sortDirection)}
+                </button>
+                <button class="sort-button ${this.sortField === 'title' ? 'active' : ''}" @click=${() => this.handleSort('title')}>
+                  Title
+                  ${EventDataMigrator.getSortIcon('title', this.sortField, this.sortDirection)}
+                </button>
               </div>
               ${this.isLoadingEvents ? html`
                 <div class="loading-container">
