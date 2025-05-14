@@ -228,7 +228,6 @@ export default class Profile extends LitElement {
       quietTextfieldConfig,
       titleData,
       bioData,
-      textareaConfig,
       socialLinksData,
       socialLinksConfig,
     } = this.getRequiredProps(edited);
@@ -247,7 +246,9 @@ export default class Profile extends LitElement {
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
     <custom-textfield fielddata=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ title: event.detail.value }, edited)}></custom-textfield>
-    <custom-textfield fielddata=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @change-custom=${(event) => this.updateProfile({ bio: event.detail.value }, edited)}></custom-textfield>
+    <rte-tiptap placeholder=${bioData.placeholder} content=${bioData.value} size="s" .handleInput=${(value) => {
+  this.updateProfile({ bio: value }, edited);
+}}></rte-tiptap>
     <div class="social-media">
     <h3>${fieldLabelsJSON.socialLinks}</h3>
     ${profile?.socialLinks ? repeat(
@@ -322,13 +323,6 @@ export default class Profile extends LitElement {
 
     const socialLinksData = { placeholder: fieldLabelsJSON.addSocialLink };
 
-    const textareaConfig = {
-      grows: true,
-      multiline: true,
-      size: 'xl',
-      quiet: true,
-    };
-
     const socialLinksConfig = { size: 'xl', pattern: LINK_REGEX };
     const quietTextfieldConfig = { size: 'xl', quiet: true };
 
@@ -349,7 +343,6 @@ export default class Profile extends LitElement {
       lastNameData,
       titleData,
       bioData,
-      textareaConfig,
       socialLinksData,
       socialLinksConfig,
       firstNameSearchMap,
@@ -419,6 +412,17 @@ export default class Profile extends LitElement {
     <h3>${socialLinks.link}</h3></div>` : nothing;
   }
 
+  renderBio(bio) {
+    if (!bio) {
+      return nothing;
+    }
+
+    const { body } = (new DOMParser()).parseFromString(bio, 'text/html');
+    const bioElement = document.createElement('div');
+    bioElement.innerHTML = body.innerHTML;
+    return bioElement;
+  }
+
   renderProfileView() {
     const fieldLabelsJSON = {
       ...DEFAULT_FIELD_LABELS,
@@ -451,7 +455,7 @@ export default class Profile extends LitElement {
     : nothing}
     <div>
         <h5>${title}</h5>
-        ${bio ? html`<p>${bio}</p>` : nothing}
+        ${this.renderBio(bio)}
     </div>
     ${this.profile.socialLinks?.length ? html`
     <div class="social-media">

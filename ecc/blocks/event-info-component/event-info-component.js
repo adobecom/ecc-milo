@@ -196,7 +196,7 @@ export default function init(el) {
         const clonedRow = r.cloneNode(true);
         await decorateTextarea(r, { id: 'info-field-event-description', grows: true, quiet: true });
         decorateRTETiptap(clonedRow);
-        r.append(clonedRow);
+        r.prepend(clonedRow);
         break;
       }
       case 3:

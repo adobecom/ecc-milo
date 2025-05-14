@@ -173,4 +173,12 @@ export const style = css`
     margin: 0 0 var(--spacing-s) 0;
     padding-left: 1rem
 }
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
 `;
