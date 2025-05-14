@@ -33,6 +33,7 @@ export default class Profile extends LitElement {
     firstnamesearch: { type: Array },
     lastnamesearch: { type: Array },
     locale: { type: String },
+    submitting: { type: Boolean, reflect: true },
   };
 
   static styles = style;
@@ -99,23 +100,25 @@ export default class Profile extends LitElement {
 
   async saveProfile(e, edited = false) {
     const imageDropzone = this.shadowRoot.querySelector('image-dropzone');
-    const saveButton = e.target;
-
-    saveButton.pending = true;
+    this.submitting = true;
 
     try {
       const profile = edited ? structuredClone(this.profileCopy) : structuredClone(this.profile);
+      if (!this.isValidSpeaker(profile)) {
+        this.submitting = false;
+        throw new Error('Please make sure to fill out all required speaker information.');
+      }
+
       const correctSocialLinks = profile.socialLinks.filter((sm) => sm.link === '' || sm.link?.match(LINK_REGEX));
 
       if (correctSocialLinks.length < profile.socialLinks.length) {
         const dialogToastParent = edited ? this.shadowRoot.querySelector('.edit-profile-dialog') : null;
         this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please enter a valid website address starting with "https://". For example: https://www.example.com' }, targetEl: dialogToastParent }, bubbles: true, composed: true }));
-        saveButton.pending = false;
+        this.submitting = false;
         return false;
       }
 
       profile.isPlaceholder = false;
-      profile.socialLinks = profile.socialLinks.filter((sm) => sm.link !== '');
 
       const sProfile = { ...profile };
       delete sProfile.speakerType;
@@ -130,7 +133,7 @@ export default class Profile extends LitElement {
       if (respJson.error) {
         const { errors, message } = respJson.error;
         window.lana?.log(`Error occurred while saving profile: ${errors ?? message}`);
-        saveButton.pending = false;
+        this.submitting = false;
         const dialogToastParent = edited ? this.shadowRoot.querySelector('.edit-profile-dialog') : null;
         this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message }, targetEl: dialogToastParent }, bubbles: true, composed: true }));
         return false;
@@ -176,14 +179,14 @@ export default class Profile extends LitElement {
 
         this.updateProfile(profile);
         this.requestUpdate();
-        saveButton.pending = false;
+        this.submitting = false;
         return true;
       }
     } catch (error) {
       window.lana?.log(`Error occurred while saving profile: ${error}`);
     }
 
-    saveButton.pending = false;
+    this.submitting = false;
     return false;
   }
 
@@ -225,7 +228,6 @@ export default class Profile extends LitElement {
       quietTextfieldConfig,
       titleData,
       bioData,
-      textareaConfig,
       socialLinksData,
       socialLinksConfig,
     } = this.getRequiredProps(edited);
@@ -244,7 +246,9 @@ export default class Profile extends LitElement {
         <slot name="img-label" slot="img-label"></slot>
     </image-dropzone>
     <custom-textfield fielddata=${JSON.stringify(titleData)} config=${JSON.stringify(quietTextfieldConfig)} @change-custom=${(event) => this.updateProfile({ title: event.detail.value }, edited)}></custom-textfield>
-    <custom-textfield fielddata=${JSON.stringify(bioData)} config=${JSON.stringify(textareaConfig)} @change-custom=${(event) => this.updateProfile({ bio: event.detail.value }, edited)}></custom-textfield>
+    <rte-tiptap placeholder=${bioData.placeholder} content=${bioData.value} size="s" .handleInput=${(value) => {
+  this.updateProfile({ bio: value }, edited);
+}}></rte-tiptap>
     <div class="social-media">
     <h3>${fieldLabelsJSON.socialLinks}</h3>
     ${profile?.socialLinks ? repeat(
@@ -319,13 +323,6 @@ export default class Profile extends LitElement {
 
     const socialLinksData = { placeholder: fieldLabelsJSON.addSocialLink };
 
-    const textareaConfig = {
-      grows: true,
-      multiline: true,
-      size: 'xl',
-      quiet: true,
-    };
-
     const socialLinksConfig = { size: 'xl', pattern: LINK_REGEX };
     const quietTextfieldConfig = { size: 'xl', quiet: true };
 
@@ -346,7 +343,6 @@ export default class Profile extends LitElement {
       lastNameData,
       titleData,
       bioData,
-      textareaConfig,
       socialLinksData,
       socialLinksConfig,
       firstNameSearchMap,
@@ -360,9 +356,9 @@ export default class Profile extends LitElement {
     <h2>${this.fieldlabels.heading}</h2>
     ${this.renderProfileForm()}
     <div class="profile-save-footer">
-      <sp-button variant="primary" class="save-profile-button" @click=${async (e) => {
-    this.saveProfile(e);
-  }} ?disabled=${this.saveDisabled(this.profile)}>
+      <sp-button variant="primary" class="save-profile-button" @click=${async () => {
+    this.saveProfile();
+  }} ?pending=${this.submitting} ?disabled=${this.saveDisabled(this.profile)}>
   <img src="/ecc/icons/user-add.svg" slot="icon"></img>
   Save Profile</sp-button>
     </div>
@@ -392,14 +388,14 @@ export default class Profile extends LitElement {
     <p class="last-updated">Last update: ${new Date().toLocaleDateString()}</p>
     <sp-button-group class="footer-button-group">
       <sp-button variant="secondary" class="profile-edit-button" onclick="javascript: this.dispatchEvent(new Event('close', {bubbles: true, composed: true}));">Cancel</sp-button>
-      <sp-button variant="primary" class="profile-edit-button" @click=${async (e) => {
-    this.saveProfile(e, true).then((success) => {
-      if (success) {
-        const dialog = this.shadowRoot.querySelector('sp-dialog-wrapper');
-        dialog?.dispatchEvent(new Event('close', { bubbles: true, composed: true }));
-      }
-    });
-  }} ?disabled=${this.saveDisabled(this.profileCopy)}>
+      <sp-button variant="primary" ?pending=${this.submitting} class="profile-edit-button" @click=${async (e) => {
+  this.saveProfile(e, true).then((success) => {
+    if (success) {
+      const dialog = this.shadowRoot.querySelector('sp-dialog-wrapper');
+      dialog?.dispatchEvent(new Event('close', { bubbles: true, composed: true }));
+    }
+  });
+}} ?disabled=${this.saveDisabled(this.profileCopy)}>
   <img src="/ecc/icons/user-edit.svg" slot="icon"></img>
   Confirm update</sp-button>
   </sp-button-group>
@@ -414,6 +410,17 @@ export default class Profile extends LitElement {
       <use href="#footer-icon-${serviceName}"></use>
     </svg>
     <h3>${socialLinks.link}</h3></div>` : nothing;
+  }
+
+  renderBio(bio) {
+    if (!bio) {
+      return nothing;
+    }
+
+    const { body } = (new DOMParser()).parseFromString(bio, 'text/html');
+    const bioElement = document.createElement('div');
+    bioElement.innerHTML = body.innerHTML;
+    return bioElement;
   }
 
   renderProfileView() {
@@ -448,7 +455,7 @@ export default class Profile extends LitElement {
     : nothing}
     <div>
         <h5>${title}</h5>
-        ${bio ? html`<p>${bio}</p>` : nothing}
+        ${this.renderBio(bio)}
     </div>
     ${this.profile.socialLinks?.length ? html`
     <div class="social-media">
