@@ -45,7 +45,7 @@ export const style = css`
 
   .migration-container {
     display: grid;
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 400px 1fr;
     gap: 20px;
   }
 
@@ -210,5 +210,57 @@ export const style = css`
     display: flex;
     justify-content: flex-end;
     gap: 16px;
+  }
+
+  .status-badge {
+    padding: 0 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .status-badge.published {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .status-badge.draft {
+    background-color: #fff3e0;
+    color: #ef6c00;
+  }
+
+  .sort-controls {
+    display: flex;
+    gap: 8px;
+    justify-content: space-around;
+    margin-bottom: 16px;
+    padding: 8px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .sort-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border: none;
+    background: none;
+    color: #666;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+
+  .sort-button:hover {
+    background-color: #f5f5f5;
+  }
+
+  .sort-button.active {
+    background-color: #e8e8e8;
+    color: #333;
   }
 `;
