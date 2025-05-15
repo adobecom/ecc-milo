@@ -9,145 +9,9 @@ import initCalendar, { updateCalendarInput, parseFormattedDate } from './calenda
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
-function dateTimeStringToTimestamp(dateString, timeString) {
-  const dateTimeString = `${dateString}T${timeString}`;
+let languagePickerUpdatePromise = null;
 
-  const date = new Date(dateTimeString);
-
-  return date.getTime();
-}
-
-async function updateLanguagePicker(component, props) {
-  const languagePicker = component.querySelector('#language-picker');
-  const eventUrlInput = component.querySelector('#event-info-url-input');
-
-  if (!languagePicker || !eventUrlInput) return;
-
-  const { cloudType } = component.dataset;
-
-  if (!cloudType) return;
-
-  const [cloud, localesResp] = await Promise.all([getCloud(cloudType), getLocales()]);
-
-  if (!cloud || cloud.error) return;
-  const { locales } = cloud;
-  const allLocales = localesResp.localeNames;
-
-  languagePicker.querySelectorAll('sp-menu-item').forEach((option) => {
-    option.remove();
-  });
-
-  locales.forEach((l, i) => {
-    const lang = allLocales[l];
-    const opt = createTag('sp-menu-item', { value: l }, lang);
-    languagePicker.append(opt);
-
-    if (props.locale === l) {
-      languagePicker.value = l;
-      languagePicker.dispatchEvent(new Event('change'));
-    }
-  });
-
-  if (!props.eventDataResp?.defaultLocale) languagePicker.disabled = false;
-}
-
-function initTitleWatcher(component, props) {
-  const titleInput = component.querySelector('#info-field-event-title');
-  const engTitle = component.querySelector('#event-info-url-input');
-
-  let existingTitle = titleInput.value;
-
-  if (!engTitle) return;
-
-  engTitle.value = props.eventDataResp?.engTitle;
-  if (!engTitle.value || engTitle.value === existingTitle) {
-    engTitle.value = titleInput.value;
-  }
-
-  BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: engTitle.value });
-
-  titleInput.addEventListener('input', () => {
-    if (engTitle.value === '' || engTitle.value === existingTitle) {
-      engTitle.value = titleInput.value;
-    }
-
-    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: engTitle.value });
-
-    existingTitle = titleInput.value;
-  });
-}
-
-export function onSubmit(component, props) {
-  if (component.closest('.fragment')?.classList.contains('hidden')) return;
-
-  const isPrivate = component.querySelector('#private-event').checked;
-  const title = component.querySelector('#info-field-event-title').value;
-  const description = component.querySelector('#info-field-event-description').value;
-  const eventDetails = component.querySelector('#event-info-details-rte-output').value;
-  const datePicker = component.querySelector('#event-info-date-picker');
-  const enTitle = component.querySelector('#event-info-url-input').value;
-  const localStartDate = datePicker.dataset.startDate;
-  const localEndDate = datePicker.dataset.endDate;
-
-  const localStartTime = component.querySelector('#time-picker-start-time-value').value;
-  const localEndTime = component.querySelector('#time-picker-end-time-value').value;
-
-  const timezone = component.querySelector('#time-zone-select-input').value;
-
-  const localStartTimeMillis = dateTimeStringToTimestamp(localStartDate, localStartTime);
-  const localEndTimeMillis = dateTimeStringToTimestamp(localEndDate, localEndTime);
-
-  const eventInfo = {
-    title,
-    description,
-    eventDetails,
-    localStartDate,
-    localEndDate,
-    localStartTime,
-    localEndTime,
-    localStartTimeMillis,
-    localEndTimeMillis,
-    timezone,
-    enTitle,
-    isPrivate,
-  };
-
-  setPropsPayload(props, eventInfo);
-}
-
-export async function onPayloadUpdate(component, props) {
-  const { cloudType } = props.payload;
-
-  if (cloudType && cloudType !== component.dataset.cloudType) {
-    component.dataset.cloudType = cloudType;
-    updateLanguagePicker(component, props);
-  }
-}
-
-export async function onRespUpdate(component, props) {
-  // lock language picker on defaultLocale given and is not en-US
-
-  if (props.eventDataResp) {
-    const { defaultLocale } = props.eventDataResp;
-    const languagePicker = component.querySelector('#language-picker');
-
-    if (defaultLocale) {
-      languagePicker.disabled = true;
-    }
-  }
-}
-
-function checkEventDuplication(event, compareMetrics) {
-  const titleMatch = event.title === compareMetrics.title;
-  const startDateMatch = event.localStartDate === compareMetrics.startDate;
-  const venueIdMatch = event.venue?.city === compareMetrics.city;
-  const eventIdNoMatch = event.eventId !== compareMetrics.eventId;
-  const stateCodeMatch = event.venue?.stateCode === compareMetrics.stateCode;
-
-  return titleMatch && startDateMatch && venueIdMatch && eventIdNoMatch && stateCodeMatch;
-}
-
-function prefillFields(component, props, eventData) {
+function refillFields(component, props, eventData) {
   const eventTitleInput = component.querySelector('#info-field-event-title');
   const eventDescription = component.querySelector('#info-field-event-description');
   const eventDescriptionRTE = component.querySelector('#event-info-details-rte');
@@ -220,6 +84,161 @@ function prefillFields(component, props, eventData) {
   if (eventData.eventId) {
     component.classList.add('prefilled');
   }
+}
+
+function dateTimeStringToTimestamp(dateString, timeString) {
+  const dateTimeString = `${dateString}T${timeString}`;
+
+  const date = new Date(dateTimeString);
+
+  return date.getTime();
+}
+
+async function updateLanguagePicker(component, props) {
+  const languagePicker = component.querySelector('#language-picker');
+  const eventUrlInput = component.querySelector('#event-info-url-input');
+
+  if (!languagePicker || !eventUrlInput) return;
+
+  const { cloudType } = component.dataset;
+
+  if (!cloudType) return;
+
+  if (languagePickerUpdatePromise) {
+    await languagePickerUpdatePromise;
+    return;
+  }
+
+  languagePickerUpdatePromise = (async () => {
+    try {
+      const [cloud, localesResp] = await Promise.all([getCloud(cloudType), getLocales()]);
+
+      if (!cloud || cloud.error) return;
+      const { locales } = cloud;
+      const allLocales = localesResp.localeNames;
+
+      languagePicker.querySelectorAll('sp-menu-item').forEach((option) => {
+        option.remove();
+      });
+
+      locales.forEach((l) => {
+        const lang = allLocales[l];
+        const opt = createTag('sp-menu-item', { value: l }, lang);
+        languagePicker.append(opt);
+      });
+
+      const defaultLocale = props.eventDataResp?.defaultLocale;
+      if (defaultLocale) {
+        languagePicker.value = defaultLocale;
+        languagePicker.dispatchEvent(new Event('change'));
+      } else if (props.locale) {
+        languagePicker.value = props.locale;
+        languagePicker.dispatchEvent(new Event('change'));
+      }
+
+      languagePicker.disabled = !!defaultLocale;
+    } catch (error) {
+      console.error('Error updating language picker:', error);
+    }
+  })();
+
+  await languagePickerUpdatePromise;
+}
+
+function initTitleWatcher(component, props) {
+  const titleInput = component.querySelector('#info-field-event-title');
+  const engTitle = component.querySelector('#event-info-url-input');
+
+  let existingTitle = titleInput.value;
+
+  if (!engTitle) return;
+
+  engTitle.value = props.eventDataResp?.engTitle;
+  if (!engTitle.value || engTitle.value === existingTitle) {
+    engTitle.value = titleInput.value;
+  }
+
+  BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: engTitle.value });
+
+  titleInput.addEventListener('input', () => {
+    if (engTitle.value === '' || engTitle.value === existingTitle) {
+      engTitle.value = titleInput.value;
+    }
+
+    BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: engTitle.value });
+
+    existingTitle = titleInput.value;
+  });
+}
+
+export function onSubmit(component, props) {
+  if (component.closest('.fragment')?.classList.contains('hidden')) return;
+
+  const isPrivate = component.querySelector('#private-event').checked;
+  const title = component.querySelector('#info-field-event-title').value;
+  const description = component.querySelector('#info-field-event-description').value;
+  const eventDetails = component.querySelector('#event-info-details-rte-output').value;
+  const datePicker = component.querySelector('#event-info-date-picker');
+  const enTitle = component.querySelector('#event-info-url-input').value;
+  const localStartDate = datePicker.dataset.startDate;
+  const localEndDate = datePicker.dataset.endDate;
+
+  const localStartTime = component.querySelector('#time-picker-start-time-value').value;
+  const localEndTime = component.querySelector('#time-picker-end-time-value').value;
+
+  const timezone = component.querySelector('#time-zone-select-input').value;
+
+  const localStartTimeMillis = dateTimeStringToTimestamp(localStartDate, localStartTime);
+  const localEndTimeMillis = dateTimeStringToTimestamp(localEndDate, localEndTime);
+
+  const eventInfo = {
+    title,
+    description,
+    eventDetails,
+    localStartDate,
+    localEndDate,
+    localStartTime,
+    localEndTime,
+    localStartTimeMillis,
+    localEndTimeMillis,
+    timezone,
+    enTitle,
+    isPrivate,
+  };
+
+  setPropsPayload(props, eventInfo);
+}
+
+export async function onPayloadUpdate(component, props) {
+  const { cloudType } = props.payload;
+
+  if (cloudType && cloudType !== component.dataset.cloudType) {
+    component.dataset.cloudType = cloudType;
+    await updateLanguagePicker(component, props);
+  }
+}
+
+export async function onRespUpdate(component, props) {
+  if (props.eventDataResp) {
+    const { defaultLocale } = props.eventDataResp;
+    const languagePicker = component.querySelector('#language-picker');
+
+    if (defaultLocale) {
+      await updateLanguagePicker(component, props);
+    }
+  }
+
+  refillFields(component, props, props.eventDataResp);
+}
+
+function checkEventDuplication(event, compareMetrics) {
+  const titleMatch = event.title === compareMetrics.title;
+  const startDateMatch = event.localStartDate === compareMetrics.startDate;
+  const venueIdMatch = event.venue?.city === compareMetrics.city;
+  const eventIdNoMatch = event.eventId !== compareMetrics.eventId;
+  const stateCodeMatch = event.venue?.stateCode === compareMetrics.stateCode;
+
+  return titleMatch && startDateMatch && venueIdMatch && eventIdNoMatch && stateCodeMatch;
 }
 
 export default async function init(component, props) {
@@ -411,8 +430,6 @@ export default async function init(component, props) {
 
     eventTitleInput.dispatchEvent(new Event('change'));
   });
-
-  prefillFields(component, props, eventData);
 
   initTitleWatcher(component, props);
   languagePicker.addEventListener('change', () => {
