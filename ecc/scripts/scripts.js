@@ -118,6 +118,8 @@ const CONFIG = {
   },
 };
 
+const RELEASE_VERSION = 'T3-25.20';
+
 // Decorate the page with site specific needs.
 decorateArea();
 
@@ -153,4 +155,8 @@ export const LIBS = (() => {
   await loadArea().then(() => {
     lazyCaptureProfile();
   });
+}());
+
+(async function logReleaseVersion() {
+  console.log('Release version:', RELEASE_VERSION);
 }());
