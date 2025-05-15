@@ -191,6 +191,7 @@ export default function getJoinedData(locale) {
     }
   });
 
+  setPayloadCache(finalPayload, locale);
   clearRemoveCache();
 
   return finalPayload;
