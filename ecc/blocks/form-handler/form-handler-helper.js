@@ -16,7 +16,7 @@ import RsvpForm from '../../components/rsvp-form/rsvp-form.js';
 import getJoinedData, {
   setPayloadCache,
   setResponseCache,
-  setRemoveCache,
+  setDeleteList,
 } from './data-handler.js';
 
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
@@ -1081,7 +1081,7 @@ export async function buildECCForm(el) {
       localizations: {},
     },
     eventDataResp: {},
-    removeFromPayload: {},
+    deleteList: {},
   };
 
   const dataHandler = {
@@ -1123,7 +1123,7 @@ export async function buildECCForm(el) {
           updateComponentsOnRespChange(target);
           updateCtas(target);
           toggleSections(target);
-          props.removeFromPayload = [];
+          props.deleteList = [];
           if (value.error) {
             props.el.classList.add('show-error');
           } else {
@@ -1137,8 +1137,8 @@ export async function buildECCForm(el) {
           break;
         }
 
-        case 'removeFromPayload': {
-          setRemoveCache(value);
+        case 'deleteList': {
+          setDeleteList(value);
           break;
         }
 
