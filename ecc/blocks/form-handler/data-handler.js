@@ -4,14 +4,27 @@ import { EVENT_DATA_FILTER, isValidAttribute, splitLocalizableFields } from '../
 
 const responseCache = { localizations: {} };
 const payloadCache = { localizations: {} };
-let removeFromPayload = [];
+let deleteList = [];
 
-export function setRemoveCache(data) {
-  removeFromPayload.push(...data);
+export function setDeleteList(data) {
+  deleteList.push(...data);
 }
 
-export function clearRemoveCache() {
-  removeFromPayload = [];
+export function runDelete() {
+  deleteList.forEach((item) => {
+    if (item.path) {
+      const path = item.path.split('.');
+      const payloadTarget = path.reduce((acc, subKey) => acc[subKey], payloadCache);
+      const responseTarget = path.reduce((acc, subKey) => acc[subKey], responseCache);
+      delete payloadTarget[item.key];
+      delete responseTarget[item.key];
+    } else {
+      delete payloadCache[item.key];
+      delete responseCache[item.key];
+    }
+  });
+
+  deleteList = [];
 }
 
 export function submitFilter(obj) {
@@ -95,7 +108,7 @@ export function setPropsPayload(props, newData, removeData = []) {
 
   // Update the payload
   props.payload = payload;
-  props.removeFromPayload = removeData;
+  props.deleteList = removeData;
 }
 
 export function setPayloadCache(payload, locale) {
@@ -115,7 +128,7 @@ export function setPayloadCache(payload, locale) {
 
   payloadCache.localizations[locale] = {
     ...payloadCache.localizations[locale],
-    ...splitNewPayload.localizableFields,
+    ...splitNewPayload.localizableFields[locale],
   };
 }
 
@@ -171,6 +184,8 @@ export function getFilteredCachedResponse() {
 }
 
 export default function getJoinedData() {
+  runDelete();
+  
   const filteredResponse = getFilteredCachedResponse();
   const filteredPayload = getFilteredCachedPayload();
 
@@ -180,18 +195,6 @@ export default function getJoinedData() {
     ...filteredPayload,
     modificationTime: filteredResponse.modificationTime,
   };
-
-  removeFromPayload.forEach((item) => {
-    if (item.path) {
-      const path = item.path.split('.');
-      const target = path.reduce((acc, subKey) => acc[subKey], finalPayload);
-      delete target[item.key];
-    } else {
-      delete finalPayload[item.key];
-    }
-  });
-
-  clearRemoveCache();
 
   return finalPayload;
 }
