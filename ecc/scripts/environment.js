@@ -1,3 +1,5 @@
+import { DOMAINS, ENVIRONMENTS, IMS_ENVIRONMENTS, HOST_PATTERNS } from './constants.js';
+
 /**
  * Environment detection and configuration module
  * @module environment
@@ -18,44 +20,6 @@
  * @property {string} STAGE - IMS staging environment
  * @property {string} PROD - IMS production environment
  */
-
-/**
- * Available application environments
- * @type {EnvironmentConfig}
- */
-export const ENVIRONMENTS = Object.freeze({
-  LOCAL: 'local',
-  DEV: 'dev',
-  DEV02: 'dev02',
-  STAGE: 'stage',
-  STAGE02: 'stage02',
-  PROD: 'prod',
-});
-
-/**
- * Available IMS environments
- * @type {ImsEnvironmentConfig}
- */
-export const IMS_ENVIRONMENTS = Object.freeze({
-  STAGE: 'stg1',
-  PROD: 'prod',
-});
-
-/**
- * Environment detection patterns
- * @type {Object.<string, function(string): boolean>}
- */
-const HOST_PATTERNS = Object.freeze({
-  [ENVIRONMENTS.LOCAL]: (host) => host.includes('localhost'),
-  [ENVIRONMENTS.DEV02]: (host) => host.startsWith('dev02--') || host.includes('dev02.adobe.com'),
-  [ENVIRONMENTS.STAGE]: (host) => host.startsWith('stage--')
-    || host.includes('stage.adobe.com')
-    || host.includes('corp.adobe.com')
-    || host.includes('graybox.adobe.com'),
-  [ENVIRONMENTS.STAGE02]: (host) => host.startsWith('stage02--') || host.includes('stage02.adobe.com'),
-  [ENVIRONMENTS.PROD]: (host) => host.startsWith('main--') || host.endsWith('adobe.com'),
-  [ENVIRONMENTS.DEV]: (host) => host.startsWith('dev--') || host.includes('dev.adobe.com'),
-});
 
 /**
  * Gets the current hostname from location
@@ -172,15 +136,15 @@ export function getEventServiceHost(relativeDomain, location = window.location) 
   if (relativeDomain) return relativeDomain;
 
   if ([
-    'www.stage.adobe.com',
-    'www.adobe.com',
+    DOMAINS.STAGE_ADOBE_COM,
+    DOMAINS.ADOBE_COM,
   ].includes(hostname)) {
     return origin;
   }
 
-  if (hostname.includes('localhost')) {
+  if (hostname.includes(DOMAINS.LOCALHOST)) {
     return 'https://dev--events-milo--adobecom.hlx.page';
   }
 
-  return 'https://www.adobe.com';
+  return `https://${DOMAINS.ADOBE_COM}`;
 }
