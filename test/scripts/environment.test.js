@@ -1,12 +1,11 @@
 import { expect } from '@esm-bundle/chai';
 import {
-  ENVIRONMENTS,
-  IMS_ENVIRONMENTS,
   getCurrentEnvironment,
   isEnvironment,
   getImsEnvironment,
   getEventServiceHost,
 } from '../../ecc/scripts/environment.js';
+import { ENVIRONMENTS, IMS_ENVIRONMENTS, DOMAINS } from '../../ecc/scripts/constants.js';
 
 describe('Environment Module', () => {
   let locationStub;
@@ -14,17 +13,17 @@ describe('Environment Module', () => {
   beforeEach(() => {
     // Create a fake location object
     locationStub = {
-      hostname: 'localhost',
-      host: 'localhost',
-      href: 'http://localhost',
-      origin: 'http://localhost',
+      hostname: DOMAINS.LOCALHOST,
+      host: DOMAINS.LOCALHOST,
+      href: `http://${DOMAINS.LOCALHOST}`,
+      origin: `http://${DOMAINS.LOCALHOST}`,
       search: '',
     };
   });
 
   describe('getCurrentEnvironment', () => {
     it('should return LOCAL for localhost with localTest param', () => {
-      locationStub.hostname = 'localhost';
+      locationStub.hostname = DOMAINS.LOCALHOST;
       locationStub.search = '?localTest=true';
       expect(getCurrentEnvironment(locationStub)).to.equal(ENVIRONMENTS.LOCAL);
     });
@@ -100,19 +99,19 @@ describe('Environment Module', () => {
     });
 
     it('should return correct host for stage.adobe.com', () => {
-      locationStub.hostname = 'www.stage.adobe.com';
-      locationStub.origin = 'https://www.stage.adobe.com';
-      expect(getEventServiceHost(undefined, locationStub)).to.equal('https://www.stage.adobe.com');
+      locationStub.hostname = DOMAINS.STAGE_ADOBE_COM;
+      locationStub.origin = `https://${DOMAINS.STAGE_ADOBE_COM}`;
+      expect(getEventServiceHost(undefined, locationStub)).to.equal(`https://${DOMAINS.STAGE_ADOBE_COM}`);
     });
 
     it('should return correct host for localhost', () => {
-      locationStub.hostname = 'localhost';
+      locationStub.hostname = DOMAINS.LOCALHOST;
       expect(getEventServiceHost(undefined, locationStub)).to.equal('https://dev--events-milo--adobecom.hlx.page');
     });
 
     it('should return adobe.com as fallback', () => {
       locationStub.hostname = 'unknown-host';
-      expect(getEventServiceHost(undefined, locationStub)).to.equal('https://www.adobe.com');
+      expect(getEventServiceHost(undefined, locationStub)).to.equal(`https://${DOMAINS.ADOBE_COM}`);
     });
   });
 });
