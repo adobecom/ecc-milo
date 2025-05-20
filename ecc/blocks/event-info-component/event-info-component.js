@@ -179,6 +179,19 @@ function decorateRTETiptap(row) {
   row.append(rte);
 }
 
+function initPrivateEventModal(props) {
+  const spTheme = props.el.querySelector('#form-app');
+  if (!spTheme) return;
+
+  const underlay = spTheme.querySelector('sp-underlay');
+  const dialog = spTheme.querySelector('sp-dialog');
+
+  if (!underlay || !dialog) return;
+
+  underlay.open = false;
+  dialog.innerHTML = '';
+}
+
 export default function init(el) {
   el.classList.add('form-component');
 
