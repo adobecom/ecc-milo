@@ -725,6 +725,47 @@ async function validatePreview(props, cta) {
   });
 }
 
+function buildWarningModal(props, dialog, spCheckbox) {
+  dialog.innerHTML = '';
+  
+  createTag('h1', { slot: 'heading' }, 'Note: Before you set your event to private', { parent: dialog });
+  createTag('p', {}, 'By setting to private, your event won\'t be publicly found online or published on the Events Hub. You cannot change your event to public once it\'s set to private.', { parent: dialog });
+
+  const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+  const okayButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'okay-private' }, 'OK', { parent: buttonContainer });
+  const cancelButton = createTag('sp-button', { variant: 'secondary', slot: 'button', id: 'cancel-private' }, 'Cancel', { parent: buttonContainer });
+
+  okayButton.addEventListener('click', () => {
+    spCheckbox.checked = true;
+    closeDialog(props);
+  });
+
+  cancelButton.addEventListener('click', () => {
+    spCheckbox.checked = false;
+    closeDialog(props);
+  });
+}
+
+function initPrivateEventModal(props) {
+  const spTheme = props.el.querySelector('#form-app');
+  if (!spTheme) return;
+
+  const underlay = spTheme.querySelector('sp-underlay');
+  const dialog = spTheme.querySelector('sp-dialog');
+
+  if (!underlay || !dialog) return;
+
+  underlay.open = false;
+  dialog.innerHTML = '';
+
+  let spCheckbox = props.el.querySelector('sp-checkbox');
+  spCheckbox.addEventListener('click', async (e) => {
+    e.preventDefault();
+    buildWarningModal(props, dialog, spCheckbox);
+    underlay.open = true;
+  });
+}
+
 function initFormCtas(props) {
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
   decorateButtons(ctaRow, 'button-l');
@@ -1165,6 +1206,7 @@ export async function buildECCForm(el) {
   });
 
   await loadEventData(proxyProps);
+  initPrivateEventModal(proxyProps);
   initFormCtas(proxyProps);
   initNavigation(proxyProps);
   await initComponents(proxyProps);
