@@ -83,7 +83,7 @@ function getAdobeid() {
   };
 
   if (window.location.hostname === 'events-internal.dev.adobe.com') {
-    adobeid.environment = 'stage';
+    adobeid.environment = 'stg1';
   }
 
   return adobeid;
