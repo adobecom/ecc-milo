@@ -11,6 +11,7 @@
  */
 
 import { lazyCaptureProfile } from './profile.js';
+import { getImsEnvironment } from './environment.js';
 
 function convertEccIcon(n) {
   const createSVGIcon = (iconName) => {
@@ -75,20 +76,6 @@ export function decorateArea(area = document) {
   });
 }
 
-function getAdobeid() {
-  const adobeid = {
-    onTokenExpired: () => {
-      window.location.reload();
-    },
-  };
-
-  if (window.location.hostname === 'events-internal.dev.adobe.com') {
-    adobeid.environment = 'stage';
-  }
-
-  return adobeid;
-}
-
 const locales = {
   '': { ietf: 'en-US', tk: 'jdq5hay.css' },
   br: { ietf: 'pt-BR', tk: 'inq1xob.css' },
@@ -125,7 +112,12 @@ const CONFIG = {
   // fallbackRouting: 'off',
   decorateArea,
   locales,
-  adobeid: getAdobeid(),
+  adobeid: {
+    onTokenExpired: () => {
+      window.location.reload();
+    },
+    environment: getImsEnvironment(),
+  },
 };
 
 const RELEASE_VERSION = 'T3-25.20';
