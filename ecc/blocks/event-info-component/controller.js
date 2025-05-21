@@ -138,7 +138,7 @@ async function updateLanguagePicker(component, props) {
 
       languagePicker.disabled = !!defaultLocale;
     } catch (error) {
-      window.lana?.log('Error updating language picker:', error);
+      console.error('Error updating language picker:', error);
     }
   })();
 
