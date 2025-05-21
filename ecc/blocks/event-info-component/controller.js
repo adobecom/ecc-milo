@@ -6,10 +6,9 @@ import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../.
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { getAttribute, isValidAttribute } from '../../scripts/data-utils.js';
 import initCalendar, { updateCalendarInput, parseFormattedDate } from './calendar.js';
+import { buildErrorMessage } from '../form-handler/form-handler-helper.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
-
-let languagePickerUpdatePromise = null;
 
 function refillFields(component, props, eventData) {
   const eventTitleInput = component.querySelector('#info-field-event-title');
@@ -104,45 +103,42 @@ async function updateLanguagePicker(component, props) {
 
   if (!cloudType) return;
 
-  if (languagePickerUpdatePromise) {
-    await languagePickerUpdatePromise;
-    return;
-  }
+  try {
+    const [cloud, localesResp] = await Promise.all([getCloud(cloudType), getLocales()]);
 
-  languagePickerUpdatePromise = (async () => {
-    try {
-      const [cloud, localesResp] = await Promise.all([getCloud(cloudType), getLocales()]);
-
-      if (!cloud || cloud.error) return;
-      const { locales } = cloud;
-      const allLocales = localesResp.localeNames;
-
-      languagePicker.querySelectorAll('sp-menu-item').forEach((option) => {
-        option.remove();
-      });
-
-      locales.forEach((l) => {
-        const lang = allLocales[l];
-        const opt = createTag('sp-menu-item', { value: l }, lang);
-        languagePicker.append(opt);
-      });
-
-      const defaultLocale = props.eventDataResp?.defaultLocale;
-      if (defaultLocale) {
-        languagePicker.value = defaultLocale;
-        languagePicker.dispatchEvent(new Event('change'));
-      } else if (props.locale) {
-        languagePicker.value = props.locale;
-        languagePicker.dispatchEvent(new Event('change'));
-      }
-
-      languagePicker.disabled = !!defaultLocale;
-    } catch (error) {
-      console.error('Error updating language picker:', error);
+    if (!cloud || cloud.error) {
+      buildErrorMessage(component, 'Error loading cloud data. Please refresh the page or try again later.');
+      window.lana?.log('Error loading cloud data. Please refresh the page or try again later.');
+      return;
     }
-  })();
 
-  await languagePickerUpdatePromise;
+    const { locales } = cloud;
+    const allLocales = localesResp.localeNames;
+
+    languagePicker.querySelectorAll('sp-menu-item').forEach((option) => {
+      option.remove();
+    });
+
+    locales.forEach((l) => {
+      const lang = allLocales[l];
+      const opt = createTag('sp-menu-item', { value: l }, lang);
+      languagePicker.append(opt);
+    });
+
+    const defaultLocale = props.eventDataResp?.defaultLocale;
+    if (defaultLocale) {
+      languagePicker.value = defaultLocale;
+      languagePicker.dispatchEvent(new Event('change'));
+    } else if (props.locale) {
+      languagePicker.value = props.locale;
+      languagePicker.dispatchEvent(new Event('change'));
+    }
+
+    languagePicker.disabled = !!defaultLocale;
+  } catch (error) {
+    buildErrorMessage(component, 'Error updating language picker. Please refresh the page or try again later.');
+    window.lana?.log('Error updating language picker. Please refresh the page or try again later.');
+  }
 }
 
 function initTitleWatcher(component, props) {
@@ -221,7 +217,6 @@ export async function onPayloadUpdate(component, props) {
 export async function onRespUpdate(component, props) {
   if (props.eventDataResp) {
     const { defaultLocale } = props.eventDataResp;
-    const languagePicker = component.querySelector('#language-picker');
 
     if (defaultLocale) {
       await updateLanguagePicker(component, props);
