@@ -138,7 +138,7 @@ async function updateLanguagePicker(component, props) {
 
       languagePicker.disabled = !!defaultLocale;
     } catch (error) {
-      console.error('Error updating language picker:', error);
+      window.lana?.log('Error updating language picker:', error);
     }
   })();
 
@@ -267,10 +267,9 @@ export default async function init(component, props) {
   const descriptionRTE = component.querySelector('#event-info-details-rte');
   const descriptionRTEOutput = component.querySelector('#event-info-details-rte-output');
 
-  const spTheme = props.el.querySelector('#form-app');
-  let spCheckbox = props.el.querySelector('sp-checkbox');
-  const dialog = spTheme.querySelector('sp-dialog')
-  const underlay = spTheme.querySelector('sp-underlay');
+  const privateEventCheckbox = component.querySelector('sp-checkbox#private-event');
+  const dialog = props.el.querySelector('#form-app sp-dialog');
+  const underlay = props.el.querySelector('#form-app sp-underlay');
 
   initCalendar(component);
 
@@ -400,6 +399,34 @@ export default async function init(component, props) {
     }
   };
 
+  function closeDialog() {
+    if (!dialog || !underlay) return;
+
+    if (underlay) underlay.open = false;
+    if (dialog) dialog.innerHTML = '';
+  }
+
+  function buildWarningModal() {
+    dialog.innerHTML = '';
+
+    createTag('h1', { slot: 'heading' }, 'Note: Before you set your event to private', { parent: dialog });
+    createTag('p', {}, 'By setting to private, your event won\'t be publicly found online or published on the Events Hub. You cannot change your event to public once it\'s set to private.', { parent: dialog });
+
+    const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+    const okayButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'okay-private' }, 'OK', { parent: buttonContainer });
+    const cancelButton = createTag('sp-button', { variant: 'secondary', slot: 'button', id: 'cancel-private' }, 'Cancel', { parent: buttonContainer });
+
+    okayButton.addEventListener('click', () => {
+      privateEventCheckbox.checked = true;
+      closeDialog();
+    });
+
+    cancelButton.addEventListener('click', () => {
+      privateEventCheckbox.checked = false;
+      closeDialog();
+    });
+  }
+
   startTimeInput.addEventListener('change', onStartTimeUpdate);
   endTimeInput.addEventListener('change', onEndTimeUpdate);
   startAmpmInput.addEventListener('change', onStartTimeUpdate);
@@ -416,9 +443,9 @@ export default async function init(component, props) {
     };
   }
 
-  spCheckbox.addEventListener('click', async (e) => {
+  privateEventCheckbox.addEventListener('click', async (e) => {
     e.preventDefault();
-    buildWarningModal(dialog, spCheckbox);
+    buildWarningModal(dialog, privateEventCheckbox);
     underlay.open = true;
   });
 
@@ -446,37 +473,6 @@ export default async function init(component, props) {
   languagePicker.addEventListener('change', () => {
     props.locale = languagePicker.value;
   });
-
-  function closeDialog() {
-    if (!spTheme) return;
-
-    const underlay = spTheme.querySelector('sp-underlay');
-    const dialog = spTheme.querySelector('sp-dialog');
-
-    if (underlay) underlay.open = false;
-    if (dialog) dialog.innerHTML = '';
-  }
-
-  function buildWarningModal(dialog, spCheckbox) {
-    dialog.innerHTML = '';
-
-    createTag('h1', { slot: 'heading' }, 'Note: Before you set your event to private', { parent: dialog });
-    createTag('p', {}, 'By setting to private, your event won\'t be publicly found online or published on the Events Hub. You cannot change your event to public once it\'s set to private.', { parent: dialog });
-
-    const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
-    const okayButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'okay-private' }, 'OK', { parent: buttonContainer });
-    const cancelButton = createTag('sp-button', { variant: 'secondary', slot: 'button', id: 'cancel-private' }, 'Cancel', { parent: buttonContainer });
-
-    okayButton.addEventListener('click', () => {
-      spCheckbox.checked = true;
-      closeDialog();
-    });
-
-    cancelButton.addEventListener('click', () => {
-      spCheckbox.checked = false;
-      closeDialog();
-    });
-  }
 }
 
 export function onTargetUpdate(component, props) {
