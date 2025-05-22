@@ -75,6 +75,20 @@ export function decorateArea(area = document) {
   });
 }
 
+function getAdobeid() {
+  const adobeid = {
+    onTokenExpired: () => {
+      window.location.reload();
+    },
+  };
+
+  if (window.location.hostname === 'events-internal.dev.adobe.com') {
+    adobeid.environment = 'stg1';
+  }
+
+  return adobeid;
+}
+
 const locales = {
   '': { ietf: 'en-US', tk: 'jdq5hay.css' },
   br: { ietf: 'pt-BR', tk: 'inq1xob.css' },
@@ -111,12 +125,10 @@ const CONFIG = {
   // fallbackRouting: 'off',
   decorateArea,
   locales,
-  adobeid: {
-    onTokenExpired: () => {
-      window.locaton.reload();
-    },
-  },
+  adobeid: getAdobeid(),
 };
+
+const RELEASE_VERSION = 'T3-25.20';
 
 // Decorate the page with site specific needs.
 decorateArea();
@@ -153,4 +165,8 @@ export const LIBS = (() => {
   await loadArea().then(() => {
     lazyCaptureProfile();
   });
+}());
+
+(async function logReleaseVersion() {
+  console.log('Release version:', RELEASE_VERSION);
 }());

@@ -6,8 +6,83 @@ import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../.
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { getAttribute, isValidAttribute } from '../../scripts/data-utils.js';
 import initCalendar, { updateCalendarInput, parseFormattedDate } from './calendar.js';
+import { buildErrorMessage } from '../form-handler/form-handler-helper.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
+
+function refillFields(component, props, eventData) {
+  const eventTitleInput = component.querySelector('#info-field-event-title');
+  const eventDescription = component.querySelector('#info-field-event-description');
+  const eventDescriptionRTE = component.querySelector('#event-info-details-rte');
+  const eventDescriptionRTEOutput = component.querySelector('#event-info-details-rte-output');
+  const startTimeInput = component.querySelector('#time-picker-start-time');
+  const startAmpmInput = component.querySelector('#ampm-picker-start-time');
+  const endTimeInput = component.querySelector('#time-picker-end-time');
+  const endAmpmInput = component.querySelector('#ampm-picker-end-time');
+  const startTime = component.querySelector('#time-picker-start-time-value');
+  const endTime = component.querySelector('#time-picker-end-time-value');
+  const datePicker = component.querySelector('#event-info-date-picker');
+  const languagePicker = component.querySelector('#language-picker');
+  const enTitleInput = component.querySelector('#event-info-url-input');
+  const isPrivateInput = component.querySelector('#private-event');
+
+  const title = getAttribute(eventData, 'title', props.locale);
+  const description = getAttribute(eventData, 'description', props.locale);
+  const eventDetails = getAttribute(eventData, 'eventDetails', props.locale);
+  const localStartDate = getAttribute(eventData, 'localStartDate', props.locale);
+  const localEndDate = getAttribute(eventData, 'localEndDate', props.locale);
+  const localStartTime = getAttribute(eventData, 'localStartTime', props.locale);
+  const localEndTime = getAttribute(eventData, 'localEndTime', props.locale);
+  const timezone = getAttribute(eventData, 'timezone', props.locale);
+  const enTitle = getAttribute(eventData, 'enTitle', props.locale);
+  const defaultLocale = getAttribute(eventData, 'defaultLocale', props.locale);
+  const isPrivate = getAttribute(eventData, 'isPrivate', props.locale);
+
+  if (isValidAttribute(title)) eventTitleInput.value = title;
+  if (isValidAttribute(description)) eventDescription.value = description;
+  if (isValidAttribute(eventDetails)) {
+    eventDescriptionRTE.content = eventDetails;
+    eventDescriptionRTEOutput.value = eventDetails;
+  }
+  if (isValidAttribute(localStartDate)) datePicker.dataset.startDate = localStartDate;
+  if (isValidAttribute(localEndDate)) datePicker.dataset.endDate = localEndDate;
+  if (isValidAttribute(localStartTime)) {
+    const startTimePieces = parse24HourFormat(localStartTime);
+    changeInputValue(startTime, 'value', `${localStartTime}` || '');
+    changeInputValue(startTimeInput, 'value', `${startTimePieces.hours}:${startTimePieces.minutes}` || '');
+    changeInputValue(startAmpmInput, 'value', startTimePieces.period || '');
+  }
+  if (isValidAttribute(localEndTime)) {
+    const endTimePieces = parse24HourFormat(localEndTime);
+    changeInputValue(endTime, 'value', `${localEndTime}` || '');
+    changeInputValue(endTimeInput, 'value', `${endTimePieces.hours}:${endTimePieces.minutes}` || '');
+    changeInputValue(endAmpmInput, 'value', endTimePieces.period || '');
+  }
+  if (isValidAttribute(localStartDate) && isValidAttribute(localEndDate)) {
+    updateCalendarInput(component, {
+      selectedStartDate: parseFormattedDate(localStartDate),
+      selectedEndDate: parseFormattedDate(localEndDate),
+    });
+  }
+  if (isValidAttribute(timezone)) changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
+  if (isValidAttribute(enTitle)) changeInputValue(enTitleInput, 'value', enTitle || '');
+  if (isValidAttribute(isPrivate)) changeInputValue(isPrivateInput, 'checked', isPrivate || false);
+
+  if (title && localStartDate && eventData.eventId) {
+    BlockMediator.set('eventDupMetrics', {
+      ...BlockMediator.get('eventDupMetrics'),
+      ...{
+        title,
+        startDate: localStartDate,
+        eventId: eventData.eventId,
+      },
+    });
+  }
+
+  if (eventData.eventId) {
+    component.classList.add('prefilled');
+  }
+}
 
 function dateTimeStringToTimestamp(dateString, timeString) {
   const dateTimeString = `${dateString}T${timeString}`;
@@ -29,7 +104,12 @@ async function updateLanguagePicker(component, props) {
 
   const [cloud, localesResp] = await Promise.all([getCloud(cloudType), getLocales()]);
 
-  if (!cloud || cloud.error) return;
+  if (!cloud || cloud.error) {
+    buildErrorMessage(component, 'Error loading cloud data. Please refresh the page or try again later.');
+    window.lana?.log('Error loading cloud data. Please refresh the page or try again later.');
+    return;
+  }
+
   const { locales } = cloud;
   const allLocales = localesResp.localeNames;
 
@@ -37,18 +117,15 @@ async function updateLanguagePicker(component, props) {
     option.remove();
   });
 
-  locales.forEach((l, i) => {
+  locales.forEach((l) => {
     const lang = allLocales[l];
     const opt = createTag('sp-menu-item', { value: l }, lang);
     languagePicker.append(opt);
-
-    if (props.locale === l) {
-      languagePicker.value = l;
-      languagePicker.dispatchEvent(new Event('change'));
-    }
   });
 
-  if (!props.eventDataResp?.defaultLocale) languagePicker.disabled = false;
+  const defaultLocale = props.eventDataResp?.defaultLocale;
+  if (isValidAttribute(defaultLocale)) changeInputValue(languagePicker, 'value', defaultLocale || props.locale);
+  languagePicker.disabled = !!defaultLocale;
 }
 
 function initTitleWatcher(component, props) {
@@ -120,21 +197,20 @@ export async function onPayloadUpdate(component, props) {
 
   if (cloudType && cloudType !== component.dataset.cloudType) {
     component.dataset.cloudType = cloudType;
-    updateLanguagePicker(component, props);
+    await updateLanguagePicker(component, props);
   }
 }
 
 export async function onRespUpdate(component, props) {
-  // lock language picker on defaultLocale given and is not en-US
-
   if (props.eventDataResp) {
     const { defaultLocale } = props.eventDataResp;
-    const languagePicker = component.querySelector('#language-picker');
 
     if (defaultLocale) {
-      languagePicker.disabled = true;
+      await updateLanguagePicker(component, props);
     }
   }
+
+  refillFields(component, props, props.eventDataResp);
 }
 
 function checkEventDuplication(event, compareMetrics) {
@@ -145,81 +221,6 @@ function checkEventDuplication(event, compareMetrics) {
   const stateCodeMatch = event.venue?.stateCode === compareMetrics.stateCode;
 
   return titleMatch && startDateMatch && venueIdMatch && eventIdNoMatch && stateCodeMatch;
-}
-
-function prefillFields(component, props, eventData) {
-  const eventTitleInput = component.querySelector('#info-field-event-title');
-  const eventDescription = component.querySelector('#info-field-event-description');
-  const eventDescriptionRTE = component.querySelector('#event-info-details-rte');
-  const eventDescriptionRTEOutput = component.querySelector('#event-info-details-rte-output');
-  const startTimeInput = component.querySelector('#time-picker-start-time');
-  const startAmpmInput = component.querySelector('#ampm-picker-start-time');
-  const endTimeInput = component.querySelector('#time-picker-end-time');
-  const endAmpmInput = component.querySelector('#ampm-picker-end-time');
-  const startTime = component.querySelector('#time-picker-start-time-value');
-  const endTime = component.querySelector('#time-picker-end-time-value');
-  const datePicker = component.querySelector('#event-info-date-picker');
-  const languagePicker = component.querySelector('#language-picker');
-  const enTitleInput = component.querySelector('#event-info-url-input');
-  const isPrivateInput = component.querySelector('#private-event');
-
-  const title = getAttribute(eventData, 'title', props.locale);
-  const description = getAttribute(eventData, 'description', props.locale);
-  const eventDetails = getAttribute(eventData, 'eventDetails', props.locale);
-  const localStartDate = getAttribute(eventData, 'localStartDate', props.locale);
-  const localEndDate = getAttribute(eventData, 'localEndDate', props.locale);
-  const localStartTime = getAttribute(eventData, 'localStartTime', props.locale);
-  const localEndTime = getAttribute(eventData, 'localEndTime', props.locale);
-  const timezone = getAttribute(eventData, 'timezone', props.locale);
-  const enTitle = getAttribute(eventData, 'enTitle', props.locale);
-  const defaultLocale = getAttribute(eventData, 'defaultLocale', props.locale);
-  const isPrivate = getAttribute(eventData, 'isPrivate', props.locale);
-
-  if (isValidAttribute(title)) eventTitleInput.value = title;
-  if (isValidAttribute(description)) eventDescription.value = description;
-  if (isValidAttribute(eventDetails)) {
-    eventDescriptionRTE.content = eventDetails;
-    eventDescriptionRTEOutput.value = eventDetails;
-  }
-  if (isValidAttribute(localStartDate)) datePicker.dataset.startDate = localStartDate;
-  if (isValidAttribute(localEndDate)) datePicker.dataset.endDate = localEndDate;
-  if (isValidAttribute(localStartTime)) {
-    const startTimePieces = parse24HourFormat(localStartTime);
-    changeInputValue(startTime, 'value', `${localStartTime}` || '');
-    changeInputValue(startTimeInput, 'value', `${startTimePieces.hours}:${startTimePieces.minutes}` || '');
-    changeInputValue(startAmpmInput, 'value', startTimePieces.period || '');
-  }
-  if (isValidAttribute(localEndTime)) {
-    const endTimePieces = parse24HourFormat(localEndTime);
-    changeInputValue(endTime, 'value', `${localEndTime}` || '');
-    changeInputValue(endTimeInput, 'value', `${endTimePieces.hours}:${endTimePieces.minutes}` || '');
-    changeInputValue(endAmpmInput, 'value', endTimePieces.period || '');
-  }
-  if (isValidAttribute(localStartDate) && isValidAttribute(localEndDate)) {
-    updateCalendarInput(component, {
-      selectedStartDate: parseFormattedDate(localStartDate),
-      selectedEndDate: parseFormattedDate(localEndDate),
-    });
-  }
-  if (isValidAttribute(timezone)) changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
-  if (isValidAttribute(defaultLocale)) changeInputValue(languagePicker, 'value', defaultLocale || props.locale);
-  if (isValidAttribute(enTitle)) changeInputValue(enTitleInput, 'value', enTitle || '');
-  if (isValidAttribute(isPrivate)) changeInputValue(isPrivateInput, 'checked', isPrivate || false);
-
-  if (title && localStartDate && eventData.eventId) {
-    BlockMediator.set('eventDupMetrics', {
-      ...BlockMediator.get('eventDupMetrics'),
-      ...{
-        title,
-        startDate: localStartDate,
-        eventId: eventData.eventId,
-      },
-    });
-  }
-
-  if (eventData.eventId) {
-    component.classList.add('prefilled');
-  }
 }
 
 export default async function init(component, props) {
@@ -411,8 +412,6 @@ export default async function init(component, props) {
 
     eventTitleInput.dispatchEvent(new Event('change'));
   });
-
-  prefillFields(component, props, eventData);
 
   initTitleWatcher(component, props);
   languagePicker.addEventListener('change', () => {
