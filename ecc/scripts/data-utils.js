@@ -60,6 +60,7 @@ export const EVENT_DATA_FILTER = {
   localStartTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localEndTime: { type: 'string', localizable: false, cloneable: true, submittable: true },
   localizations: { type: 'object', localizable: false, cloneable: true, submittable: true },
+  localizationOverrides: { type: 'object', localizable: false, cloneable: true, submittable: true },
   timezone: { type: 'string', localizable: false, cloneable: true, submittable: true },
   showAgendaPostEvent: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
   showVenuePostEvent: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
