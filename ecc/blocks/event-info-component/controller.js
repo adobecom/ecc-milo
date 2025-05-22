@@ -124,16 +124,7 @@ async function updateLanguagePicker(component, props) {
     languagePicker.append(opt);
   });
 
-  const defaultLocale = props.eventDataResp?.defaultLocale;
-  if (defaultLocale) {
-    languagePicker.value = defaultLocale;
-    languagePicker.dispatchEvent(new Event('change'));
-  } else if (props.locale) {
-    languagePicker.value = props.locale;
-    languagePicker.dispatchEvent(new Event('change'));
-  }
-
-  languagePicker.disabled = !!defaultLocale;
+  if (!props.eventDataResp?.defaultLocale) languagePicker.disabled = false;
 }
 
 function initTitleWatcher(component, props) {
