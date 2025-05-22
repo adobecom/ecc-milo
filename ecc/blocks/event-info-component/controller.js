@@ -65,7 +65,6 @@ function refillFields(component, props, eventData) {
     });
   }
   if (isValidAttribute(timezone)) changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
-  if (isValidAttribute(defaultLocale)) changeInputValue(languagePicker, 'value', defaultLocale || props.locale);
   if (isValidAttribute(enTitle)) changeInputValue(enTitleInput, 'value', enTitle || '');
   if (isValidAttribute(isPrivate)) changeInputValue(isPrivateInput, 'checked', isPrivate || false);
 
@@ -124,7 +123,9 @@ async function updateLanguagePicker(component, props) {
     languagePicker.append(opt);
   });
 
-  if (!props.eventDataResp?.defaultLocale) languagePicker.disabled = false;
+  const defaultLocale = props.eventDataResp?.defaultLocale;
+  if (isValidAttribute(defaultLocale)) changeInputValue(languagePicker, 'value', defaultLocale || props.locale);
+  languagePicker.disabled = !!defaultLocale;
 }
 
 function initTitleWatcher(component, props) {
