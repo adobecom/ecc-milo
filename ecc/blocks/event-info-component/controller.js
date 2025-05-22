@@ -241,7 +241,10 @@ function checkEventDuplication(event, compareMetrics) {
   return titleMatch && startDateMatch && venueIdMatch && eventIdNoMatch && stateCodeMatch;
 }
 
-function buildWarningModal(dialog, privateEventCheckbox, underlay) {
+function buildWarningModal(privateEventCheckbox, element) {
+  const dialog = element.querySelector('#form-app sp-dialog');
+  const underlay = element.querySelector('#form-app sp-underlay');
+
   const closeDialog = () => {
     if (underlay) underlay.open = false;
     if (dialog) dialog.innerHTML = '';
@@ -265,6 +268,7 @@ function buildWarningModal(dialog, privateEventCheckbox, underlay) {
     privateEventCheckbox.checked = false;
     closeDialog();
   });
+  underlay.open = true;
 }
 
 export default async function init(component, props) {
@@ -440,12 +444,8 @@ export default async function init(component, props) {
   }
 
   privateEventCheckbox.addEventListener('click', async (e) => {
-    const dialog = props.el.querySelector('#form-app sp-dialog');
-    const underlay = props.el.querySelector('#form-app sp-underlay');
-
     e.preventDefault();
-    buildWarningModal(dialog, privateEventCheckbox, underlay);
-    underlay.open = true;
+    buildWarningModal(e.target, props.el);
   });
 
   BlockMediator.subscribe('eventDupMetrics', (store) => {
