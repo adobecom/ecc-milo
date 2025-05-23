@@ -185,7 +185,7 @@ export function getFilteredCachedResponse() {
 
 export default function getJoinedData() {
   runDelete();
-  
+
   const filteredResponse = getFilteredCachedResponse();
   const filteredPayload = getFilteredCachedPayload();
 
