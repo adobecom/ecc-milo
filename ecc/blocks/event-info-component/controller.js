@@ -223,6 +223,36 @@ function checkEventDuplication(event, compareMetrics) {
   return titleMatch && startDateMatch && venueIdMatch && eventIdNoMatch && stateCodeMatch;
 }
 
+function buildWarningModal(privateEventCheckbox, element) {
+  const dialog = element.querySelector('#form-app sp-dialog');
+  const underlay = element.querySelector('#form-app sp-underlay');
+
+  const closeDialog = () => {
+    if (underlay) underlay.open = false;
+    if (dialog) dialog.innerHTML = '';
+  };
+
+  dialog.innerHTML = '';
+
+  createTag('h1', { slot: 'heading' }, 'Note: Before you set your event to private', { parent: dialog });
+  createTag('p', {}, 'By setting to private, your event won\'t be publicly found online or published on the Events Hub. You cannot change your event to public once it\'s set to private.', { parent: dialog });
+
+  const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+  const okayButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'okay-private' }, 'OK', { parent: buttonContainer });
+  const cancelButton = createTag('sp-button', { variant: 'secondary', slot: 'button', id: 'cancel-private' }, 'Cancel', { parent: buttonContainer });
+
+  okayButton.addEventListener('click', () => {
+    privateEventCheckbox.checked = true;
+    closeDialog();
+  });
+
+  cancelButton.addEventListener('click', () => {
+    privateEventCheckbox.checked = false;
+    closeDialog();
+  });
+  underlay.open = true;
+}
+
 export default async function init(component, props) {
   const allEventsResp = await getEvents();
   const allEvents = allEventsResp?.events;
@@ -248,6 +278,8 @@ export default async function init(component, props) {
   const datePicker = component.querySelector('#event-info-date-picker');
   const descriptionRTE = component.querySelector('#event-info-details-rte');
   const descriptionRTEOutput = component.querySelector('#event-info-details-rte-output');
+
+  const privateEventCheckbox = component.querySelector('sp-checkbox#private-event');
 
   initCalendar(component);
 
@@ -392,6 +424,11 @@ export default async function init(component, props) {
       changeInputValue(descriptionRTEOutput, 'value', output);
     };
   }
+
+  privateEventCheckbox.addEventListener('click', async (e) => {
+    e.preventDefault();
+    buildWarningModal(e.target, props.el);
+  });
 
   BlockMediator.subscribe('eventDupMetrics', (store) => {
     const metrics = store.newValue;
