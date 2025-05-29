@@ -329,7 +329,7 @@
 }
 
 .form-handler .fragment.hidden {
-  display: none;
+  /* display: none; */
 }
 
 .form-handler .form-component {
@@ -463,7 +463,7 @@
 
 .form-handler.hidden,
 .form-handler .hidden {
-  display: none;
+  /* display: none; */
 }
 
 .form-handler .section.disabled,

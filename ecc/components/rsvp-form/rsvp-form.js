@@ -26,6 +26,10 @@ export default class RsvpForm extends LitElement {
     required: { type: Set },
     eventType: { type: String },
     formUrl: { type: String },
+    editFieldModal: { type: Boolean },
+    editingField: { type: Object },
+    tempRequired: { type: Set },
+    tempEditingField: { type: Object },
   };
 
   constructor() {
@@ -35,6 +39,10 @@ export default class RsvpForm extends LitElement {
     this.visible = new Set();
     this.required = new Set();
     this.formUrl = '';
+    this.editFieldModal = false;
+    this.editingField = null;
+    this.tempRequired = new Set();
+    this.tempEditingField = null;
   }
 
   static styles = style;
@@ -54,9 +62,9 @@ export default class RsvpForm extends LitElement {
     const { name, checked } = event.target;
     if (checked) {
       this.visible.add(name);
-      this.required.add(name);
+      this.tempRequired.add(name);
     } else {
-      this.required.delete(name);
+      this.tempRequired.delete(name);
     }
     this.requestUpdate();
   }
@@ -79,28 +87,188 @@ export default class RsvpForm extends LitElement {
     this.requestUpdate();
   }
 
+  showEditFieldModal(field) {
+    if (field) {
+      this.editingField = field;
+      this.tempEditingField = {
+        ...field,
+        Options: field.Options ? [...field.Options.split(';')] : [],
+      };
+      this.tempRequired = new Set(this.required);
+      this.editFieldModal = true;
+      this.requestUpdate();
+    }
+  }
+
+  closeEditFieldModal() {
+    this.tempRequired = new Set();
+    this.tempEditingField = null;
+    this.editFieldModal = false;
+    this.editingField = null;
+    this.requestUpdate();
+  }
+
+  saveEditFieldModal() {
+    const fieldIndex = this.data.findIndex(f => f.Field === this.tempEditingField.Field);
+    if (fieldIndex !== -1) {
+      this.data[fieldIndex] = {
+        ...this.tempEditingField,
+        Options: this.tempEditingField.Options.join(';')
+      };
+    }
+    this.required = new Set(this.tempRequired);
+    this.closeEditFieldModal();
+  }
+
+  updateTempField(event) {
+    const { name, value } = event.target;
+    if (this.tempEditingField) {
+      this.tempEditingField[name] = value;
+      this.requestUpdate();
+    }
+  }
+
+  reorderOptions(event) {
+    const { fromIndex, toIndex } = event.detail;
+    if (this.tempEditingField && this.tempEditingField.Options) {
+      const options = [...this.tempEditingField.Options];
+      const [movedOption] = options.splice(fromIndex, 1);
+      options.splice(toIndex, 0, movedOption);
+      this.tempEditingField.Options = options;
+      this.requestUpdate();
+    }
+  }
+
+  toggleFieldEnabled(event) {
+    const { name } = event.target;
+    this.toggleVisible(event);
+  }
+
+  dragAndReorderFields(event) {
+    const { name } = event.target;
+    this.dragAndReorderFields(event);
+  }
+
+  static isListTypeField(item) {
+    return ['select', 'multi-select'].includes(item.Type);
+  }
+
+  static buildFieldPreview(item) {
+    if (item.Type === 'select') {
+      return html`
+        <div class="field-preview-row-input">
+          <sp-field-label size="l" class="field-label">${item.Label}</sp-field-label>
+          <sp-picker label="Field name" value=${item.Field}>
+            ${repeat(item.Options, (option) => option, (option) => html`<sp-menu-item value=${option}>${option}</sp-menu-item>`)}
+          </sp-picker>
+        </div>
+      `;
+    }
+
+    if (item.Type === 'multi-select') {
+      return html`
+        <div class="field-preview-row-input">
+          <sp-field-label size="l" class="field-label">${item.Label}</sp-field-label>
+          <sp-textfield label="Field name" value=${item.Field}>${item.Placeholder}</sp-textfield>
+          <sp-popover>
+            <sp-menu label="Field name" selects="multiple" value=${item.Field}>
+              ${repeat(item.Options, (option) => option, (option) => html`<sp-menu-item value=${option}>${option}</sp-menu-item>`)}
+            </sp-menu>
+          </sp-popover>
+        </div>
+      `;
+    }
+
+    return html`
+      <div class="field-preview-row-input">
+        <sp-field-label size="l" class="field-label">${item.Label}</sp-field-label>
+        <sp-textfield label="Field name" value=${item.Field}>${item.Placeholder}</sp-textfield>
+      </div>
+    `;
+  }
+
   renderBasicForm() {
     const data = this.data.filter((f) => f.Required !== 'x' && f.Type !== 'submit');
 
     return html`
-      <div class="rsvp-checkboxes">
+      <div class="rsvp-fields">
         <table class="field-config-table">
           <thead>
             <tr class="table-header-row">
               <td class="table-heading">FIELD CATEGORIES</td>
-              <td class="table-heading">INCLUDE ON FORM</td>
-              <td class="table-heading">MAKE IT REQUIRED</td>
+              <td class="table-heading">REQUIRED FIELD?</td>
             </tr>
           </thead>
           <tbody>
             ${repeat(data, (item) => item.Field, (item) => html`<tr class="field-row">
               <td><div class="cat-text">${convertString(item.Field)}</div></td>
               <td>
-                <sp-switch class="check-appear" name=${item.Field} ?checked=${(this.visible.has(item.Field))} @change=${this.toggleVisible}>Appears on form</sp-switch>
+                <div class="field-container">  
+                  <sp-switch class="check-require" name=${item.Field} ?checked=${(this.required.has(item.Field))} @change=${this.toggleRequired}>${this.required.has(item.Field) ? 'Yes' : 'No'}</sp-switch>
+                  <div class="field-config-container">
+                    <button class="field-config-button" aria-label="Edit field" @click=${() => this.showEditFieldModal(item)}>
+                      <img src="/ecc/icons/pencil-wire.svg" alt="Edit field">
+                    </button>
+                    <button class="field-config-button" aria-label="Show field" @click=${this.toggleFieldEnabled}>
+                      <img src="/ecc/icons/eye-wire.svg" alt="Show field">
+                    </button>
+                    <button class="field-config-button" aria-label="Drag field" @mousedown=${this.dragAndReorderFields}>
+                      <img src="/ecc/icons/drag-dots.svg" alt="Drag field">
+                    </button>
+                  </div>
+                </div>
               </td>
-              <td>
-                <sp-switch class="check-require" name=${item.Field} ?checked=${(this.required.has(item.Field))} @change=${this.toggleRequired}>Required field</sp-switch>
-              </td>
+              <div class="edit-field-modal" ?open=${this.editFieldModal}>
+                <div>
+                  <div class="header-row">
+                    <h2>Edit Field</h2>
+                    <div class="header-row-buttons">
+                      <button class="header-row-button" aria-label="Cancel" @click=${this.closeEditFieldModal}>
+                        Cancel
+                      </button>
+                      <button class="header-row-button" aria-label="Save changes" @click=${this.saveEditFieldModal}>
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                  ${this.tempEditingField ? html`
+                    <div class="field-presentation-row">
+                      <div>
+                        <sp-field-label size="l" class="field-label">Field category</sp-field-label>
+                        <sp-textfield label="Field name" value=${this.tempEditingField.Field} disabled></sp-textfield>
+                      </div>
+                      <div class="field-presentation-row-input">
+                        <sp-field-label size="l" class="field-label">Label</sp-field-label>
+                        <sp-textfield label="Label" name="Label" value=${this.tempEditingField.Label} @change=${this.updateTempField}></sp-textfield>
+                      </div>
+                      <div class="field-presentation-row-input">
+                        <sp-field-label size="l" class="field-label">Placeholder text</sp-field-label>
+                        <sp-textfield label="Placeholder" name="Placeholder" value=${this.tempEditingField.Placeholder} @change=${this.updateTempField}></sp-textfield>
+                      </div>
+                    </div>
+                    <div class="field-required-toggle-row">
+                      <sp-switch class="check-require" name=${this.tempEditingField.Field} ?checked=${this.tempRequired.has(this.tempEditingField.Field)} @change=${this.toggleRequired}>${this.tempRequired.has(this.tempEditingField.Field) ? 'Yes' : 'No'}</sp-switch>
+                    </div>
+                    <div class="field-options-row ${RsvpForm.isListTypeField(this.tempEditingField) ? '' : 'hidden'}">
+                      <sp-field-label size="l" class="field-label">List options</sp-field-label>
+                      <div class="field-option-row">
+                        ${repeat(this.tempEditingField.Options, (option) => option, (option, index) => html`
+                          <div class="field-option-item">
+                            <span>${option}</span>
+                            <button class="field-config-button" aria-label="Drag option" @mousedown=${() => this.dragAndReorderOptions(index)}>
+                              <img src="/ecc/icons/drag-dots.svg" alt="Drag option">
+                            </button>
+                          </div>
+                        `)}
+                      </div>
+                    </div>
+                    <div class="field-preview-row">
+                      <h3>Preview</h3>
+                      ${RsvpForm.buildFieldPreview(this.tempEditingField)}
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
             </tr>`)}
           </tbody>
         </table>
