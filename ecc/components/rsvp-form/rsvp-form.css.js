@@ -4,9 +4,13 @@ const { css } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
+:host * {
+  font-family: var(--body-font-family);
+}
+
 .rsvp-fields {
   padding: 32px 64px;
-  background-color: #f8f8f8;
+  background-color: var(--color-white);
   border-radius: 6px;
   margin: 0 auto 40px;
   width: 100%;
@@ -41,10 +45,6 @@ export const style = css`
     margin-inline: 0px;
     border-width: 0px;
     padding-inline: 0px;
-  }
-  
-  .field-label {
-    width: 520px;
   }
   
   .rsvp-form {
@@ -88,7 +88,7 @@ export const style = css`
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: #90909030;
     z-index: 1000;
   }
 
@@ -100,10 +100,10 @@ export const style = css`
 
   .edit-field-modal > div {
     background-color: white;
-    padding: 24px;
+    padding: 32px;
     border-radius: 8px;
     width: 90%;
-    max-width: 800px;
+    max-width: 496px;
     max-height: 90vh;
     overflow-y: auto;
   }
@@ -127,21 +127,22 @@ export const style = css`
 
   .header-row-button {
     padding: 8px 16px;
-    border-radius: 4px;
+    border-radius: 24px;
     border: 1px solid #ccc;
     background: white;
     cursor: pointer;
   }
 
   .header-row-button:last-child {
-    background: #1473e6;
+    background-color: var(--color-gray-800);
+    border-color: var(--color-gray-800);
     color: white;
-    border-color: #1473e6;
   }
 
   .field-presentation-row {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
     gap: 16px;
     margin-bottom: 24px;
   }

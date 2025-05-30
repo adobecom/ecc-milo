@@ -109,11 +109,11 @@ export default class RsvpForm extends LitElement {
   }
 
   saveEditFieldModal() {
-    const fieldIndex = this.data.findIndex(f => f.Field === this.tempEditingField.Field);
+    const fieldIndex = this.data.findIndex((f) => f.Field === this.tempEditingField.Field);
     if (fieldIndex !== -1) {
       this.data[fieldIndex] = {
         ...this.tempEditingField,
-        Options: this.tempEditingField.Options.join(';')
+        Options: this.tempEditingField.Options.join(';'),
       };
     }
     this.required = new Set(this.tempRequired);
@@ -158,7 +158,7 @@ export default class RsvpForm extends LitElement {
       return html`
         <div class="field-preview-row-input">
           <sp-field-label size="l" class="field-label">${item.Label}</sp-field-label>
-          <sp-picker label="Field name" value=${item.Field}>
+          <sp-picker label="Field name">
             ${repeat(item.Options, (option) => option, (option) => html`<sp-menu-item value=${option}>${option}</sp-menu-item>`)}
           </sp-picker>
         </div>
@@ -169,7 +169,7 @@ export default class RsvpForm extends LitElement {
       return html`
         <div class="field-preview-row-input">
           <sp-field-label size="l" class="field-label">${item.Label}</sp-field-label>
-          <sp-textfield label="Field name" value=${item.Field}>${item.Placeholder}</sp-textfield>
+          <sp-textfield label="Field name" placeholder=${item.Placeholder}></sp-textfield>
           <sp-popover>
             <sp-menu label="Field name" selects="multiple" value=${item.Field}>
               ${repeat(item.Options, (option) => option, (option) => html`<sp-menu-item value=${option}>${option}</sp-menu-item>`)}
@@ -182,7 +182,7 @@ export default class RsvpForm extends LitElement {
     return html`
       <div class="field-preview-row-input">
         <sp-field-label size="l" class="field-label">${item.Label}</sp-field-label>
-        <sp-textfield label="Field name" value=${item.Field}>${item.Placeholder}</sp-textfield>
+        <sp-textfield label="Field name" placeholder=${item.Placeholder}></sp-textfield>
       </div>
     `;
   }
@@ -235,11 +235,7 @@ export default class RsvpForm extends LitElement {
                     <div class="field-presentation-row">
                       <div>
                         <sp-field-label size="l" class="field-label">Field category</sp-field-label>
-                        <sp-textfield label="Field name" value=${this.tempEditingField.Field} disabled></sp-textfield>
-                      </div>
-                      <div class="field-presentation-row-input">
-                        <sp-field-label size="l" class="field-label">Label</sp-field-label>
-                        <sp-textfield label="Label" name="Label" value=${this.tempEditingField.Label} @change=${this.updateTempField}></sp-textfield>
+                        <sp-textfield label="Field name" value=${this.tempEditingField.Label} disabled></sp-textfield>
                       </div>
                       <div class="field-presentation-row-input">
                         <sp-field-label size="l" class="field-label">Placeholder text</sp-field-label>
@@ -247,6 +243,7 @@ export default class RsvpForm extends LitElement {
                       </div>
                     </div>
                     <div class="field-required-toggle-row">
+                      <sp-field-label size="l" class="field-label">Required field?</sp-field-label>
                       <sp-switch class="check-require" name=${this.tempEditingField.Field} ?checked=${this.tempRequired.has(this.tempEditingField.Field)} @change=${this.toggleRequired}>${this.tempRequired.has(this.tempEditingField.Field) ? 'Yes' : 'No'}</sp-switch>
                     </div>
                     <div class="field-options-row ${RsvpForm.isListTypeField(this.tempEditingField) ? '' : 'hidden'}">
