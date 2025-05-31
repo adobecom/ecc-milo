@@ -1,3 +1,4 @@
+import { getRegistrationFields } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { generateToolTip } from '../../scripts/utils.js';
 
@@ -15,9 +16,11 @@ async function decorateRSVPFields(el) {
 
   row.innerHTML = '';
 
+  const mockFields = await getRegistrationFields('CreativeCloud', 'en-US');
+
   createTag(
     'rsvp-form',
-    { class: 'rsvp-form', data: JSON.stringify(config.data) },
+    { class: 'rsvp-form', data: JSON.stringify(mockFields) },
     '',
     { parent: row },
   );

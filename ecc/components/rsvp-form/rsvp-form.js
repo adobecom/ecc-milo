@@ -22,13 +22,10 @@ export default class RsvpForm extends LitElement {
   static properties = {
     data: { type: Array },
     formType: { type: String },
-    visible: { type: Set },
-    required: { type: Set },
     eventType: { type: String },
     formUrl: { type: String },
     editFieldModal: { type: Boolean },
     editingField: { type: Object },
-    tempRequired: { type: Set },
     tempEditingField: { type: Object },
   };
 
@@ -36,72 +33,52 @@ export default class RsvpForm extends LitElement {
     super();
     this.data = [];
     this.formType = 'basic';
-    this.visible = new Set();
-    this.required = new Set();
     this.formUrl = '';
     this.editFieldModal = false;
     this.editingField = null;
-    this.tempRequired = new Set();
     this.tempEditingField = null;
   }
 
   static styles = style;
 
-  toggleVisible(event) {
-    const { name, checked } = event.target;
-    if (checked) {
-      this.visible.add(name);
-    } else {
-      this.visible.delete(name);
-      this.required.delete(name);
+  static isListTypeField(item) {
+    return item.type === 'List';
+  }
+
+  static buildFieldPreview(item) {
+    if (item.type === 'List') {
+      return html`
+        <div class="field-preview-row-input">
+          <sp-field-label size="l" class="field-label">${item.name}</sp-field-label>
+          <sp-picker label="Field name">
+            ${repeat(item.values, (option) => option.value, (option) => html`<sp-menu-item value=${option.value}>${option.label}</sp-menu-item>`)}
+          </sp-picker>
+        </div>
+      `;
     }
-    this.requestUpdate();
-  }
 
-  toggleRequired(event) {
-    const { name, checked } = event.target;
-    if (checked) {
-      this.visible.add(name);
-      this.tempRequired.add(name);
-    } else {
-      this.tempRequired.delete(name);
-    }
-    this.requestUpdate();
-  }
-
-  getRsvpFormFields() {
-    const visible = Array.from(this.visible);
-    const required = Array.from(this.required);
-    const mandatedfields = this.data.filter((f) => f.Required === 'x').map((f) => f.Field);
-
-    return {
-      rsvpFormFields: {
-        visible: [...mandatedfields, ...visible],
-        required: [...mandatedfields, ...required],
-      },
-    };
-  }
-
-  updateMarketoFormUrl(value) {
-    this.formUrl = value;
-    this.requestUpdate();
+    return html`
+      <div class="field-preview-row-input">
+        <sp-field-label size="l" class="field-label">${item.name}</sp-field-label>
+        <sp-textfield label="Field name" placeholder=${item.placeholder || ''}></sp-textfield>
+      </div>
+    `;
   }
 
   showEditFieldModal(field) {
     if (field) {
       this.editingField = field;
+      // Create a deep copy of the field for editing
       this.tempEditingField = {
         ...field,
-        Options: field.Options ? [...field.Options.split(';')] : [],
+        values: field.values ? [...field.values] : [],
       };
-      this.tempRequired = new Set(this.required);
       this.editFieldModal = true;
       this.requestUpdate();
     }
   }
 
   closeEditFieldModal() {
-    this.tempRequired = new Set();
     this.tempEditingField = null;
     this.editFieldModal = false;
     this.editingField = null;
@@ -109,14 +86,12 @@ export default class RsvpForm extends LitElement {
   }
 
   saveEditFieldModal() {
-    const fieldIndex = this.data.findIndex((f) => f.Field === this.tempEditingField.Field);
+    const fieldIndex = this.data.findIndex((f) => f.name === this.tempEditingField.name);
     if (fieldIndex !== -1) {
       this.data[fieldIndex] = {
         ...this.tempEditingField,
-        Options: this.tempEditingField.Options.join(';'),
       };
     }
-    this.required = new Set(this.tempRequired);
     this.closeEditFieldModal();
   }
 
@@ -130,65 +105,32 @@ export default class RsvpForm extends LitElement {
 
   reorderOptions(event) {
     const { fromIndex, toIndex } = event.detail;
-    if (this.tempEditingField && this.tempEditingField.Options) {
-      const options = [...this.tempEditingField.Options];
-      const [movedOption] = options.splice(fromIndex, 1);
-      options.splice(toIndex, 0, movedOption);
-      this.tempEditingField.Options = options;
+    if (this.tempEditingField && this.tempEditingField.values) {
+      const values = [...this.tempEditingField.values];
+      const [movedValue] = values.splice(fromIndex, 1);
+      values.splice(toIndex, 0, movedValue);
+      this.tempEditingField.values = values;
       this.requestUpdate();
     }
   }
 
-  toggleFieldEnabled(event) {
-    const { name } = event.target;
-    this.toggleVisible(event);
-  }
+  getRegistrationPayload() {
+    const registration = { type: this.formType === 'basic' ? 'ESP' : 'Marketo' };
 
-  dragAndReorderFields(event) {
-    const { name } = event.target;
-    this.dragAndReorderFields(event);
-  }
-
-  static isListTypeField(item) {
-    return ['select', 'multi-select'].includes(item.Type);
-  }
-
-  static buildFieldPreview(item) {
-    if (item.Type === 'select') {
-      return html`
-        <div class="field-preview-row-input">
-          <sp-field-label size="l" class="field-label">${item.Label}</sp-field-label>
-          <sp-picker label="Field name">
-            ${repeat(item.Options, (option) => option, (option) => html`<sp-menu-item value=${option}>${option}</sp-menu-item>`)}
-          </sp-picker>
-        </div>
-      `;
+    if (this.formType === 'basic') {
+      registration.formData = 'v1';
+      return { registration, fields: this.data };
     }
 
-    if (item.Type === 'multi-select') {
-      return html`
-        <div class="field-preview-row-input">
-          <sp-field-label size="l" class="field-label">${item.Label}</sp-field-label>
-          <sp-textfield label="Field name" placeholder=${item.Placeholder}></sp-textfield>
-          <sp-popover>
-            <sp-menu label="Field name" selects="multiple" value=${item.Field}>
-              ${repeat(item.Options, (option) => option, (option) => html`<sp-menu-item value=${option}>${option}</sp-menu-item>`)}
-            </sp-menu>
-          </sp-popover>
-        </div>
-      `;
+    if (this.formType === 'marketo') {
+      registration.formData = this.formUrl;
+      return { registration };
     }
-
-    return html`
-      <div class="field-preview-row-input">
-        <sp-field-label size="l" class="field-label">${item.Label}</sp-field-label>
-        <sp-textfield label="Field name" placeholder=${item.Placeholder}></sp-textfield>
-      </div>
-    `;
+    return {};
   }
 
   renderBasicForm() {
-    const data = this.data.filter((f) => f.Required !== 'x' && f.Type !== 'submit');
+    const { data } = this;
 
     return html`
       <div class="rsvp-fields">
@@ -200,19 +142,19 @@ export default class RsvpForm extends LitElement {
             </tr>
           </thead>
           <tbody>
-            ${repeat(data, (item) => item.Field, (item) => html`<tr class="field-row">
-              <td><div class="cat-text">${convertString(item.Field)}</div></td>
+            ${repeat(data, (item) => item.name, (item) => html`<tr class="field-row">
+              <td><div class="cat-text">${convertString(item.name)}</div></td>
               <td>
                 <div class="field-container">  
-                  <sp-switch class="check-require" name=${item.Field} ?checked=${(this.required.has(item.Field))} @change=${this.toggleRequired}>${this.required.has(item.Field) ? 'Yes' : 'No'}</sp-switch>
+                  <sp-switch class="check-require" name=${item.name} ?checked=${item.required} @change=${(e) => this.updateTempField({ target: { name: 'required', value: e.target.checked } })}>${item.required ? 'Yes' : 'No'}</sp-switch>
                   <div class="field-config-container">
                     <button class="field-config-button" aria-label="Edit field" @click=${() => this.showEditFieldModal(item)}>
                       <img src="/ecc/icons/pencil-wire.svg" alt="Edit field">
                     </button>
-                    <button class="field-config-button" aria-label="Show field" @click=${this.toggleFieldEnabled}>
+                    <button class="field-config-button" aria-label="Show field" @click=${() => this.updateTempField({ target: { name: 'visible', value: !item.visible } })}>
                       <img src="/ecc/icons/eye-wire.svg" alt="Show field">
                     </button>
-                    <button class="field-config-button" aria-label="Drag field" @mousedown=${this.dragAndReorderFields}>
+                    <button class="field-config-button" aria-label="Drag field" @mousedown=${() => this.dragAndReorderFields(item)}>
                       <img src="/ecc/icons/drag-dots.svg" alt="Drag field">
                     </button>
                   </div>
@@ -235,23 +177,23 @@ export default class RsvpForm extends LitElement {
                     <div class="field-presentation-row">
                       <div>
                         <sp-field-label size="l" class="field-label">Field category</sp-field-label>
-                        <sp-textfield label="Field name" value=${this.tempEditingField.Label} disabled></sp-textfield>
+                        <sp-textfield label="Field name" value=${this.tempEditingField.name} disabled></sp-textfield>
                       </div>
                       <div class="field-presentation-row-input">
                         <sp-field-label size="l" class="field-label">Placeholder text</sp-field-label>
-                        <sp-textfield label="Placeholder" name="Placeholder" value=${this.tempEditingField.Placeholder} @change=${this.updateTempField}></sp-textfield>
+                        <sp-textfield label="Placeholder" name="placeholder" value=${this.tempEditingField.placeholder || ''} @change=${this.updateTempField}></sp-textfield>
                       </div>
                     </div>
                     <div class="field-required-toggle-row">
                       <sp-field-label size="l" class="field-label">Required field?</sp-field-label>
-                      <sp-switch class="check-require" name=${this.tempEditingField.Field} ?checked=${this.tempRequired.has(this.tempEditingField.Field)} @change=${this.toggleRequired}>${this.tempRequired.has(this.tempEditingField.Field) ? 'Yes' : 'No'}</sp-switch>
+                      <sp-switch class="check-require" name="required" ?checked=${this.tempEditingField.required} @change=${(e) => this.updateTempField({ target: { name: 'required', value: e.target.checked } })}>${this.tempEditingField.required ? 'Yes' : 'No'}</sp-switch>
                     </div>
                     <div class="field-options-row ${RsvpForm.isListTypeField(this.tempEditingField) ? '' : 'hidden'}">
                       <sp-field-label size="l" class="field-label">List options</sp-field-label>
                       <div class="field-option-row">
-                        ${repeat(this.tempEditingField.Options, (option) => option, (option, index) => html`
+                        ${repeat(this.tempEditingField.values || [], (option) => option.value, (option, index) => html`
                           <div class="field-option-item">
-                            <span>${option}</span>
+                            <span>${option.label}</span>
                             <button class="field-config-button" aria-label="Drag option" @mousedown=${() => this.dragAndReorderOptions(index)}>
                               <img src="/ecc/icons/drag-dots.svg" alt="Drag option">
                             </button>
@@ -271,24 +213,6 @@ export default class RsvpForm extends LitElement {
         </table>
       </div>
     `;
-  }
-
-  getRegistrationPayload() {
-    const registration = { type: this.formType === 'basic' ? 'ESP' : 'Marketo' };
-
-    if (this.formType === 'basic') {
-      registration.formData = 'v1';
-      return {
-        registration,
-        ...this.getRsvpFormFields(),
-      };
-    }
-
-    if (this.formType === 'marketo') {
-      registration.formData = this.formUrl;
-      return { registration };
-    }
-    return {};
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -335,6 +259,8 @@ export default class RsvpForm extends LitElement {
   }
 
   render() {
+    const regPayload = this.getRegistrationPayload();
+    console.log('regPayload', regPayload);
     if (this.eventType === EVENT_TYPES.ONLINE) {
       return this.renderWebinarForm();
     }

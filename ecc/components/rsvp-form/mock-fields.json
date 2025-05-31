@@ -1,0 +1,173 @@
+[
+  {
+  "cloudType": "CreativeCloud",
+  "localization": {
+    "en-US": [
+      {
+        "name": "First Name",
+        "type": "Free Text"
+      },
+      {
+        "name": "Last Name",
+        "type": "Free Text"
+      },
+      {
+        "name": "Email",
+        "type": "Free Text"
+      },
+      {
+        "name": "Business Phone",
+        "type": "Free Text"
+      },
+      {
+        "name": "Organization Name",
+        "type": "Free Text"
+      },
+      {
+        "name": "Country / Region",
+        "type": "List",
+        "values": []
+      },
+      {
+        "name": "Zip / Postal Code",
+        "type": "Free Text"
+      },
+      {
+        "name": "Employees in Organization",
+        "type": "List",
+        "values": [
+          { "label": "1-9", "value": "1_9" },
+          { "label": "10-99", "value": "10_99" },
+          { "label": "100-499", "value": "100_499" },
+          { "label": "500-999", "value": "500_999" },
+          { "label": "1000-4999", "value": "1000_4999" },
+          { "label": "5000+", "value": "5000_plus" }
+        ]
+      },
+      {
+        "name": "Industry",
+        "type": "List",
+        "values": [
+          { "label": "Advertising", "value": "advertising" },
+          { "label": "Agriculture & Forestry", "value": "agriculture_forestry" },
+          { "label": "Construction", "value": "construction" },
+          { "label": "Education - Higher Ed", "value": "education_higher_ed" },
+          { "label": "Education - K12", "value": "education_k12" },
+          { "label": "Energy, Mining, Oil & Gas", "value": "energy_mining_oil_gas" },
+          { "label": "Financial Services", "value": "financial_services" },
+          { "label": "Government - Federal", "value": "government_federal" },
+          { "label": "Government Local", "value": "government_local" },
+          { "label": "Government Military", "value": "government_military" },
+          { "label": "Health Care", "value": "health_care" },
+          { "label": "Insurance", "value": "insurance" },
+          { "label": "Manufacturing Aerospace", "value": "manufacturing_aerospace" },
+          { "label": "Manufacturing Automotive", "value": "manufacturing_automotive" },
+          { "label": "Manufacturing Consumergoods", "value": "manufacturing_consumergoods" },
+          { "label": "Manufacturing Industrial", "value": "manufacturing_industrial" },
+          { "label": "Media Entertainment", "value": "media_entertainment" },
+          { "label": "Membership Organizations", "value": "membership_organizations" },
+          { "label": "Non Profit", "value": "non_profit" },
+          { "label": "Pharmaceuticals Biotech", "value": "pharmaceuticals_biotech" },
+          { "label": "Professional Technicalservices", "value": "professional_technicalservices" },
+          { "label": "Realestate Retail Leasing", "value": "realestate_retail_leasing" },
+          { "label": "Retail", "value": "retail" },
+          { "label": "Technology Hardware", "value": "technology_hardware" },
+          { "label": "Technology Software Services", "value": "technology_software_services" },
+          { "label": "Telecommunications", "value": "telecommunications" },
+          { "label": "Transportation Warehousing", "value": "transportation_warehousing" },
+          { "label": "Travel Leisure Hospitality", "value": "travel_leisure_hospitality" },
+          { "label": "Utilities", "value": "utilities" }
+        ]
+      },
+      {
+        "name": "Functional area/department",
+        "type": "List",
+        "values": [
+          { "label": "Analytics", "value": "analytics" },
+          { "label": "Business Development", "value": "business_development" },
+          { "label": "Creative Art Buyer", "value": "creative_art_buyer" },
+          { "label": "Creative General", "value": "creative_general" },
+          { "label": "Creative Graphics Visual Design", "value": "creative_graphics_visual_design" },
+          { "label": "Creative UX UI Digital Product Design", "value": "creative_ux_ui_digital_product_design" },
+          { "label": "Creative Video", "value": "creative_video" },
+          { "label": "Customer Experience", "value": "customer_experience" },
+          { "label": "Ecommerce", "value": "ecommerce" },
+          { "label": "Education", "value": "education" },
+          { "label": "Engineering Development", "value": "engineering_development" },
+          { "label": "Executive General Administration", "value": "executive_general_administration" },
+          { "label": "Finance", "value": "finance" },
+          { "label": "Human Resources", "value": "human_resources" },
+          { "label": "IT Operations General", "value": "it_operations_general" },
+          { "label": "IT Enterprise Cloud Applications", "value": "it_enterprise_cloud_applications" },
+          { "label": "IT Desktop Applications", "value": "it_desktop_applications" },
+          { "label": "IT Mobile Applications", "value": "it_mobile_applications" },
+          { "label": "IT Security", "value": "it_security" },
+          { "label": "Journalism", "value": "journalism" },
+          { "label": "Legal", "value": "legal" },
+          { "label": "Marketing Advertising", "value": "marketing_advertising" },
+          { "label": "Marketing Automation Ops", "value": "marketing_automation_ops" },
+          { "label": "Marketing Brand", "value": "marketing_brand" },
+          { "label": "Marketing Content Marketing", "value": "marketing_content_marketing" },
+          { "label": "Marketing Creative", "value": "marketing_creative" },
+          { "label": "Marketing Digital", "value": "marketing_digital" },
+          { "label": "Marketing Email Marketing", "value": "marketing_email_marketing" },
+          { "label": "Marketing Social Media", "value": "marketing_social_media" },
+          { "label": "Other", "value": "other" },
+          { "label": "Procurement", "value": "procurement" },
+          { "label": "Public Relation Affairs Communications", "value": "public_relation_affairs_communications" },
+          { "label": "Public Social Services", "value": "public_social_services" },
+          { "label": "Records Form Management", "value": "records_form_management" },
+          { "label": "Research Sciences Forensics", "value": "research_sciences_forensics" },
+          { "label": "Sales", "value": "sales" },
+          { "label": "Sales Operation", "value": "sales_operation" },
+          { "label": "Services Customer Support", "value": "services_customer_support" },
+          { "label": "Services Professional Client", "value": "services_professional_client" },
+          { "label": "Training Learning", "value": "training_learning" }
+        ]
+      },
+      {
+        "name": "Title",
+        "type": "Free Text"
+      },
+      {
+        "name": "Job Role",
+        "type": "List",
+        "values": [
+          { "label": "CXO/EVP", "value": "cxo_evp" },
+          { "label": "Senior VP", "value": "senior_vp" },
+          { "label": "Elected Official", "value": "elected_official" },
+          { "label": "Senior Director", "value": "senior_director" },
+          { "label": "Senior Manager", "value": "senior_manager" },
+          { "label": "Individual Contributor", "value": "individual_contributor" },
+          { "label": "Architect", "value": "architect" },
+          { "label": "Analyst", "value": "analyst" },
+          { "label": "Educator", "value": "educator" },
+          { "label": "Developer", "value": "developer" },
+          { "label": "Professional Staff", "value": "professional_staff" },
+          { "label": "Support Staff", "value": "support_staff" },
+          { "label": "Consultant", "value": "consultant" },
+          { "label": "Student", "value": "student" },
+          { "label": "Self Employed", "value": "self_employed" },
+          { "label": "Other", "value": "other" }
+        ]
+      },
+      {
+        "name": "Primary Product of Interest",
+        "type": "List",
+        "values": []
+      },
+      {
+        "name": "Invited by",
+        "type": "Free Text"
+      },
+      {
+        "name": "Special requirements",
+        "type": "Free Text"
+      },
+      {
+        "name": "Partner Information Sharing",
+        "type": "Free Text"
+      }
+    ]
+  }
+}]

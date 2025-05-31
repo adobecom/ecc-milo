@@ -88,7 +88,7 @@ export const style = css`
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #90909030;
+    background-color: #90909010;
     z-index: 1000;
   }
 

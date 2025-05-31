@@ -186,6 +186,27 @@ export async function uploadImage(file, configs, tracker, imageId = null) {
   });
 }
 
+export async function getRegistrationFields(cloudType, locale) {
+  // const { host } = API_CONFIG.esp[getEventServiceEnv()];
+  // const options = await constructRequestOptions('GET');
+
+  try {
+    // const response = await safeFetch(`${host}/v1/clouds/${cloudType}/registration-fields`, options);
+    // FIXME: use mock data for now
+    const response = await fetch('/ecc/components/rsvp-form/mock-fields.json')
+      .then((resp) => resp.json())
+      .catch((err) => window.lana?.log(`Failed to load mock fields: ${err}`));
+
+    const cloudFields = response.find((f) => f.cloudType === cloudType);
+    const localeFields = cloudFields.localization[locale];
+
+    return localeFields;
+  } catch (error) {
+    window.lana?.log(`Failed to get registration fields:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
 export async function getLocales() {
   const { host } = API_CONFIG.esp[getEventServiceEnv()];
   const options = await constructRequestOptions('GET');
