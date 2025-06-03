@@ -9,12 +9,14 @@ export const style = css`
 }
 
 .rsvp-fields {
-  padding: 32px 64px;
-  background-color: var(--color-white);
+  padding: 24px 16px;
+  background-color: var(--color-gray-100);
   border-radius: 6px;
   margin: 0 auto 40px;
   width: 100%;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
  .field-config-table {
@@ -67,11 +69,48 @@ export const style = css`
     gap: 28px;
   }
 
+  .selected-fields .field-config-container {
+    display: none;
+  }
+
+  .selected-fields .field-row:hover .field-config-container {
+    display: flex;
+  }
+
+  .unselected-fields {
+    opacity: 0.5;
+  }
+
   .field-config-button {
     background: none;
     border: none;
     cursor: pointer;
     padding: 0;
+  }
+
+  .field-config-button[aria-label="Drag and reorder field"] {
+    cursor: grab;
+  }
+
+  .field-config-button[aria-label="Drag and reorder field"]:active {
+    cursor: grabbing;
+  }
+
+  .selected-fields .field-row {
+    transition: background-color 0.2s ease;
+  }
+
+  .selected-fields .field-row.dragging {
+    box-shadow: 3px 3px 8px 3px var(--color-gray-200);
+    cursor: grabbing;
+  }
+
+  .selected-fields .field-row:not(.dragging) {
+    transition: background-color 0.2s ease;
+  }
+
+  .selected-fields .field-row:not(.dragging):hover {
+    background: var(--color-gray-50);
   }
 
   .tooltip-trigger {
@@ -88,7 +127,7 @@ export const style = css`
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #90909010;
+    background-color: #90909070;
     z-index: 1000;
   }
 
@@ -180,13 +219,23 @@ export const style = css`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px;
-    background-color: #f8f8f8;
     border-radius: 4px;
+    cursor: grab;
   }
 
-  .field-option-item span {
-    font-size: var(--type-body-s-size);
+  .field-option-item.dragging {
+    opacity: 0.5;
+    background: var(--color-gray-100);
+    cursor: grabbing;
+    box-shadow: 3px 3px 8px 3px var(--color-gray-200);
+  }
+
+  .field-option-item:not(.dragging) {
+    transition: background-color 0.2s ease;
+  }
+
+  .field-option-item:not(.dragging):hover {
+    background: var(--color-gray-50);
   }
 
   .field-option-item .field-config-button {
@@ -195,5 +244,10 @@ export const style = css`
 
   .field-option-item:hover .field-config-button {
     opacity: 1;
+  }
+
+  .selected-fields,
+  .unselected-fields {
+    width: 100%;
   }
 `;

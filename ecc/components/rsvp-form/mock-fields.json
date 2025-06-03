@@ -4,37 +4,47 @@
   "localization": {
     "en-US": [
       {
+        "mandatory": true,
         "name": "First Name",
-        "type": "Free Text"
+        "placeholder": "First Name",
+        "type": "text"
       },
       {
+        "mandatory": true,
         "name": "Last Name",
-        "type": "Free Text"
+        "placeholder": "Last Name",
+        "type": "text"
       },
       {
+        "mandatory": true,
         "name": "Email",
-        "type": "Free Text"
+        "placeholder": "Email",
+        "type": "text"
       },
       {
+        "mandatory": true,
         "name": "Business Phone",
-        "type": "Free Text"
+        "placeholder": "Business Phone",
+        "type": "text"
       },
       {
         "name": "Organization Name",
-        "type": "Free Text"
+        "placeholder": "Organization Name",
+        "type": "text"
       },
       {
         "name": "Country / Region",
-        "type": "List",
+        "type": "list",
         "values": []
       },
       {
         "name": "Zip / Postal Code",
-        "type": "Free Text"
+        "placeholder": "Zip / Postal Code",
+        "type": "text"
       },
       {
         "name": "Employees in Organization",
-        "type": "List",
+        "type": "list",
         "values": [
           { "label": "1-9", "value": "1_9" },
           { "label": "10-99", "value": "10_99" },
@@ -46,7 +56,7 @@
       },
       {
         "name": "Industry",
-        "type": "List",
+        "type": "list",
         "values": [
           { "label": "Advertising", "value": "advertising" },
           { "label": "Agriculture & Forestry", "value": "agriculture_forestry" },
@@ -81,7 +91,7 @@
       },
       {
         "name": "Functional area/department",
-        "type": "List",
+        "type": "list",
         "values": [
           { "label": "Analytics", "value": "analytics" },
           { "label": "Business Development", "value": "business_development" },
@@ -127,11 +137,12 @@
       },
       {
         "name": "Title",
-        "type": "Free Text"
+        "placeholder": "Title",
+        "type": "text"
       },
       {
         "name": "Job Role",
-        "type": "List",
+        "type": "list",
         "values": [
           { "label": "CXO/EVP", "value": "cxo_evp" },
           { "label": "Senior VP", "value": "senior_vp" },
@@ -153,20 +164,24 @@
       },
       {
         "name": "Primary Product of Interest",
-        "type": "List",
+        "type": "list",
+        "multiple": true,
         "values": []
       },
       {
         "name": "Invited by",
-        "type": "Free Text"
+        "placeholder": "Invited by",
+        "type": "text"
       },
       {
         "name": "Special requirements",
-        "type": "Free Text"
+        "placeholder": "Special requirements",
+        "type": "text"
       },
       {
         "name": "Partner Information Sharing",
-        "type": "Free Text"
+        "placeholder": "Partner Information Sharing",
+        "type": "text"
       }
     ]
   }
