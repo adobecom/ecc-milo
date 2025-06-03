@@ -9,10 +9,10 @@ async function decorateRSVPFields(el) {
 
   if (!row) return;
 
-  const configSheetLocation = row.querySelector('a')?.href;
-  const config = await fetch(configSheetLocation)
-    .then((resp) => (resp.ok ? resp.json() : null))
-    .catch((err) => window.lana?.log(`Failed to load RSVP fields config: ${err}`));
+  // const configSheetLocation = row.querySelector('a')?.href;
+  // const config = await fetch(configSheetLocation)
+  //   .then((resp) => (resp.ok ? resp.json() : null))
+  //   .catch((err) => window.lana?.log(`Failed to load RSVP fields config: ${err}`));
 
   row.innerHTML = '';
 

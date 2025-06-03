@@ -1,0 +1,43 @@
+.rsvp-management-console sp-theme sp-underlay + sp-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  background: var(--spectrum-gray-100);
+  min-width: 480px;
+  width: max-content;
+}
+
+.rsvp-management-console sp-theme sp-underlay:not([open]) + sp-dialog {
+  display: none;
+}
+
+.rsvp-management-console sp-theme sp-underlay + sp-dialog .field-container {
+  margin-bottom: var(--spectrum-global-dimension-size-200);
+}
+
+.rsvp-management-console sp-theme sp-underlay + sp-dialog .field-container.inline {
+  display: flex;
+  align-items: center;
+  gap: var(--spectrum-global-dimension-size-200);
+}
+
+.rsvp-management-console sp-theme sp-underlay + sp-dialog .button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spectrum-global-dimension-size-200);
+}
+
+
+.rsvp-management-console sp-theme sp-underlay + sp-dialog  .option-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spectrum-global-dimension-size-200);
+    margin-bottom: var(--spectrum-global-dimension-size-200);
+  }
+
+.rsvp-management-console sp-theme sp-underlay + sp-dialog  .option-row-container {
+    display: flex;
+    gap: var(--spectrum-global-dimension-size-200);
+  }
