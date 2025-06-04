@@ -409,13 +409,13 @@ export default class RsvpForm extends LitElement {
   renderWebinarForm() {
     return html`
       <div class="rsvp-form">
-      <fieldset class="form-type" @change=${(e) => { this.handleFormTypeChange(e); }} >
-        <input type="radio" id="basic" name="drone" value="basic" .checked=${this.formType === 'basic'}/>
-        <label for="basic">Basic form</label>
-        <input type="radio" id="marketo" name="drone" value="marketo" .checked=${this.formType === 'marketo'} />
-        <label for="marketo">Marketo</label>
-      </fieldset>
-      ${this.renderForm()}
+        <fieldset class="form-type" @change=${(e) => { this.handleFormTypeChange(e); }} >
+          <input type="radio" id="basic" name="drone" value="basic" .checked=${this.formType === 'basic'}/>
+          <label for="basic">Basic form</label>
+          <input type="radio" id="marketo" name="drone" value="marketo" .checked=${this.formType === 'marketo'} />
+          <label for="marketo">Marketo</label>
+        </fieldset>
+        ${this.renderForm()}
       </div>
     `;
   }
