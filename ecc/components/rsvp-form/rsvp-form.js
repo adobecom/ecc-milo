@@ -380,7 +380,7 @@ export default class RsvpForm extends LitElement {
   // eslint-disable-next-line class-methods-use-this
   renderMarketoForm() {
     return html`
-      <div class="rsvp-checkboxes">
+      <div class="rsvp-fields">
       <sp-field-label size="l" class="field-label">Marketo form URL
       <sp-action-button size="s" class="tooltip-trigger">
         ${getIcon('info')}
