@@ -42,8 +42,6 @@ const style = css`
     overflow-y: auto;
     padding: 16px;
     position: relative;
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
   }
 
   .template-item {
@@ -91,10 +89,6 @@ const style = css`
 
   .template-item:hover .template-actions {
     opacity: 1;
-  }
-
-  sp-textfield:focus {
-    outline: none;
   }
 
   .search-container sp-textfield {

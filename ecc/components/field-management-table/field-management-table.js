@@ -2,7 +2,7 @@ import { LIBS } from '../../scripts/scripts.js';
 import style from './field-management-table.css.js';
 import { getIcon } from '../../scripts/utils.js';
 
-const { LitElement, html, repeat, render, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, render } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 export default class FieldManagementTable extends LitElement {
   static styles = style;
@@ -18,6 +18,8 @@ export default class FieldManagementTable extends LitElement {
     dialogContent: { type: Object },
     dialogTitle: { type: String },
     isDialogOpen: { type: Boolean },
+    tempOptionList: { type: Array },
+    currentFieldId: { type: String },
   };
 
   constructor() {
@@ -31,22 +33,14 @@ export default class FieldManagementTable extends LitElement {
     this.dialogContent = null;
     this.dialogTitle = '';
     this.isDialogOpen = false;
+    this.tempOptionList = [];
+    this.currentFieldId = null;
   }
 
   firstUpdated() {
     this.toast = this.shadowRoot.querySelector('sp-toast');
     // Load initial fields from mock-fields.json
     this.loadFields();
-
-    // Set up dialog content container
-    const spTheme = this.closest('sp-theme');
-    if (spTheme) {
-      const dialog = spTheme.querySelector('sp-dialog');
-      if (dialog) {
-        this.dialogContentContainer = document.createElement('div');
-        dialog.appendChild(this.dialogContentContainer);
-      }
-    }
   }
 
   async loadFields() {
@@ -121,19 +115,34 @@ export default class FieldManagementTable extends LitElement {
     }
   }
 
-  handleFieldEdit(field) {
-    const spTheme = this.closest('sp-theme');
-    if (!spTheme) return;
+  addOptionRow() {
+    const newOption = {
+      value: '',
+      label: '',
+      ordinal: this.tempOptionList.length,
+      isNew: true,
+    };
+    this.tempOptionList = [...this.tempOptionList, newOption];
+    // Recreate dialog content with new template
+    this.updateDialogContent();
+  }
 
-    const underlay = spTheme.querySelector('sp-underlay');
-    const dialog = spTheme.querySelector('sp-dialog');
+  removeOptionRow(index) {
+    this.tempOptionList = this.tempOptionList.filter((_, i) => i !== index);
+    // Recreate dialog content with new template
+    this.updateDialogContent();
+  }
 
-    this.dialogTitle = 'Edit Field';
-    this.isDialogOpen = true;
+  updateDialogContent() {
+    if (!this.isDialogOpen) return;
+
+    const field = this.fields.find((f) => f.id === this.currentFieldId);
+    if (!field) return;
+
     this.dialogContent = html`
-      <div class="form-container">
+      <div class="form-container in-dialog">
         <div class="field-container">
-          <sp-field-label size="l">Field Name</sp-field-label>
+          <sp-field-label size="l" class="field-header">Field Name</sp-field-label>
           <sp-textfield
             value=${field.name}
             style="width: 100%"
@@ -142,7 +151,7 @@ export default class FieldManagementTable extends LitElement {
         </div>
 
         <div class="field-container">
-          <sp-field-label size="l">Field Type</sp-field-label>
+          <sp-field-label size="l" class="field-header">Field Type</sp-field-label>
           <sp-textfield
             value=${field.type}
             style="width: 100%"
@@ -151,12 +160,12 @@ export default class FieldManagementTable extends LitElement {
         </div>
 
         <div class="field-container inline">
-          <sp-field-label size="l">Mandatory Field (Must be included in RSVP forms using this template)</sp-field-label>
+          <sp-field-label size="l" class="field-header">Mandatory Field (Must be included in RSVP forms using this template)</sp-field-label>
           <sp-switch ?checked=${field.mandatory}></sp-switch>
         </div>
 
         <div class="field-container">
-          <sp-field-label size="l">Placeholder Text</sp-field-label>
+          <sp-field-label size="l" class="field-header">Placeholder Text</sp-field-label>
           <sp-textfield
             value=${field.placeholder || ''}
             style="width: 100%"
@@ -164,9 +173,9 @@ export default class FieldManagementTable extends LitElement {
         </div>
 
         ${field.type === 'list' ? html`
-          <div class="field-container">
-            <sp-field-label size="l">List Options</sp-field-label>
-            ${(field.values || []).map((option) => html`
+          <div class="field-container list-options">
+            <sp-field-label size="l" class="field-header">List Options</sp-field-label>
+            ${this.tempOptionList.map((option, index) => html`
               <div class="option-row">
                 <div class="option-row-container">
                   <div class="option-row-container-item">
@@ -174,6 +183,10 @@ export default class FieldManagementTable extends LitElement {
                     <sp-textfield
                       value=${option.value}
                       placeholder="Option value"
+                      @input=${(e) => {
+    this.tempOptionList[index].value = e.target.value;
+    this.updateDialogContent();
+  }}
                     ></sp-textfield>
                   </div>
                   <div class="option-row-container-item">
@@ -181,142 +194,114 @@ export default class FieldManagementTable extends LitElement {
                     <sp-textfield
                       value=${option.label}
                       placeholder="Option label"
+                      @input=${(e) => {
+    this.tempOptionList[index].label = e.target.value;
+    this.updateDialogContent();
+  }}
                     ></sp-textfield>
                   </div>
                 </div>
-                <sp-action-button variant="negative" @click=${(e) => e.target.closest('.option-row').remove()}>
+                <sp-action-button variant="negative" @click=${() => this.removeOptionRow(index)}>
                   ${getIcon('delete-wire-round')}
                 </sp-action-button>
               </div>
             `)}
-            ${this.addOptionRow()}
+            <sp-button
+              variant="secondary"
+              size="m"
+              @click=${() => this.addOptionRow()}
+            >Add Option</sp-button>
           </div>
         ` : ''}
 
         <div class="button-container">
           <sp-button variant="secondary" slot="button" @click=${() => {
-            underlay.open = false;
-            this.isDialogOpen = false;
-            this.dialogContent = null;
-          }}>Cancel</sp-button>
+    this.isDialogOpen = false;
+    this.dialogContent = null;
+    this.tempOptionList = [];
+    this.currentFieldId = null;
+    this.requestUpdate();
+  }}>Cancel</sp-button>
           <sp-button variant="primary" slot="button" @click=${() => {
-            // Store original state before making changes
-            if (!this.originalFields.has(field.id)) {
-              this.originalFields.set(field.id, { ...field });
-            }
+    // Store original state before making changes
+    if (!this.originalFields.has(field.id)) {
+      this.originalFields.set(field.id, { ...field });
+    }
 
-            // Update field properties
-            field.name = dialog.querySelector('sp-textfield').value;
-            field.mandatory = dialog.querySelector('sp-switch').checked;
-            field.placeholder = dialog.querySelectorAll('sp-textfield')[2].value;
+    const dialog = this.shadowRoot.querySelector('sp-dialog');
+    // Update field properties
+    field.name = dialog.querySelector('sp-textfield').value;
+    field.mandatory = dialog.querySelector('sp-switch').checked;
+    field.placeholder = dialog.querySelectorAll('sp-textfield')[2].value;
 
-            if (field.type === 'list') {
-              const optionRows = dialog.querySelectorAll('.option-row');
-              field.values = Array.from(optionRows).map((row, index) => {
-                const [valueInput, labelInput] = row.querySelectorAll('sp-textfield');
-                return {
-                  value: valueInput.value,
-                  label: labelInput.value,
-                  ordinal: index,
-                };
-              });
-            }
+    if (field.type === 'list') {
+      field.values = this.tempOptionList.map((option, index) => ({
+        value: option.value,
+        label: option.label,
+        ordinal: index,
+      }));
+    }
 
-            this.toggleFieldChange(field);
-            underlay.open = false;
-            this.isDialogOpen = false;
-            this.dialogContent = null;
-          }}>Save Changes</sp-button>
+    this.toggleFieldChange(field);
+    this.isDialogOpen = false;
+    this.dialogContent = null;
+    this.tempOptionList = [];
+    this.currentFieldId = null;
+    this.requestUpdate();
+  }}>Save Changes</sp-button>
         </div>
       </div>
     `;
+    this.requestUpdate();
+  }
 
-    // Set dialog heading and content
-    const heading = document.createElement('h1');
-    heading.setAttribute('slot', 'heading');
-    heading.textContent = this.dialogTitle;
-    dialog.appendChild(heading);
-    render(this.dialogContent, this.dialogContentContainer);
-    underlay.open = true;
+  handleFieldEdit(field) {
+    // Store the current field ID for updates
+    this.currentFieldId = field.id;
+
+    // Initialize temp option list with existing values
+    this.tempOptionList = (field.values || []).map((option, index) => ({
+      ...option,
+      ordinal: index,
+      isNew: false,
+    }));
+
+    this.dialogTitle = 'Edit Field';
+    this.isDialogOpen = true;
+    this.updateDialogContent();
   }
 
   handleFieldDelete(field) {
-    const spTheme = this.closest('sp-theme');
-    if (!spTheme) return;
-
-    const underlay = spTheme.querySelector('sp-underlay');
-    const dialog = spTheme.querySelector('sp-dialog');
-
     this.dialogTitle = 'Delete Field';
     this.isDialogOpen = true;
     this.dialogContent = html`
       <p>Are you sure you want to delete "${field.name}"? This cannot be undone.</p>
       <div class="button-container">
         <sp-button variant="secondary" slot="button" @click=${() => {
-          underlay.open = false;
-          this.isDialogOpen = false;
-          this.dialogContent = null;
-        }}>Cancel</sp-button>
+    this.isDialogOpen = false;
+    this.dialogContent = null;
+    this.tempOptionList = [];
+  }}>Cancel</sp-button>
         <sp-button variant="negative" slot="button" @click=${() => {
-          // Store original state before deletion
-          if (!this.originalFields.has(field.id)) {
-            this.originalFields.set(field.id, { ...field });
-          }
-          this.fields = this.fields.filter((f) => f.id !== field.id);
-          this.changedFields.delete(field.id);
-          underlay.open = false;
-          this.isDialogOpen = false;
-          this.dialogContent = null;
-          this.requestUpdate();
-        }}>Delete</sp-button>
+    // Store original state before deletion
+    if (!this.originalFields.has(field.id)) {
+      this.originalFields.set(field.id, { ...field });
+    }
+    this.fields = this.fields.filter((f) => f.id !== field.id);
+    this.changedFields.delete(field.id);
+    this.isDialogOpen = false;
+    this.dialogContent = null;
+    this.tempOptionList = [];
+    this.requestUpdate();
+  }}>Delete</sp-button>
       </div>
     `;
-
-    // Set dialog heading and content
-    const heading = document.createElement('h1');
-    heading.setAttribute('slot', 'heading');
-    heading.textContent = this.dialogTitle;
-    dialog.appendChild(heading);
-    render(this.dialogContent, this.dialogContentContainer);
-    underlay.open = true;
-  }
-
-  addOptionRow() {
-    const spTheme = this.closest('sp-theme');
-    if (!spTheme) return nothing;
-
-    const dialog = spTheme.querySelector('sp-dialog');
-
-    return html`
-      <div class="option-row">
-        <div class="option-row-container">
-          <div class="option-row-container-item">
-            <sp-field-label size="l">Option Value</sp-field-label>
-            <sp-textfield placeholder="Option value"></sp-textfield>
-          </div>
-          <div class="option-row-container-item">
-            <sp-field-label size="l">Option Label</sp-field-label>
-            <sp-textfield placeholder="Option label"></sp-textfield>
-          </div>
-        </div>
-        <sp-action-button variant="negative" @click>${getIcon('delete-wire-round')}</sp-action-button>
-      </div>
-      <sp-button
-        variant="secondary"
-        size="m"
-        @click=${() => {
-    dialog.querySelector('.list-options').appendChild(this.addOptionRow());
-  }}
-      >Add Option</sp-button>
-    `;
+    this.requestUpdate();
   }
 
   handleFieldAdd() {
-    const spTheme = this.closest('sp-theme');
-    if (!spTheme) return;
-
-    const underlay = spTheme.querySelector('sp-underlay');
-    const dialog = spTheme.querySelector('sp-dialog');
+    // Initialize empty temp option list
+    this.tempOptionList = [];
 
     this.dialogTitle = 'Add New Field';
     this.isDialogOpen = true;
@@ -336,12 +321,12 @@ export default class FieldManagementTable extends LitElement {
           <sp-picker
             style="width: 100%"
             @change=${(e) => {
-              const type = e.target.value;
-              const listOptionsContainer = dialog.querySelector('.list-options-container');
-              if (listOptionsContainer) {
-                listOptionsContainer.style.display = type === 'list' ? 'block' : 'none';
-              }
-            }}
+    const type = e.target.value;
+    const listOptionsContainer = this.shadowRoot.querySelector('.list-options-container');
+    if (listOptionsContainer) {
+      listOptionsContainer.style.display = type === 'list' ? 'block' : 'none';
+    }
+  }}
           >
             <sp-menu-item value="text">Text</sp-menu-item>
             <sp-menu-item value="number">Number</sp-menu-item>
@@ -367,23 +352,41 @@ export default class FieldManagementTable extends LitElement {
         <div class="field-container list-options-container" style="display: none;">
           <sp-field-label size="l">List Options</sp-field-label>
           <div class="list-options">
-            <div class="option-row">
-              <div class="option-row-container">
-                <div class="option-row-container-item">
-                  <sp-field-label size="l">Option Value</sp-field-label>
-                  <sp-textfield placeholder="Option value"></sp-textfield>
+            ${this.tempOptionList.map((option, index) => html`
+              <div class="option-row">
+                <div class="option-row-container">
+                  <div class="option-row-container-item">
+                    <sp-field-label size="l">Option Value</sp-field-label>
+                    <sp-textfield
+                      placeholder="Option value"
+                      @input=${(e) => {
+    this.tempOptionList[index].value = e.target.value;
+    this.requestUpdate();
+  }}
+                    ></sp-textfield>
+                  </div>
+                  <div class="option-row-container-item">
+                    <sp-field-label size="l">Option Label</sp-field-label>
+                    <sp-textfield
+                      placeholder="Option label"
+                      @input=${(e) => {
+    this.tempOptionList[index].label = e.target.value;
+    this.requestUpdate();
+  }}
+                    ></sp-textfield>
+                  </div>
                 </div>
-                <div class="option-row-container-item">
-                  <sp-field-label size="l">Option Label</sp-field-label>
-                  <sp-textfield placeholder="Option label"></sp-textfield>
-                </div>
+                <sp-action-button variant="negative" @click=${() => this.removeOptionRow(index)}>
+                  ${getIcon('delete-wire-round')}
+                </sp-action-button>
               </div>
-              <sp-action-button variant="negative" @click=${(e) => e.target.closest('.option-row').remove()}>
-                ${getIcon('delete-wire-round')}
-              </sp-action-button>
-            </div>
+            `)}
+            <sp-button
+              variant="secondary"
+              size="m"
+              @click=${() => this.addOptionRow()}
+            >Add Option</sp-button>
           </div>
-          ${this.addOptionRow()}
         </div>
 
         <div class="button-container">
@@ -391,63 +394,53 @@ export default class FieldManagementTable extends LitElement {
             variant="secondary"
             slot="button"
             @click=${() => {
-              underlay.open = false;
-              this.isDialogOpen = false;
-              this.dialogContent = null;
-            }}
+    this.isDialogOpen = false;
+    this.dialogContent = null;
+    this.tempOptionList = [];
+  }}
           >Cancel</sp-button>
           <sp-button
             variant="primary"
             slot="button"
             @click=${() => {
-              const name = dialog.querySelector('sp-textfield').value.trim();
-              const type = dialog.querySelector('sp-picker').value;
-              const mandatory = dialog.querySelector('sp-switch').checked;
-              const placeholder = dialog.querySelectorAll('sp-textfield')[1].value.trim();
+    const dialog = this.shadowRoot.querySelector('sp-dialog');
+    const name = dialog.querySelector('sp-textfield').value.trim();
+    const type = dialog.querySelector('sp-picker').value;
+    const mandatory = dialog.querySelector('sp-switch').checked;
+    const placeholder = dialog.querySelectorAll('sp-textfield')[1].value.trim();
 
-              if (name) {
-                const newField = {
-                  name,
-                  type,
-                  placeholder,
-                  mandatory,
-                  ordinal: this.fields.length,
-                  id: `field-${this.fields.length}-${Date.now()}`,
-                };
+    if (name) {
+      const newField = {
+        name,
+        type,
+        placeholder,
+        mandatory,
+        ordinal: this.fields.length,
+        id: `field-${this.fields.length}-${Date.now()}`,
+      };
 
-                if (type === 'list') {
-                  const optionRows = dialog.querySelectorAll('.option-row');
-                  newField.values = Array.from(optionRows).map((row, index) => {
-                    const [valueInput, labelInput] = row.querySelectorAll('sp-textfield');
-                    return {
-                      value: valueInput.value,
-                      label: labelInput.value,
-                      ordinal: index,
-                    };
-                  });
-                }
+      if (type === 'list') {
+        newField.values = this.tempOptionList.map((option, index) => ({
+          value: option.value,
+          label: option.label,
+          ordinal: index,
+        }));
+      }
 
-                this.fields = [...this.fields, newField];
-                this.originalFields.set(newField.id, { ...newField });
-                this.changedFields.add(newField.id);
-                underlay.open = false;
-                this.isDialogOpen = false;
-                this.dialogContent = null;
-                this.requestUpdate();
-              }
-            }}
+      this.fields = [...this.fields, newField];
+      this.originalFields.set(newField.id, { ...newField });
+      this.changedFields.add(newField.id);
+      this.isDialogOpen = false;
+      this.dialogContent = null;
+      this.tempOptionList = [];
+      this.requestUpdate();
+    }
+  }}
           >Add Field</sp-button>
         </div>
       </div>
     `;
-
-    // Set dialog heading and content
-    const heading = document.createElement('h1');
-    heading.setAttribute('slot', 'heading');
-    heading.textContent = this.dialogTitle;
-    dialog.appendChild(heading);
-    render(this.dialogContent, this.dialogContentContainer);
-    underlay.open = true;
+    this.requestUpdate();
   }
 
   handleTemplateSelect(e) {
@@ -472,9 +465,6 @@ export default class FieldManagementTable extends LitElement {
   }
 
   showToast(message, variant = 'positive') {
-    const spTheme = this.closest('sp-theme');
-    if (!spTheme) return;
-
     const toastContent = html`
       <sp-toast
         variant=${variant}
@@ -485,7 +475,12 @@ export default class FieldManagementTable extends LitElement {
       >${message}</sp-toast>
     `;
 
-    render(toastContent, spTheme);
+    // Create a container for the toast if it doesn't exist
+    if (!this.toastContainer) {
+      this.toastContainer = document.createElement('div');
+      this.shadowRoot.appendChild(this.toastContainer);
+    }
+    render(toastContent, this.toastContainer);
   }
 
   async save() {
@@ -669,9 +664,9 @@ export default class FieldManagementTable extends LitElement {
                         <sp-switch
                           ?checked=${field.mandatory}
                           @change=${(e) => {
-                            field.mandatory = e.target.checked;
-                            this.toggleFieldChange(field);
-                          }}
+    field.mandatory = e.target.checked;
+    this.toggleFieldChange(field);
+  }}
                         ></sp-switch>
                       </td>
                       <td>
@@ -694,6 +689,14 @@ export default class FieldManagementTable extends LitElement {
             </div>
           </div>
         </div>
+
+        ${this.isDialogOpen ? html`
+          <sp-underlay ?open=${this.isDialogOpen}></sp-underlay>
+          <sp-dialog>
+            <h1 slot="heading">${this.dialogTitle}</h1>
+            ${this.dialogContent}
+          </sp-dialog>
+        ` : ''}
       </div>
     `;
   }

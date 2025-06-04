@@ -37,15 +37,12 @@ async function buildRMC(el, blockConfig) {
   // Create sp-theme inside the block element
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium' }, '', { parent: el });
 
-  // Create dialog and underlay
-  createTag('sp-underlay', {}, '', { parent: spTheme });
-  createTag('sp-dialog', { size: 's' }, '', { parent: spTheme });
-
   customElements.define('field-templates', FieldTemplates);
-  customElements.define('rsvp-management-console', FieldManagementTable);
+  customElements.define('field-management-table', FieldManagementTable);
 
-  const rsvpManager = createTag('rsvp-management-console', { class: 'rsvp-management-console' }, '', { parent: spTheme });
-  rsvpManager.config = blockConfig;
+  const fieldManagementTable = createTag('field-management-table', { class: 'field-management-table' }, '', { parent: spTheme });
+  fieldManagementTable.config = blockConfig;
+  fieldManagementTable.spTheme = spTheme;
 }
 
 export default async function init(el) {
