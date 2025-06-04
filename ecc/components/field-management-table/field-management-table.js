@@ -12,6 +12,9 @@ export default class FieldManagementTable extends LitElement {
     fields: { type: Array },
     pendingChanges: { type: Boolean },
     toastState: { type: Object },
+    changedFields: { type: Set },
+    originalFields: { type: Map },
+    selectedTemplate: { type: Object },
   };
 
   constructor() {
@@ -19,6 +22,9 @@ export default class FieldManagementTable extends LitElement {
     this.fields = [];
     this.pendingChanges = false;
     this.config = {};
+    this.changedFields = new Set();
+    this.originalFields = new Map();
+    this.selectedTemplate = null;
   }
 
   firstUpdated() {
@@ -34,7 +40,10 @@ export default class FieldManagementTable extends LitElement {
       this.fields = data[0].localization['en-US'].map((field, index) => ({
         ...field,
         ordinal: index,
+        id: `field-${index}-${Date.now()}`,
       }));
+      // Store original states after loading
+      this.originalFields = new Map(this.fields.map((field) => [field.id, { ...field }]));
       this.requestUpdate();
     } catch (error) {
       window.lana?.log(`Error loading fields: ${JSON.stringify(error)}`);
@@ -45,6 +54,55 @@ export default class FieldManagementTable extends LitElement {
     // Implement change detection logic here
     this.pendingChanges = true;
     this.requestUpdate();
+  }
+
+  isFieldChanged(field) {
+    const originalField = this.originalFields.get(field.id);
+    if (!originalField) return false;
+
+    // Compare basic properties
+    if (field.name !== originalField.name
+        || field.type !== originalField.type
+        || field.mandatory !== originalField.mandatory
+        || field.placeholder !== originalField.placeholder) {
+      return true;
+    }
+
+    // Compare list values if present
+    if (field.type === 'list') {
+      // Check if both have values
+      if (!field.values && !originalField.values) return false;
+      if (!field.values || !originalField.values) return true;
+      if (field.values.length !== originalField.values.length) return true;
+
+      // Deep compare each value/label pair
+      return field.values.some((value, index) => {
+        const originalValue = originalField.values[index];
+        if (!originalValue) return true;
+        return value.value !== originalValue.value || value.label !== originalValue.label;
+      });
+    }
+
+    return false;
+  }
+
+  toggleFieldChange(field) {
+    if (this.isFieldChanged(field)) {
+      this.changedFields.add(field.id);
+    } else {
+      this.changedFields.delete(field.id);
+    }
+    this.requestUpdate();
+  }
+
+  resetField(field) {
+    // Reset the field to its original state using the unique ID
+    const originalField = this.originalFields.get(field.id);
+    if (originalField) {
+      Object.assign(field, { ...originalField });
+      this.changedFields.delete(field.id);
+      this.requestUpdate();
+    }
   }
 
   handleFieldEdit(field) {
@@ -154,6 +212,11 @@ export default class FieldManagementTable extends LitElement {
     dialog.innerHTML = '';
   }}>Cancel</sp-button>
           <sp-button variant="primary" slot="button" @click=${() => {
+    // Store original state before making changes
+    if (!this.originalFields.has(field.id)) {
+      this.originalFields.set(field.id, { ...field });
+    }
+
     // Update field properties
     field.name = dialog.querySelector('sp-textfield').value;
     field.mandatory = dialog.querySelector('sp-switch').checked;
@@ -171,7 +234,7 @@ export default class FieldManagementTable extends LitElement {
       });
     }
 
-    this.togglePendingChanges();
+    this.toggleFieldChange(field);
     underlay.open = false;
     dialog.innerHTML = '';
   }}>Save Changes</sp-button>
@@ -206,15 +269,20 @@ export default class FieldManagementTable extends LitElement {
       <p>Are you sure you want to delete "${field.name}"? This cannot be undone.</p>
       <div class="button-container">
         <sp-button variant="secondary" slot="button" @click=${() => {
-    this.fields = this.fields.filter((f) => f.name !== field.name);
-    this.togglePendingChanges();
     underlay.open = false;
     dialog.innerHTML = '';
-  }}>Yes, delete this field</sp-button>
-        <sp-button variant="cta" slot="button" @click=${() => {
+  }}>Cancel</sp-button>
+        <sp-button variant="negative" slot="button" @click=${() => {
+    // Store original state before deletion
+    if (!this.originalFields.has(field.id)) {
+      this.originalFields.set(field.id, { ...field });
+    }
+    this.fields = this.fields.filter((f) => f.id !== field.id);
+    this.changedFields.delete(field.id);
+    this.requestUpdate();
     underlay.open = false;
     dialog.innerHTML = '';
-  }}>Do not delete</sp-button>
+  }}>Delete</sp-button>
       </div>
     `;
 
@@ -354,6 +422,7 @@ export default class FieldManagementTable extends LitElement {
         placeholder,
         mandatory,
         ordinal: this.fields.length,
+        id: `field-${this.fields.length}-${Date.now()}`,
       };
 
       if (type === 'list') {
@@ -369,7 +438,9 @@ export default class FieldManagementTable extends LitElement {
       }
 
       this.fields = [...this.fields, newField];
-      this.togglePendingChanges();
+      this.originalFields.set(newField.id, { ...newField });
+      this.changedFields.add(newField.id);
+      this.requestUpdate();
       underlay.open = false;
       dialog.innerHTML = '';
     }
@@ -388,11 +459,21 @@ export default class FieldManagementTable extends LitElement {
 
   handleTemplateSelect(e) {
     const { template } = e.detail;
+    this.selectedTemplate = template;
     if (template) {
       this.fields = template.fields.map((field, index) => ({
         ...field,
         ordinal: index,
+        id: `field-${index}-${Date.now()}`,
       }));
+      this.originalFields = new Map(this.fields.map((field) => [field.id, { ...field }]));
+      this.changedFields.clear();
+      this.togglePendingChanges();
+    } else {
+      // Template was deselected (deleted)
+      this.fields = [];
+      this.originalFields.clear();
+      this.changedFields.clear();
       this.togglePendingChanges();
     }
   }
@@ -415,15 +496,120 @@ export default class FieldManagementTable extends LitElement {
   }
 
   async save() {
-    // Implement save logic here
-    this.showToast('Changes saved successfully');
-    this.pendingChanges = false;
-    this.requestUpdate();
+    if (!this.selectedTemplate) {
+      // Show dialog to get template name
+      const spTheme = this.closest('sp-theme');
+      if (!spTheme) return;
+
+      const underlay = spTheme.querySelector('sp-underlay');
+      const dialog = spTheme.querySelector('sp-dialog');
+
+      // Clear any existing content
+      dialog.innerHTML = '';
+
+      // Create the dialog content
+      const heading = document.createElement('h1');
+      heading.setAttribute('slot', 'heading');
+      heading.textContent = 'Save as New Template';
+      dialog.appendChild(heading);
+
+      const dialogContent = html`
+        <div style="margin-bottom: 16px">
+          <sp-textfield
+            placeholder="Enter template name"
+            style="width: 100%"
+          ></sp-textfield>
+        </div>
+        <div class="button-container">
+          <sp-button
+            variant="secondary"
+            slot="button"
+            @click=${() => {
+    underlay.open = false;
+    dialog.innerHTML = '';
+  }}
+          >Cancel</sp-button>
+          <sp-button
+            variant="primary"
+            slot="button"
+            @click=${() => {
+    const templateName = dialog.querySelector('sp-textfield').value.trim();
+    if (templateName) {
+      // Create a new template
+      const newTemplate = {
+        id: `template-${Date.now()}`,
+        name: templateName,
+        fields: this.fields.map((field) => ({
+          ...field,
+          values: field.type === 'list' && field.values
+            ? field.values.map((value, index) => ({
+              ...value,
+              ordinal: index,
+            }))
+            : field.values,
+        })),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Get the field-templates component and use its public API
+      const fieldTemplates = this.shadowRoot.querySelector('field-templates');
+      if (fieldTemplates?.addTemplate(newTemplate)) {
+        // Update original fields to match new state
+        this.originalFields = new Map(this.fields.map((field) => [field.id, { ...field }]));
+        this.changedFields.clear();
+        this.selectedTemplate = newTemplate;
+        this.requestUpdate();
+
+        this.showToast('New template created successfully');
+        underlay.open = false;
+        dialog.innerHTML = '';
+      }
+    }
+  }}
+          >Save</sp-button>
+        </div>
+      `;
+
+      // Create a container for the dialog content
+      const contentContainer = document.createElement('div');
+      dialog.appendChild(contentContainer);
+      render(dialogContent, contentContainer);
+      underlay.open = true;
+      return;
+    }
+
+    try {
+      // Create a deep copy of fields with preserved ordinal values
+      const fieldsWithOrdinals = this.fields.map((field) => ({
+        ...field,
+        values: field.type === 'list' && field.values
+          ? field.values.map((value, index) => ({
+            ...value,
+            ordinal: index,
+          }))
+          : field.values,
+      }));
+
+      // Update the selected template
+      this.selectedTemplate.fields = fieldsWithOrdinals;
+      this.selectedTemplate.updatedAt = new Date().toISOString();
+
+      // Update original fields to match new state
+      this.originalFields = new Map(this.fields.map((field) => [field.id, { ...field }]));
+      this.changedFields.clear();
+      this.requestUpdate();
+
+      this.showToast('Changes saved successfully');
+    } catch (error) {
+      window.lana?.log(`Error saving template: ${JSON.stringify(error)}`);
+      this.showToast('Error saving changes', 'negative');
+    }
   }
 
   resetForm() {
     this.loadFields();
-    this.pendingChanges = false;
+    this.changedFields.clear();
   }
 
   render() {
@@ -432,11 +618,6 @@ export default class FieldManagementTable extends LitElement {
         <div class="header">
           <div>
             <h1>RSVP Form Management</h1>
-            <div class="change-status">
-              ${this.pendingChanges
-    ? html`<span class="status" size="s">${getIcon('dot-orange')} Unsaved changes</span>`
-    : html`<span class="status" size="s">${getIcon('dot-green')} Up-to-date</span>`}
-            </div>
           </div>
         </div>
 
@@ -451,11 +632,21 @@ export default class FieldManagementTable extends LitElement {
             <div class="section-header">
               <h2>Form Fields</h2>
               <div class="button-container">
-                <sp-button variant="secondary" size="m" ?disabled=${!this.pendingChanges} @click=${this.resetForm}>
+                <sp-button 
+                  variant="secondary" 
+                  size="m" 
+                  ?disabled=${this.changedFields.size === 0} 
+                  @click=${this.resetForm}
+                >
                   Cancel
                 </sp-button>
-                <sp-button variant="primary" size="m" ?disabled=${!this.pendingChanges} @click=${this.save}>
-                  Save
+                <sp-button 
+                  variant="primary" 
+                  size="m" 
+                  ?disabled=${this.changedFields.size === 0} 
+                  @click=${this.save}
+                >
+                  ${this.selectedTemplate ? 'Save Changes' : 'Save as New Template'}
                 </sp-button>
                 <span class="divider"></span>
                 <sp-button variant="primary" size="m" @click=${this.handleFieldAdd}>
@@ -475,16 +666,18 @@ export default class FieldManagementTable extends LitElement {
                   </tr>
                 </thead>
                 <tbody>
-                  ${repeat(this.fields, (field) => field.name, (field) => html`
-                    <tr class="field-row">
-                      <td>${field.name}</td>
+                  ${repeat(this.fields, (field) => field.id, (field) => html`
+                    <tr class="field-row ${this.changedFields.has(field.id) ? 'edited' : ''}">
+                      <td>
+                        ${field.name}
+                      </td>
                       <td>${field.type}</td>
                       <td>
                         <sp-switch
                           ?checked=${field.mandatory}
                           @change=${(e) => {
     field.mandatory = e.target.checked;
-    this.togglePendingChanges();
+    this.toggleFieldChange(field);
   }}
                         ></sp-switch>
                       </td>
@@ -496,6 +689,9 @@ export default class FieldManagementTable extends LitElement {
                           <sp-action-button @click=${() => this.handleFieldDelete(field)}>
                             ${getIcon('delete-wire-round')}
                           </sp-action-button>
+                          <sp-action-button ?disabled=${!this.changedFields.has(field.id)} @click=${() => this.resetField(field)}>
+                              ${getIcon('revert')}
+                            </sp-action-button>
                         </div>
                       </td>
                     </tr>

@@ -1,9 +1,13 @@
+.rsvp-management-console sp-theme sp-underlay {
+  z-index: 10;
+}
+
 .rsvp-management-console sp-theme sp-underlay + sp-dialog {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 1;
+  z-index: 11;
   background: var(--spectrum-gray-100);
   min-width: 480px;
   width: max-content;
@@ -31,13 +35,19 @@
 
 
 .rsvp-management-console sp-theme sp-underlay + sp-dialog  .option-row {
-    display: flex;
-    align-items: center;
-    gap: var(--spectrum-global-dimension-size-200);
-    margin-bottom: var(--spectrum-global-dimension-size-200);
-  }
+  display: flex;
+  align-items: center;
+  gap: var(--spectrum-global-dimension-size-200);
+  margin-bottom: var(--spectrum-global-dimension-size-200);
+}
 
 .rsvp-management-console sp-theme sp-underlay + sp-dialog  .option-row-container {
-    display: flex;
-    gap: var(--spectrum-global-dimension-size-200);
-  }
+  display: flex;
+  gap: var(--spectrum-global-dimension-size-200);
+}
+
+.rsvp-management-console sp-theme sp-toast {
+  position: fixed;
+  bottom: var(--spectrum-global-dimension-size-400);
+  right: var(--spectrum-global-dimension-size-400);
+}

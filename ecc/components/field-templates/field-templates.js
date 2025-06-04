@@ -24,98 +24,55 @@ export default class FieldTemplates extends LitElement {
     this.spTheme = null;
   }
 
-  handleTemplateSelect(template) {
+  // Public API methods
+  addTemplate(template) {
+    if (template) {
+      this.templates = [...this.templates, template];
+      this.selectedTemplate = template;
+      this.requestUpdate();
+      return true;
+    }
+    return false;
+  }
+
+  deleteTemplate(template) {
+    if (!template) return false;
+    this.templates = this.templates.filter((t) => t !== template);
+    if (this.selectedTemplate === template) {
+      this.selectedTemplate = null;
+      // Notify parent component about template deselection
+      this.dispatchEvent(new CustomEvent('template-select', {
+        detail: { template: null },
+        bubbles: true,
+        composed: true,
+      }));
+    }
+    this.requestUpdate();
+    return true;
+  }
+
+  selectTemplate(template) {
     this.selectedTemplate = template;
+    this.requestUpdate();
+    return true;
+  }
+
+  getSelectedTemplate() {
+    return this.selectedTemplate;
+  }
+
+  getTemplates() {
+    return this.templates;
+  }
+
+  handleTemplateSelect(template) {
+    this.selectTemplate(template);
+    // Still dispatch event for backward compatibility
     this.dispatchEvent(new CustomEvent('template-select', {
       detail: { template },
       bubbles: true,
       composed: true,
     }));
-  }
-
-  handleTemplateSave(event) {
-    event.preventDefault();
-    if (!this.spTheme) return;
-
-    const underlay = this.spTheme.querySelector('sp-underlay');
-    const dialog = this.spTheme.querySelector('sp-dialog');
-
-    // Clear any existing content
-    dialog.innerHTML = '';
-
-    // Create the dialog content
-    const heading = document.createElement('h1');
-    heading.setAttribute('slot', 'heading');
-    heading.textContent = 'Save Template';
-    dialog.appendChild(heading);
-
-    const dialogContent = html`
-      <div style="margin-bottom: 16px">
-        <sp-textfield
-          placeholder="Enter template name"
-          style="width: 100%"
-        ></sp-textfield>
-      </div>
-      <div class="button-container">
-        <sp-button
-          variant="secondary"
-          slot="button"
-          @click=${() => {
-    underlay.open = false;
-    dialog.innerHTML = '';
-  }}
-        >Cancel</sp-button>
-        <sp-button
-          variant="primary"
-          slot="button"
-          @click=${() => {
-    const templateName = dialog.querySelector('sp-textfield').value.trim();
-    if (templateName) {
-      // Create a deep copy of fields with preserved ordinal values
-      const fieldsWithOrdinals = this.fields.map((field) => ({
-        ...field,
-        values: field.type === 'list' && field.values
-          ? field.values.map((value, index) => ({
-            ...value,
-            ordinal: index,
-          }))
-          : field.values,
-      }));
-
-      const newTemplate = {
-        name: templateName,
-        fields: fieldsWithOrdinals,
-        createdAt: new Date().toISOString(),
-      };
-
-      this.templates = [...this.templates, newTemplate];
-      this.requestUpdate();
-
-      const toastContent = html`
-                <sp-toast
-                  variant="positive"
-                  size="m"
-                  timeout="6000"
-                  open
-                  @close=${(e) => e.target.remove()}
-                >Template saved successfully</sp-toast>
-              `;
-
-      render(toastContent, this.spTheme);
-
-      underlay.open = false;
-      dialog.innerHTML = '';
-    }
-  }}
-        >Save</sp-button>
-      </div>
-    `;
-
-    // Create a container for the dialog content
-    const contentContainer = document.createElement('div');
-    dialog.appendChild(contentContainer);
-    render(dialogContent, contentContainer);
-    underlay.open = true;
   }
 
   handleTemplateDelete(template) {
@@ -148,13 +105,8 @@ export default class FieldTemplates extends LitElement {
           variant="negative"
           slot="button"
           @click=${() => {
-    this.templates = this.templates.filter((t) => t !== template);
-    if (this.selectedTemplate === template) {
-      this.selectedTemplate = null;
-    }
-    this.requestUpdate();
-
-    const toastContent = html`
+    if (this.deleteTemplate(template)) {
+      const toastContent = html`
               <sp-toast
                 variant="positive"
                 size="m"
@@ -164,8 +116,8 @@ export default class FieldTemplates extends LitElement {
               >Template deleted successfully</sp-toast>
             `;
 
-    render(toastContent, this.spTheme);
-
+      render(toastContent, this.spTheme);
+    }
     underlay.open = false;
     dialog.innerHTML = '';
   }}
@@ -194,13 +146,6 @@ export default class FieldTemplates extends LitElement {
       <div class="templates-container">
         <div class="templates-header">
           <h2>Field Templates</h2>
-          <sp-button variant="primary" size="m" @click=${(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.handleTemplateSave(e);
-          }}>
-            Save as new template
-          </sp-button>
         </div>
 
         <div class="search-container">
@@ -220,10 +165,9 @@ export default class FieldTemplates extends LitElement {
                 <span class="template-date">${new Date(template.createdAt).toLocaleDateString()}</span>
               </div>
               <div class="template-actions">
-                <sp-action-button @click=${(e) => {
-    e.stopPropagation();
-    this.handleTemplateDelete(template);
-  }}>
+                <sp-action-button @click=${() => {
+                  this.handleTemplateDelete(template);
+                }}>
                   ${getIcon('delete-wire-round')}
                 </sp-action-button>
               </div>
