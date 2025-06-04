@@ -64,7 +64,6 @@ export default css`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spectrum-global-dimension-size-400);
   }
 
   .section-header h2 {

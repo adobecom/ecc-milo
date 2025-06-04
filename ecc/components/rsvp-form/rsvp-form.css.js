@@ -66,14 +66,17 @@ export const style = css`
   .field-config-container {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 28px;
   }
 
-  .selected-fields .field-config-container {
+  .selected-fields .field-config-container,
+  .selected-options .field-config-container button[aria-label="Remove option"] {
     display: none;
   }
 
-  .selected-fields .field-row:hover .field-config-container {
+  .selected-fields .field-row:hover .field-config-container,
+  .selected-options .field-option-item:hover .field-config-container button[aria-label="Remove option"] {
     display: flex;
   }
 
@@ -249,5 +252,38 @@ export const style = css`
   .selected-fields,
   .unselected-fields {
     width: 100%;
+  }
+
+  .selected-options,
+  .unselected-options {
+    width: 100%;
+  }
+
+  .unselected-options {
+    opacity: 0.5;
+  }
+
+  .selected-options .field-option-item,
+  .unselected-options .field-option-item {
+    height: 54px;
+    transition: background-color 0.2s ease;
+  }
+
+  .selected-options .field-option-item:hover,
+  .unselected-options .field-option-item:hover {
+    background: var(--color-gray-50);
+  }
+
+  .selected-options .field-option-item.dragging {
+    box-shadow: 3px 3px 8px 3px var(--color-gray-200);
+    cursor: grabbing;
+  }
+
+  .selected-options .field-option-item:not(.dragging) {
+    cursor: grab;
+  }
+
+  .selected-options .field-option-item:not(.dragging):active {
+    cursor: grabbing;
   }
 `;

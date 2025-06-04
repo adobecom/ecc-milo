@@ -317,17 +317,53 @@ export default class RsvpForm extends LitElement {
               </div>
               <div class="field-options-row ${RsvpForm.isListTypeField(this.editingField) ? '' : 'hidden'}">
                 <sp-field-label size="l" class="field-label">List options</sp-field-label>
-                <div class="field-option-row" @dragover=${RsvpForm.handleOptionsDragOver}>
-                  ${repeat(this.editingField.values || [], (option) => option.value, (option) => html`
-                    <div class="field-option-item" draggable="true"
-                      @dragstart=${RsvpForm.dragAndReorderOptions(option)}
-                      @dragend=${this.handleOptionsDragEnd}>
-                      <span>${option.label}</span>
-                      <button class="field-config-button" aria-label="Drag option">
-                        <img src="/ecc/icons/drag-dots.svg" alt="Drag option">
-                      </button>
-                    </div>
-                  `)}
+                <div class="selected-options">
+                  <table class="field-config-table">
+                    <tbody @dragover=${RsvpForm.handleOptionsDragOver}>
+                      ${repeat(this.editingField.values || [], (option) => option, (option) => html`
+                        <tr class="field-option-item" draggable="true"
+                          @dragstart=${RsvpForm.dragAndReorderOptions(option)}
+                          @dragend=${this.handleOptionsDragEnd}>
+                          <td><span>${option.label}</span></td>
+                          <td>
+                            <div class="field-config-container">
+                              <button class="field-config-button" aria-label="Remove option" @click=${() => this.moveOptionToUnselected(option)}>
+                                <img src="/ecc/icons/eye-wire.svg" alt="Remove option">
+                              </button>
+                              <button class="field-config-button" aria-label="Drag option">
+                                <img src="/ecc/icons/drag-dots.svg" alt="Drag option">
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      `)}
+                    </tbody>
+                  </table>
+                </div>
+                <div class="unselected-options">
+                  <table class="field-config-table">
+                    <tbody>
+                      ${repeat(
+    (this.data.find((f) => f.name === this.editingField.name)?.values || [])
+      .filter((option) => !this.editingField.values?.some(
+        (selected) => selected.value === option.value,
+      )),
+    (option) => option.value,
+    (option) => html`
+                          <tr class="field-option-item">
+                            <td><span>${option.label}</span></td>
+                            <td>
+                              <div class="field-config-container">
+                                <button class="field-config-button" aria-label="Add option" @click=${() => this.moveOptionToSelected(option)}>
+                                  <img src="/ecc/icons/eye-slash-wire.svg" alt="Add option">
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        `,
+  )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
               <div class="field-preview-row">
@@ -415,13 +451,13 @@ export default class RsvpForm extends LitElement {
 
   static handleOptionsDragOver(e) {
     e.preventDefault();
-    const container = e.target.closest('.field-option-row');
-    if (!container) return;
+    const tbody = e.target.closest('tbody');
+    if (!tbody) return;
 
-    const draggingElement = container.querySelector('.dragging');
+    const draggingElement = tbody.querySelector('.dragging');
     if (!draggingElement) return;
 
-    const siblings = [...container.querySelectorAll('.field-option-item:not(.dragging)')];
+    const siblings = [...tbody.querySelectorAll('.field-option-item:not(.dragging)')];
     const nextSibling = siblings.find((sibling) => {
       const box = sibling.getBoundingClientRect();
       const offset = e.clientY - box.top - box.height / 2;
@@ -429,21 +465,21 @@ export default class RsvpForm extends LitElement {
     });
 
     if (nextSibling) {
-      container.insertBefore(draggingElement, nextSibling);
+      tbody.insertBefore(draggingElement, nextSibling);
     } else {
-      container.appendChild(draggingElement);
+      tbody.appendChild(draggingElement);
     }
   }
 
   handleOptionsDragEnd(e) {
-    const container = e.target.closest('.field-option-row');
-    if (!container) return;
+    const tbody = e.target.closest('tbody');
+    if (!tbody) return;
 
-    const draggingElement = container.querySelector('.dragging');
+    const draggingElement = tbody.querySelector('.dragging');
     if (!draggingElement) return;
 
     draggingElement.classList.remove('dragging');
-    const options = container.querySelectorAll('.field-option-item');
+    const options = tbody.querySelectorAll('.field-option-item');
     const newOrder = Array.from(options).map((option, index) => {
       const value = option.querySelector('span').textContent;
       const optionData = this.editingField.values.find((v) => v.label === value);
@@ -451,6 +487,28 @@ export default class RsvpForm extends LitElement {
     }).filter(Boolean);
 
     this.editingField.values = newOrder;
+    this.requestUpdate();
+  }
+
+  moveOptionToSelected(option) {
+    if (!this.editingField.values) {
+      this.editingField.values = [];
+    }
+    const newOption = {
+      ...option,
+      ordinal: this.editingField.values.length,
+    };
+    this.editingField.values = [...this.editingField.values, newOption];
+    this.requestUpdate();
+  }
+
+  moveOptionToUnselected(option) {
+    this.editingField.values = this.editingField.values
+      .filter((o) => o.value !== option.value)
+      .map((o, index) => ({
+        ...o,
+        ordinal: index,
+      }));
     this.requestUpdate();
   }
 }

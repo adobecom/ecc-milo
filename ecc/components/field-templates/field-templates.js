@@ -166,8 +166,8 @@ export default class FieldTemplates extends LitElement {
               </div>
               <div class="template-actions">
                 <sp-action-button @click=${() => {
-                  this.handleTemplateDelete(template);
-                }}>
+    this.handleTemplateDelete(template);
+  }}>
                   ${getIcon('delete-wire-round')}
                 </sp-action-button>
               </div>
