@@ -58,7 +58,7 @@ function setRsvpFormAttributes(props, eventData, component) {
   const rsvpForm = component.querySelector('div > rsvp-form');
   rsvpForm.setAttribute('eventType', eventType);
 
-  if (eventType === EVENT_TYPES.ONLINE && registration?.type === 'Marketo') {
+  if (eventType === EVENT_TYPES.WEBINAR && registration?.type === 'Marketo') {
     setMarketoAttributes(rsvpForm, registration);
   } else {
     setBasicFormAttributes(rsvpForm, eventData, props.locale);

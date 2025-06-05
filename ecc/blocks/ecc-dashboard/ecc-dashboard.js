@@ -223,7 +223,7 @@ function sortData(props, config, options = {}) {
 }
 
 function getEventEditUrl(config, eventObj) {
-  const url = new URL(`${window.location.origin}${eventObj.eventType === EVENT_TYPES.ONLINE ? config['webinar-form-url'] : config['create-form-url']}`);
+  const url = new URL(`${window.location.origin}${eventObj.eventType === EVENT_TYPES.WEBINAR ? config['webinar-form-url'] : config['create-form-url']}`);
   url.searchParams.set('eventId', eventObj.eventId);
   return url;
 }
@@ -703,7 +703,7 @@ function buildDashboardHeader(props, config) {
   const createCta = createTag('a', { class: 'con-button blue' }, config['create-event-cta-text'], { parent: dropdown });
   const dropdownContent = createTag('div', { class: 'dropdown-content hidden' }, '', { parent: dropdown });
 
-  createTag('a', { class: 'dropdown-item', href: config['webinar-form-url'] }, 'Online', { parent: dropdownContent });
+  createTag('a', { class: 'dropdown-item', href: config['webinar-form-url'] }, 'Webinar', { parent: dropdownContent });
   createTag('a', { class: 'dropdown-item', href: config['create-form-url'] }, 'In-Person', { parent: dropdownContent });
 
   createCta.addEventListener('click', (e) => {

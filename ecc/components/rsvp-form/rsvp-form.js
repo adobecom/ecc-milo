@@ -170,7 +170,7 @@ export default class RsvpForm extends LitElement {
   }
 
   render() {
-    if (this.eventType === EVENT_TYPES.ONLINE) {
+    if (this.eventType === EVENT_TYPES.WEBINAR) {
       return this.renderWebinarForm();
     }
 
