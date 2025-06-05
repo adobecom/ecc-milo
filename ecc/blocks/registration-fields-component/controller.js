@@ -76,9 +76,11 @@ function setRsvpFormAttributes(props, eventData, component) {
 function updateDescription(component, props) {
   const rsvpFormConfigs = JSON.parse(component.dataset.rsvpFormConfigs);
   const cloudType = getAttribute(props.eventDataResp, 'cloudType', props.locale);
+
+  if (!cloudType) return;
+
   const config = rsvpFormConfigs.find(({ cloudType: cType }) => cType === cloudType);
   const requiredFields = config?.config?.data?.filter(({ Required }) => Required === 'x');
-  console.log('requiredFields', requiredFields);
 
   const descriptionDiv = component.querySelector(':scope > div:nth-of-type(2)');
   const existingDescription = descriptionDiv.querySelector('p');
@@ -87,7 +89,7 @@ function updateDescription(component, props) {
     existingDescription.remove();
   }
 
-  const requiredFieldsDescription = requiredFields.map(({ Label }) => `<strong>${Label}</strong>`).join(', ').replace(/, ([^,]*)$/, ' and $1');
+  const requiredFieldsDescription = requiredFields?.map(({ Label }) => `<strong>${Label}</strong>`).join(', ').replace(/, ([^,]*)$/, ' and $1') || '';
   createTag('p', { class: 'description' }, `Note: <strong>${SUPPORTED_CLOUDS.find(({ id }) => id === cloudType)?.name}</strong> required fields include ${requiredFieldsDescription}`, { parent: descriptionDiv });
 }
 
