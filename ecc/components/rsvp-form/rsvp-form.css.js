@@ -286,4 +286,21 @@ export const style = css`
   .selected-options .field-option-item:not(.dragging):active {
     cursor: grabbing;
   }
+
+  /* Drop indicator styles */
+  .field-row.drop-above {
+    border-top: 3px solid #378ef0;
+  }
+
+  .field-row.drop-below {
+    border-bottom: 3px solid #378ef0;
+  }
+
+  .field-option-item.drop-above {
+    border-top: 3px solid #378ef0;
+  }
+
+  .field-option-item.drop-below {
+    border-bottom: 3px solid #378ef0;
+  }
 `;

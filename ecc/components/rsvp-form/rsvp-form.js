@@ -170,6 +170,11 @@ export default class RsvpForm extends LitElement {
     const draggingElement = tbody.querySelector('.dragging');
     if (!draggingElement) return;
 
+    // Clear existing drop indicators
+    tbody.querySelectorAll('.field-row').forEach((row) => {
+      row.classList.remove('drop-above', 'drop-below');
+    });
+
     const siblings = [...tbody.querySelectorAll('.field-row:not(.dragging)')];
     const nextSibling = siblings.find((sibling) => {
       const box = sibling.getBoundingClientRect();
@@ -178,9 +183,9 @@ export default class RsvpForm extends LitElement {
     });
 
     if (nextSibling) {
-      tbody.insertBefore(draggingElement, nextSibling);
-    } else {
-      tbody.appendChild(draggingElement);
+      nextSibling.classList.add('drop-above');
+    } else if (siblings.length > 0) {
+      siblings[siblings.length - 1].classList.add('drop-below');
     }
   }
 
@@ -191,15 +196,55 @@ export default class RsvpForm extends LitElement {
     const draggingElement = tbody.querySelector('.dragging');
     if (!draggingElement) return;
 
-    draggingElement.classList.remove('dragging');
-    const rows = tbody.querySelectorAll('.field-row');
-    const newOrder = Array.from(rows).map((row, index) => {
-      const fieldName = row.querySelector('.cat-text').textContent.toLowerCase().replace(/\s+/g, '');
-      const field = this.eventFields.find((f) => f.name.toLowerCase().replace(/\s+/g, '') === fieldName);
-      return field ? { ...field, ordinal: index } : null;
-    }).filter(Boolean);
+    // Calculate new order based on drop indicators that were set during dragover
+    const draggedFieldName = draggingElement.querySelector('.cat-text').textContent.toLowerCase().replace(/\s+/g, '');
+    const draggedField = this.eventFields.find((f) => f.name.toLowerCase().replace(/\s+/g, '') === draggedFieldName);
 
-    this.eventFields = newOrder;
+    if (!draggedField) return;
+
+    // Read drop indicators BEFORE clearing them
+    const dropAbove = tbody.querySelector('.drop-above');
+    const dropBelow = tbody.querySelector('.drop-below');
+
+    // Clear all drag states and indicators
+    draggingElement.classList.remove('dragging');
+    tbody.querySelectorAll('.field-row').forEach((row) => {
+      row.classList.remove('drop-above', 'drop-below');
+    });
+
+    const newOrder = [...this.eventFields];
+    const draggedIndex = newOrder.findIndex((f) => f.name === draggedField.name);
+
+    if (draggedIndex === -1) return;
+
+    // Remove dragged item from current position
+    const [removed] = newOrder.splice(draggedIndex, 1);
+
+    if (dropAbove) {
+      const dropFieldName = dropAbove.querySelector('.cat-text').textContent.toLowerCase().replace(/\s+/g, '');
+      const dropIndex = newOrder.findIndex((f) => f.name.toLowerCase().replace(/\s+/g, '') === dropFieldName);
+      if (dropIndex !== -1) {
+        newOrder.splice(dropIndex, 0, removed);
+      } else {
+        // If we can't find the drop target, put it back at original position
+        newOrder.splice(draggedIndex, 0, removed);
+      }
+    } else if (dropBelow) {
+      const dropFieldName = dropBelow.querySelector('.cat-text').textContent.toLowerCase().replace(/\s+/g, '');
+      const dropIndex = newOrder.findIndex((f) => f.name.toLowerCase().replace(/\s+/g, '') === dropFieldName);
+      if (dropIndex !== -1) {
+        newOrder.splice(dropIndex + 1, 0, removed);
+      } else {
+        // If we can't find the drop target, put it back at original position
+        newOrder.splice(draggedIndex, 0, removed);
+      }
+    } else {
+      // No drop indicator found, put item back at original position
+      newOrder.splice(draggedIndex, 0, removed);
+    }
+
+    // Update ordinals and save
+    this.eventFields = newOrder.map((field, index) => ({ ...field, ordinal: index }));
     this.requestUpdate();
   }
 
@@ -457,6 +502,11 @@ export default class RsvpForm extends LitElement {
     const draggingElement = tbody.querySelector('.dragging');
     if (!draggingElement) return;
 
+    // Clear existing drop indicators
+    tbody.querySelectorAll('.field-option-item').forEach((item) => {
+      item.classList.remove('drop-above', 'drop-below');
+    });
+
     const siblings = [...tbody.querySelectorAll('.field-option-item:not(.dragging)')];
     const nextSibling = siblings.find((sibling) => {
       const box = sibling.getBoundingClientRect();
@@ -465,9 +515,9 @@ export default class RsvpForm extends LitElement {
     });
 
     if (nextSibling) {
-      tbody.insertBefore(draggingElement, nextSibling);
-    } else {
-      tbody.appendChild(draggingElement);
+      nextSibling.classList.add('drop-above');
+    } else if (siblings.length > 0) {
+      siblings[siblings.length - 1].classList.add('drop-below');
     }
   }
 
@@ -478,15 +528,55 @@ export default class RsvpForm extends LitElement {
     const draggingElement = tbody.querySelector('.dragging');
     if (!draggingElement) return;
 
-    draggingElement.classList.remove('dragging');
-    const options = tbody.querySelectorAll('.field-option-item');
-    const newOrder = Array.from(options).map((option, index) => {
-      const value = option.querySelector('span').textContent;
-      const optionData = this.editingField.values.find((v) => v.label === value);
-      return optionData ? { ...optionData, ordinal: index } : null;
-    }).filter(Boolean);
+    // Calculate new order based on drop indicators
+    const draggedLabel = draggingElement.querySelector('span').textContent;
+    const draggedOption = this.editingField.values.find((v) => v.label === draggedLabel);
 
-    this.editingField.values = newOrder;
+    if (!draggedOption) return;
+
+    // Read drop indicators BEFORE clearing them
+    const dropAbove = tbody.querySelector('.drop-above');
+    const dropBelow = tbody.querySelector('.drop-below');
+
+    // Clear all drag states and indicators
+    draggingElement.classList.remove('dragging');
+    tbody.querySelectorAll('.field-option-item').forEach((item) => {
+      item.classList.remove('drop-above', 'drop-below');
+    });
+
+    const newOrder = [...this.editingField.values];
+    const draggedIndex = newOrder.findIndex((v) => v.label === draggedLabel);
+
+    if (draggedIndex === -1) return;
+
+    // Remove dragged item from current position
+    const [removed] = newOrder.splice(draggedIndex, 1);
+
+    if (dropAbove) {
+      const dropLabel = dropAbove.querySelector('span').textContent;
+      const dropIndex = newOrder.findIndex((v) => v.label === dropLabel);
+      if (dropIndex !== -1) {
+        newOrder.splice(dropIndex, 0, removed);
+      } else {
+        // If we can't find the drop target, put it back at original position
+        newOrder.splice(draggedIndex, 0, removed);
+      }
+    } else if (dropBelow) {
+      const dropLabel = dropBelow.querySelector('span').textContent;
+      const dropIndex = newOrder.findIndex((v) => v.label === dropLabel);
+      if (dropIndex !== -1) {
+        newOrder.splice(dropIndex + 1, 0, removed);
+      } else {
+        // If we can't find the drop target, put it back at original position
+        newOrder.splice(draggedIndex, 0, removed);
+      }
+    } else {
+      // No drop indicator found, put item back at original position
+      newOrder.splice(draggedIndex, 0, removed);
+    }
+
+    // Update ordinals and save
+    this.editingField.values = newOrder.map((option, index) => ({ ...option, ordinal: index }));
     this.requestUpdate();
   }
 
