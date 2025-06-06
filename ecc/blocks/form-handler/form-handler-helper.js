@@ -113,6 +113,7 @@ export const VANILLA_COMPONENTS = [
   'registration-fields',
   'secondary-cta',
   'video-content',
+  'marketo-integration',
 ];
 
 async function initVanillaComponents(props) {
