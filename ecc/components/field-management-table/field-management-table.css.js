@@ -17,7 +17,7 @@ export default css`
     padding: var(--spectrum-global-dimension-size-400);
   }
 
-  .form-container.in-dialog {
+  sp-dialog .form-container {
     padding: 0;
     gap: 0;
   }
@@ -123,12 +123,6 @@ export default css`
     padding: var(--spectrum-global-dimension-size-400);
     background: var(--spectrum-global-color-gray-50);
     border-top: 1px solid var(--spectrum-global-color-gray-200);
-  }
-
-  .form-container {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spectrum-global-dimension-size-400);
   }
 
   .field-container {
