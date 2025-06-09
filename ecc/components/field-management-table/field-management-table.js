@@ -147,28 +147,28 @@ export default class FieldManagementTable extends LitElement {
     }
   }
 
-    regenerateAddFieldDialog() {
+  regenerateAddFieldDialog() {
     if (!this.isDialogOpen) return;
-    
+
     // Capture current form values before regenerating
     const dialog = this.shadowRoot.querySelector('sp-dialog');
     let currentName = '';
     let currentType = '';
     let currentMandatory = false;
     let currentPlaceholder = '';
-    
+
     if (dialog) {
       const nameField = dialog.querySelector('sp-textfield');
       const typeField = dialog.querySelector('sp-picker');
       const mandatoryField = dialog.querySelector('sp-switch');
       const placeholderField = dialog.querySelectorAll('sp-textfield')[1];
-      
+
       currentName = nameField?.value || '';
       currentType = typeField?.value || '';
       currentMandatory = mandatoryField?.checked || false;
       currentPlaceholder = placeholderField?.value || '';
     }
-    
+
     this.dialogContent = html`
       <div class="form-container">
         <div class="field-container">
@@ -273,11 +273,11 @@ export default class FieldManagementTable extends LitElement {
             variant="primary"
             slot="button"
             @click=${() => {
-    const dialog = this.shadowRoot.querySelector('sp-dialog');
-    const name = dialog.querySelector('sp-textfield').value.trim();
-    const type = dialog.querySelector('sp-picker').value;
-    const mandatory = dialog.querySelector('sp-switch').checked;
-    const placeholder = dialog.querySelectorAll('sp-textfield')[1].value.trim();
+    const dialogEl = this.shadowRoot.querySelector('sp-dialog');
+    const name = dialogEl.querySelector('sp-textfield').value.trim();
+    const type = dialogEl.querySelector('sp-picker').value;
+    const mandatory = dialogEl.querySelector('sp-switch').checked;
+    const placeholder = dialogEl.querySelectorAll('sp-textfield')[1].value.trim();
 
     if (name) {
       const newField = {
@@ -408,11 +408,11 @@ export default class FieldManagementTable extends LitElement {
       this.originalFields.set(field.id, { ...field });
     }
 
-    const dialog = this.shadowRoot.querySelector('sp-dialog');
+    const dialogEl = this.shadowRoot.querySelector('sp-dialog');
     // Update field properties
-    field.name = dialog.querySelector('sp-textfield').value;
-    field.mandatory = dialog.querySelector('sp-switch').checked;
-    field.placeholder = dialog.querySelectorAll('sp-textfield')[2].value;
+    field.name = dialogEl.querySelector('sp-textfield').value;
+    field.mandatory = dialogEl.querySelector('sp-switch').checked;
+    field.placeholder = dialogEl.querySelectorAll('sp-textfield')[2].value;
 
     if (field.type === 'list') {
       field.values = this.tempOptionList.map((option, index) => ({
@@ -583,11 +583,11 @@ export default class FieldManagementTable extends LitElement {
             variant="primary"
             slot="button"
             @click=${() => {
-    const dialog = this.shadowRoot.querySelector('sp-dialog');
-    const name = dialog.querySelector('sp-textfield').value.trim();
-    const type = dialog.querySelector('sp-picker').value;
-    const mandatory = dialog.querySelector('sp-switch').checked;
-    const placeholder = dialog.querySelectorAll('sp-textfield')[1].value.trim();
+    const dialogEl = this.shadowRoot.querySelector('sp-dialog');
+    const name = dialogEl.querySelector('sp-textfield').value.trim();
+    const type = dialogEl.querySelector('sp-picker').value;
+    const mandatory = dialogEl.querySelector('sp-switch').checked;
+    const placeholder = dialogEl.querySelectorAll('sp-textfield')[1].value.trim();
 
     if (name) {
       const newField = {
