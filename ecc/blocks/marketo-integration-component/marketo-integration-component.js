@@ -64,6 +64,8 @@ export default function init(el) {
           disableFields: [
             { id: 'marketo-salesforce-campaign-id-input', name: 'salesforceCampaignId' },
             { id: 'marketo-mcz-program-name-input', name: 'mczProgramName' },
+            { id: 'marketo-co-marketing-partner-input', name: 'coMarketingPartner' },
+            { id: 'marketo-event-poi-input', name: 'eventPoi' },
           ],
         },
       ],

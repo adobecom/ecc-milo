@@ -2,7 +2,10 @@
 import { setPropsPayload } from '../form-handler/data-handler.js';
 
 export async function onPayloadUpdate(component, props) {
-  // Do nothing
+  const { cloudType } = props.payload;
+  if (cloudType && cloudType !== component.dataset.cloudType) {
+    component.dataset.cloudType = cloudType;
+  }
 }
 
 export async function onRespUpdate(component, props) {
@@ -24,11 +27,11 @@ export async function onRespUpdate(component, props) {
       const coMarketingPartnerInput = component.querySelector('#marketo-co-marketing-partner-input');
       const eventPoiInput = component.querySelector('#marketo-event-poi-input');
 
-      eventTypeSelect.value = eventType;
-      salesforceCampaignIdInput.value = salesforceCampaignId;
-      mczProgramNameInput.value = mczProgramName;
-      coMarketingPartnerInput.value = coMarketingPartner;
-      eventPoiInput.value = eventPoi;
+      if (eventType) eventTypeSelect.value = eventType;
+      if (salesforceCampaignId) salesforceCampaignIdInput.value = salesforceCampaignId;
+      if (mczProgramName) mczProgramNameInput.value = mczProgramName;
+      if (coMarketingPartner) coMarketingPartnerInput.value = coMarketingPartner;
+      if (eventPoi) eventPoiInput.value = eventPoi;
     }
   }
 }
@@ -42,15 +45,15 @@ export function onSubmit(component, props) {
   const coMarketingPartner = component.querySelector('#marketo-co-marketing-partner-input').value;
   const eventPoi = component.querySelector('#marketo-event-poi-input').value;
 
-  const marketoIntegration = {
-    eventType,
-    salesforceCampaignId,
-    mczProgramName,
-    coMarketingPartner,
-    eventPoi,
-  };
+  const markettoIntegration = {};
 
-  setPropsPayload(props, marketoIntegration);
+  if (eventType) markettoIntegration.eventType = eventType;
+  if (salesforceCampaignId) markettoIntegration.salesforceCampaignId = salesforceCampaignId;
+  if (mczProgramName) markettoIntegration.mczProgramName = mczProgramName;
+  if (coMarketingPartner) markettoIntegration.coMarketingPartner = coMarketingPartner;
+  if (eventPoi) markettoIntegration.eventPoi = eventPoi;
+
+  setPropsPayload(props, markettoIntegration);
 }
 
 export function onTargetUpdate(component, props) {
@@ -72,6 +75,7 @@ export default async function init(component, props) {
       if (selectedValue === optionWithDisableRule.value) {
         fieldsToDisable.forEach((field) => {
           const fieldInput = component.querySelector(`#${field.id}`);
+          fieldInput.value = '';
           fieldInput.disabled = true;
         });
       } else {
