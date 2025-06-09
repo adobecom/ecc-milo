@@ -203,14 +203,10 @@ export function getCurrentFragment(props) {
 }
 
 function validateRequiredFields(fields) {
-  return fields.length === 0 || Array.from(fields).every((f) => {
-    const isHidden = f.closest('.section').classList.contains('hidden');
+  const enabledFields = fields.filter((f) => !f.disabled);
 
-    // by pass hidden fields
-    if (isHidden) return true;
-
-    return f.value && !f.invalid;
-  });
+  return enabledFields.length === 0
+  || Array.from(enabledFields).every((f) => f.value && !f.invalid);
 }
 
 function onStepValidate(props) {
