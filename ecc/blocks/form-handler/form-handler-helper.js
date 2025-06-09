@@ -302,8 +302,6 @@ function enableSideNavForEditFlow(props) {
       props.farthestStep = Math.max(props.farthestStep, i);
     }
   });
-
-  initRequiredFieldsValidation(props);
 }
 
 async function loadEventData(props) {
@@ -1181,6 +1179,7 @@ export async function buildECCForm(el) {
   initNavigation(proxyProps);
   await initComponents(proxyProps);
   enableSideNavForEditFlow(proxyProps);
+  initRequiredFieldsValidation(proxyProps);
   initDeepLink(proxyProps);
   updateStatusTag(proxyProps);
   toggleSections(proxyProps);
