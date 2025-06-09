@@ -203,7 +203,10 @@ export function getCurrentFragment(props) {
 }
 
 function validateRequiredFields(fields) {
-  return fields.length === 0 || Array.from(fields).every((f) => f.value && !f.invalid);
+  return fields.length === 0 || Array.from(fields).every((f) => {
+    const isHidden = f.closest('.section').classList.contains('hidden');
+    return !isHidden && f.value && !f.invalid;
+  });
 }
 
 function onStepValidate(props) {
@@ -229,9 +232,11 @@ function onStepValidate(props) {
   };
 }
 
-export function updateRequiredFields(props) {
+export function getUpdatedRequiredFields(props) {
   const currentFrag = getCurrentFragment(props);
-  props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(`.section:not(.hidden) .form-component ${INPUT_TYPES.join(',')}`);
+  const requiredFields = currentFrag.querySelectorAll(INPUT_TYPES.join());
+
+  return requiredFields;
 }
 
 function initRequiredFieldsValidation(props) {
@@ -243,11 +248,8 @@ function initRequiredFieldsValidation(props) {
     field.removeEventListener('change', inputValidationCB);
   });
 
-  console.log('currentRequiredFields', currentRequiredFields);
+  props[`required-fields-in-${currentFrag.id}`] = getUpdatedRequiredFields(props);
 
-  updateRequiredFields(props);
-
-  console.log('updated required fields`', props[`required-fields-in-${currentFrag.id}`]);
   props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
     field.addEventListener('change', inputValidationCB, { bubbles: true });
   });
