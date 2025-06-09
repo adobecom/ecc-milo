@@ -1180,7 +1180,6 @@ export async function buildECCForm(el) {
   initFormCtas(proxyProps);
   initNavigation(proxyProps);
   await initComponents(proxyProps);
-  initRequiredFieldsValidation(proxyProps);
   enableSideNavForEditFlow(proxyProps);
   initDeepLink(proxyProps);
   updateStatusTag(proxyProps);
