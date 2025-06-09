@@ -204,7 +204,7 @@ export function getCurrentFragment(props) {
 
 export function updateRequiredFields(props) {
   const currentFrag = getCurrentFragment(props);
-  props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(INPUT_TYPES.join());
+  props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(`.section:not(.hidden) .form-component ${INPUT_TYPES.join(',')}`);
 }
 
 export function navigateForm(props, stepIndex) {
