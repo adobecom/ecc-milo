@@ -1111,6 +1111,7 @@ export async function buildECCForm(el) {
 
         case 'payload': {
           setPayloadCache(value, props.locale);
+          updateRequiredFields(target);
           updateComponentsOnPayloadChange(target);
           initRequiredFieldsValidation(target);
           toggleSections(target);
