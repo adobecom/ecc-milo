@@ -28,9 +28,10 @@ import {
   generateToolTip,
   camelToSentenceCase,
   getEventPageHost,
-  getEventServiceEnv,
   replaceAnchorWithButton,
 } from '../../scripts/utils.js';
+
+import { getCurrentEnvironment } from '../../scripts/environment.js';
 
 import {
   createEvent,
@@ -658,7 +659,7 @@ async function getNonProdPreviewDataById(props) {
 
   if (!eventId) return null;
 
-  const esEnv = getEventServiceEnv();
+  const esEnv = getCurrentEnvironment();
   const resp = await fetch(`${getEventPageHost()}/events/default/${esEnv === 'prod' ? '' : `${esEnv}/`}metadata-preview.json`);
   if (resp.ok) {
     const json = await resp.json();
