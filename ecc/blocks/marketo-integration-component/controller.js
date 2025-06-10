@@ -50,20 +50,20 @@ export function onSubmit(component, props) {
   const marketoIntegration = {};
   const removeData = [];
 
-  if (eventType && eventType !== 'No Marketo integration') marketoIntegration.eventType = eventType;
-  if (salesforceCampaignId) marketoIntegration.salesforceCampaignId = salesforceCampaignId;
-  if (mczProgramName) marketoIntegration.mczProgramName = mczProgramName;
-  if (coMarketingPartner) marketoIntegration.coMarketingPartner = coMarketingPartner;
-  if (eventPoi) marketoIntegration.eventPoi = eventPoi;
-
-  if (Object.keys(marketoIntegration).length > 0) {
-    setPropsPayload(props, { marketoIntegration });
+  if (eventType && eventType !== 'No Marketo integration') {
+    marketoIntegration.eventType = eventType;
+    if (salesforceCampaignId) marketoIntegration.salesforceCampaignId = salesforceCampaignId;
+    if (mczProgramName) marketoIntegration.mczProgramName = mczProgramName;
+    if (coMarketingPartner) marketoIntegration.coMarketingPartner = coMarketingPartner;
+    if (eventPoi) marketoIntegration.eventPoi = eventPoi;
   } else {
     removeData.push({
       key: 'marketoIntegration',
       path: '',
     });
   }
+
+  setPropsPayload(props, { marketoIntegration }, removeData);
 }
 
 export function onTargetUpdate(component, props) {
