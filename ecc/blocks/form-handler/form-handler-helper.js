@@ -114,6 +114,7 @@ export const VANILLA_COMPONENTS = [
   'registration-fields',
   'secondary-cta',
   'video-content',
+  'marketo-integration',
 ];
 
 async function initVanillaComponents(props) {
@@ -202,40 +203,11 @@ export function getCurrentFragment(props) {
   return currentFrag;
 }
 
-export function updateRequiredFields(props) {
-  const currentFrag = getCurrentFragment(props);
-  props[`required-fields-in-${currentFrag.id}`] = currentFrag.querySelectorAll(INPUT_TYPES.join());
-}
-
-export function navigateForm(props, stepIndex) {
-  const index = stepIndex || stepIndex === 0 ? stepIndex : props.currentStep + 1;
-  const frags = props.el.querySelectorAll('.fragment');
-
-  if (index >= frags.length || index < 0) return;
-
-  props.currentStep = index;
-  props.farthestStep = Math.max(props.farthestStep, index);
-
-  window.scrollTo(0, 0);
-  updateRequiredFields(props);
-}
-
-function initDeepLink(props) {
-  const { hash } = window.location;
-
-  if (hash) {
-    const frags = props.el.querySelectorAll('.fragment');
-
-    const targetFragindex = Array.from(frags).findIndex((frag) => `#${frag.id}` === hash);
-
-    if (targetFragindex && targetFragindex <= props.farthestStep) {
-      navigateForm(props, targetFragindex);
-    }
-  }
-}
-
 function validateRequiredFields(fields) {
-  return fields.length === 0 || Array.from(fields).every((f) => f.value && !f.invalid);
+  const enabledFields = Array.from(fields).filter((f) => !f.disabled);
+
+  return enabledFields.length === 0
+    || enabledFields.every((f) => f.value && !f.invalid);
 }
 
 function onStepValidate(props) {
@@ -261,16 +233,56 @@ function onStepValidate(props) {
   };
 }
 
+export function getUpdatedRequiredFields(props) {
+  const currentFrag = getCurrentFragment(props);
+  const requiredFields = currentFrag.querySelectorAll(INPUT_TYPES.join());
+
+  return requiredFields;
+}
+
 function initRequiredFieldsValidation(props) {
   const currentFrag = getCurrentFragment(props);
 
+  const currentRequiredFields = props[`required-fields-in-${currentFrag.id}`];
   const inputValidationCB = onStepValidate(props);
-  props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
+  currentRequiredFields.forEach((field) => {
     field.removeEventListener('change', inputValidationCB);
+  });
+
+  props[`required-fields-in-${currentFrag.id}`] = getUpdatedRequiredFields(props);
+
+  props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
     field.addEventListener('change', inputValidationCB, { bubbles: true });
   });
 
   inputValidationCB();
+}
+
+export function navigateForm(props, stepIndex) {
+  const index = stepIndex || stepIndex === 0 ? stepIndex : props.currentStep + 1;
+  const frags = props.el.querySelectorAll('.fragment');
+
+  if (index >= frags.length || index < 0) return;
+
+  props.currentStep = index;
+  props.farthestStep = Math.max(props.farthestStep, index);
+
+  window.scrollTo(0, 0);
+  initRequiredFieldsValidation(props);
+}
+
+function initDeepLink(props) {
+  const { hash } = window.location;
+
+  if (hash) {
+    const frags = props.el.querySelectorAll('.fragment');
+
+    const targetFragindex = Array.from(frags).findIndex((frag) => `#${frag.id}` === hash);
+
+    if (targetFragindex && targetFragindex <= props.farthestStep) {
+      navigateForm(props, targetFragindex);
+    }
+  }
 }
 
 function enableSideNavForEditFlow(props) {
@@ -287,8 +299,6 @@ function enableSideNavForEditFlow(props) {
       props.farthestStep = Math.max(props.farthestStep, i);
     }
   });
-
-  initRequiredFieldsValidation(props);
 }
 
 async function loadEventData(props) {
@@ -1090,10 +1100,6 @@ export async function buildECCForm(el) {
       const oldValue = target[prop];
       target[prop] = value;
 
-      if (prop.startsWith('required-fields-in-')) {
-        initRequiredFieldsValidation(target);
-      }
-
       switch (prop) {
         case 'currentStep':
         {
@@ -1151,8 +1157,6 @@ export async function buildECCForm(el) {
     },
   };
 
-  const proxyProps = new Proxy(props, dataHandler);
-
   decorateForm(el);
 
   const frags = el.querySelectorAll('.fragment');
@@ -1165,12 +1169,14 @@ export async function buildECCForm(el) {
     });
   });
 
+  const proxyProps = new Proxy(props, dataHandler);
+
   await loadEventData(proxyProps);
   initFormCtas(proxyProps);
   initNavigation(proxyProps);
   await initComponents(proxyProps);
-  updateRequiredFields(proxyProps);
   enableSideNavForEditFlow(proxyProps);
+  initRequiredFieldsValidation(proxyProps);
   initDeepLink(proxyProps);
   updateStatusTag(proxyProps);
   toggleSections(proxyProps);
