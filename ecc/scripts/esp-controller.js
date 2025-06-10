@@ -2,7 +2,7 @@ import { LIBS } from './scripts.js';
 import { getSecret, signIn } from './utils.js';
 import { getCurrentEnvironment } from './environment.js';
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from './profile.js';
-import { API_CONFIG, ALLOWED_HOSTS } from './constants.js';
+import { API_CONFIG, ALLOWED_HOSTS, ENVIRONMENTS } from './constants.js';
 
 export function waitForAdobeIMS() {
   return new Promise((resolve) => {
@@ -66,7 +66,9 @@ async function safeFetch(url, options) {
 }
 
 export async function constructRequestOptions(method, body = null) {
-  const secretEnv = getCurrentEnvironment() === 'local' ? 'dev' : getCurrentEnvironment();
+  const secretEnv = getCurrentEnvironment() === ENVIRONMENTS.LOCAL
+    ? ENVIRONMENTS.DEV
+    : getCurrentEnvironment();
   const [
     { default: getUuid },
     clientIdentity,
@@ -125,7 +127,9 @@ export async function constructRequestOptions(method, body = null) {
 }
 
 export async function uploadImage(file, configs, tracker, imageId = null) {
-  const secretEnv = getCurrentEnvironment() === 'local' ? 'dev' : getCurrentEnvironment();
+  const secretEnv = getCurrentEnvironment() === ENVIRONMENTS.LOCAL
+    ? ENVIRONMENTS.DEV
+    : getCurrentEnvironment();
   const [
     { default: getUuid },
     clientIdentity,
