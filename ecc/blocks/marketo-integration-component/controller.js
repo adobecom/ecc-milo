@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { initRequiredFieldsValidation } from '../form-handler/form-handler-helper.js';
+import { MARKETO_INTEGRATION_FIELDS } from './marketo-integration-component.js';
 
 export async function onPayloadUpdate(component, props) {
   const { cloudType } = props.payload;
@@ -49,7 +50,7 @@ export function onSubmit(component, props) {
   const marketoIntegration = {};
   const removeData = [];
 
-  if (eventType) marketoIntegration.eventType = eventType;
+  if (eventType && eventType !== 'No Marketo integration') marketoIntegration.eventType = eventType;
   if (salesforceCampaignId) marketoIntegration.salesforceCampaignId = salesforceCampaignId;
   if (mczProgramName) marketoIntegration.mczProgramName = mczProgramName;
   if (coMarketingPartner) marketoIntegration.coMarketingPartner = coMarketingPartner;
@@ -70,7 +71,7 @@ export function onTargetUpdate(component, props) {
 }
 
 export default async function init(component, props) {
-  const fields = JSON.parse(component.dataset.fields);
+  const fields = MARKETO_INTEGRATION_FIELDS;
 
   const masterField = fields.find((field) => field.masterField);
 
