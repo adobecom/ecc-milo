@@ -54,7 +54,7 @@ export function onSubmit(component, props) {
   if (coMarketingPartner) marketoIntegration.coMarketingPartner = coMarketingPartner;
   if (eventPoi) marketoIntegration.eventPoi = eventPoi;
 
-  setPropsPayload(props, marketoIntegration);
+  setPropsPayload(props, { marketoIntegration });
 }
 
 export function onTargetUpdate(component, props) {
