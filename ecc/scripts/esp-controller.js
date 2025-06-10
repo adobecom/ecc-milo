@@ -1433,3 +1433,12 @@ export async function deleteSpeakerImage(speakerId, seriesId, imageId) {
     return { status: 'Network Error', error: error.message };
   }
 }
+
+export async function fetchRsvpFormConfigs() {
+  const { SUPPORTED_CLOUDS } = await import('./constants.js');
+
+  return Promise.all(SUPPORTED_CLOUDS.map(async ({ id }) => {
+    const config = await fetch(`/ecc/system/rsvp-config-sheets/${id.toLowerCase()}.json`).then((resp) => (resp.ok ? resp.json() : null));
+    return { cloudType: id, config };
+  }));
+}
