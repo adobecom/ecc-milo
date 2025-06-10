@@ -6,12 +6,6 @@ export async function onPayloadUpdate(component, props) {
   const { cloudType } = props.payload;
   if (cloudType && cloudType !== component.dataset.cloudType) {
     component.dataset.cloudType = cloudType;
-    const isDX = cloudType === 'ExperienceCloud' && component.classList.contains('dx-only');
-    const isDME = cloudType === 'CreativeCloud' && component.classList.contains('dme-only');
-    const noSpecifiedCloud = !(component.classList.contains('dx-only') || component.classList.contains('dme-only'));
-    const eventTypeSelect = component.querySelector('#marketo-event-type-select-input');
-
-    eventTypeSelect.disabled = !(isDME || isDX || noSpecifiedCloud);
   }
 }
 
