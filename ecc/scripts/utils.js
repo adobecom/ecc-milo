@@ -4,6 +4,15 @@ const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 let secretCache = [];
 
+export async function getSystemConfig(configType = '') {
+  const configUrlBase = '/ecc/system/config.json';
+  const configUrl = `${configUrlBase}?sheet=${configType}`;
+  const config = await fetch(configUrl);
+  const configData = await config.json().then((json) => json.data);
+
+  return configData;
+}
+
 export function getEventServiceEnv() {
   const { host, search } = window.location;
   const SLD = host.includes('.aem.') ? 'aem' : 'hlx';
