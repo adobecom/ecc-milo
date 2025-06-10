@@ -573,7 +573,7 @@ function decoratePagination(props, config) {
 
   pageInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
-      let page = parseInt(pageInput.value, +config['page-size']);
+      let page = parseInt(pageInput.value, 10);
       if (page > totalPages) {
         page = totalPages;
       } else if (page < 1) {

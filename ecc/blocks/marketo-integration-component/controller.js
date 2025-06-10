@@ -1,5 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { setPropsPayload } from '../form-handler/data-handler.js';
+import { initRequiredFieldsValidation } from '../form-handler/form-handler-helper.js';
+import { MARKETO_INTEGRATION_FIELDS } from './marketo-integration-component.js';
 
 export async function onPayloadUpdate(component, props) {
   const { cloudType } = props.payload;
@@ -45,15 +47,23 @@ export function onSubmit(component, props) {
   const coMarketingPartner = component.querySelector('#marketo-co-marketing-partner-input').value;
   const eventPoi = component.querySelector('#marketo-event-poi-input').value;
 
-  const markettoIntegration = {};
+  const marketoIntegration = {};
+  const removeData = [];
 
-  if (eventType) markettoIntegration.eventType = eventType;
-  if (salesforceCampaignId) markettoIntegration.salesforceCampaignId = salesforceCampaignId;
-  if (mczProgramName) markettoIntegration.mczProgramName = mczProgramName;
-  if (coMarketingPartner) markettoIntegration.coMarketingPartner = coMarketingPartner;
-  if (eventPoi) markettoIntegration.eventPoi = eventPoi;
+  if (eventType && eventType !== 'No Marketo integration') {
+    marketoIntegration.eventType = eventType;
+    if (salesforceCampaignId) marketoIntegration.salesforceCampaignId = salesforceCampaignId;
+    if (mczProgramName) marketoIntegration.mczProgramName = mczProgramName;
+    if (coMarketingPartner) marketoIntegration.coMarketingPartner = coMarketingPartner;
+    if (eventPoi) marketoIntegration.eventPoi = eventPoi;
+  } else {
+    removeData.push({
+      key: 'marketoIntegration',
+      path: '',
+    });
+  }
 
-  setPropsPayload(props, markettoIntegration);
+  setPropsPayload(props, { marketoIntegration }, removeData);
 }
 
 export function onTargetUpdate(component, props) {
@@ -61,7 +71,7 @@ export function onTargetUpdate(component, props) {
 }
 
 export default async function init(component, props) {
-  const fields = JSON.parse(component.dataset.fields);
+  const fields = MARKETO_INTEGRATION_FIELDS;
 
   const masterField = fields.find((field) => field.masterField);
 
@@ -72,18 +82,21 @@ export default async function init(component, props) {
 
     masterFieldInput.addEventListener('change', (e) => {
       const selectedValue = e.target.value;
-      if (selectedValue === optionWithDisableRule.value) {
+      if (selectedValue === 'No Marketo integration') {
         fieldsToDisable.forEach((field) => {
           const fieldInput = component.querySelector(`#${field.id}`);
           fieldInput.value = '';
           fieldInput.disabled = true;
         });
+        setPropsPayload(props, { 'marketo-integration': {} });
       } else {
         fieldsToDisable.forEach((field) => {
           const fieldInput = component.querySelector(`#${field.id}`);
           fieldInput.disabled = false;
         });
       }
+
+      initRequiredFieldsValidation(props);
     });
   }
 }
