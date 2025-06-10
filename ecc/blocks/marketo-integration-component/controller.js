@@ -46,15 +46,15 @@ export function onSubmit(component, props) {
   const coMarketingPartner = component.querySelector('#marketo-co-marketing-partner-input').value;
   const eventPoi = component.querySelector('#marketo-event-poi-input').value;
 
-  const markettoIntegration = {};
+  const marketoIntegration = {};
 
-  if (eventType) markettoIntegration.eventType = eventType;
-  if (salesforceCampaignId) markettoIntegration.salesforceCampaignId = salesforceCampaignId;
-  if (mczProgramName) markettoIntegration.mczProgramName = mczProgramName;
-  if (coMarketingPartner) markettoIntegration.coMarketingPartner = coMarketingPartner;
-  if (eventPoi) markettoIntegration.eventPoi = eventPoi;
+  if (eventType) marketoIntegration.eventType = eventType;
+  if (salesforceCampaignId) marketoIntegration.salesforceCampaignId = salesforceCampaignId;
+  if (mczProgramName) marketoIntegration.mczProgramName = mczProgramName;
+  if (coMarketingPartner) marketoIntegration.coMarketingPartner = coMarketingPartner;
+  if (eventPoi) marketoIntegration.eventPoi = eventPoi;
 
-  setPropsPayload(props, markettoIntegration);
+  setPropsPayload(props, marketoIntegration);
 }
 
 export function onTargetUpdate(component, props) {
