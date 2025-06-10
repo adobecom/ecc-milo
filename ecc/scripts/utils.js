@@ -1,4 +1,5 @@
 import { LIBS } from './scripts.js';
+import { getEventServiceHost } from './environment.js';
 
 const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
@@ -11,31 +12,6 @@ export async function getSystemConfig(configType = '') {
   const configData = await config.json().then((json) => json.data);
 
   return configData;
-}
-
-export function getEventServiceEnv() {
-  const { host, search } = window.location;
-  const SLD = host.includes('.aem.') ? 'aem' : 'hlx';
-  const usp = new URLSearchParams(search);
-  const localTest = usp.get('localTest');
-
-  if (window.location.hostname.includes('localhost') && localTest) return 'local';
-
-  if ((host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`))) {
-    if (host.startsWith('dev02--') || host.startsWith('main02--')) return 'dev02';
-    if (host.startsWith('stage--')) return 'stage';
-    if (host.startsWith('stage02--')) return 'stage02';
-    if (host.startsWith('main--')) return 'prod';
-    return 'dev';
-  }
-
-  if (host.includes('stage.adobe')
-    || host.includes('corp.adobe')
-    || host.includes('graybox.adobe')) return 'stage';
-
-  if (host.endsWith('adobe.com')) return 'prod';
-  // fallback to dev
-  return 'dev';
 }
 
 export function getIcon(tag) {
@@ -112,25 +88,7 @@ export function parse24HourFormat(timeStr) {
 }
 
 export function getEventPageHost(relativeDomain) {
-  if (window.location.href.includes('.hlx.') || window.location.href.includes('.aem.')) {
-    return window.location.origin.replace(window.location.hostname, `${getEventServiceEnv()}--events-milo--adobecom.aem.page`);
-  }
-
-  if (relativeDomain) return relativeDomain;
-
-  if ([
-    'www.stage.adobe.com',
-    'www.adobe.com',
-  ].includes(window.location.hostname)) {
-    return window.location.origin;
-  }
-
-  if (window.location.hostname.includes('localhost')) {
-    return 'https://dev--events-milo--adobecom.hlx.page';
-  }
-
-  // fallback to a.com prod
-  return 'https://www.adobe.com';
+  return getEventServiceHost(relativeDomain);
 }
 
 export function addTooltipToEl(tooltipText, appendee) {
