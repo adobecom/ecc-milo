@@ -718,7 +718,15 @@ function buildDashboardHeader(props, config) {
     }
   });
 
-  searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
+  let debounceTimer;
+  const handleSearch = () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      filterData(props, config, searchInput.value);
+    }, 1000);
+  };
+
+  searchInput.addEventListener('input', handleSearch);
 
   dashboardHeader.append(textContainer, actionsContainer);
   props.el.prepend(dashboardHeader);
