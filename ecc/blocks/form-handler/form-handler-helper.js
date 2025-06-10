@@ -203,10 +203,10 @@ export function getCurrentFragment(props) {
 }
 
 function validateRequiredFields(fields) {
-  const enabledFields = fields.filter((f) => !f.disabled);
+  const enabledFields = Array.from(fields).filter((f) => !f.disabled);
 
   return enabledFields.length === 0
-  || Array.from(enabledFields).every((f) => f.value && !f.invalid);
+    || enabledFields.every((f) => f.value && !f.invalid);
 }
 
 function onStepValidate(props) {

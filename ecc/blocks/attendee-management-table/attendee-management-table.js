@@ -298,7 +298,7 @@ function decoratePagination(props, config) {
 
   pageInput.addEventListener('keypress', (attendee) => {
     if (attendee.key === 'Enter') {
-      let page = parseInt(pageInput.value, +config['page-size']);
+      let page = parseInt(pageInput.value, 10);
       if (page > totalPages) {
         page = totalPages;
       } else if (page < 1) {
@@ -458,12 +458,16 @@ async function buildEventInfo(props) {
     eventType,
     attendeeCount,
     attendeeLimit,
+    waitlistAttendeeCount,
   ] = [
     getAttribute(eventObj, 'defaultLocale', props.locale),
     getAttribute(eventObj, 'eventType', props.locale),
     getAttribute(eventObj, 'attendeeCount', props.locale),
     getAttribute(eventObj, 'attendeeLimit', props.locale),
+    getAttribute(eventObj, 'waitlistAttendeeCount', props.locale),
   ];
+
+  const totalAttendeeCount = +attendeeCount + (+waitlistAttendeeCount || 0);
   const infoContainer = createTag('div', { class: 'event-info-container' }, '', { parent: eventInfoContainer });
   const infoRow = createTag('div', { class: 'event-info-row' }, '', { parent: infoContainer });
   const statsRow = createTag('div', { class: 'event-stats-row' }, '', { parent: infoContainer });
@@ -492,8 +496,8 @@ async function buildEventInfo(props) {
   [
     {
       label: 'RSVPs',
-      value: attendeeCount || '0',
-      subText: calculatePercentage(+attendeeCount, +attendeeLimit),
+      value: totalAttendeeCount || '0',
+      subText: calculatePercentage(+totalAttendeeCount, +attendeeLimit),
     },
   ].forEach(({ label, value, subText }) => {
     const statsColWrapper = createTag('div', { class: 'event-stats-col-wrapper' }, '', { parent: statsRow });
