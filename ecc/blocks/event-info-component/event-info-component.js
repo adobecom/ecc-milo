@@ -24,7 +24,7 @@ function buildDatePicker(column) {
 
 async function addLanguagePicker(row) {
   const pickerWrapper = createTag('div', { class: 'language-picker-wrapper' });
-  createTag('sp-label', { for: 'language-picker' }, 'Language *', { parent: pickerWrapper });
+  createTag('sp-label', { for: 'language-picker' }, 'Language', { parent: pickerWrapper });
   const picker = createTag('sp-picker', { id: 'language-picker', class: 'select-input', required: true, label: 'Pick a Language' }, '', { parent: pickerWrapper });
   addTooltipToEl('Select a language and region to publish the page based on your preference.', pickerWrapper);
 
