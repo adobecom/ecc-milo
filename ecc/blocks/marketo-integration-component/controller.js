@@ -1,10 +1,18 @@
 /* eslint-disable no-unused-vars */
 import { setPropsPayload } from '../form-handler/data-handler.js';
+import { initRequiredFieldsValidation } from '../form-handler/form-handler-helper.js';
 
 export async function onPayloadUpdate(component, props) {
   const { cloudType } = props.payload;
   if (cloudType && cloudType !== component.dataset.cloudType) {
     component.dataset.cloudType = cloudType;
+    const isDX = cloudType === 'ExperienceCloud' && component.classList.contains('dx-only');
+    const isDME = cloudType === 'CreativeCloud' && component.classList.contains('dme-only');
+
+    if (isDME || isDX) {
+      const eventTypeSelect = component.querySelector('#marketo-event-type-select-input');
+      eventTypeSelect.disabled = false;
+    }
   }
 }
 
@@ -72,18 +80,21 @@ export default async function init(component, props) {
 
     masterFieldInput.addEventListener('change', (e) => {
       const selectedValue = e.target.value;
-      if (!selectedValue) {
+      if (selectedValue === 'No Marketo integration') {
         fieldsToDisable.forEach((field) => {
           const fieldInput = component.querySelector(`#${field.id}`);
           fieldInput.value = '';
           fieldInput.disabled = true;
         });
+        setPropsPayload(props, { 'marketo-integration': {} });
       } else {
         fieldsToDisable.forEach((field) => {
           const fieldInput = component.querySelector(`#${field.id}`);
           fieldInput.disabled = false;
         });
       }
+
+      initRequiredFieldsValidation(props);
     });
   }
 }

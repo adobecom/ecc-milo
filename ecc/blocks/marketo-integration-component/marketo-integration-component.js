@@ -16,8 +16,8 @@ function decorateMarketoIntegrationFields(el, fields) {
       const fieldSelect = createTag('sp-picker', {
         id: field.id,
         size: 'l',
-        required: field.required,
       });
+      if (field.required) fieldSelect.required = true;
       if (!field.masterField) fieldSelect.disabled = true;
       const label = createTag('span', { slot: 'label' }, field.placeholder);
       fieldSelect.appendChild(label);
@@ -32,8 +32,8 @@ function decorateMarketoIntegrationFields(el, fields) {
         size: 'l',
         type: field.type,
         placeholder: field.placeholder,
-        required: field.required,
       });
+      if (field.required) fieldInput.required = true;
       if (!field.masterField) fieldInput.disabled = true;
       fieldContainer.appendChild(fieldInput);
     }
@@ -51,7 +51,7 @@ export default function init(el) {
       label: 'Event type',
       placeholder: 'Select event type',
       type: 'select',
-      required: false,
+      required: true,
       masterField: true,
       options: [
         { label: 'DX NA/ROW', value: 'DX NA/ROW' },
@@ -61,7 +61,7 @@ export default function init(el) {
         { label: 'DX LATAM', value: 'DX LATAM' },
         {
           label: 'No Marketo integration',
-          value: null,
+          value: 'No Marketo integration',
           placeholder: 'Select event type',
           disableFields: [
             { id: 'marketo-salesforce-campaign-id-input', name: 'salesforceCampaignId' },

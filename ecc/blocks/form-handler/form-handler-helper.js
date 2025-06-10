@@ -213,7 +213,17 @@ function validateRequiredFields(fields) {
 function onStepValidate(props) {
   return function updateCtaStatus() {
     const currentFrag = getCurrentFragment(props);
-    const stepValid = validateRequiredFields(props[`required-fields-in-${currentFrag.id}`]);
+    const requiredFields = props[`required-fields-in-${currentFrag.id}`];
+    const enabledFields = Array.from(requiredFields).filter((f) => !f.disabled);
+    const invalidFields = enabledFields.filter((f) => !f.value || f.invalid);
+    const stepValid = validateRequiredFields(requiredFields);
+
+    console.log('Step validation:', {
+      stepValid,
+      enabledFields: enabledFields.map(f => ({ id: f.id, value: f.value, invalid: f.invalid })),
+      invalidFields: invalidFields.map(f => ({ id: f.id, value: f.value, invalid: f.invalid }))
+    });
+
     const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
     const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
 
@@ -240,7 +250,7 @@ export function getUpdatedRequiredFields(props) {
   return requiredFields;
 }
 
-function initRequiredFieldsValidation(props) {
+export function initRequiredFieldsValidation(props) {
   const currentFrag = getCurrentFragment(props);
 
   const currentRequiredFields = props[`required-fields-in-${currentFrag.id}`];
