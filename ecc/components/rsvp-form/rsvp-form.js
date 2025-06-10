@@ -173,6 +173,8 @@ export default class RsvpForm extends LitElement {
   }
 
   render() {
+    // due to the dynamic data fetching based on the cloud type,
+    // we need to handle the case where the data is not yet available.
     if (!this.data) return html`<div class="rsvp-form"></div>`;
 
     if (this.eventType === EVENT_TYPES.WEBINAR) {

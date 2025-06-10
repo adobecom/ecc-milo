@@ -1,6 +1,6 @@
 import { LIBS } from '../../scripts/scripts.js';
 import { generateToolTip } from '../../scripts/utils.js';
-import { SUPPORTED_CLOUDS } from '../../scripts/constants.js';
+import { fetchRsvpFormConfigs } from '../../scripts/esp-controller.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -22,10 +22,7 @@ async function decorateRSVPFields(el, rsvpFormConfigs) {
 
 export default async function init(el) {
   el.classList.add('form-component');
-  const rsvpFormConfigs = await Promise.all(SUPPORTED_CLOUDS.map(async ({ id }) => {
-    const config = await fetch(`/ecc/system/rsvp-config-sheets/${id.toLowerCase()}.json`).then((resp) => (resp.ok ? resp.json() : null));
-    return { cloudType: id, config };
-  }));
+  const rsvpFormConfigs = await fetchRsvpFormConfigs();
   generateToolTip(el.querySelector(':scope > div:first-of-type'));
   await decorateRSVPFields(el, rsvpFormConfigs);
 }
