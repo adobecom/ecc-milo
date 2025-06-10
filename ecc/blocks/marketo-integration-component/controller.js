@@ -47,6 +47,7 @@ export function onSubmit(component, props) {
   const eventPoi = component.querySelector('#marketo-event-poi-input').value;
 
   const marketoIntegration = {};
+  const removeData = [];
 
   if (eventType) marketoIntegration.eventType = eventType;
   if (salesforceCampaignId) marketoIntegration.salesforceCampaignId = salesforceCampaignId;
@@ -54,7 +55,14 @@ export function onSubmit(component, props) {
   if (coMarketingPartner) marketoIntegration.coMarketingPartner = coMarketingPartner;
   if (eventPoi) marketoIntegration.eventPoi = eventPoi;
 
-  setPropsPayload(props, { marketoIntegration });
+  if (Object.keys(marketoIntegration).length > 0) {
+    setPropsPayload(props, { marketoIntegration });
+  } else {
+    removeData.push({
+      key: 'marketoIntegration',
+      path: '',
+    });
+  }
 }
 
 export function onTargetUpdate(component, props) {
