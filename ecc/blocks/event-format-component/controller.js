@@ -173,6 +173,8 @@ async function initDupCheck(props, component) {
   seriesSelect.disabled = filteredSeries.length === 0 || props.eventDataResp.seriesId;
 
   seriesSelect.addEventListener('change', () => {
+    props.payload = { ...props.payload, seriesId: seriesSelect.value };
+
     const seriesId = seriesSelect.value;
     const selectedSeries = seriesSelect.querySelector(`[value="${seriesId}"]`);
 
@@ -206,9 +208,12 @@ export default async function init(component, props) {
   await initDupCheck(props, component);
   initStepLock(component);
 
+  const cloudTypeSelect = component.querySelector('#bu-select-input');
+  const seriesSelect = component.querySelector('#series-select-input');
+
   if (cloudType && seriesId) {
-    changeInputValue(component.querySelector('#bu-select-input'), 'value', cloudType);
-    changeInputValue(component.querySelector('#series-select-input'), 'value', seriesId);
+    changeInputValue(cloudTypeSelect, 'value', cloudType);
+    changeInputValue(seriesSelect, 'value', seriesId);
     component.classList.add('prefilled');
   }
 }
