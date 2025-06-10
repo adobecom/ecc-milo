@@ -2,6 +2,7 @@
 import { getAttribute } from '../../scripts/data-utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { EVENT_TYPES, LINK_REGEX, SUPPORTED_CLOUDS } from '../../scripts/constants.js';
+import { getSystemConfig } from '../../scripts/utils.js';
 import { LIBS } from '../../scripts/scripts.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -39,9 +40,10 @@ export function onSubmit(component, props) {
 }
 
 function setMarketoAttributes(rsvpForm, registration) {
-  const { formData } = registration;
   rsvpForm.setAttribute('formType', 'marketo');
-  rsvpForm.setAttribute('formUrl', formData);
+  if (registration?.formData) {
+    rsvpForm.setAttribute('formUrl', registration.formData);
+  }
 }
 
 function setBasicFormAttributes(rsvpForm, eventData, locale) {
@@ -54,19 +56,23 @@ function setBasicFormAttributes(rsvpForm, eventData, locale) {
   rsvpForm.required = requiredFields;
 }
 
-function setRsvpFormAttributes(props, eventData, component) {
+async function setRsvpFormAttributes(props, eventData, component) {
   const rsvpFormConfigs = JSON.parse(component.dataset.rsvpFormConfigs);
   const cloudType = getAttribute(eventData, 'cloudType', props.locale);
   const eventType = getAttribute(eventData, 'eventType', props.locale);
   const registration = getAttribute(eventData, 'registration', props.locale);
 
-  const rsvpForm = component.querySelector('div > rsvp-form');
-  const config = rsvpFormConfigs.find(({ cloudType: cType }) => cType === cloudType);
+  const eventTypeConfig = await getSystemConfig('event-type');
+  const defaultRsvpFormConfig = eventTypeConfig.find((c) => c.configKey === 'default-rsvp-form');
+  const defaultForm = defaultRsvpFormConfig[eventType]?.toLowerCase();
 
-  rsvpForm.setAttribute('data', JSON.stringify(config?.config?.data));
+  const rsvpForm = component.querySelector('div > rsvp-form');
+  const rsvpConfig = rsvpFormConfigs.find(({ cloudType: cType }) => cType === cloudType);
+
+  rsvpForm.setAttribute('data', JSON.stringify(rsvpConfig?.config?.data));
   rsvpForm.setAttribute('eventType', eventType);
 
-  if (eventType === EVENT_TYPES.WEBINAR && registration?.type === 'Marketo') {
+  if ((eventType === EVENT_TYPES.WEBINAR && registration?.type === 'Marketo') || defaultForm === 'marketo') {
     setMarketoAttributes(rsvpForm, registration);
   } else {
     setBasicFormAttributes(rsvpForm, eventData, props.locale);
@@ -95,17 +101,17 @@ function updateDescription(component, props) {
 
 export async function onPayloadUpdate(component, props) {
   updateDescription(component, props);
-  setRsvpFormAttributes(props, props.payload, component);
+  await setRsvpFormAttributes(props, props.payload, component);
 }
 
 export async function onRespUpdate(component, props) {
   updateDescription(component, props);
-  setRsvpFormAttributes(props, props.eventDataResp, component);
+  await setRsvpFormAttributes(props, props.eventDataResp, component);
 }
 
-export default function init(component, props) {
+export default async function init(component, props) {
   updateDescription(component, props);
-  setRsvpFormAttributes(props, props.eventDataResp, component);
+  await setRsvpFormAttributes(props, props.eventDataResp, component);
 }
 
 export function onTargetUpdate(component, props) {
