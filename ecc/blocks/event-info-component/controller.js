@@ -22,7 +22,6 @@ function refillFields(component, props, eventData) {
   const startTime = component.querySelector('#time-picker-start-time-value');
   const endTime = component.querySelector('#time-picker-end-time-value');
   const datePicker = component.querySelector('#event-info-date-picker');
-  const languagePicker = component.querySelector('#language-picker');
   const enTitleInput = component.querySelector('#event-info-url-input');
   const isPrivateInput = component.querySelector('#private-event');
 
@@ -35,7 +34,6 @@ function refillFields(component, props, eventData) {
   const localEndTime = getAttribute(eventData, 'localEndTime', props.locale);
   const timezone = getAttribute(eventData, 'timezone', props.locale);
   const enTitle = getAttribute(eventData, 'enTitle', props.locale);
-  const defaultLocale = getAttribute(eventData, 'defaultLocale', props.locale);
   const isPrivate = getAttribute(eventData, 'isPrivate', props.locale);
 
   if (isValidAttribute(title)) eventTitleInput.value = title;
@@ -235,11 +233,11 @@ function buildWarningModal(privateEventCheckbox, element) {
   dialog.innerHTML = '';
 
   createTag('h1', { slot: 'heading' }, 'Note: Before you set your event to private', { parent: dialog });
-  createTag('p', {}, 'By setting to private, your event won\'t be publicly found online or published on the Events Hub. You cannot change your event to public once it\'s set to private.', { parent: dialog });
+  createTag('p', {}, 'By setting to private, your event won’t be publicly found online or published on the Events Hub. Making an event public again will not take immediate effect due to the delay in re-indexing.', { parent: dialog });
 
   const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
-  const okayButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'okay-private' }, 'OK', { parent: buttonContainer });
   const cancelButton = createTag('sp-button', { variant: 'secondary', slot: 'button', id: 'cancel-private' }, 'Cancel', { parent: buttonContainer });
+  const okayButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'okay-private' }, 'I understand', { parent: buttonContainer });
 
   okayButton.addEventListener('click', () => {
     privateEventCheckbox.checked = true;
@@ -250,6 +248,7 @@ function buildWarningModal(privateEventCheckbox, element) {
     privateEventCheckbox.checked = false;
     closeDialog();
   });
+
   underlay.open = true;
 }
 
@@ -426,8 +425,10 @@ export default async function init(component, props) {
   }
 
   privateEventCheckbox.addEventListener('click', async (e) => {
-    e.preventDefault();
-    buildWarningModal(e.target, props.el);
+    if (!e.target.checked) {
+      e.preventDefault();
+      buildWarningModal(e.target, props.el);
+    }
   });
 
   BlockMediator.subscribe('eventDupMetrics', (store) => {
