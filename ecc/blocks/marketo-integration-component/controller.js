@@ -8,11 +8,10 @@ export async function onPayloadUpdate(component, props) {
     component.dataset.cloudType = cloudType;
     const isDX = cloudType === 'ExperienceCloud' && component.classList.contains('dx-only');
     const isDME = cloudType === 'CreativeCloud' && component.classList.contains('dme-only');
+    const noSpecifiedCloud = !(component.classList.contains('dx-only') || component.classList.contains('dme-only'));
+    const eventTypeSelect = component.querySelector('#marketo-event-type-select-input');
 
-    if (isDME || isDX) {
-      const eventTypeSelect = component.querySelector('#marketo-event-type-select-input');
-      eventTypeSelect.disabled = false;
-    }
+    eventTypeSelect.disabled = !(isDME || isDX || noSpecifiedCloud);
   }
 }
 
