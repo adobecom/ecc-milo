@@ -72,7 +72,7 @@ export default async function init(component, props) {
 
     masterFieldInput.addEventListener('change', (e) => {
       const selectedValue = e.target.value;
-      if (selectedValue === optionWithDisableRule.value) {
+      if (!selectedValue) {
         fieldsToDisable.forEach((field) => {
           const fieldInput = component.querySelector(`#${field.id}`);
           fieldInput.value = '';
