@@ -5,6 +5,15 @@ const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 let secretCache = [];
 
+export async function getSystemConfig(configType = '') {
+  const configUrlBase = '/ecc/system/config.json';
+  const configUrl = `${configUrlBase}?sheet=${configType}`;
+  const config = await fetch(configUrl);
+  const configData = await config.json().then((json) => json.data);
+
+  return configData;
+}
+
 export function getIcon(tag) {
   const img = document.createElement('img');
   img.className = `icon icon-${tag}`;

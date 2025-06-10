@@ -93,12 +93,12 @@ export const ALLOWED_HOSTS = {
 
 export const EVENT_TYPES = {
   IN_PERSON: 'InPerson',
-  ONLINE: 'Online',
+  WEBINAR: 'Webinar',
   HYBRID: 'Hybrid',
 };
 
 export const CONTENT_TYPE_TAGS = {
-  [EVENT_TYPES.ONLINE]: {
+  [EVENT_TYPES.WEBINAR]: {
     title: 'Webinar',
     caasId: 'caas:content-type/webinar',
   },

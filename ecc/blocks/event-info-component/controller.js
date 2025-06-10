@@ -6,10 +6,9 @@ import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../.
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { getAttribute, isValidAttribute } from '../../scripts/data-utils.js';
 import initCalendar, { updateCalendarInput, parseFormattedDate } from './calendar.js';
+import { buildErrorMessage } from '../form-handler/form-handler-helper.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
-
-let languagePickerUpdatePromise = null;
 
 function refillFields(component, props, eventData) {
   const eventTitleInput = component.querySelector('#info-field-event-title');
@@ -66,7 +65,6 @@ function refillFields(component, props, eventData) {
     });
   }
   if (isValidAttribute(timezone)) changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
-  if (isValidAttribute(defaultLocale)) changeInputValue(languagePicker, 'value', defaultLocale || props.locale);
   if (isValidAttribute(enTitle)) changeInputValue(enTitleInput, 'value', enTitle || '');
   if (isValidAttribute(isPrivate)) changeInputValue(isPrivateInput, 'checked', isPrivate || false);
 
@@ -104,45 +102,30 @@ async function updateLanguagePicker(component, props) {
 
   if (!cloudType) return;
 
-  if (languagePickerUpdatePromise) {
-    await languagePickerUpdatePromise;
+  const [cloud, localesResp] = await Promise.all([getCloud(cloudType), getLocales()]);
+
+  if (!cloud || cloud.error) {
+    buildErrorMessage(component, 'Error loading cloud data. Please refresh the page or try again later.');
+    window.lana?.log('Error loading cloud data. Please refresh the page or try again later.');
     return;
   }
 
-  languagePickerUpdatePromise = (async () => {
-    try {
-      const [cloud, localesResp] = await Promise.all([getCloud(cloudType), getLocales()]);
+  const { locales } = cloud;
+  const allLocales = localesResp.localeNames;
 
-      if (!cloud || cloud.error) return;
-      const { locales } = cloud;
-      const allLocales = localesResp.localeNames;
+  languagePicker.querySelectorAll('sp-menu-item').forEach((option) => {
+    option.remove();
+  });
 
-      languagePicker.querySelectorAll('sp-menu-item').forEach((option) => {
-        option.remove();
-      });
+  locales.forEach((l) => {
+    const lang = allLocales[l];
+    const opt = createTag('sp-menu-item', { value: l }, lang);
+    languagePicker.append(opt);
+  });
 
-      locales.forEach((l) => {
-        const lang = allLocales[l];
-        const opt = createTag('sp-menu-item', { value: l }, lang);
-        languagePicker.append(opt);
-      });
-
-      const defaultLocale = props.eventDataResp?.defaultLocale;
-      if (defaultLocale) {
-        languagePicker.value = defaultLocale;
-        languagePicker.dispatchEvent(new Event('change'));
-      } else if (props.locale) {
-        languagePicker.value = props.locale;
-        languagePicker.dispatchEvent(new Event('change'));
-      }
-
-      languagePicker.disabled = !!defaultLocale;
-    } catch (error) {
-      console.error('Error updating language picker:', error);
-    }
-  })();
-
-  await languagePickerUpdatePromise;
+  const defaultLocale = props.eventDataResp?.defaultLocale;
+  if (isValidAttribute(defaultLocale)) changeInputValue(languagePicker, 'value', defaultLocale || props.locale);
+  languagePicker.disabled = !!defaultLocale;
 }
 
 function initTitleWatcher(component, props) {
@@ -221,7 +204,6 @@ export async function onPayloadUpdate(component, props) {
 export async function onRespUpdate(component, props) {
   if (props.eventDataResp) {
     const { defaultLocale } = props.eventDataResp;
-    const languagePicker = component.querySelector('#language-picker');
 
     if (defaultLocale) {
       await updateLanguagePicker(component, props);
@@ -239,6 +221,36 @@ function checkEventDuplication(event, compareMetrics) {
   const stateCodeMatch = event.venue?.stateCode === compareMetrics.stateCode;
 
   return titleMatch && startDateMatch && venueIdMatch && eventIdNoMatch && stateCodeMatch;
+}
+
+function buildWarningModal(privateEventCheckbox, element) {
+  const dialog = element.querySelector('#form-app sp-dialog');
+  const underlay = element.querySelector('#form-app sp-underlay');
+
+  const closeDialog = () => {
+    if (underlay) underlay.open = false;
+    if (dialog) dialog.innerHTML = '';
+  };
+
+  dialog.innerHTML = '';
+
+  createTag('h1', { slot: 'heading' }, 'Note: Before you set your event to private', { parent: dialog });
+  createTag('p', {}, 'By setting to private, your event won\'t be publicly found online or published on the Events Hub. You cannot change your event to public once it\'s set to private.', { parent: dialog });
+
+  const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+  const okayButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'okay-private' }, 'OK', { parent: buttonContainer });
+  const cancelButton = createTag('sp-button', { variant: 'secondary', slot: 'button', id: 'cancel-private' }, 'Cancel', { parent: buttonContainer });
+
+  okayButton.addEventListener('click', () => {
+    privateEventCheckbox.checked = true;
+    closeDialog();
+  });
+
+  cancelButton.addEventListener('click', () => {
+    privateEventCheckbox.checked = false;
+    closeDialog();
+  });
+  underlay.open = true;
 }
 
 export default async function init(component, props) {
@@ -266,6 +278,8 @@ export default async function init(component, props) {
   const datePicker = component.querySelector('#event-info-date-picker');
   const descriptionRTE = component.querySelector('#event-info-details-rte');
   const descriptionRTEOutput = component.querySelector('#event-info-details-rte-output');
+
+  const privateEventCheckbox = component.querySelector('sp-checkbox#private-event');
 
   initCalendar(component);
 
@@ -410,6 +424,11 @@ export default async function init(component, props) {
       changeInputValue(descriptionRTEOutput, 'value', output);
     };
   }
+
+  privateEventCheckbox.addEventListener('click', async (e) => {
+    e.preventDefault();
+    buildWarningModal(e.target, props.el);
+  });
 
   BlockMediator.subscribe('eventDupMetrics', (store) => {
     const metrics = store.newValue;
