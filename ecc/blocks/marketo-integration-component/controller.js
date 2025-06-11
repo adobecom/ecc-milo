@@ -102,6 +102,7 @@ export default async function init(component, props) {
         fieldsToDisable.forEach((field) => {
           const fieldInput = component.querySelector(`#${field.id}`);
           fieldInput.disabled = false;
+          if (fieldInput.required && fieldInput.value === '') fieldInput.invalid = true;
         });
       }
 

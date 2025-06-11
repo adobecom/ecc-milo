@@ -367,7 +367,9 @@ function initMoreOptions(props, config, eventObj, row) {
       e.preventDefault();
       const payload = { ...eventObj };
       const cloneTitle = `${getAttribute(eventObj, 'title', payload.defaultLocale || 'en-US')} - copy`;
+      const cloneEnTitle = `${getAttribute(eventObj, 'enTitle', payload.defaultLocale || 'en-US')} - copy`;
       setEventAttribute(payload, 'title', cloneTitle, payload.defaultLocale || 'en-US');
+      setEventAttribute(payload, 'enTitle', cloneEnTitle, payload.defaultLocale || 'en-US');
       toolBox.remove();
       row.classList.add('pending');
       const newEventJSON = await createEvent({ ...cloneFilter(payload), published: false }, payload.defaultLocale || 'en-US');
