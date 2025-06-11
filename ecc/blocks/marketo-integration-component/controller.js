@@ -56,14 +56,15 @@ export function onSubmit(component, props) {
     if (mczProgramName) marketoIntegration.mczProgramName = mczProgramName;
     if (coMarketingPartner) marketoIntegration.coMarketingPartner = coMarketingPartner;
     if (eventPoi) marketoIntegration.eventPoi = eventPoi;
+    setPropsPayload(props, { marketoIntegration });
   } else {
     removeData.push({
       key: 'marketoIntegration',
       path: '',
     });
-  }
 
-  setPropsPayload(props, { marketoIntegration }, removeData);
+    setPropsPayload(props, {}, removeData);
+  }
 }
 
 export function onTargetUpdate(component, props) {
