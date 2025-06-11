@@ -42,7 +42,7 @@ export const MARKETO_INTEGRATION_DATA_REF_FILTER = {
   salesforceCampaignId: { type: 'string', submittable: true },
   mczProgramName: { type: 'string', submittable: true },
   coMarketingPartner: { type: 'string', submittable: true },
-  eventPoi: { type: 'string', submittable: true }
+  eventPoi: { type: 'string', submittable: true },
 };
 
 /**
@@ -96,7 +96,7 @@ export const EVENT_DATA_FILTER = {
   useLegacyDetailPagePath: { type: 'boolean', localizable: false, cloneable: false, submittable: true },
   video: { type: 'object', localizable: false, cloneable: true, submittable: true, ref: VIDEO_DATA_REF_FILTER },
   registration: { type: 'object', localizable: false, cloneable: true, submittable: true, ref: REGISTRATION_DATA_REF_FILTER },
-  marketoIntegration: { type: 'object', localizable: false, cloneable: true, submittable: true, ref: MARKETO_INTEGRATION_DATA_REF_FILTER },
+  marketoIntegration: { type: 'object', localizable: false, cloneable: false, submittable: true, ref: MARKETO_INTEGRATION_DATA_REF_FILTER },
 };
 
 /**
