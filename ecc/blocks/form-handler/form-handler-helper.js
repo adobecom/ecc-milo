@@ -203,18 +203,111 @@ export function getCurrentFragment(props) {
   return currentFrag;
 }
 
-function validateRequiredFields(fields) {
-  const enabledFields = Array.from(fields).filter((f) => !f.disabled);
+function getEnabledFields(fields) {
+  return Array.from(fields).filter((f) => !f.disabled);
+}
 
-  return enabledFields.length === 0
-    || enabledFields.every((f) => f.value && !f.invalid);
+function getValidFields(fields) {
+  return Array.from(fields).filter((f) => f.value && !f.invalid);
+}
+
+function getInvalidFields(fields) {
+  return Array.from(fields).filter((f) => !f.value || f.invalid);
+}
+
+function hasInvalidRequiredFields(fields) {
+  const enabledFields = getEnabledFields(fields);
+
+  // If no fields are enabled, consider it valid (nothing to validate)
+  if (enabledFields.length === 0) {
+    return false;
+  }
+
+  // Check if all enabled fields are valid
+  const validFields = getValidFields(enabledFields);
+  return validFields.length < enabledFields.length;
+}
+
+function addErrorStyling(field) {
+  field.classList.add('field-invalid');
+}
+
+function removeErrorStyling(field) {
+  field.classList.remove('field-invalid');
+}
+
+function showInvalidFieldsToast(props, invalidFieldsCount) {
+  const toastArea = props.el.querySelector('.toast-area');
+  if (!toastArea) return;
+
+  const message = `Please fill in ${invalidFieldsCount} required field${invalidFieldsCount > 1 ? 's' : ''} before proceeding.`;
+  const toast = createTag('sp-toast', {
+    open: true,
+    variant: 'negative',
+    timeout: 6000,
+    class: 'invalid-fields-toast',
+  }, message, { parent: toastArea });
+
+  toast.addEventListener('close', (e) => {
+    e.stopPropagation();
+    toast.remove();
+  }, { once: true });
+}
+
+function focusFirstInvalidField(invalidFields) {
+  if (invalidFields.length === 0) return;
+
+  const firstInvalidField = invalidFields[0];
+  firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Small delay to ensure scroll is complete before focusing
+  setTimeout(() => {
+    if (firstInvalidField.focus) {
+      firstInvalidField.focus();
+    }
+  }, 300);
+}
+
+function handlePreNavigationValidation(props) {
+  if (props.currentStepValid) {
+    return true; // Step is valid, allow navigation
+  }
+
+  const invalidFields = props.currentStepInvalidFields || [];
+
+  invalidFields.forEach(addErrorStyling);
+
+  showInvalidFieldsToast(props, invalidFields.length);
+
+  focusFirstInvalidField(invalidFields);
+
+  return false; // Prevent navigation
+}
+
+// Clean up field validation listeners and styling
+function cleanupFieldValidation(props, fragId) {
+  const requiredFields = props[`required-fields-in-${fragId}`] || [];
+  requiredFields.forEach((field) => {
+    removeErrorStyling(field);
+    // Remove any validation listeners that might have been added
+    field.removeEventListener('input', props[`field-input-handler-${field.id}`]);
+    field.removeEventListener('change', props[`field-change-handler-${field.id}`]);
+    delete props[`field-input-handler-${field.id}`];
+    delete props[`field-change-handler-${field.id}`];
+  });
 }
 
 function onStepValidate(props) {
   return function updateCtaStatus() {
     const currentFrag = getCurrentFragment(props);
     const requiredFields = props[`required-fields-in-${currentFrag.id}`];
-    const stepValid = validateRequiredFields(requiredFields);
+    const enabledFields = getEnabledFields(requiredFields);
+    const invalidFields = getInvalidFields(enabledFields);
+    const stepHasInvalidFields = hasInvalidRequiredFields(requiredFields);
+
+    // Store validation state on props for use in navigation handlers
+    props.currentStepValid = !stepHasInvalidFields;
+    props.currentStepInvalidFields = invalidFields;
 
     const ctas = props.el.querySelectorAll('.form-handler-panel-wrapper a');
     const sideNavs = props.el.querySelectorAll('.side-menu .nav-item');
@@ -222,14 +315,13 @@ function onStepValidate(props) {
     ctas.forEach((cta) => {
       if (cta.classList.contains('back-btn')) {
         cta.classList.toggle('disabled', props.currentStep === 0);
-      } else {
-        cta.classList.toggle('disabled', !stepValid);
       }
     });
 
     sideNavs.forEach((nav, i) => {
       if (i !== props.currentStep) {
-        nav.disabled = !stepValid;
+        // Remove the navigation lock - allow navigation even if step is invalid
+        nav.disabled = false;
       }
     });
   };
@@ -245,6 +337,11 @@ export function getUpdatedRequiredFields(props) {
 export function initRequiredFieldsValidation(props) {
   const currentFrag = getCurrentFragment(props);
 
+  // Clean up previous validation listeners and styling
+  if (props.previousFragId) {
+    cleanupFieldValidation(props, props.previousFragId);
+  }
+
   const currentRequiredFields = props[`required-fields-in-${currentFrag.id}`];
   const inputValidationCB = onStepValidate(props);
   currentRequiredFields.forEach((field) => {
@@ -255,7 +352,25 @@ export function initRequiredFieldsValidation(props) {
 
   props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
     field.addEventListener('change', inputValidationCB, { bubbles: true });
+
+    // Add listeners to remove error styling when field is updated
+    const inputHandler = () => {
+      removeErrorStyling(field);
+    };
+    const changeHandler = () => {
+      removeErrorStyling(field);
+    };
+
+    // Store handlers for cleanup
+    props[`field-input-handler-${field.id}`] = inputHandler;
+    props[`field-change-handler-${field.id}`] = changeHandler;
+
+    field.addEventListener('input', inputHandler);
+    field.addEventListener('change', changeHandler);
   });
+
+  // Store current fragment ID for cleanup
+  props.previousFragId = currentFrag.id;
 
   inputValidationCB();
 }
@@ -456,6 +571,11 @@ async function saveEvent(props, toPublish = false) {
       showSaveSuccessMessage(props);
     }
   };
+
+  if (!props.locale) {
+    buildErrorMessage(props, { error: { message: 'Locale is required' } });
+    return { error: { message: 'Locale is required' } };
+  }
 
   if (props.currentStep === 0 && !getAttribute(props.eventDataResp, 'eventId', props.locale)) {
     resp = await createEvent(getJoinedData(), props.locale);
@@ -829,6 +949,12 @@ function initFormCtas(props) {
 
         cta.addEventListener('click', async (e) => {
           e.preventDefault();
+
+          // Check validation before proceeding with navigation
+          if (!handlePreNavigationValidation(props)) {
+            return; // Don't proceed if validation failed
+          }
+
           toggleBtnsSubmittingState(true);
 
           if (ctaUrl.hash === '#next') {
@@ -881,6 +1007,11 @@ function initFormCtas(props) {
   });
 
   backBtn.addEventListener('click', async () => {
+    // Check validation before proceeding with navigation
+    if (!handlePreNavigationValidation(props)) {
+      return; // Don't proceed if validation failed
+    }
+
     toggleBtnsSubmittingState(true);
     const resp = await saveEvent(props);
     if (resp && !resp.error) {
@@ -951,6 +1082,11 @@ function initNavigation(props) {
     nav.addEventListener('click', async () => {
       if (nav.closest('li').classList.contains('active')) return;
       if (!nav.disabled && !sideMenu.classList.contains('disabled')) {
+        // Check validation before proceeding with navigation
+        if (!handlePreNavigationValidation(props)) {
+          return; // Don't proceed if validation failed
+        }
+
         sideMenu.classList.add('disabled');
 
         const resp = await saveEvent(props);
@@ -1019,6 +1155,35 @@ function decorateForm(el) {
   const app = createTag('sp-theme', { color: 'light', scale: 'medium', id: 'form-app' });
   createTag('sp-underlay', {}, '', { parent: app });
   createTag('sp-dialog', { size: 's' }, '', { parent: app });
+
+  // Add styles for invalid field highlighting
+  createTag('style', {}, `
+    .field-invalid {
+      position: relative;
+    }
+    .field-invalid::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 0, 0, 0.1);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      border-radius: 4px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    sp-textfield.field-invalid,
+    sp-picker.field-invalid,
+    input.field-invalid,
+    select.field-invalid,
+    textarea.field-invalid {
+      background-color: rgba(255, 0, 0, 0.05);
+      border-color: rgba(255, 0, 0, 0.3);
+    }
+  `, { parent: app });
+
   const form = createTag('form', {}, '', { parent: app });
   const formDivs = el.querySelectorAll('.fragment');
 
@@ -1095,6 +1260,8 @@ export async function buildECCForm(el) {
     },
     eventDataResp: {},
     deleteList: {},
+    currentStepValid: false, // Assume invalid until validation runs
+    currentStepInvalidFields: [], // Start with empty array
   };
 
   const dataHandler = {

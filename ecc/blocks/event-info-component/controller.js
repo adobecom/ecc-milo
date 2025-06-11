@@ -143,7 +143,7 @@ function initTitleWatcher(component, props) {
 
   titleInput.addEventListener('input', () => {
     if (engTitle.value === '' || engTitle.value === existingTitle) {
-      engTitle.value = titleInput.value;
+      changeInputValue(engTitle, 'value', titleInput.value);
     }
 
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), title: engTitle.value });
