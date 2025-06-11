@@ -29,7 +29,6 @@ export async function onRespUpdate(component, props) {
         eventPoi,
       } = marketoIntegration;
 
-
       if (eventType) eventTypeSelect.value = eventType;
       if (salesforceCampaignId) salesforceCampaignIdInput.value = salesforceCampaignId;
       if (mczProgramName) mczProgramNameInput.value = mczProgramName;
