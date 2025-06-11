@@ -56,6 +56,16 @@ function setBasicFormAttributes(rsvpForm, eventData, locale) {
   rsvpForm.required = requiredFields;
 }
 
+function filterRsvpConfigData(rsvpConfigData, eventData, props) {
+  let data = rsvpConfigData;
+  const marketoIntegration = getAttribute(eventData, 'marketoIntegration', props.locale);
+
+  if (marketoIntegration?.eventPoi) {
+    data = rsvpConfigData.filter(({ Field }) => Field !== 'primaryProductOfInterest');
+  }
+  return data;
+}
+
 async function setRsvpFormAttributes(props, eventData, component) {
   const rsvpFormConfigs = JSON.parse(component.dataset.rsvpFormConfigs);
   const cloudType = getAttribute(eventData, 'cloudType', props.locale);
@@ -69,7 +79,9 @@ async function setRsvpFormAttributes(props, eventData, component) {
   const rsvpForm = component.querySelector('div > rsvp-form');
   const rsvpConfig = rsvpFormConfigs.find(({ cloudType: cType }) => cType === cloudType);
 
-  rsvpForm.setAttribute('data', JSON.stringify(rsvpConfig?.config?.data));
+  const data = filterRsvpConfigData(rsvpConfig?.config?.data, eventData, props);
+
+  rsvpForm.setAttribute('data', JSON.stringify(data));
   rsvpForm.setAttribute('eventType', eventType);
 
   if ((eventType === EVENT_TYPES.WEBINAR && registration?.type === 'Marketo') || defaultForm === 'marketo') {

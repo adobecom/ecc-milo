@@ -12,7 +12,13 @@ export async function onPayloadUpdate(component, props) {
 
 export async function onRespUpdate(component, props) {
   if (props.eventDataResp) {
-    const { marketoIntegration } = props.eventDataResp;
+    const { marketoIntegration, eventId } = props.eventDataResp;
+
+    const eventTypeSelect = component.querySelector('#marketo-event-type-select-input');
+    const salesforceCampaignIdInput = component.querySelector('#marketo-salesforce-campaign-id-input');
+    const mczProgramNameInput = component.querySelector('#marketo-mcz-program-name-input');
+    const coMarketingPartnerInput = component.querySelector('#marketo-co-marketing-partner-input');
+    const eventPoiInput = component.querySelector('#marketo-event-poi-input');
 
     if (marketoIntegration) {
       const {
@@ -23,17 +29,20 @@ export async function onRespUpdate(component, props) {
         eventPoi,
       } = marketoIntegration;
 
-      const eventTypeSelect = component.querySelector('#marketo-event-type-select-input');
-      const salesforceCampaignIdInput = component.querySelector('#marketo-salesforce-campaign-id-input');
-      const mczProgramNameInput = component.querySelector('#marketo-mcz-program-name-input');
-      const coMarketingPartnerInput = component.querySelector('#marketo-co-marketing-partner-input');
-      const eventPoiInput = component.querySelector('#marketo-event-poi-input');
 
       if (eventType) eventTypeSelect.value = eventType;
       if (salesforceCampaignId) salesforceCampaignIdInput.value = salesforceCampaignId;
       if (mczProgramName) mczProgramNameInput.value = mczProgramName;
       if (coMarketingPartner) coMarketingPartnerInput.value = coMarketingPartner;
       if (eventPoi) eventPoiInput.value = eventPoi;
+    }
+
+    if (eventId) {
+      eventTypeSelect.disabled = true;
+      salesforceCampaignIdInput.disabled = true;
+      mczProgramNameInput.disabled = true;
+      coMarketingPartnerInput.disabled = true;
+      eventPoiInput.disabled = true;
     }
   }
 }
