@@ -15,8 +15,8 @@ export function onSubmit(component, props) {
   const seriesInfo = {};
 
   if (cloudType.value) seriesInfo.cloudType = cloudType.value;
-  if (seriesName.value) seriesInfo.seriesName = seriesName.value;
-  if (seriesDescription.value) seriesInfo.seriesDescription = seriesDescription.value;
+  if (seriesName.value) seriesInfo.seriesName = seriesName.value.trim();
+  if (seriesDescription.value) seriesInfo.seriesDescription = seriesDescription.value.trim();
 
   props.payload = { ...props.payload, ...seriesInfo };
 }

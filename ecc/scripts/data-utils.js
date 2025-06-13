@@ -32,6 +32,20 @@ export const REGISTRATION_DATA_REF_FILTER = {
 };
 
 /**
+ * @typedef {Object} MarketoIntegrationDataRefFilter
+ * @property {string} type - The type of the attribute.
+ * @property {boolean} submittable - Whether the attribute can be submitted.
+ */
+
+export const MARKETO_INTEGRATION_DATA_REF_FILTER = {
+  eventType: { type: 'string', submittable: true },
+  salesforceCampaignId: { type: 'string', submittable: true },
+  mczProgramName: { type: 'string', submittable: true },
+  coMarketingPartner: { type: 'string', submittable: true },
+  eventPoi: { type: 'string', submittable: true },
+};
+
+/**
  * @typedef {Object} EventDataFilter
  * @property {string} type - The type of the attribute.
  * @property {boolean} localizable - Whether the attr should be in payload or payload.localizations.
@@ -82,6 +96,7 @@ export const EVENT_DATA_FILTER = {
   useLegacyDetailPagePath: { type: 'boolean', localizable: false, cloneable: false, submittable: true },
   video: { type: 'object', localizable: false, cloneable: true, submittable: true, ref: VIDEO_DATA_REF_FILTER },
   registration: { type: 'object', localizable: false, cloneable: true, submittable: true, ref: REGISTRATION_DATA_REF_FILTER },
+  marketoIntegration: { type: 'object', localizable: false, cloneable: false, submittable: true, ref: MARKETO_INTEGRATION_DATA_REF_FILTER },
 };
 
 /**

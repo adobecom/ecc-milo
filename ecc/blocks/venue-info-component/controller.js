@@ -4,10 +4,12 @@ import {
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
-import { changeInputValue, getEventServiceEnv, getSecret } from '../../scripts/utils.js';
+import { changeInputValue, getSecret } from '../../scripts/utils.js';
+import { getCurrentEnvironment } from '../../scripts/environment.js';
 import { buildErrorMessage } from '../form-handler/form-handler-helper.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { getAttribute, getVenuePayload } from '../../scripts/data-utils.js';
+import { ENVIRONMENTS } from '../../scripts/constants.js';
 
 const imageType = 'venue-additional-image';
 let imageFile = null;
@@ -23,7 +25,9 @@ function togglePrefillableFieldsHiddenState(component) {
 async function loadGoogleMapsAPI(callback) {
   const ALLOWED_ENVS = new Set(['dev', 'dev02', 'stage', 'stage02', 'prod']);
 
-  const currentEnv = getEventServiceEnv() === 'local' ? 'dev' : getEventServiceEnv();
+  const currentEnv = getCurrentEnvironment() === ENVIRONMENTS.LOCAL
+    ? ENVIRONMENTS.DEV
+    : getCurrentEnvironment();
 
   if (!ALLOWED_ENVS.has(currentEnv)) {
     throw new Error('Invalid environment detected.');

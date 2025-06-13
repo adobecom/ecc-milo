@@ -223,7 +223,7 @@ function sortData(props, config, options = {}) {
 }
 
 function getEventEditUrl(config, eventObj) {
-  const url = new URL(`${window.location.origin}${eventObj.eventType === EVENT_TYPES.ONLINE ? config['webinar-form-url'] : config['create-form-url']}`);
+  const url = new URL(`${window.location.origin}${eventObj.eventType === EVENT_TYPES.WEBINAR ? config['webinar-form-url'] : config['create-form-url']}`);
   url.searchParams.set('eventId', eventObj.eventId);
   return url;
 }
@@ -367,7 +367,9 @@ function initMoreOptions(props, config, eventObj, row) {
       e.preventDefault();
       const payload = { ...eventObj };
       const cloneTitle = `${getAttribute(eventObj, 'title', payload.defaultLocale || 'en-US')} - copy`;
+      const cloneEnTitle = `${getAttribute(eventObj, 'enTitle', payload.defaultLocale || 'en-US')} - copy`;
       setEventAttribute(payload, 'title', cloneTitle, payload.defaultLocale || 'en-US');
+      setEventAttribute(payload, 'enTitle', cloneEnTitle, payload.defaultLocale || 'en-US');
       toolBox.remove();
       row.classList.add('pending');
       const newEventJSON = await createEvent({ ...cloneFilter(payload), published: false }, payload.defaultLocale || 'en-US');
@@ -573,7 +575,7 @@ function decoratePagination(props, config) {
 
   pageInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
-      let page = parseInt(pageInput.value, +config['page-size']);
+      let page = parseInt(pageInput.value, 10);
       if (page > totalPages) {
         page = totalPages;
       } else if (page < 1) {
@@ -703,7 +705,7 @@ function buildDashboardHeader(props, config) {
   const createCta = createTag('a', { class: 'con-button blue' }, config['create-event-cta-text'], { parent: dropdown });
   const dropdownContent = createTag('div', { class: 'dropdown-content hidden' }, '', { parent: dropdown });
 
-  createTag('a', { class: 'dropdown-item', href: config['webinar-form-url'] }, 'Online', { parent: dropdownContent });
+  createTag('a', { class: 'dropdown-item', href: config['webinar-form-url'] }, 'Webinar', { parent: dropdownContent });
   createTag('a', { class: 'dropdown-item', href: config['create-form-url'] }, 'In-Person', { parent: dropdownContent });
 
   createCta.addEventListener('click', (e) => {
@@ -718,7 +720,15 @@ function buildDashboardHeader(props, config) {
     }
   });
 
-  searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
+  let debounceTimer;
+  const handleSearch = () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      filterData(props, config, searchInput.value);
+    }, 1000);
+  };
+
+  searchInput.addEventListener('input', handleSearch);
 
   dashboardHeader.append(textContainer, actionsContainer);
   props.el.prepend(dashboardHeader);
