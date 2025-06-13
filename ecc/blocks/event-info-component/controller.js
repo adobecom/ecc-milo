@@ -22,7 +22,6 @@ function refillFields(component, props, eventData) {
   const startTime = component.querySelector('#time-picker-start-time-value');
   const endTime = component.querySelector('#time-picker-end-time-value');
   const datePicker = component.querySelector('#event-info-date-picker');
-  const languagePicker = component.querySelector('#language-picker');
   const enTitleInput = component.querySelector('#event-info-url-input');
   const isPrivateInput = component.querySelector('#private-event');
 
@@ -35,7 +34,6 @@ function refillFields(component, props, eventData) {
   const localEndTime = getAttribute(eventData, 'localEndTime', props.locale);
   const timezone = getAttribute(eventData, 'timezone', props.locale);
   const enTitle = getAttribute(eventData, 'enTitle', props.locale);
-  const defaultLocale = getAttribute(eventData, 'defaultLocale', props.locale);
   const isPrivate = getAttribute(eventData, 'isPrivate', props.locale);
 
   if (isValidAttribute(title)) eventTitleInput.value = title;
@@ -223,6 +221,37 @@ function checkEventDuplication(event, compareMetrics) {
   return titleMatch && startDateMatch && venueIdMatch && eventIdNoMatch && stateCodeMatch;
 }
 
+function buildWarningModal(privateEventCheckbox, element) {
+  const dialog = element.querySelector('#form-app sp-dialog');
+  const underlay = element.querySelector('#form-app sp-underlay');
+
+  const closeDialog = () => {
+    if (underlay) underlay.open = false;
+    if (dialog) dialog.innerHTML = '';
+  };
+
+  dialog.innerHTML = '';
+
+  createTag('h1', { slot: 'heading' }, 'Note: Before you set your event to private', { parent: dialog });
+  createTag('p', {}, 'By setting to private, your event won’t be publicly found online or published on the Events Hub. Making an event public again will not take immediate effect due to the delay in re-indexing.', { parent: dialog });
+
+  const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+  const cancelButton = createTag('sp-button', { variant: 'secondary', slot: 'button', id: 'cancel-private' }, 'Cancel', { parent: buttonContainer });
+  const okayButton = createTag('sp-button', { variant: 'cta', slot: 'button', id: 'okay-private' }, 'I understand', { parent: buttonContainer });
+
+  okayButton.addEventListener('click', () => {
+    privateEventCheckbox.checked = true;
+    closeDialog();
+  });
+
+  cancelButton.addEventListener('click', () => {
+    privateEventCheckbox.checked = false;
+    closeDialog();
+  });
+
+  underlay.open = true;
+}
+
 export default async function init(component, props) {
   const allEventsResp = await getEvents();
   const allEvents = allEventsResp?.events;
@@ -248,6 +277,8 @@ export default async function init(component, props) {
   const datePicker = component.querySelector('#event-info-date-picker');
   const descriptionRTE = component.querySelector('#event-info-details-rte');
   const descriptionRTEOutput = component.querySelector('#event-info-details-rte-output');
+
+  const privateEventCheckbox = component.querySelector('sp-checkbox#private-event');
 
   initCalendar(component);
 
@@ -392,6 +423,13 @@ export default async function init(component, props) {
       changeInputValue(descriptionRTEOutput, 'value', output);
     };
   }
+
+  privateEventCheckbox.addEventListener('click', async (e) => {
+    if (!e.target.checked) {
+      e.preventDefault();
+      buildWarningModal(e.target, props.el);
+    }
+  });
 
   BlockMediator.subscribe('eventDupMetrics', (store) => {
     const metrics = store.newValue;
