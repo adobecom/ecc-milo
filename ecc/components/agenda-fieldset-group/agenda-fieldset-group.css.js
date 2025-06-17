@@ -14,6 +14,17 @@ export const style = css`
     display: flex;
     width: 100%;
     gap: 16px;
+    transition: all 0.2s ease;
+  }
+
+  agenda-fieldset.dragging {
+    opacity: 0.5;
+    cursor: move;
+  }
+
+  agenda-fieldset.drop-target {
+    border-bottom: 2px solid #378ef0;
+    margin-bottom: -2px;
   }
 
   .icon-remove-circle {
