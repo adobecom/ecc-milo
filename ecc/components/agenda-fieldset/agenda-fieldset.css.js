@@ -4,6 +4,16 @@ const { css } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 // eslint-disable-next-line import/prefer-default-export
 export const style = css`
+:host {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.agenda-drag-handle {
+  cursor: grab;
+}
+
 .agenda-container {
   display: flex;
   flex-direction: column;
