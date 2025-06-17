@@ -13,6 +13,7 @@ export default class AgendaFieldsetGroup extends LitElement {
     timeslots: { type: Array },
     draggedIndex: { type: Number },
     dropTargetIndex: { type: Number },
+    dropPosition: { type: String }, // 'above' or 'below'
   };
 
   constructor() {
@@ -21,6 +22,7 @@ export default class AgendaFieldsetGroup extends LitElement {
     this.timeslots = this.dataset.timeslots.split(',');
     this.draggedIndex = -1;
     this.dropTargetIndex = -1;
+    this.dropPosition = '';
   }
 
   static styles = style;
@@ -64,6 +66,7 @@ export default class AgendaFieldsetGroup extends LitElement {
   handleDragEnd(e) {
     this.draggedIndex = -1;
     this.dropTargetIndex = -1;
+    this.dropPosition = '';
     e.target.classList.remove('dragging');
     this.requestUpdate();
   }
@@ -72,12 +75,14 @@ export default class AgendaFieldsetGroup extends LitElement {
     e.preventDefault();
     if (this.draggedIndex === index) return;
     this.dropTargetIndex = index;
+    this.dropPosition = this.draggedIndex > index ? 'above' : 'below';
     this.requestUpdate();
   }
 
   handleDragLeave(e) {
     e.preventDefault();
     this.dropTargetIndex = -1;
+    this.dropPosition = '';
     this.requestUpdate();
   }
 
@@ -91,6 +96,7 @@ export default class AgendaFieldsetGroup extends LitElement {
     this.agendaItems = newAgendaItems;
     this.draggedIndex = -1;
     this.dropTargetIndex = -1;
+    this.dropPosition = '';
     this.requestUpdate();
   }
 
@@ -110,7 +116,7 @@ export default class AgendaFieldsetGroup extends LitElement {
     const options = { timeslots: this.timeslots };
     return html`
         <agenda-fieldset 
-          class="${this.draggedIndex === index ? 'dragging' : ''} ${this.dropTargetIndex === index ? 'drop-target' : ''}"
+          class="${this.draggedIndex === index ? 'dragging' : ''} ${this.dropTargetIndex === index ? `drop-target-${this.dropPosition}` : ''}"
           .agenda=${agendaComponents} 
           .options=${options}
           draggable="true"

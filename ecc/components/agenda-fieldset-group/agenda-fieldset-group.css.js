@@ -22,7 +22,12 @@ export const style = css`
     cursor: move;
   }
 
-  agenda-fieldset.drop-target {
+  agenda-fieldset.drop-target-above {
+    border-top: 2px solid #378ef0;
+    margin-top: -2px;
+  }
+
+  agenda-fieldset.drop-target-below {
     border-bottom: 2px solid #378ef0;
     margin-bottom: -2px;
   }
