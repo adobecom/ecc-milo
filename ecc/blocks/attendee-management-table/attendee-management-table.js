@@ -101,6 +101,8 @@ function buildFilters(props) {
 function updateFilterMap(props) {
   if (!props.columnMap) return;
   props.columnMap.forEach(({ key }) => {
+    // Skip firstName and lastName for filters
+    if (['firstName', 'lastName'].includes(key)) return;
     FILTER_MAP[key] = [...new Set(props.data.map((e) => e[key]))].filter((e) => e);
   });
 }
@@ -171,6 +173,9 @@ async function populateRow(props, index) {
   const getDisplayVal = (key) => {
     if (key === 'checkedIn') {
       return attendee[key] ? 'yes' : 'no';
+    }
+    if (key === 'name') {
+      return `${attendee.firstName || ''} ${attendee.lastName || ''}`.trim() || '-';
     }
     return attendee[key];
   };
@@ -611,12 +616,23 @@ async function fetchRSVPConfig(cloudType) {
     }
 
     // Only use rows where Type is not 'submit'
-    const configColumns = configItem.config.data.filter((row) => row.Type !== 'submit').map((row) => ({
-      key: row.Field,
-      label: row.Label,
-      type: row.Type,
+    const configColumns = configItem.config.data
+      .filter((row) => row.Type !== 'submit')
+      .filter((row) => !['firstName', 'lastName'].includes(row.Field)) // Remove individual name fields
+      .map((row) => ({
+        key: row.Field,
+        label: row.Label,
+        type: row.Type,
+        fallback: '',
+      }));
+
+    // Add the name column at the beginning
+    configColumns.unshift({
+      key: 'name',
+      label: 'Name',
+      type: 'text',
       fallback: '',
-    }));
+    });
 
     // Add the required sticky columns if they don't exist
     const requiredColumns = [
