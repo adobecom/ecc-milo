@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { getAllEventAttendees, getEventImages, getEventsForUser } from '../../scripts/esp-controller.js';
+import { getAllEventAttendees, getEventImages, getEventsForUser, fetchRsvpFormConfigs } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -16,97 +16,9 @@ import { getAttribute } from '../../scripts/data-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
-const ATTENDEE_ATTR_MAP = [
-  {
-    key: 'firstName',
-    label: 'First name',
-    fallback: '',
-  },
-  {
-    key: 'lastName',
-    label: 'Last name',
-    fallback: '',
-  },
-  {
-    key: 'email',
-    label: 'Email',
-    fallback: '',
-  },
-  {
-    key: 'companyName',
-    label: 'Company',
-    fallback: '',
-  },
-  {
-    key: 'jobTitle',
-    label: 'Job title',
-    fallback: '',
-  },
-  {
-    key: 'mobilePhone',
-    label: 'Mobile phone',
-    fallback: '',
-  },
-  {
-    key: 'industry',
-    label: 'Industry',
-    fallback: '',
-  },
-  {
-    key: 'productsOfInterest',
-    label: 'Products of interest',
-    fallback: '',
-  },
-  {
-    key: 'companySize',
-    label: 'Company size',
-    fallback: '',
-  },
-  {
-    key: 'age',
-    label: 'Age',
-    fallback: '',
-  },
-  {
-    key: 'jobLevel',
-    label: 'Job level',
-    fallback: '',
-  },
-  {
-    key: 'contactMethod',
-    label: 'Contact method',
-    fallback: '',
-  },
-  {
-    key: 'registrationDate',
-    label: 'Registration date',
-    fallback: '',
-  },
-  {
-    key: 'registrationStatus',
-    label: 'RSVP status',
-    fallback: 'registered',
-  },
-  {
-    key: 'checkedIn',
-    label: 'Checked in',
-    fallback: '-',
-  },
-];
-
+// Place these at the top so they're defined before use
 const stickyColumns = ['registrationStatus', 'checkedIn'];
-
-const FILTER_MAP = {
-  companyName: [],
-  jobTitle: [],
-  industry: [],
-  productsOfInterest: [],
-  companySize: [],
-  age: [],
-  jobLevel: [],
-  contactMethod: [],
-};
-
+const FILTER_MAP = {};
 const SPECTRUM_COMPONENTS = [
   'theme',
   'toast',
@@ -123,6 +35,9 @@ const SPECTRUM_COMPONENTS = [
   'tooltip',
   'action-button',
 ];
+
+// Remove the top-level cache since we'll pass it through
+let rsvpConfigCache = null;
 
 function buildAllFilterMenues(props) {
   const sidePanel = props.el.querySelector('.dashboard-side-panel');
@@ -184,7 +99,8 @@ function buildFilters(props) {
 }
 
 function updateFilterMap(props) {
-  Object.keys(FILTER_MAP).forEach((key) => {
+  if (!props.columnMap) return;
+  props.columnMap.forEach(({ key }) => {
     FILTER_MAP[key] = [...new Set(props.data.map((e) => e[key]))].filter((e) => e);
   });
 }
@@ -251,18 +167,14 @@ function sortData(props, config, options = {}) {
 async function populateRow(props, index) {
   const attendee = props.paginatedData[index];
   const tBody = props.el.querySelector('table.dashboard-table tbody');
-
   const row = createTag('tr', { class: 'attendee-row', 'data-attendee-id': attendee.attendeeId }, '', { parent: tBody });
-
   const getDisplayVal = (key) => {
     if (key === 'checkedIn') {
       return attendee[key] ? 'yes' : 'no';
     }
-
     return attendee[key];
   };
-
-  ATTENDEE_ATTR_MAP.forEach(({ key, fallback }, i, arr) => {
+  props.columnMap.forEach(({ key, fallback }, i, arr) => {
     const td = createTag('td', {}, getDisplayVal(key) || fallback, { parent: row });
     if (stickyColumns.includes(key)) {
       td.classList.add(`sticky-right-${arr.length - i}`, 'actions');
@@ -350,16 +262,34 @@ function initSorting(props, config) {
 }
 
 function buildTableHeaders(props, config) {
-  const thead = props.el.querySelector('thead');
-  const thRow = thead.querySelector('tr');
+  if (!props.columnMap?.length) {
+    return;
+  }
 
-  ATTENDEE_ATTR_MAP.forEach(({ key, label }, i, arr) => {
+  const thead = props.el.querySelector('thead');
+  if (!thead) {
+    return;
+  }
+
+  const thRow = thead.querySelector('tr');
+  if (!thRow) {
+    return;
+  }
+
+  // Sort columns to ensure sticky columns are last
+  const sortedColumns = [...props.columnMap].sort((a, b) => {
+    if (stickyColumns.includes(a.key) && !stickyColumns.includes(b.key)) return 1;
+    if (!stickyColumns.includes(a.key) && stickyColumns.includes(b.key)) return -1;
+    return 0;
+  });
+
+  sortedColumns.forEach(({ key, label }, i, arr) => {
     const thText = createTag('span', {}, label.toUpperCase());
     const th = createTag('th', {}, thText, { parent: thRow });
-
     th.append(getIcon('chev-down'), getIcon('chev-up'));
-
-    if (stickyColumns.includes(key)) th.classList.add('actions', `sticky-right-${arr.length - i}`);
+    if (stickyColumns.includes(key)) {
+      th.classList.add('actions', `sticky-right-${arr.length - i}`);
+    }
     th.classList.add('sortable');
     th.dataset.field = key;
   });
@@ -401,13 +331,11 @@ function populateTable(props, config) {
 function filterData(props, config) {
   const q = props.currentQuery.toLowerCase();
   props.filteredData = props.data.filter((e) => {
-    const searchMatch = ATTENDEE_ATTR_MAP.some(({ key }) => e[key]?.toString().toLowerCase().includes(q));
+    const searchMatch = props.columnMap.some(({ key }) => e[key]?.toString().toLowerCase().includes(q));
     const appliedFilters = Object.entries(props.currentFilters).filter(([, val]) => val.length);
     const filterMatch = appliedFilters.every(([key, val]) => val.includes(e[key]));
-
     return searchMatch && filterMatch;
   });
-
   props.currentPage = 1;
   paginateData(props, config, 1);
   sortData(props, config, { resort: true });
@@ -538,8 +466,15 @@ function buildDashboardHeader(props, config) {
 
 function buildDashboardTable(props, config) {
   const dashboardBody = props.el.querySelector('.dashboard-body-container');
+  if (!dashboardBody) {
+    return;
+  }
 
-  if (!dashboardBody) return;
+  // Clear any existing table
+  const existingTable = dashboardBody.querySelector('.dashboard-table-container');
+  if (existingTable) {
+    existingTable.remove();
+  }
 
   const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: dashboardBody });
   const tableWrapper = createTag('div', { class: 'dashboard-table-wrapper' }, '', { parent: tableContainer });
@@ -547,8 +482,16 @@ function buildDashboardTable(props, config) {
   const thead = createTag('thead', {}, '', { parent: table });
   createTag('tbody', {}, '', { parent: table });
   createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
-  buildTableHeaders(props, config);
-  populateTable(props, config);
+
+  if (props.columnMap?.length) {
+    buildTableHeaders(props, config);
+    populateTable(props, config);
+  } else {
+    const tBody = table.querySelector('tbody');
+    const noDataRow = createTag('tr', { class: 'no-data-row' });
+    createTag('td', { colspan: '100%' }, 'No columns available', { parent: noDataRow });
+    tBody.append(noDataRow);
+  }
 }
 
 function renderTableLoadingOverlay(props) {
@@ -655,6 +598,45 @@ function initCustomLitComponents() {
   customElements.define('filter-menu', FilterMenu);
 }
 
+async function fetchRSVPConfig(cloudType) {
+  try {
+    if (!rsvpConfigCache) {
+      return [];
+    }
+
+    // Find the appropriate config based on cloudType
+    const configItem = rsvpConfigCache.find((c) => c.cloudType === cloudType);
+    if (!configItem?.config?.data?.length) {
+      return [];
+    }
+
+    // Only use rows where Type is not 'submit'
+    const configColumns = configItem.config.data.filter((row) => row.Type !== 'submit').map((row) => ({
+      key: row.Field,
+      label: row.Label,
+      type: row.Type,
+      fallback: '',
+    }));
+
+    // Add the required sticky columns if they don't exist
+    const requiredColumns = [
+      { key: 'registrationStatus', label: 'RSVP Status', type: 'text', fallback: 'registered' },
+      { key: 'checkedIn', label: 'Checked In', type: 'text', fallback: '-' },
+    ];
+
+    // Only add if they don't already exist in the config
+    requiredColumns.forEach((col) => {
+      if (!configColumns.find((c) => c.key === col.key)) {
+        configColumns.push(col);
+      }
+    });
+
+    return configColumns;
+  } catch (error) {
+    return [];
+  }
+}
+
 async function buildDashboard(el, config) {
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
   createTag('sp-underlay', {}, '', { parent: spTheme });
@@ -674,17 +656,54 @@ async function buildDashboard(el, config) {
     currentQuery: '',
     currentEventId: uspEventId || '',
     showAllAttendees: false,
+    columnMap: [],
+    currentCloudType: '',
   };
 
   let data = [];
 
   if (props.currentEventId) {
     const currentEvent = events.find((e) => e.eventId === props.currentEventId);
+    if (!currentEvent) {
+      console.error('Current event not found for ID:', props.currentEventId);
+      buildNoAccessScreen(el);
+      return;
+    }
+
     const user = await getUser();
-    if (userHasAccessToEvent(user, props.currentEventId) || userHasAccessToSeries(user, currentEvent.seriesId) || userHasAccessToBU(user, currentEvent.cloudType)) {
+    const hasEventAccess = userHasAccessToEvent(user, props.currentEventId);
+    const hasSeriesAccess = userHasAccessToSeries(user, currentEvent.seriesId);
+    const hasBUAccess = userHasAccessToBU(user, currentEvent.cloudType);
+
+    if (hasEventAccess || hasSeriesAccess || hasBUAccess) {
       const resp = await getAllEventAttendees(props.currentEventId);
-      if (resp && !resp.error) data = resp;
+      if (resp && !resp.error) {
+        data = resp;
+      } else {
+        console.error('Failed to load attendee data:', resp?.error);
+      }
+
+      // Fetch the RSVP config based on cloudType
+      props.columnMap = await fetchRSVPConfig(currentEvent.cloudType);
+      props.currentCloudType = currentEvent.cloudType;
+
+      console.log('RSVP config load results:', {
+        cloudType: currentEvent.cloudType,
+        columnCount: props.columnMap.length,
+        columns: props.columnMap.map((c) => c.key),
+      });
+
+      if (!props.columnMap.length) {
+        console.error('Failed to load column configuration for cloudType:', currentEvent.cloudType);
+        buildNoAccessScreen(el);
+        return;
+      }
     } else {
+      console.error('User does not have access to event:', {
+        eventId: props.currentEventId,
+        userId: user?.id,
+        cloudType: currentEvent.cloudType,
+      });
       buildNoAccessScreen(el);
       return;
     }
@@ -698,7 +717,6 @@ async function buildDashboard(el, config) {
   const dataHandler = {
     set(target, prop, value, receiver) {
       target[prop] = value;
-
       if (prop === 'data') {
         target.filteredData = [...value];
         target.paginatedData = [...value];
@@ -707,25 +725,31 @@ async function buildDashboard(el, config) {
         buildFilters(receiver);
         buildEventInfo(target);
       }
-
       if (prop === 'currentEventId') {
         clearActionArea(target);
         resetSort(target);
+        // On event change, check if cloudType changed and reload config if needed
+        const newEvent = target.events.find((e) => e.eventId === value);
+        if (newEvent && newEvent.cloudType !== target.currentCloudType) {
+          fetchRSVPConfig(newEvent.cloudType).then((columnMap) => {
+            target.columnMap = columnMap;
+            target.currentCloudType = newEvent.cloudType;
+            updateFilterMap(target);
+            buildFilters(target);
+            buildDashboardTable(target, config);
+          });
+        }
       }
-
       if (prop === 'currentFilters') {
         filterData(target, config);
       }
-
       populateTable(receiver, config);
       updateResetFilterBtnState(target);
-
       return true;
     },
   };
 
   const proxyProps = new Proxy(props, dataHandler);
-
   buildDashboardSidePanel(proxyProps, config);
   buildDashboardHeader(proxyProps, config);
   buildDashboardTable(proxyProps, config);
@@ -757,6 +781,18 @@ export default async function init(el) {
   const config = readBlockConfig(el);
   el.innerHTML = '';
   buildLoadingScreen(el);
+
+  // Fetch RSVP configs once during initialization
+  try {
+    rsvpConfigCache = await fetchRsvpFormConfigs();
+    if (!rsvpConfigCache?.length) {
+      buildNoAccessScreen(el);
+      return;
+    }
+  } catch (error) {
+    buildNoAccessScreen(el);
+    return;
+  }
 
   await initProfileLogicTree('attendee-management-table', {
     noProfile: () => {
