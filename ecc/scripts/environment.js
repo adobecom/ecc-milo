@@ -77,17 +77,10 @@ export function getCurrentEnvironment(location = window.location) {
     return ENVIRONMENTS.LOCAL;
   }
 
-  // Check if we're in AEM or HLX environment
-  const SLD = host.includes('.aem.') ? 'aem' : 'hlx';
-  if (host.includes(`${SLD}.page`) || host.includes(`${SLD}.live`)) {
-    // Check each environment pattern
-    const matchedEnv = Object.entries(HOST_PATTERNS)
-      .find(([, pattern]) => pattern(host))?.[0];
-    return matchedEnv || ENVIRONMENTS.DEV;
-  }
-
-  // Fallback to dev environment
-  return ENVIRONMENTS.DEV;
+  // Check each environment pattern
+  const matchedEnv = Object.entries(HOST_PATTERNS)
+    .find(([, pattern]) => pattern(host))?.[0];
+  return matchedEnv || ENVIRONMENTS.DEV;
 }
 
 /**
