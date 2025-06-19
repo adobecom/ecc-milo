@@ -12,6 +12,19 @@ export const style = css`
 
 .agenda-drag-handle {
   cursor: grab;
+  transition: cursor 0.1s ease;
+}
+
+.agenda-drag-handle:hover {
+  cursor: grab;
+}
+
+.agenda-drag-handle:active {
+  cursor: grabbing;
+}
+
+:host(.dragging) .agenda-drag-handle {
+  cursor: grabbing;
 }
 
 .agenda-container {

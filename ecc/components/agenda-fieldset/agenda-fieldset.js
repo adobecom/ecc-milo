@@ -85,9 +85,7 @@ export default class AgendaFieldset extends LitElement {
 }}></rte-tiptap>
         </div>
       </div>
-      <div class="agenda-drag-handle">
-        <img class="icon icon-drag-dots" src="/ecc/icons/drag-dots.svg" alt="drag-dots"></img>
-      </div>
+      <slot name="drag-handle"></slot>
     `;
   }
 }
