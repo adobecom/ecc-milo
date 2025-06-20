@@ -457,6 +457,18 @@ export async function onTargetUpdate(component, props) {
 
   if (!oldVenueData) {
     resp = await createVenue(props.eventDataResp.eventId, venueData);
+
+    if (resp?.error) {
+      if (resp.status === 500) {
+        const { message } = resp.error;
+        const parsedMsg = message.match(/"message":"(.*?)"/);
+        const errorMessage = parsedMsg ? parsedMsg[1] : message;
+        component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: `Invalid address. ${errorMessage}` } }, bubbles: true, composed: true }));
+      } else {
+        buildErrorMessage(props, resp);
+      }
+      return;
+    }
   } else {
     const { placeId } = venueData;
     const additionalInformation = getAttribute(venueData, 'additionalInformation', props.locale);
