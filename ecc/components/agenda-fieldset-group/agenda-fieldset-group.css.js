@@ -14,6 +14,39 @@ export const style = css`
     display: flex;
     width: 100%;
     gap: 16px;
+    transition: all 0.2s ease;
+  }
+
+  agenda-fieldset.dragging {
+    opacity: 0.5;
+    cursor: move;
+  }
+
+  agenda-fieldset.dragging .agenda-drag-handle {
+    cursor: grabbing;
+  }
+
+  agenda-fieldset.drop-target-above {
+    border-top: 2px solid #378ef0;
+    margin-top: -2px;
+  }
+
+  agenda-fieldset.drop-target-below {
+    border-bottom: 2px solid #378ef0;
+    margin-bottom: -2px;
+  }
+
+  .agenda-drag-handle {
+    cursor: grab;
+    transition: all 0.2s ease;
+  }
+
+  .agenda-drag-handle:hover {
+    cursor: grab;
+  }
+
+  .agenda-drag-handle:active {
+    cursor: grabbing;
   }
 
   .icon-remove-circle {
