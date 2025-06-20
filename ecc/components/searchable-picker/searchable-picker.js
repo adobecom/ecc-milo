@@ -25,11 +25,18 @@ export default class SearchablePicker extends LitElement {
     this.focusedIndex = -1;
     this.isClickInsideMenu = false;
     this.label = this.label || '';
+    this.items = [];
+    this.filteredItems = [];
   }
 
   handleInput(event) {
     const filterValue = event.target.value.toLowerCase();
-    this.filteredItems = this.items.filter((i) => i.label.toLowerCase().includes(filterValue));
+    if (!this.items?.length) {
+      this.filteredItems = [];
+      this.menuOpen = false;
+      return;
+    }
+    this.filteredItems = this.items.filter((i) => i?.label?.toLowerCase().includes(filterValue));
     this.menuOpen = this.filteredItems.length > 0;
     this.focusedIndex = this.menuOpen ? 0 : -1;
   }
