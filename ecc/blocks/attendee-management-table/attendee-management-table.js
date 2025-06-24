@@ -18,7 +18,6 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 // Place these at the top so they're defined before use
 const stickyColumns = ['registrationStatus', 'checkedIn'];
-const FILTER_MAP = {};
 const SPECTRUM_COMPONENTS = [
   'theme',
   'toast',
@@ -47,9 +46,9 @@ function buildAllFilterMenues(props) {
   const filterMenus = props.el.querySelectorAll('.filter-menu-wrapper:not(.clear-all-wrapper)');
   filterMenus.forEach((menu) => menu.remove());
 
-  const { currentFilters } = props;
+  const { currentFilters, filterMap } = props;
 
-  const menues = Object.entries(FILTER_MAP).filter(([key, val]) => {
+  const menues = Object.entries(filterMap).filter(([key, val]) => {
     if (!val.length) return null;
 
     const filterMenuWrapper = createTag('div', { class: 'filter-menu-wrapper' }, '', { parent: sidePanel });
@@ -85,7 +84,7 @@ function buildFilters(props) {
   clearAllButton.addEventListener('click', () => {
     const { currentFilters } = props;
 
-    Object.keys(FILTER_MAP).forEach((key) => {
+    Object.keys(props.filterMap).forEach((key) => {
       currentFilters[key] = [];
     });
 
@@ -100,10 +99,14 @@ function buildFilters(props) {
 
 function updateFilterMap(props) {
   if (!props.columnMap) return;
+
+  // Clear existing filter map
+  props.filterMap = {};
+
   props.columnMap.forEach(({ key }) => {
     // Skip firstName and lastName for filters
     if (['firstName', 'lastName'].includes(key)) return;
-    FILTER_MAP[key] = [...new Set(props.data.map((e) => e[key]))].filter((e) => e);
+    props.filterMap[key] = [...new Set(props.data.map((e) => e[key]))].filter((e) => e);
   });
 }
 
@@ -674,6 +677,7 @@ async function buildDashboard(el, config) {
     showAllAttendees: false,
     columnMap: [],
     currentCloudType: '',
+    filterMap: {},
   };
 
   let data = [];
@@ -740,6 +744,12 @@ async function buildDashboard(el, config) {
         updateFilterMap(receiver);
         buildFilters(receiver);
         buildEventInfo(target);
+      }
+      if (prop === 'columnMap') {
+        // When column map changes, update filter map and rebuild filters
+        updateFilterMap(receiver);
+        buildFilters(receiver);
+        buildDashboardTable(receiver, config);
       }
       if (prop === 'currentEventId') {
         clearActionArea(target);
