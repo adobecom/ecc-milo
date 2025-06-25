@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
-import { getAttribute, getSpeakerPayload } from '../../scripts/data-utils.js';
+import { getAttribute } from '../../scripts/data-utils.js';
 import {
   addSpeakerToEvent,
   getSpeakers,
   updateSpeakerInEvent,
   removeSpeakerFromEvent,
-  getEventSpeaker,
   getEvent,
+  getHydratedEventSpeaker,
 } from '../../scripts/esp-controller.js';
 
 export async function onSubmit(component, props) {
@@ -126,7 +126,7 @@ async function prefillProfiles(component, props) {
     const { eventId, seriesId } = d;
     try {
       // eslint-disable-next-line max-len
-      const speakers = await Promise.all(d.speakers.map(async (sp) => getEventSpeaker(seriesId, eventId, sp.speakerId)));
+      const speakers = await Promise.all(d.speakers.map(async (sp) => getHydratedEventSpeaker(seriesId, eventId, sp.speakerId)));
       for (let idx = 0; idx < d.speakers.length; idx += 1) {
         // eslint-disable-next-line max-len
         d.speakers[idx] = { ...d.speakers[idx], type: d.speakers[idx].speakerType, ...speakers[idx] };
