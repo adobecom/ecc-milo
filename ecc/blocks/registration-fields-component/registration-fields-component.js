@@ -1,3 +1,4 @@
+import { getRegistrationFields } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { generateToolTip } from '../../scripts/utils.js';
 import { fetchRsvpFormConfigs } from '../../scripts/esp-controller.js';
@@ -9,12 +10,18 @@ async function decorateRSVPFields(el, rsvpFormConfigs) {
 
   if (!row) return;
 
-  el.dataset.rsvpFormConfigs = JSON.stringify(rsvpFormConfigs);
+  // const configSheetLocation = row.querySelector('a')?.href;
+  // const config = await fetch(configSheetLocation)
+  //   .then((resp) => (resp.ok ? resp.json() : null))
+  //   .catch((err) => window.lana?.log(`Failed to load RSVP fields config: ${err}`));
+
   row.innerHTML = '';
+
+  const mockFields = await getRegistrationFields('CreativeCloud', 'en-US');
 
   createTag(
     'rsvp-form',
-    { class: 'rsvp-form' },
+    { class: 'rsvp-form', data: JSON.stringify(mockFields) },
     '',
     { parent: row },
   );

@@ -1,0 +1,217 @@
+import { LIBS } from '../../scripts/scripts.js';
+
+const { css } = await import(`${LIBS}/deps/lit-all.min.js`);
+
+export default css`
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--spectrum-global-color-gray-50);
+  }
+
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: var(--spectrum-global-dimension-size-400);
+  }
+
+  sp-dialog .form-container {
+    padding: 0;
+    gap: 0;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spectrum-global-dimension-size-400);
+  }
+
+  .header h1 {
+    margin: 0;
+    font-size: var(--spectrum-global-dimension-size-500);
+    color: var(--spectrum-global-color-gray-900);
+  }
+
+  .field-row.edited {
+    background: var(--spectrum-global-color-gray-100);
+    border: 1px solid var(--spectrum-global-color-orange-400);
+    border-radius: var(--spectrum-global-dimension-size-100);
+  }
+
+  .content {
+    flex: 1;
+    display: flex;
+    gap: var(--spectrum-global-dimension-size-400);
+    max-height: 100vh;
+    height: max-content;
+  }
+
+  .form-section {
+    background: var(--spectrum-global-color-gray-50);
+    border: 1px solid var(--spectrum-global-color-gray-200);
+    border-radius: var(--spectrum-global-dimension-size-100);
+    padding: var(--spectrum-global-dimension-size-400);
+    padding-top: 0;
+    flex-grow: 1;
+    overflow: auto;
+  }
+
+  .section-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding-top: var(--spectrum-global-dimension-size-400);
+    padding-bottom: var(--spectrum-global-dimension-size-400);
+    background: var(--spectrum-global-color-gray-50);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .section-header h2 {
+    margin: 0;
+    font-size: var(--spectrum-global-dimension-size-400);
+    color: var(--spectrum-global-color-gray-900);
+  }
+
+  .section-header .button-container {
+    display: flex;
+    align-items: center;
+    gap: var(--spectrum-global-dimension-size-200);
+  }
+
+  .fields-table {
+    width: 100%;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: var(--spectrum-global-dimension-size-200);
+    text-align: left;
+    border-bottom: 1px solid var(--spectrum-global-color-gray-200);
+  }
+
+  th {
+    font-weight: var(--spectrum-global-font-weight-bold);
+    color: var(--spectrum-global-color-gray-700);
+  }
+
+  .field-row {
+    background: var(--spectrum-global-color-gray-50);
+  }
+
+  .field-row:hover {
+    background: var(--spectrum-global-color-gray-100);
+  }
+
+  .actions {
+    display: flex;
+    gap: var(--spectrum-global-dimension-size-100);
+  }
+
+  .action-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spectrum-global-dimension-size-200);
+    padding: var(--spectrum-global-dimension-size-400);
+    background: var(--spectrum-global-color-gray-50);
+    border-top: 1px solid var(--spectrum-global-color-gray-200);
+  }
+
+  .field-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spectrum-global-dimension-size-100);
+  }
+
+  span.divider {
+    display: inline-block;
+    width: 1px;
+    height: 40px;
+    background: var(--color-black);
+  }
+
+  sp-action-button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  sp-underlay {
+    z-index: 10;
+  }
+
+  sp-underlay + sp-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 11;
+    background: var(--spectrum-gray-100);
+    min-width: 480px;
+    width: max-content;
+  }
+
+  sp-underlay:not([open]) + sp-dialog {
+    display: none;
+  }
+
+  sp-dialog .field-container {
+    margin-bottom: var(--spectrum-global-dimension-size-200);
+  }
+
+  sp-dialog .field-container .field-header {
+    font-weight: var(--spectrum-global-font-weight-bold);
+  }
+
+  sp-dialog .field-container.list-options {
+    position: relative;
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  sp-dialog .field-container.list-options .field-header {
+    position: sticky;
+    top: 0;
+    background: var(--spectrum-gray-100);
+    z-index: 1;
+  }
+
+  sp-dialog .field-container.inline {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spectrum-global-dimension-size-200);
+  }
+
+  sp-dialog .button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spectrum-global-dimension-size-200);
+  }
+
+  sp-dialog .option-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spectrum-global-dimension-size-200);
+    margin-bottom: var(--spectrum-global-dimension-size-200);
+  }
+
+  sp-dialog .option-row-container {
+    display: flex;
+    gap: var(--spectrum-global-dimension-size-200);
+  }
+
+  sp-toast {
+    position: fixed;
+    bottom: var(--spectrum-global-dimension-size-400);
+    right: var(--spectrum-global-dimension-size-400);
+  }
+`;

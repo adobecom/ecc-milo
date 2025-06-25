@@ -17,6 +17,15 @@ export default class AgendaFieldset extends LitElement {
 
   static styles = style;
 
+  firstUpdated() {
+    // Prevent drag and drop into tiptap editor
+    const tiptap = this.renderRoot.querySelector('rte-tiptap');
+    if (tiptap) {
+      tiptap.addEventListener('dragover', (e) => e.preventDefault());
+      tiptap.addEventListener('drop', (e) => e.preventDefault());
+    }
+  }
+
   updateValue(key, value) {
     this.agenda = { ...this.agenda, [key]: value };
 
@@ -75,6 +84,9 @@ export default class AgendaFieldset extends LitElement {
   this.updateValue('description', value);
 }}></rte-tiptap>
         </div>
+      </div>
+      <div class="agenda-drag-handle">
+        <img class="icon icon-drag-dots" src="/ecc/icons/drag-dots.svg" alt="drag-dots"></img>
       </div>
     `;
   }
