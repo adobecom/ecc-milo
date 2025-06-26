@@ -84,7 +84,9 @@ async function setRsvpFormAttributes(props, eventData, component) {
   rsvpForm.setAttribute('data', JSON.stringify(data));
   rsvpForm.setAttribute('eventType', eventType);
 
-  if ((eventType === EVENT_TYPES.WEBINAR && registration?.type === 'Marketo') || defaultForm === 'marketo') {
+  const eventHasMarketoForm = eventType === EVENT_TYPES.WEBINAR && registration?.type === 'Marketo';
+  const defaultFormIsMarketo = defaultForm === 'marketo' && !registration?.type;
+  if (eventHasMarketoForm || defaultFormIsMarketo) {
     setMarketoAttributes(rsvpForm, registration);
   } else {
     setBasicFormAttributes(rsvpForm, eventData, props.locale);
