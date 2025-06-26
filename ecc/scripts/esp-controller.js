@@ -480,13 +480,47 @@ export async function addSponsorToEvent(sponsorData, eventId) {
   }
 }
 
+export async function getEventSponsor(eventId, sponsorId) {
+  if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
+  if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/events/${eventId}/sponsors/${sponsorId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to get event sponsor. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to get event sponsor:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
 export async function updateSponsorInEvent(sponsorData, sponsorId, eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!sponsorId || typeof sponsorId !== 'string') throw new Error('Invalid sponsor ID');
   if (!sponsorData || typeof sponsorData !== 'object') throw new Error('Invalid sponsor data');
 
+  const eventSponsor = await getEventSponsor(eventId, sponsorId);
+  if (eventSponsor.error) {
+    window.lana?.log(`Failed to get event sponsor. Status: ${eventSponsor.status}\nError: ${JSON.stringify(eventSponsor, null, 2)}`);
+    return { status: eventSponsor.status, error: eventSponsor.error.message };
+  }
+
   const { host } = API_CONFIG.esp[getCurrentEnvironment()];
-  const raw = JSON.stringify(sponsorData);
+  const updatedSponsorData = {
+    ...sponsorData,
+    modificationTime: eventSponsor.modificationTime,
+  };
+  const raw = JSON.stringify(updatedSponsorData);
+
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -619,13 +653,100 @@ export async function addSpeakerToEvent(speakerData, eventId) {
   }
 }
 
+export async function getSpeaker(seriesId, speakerId) {
+  if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
+  if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/series/${seriesId}/speakers/${speakerId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to get speaker details. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to get speaker details:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function getEventSpeaker(eventId, speakerId) {
+  if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
+  if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to get event speaker details. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to get event speaker details:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function getHydratedEventSpeaker(seriesId, eventId, speakerId) {
+  if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
+  if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
+  if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('GET');
+
+  const seriesSpeaker = await getSpeaker(seriesId, speakerId);
+
+  if (seriesSpeaker.error) {
+    window.lana?.log(`Failed to get event speaker details. Status: ${seriesSpeaker.status}\nError: ${JSON.stringify(seriesSpeaker, null, 2)}`);
+    return { status: seriesSpeaker.status, error: seriesSpeaker.error.message };
+  }
+
+  try {
+    const response = await safeFetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to get event speaker details. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return seriesSpeaker;
+  } catch (error) {
+    window.lana?.log(`Failed to get event speaker details:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
 export async function updateSpeakerInEvent(speakerData, speakerId, eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
   if (!speakerData || typeof speakerData !== 'object') throw new Error('Invalid speaker data');
 
+  const eventSpeakerData = await getEventSpeaker(eventId, speakerId);
+  if (eventSpeakerData.error) {
+    window.lana?.log(`Failed to get event speaker details. Status: ${eventSpeakerData.status}\nError: ${JSON.stringify(eventSpeakerData, null, 2)}`);
+    return { status: eventSpeakerData.status, error: eventSpeakerData.error.message };
+  }
+
   const { host } = API_CONFIG.esp[getCurrentEnvironment()];
-  const raw = JSON.stringify(speakerData);
+  const updatedSpeakerData = {
+    ...speakerData,
+    modificationTime: eventSpeakerData.modificationTime,
+  };
+  const raw = JSON.stringify(updatedSpeakerData);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -662,60 +783,6 @@ export async function removeSpeakerFromEvent(speakerId, eventId) {
     return { ok: true };
   } catch (error) {
     window.lana?.log(`Failed to delete speaker from event:\n${JSON.stringify(error, null, 2)}`);
-    return { status: 'Network Error', error: error.message };
-  }
-}
-
-export async function getSpeaker(seriesId, speakerId) {
-  if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
-  if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
-
-  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
-  const options = await constructRequestOptions('GET');
-
-  try {
-    const response = await safeFetch(`${host}/v1/series/${seriesId}/speakers/${speakerId}`, options);
-    const data = await response.json();
-
-    if (!response.ok) {
-      window.lana?.log(`Failed to get speaker details. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
-      return { status: response.status, error: data };
-    }
-
-    return data;
-  } catch (error) {
-    window.lana?.log(`Failed to get speaker details:\n${JSON.stringify(error, null, 2)}`);
-    return { status: 'Network Error', error: error.message };
-  }
-}
-
-export async function getEventSpeaker(seriesId, eventId, speakerId) {
-  if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
-  if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
-  if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
-
-  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
-  const options = await constructRequestOptions('GET');
-
-  const seriesSpeaker = await getSpeaker(seriesId, speakerId);
-
-  if (seriesSpeaker.error) {
-    window.lana?.log(`Failed to get event speaker details. Status: ${seriesSpeaker.status}\nError: ${JSON.stringify(seriesSpeaker, null, 2)}`);
-    return { status: seriesSpeaker.status, error: seriesSpeaker.error.message };
-  }
-
-  try {
-    const response = await safeFetch(`${host}/v1/events/${eventId}/speakers/${speakerId}`, options);
-    const data = await response.json();
-
-    if (!response.ok) {
-      window.lana?.log(`Failed to get event speaker details. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
-      return { status: response.status, error: data };
-    }
-
-    return seriesSpeaker;
-  } catch (error) {
-    window.lana?.log(`Failed to get event speaker details:\n${JSON.stringify(error, null, 2)}`);
     return { status: 'Network Error', error: error.message };
   }
 }

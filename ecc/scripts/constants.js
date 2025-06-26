@@ -57,7 +57,7 @@ export const SUPPORTED_CLOUDS = [{ id: 'CreativeCloud', name: 'Creative Cloud' }
 
 export const API_CONFIG = {
   esl: {
-    [ENVIRONMENTS.LOCAL]: { host: 'http://localhost:8499' },
+    [ENVIRONMENTS.LOCAL]: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
     [ENVIRONMENTS.DEV]: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
     [ENVIRONMENTS.DEV02]: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-d5dc93.stage.cloud.adobe.io' },
     [ENVIRONMENTS.STAGE]: { host: 'https://events-service-layer-stage.adobe.io' },
@@ -65,7 +65,7 @@ export const API_CONFIG = {
     [ENVIRONMENTS.PROD]: { host: 'https://events-service-layer.adobe.io' },
   },
   esp: {
-    [ENVIRONMENTS.LOCAL]: { host: 'http://localhost:8500' },
+    [ENVIRONMENTS.LOCAL]: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
     [ENVIRONMENTS.DEV]: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
     [ENVIRONMENTS.DEV02]: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-c81eb6.stage.cloud.adobe.io' },
     [ENVIRONMENTS.STAGE]: { host: 'https://events-service-platform-stage-or2.adobe.io' },
