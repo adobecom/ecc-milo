@@ -4,6 +4,7 @@ import { setPropsPayload } from '../form-handler/data-handler.js';
 import { EVENT_TYPES, LINK_REGEX, SUPPORTED_CLOUDS } from '../../scripts/constants.js';
 import { getSystemConfig } from '../../scripts/utils.js';
 import { LIBS } from '../../scripts/scripts.js';
+import { getRegistrationFields } from '../../scripts/esp-controller.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -79,9 +80,11 @@ async function setRsvpFormAttributes(props, eventData, component) {
   const rsvpForm = component.querySelector('div > rsvp-form');
   const rsvpConfig = rsvpFormConfigs.find(({ cloudType: cType }) => cType === cloudType);
 
-  const data = filterRsvpConfigData(rsvpConfig?.config?.data, eventData, props);
+  // const data = filterRsvpConfigData(rsvpConfig?.config?.data, eventData, props);
+  // FIXME: use mock data for now
+  const mockFields = await getRegistrationFields('CreativeCloud', 'en-US');
 
-  rsvpForm.setAttribute('data', JSON.stringify(data));
+  rsvpForm.setAttribute('data', JSON.stringify(mockFields));
   rsvpForm.setAttribute('eventType', eventType);
 
   const eventHasMarketoForm = eventType === EVENT_TYPES.WEBINAR && registration?.type === 'Marketo';
