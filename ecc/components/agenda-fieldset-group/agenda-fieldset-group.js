@@ -100,6 +100,29 @@ export default class AgendaFieldsetGroup extends LitElement {
     this.requestUpdate();
   }
 
+  handleDragHandleMouseDown(e, index) {
+    const agendaFieldset = e.target.closest('agenda-fieldset');
+    if (!agendaFieldset) return;
+
+    // Enable dragging on the agenda-fieldset
+    agendaFieldset.draggable = true;
+
+    // Add event listeners for the drag operation
+    const handleDragStart = (dragEvent) => {
+      this.handleDragStart(dragEvent, index);
+    };
+
+    const handleDragEnd = (dragEvent) => {
+      this.handleDragEnd(dragEvent);
+      agendaFieldset.draggable = false;
+      agendaFieldset.removeEventListener('dragstart', handleDragStart);
+      agendaFieldset.removeEventListener('dragend', handleDragEnd);
+    };
+
+    agendaFieldset.addEventListener('dragstart', handleDragStart);
+    agendaFieldset.addEventListener('dragend', handleDragEnd);
+  }
+
   render() {
     return html`
       <div class="agenda-group-container">
@@ -130,6 +153,9 @@ export default class AgendaFieldsetGroup extends LitElement {
             ${this.agendaItems.length === 1 && this.hasOnlyEmptyAgendaLeft() ? nothing : html`
               <img class="icon icon-remove-circle" src="${this.agendaItems.length === 1 ? '/ecc/icons/delete.svg' : '/ecc/icons/remove-circle.svg'}" alt="remove-repeater" @click=${() => this.deleteAgenda(index)}></img>
             `}
+          </div>
+          <div slot="drag-handle" class="agenda-drag-handle" @mousedown=${(e) => this.handleDragHandleMouseDown(e, index)}>
+            <img class="icon icon-drag-dots" src="/ecc/icons/drag-dots.svg" alt="drag-dots"></img>
           </div>
         </agenda-fieldset>
       `;

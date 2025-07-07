@@ -22,6 +22,10 @@ export const style = css`
     cursor: move;
   }
 
+  agenda-fieldset.dragging .agenda-drag-handle {
+    cursor: grabbing;
+  }
+
   agenda-fieldset.drop-target-above {
     border-top: 2px solid #378ef0;
     margin-top: -2px;
@@ -30,6 +34,19 @@ export const style = css`
   agenda-fieldset.drop-target-below {
     border-bottom: 2px solid #378ef0;
     margin-bottom: -2px;
+  }
+
+  .agenda-drag-handle {
+    cursor: grab;
+    transition: all 0.2s ease;
+  }
+
+  .agenda-drag-handle:hover {
+    cursor: grab;
+  }
+
+  .agenda-drag-handle:active {
+    cursor: grabbing;
   }
 
   .icon-remove-circle {
