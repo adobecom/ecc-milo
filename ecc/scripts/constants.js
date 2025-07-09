@@ -27,9 +27,12 @@ export const IMS_ENVIRONMENTS = Object.freeze({
  */
 export const DOMAINS = Object.freeze({
   ADOBE_COM: 'www.adobe.com',
+  INTERNAL_ADOBE_COM: 'events-internal.adobe.com',
   STAGE_ADOBE_COM: 'www.stage.adobe.com',
+  STAGE_INTERNAL_ADOBE_COM: 'events-internal.stage.adobe.com',
   LOCALHOST: 'localhost',
   DEV_ADOBE_COM: 'dev.adobe.com',
+  DEV_INTERNAL_ADOBE_COM: 'events-internal.dev.adobe.com',
   DEV02_ADOBE_COM: 'dev02.adobe.com',
   STAGE02_ADOBE_COM: 'stage02.adobe.com',
   CORP_ADOBE_COM: 'corp.adobe.com',
@@ -42,13 +45,18 @@ export const DOMAINS = Object.freeze({
 export const HOST_PATTERNS = Object.freeze({
   [ENVIRONMENTS.LOCAL]: (host) => host.includes(DOMAINS.LOCALHOST),
   [ENVIRONMENTS.DEV02]: (host) => host.startsWith('dev02--') || host.includes(DOMAINS.DEV02_ADOBE_COM),
+  [ENVIRONMENTS.DEV]: (host) => host.startsWith('dev--')
+    || host.includes(DOMAINS.DEV_ADOBE_COM)
+    || host.includes(DOMAINS.DEV_INTERNAL_ADOBE_COM),
   [ENVIRONMENTS.STAGE]: (host) => host.startsWith('stage--')
     || host.includes(DOMAINS.STAGE_ADOBE_COM)
+    || host.includes(DOMAINS.STAGE_INTERNAL_ADOBE_COM)
     || host.includes(DOMAINS.CORP_ADOBE_COM)
     || host.includes(DOMAINS.GRAYBOX_ADOBE_COM),
   [ENVIRONMENTS.STAGE02]: (host) => host.startsWith('stage02--') || host.includes(DOMAINS.STAGE02_ADOBE_COM),
-  [ENVIRONMENTS.PROD]: (host) => host.startsWith('main--') || host.endsWith('adobe.com'),
-  [ENVIRONMENTS.DEV]: (host) => host.startsWith('dev--') || host.includes(DOMAINS.DEV_ADOBE_COM),
+  [ENVIRONMENTS.PROD]: (host) => host.startsWith('main--')
+    || host.endsWith('adobe.com')
+    || host.includes(DOMAINS.INTERNAL_ADOBE_COM),
 });
 
 export const LINK_REGEX = '^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,63}(:[0-9]{1,5})?(\\/.*)?$';
