@@ -2,6 +2,7 @@
 import { isImageTypeValid, isImageSizeValid } from '../../scripts/image-validator.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './image-dropzone.css.js';
+import init from './cc-everywhere-cropper.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -10,6 +11,7 @@ export default class ImageDropzone extends LitElement {
     file: { type: Object, reflect: true },
     handleImage: { type: Function },
     handleDelete: { type: Function },
+    enableCropper: { type: Boolean },
   };
 
   static styles = style;
@@ -20,6 +22,7 @@ export default class ImageDropzone extends LitElement {
     this.file = null;
     this.handleImage = () => {};
     this.handleDelete = this.handleDelete || null;
+    this.enableCropper = true;
   }
 
   async setFile(files) {
@@ -85,6 +88,29 @@ export default class ImageDropzone extends LitElement {
     this.dispatchEvent(new CustomEvent('image-change', { detail: { file: this.file } }));
   }
 
+  onCropClick() {
+    if (!this.file?.url) return;
+
+    const cropperContainer = this.shadowRoot.querySelector('#cc-everywhere-cropper-container');
+    if (cropperContainer) {
+      cropperContainer.remove();
+    }
+
+    const triggerElement = this.shadowRoot.querySelector('img.icon-crop');
+    init(this, triggerElement);
+  }
+
+  handleCropFileReady(event) {
+    const { file } = event.detail;
+
+    // Update the file with the cropped version
+    this.file = file;
+    this.file.url = URL.createObjectURL(file);
+
+    this.dispatchEvent(new CustomEvent('image-change', { detail: { file: this.file } }));
+    this.handleImage();
+  }
+
   render() {
     return this.file?.url ? html`
       <div class="img-file-input-wrapper solid-border">
@@ -92,9 +118,17 @@ export default class ImageDropzone extends LitElement {
           <div class="preview-img-placeholder">
             <img src="${this.file.url}" alt="preview image">
           </div>
-          <img src="/ecc/icons/delete.svg" alt="delete icon" class="icon icon-delete" @click=${this.handleDelete ? this.handleDelete : this.deleteImage}>
+          <div class="action-buttons">
+            ${this.enableCropper ? html`
+              <img src="/ecc/icons/crop.svg" alt="crop icon" class="icon icon-crop" @click=${this.onCropClick}>
+            ` : ''}
+            <img src="/ecc/icons/delete.svg" alt="delete icon" class="icon icon-delete" @click=${this.handleDelete ? this.handleDelete : this.deleteImage}>
+          </div>
         </div>
-      </div>`
+      </div>
+      ${this.enableCropper ? html`
+        <div id="cc-everywhere-cropper-container"></div>
+      ` : ''}`
       : html`
     <div class="img-file-input-wrapper">
       <label class="img-file-input-label" @dragover=${this.handleDragover} @dragleave=${this.handleDragleave} @drop=${this.handleImageDrop}>

@@ -27,12 +27,21 @@ export const style = css`
   z-index: 1;
 }
 
-.img-file-input-wrapper .preview-wrapper .icon-delete {
+.img-file-input-wrapper .preview-wrapper .action-buttons {
   position: absolute;
   top: 8px;
   right: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.img-file-input-wrapper .preview-wrapper .icon-delete,
+.img-file-input-wrapper .preview-wrapper .icon-crop {
   cursor: pointer;
   filter: drop-shadow(1px 1px 1px white);
+  width: 20px;
+  height: 20px;
 }
 
 .img-file-input-wrapper .preview-img-placeholder {
