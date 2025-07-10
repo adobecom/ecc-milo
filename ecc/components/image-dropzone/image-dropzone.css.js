@@ -24,7 +24,6 @@ export const style = css`
   width: 100%;
   height: 100%;
   position: relative;
-  z-index: 1;
 }
 
 .img-file-input-wrapper .preview-wrapper .action-buttons {

@@ -2,7 +2,7 @@
 import { isImageTypeValid, isImageSizeValid } from '../../scripts/image-validator.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './image-dropzone.css.js';
-import init from './cc-everywhere-cropper.js';
+import { initCropper } from '../../scripts/utils.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -97,15 +97,14 @@ export default class ImageDropzone extends LitElement {
     }
 
     const triggerElement = this.shadowRoot.querySelector('img.icon-crop');
-    init(this, triggerElement);
+    initCropper(this, triggerElement);
   }
 
-  handleCropFileReady(event) {
-    const { file } = event.detail;
-
-    // Update the file with the cropped version
+  handleCroppedFile(file) {
     this.file = file;
     this.file.url = URL.createObjectURL(file);
+
+    console.log('handleCropFileReady', this.file);
 
     this.dispatchEvent(new CustomEvent('image-change', { detail: { file: this.file } }));
     this.handleImage();
@@ -125,10 +124,7 @@ export default class ImageDropzone extends LitElement {
             <img src="/ecc/icons/delete.svg" alt="delete icon" class="icon icon-delete" @click=${this.handleDelete ? this.handleDelete : this.deleteImage}>
           </div>
         </div>
-      </div>
-      ${this.enableCropper ? html`
-        <div id="cc-everywhere-cropper-container"></div>
-      ` : ''}`
+      </div>`
       : html`
     <div class="img-file-input-wrapper">
       <label class="img-file-input-label" @dragover=${this.handleDragover} @dragleave=${this.handleDragleave} @drop=${this.handleImageDrop}>

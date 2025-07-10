@@ -3,7 +3,6 @@ import {
   getErrorMsg,
   createDocConfig,
   createMergeVideosDocConfig,
-  createContainerConfig,
   createDefaultExportConfig,
   executeQuickAction,
   processFilesForQuickAction,
@@ -21,19 +20,14 @@ export function runQuickAction(quickActionId, data) {
   quickActionContainer = createTag('div', { id: `${quickActionId}-container`, class: 'quick-action-container' });
   document.body.append(quickActionContainer);
 
-  const contConfig = createContainerConfig(quickActionId);
   const docConfig = createDocConfig(data[0], 'image');
   const videoDocConfig = quickActionId === 'merge-videos' ? createMergeVideosDocConfig(data) : createDocConfig(data[0], 'video');
 
   const appConfig = {
-    metaData: { isFrictionlessQa: 'true' },
     receiveQuickActionErrors: true,
     callbacks: {
       onError: (error) => {
         quickActionContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error } }));
-      },
-      onPublish: (result) => {
-        console.log('onPublish', result);
       },
     },
   };
@@ -47,7 +41,6 @@ export function runQuickAction(quickActionId, data) {
     docConfig,
     appConfig,
     exportConfig,
-    contConfig,
     videoDocConfig,
   );
 }

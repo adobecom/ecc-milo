@@ -159,17 +159,6 @@ export function createMergeVideosDocConfig(data) {
   return { assets };
 }
 
-// Common container configuration
-export function createContainerConfig(quickAction) {
-  return {
-    mode: 'inline',
-    parentElementId: `${quickAction}-container`,
-    backgroundColor: 'transparent',
-    hideCloseButton: true,
-    padding: 0,
-  };
-}
-
 export function createDefaultExportConfig() {
   return [
     {

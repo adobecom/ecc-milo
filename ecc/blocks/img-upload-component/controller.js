@@ -157,9 +157,28 @@ export default async function init(component, props) {
       const photoObj = images.find((p) => p.imageKind === type);
 
       if (photoObj) {
-        dropzones.forEach((dz) => {
-          dz.file = { ...photoObj, url: photoObj.imageUrl };
-          dz.requestUpdate();
+        dropzones.forEach(async (dz) => {
+          // Convert the existing image to a proper File object for consistency
+          try {
+            const response = await fetch(photoObj.imageUrl);
+            const blob = await response.blob();
+
+            // Create a proper File object from the blob
+            const file = new File([blob], photoObj.fileName || 'event-image.jpg', {
+              type: photoObj.contentType || 'image/jpeg',
+              lastModified: Date.now(),
+            });
+
+            // Set the file and create object URL
+            dz.file = file;
+            dz.file.url = URL.createObjectURL(file);
+            dz.requestUpdate();
+          } catch (error) {
+            // Fallback to the original approach if fetch fails
+            console.warn('Failed to convert image to File object, using fallback:', error);
+            dz.file = { ...photoObj, url: photoObj.imageUrl };
+            dz.requestUpdate();
+          }
         });
       }
     }
