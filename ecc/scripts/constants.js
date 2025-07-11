@@ -76,7 +76,7 @@ export const API_CONFIG = {
     [ENVIRONMENTS.LOCAL]: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
     [ENVIRONMENTS.DEV]: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
     [ENVIRONMENTS.DEV02]: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-c81eb6.stage.cloud.adobe.io' },
-    [ENVIRONMENTS.STAGE]: { host: 'https://events-service-platform-stage-or2.adobe.io' },
+    [ENVIRONMENTS.STAGE]: { host: 'https://events-service-platform-stage.adobe.io' },
     [ENVIRONMENTS.STAGE02]: { host: 'https://wcms-events-service-platform-deploy-ethos105-stage-9a5fdc.stage.cloud.adobe.io' },
     [ENVIRONMENTS.PROD]: { host: 'https://events-service-platform.adobe.io' },
   },
