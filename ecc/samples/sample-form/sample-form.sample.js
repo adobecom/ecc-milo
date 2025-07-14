@@ -65,11 +65,6 @@ const PUBLISHABLE_ATTRS = [
   'templateId',
 ];
 
-export function buildErrorMessage(props, resp) {
-  const errorManager = ErrorManager.withContext(props);
-  errorManager.handleErrorResponse(resp);
-}
-
 function replaceAnchorWithButton(anchor) {
   if (!anchor || anchor.tagName !== 'A') {
     return null;
@@ -467,7 +462,9 @@ function initFormCtas(props) {
       if (['#save', '#next'].includes(ctaUrl.hash)) {
         if (ctaUrl.hash === '#next') {
           cta.classList.add('next-button');
-          const [finalStateText, doneStateText, republishStateText] = cta.textContent.split('||');
+          const finalStateText = 'Publish series';
+          const doneStateText = 'Done';
+          const republishStateText = 'Re-publish series';
 
           cta.textContent = finalStateText;
           cta.prepend(getIcon('golden-rocket'));
@@ -493,7 +490,8 @@ function initFormCtas(props) {
             }
 
             if (resp?.error) {
-              buildErrorMessage(props, resp);
+              const errorManager = ErrorManager.withContext(props);
+              errorManager.handleErrorResponse(resp);
             } else if (props.currentStep === props.maxStep) {
               const toastArea = props.el.querySelector('.toast-area');
               cta.textContent = cta.dataset.doneStateText;
@@ -508,7 +506,8 @@ function initFormCtas(props) {
           } else {
             const resp = await saveSeries(props);
             if (resp?.error) {
-              buildErrorMessage(props, resp);
+              const errorManager = ErrorManager.withContext(props);
+              errorManager.handleErrorResponse(resp);
             }
           }
 
@@ -558,7 +557,8 @@ function initNavigation(props) {
 
         const resp = await saveSeries(props);
         if (resp?.error) {
-          buildErrorMessage(props, resp);
+          const errorManager = ErrorManager.withContext(props);
+          errorManager.handleErrorResponse(resp);
         } else {
           navigateForm(props, i);
         }

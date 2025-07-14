@@ -62,11 +62,6 @@ const PUBLISHABLE_ATTRS = [
   'templateId',
 ];
 
-export function buildErrorMessage(props, resp) {
-  const errorManager = ErrorManager.withContext(props);
-  errorManager.handleErrorResponse(resp);
-}
-
 function replaceAnchorWithButton(anchor) {
   if (!anchor || anchor.tagName !== 'A') {
     return null;
@@ -434,7 +429,6 @@ function navigateForm(props, stepIndex) {
 }
 
 function initFormCtas(props) {
-  const errorManager = ErrorManager.withContext(props);
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
   decorateButtons(ctaRow, 'button-l');
   const ctas = ctaRow.querySelectorAll('a');
@@ -492,19 +486,15 @@ function initFormCtas(props) {
             }
 
             if (resp?.error) {
-              buildErrorMessage(props, resp);
+              const errorManager = ErrorManager.withContext(props);
+              errorManager.handleErrorResponse(resp);
             } else if (props.currentStep === props.maxStep) {
               const toastArea = props.el.querySelector('.toast-area');
               cta.textContent = cta.dataset.doneStateText;
               cta.classList.add('disabled');
 
               if (toastArea) {
-                errorManager.showSuccess(props, 'Success! This series has been published.', {
-                  actionButton: {
-                    text: 'Go to dashboard',
-                    href: props.el.querySelector('.side-menu > ul > li > a')?.href,
-                  },
-                });
+                updateDashboardLink(props);
               }
             } else {
               navigateForm(props);
@@ -512,7 +502,8 @@ function initFormCtas(props) {
           } else {
             const resp = await save(props);
             if (resp?.error) {
-              buildErrorMessage(props, resp);
+              const errorManager = ErrorManager.withContext(props);
+              errorManager.handleErrorResponse(resp);
             }
           }
 
@@ -562,7 +553,8 @@ function initNavigation(props) {
 
         const resp = await save(props);
         if (resp?.error) {
-          buildErrorMessage(props, resp);
+          const errorManager = ErrorManager.withContext(props);
+          errorManager.handleErrorResponse(resp);
         } else {
           navigateForm(props, i);
         }

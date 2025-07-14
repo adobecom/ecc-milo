@@ -27,7 +27,22 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function showToast(props, msg, options = {}) {
   const errorManager = ErrorManager.withContext(props);
-  errorManager.showToast(props, msg, options);
+
+  // Use the appropriate method based on variant
+  const variant = options.variant || 'info';
+
+  switch (variant) {
+    case 'positive':
+      errorManager.showSuccess(msg, options);
+      break;
+    case 'negative':
+      errorManager.showError(msg, options);
+      break;
+    case 'info':
+    default:
+      errorManager.showInfo(msg, options);
+      break;
+  }
 }
 
 function formatLocaleDate(string) {

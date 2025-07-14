@@ -146,11 +146,6 @@ const INPUT_TYPES = [
   'sp-picker[required]',
 ];
 
-export function buildErrorMessage(props, resp) {
-  const errorManager = ErrorManager.withContext(props);
-  errorManager.handleErrorResponse(resp);
-}
-
 export function getCurrentFragment(props) {
   const frags = props.el.querySelectorAll('.fragment');
   const currentFrag = frags[props.currentStep];
@@ -381,7 +376,8 @@ async function saveEvent(props, toPublish = false) {
     await gatherValues(props);
   } catch (e) {
     const errorObj = { error: { message: e.message } };
-    buildErrorMessage(props, errorObj);
+    const errorManager = ErrorManager.withContext(props);
+    errorManager.handleErrorResponse(errorObj);
     return errorObj;
   }
 
@@ -656,7 +652,8 @@ async function validatePreview(props, cta) {
             return;
           }
           if (metadataJson?.error) {
-            buildErrorMessage(props, metadataJson.error);
+            const errorManager = ErrorManager.withContext(props);
+            errorManager.handleErrorResponse(metadataJson.error);
             buildPreviewLoadingFailedDialog(props, previewHref);
             poll.cancel();
             return;
@@ -715,7 +712,8 @@ function initFormCtas(props) {
 
           const eventId = getAttribute(props.eventDataResp, 'eventId', props.locale);
           if (!eventId) {
-            buildErrorMessage(props, { error: { message: 'Event ID is not found' } });
+            const errorManager = ErrorManager.withContext(props);
+            errorManager.showError('Event ID is not found');
             toggleBtnsSubmittingState(false);
             return;
           }
@@ -728,7 +726,8 @@ function initFormCtas(props) {
           );
 
           if (resp.error) {
-            buildErrorMessage(props, resp.error);
+            const errorManager = ErrorManager.withContext(props);
+            errorManager.handleErrorResponse(resp.error);
             toggleBtnsSubmittingState(false);
             return;
           }
