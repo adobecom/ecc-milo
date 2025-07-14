@@ -7,30 +7,42 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
  * Centralized error manager for handling all error display patterns
  */
 class ErrorManager {
-  constructor() {
+  constructor(context = null) {
     this.defaultOptions = {
       variant: 'negative',
       timeout: 6000,
       showCloseButton: true,
     };
+    this.context = context;
+  }
+
+  /**
+   * Create a new error manager instance with a specific context
+   * @param {Object} context - Props object or target element
+   * @returns {ErrorManager} New error manager instance with context
+   */
+  static withContext(context) {
+    return new ErrorManager(context);
   }
 
   /**
    * Get the toast area from the target element or fallback to a default
-   * @param {Object} target - Target element or props object
+   * @param {Object} target - Target element or props object (optional if context is set)
    * @returns {HTMLElement} Toast area element
    */
-  static getToastArea(target) {
-    if (target?.targetEl?.querySelector('.toast-area')) {
-      return target.targetEl.querySelector('.toast-area');
+  getToastArea(target = null) {
+    const context = target || this.context;
+
+    if (context?.targetEl?.querySelector('.toast-area')) {
+      return context.targetEl.querySelector('.toast-area');
     }
 
-    if (target?.el?.querySelector('.toast-area')) {
-      return target.el.querySelector('.toast-area');
+    if (context?.el?.querySelector('.toast-area')) {
+      return context.el.querySelector('.toast-area');
     }
 
-    if (target?.querySelector?.('.toast-area')) {
-      return target.querySelector('.toast-area');
+    if (context?.querySelector?.('.toast-area')) {
+      return context.querySelector('.toast-area');
     }
 
     // Fallback to document body if no toast area found
@@ -62,14 +74,15 @@ class ErrorManager {
 
   /**
    * Handle error response object (from API calls)
-   * @param {Object} target - Target element or props object
    * @param {Object} resp - Response object with error
    * @param {Object} options - Additional options
+   * @param {Object} target - Optional target override
    */
-  handleErrorResponse(target, resp, options = {}) {
+  handleErrorResponse(resp, options = {}, target = null) {
     if (!resp?.error) return;
 
-    const toastArea = this.getToastArea(target);
+    const context = target || this.context;
+    const toastArea = this.getToastArea(context);
     const messages = [];
     const errorBag = resp.error.errors;
     const errorMessage = resp.error.message;
@@ -82,52 +95,53 @@ class ErrorManager {
         messages.push(text);
       });
 
-             messages.forEach((msg, i) => {
-         this.createToast(msg, toastArea, {
-           timeout: 6000 + (i * 3000),
-           ...options,
-         });
-       });
-     } else if (errorMessage) {
-       // Handle specific error types
-       if (resp.status === 409
-           || errorMessage.includes('Event update invalid')
-           || errorMessage.includes('Series update invalid')) {
-         this.handleConcurrencyError(target, resp, options);
-       } else {
-         this.createToast(errorMessage, toastArea, options);
-       }
-     }
+      messages.forEach((msg, i) => {
+        this.createToast(msg, toastArea, {
+          timeout: 6000 + (i * 3000),
+          ...options,
+        });
+      });
+    } else if (errorMessage) {
+      // Handle specific error types
+      if (resp.status === 409
+          || errorMessage.includes('Event update invalid')
+          || errorMessage.includes('Series update invalid')) {
+        this.handleConcurrencyError(resp, options, target);
+      } else {
+        this.createToast(errorMessage, toastArea, options);
+      }
+    }
   }
 
   /**
    * Handle concurrency errors (409 status)
-   * @param {Object} target - Target element or props object
    * @param {Object} resp - Response object
    * @param {Object} options - Additional options
+   * @param {Object} target - Optional target override
    */
-  handleConcurrencyError(target, resp, options = {}) {
-    const toastArea = this.getToastArea(target);
+  handleConcurrencyError(resp, options = {}, target = null) {
+    const context = target || this.context;
+    const toastArea = this.getToastArea(context);
     const isEvent = resp.error.message.includes('Event update invalid');
     const isSeries = resp.error.message.includes('Series update invalid');
-    
-    let message = 'The item has been updated by a different session since your last save.';
-    let url = new URL(window.location.href);
-    
+
+    const message = 'The item has been updated by a different session since your last save.';
+    const url = new URL(window.location.href);
+
     if (isEvent) {
-      const eventId = target?.eventDataResp?.eventId || target?.eventId;
+      const eventId = context?.eventDataResp?.eventId || context?.eventId;
       if (eventId) {
         url.searchParams.set('eventId', eventId);
       }
     } else if (isSeries) {
-      const seriesId = target?.response?.seriesId || target?.seriesId;
+      const seriesId = context?.response?.seriesId || context?.seriesId;
       if (seriesId) {
         url.searchParams.set('seriesId', seriesId);
       }
     }
 
-    const toast = this.createToast(message, options, toastArea);
-    
+    const toast = this.createToast(message, toastArea, options);
+
     createTag('sp-button', {
       slot: 'action',
       variant: 'overBackground',
@@ -137,23 +151,25 @@ class ErrorManager {
 
   /**
    * Handle simple error messages
-   * @param {Object} target - Target element or props object
    * @param {string} message - Error message
    * @param {Object} options - Toast options
+   * @param {Object} target - Optional target override
    */
-  showError(target, message, options = {}) {
-    const toastArea = this.getToastArea(target);
-    this.createToast(message, options, toastArea);
+  showError(message, options = {}, target = null) {
+    const context = target || this.context;
+    const toastArea = this.getToastArea(context);
+    this.createToast(message, toastArea, options);
   }
 
   /**
    * Handle success messages
-   * @param {Object} target - Target element or props object
    * @param {string} message - Success message
    * @param {Object} options - Toast options
+   * @param {Object} target - Optional target override
    */
-  showSuccess(target, message, options = {}) {
-    const toastArea = this.getToastArea(target);
+  showSuccess(message, options = {}, target = null) {
+    const context = target || this.context;
+    const toastArea = this.getToastArea(context);
     const toast = this.createToast(message, toastArea, {
       variant: 'positive',
       ...options,
@@ -173,51 +189,71 @@ class ErrorManager {
 
   /**
    * Handle info messages
-   * @param {Object} target - Target element or props object
    * @param {string} message - Info message
    * @param {Object} options - Toast options
+   * @param {Object} target - Optional target override
    */
-  showInfo(target, message, options = {}) {
-    const toastArea = this.getToastArea(target);
-    this.createToast(message, {
+  showInfo(message, options = {}, target = null) {
+    const context = target || this.context;
+    const toastArea = this.getToastArea(context);
+    this.createToast(message, toastArea, {
       variant: 'info',
       ...options,
-    }, toastArea);
+    });
   }
 
   /**
    * Handle caught exceptions
-   * @param {Object} target - Target element or props object
    * @param {Error} error - Caught error
    * @param {Object} options - Toast options
+   * @param {Object} target - Optional target override
    */
-  handleException(target, error, options = {}) {
+  handleException(error, options = {}, target = null) {
     const message = error.message || 'An unexpected error occurred. Please try again.';
-    this.showError(target, message, options);
+    this.showError(message, options, target);
   }
 
   /**
    * Handle custom error events
-   * @param {Object} target - Target element or props object
    * @param {CustomEvent} event - Custom error event
+   * @param {Object} target - Optional target override
    */
-  handleCustomEvent(target, event) {
+  handleCustomEvent(event, target = null) {
     const { error, message, options = {} } = event.detail;
-    
+
     if (error) {
-      this.handleErrorResponse(target, { error }, options);
+      this.handleErrorResponse({ error }, options, target);
     } else if (message) {
-      this.showError(target, message, options);
+      this.showError(message, options, target);
     }
   }
 
+  /**
+   * Create a wrapped async function that automatically handles errors
+   * @param {Function} fn - Async function to wrap
+   * @param {Object} options - Error handling options
+   * @param {Object} target - Optional target override
+   * @returns {Function} Wrapped function
+   */
+  wrapAsyncFunction(fn, options = {}, target = null) {
+    return async (...args) => {
+      try {
+        return await fn(...args);
+      } catch (error) {
+        this.handleException(error, options, target);
+        throw error; // Re-throw to maintain original behavior
+      }
+    };
+  }
+
+  // Legacy compatibility methods - these maintain the old API
   /**
    * Legacy compatibility method for buildErrorMessage
    * @param {Object} props - Props object
    * @param {Object} resp - Response object
    */
   buildErrorMessage(props, resp) {
-    this.handleErrorResponse(props, resp);
+    this.handleErrorResponse(resp, {}, props);
   }
 
   /**
@@ -228,17 +264,17 @@ class ErrorManager {
    */
   showToast(props, message, options = {}) {
     const variant = options.variant || 'info';
-    
+
     switch (variant) {
       case 'positive':
-        this.showSuccess(props, message, options);
+        this.showSuccess(message, options, props);
         break;
       case 'negative':
-        this.showError(props, message, options);
+        this.showError(message, options, props);
         break;
       case 'info':
       default:
-        this.showInfo(props, message, options);
+        this.showInfo(message, options, props);
         break;
     }
   }
@@ -252,32 +288,19 @@ class ErrorManager {
     element.addEventListener('show-error-toast', (e) => {
       e.stopPropagation();
       e.preventDefault();
-      this.handleCustomEvent(props, e);
+      this.handleCustomEvent(e, props);
     });
 
     element.addEventListener('show-success-toast', (e) => {
       e.stopPropagation();
       e.preventDefault();
-      this.showSuccess(props, e.detail.message || 'Success!', e.detail);
+      this.showSuccess(e.detail.message || 'Success!', e.detail, props);
     });
   }
 
-  /**
-   * Create a wrapped async function that automatically handles errors
-   * @param {Function} fn - Async function to wrap
-   * @param {Object} target - Target for error display
-   * @param {Object} options - Error handling options
-   * @returns {Function} Wrapped function
-   */
-  wrapAsyncFunction(fn, target, options = {}) {
-    return async (...args) => {
-      try {
-        return await fn(...args);
-      } catch (error) {
-        this.handleException(target, error, options);
-        throw error; // Re-throw to maintain original behavior
-      }
-    };
+  // Static methods for backward compatibility
+  static getToastArea(target) {
+    return new ErrorManager().getToastArea(target);
   }
 }
 
@@ -286,4 +309,4 @@ const errorManager = new ErrorManager();
 
 // Export both the class and singleton instance
 export { ErrorManager };
-export default errorManager; 
+export default errorManager;
