@@ -3,7 +3,6 @@ import {
   getIcon,
   buildNoAccessScreen,
   generateToolTip,
-  camelToSentenceCase,
   signIn,
 } from '../../scripts/utils.js';
 import {
@@ -14,6 +13,7 @@ import {
 } from '../../scripts/esp-controller.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToSeries } from '../../scripts/profile.js';
+import errorManager from '../../scripts/error-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -63,54 +63,7 @@ const PUBLISHABLE_ATTRS = [
 ];
 
 export function buildErrorMessage(props, resp) {
-  if (!resp) return;
-
-  const toastArea = resp.targetEl ? resp.targetEl.querySelector('.toast-area') : props.el.querySelector('.toast-area');
-
-  if (resp.error) {
-    const messages = [];
-    const errorBag = resp.error.errors;
-    const errorMessage = resp.error.message;
-
-    if (errorBag) {
-      errorBag.forEach((error) => {
-        const errorPathSegments = error.path.split('/');
-        const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${error.message}`;
-        messages.push(text);
-      });
-
-      messages.forEach((msg, i) => {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 + (i * 3000) }, msg, { parent: toastArea });
-        toast.addEventListener('close', (e) => {
-          e.stopPropagation();
-          toast.remove();
-        }, { once: true });
-      });
-    } else if (errorMessage) {
-      if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Series update invalid. The series has been modified since last fetch"}') {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'The series has been updated by a different session since your last save.', { parent: toastArea });
-        const url = new URL(window.location.href);
-        url.searchParams.set('seriesId', getFilteredCachedResponse().seriesId);
-
-        createTag('sp-button', {
-          slot: 'action',
-          variant: 'overBackground',
-          href: `${url.toString()}`,
-        }, 'See the latest version', { parent: toast });
-
-        toast.addEventListener('close', (e) => {
-          e.stopPropagation();
-          toast.remove();
-        }, { once: true });
-      } else {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, errorMessage, { parent: toastArea });
-        toast.addEventListener('close', (e) => {
-          e.stopPropagation();
-          toast.remove();
-        }, { once: true });
-      }
-    }
-  }
+  errorManager.handleErrorResponse(props, resp);
 }
 
 function replaceAnchorWithButton(anchor) {
@@ -781,17 +734,7 @@ async function buildForm(el) {
   initDeepLink(proxyProps);
   updateStatusTag(proxyProps);
 
-  el.addEventListener('show-error-toast', (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    buildErrorMessage(proxyProps, e.detail);
-  });
-
-  el.addEventListener('show-success-toast', (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    showSaveSuccessMessage(proxyProps, e.detail);
-  });
+  errorManager.initErrorListeners(el, proxyProps);
 }
 
 function buildLoadingScreen(el) {
