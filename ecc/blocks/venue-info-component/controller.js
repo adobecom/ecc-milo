@@ -9,7 +9,7 @@ import { getCurrentEnvironment } from '../../scripts/environment.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { getAttribute, getVenuePayload } from '../../scripts/data-utils.js';
 import { ENVIRONMENTS } from '../../scripts/constants.js';
-import errorManager from '../../scripts/error-manager.js';
+import { ErrorManager } from '../../scripts/error-manager.js';
 
 const imageType = 'venue-additional-image';
 let imageFile = null;
@@ -443,6 +443,8 @@ export default async function init(component, props) {
 }
 
 export async function onTargetUpdate(component, props) {
+  const errorManager = ErrorManager.withContext(props);
+
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const venueDataInForm = getVenueDataInForm(component);
@@ -465,7 +467,7 @@ export async function onTargetUpdate(component, props) {
         const errorMessage = parsedMsg ? parsedMsg[1] : message;
         component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: `Invalid address. ${errorMessage}` } }, bubbles: true, composed: true }));
       } else {
-        errorManager.handleErrorResponse(props, resp);
+        errorManager.handleErrorResponse(resp);
       }
       return;
     }
@@ -489,7 +491,7 @@ export async function onTargetUpdate(component, props) {
     }
 
     if (resp?.error) {
-      errorManager.handleErrorResponse(props, resp);
+      errorManager.handleErrorResponse(resp);
     }
   }
 

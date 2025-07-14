@@ -41,7 +41,7 @@ import {
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
-import errorManager from '../../scripts/error-manager.js';
+import { ErrorManager } from '../../scripts/error-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -147,7 +147,8 @@ const INPUT_TYPES = [
 ];
 
 export function buildErrorMessage(props, resp) {
-  errorManager.handleErrorResponse(props, resp);
+  const errorManager = ErrorManager.withContext(props);
+  errorManager.handleErrorResponse(resp);
 }
 
 export function getCurrentFragment(props) {
@@ -257,6 +258,7 @@ function enableSideNavForEditFlow(props) {
 }
 
 async function loadEventData(props) {
+  const errorManager = ErrorManager.withContext(props);
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
@@ -268,7 +270,7 @@ async function loadEventData(props) {
       || userHasAccessToBU(user, event.cloudType)) {
       setTimeout(() => {
         if (!props.eventDataResp.eventId) {
-          errorManager.showError(props, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { timeout: 10000 });
+          errorManager.showError('Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { timeout: 10000 });
         }
       }, 5000);
 
@@ -354,7 +356,8 @@ async function updateComponentsOnRespChange(props) {
 }
 
 function showSaveSuccessMessage(props, detail = { message: 'Edits saved successfully' }) {
-  errorManager.showSuccess(props, detail.message || 'Edits saved successfully', { timeout: 6000 });
+  const errorManager = ErrorManager.withContext(props);
+  errorManager.showSuccess(detail.message || 'Edits saved successfully', { timeout: 6000 });
 }
 
 function updateDashboardLink(props) {
@@ -780,7 +783,7 @@ function initFormCtas(props) {
                 cta.textContent = cta.dataset.doneStateText;
                 cta.classList.add('disabled');
 
-                errorManager.showSuccess(props, 'Success! This event has been published.', {
+                showSaveSuccessMessage(props, 'Success! This event has been published.', {
                   actionButton: {
                     text: 'Go to dashboard',
                     href: props.el.querySelector('.side-menu > ul > li > a')?.href,
@@ -1103,7 +1106,7 @@ export async function buildECCForm(el) {
   updateStatusTag(proxyProps);
   toggleSections(proxyProps);
 
-  errorManager.initErrorListeners(el, proxyProps);
+  ErrorManager.withContext(proxyProps).initErrorListeners(el, proxyProps);
 }
 
 export function buildLoadingScreen(el) {

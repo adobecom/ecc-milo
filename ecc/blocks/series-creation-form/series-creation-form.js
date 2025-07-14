@@ -11,9 +11,9 @@ import {
   publishSeries,
   getSeriesById,
 } from '../../scripts/esp-controller.js';
-import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, { quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToSeries } from '../../scripts/profile.js';
-import errorManager from '../../scripts/error-manager.js';
+import { ErrorManager } from '../../scripts/error-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -63,7 +63,8 @@ const PUBLISHABLE_ATTRS = [
 ];
 
 export function buildErrorMessage(props, resp) {
-  errorManager.handleErrorResponse(props, resp);
+  const errorManager = ErrorManager.withContext(props);
+  errorManager.handleErrorResponse(resp);
 }
 
 function replaceAnchorWithButton(anchor) {
@@ -320,22 +321,22 @@ function decorateForm(el) {
 }
 
 function showSaveSuccessMessage(props, detail = { message: 'Edits saved successfully' }) {
-  errorManager.showSuccess(props, detail.message || 'Edits saved successfully', { timeout: 6000 });
+  const errorManager = ErrorManager.withContext(props);
+  errorManager.showSuccess(detail.message || 'Edits saved successfully', { timeout: 6000 });
 }
 
 function updateDashboardLink(props) {
-  // FIXME: presuming first link is dashboard link is not good.
-  if (!getFilteredCachedResponse().seriesId) return;
-  const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+  const errorManager = ErrorManager.withContext(props);
+  const url = new URL(window.location.href);
+  url.searchParams.set('seriesId', props.response.seriesId);
+  url.pathname = '/tools/series-dashboard';
 
-  if (!dashboardLink) return;
-
-  const url = new URL(dashboardLink.href);
-
-  if (url.searchParams.has('seriesId')) return;
-
-  url.searchParams.set('newEventId', getFilteredCachedResponse().seriesId);
-  dashboardLink.href = url.toString();
+  errorManager.showSuccess('Success! This series has been published.', {
+    actionButton: {
+      text: 'Go to Series Dashboard',
+      href: url.toString(),
+    },
+  });
 }
 
 async function save(props, toPublish = false) {
@@ -433,6 +434,7 @@ function navigateForm(props, stepIndex) {
 }
 
 function initFormCtas(props) {
+  const errorManager = ErrorManager.withContext(props);
   const ctaRow = props.el.querySelector(':scope > div:last-of-type');
   decorateButtons(ctaRow, 'button-l');
   const ctas = ctaRow.querySelectorAll('a');
@@ -710,7 +712,7 @@ async function buildForm(el) {
   initDeepLink(proxyProps);
   updateStatusTag(proxyProps);
 
-  errorManager.initErrorListeners(el, proxyProps);
+  ErrorManager.withContext(proxyProps).initErrorListeners(el, proxyProps);
 }
 
 function buildLoadingScreen(el) {

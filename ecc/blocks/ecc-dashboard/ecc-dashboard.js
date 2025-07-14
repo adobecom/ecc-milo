@@ -21,11 +21,12 @@ import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
-import errorManager from '../../scripts/error-manager.js';
+import { ErrorManager } from '../../scripts/error-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function showToast(props, msg, options = {}) {
+  const errorManager = ErrorManager.withContext(props);
   errorManager.showToast(props, msg, options);
 }
 
