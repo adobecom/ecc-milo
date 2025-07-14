@@ -374,7 +374,7 @@ async function buildEventInfo(props) {
     const firstImageObj = images?.[0];
 
     const imgSrc = (heroImgObj?.sharepointUrl
-      && `${getEventPageHost()}${heroImgObj?.sharepointUrl}`)
+      && `${getEventPageHost()}${heroImgObj?.sharepointUrl}`.replace('aem.page', 'aem.live'))
     || thumbnailImgObj?.imageUrl
     || heroImgObj?.imageUrl
     || firstImageObj?.imageUrl
