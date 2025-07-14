@@ -320,19 +320,7 @@ function decorateForm(el) {
 }
 
 function showSaveSuccessMessage(props, detail = { message: 'Edits saved successfully' }) {
-  const toastArea = props.el.querySelector('.toast-area');
-  if (!toastArea) return;
-
-  const previousMsgs = toastArea.querySelectorAll('.save-success-msg');
-
-  previousMsgs.forEach((msg) => {
-    msg.remove();
-  });
-
-  const toast = createTag('sp-toast', { class: 'save-success-msg', open: true, variant: 'positive', timeout: 6000 }, detail.message || 'Edits saved successfully', { parent: toastArea });
-  toast.addEventListener('close', () => {
-    toast.remove();
-  });
+  errorManager.showSuccess(props, detail.message || 'Edits saved successfully', { timeout: 6000 });
 }
 
 function updateDashboardLink(props) {
@@ -509,23 +497,11 @@ function initFormCtas(props) {
               cta.classList.add('disabled');
 
               if (toastArea) {
-                const toast = createTag('sp-toast', { open: true, variant: 'positive' }, 'Success! This series has been published.', { parent: toastArea });
-                const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-
-                createTag(
-                  'sp-button',
-                  {
-                    slot: 'action',
-                    variant: 'overBackground',
-                    treatment: 'outline',
-                    href: dashboardLink.href,
+                errorManager.showSuccess(props, 'Success! This series has been published.', {
+                  actionButton: {
+                    text: 'Go to dashboard',
+                    href: props.el.querySelector('.side-menu > ul > li > a')?.href,
                   },
-                  'Go to dashboard',
-                  { parent: toast },
-                );
-
-                toast.addEventListener('close', () => {
-                  toast.remove();
                 });
               }
             } else {

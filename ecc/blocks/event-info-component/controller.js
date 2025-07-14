@@ -6,7 +6,7 @@ import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../.
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { getAttribute, isValidAttribute } from '../../scripts/data-utils.js';
 import initCalendar, { updateCalendarInput, parseFormattedDate } from './calendar.js';
-import { buildErrorMessage } from '../form-handler/form-handler-helper.js';
+import errorManager from '../../scripts/error-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -103,7 +103,7 @@ async function updateLanguagePicker(component, props) {
   const [cloud, localesResp] = await Promise.all([getCloud(cloudType), getLocales()]);
 
   if (!cloud || cloud.error) {
-    buildErrorMessage(component, 'Error loading cloud data. Please refresh the page or try again later.');
+    errorManager.showError(component, 'Error loading cloud data. Please refresh the page or try again later.');
     window.lana?.log('Error loading cloud data. Please refresh the page or try again later.');
     return;
   }

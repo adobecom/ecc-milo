@@ -154,10 +154,21 @@ class ErrorManager {
    */
   showSuccess(target, message, options = {}) {
     const toastArea = this.getToastArea(target);
-    this.createToast(message, {
+    const toast = this.createToast(message, toastArea, {
       variant: 'positive',
       ...options,
-    }, toastArea);
+    });
+
+    // Handle action button if provided
+    if (options.actionButton) {
+      const { text, href, variant = 'overBackground', treatment = 'outline' } = options.actionButton;
+      createTag('sp-button', {
+        slot: 'action',
+        variant,
+        treatment,
+        href,
+      }, text, { parent: toast });
+    }
   }
 
   /**

@@ -6,10 +6,10 @@ import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 import { changeInputValue, getSecret } from '../../scripts/utils.js';
 import { getCurrentEnvironment } from '../../scripts/environment.js';
-import { buildErrorMessage } from '../form-handler/form-handler-helper.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { getAttribute, getVenuePayload } from '../../scripts/data-utils.js';
 import { ENVIRONMENTS } from '../../scripts/constants.js';
+import errorManager from '../../scripts/error-manager.js';
 
 const imageType = 'venue-additional-image';
 let imageFile = null;
@@ -465,7 +465,7 @@ export async function onTargetUpdate(component, props) {
         const errorMessage = parsedMsg ? parsedMsg[1] : message;
         component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: `Invalid address. ${errorMessage}` } }, bubbles: true, composed: true }));
       } else {
-        buildErrorMessage(props, resp);
+        errorManager.handleErrorResponse(props, resp);
       }
       return;
     }
@@ -489,7 +489,7 @@ export async function onTargetUpdate(component, props) {
     }
 
     if (resp?.error) {
-      buildErrorMessage(props, resp);
+      errorManager.handleErrorResponse(props, resp);
     }
   }
 

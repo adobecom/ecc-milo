@@ -268,13 +268,7 @@ async function loadEventData(props) {
       || userHasAccessToBU(user, event.cloudType)) {
       setTimeout(() => {
         if (!props.eventDataResp.eventId) {
-          const toastArea = props.el.querySelector('.toast-area');
-          if (!toastArea) return;
-
-          const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
-          toast.addEventListener('close', () => {
-            toast.remove();
-          });
+          errorManager.showError(props, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { timeout: 10000 });
         }
       }, 5000);
 
@@ -360,19 +354,7 @@ async function updateComponentsOnRespChange(props) {
 }
 
 function showSaveSuccessMessage(props, detail = { message: 'Edits saved successfully' }) {
-  const toastArea = props.el.querySelector('.toast-area');
-  if (!toastArea) return;
-
-  const previousMsgs = toastArea.querySelectorAll('.save-success-msg');
-
-  previousMsgs.forEach((msg) => {
-    msg.remove();
-  });
-
-  const toast = createTag('sp-toast', { class: 'save-success-msg', open: true, variant: 'positive', timeout: 6000 }, detail.message || 'Edits saved successfully', { parent: toastArea });
-  toast.addEventListener('close', () => {
-    toast.remove();
-  });
+  errorManager.showSuccess(props, detail.message || 'Edits saved successfully', { timeout: 6000 });
 }
 
 function updateDashboardLink(props) {
@@ -795,30 +777,15 @@ function initFormCtas(props) {
 
             if (resp && !resp.error) {
               if (props.currentStep === props.maxStep) {
-                const toastArea = props.el.querySelector('.toast-area');
                 cta.textContent = cta.dataset.doneStateText;
                 cta.classList.add('disabled');
 
-                if (toastArea) {
-                  const toast = createTag('sp-toast', { open: true, variant: 'positive' }, 'Success! This event has been published.', { parent: toastArea });
-                  const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-
-                  createTag(
-                    'sp-button',
-                    {
-                      slot: 'action',
-                      variant: 'overBackground',
-                      treatment: 'outline',
-                      href: dashboardLink.href,
-                    },
-                    'Go to dashboard',
-                    { parent: toast },
-                  );
-
-                  toast.addEventListener('close', () => {
-                    toast.remove();
-                  });
-                }
+                errorManager.showSuccess(props, 'Success! This event has been published.', {
+                  actionButton: {
+                    text: 'Go to dashboard',
+                    href: props.el.querySelector('.side-menu > ul > li > a')?.href,
+                  },
+                });
               } else {
                 navigateForm(props);
               }
