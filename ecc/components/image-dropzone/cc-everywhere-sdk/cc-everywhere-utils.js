@@ -1,4 +1,4 @@
-import { LIBS } from '../../scripts/scripts.js';
+import { LIBS } from '../../../scripts/scripts.js';
 
 // Shared constants and configurations for frictionless quick actions
 const JPG = 'jpg';

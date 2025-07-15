@@ -1,4 +1,4 @@
-import { LIBS } from '../../scripts/scripts.js';
+import { LIBS } from '../../../scripts/scripts.js';
 import {
   getErrorMsg,
   createDocConfig,
