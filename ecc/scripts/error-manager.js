@@ -154,11 +154,12 @@ class ErrorManager {
    * @param {string} message - Error message
    * @param {Object} options - Toast options
    * @param {Object} target - Optional target override
+   * @returns {HTMLElement} Created toast element
    */
   showError(message, options = {}, target = null) {
     const context = target || this.context;
     const toastArea = this.getToastArea(context);
-    this.createToast(message, toastArea, options);
+    return this.createToast(message, toastArea, options);
   }
 
   /**
@@ -166,6 +167,7 @@ class ErrorManager {
    * @param {string} message - Success message
    * @param {Object} options - Toast options
    * @param {Object} target - Optional target override
+   * @returns {HTMLElement} Created toast element
    */
   showSuccess(message, options = {}, target = null) {
     const context = target || this.context;
@@ -185,6 +187,8 @@ class ErrorManager {
         href,
       }, text, { parent: toast });
     }
+
+    return toast;
   }
 
   /**
@@ -192,11 +196,12 @@ class ErrorManager {
    * @param {string} message - Info message
    * @param {Object} options - Toast options
    * @param {Object} target - Optional target override
+   * @returns {HTMLElement} Created toast element
    */
   showInfo(message, options = {}, target = null) {
     const context = target || this.context;
     const toastArea = this.getToastArea(context);
-    this.createToast(message, toastArea, {
+    return this.createToast(message, toastArea, {
       variant: 'info',
       ...options,
     });

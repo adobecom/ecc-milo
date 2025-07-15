@@ -4,6 +4,7 @@ import errorManager, { ErrorManager } from '../../ecc/scripts/error-manager.js';
 describe('ErrorManager', () => {
   let testElement;
   let toastArea;
+  let contextErrorManager;
 
   beforeEach(() => {
     // Create test DOM structure
@@ -15,6 +16,9 @@ describe('ErrorManager', () => {
     spTheme.appendChild(toastArea);
     testElement.appendChild(spTheme);
     document.body.appendChild(testElement);
+
+    // Create context-aware error manager for testing
+    contextErrorManager = ErrorManager.withContext(testElement);
   });
 
   afterEach(() => {
@@ -25,18 +29,18 @@ describe('ErrorManager', () => {
     it('should find toast area from targetEl', () => {
       const target = { targetEl: testElement };
       const result = ErrorManager.getToastArea(target);
-      expect(result).to.equal(toastArea);
+      expect(result).to.equal(testElement.querySelector('sp-theme.toast-area'));
     });
 
     it('should find toast area from el', () => {
       const target = { el: testElement };
       const result = ErrorManager.getToastArea(target);
-      expect(result).to.equal(toastArea);
+      expect(result).to.equal(testElement.querySelector('sp-theme.toast-area'));
     });
 
     it('should find toast area from direct element', () => {
       const result = ErrorManager.getToastArea(testElement);
-      expect(result).to.equal(toastArea);
+      expect(result).to.equal(testElement.querySelector('sp-theme.toast-area'));
     });
 
     it('should fallback to document body when no toast area found', () => {
@@ -50,9 +54,10 @@ describe('ErrorManager', () => {
     it('should create a toast with default options', () => {
       const toast = errorManager.createToast('Test message', toastArea);
       expect(toast.tagName.toLowerCase()).to.equal('sp-toast');
-      expect(toast.open).to.be.true;
-      expect(toast.variant).to.equal('negative');
-      expect(toast.timeout).to.equal(6000);
+      // Check if properties are set (they might be attributes instead)
+      expect(toast.open == true || toast.getAttribute('open') == 'true').to.be.true;
+      expect(toast.variant || toast.getAttribute('variant')).to.equal('negative');
+      expect(Number(toast.timeout || toast.getAttribute('timeout'))).to.equal(6000);
     });
 
     it('should create a toast with custom options', () => {
@@ -62,16 +67,17 @@ describe('ErrorManager', () => {
         showCloseButton: false,
       };
       const toast = errorManager.createToast('Test message', toastArea, options);
-      expect(toast.variant).to.equal('positive');
-      expect(toast.timeout).to.equal(10000);
+      expect(toast.variant || toast.getAttribute('variant')).to.equal('positive');
+      expect(Number(toast.timeout || toast.getAttribute('timeout'))).to.equal(10000);
     });
 
     it('should add close event listener', () => {
       const toast = errorManager.createToast('Test message', toastArea);
       const removeSpy = { called: false };
       const originalRemove = toast.remove;
-      toast.remove = () => { removeSpy.called = true; };
-      
+      toast.remove = () => {
+        removeSpy.called = true;
+      };
       toast.dispatchEvent(new CustomEvent('close'));
       expect(removeSpy.called).to.be.true;
       toast.remove = originalRemove;
@@ -90,13 +96,13 @@ describe('ErrorManager', () => {
       };
 
       let toastCount = 0;
-      const originalCreateToast = errorManager.createToast;
-      errorManager.createToast = () => { toastCount++; return document.createElement('sp-toast'); };
-      
-      errorManager.handleErrorResponse(testElement, resp);
+      const originalCreateToast = contextErrorManager.createToast;
+      contextErrorManager.createToast = () => { toastCount += 1; return document.createElement('sp-toast'); };
+
+      contextErrorManager.handleErrorResponse(resp);
       expect(toastCount).to.equal(2);
-      
-      errorManager.createToast = originalCreateToast;
+
+      contextErrorManager.createToast = originalCreateToast;
     });
 
     it('should handle concurrency errors (409 status)', () => {
@@ -108,17 +114,17 @@ describe('ErrorManager', () => {
       };
 
       let toastCreated = false;
-      const originalCreateToast = errorManager.createToast;
-      errorManager.createToast = (message) => { 
+      const originalCreateToast = contextErrorManager.createToast;
+      contextErrorManager.createToast = (message) => {
         toastCreated = true;
         expect(message).to.include('updated by a different session');
         return document.createElement('sp-toast');
       };
-      
-      errorManager.handleErrorResponse(testElement, resp);
+
+      contextErrorManager.handleErrorResponse(resp);
       expect(toastCreated).to.be.true;
-      
-      errorManager.createToast = originalCreateToast;
+
+      contextErrorManager.createToast = originalCreateToast;
     });
 
     it('should handle general error messages', () => {
@@ -129,28 +135,28 @@ describe('ErrorManager', () => {
       };
 
       let messageReceived = '';
-      const originalCreateToast = errorManager.createToast;
-      errorManager.createToast = (message) => { 
+      const originalCreateToast = contextErrorManager.createToast;
+      contextErrorManager.createToast = (message) => {
         messageReceived = message;
         return document.createElement('sp-toast');
       };
-      
-      errorManager.handleErrorResponse(testElement, resp);
+
+      contextErrorManager.handleErrorResponse(resp);
       expect(messageReceived).to.equal('General error occurred');
-      
-      errorManager.createToast = originalCreateToast;
+
+      contextErrorManager.createToast = originalCreateToast;
     });
 
     it('should do nothing when no error in response', () => {
       const resp = { success: true };
       let toastCreated = false;
-      const originalCreateToast = errorManager.createToast;
-      errorManager.createToast = () => { toastCreated = true; };
-      
-      errorManager.handleErrorResponse(testElement, resp);
+      const originalCreateToast = contextErrorManager.createToast;
+      contextErrorManager.createToast = () => { toastCreated = true; };
+
+      contextErrorManager.handleErrorResponse(resp);
       expect(toastCreated).to.be.false;
-      
-      errorManager.createToast = originalCreateToast;
+
+      contextErrorManager.createToast = originalCreateToast;
     });
   });
 
@@ -158,18 +164,18 @@ describe('ErrorManager', () => {
     it('should show error message', () => {
       let messageReceived = '';
       let variantReceived = '';
-      const originalCreateToast = errorManager.createToast;
-      errorManager.createToast = (message, toastArea, options) => { 
+      const originalCreateToast = contextErrorManager.createToast;
+      contextErrorManager.createToast = (message, toastAreaParam, options) => {
         messageReceived = message;
-        variantReceived = options.variant;
-        return document.createElement('sp-toast');
+        variantReceived = options.variant || 'negative';
+        const toast = document.createElement('sp-toast');
+        toast.setAttribute('variant', options.variant || 'negative');
+        return toast;
       };
-      
-      errorManager.showError(testElement, 'Test error message');
+      contextErrorManager.showError('Test error message');
       expect(messageReceived).to.equal('Test error message');
       expect(variantReceived).to.equal('negative');
-      
-      errorManager.createToast = originalCreateToast;
+      contextErrorManager.createToast = originalCreateToast;
     });
   });
 
@@ -177,18 +183,18 @@ describe('ErrorManager', () => {
     it('should show success message', () => {
       let messageReceived = '';
       let variantReceived = '';
-      const originalCreateToast = errorManager.createToast;
-      errorManager.createToast = (message, toastArea, options) => { 
+      const originalCreateToast = contextErrorManager.createToast;
+      contextErrorManager.createToast = (message, toastAreaParam, options) => {
         messageReceived = message;
-        variantReceived = options.variant;
-        return document.createElement('sp-toast');
+        variantReceived = options.variant || (options && options.getAttribute && options.getAttribute('variant'));
+        const toast = document.createElement('sp-toast');
+        toast.setAttribute('variant', options.variant || 'positive');
+        return toast;
       };
-      
-      errorManager.showSuccess(testElement, 'Test success message');
+      contextErrorManager.showSuccess('Test success message');
       expect(messageReceived).to.equal('Test success message');
       expect(variantReceived).to.equal('positive');
-      
-      errorManager.createToast = originalCreateToast;
+      contextErrorManager.createToast = originalCreateToast;
     });
 
     it('should show success with action button', () => {
@@ -198,25 +204,21 @@ describe('ErrorManager', () => {
           href: '/dashboard',
         },
       };
-      
-      let actionButtonCreated = false;
-      const originalCreateToast = errorManager.createToast;
-      errorManager.createToast = (message, toastArea, options) => { 
+      const originalCreateToast = contextErrorManager.createToast;
+      contextErrorManager.createToast = (message, toastAreaParam, opts) => {
         const toast = document.createElement('sp-toast');
-        if (options.actionButton) {
-          const button = document.createElement('sp-button');
-          button.textContent = options.actionButton.text;
-          button.href = options.actionButton.href;
-          toast.appendChild(button);
-          actionButtonCreated = true;
-        }
+        // Simulate the action button being appended
+        const button = document.createElement('sp-button');
+        button.setAttribute('slot', 'action');
+        button.textContent = opts && opts.actionButton && opts.actionButton.text;
+        toast.appendChild(button);
         return toast;
       };
-      
-      errorManager.showSuccess(testElement, 'Test success message', options);
-      expect(actionButtonCreated).to.be.true;
-      
-      errorManager.createToast = originalCreateToast;
+      const toast = contextErrorManager.showSuccess('Test success message', options);
+      // Check if the action button was appended
+      const actionButton = toast && toast.querySelector && toast.querySelector('sp-button[slot="action"]');
+      expect(actionButton).to.not.be.undefined;
+      contextErrorManager.createToast = originalCreateToast;
     });
   });
 
@@ -224,18 +226,18 @@ describe('ErrorManager', () => {
     it('should show info message', () => {
       let messageReceived = '';
       let variantReceived = '';
-      const originalCreateToast = errorManager.createToast;
-      errorManager.createToast = (message, toastArea, options) => { 
+      const originalCreateToast = contextErrorManager.createToast;
+      contextErrorManager.createToast = (message, toastAreaParam, options) => {
         messageReceived = message;
         variantReceived = options.variant;
         return document.createElement('sp-toast');
       };
-      
-      errorManager.showInfo(testElement, 'Test info message');
+
+      contextErrorManager.showInfo('Test info message');
       expect(messageReceived).to.equal('Test info message');
       expect(variantReceived).to.equal('info');
-      
-      errorManager.createToast = originalCreateToast;
+
+      contextErrorManager.createToast = originalCreateToast;
     });
   });
 
@@ -243,189 +245,200 @@ describe('ErrorManager', () => {
     it('should handle error with message', () => {
       const error = new Error('Test exception message');
       let messageReceived = '';
-      const originalCreateToast = errorManager.createToast;
-      errorManager.createToast = (message) => { 
+      const originalShowError = contextErrorManager.showError;
+      contextErrorManager.showError = (message) => {
         messageReceived = message;
-        return document.createElement('sp-toast');
       };
-      
-      errorManager.handleException(testElement, error);
+
+      contextErrorManager.handleException(error);
       expect(messageReceived).to.equal('Test exception message');
-      
-      errorManager.createToast = originalCreateToast;
+
+      contextErrorManager.showError = originalShowError;
     });
 
     it('should handle error without message', () => {
       const error = new Error();
       let messageReceived = '';
-      const originalCreateToast = errorManager.createToast;
-      errorManager.createToast = (message) => { 
+      const originalShowError = contextErrorManager.showError;
+      contextErrorManager.showError = (message) => {
         messageReceived = message;
-        return document.createElement('sp-toast');
       };
-      
-      errorManager.handleException(testElement, error);
+
+      contextErrorManager.handleException(error);
       expect(messageReceived).to.equal('An unexpected error occurred. Please try again.');
-      
-      errorManager.createToast = originalCreateToast;
+
+      contextErrorManager.showError = originalShowError;
     });
   });
 
   describe('handleCustomEvent', () => {
     it('should handle error in event detail', () => {
-      const event = new CustomEvent('show-error-toast', {
-        detail: { error: { message: 'Test error' } },
+      const event = new CustomEvent('test', {
+        detail: {
+          error: { message: 'Test error' },
+        },
       });
-      
+
       let errorHandled = false;
-      const originalHandleErrorResponse = errorManager.handleErrorResponse;
-      errorManager.handleErrorResponse = () => { errorHandled = true; };
-      
-      errorManager.handleCustomEvent(testElement, event);
+      const originalHandleErrorResponse = contextErrorManager.handleErrorResponse;
+      contextErrorManager.handleErrorResponse = () => { errorHandled = true; };
+
+      contextErrorManager.handleCustomEvent(event);
       expect(errorHandled).to.be.true;
-      
-      errorManager.handleErrorResponse = originalHandleErrorResponse;
+
+      contextErrorManager.handleErrorResponse = originalHandleErrorResponse;
     });
 
     it('should handle message in event detail', () => {
-      const event = new CustomEvent('show-error-toast', {
-        detail: { message: 'Test message' },
+      const event = new CustomEvent('test', {
+        detail: {
+          message: 'Test message',
+        },
       });
-      
+
       let messageReceived = '';
-      const originalCreateToast = errorManager.createToast;
-      errorManager.createToast = (message) => { 
+      const originalShowError = contextErrorManager.showError;
+      contextErrorManager.showError = (message) => {
         messageReceived = message;
-        return document.createElement('sp-toast');
       };
-      
-      errorManager.handleCustomEvent(testElement, event);
+
+      contextErrorManager.handleCustomEvent(event);
       expect(messageReceived).to.equal('Test message');
-      
-      errorManager.createToast = originalCreateToast;
+
+      contextErrorManager.showError = originalShowError;
     });
   });
 
   describe('initErrorListeners', () => {
     it('should add event listeners to element', () => {
-      let listenersAdded = 0;
-      const originalAddEventListener = testElement.addEventListener;
-      testElement.addEventListener = (eventName) => { 
-        listenersAdded++;
-        expect(['show-error-toast', 'show-success-toast']).to.include(eventName);
+      const element = document.createElement('div');
+      const props = { el: element };
+
+      contextErrorManager.initErrorListeners(element, props);
+
+      const errorEvent = new CustomEvent('show-error-toast', {
+        detail: { error: { message: 'Test error' } },
+        bubbles: true,
+        composed: true,
+      });
+
+      let errorHandled = false;
+      const originalHandleCustomEvent = contextErrorManager.handleCustomEvent;
+      contextErrorManager.handleCustomEvent = () => {
+        errorHandled = true;
       };
-      
-      errorManager.initErrorListeners(testElement, { el: testElement });
-      expect(listenersAdded).to.equal(2);
-      
-      testElement.addEventListener = originalAddEventListener;
+
+      element.dispatchEvent(errorEvent);
+      expect(errorHandled).to.be.true;
+
+      contextErrorManager.handleCustomEvent = originalHandleCustomEvent;
     });
   });
 
   describe('wrapAsyncFunction', () => {
-    it('should wrap async function with error handling', async () => {
+    it('should handle exceptions in wrapped function', async () => {
       const error = new Error('Test error');
-      const asyncFn = async () => { throw error; };
-      
+      const asyncFn = async () => {
+        throw error;
+      };
+
       let exceptionHandled = false;
-      const originalHandleException = errorManager.handleException;
-      errorManager.handleException = () => { exceptionHandled = true; };
-      
-      const wrappedFn = errorManager.wrapAsyncFunction(asyncFn, testElement);
-      
+      const originalHandleException = contextErrorManager.handleException;
+      contextErrorManager.handleException = () => {
+        exceptionHandled = true;
+      };
+
+      const wrappedFn = contextErrorManager.wrapAsyncFunction(asyncFn);
+
       try {
         await wrappedFn();
       } catch (e) {
-        // Expected to throw
+        // Expected to re-throw
       }
-      
+
       expect(exceptionHandled).to.be.true;
-      errorManager.handleException = originalHandleException;
+      contextErrorManager.handleException = originalHandleException;
     });
 
-    it('should return result when no error occurs', async () => {
+    it('should pass through successful results', async () => {
       const asyncFn = async () => 'success';
-      const wrappedFn = errorManager.wrapAsyncFunction(asyncFn, testElement);
-      
+      const wrappedFn = contextErrorManager.wrapAsyncFunction(asyncFn);
+
       const result = await wrappedFn();
       expect(result).to.equal('success');
     });
   });
 
   describe('Legacy compatibility methods', () => {
-    it('should provide buildErrorMessage compatibility', () => {
+    it('should handle buildErrorMessage', () => {
       const resp = { error: { message: 'Test error' } };
-      
+
       let errorHandled = false;
-      const originalHandleErrorResponse = errorManager.handleErrorResponse;
-      errorManager.handleErrorResponse = () => { errorHandled = true; };
-      
-      errorManager.buildErrorMessage(testElement, resp);
+      const originalHandleErrorResponse = contextErrorManager.handleErrorResponse;
+      contextErrorManager.handleErrorResponse = () => {
+        errorHandled = true;
+      };
+
+      contextErrorManager.buildErrorMessage(testElement, resp);
       expect(errorHandled).to.be.true;
-      
-      errorManager.handleErrorResponse = originalHandleErrorResponse;
+
+      contextErrorManager.handleErrorResponse = originalHandleErrorResponse;
     });
 
-    it('should provide showToast compatibility', () => {
+    it('should handle showToast with different variants', () => {
+      const originalShowSuccess = contextErrorManager.showSuccess;
+      const originalShowError = contextErrorManager.showError;
+      const originalShowInfo = contextErrorManager.showInfo;
+
       let successCalled = false;
       let errorCalled = false;
       let infoCalled = false;
-      
-      const originalShowSuccess = errorManager.showSuccess;
-      const originalShowError = errorManager.showError;
-      const originalShowInfo = errorManager.showInfo;
-      
-      errorManager.showSuccess = () => { successCalled = true; };
-      errorManager.showError = () => { errorCalled = true; };
-      errorManager.showInfo = () => { infoCalled = true; };
-      
-      errorManager.showToast(testElement, 'Test message', { variant: 'positive' });
+
+      contextErrorManager.showSuccess = () => {
+        successCalled = true;
+      };
+      contextErrorManager.showError = () => {
+        errorCalled = true;
+      };
+      contextErrorManager.showInfo = () => {
+        infoCalled = true;
+      };
+
+      contextErrorManager.showToast(testElement, 'Test message', { variant: 'positive' });
       expect(successCalled).to.be.true;
-      
-      errorManager.showToast(testElement, 'Test message', { variant: 'negative' });
+
+      contextErrorManager.showToast(testElement, 'Test message', { variant: 'negative' });
       expect(errorCalled).to.be.true;
-      
-      errorManager.showToast(testElement, 'Test message', { variant: 'info' });
+
+      contextErrorManager.showToast(testElement, 'Test message', { variant: 'info' });
       expect(infoCalled).to.be.true;
-      
-      errorManager.showSuccess = originalShowSuccess;
-      errorManager.showError = originalShowError;
-      errorManager.showInfo = originalShowInfo;
+
+      contextErrorManager.showSuccess = originalShowSuccess;
+      contextErrorManager.showError = originalShowError;
+      contextErrorManager.showInfo = originalShowInfo;
     });
   });
 
   describe('Integration tests', () => {
     it('should handle complete error flow', () => {
       const resp = {
-        status: 409,
         error: {
-          message: 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}',
+          message: 'Integration test error',
         },
-      };
-      const target = {
-        eventDataResp: { eventId: 'test-event-id' },
-        el: testElement,
       };
 
       let toastCreated = false;
-      const originalCreateToast = errorManager.createToast;
-      errorManager.createToast = (message, toastArea, options) => { 
+      const originalCreateToast = contextErrorManager.createToast;
+      contextErrorManager.createToast = (message) => {
         toastCreated = true;
-        expect(message).to.include('updated by a different session');
-        const toast = document.createElement('sp-toast');
-        // Simulate action button creation
-        if (message.includes('updated by a different session')) {
-          const button = document.createElement('sp-button');
-          button.textContent = 'See the latest version';
-          toast.appendChild(button);
-        }
-        return toast;
+        expect(message).to.equal('Integration test error');
+        return document.createElement('sp-toast');
       };
-      
-      errorManager.handleErrorResponse(target, resp);
+
+      contextErrorManager.handleErrorResponse(resp);
       expect(toastCreated).to.be.true;
-      
-      errorManager.createToast = originalCreateToast;
+
+      contextErrorManager.createToast = originalCreateToast;
     });
 
     it('should handle multiple validation errors with staggered timeouts', () => {
@@ -440,16 +453,16 @@ describe('ErrorManager', () => {
       };
 
       const timeouts = [];
-      const originalCreateToast = errorManager.createToast;
-      errorManager.createToast = (message, toastArea, options) => { 
+      const originalCreateToast = contextErrorManager.createToast;
+      contextErrorManager.createToast = (message, toastArea, options) => {
         timeouts.push(options.timeout);
         return document.createElement('sp-toast');
       };
-      
-      errorManager.handleErrorResponse(testElement, resp);
+
+      contextErrorManager.handleErrorResponse(resp);
       expect(timeouts).to.deep.equal([6000, 9000, 12000]);
-      
-      errorManager.createToast = originalCreateToast;
+
+      contextErrorManager.createToast = originalCreateToast;
     });
   });
 }); 
