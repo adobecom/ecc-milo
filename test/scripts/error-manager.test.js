@@ -55,7 +55,7 @@ describe('ErrorManager', () => {
       const toast = errorManager.createToast('Test message', toastArea);
       expect(toast.tagName.toLowerCase()).to.equal('sp-toast');
       // Check if properties are set (they might be attributes instead)
-      expect(toast.open == true || toast.getAttribute('open') == 'true').to.be.true;
+      expect(toast.open === true || toast.getAttribute('open') === 'true').to.be.true;
       expect(toast.variant || toast.getAttribute('variant')).to.equal('negative');
       expect(Number(toast.timeout || toast.getAttribute('timeout'))).to.equal(6000);
     });
@@ -108,9 +108,7 @@ describe('ErrorManager', () => {
     it('should handle concurrency errors (409 status)', () => {
       const resp = {
         status: 409,
-        error: {
-          message: 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}',
-        },
+        error: { message: 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}' },
       };
 
       let toastCreated = false;
@@ -128,11 +126,7 @@ describe('ErrorManager', () => {
     });
 
     it('should handle general error messages', () => {
-      const resp = {
-        error: {
-          message: 'General error occurred',
-        },
-      };
+      const resp = { error: { message: 'General error occurred' } };
 
       let messageReceived = '';
       const originalCreateToast = contextErrorManager.createToast;
@@ -273,11 +267,7 @@ describe('ErrorManager', () => {
 
   describe('handleCustomEvent', () => {
     it('should handle error in event detail', () => {
-      const event = new CustomEvent('test', {
-        detail: {
-          error: { message: 'Test error' },
-        },
-      });
+      const event = new CustomEvent('test', { detail: { error: { message: 'Test error' } } });
 
       let errorHandled = false;
       const originalHandleErrorResponse = contextErrorManager.handleErrorResponse;
@@ -290,11 +280,7 @@ describe('ErrorManager', () => {
     });
 
     it('should handle message in event detail', () => {
-      const event = new CustomEvent('test', {
-        detail: {
-          message: 'Test message',
-        },
-      });
+      const event = new CustomEvent('test', { detail: { message: 'Test message' } });
 
       let messageReceived = '';
       const originalShowError = contextErrorManager.showError;
@@ -421,11 +407,7 @@ describe('ErrorManager', () => {
 
   describe('Integration tests', () => {
     it('should handle complete error flow', () => {
-      const resp = {
-        error: {
-          message: 'Integration test error',
-        },
-      };
+      const resp = { error: { message: 'Integration test error' } };
 
       let toastCreated = false;
       const originalCreateToast = contextErrorManager.createToast;
@@ -454,7 +436,7 @@ describe('ErrorManager', () => {
 
       const timeouts = [];
       const originalCreateToast = contextErrorManager.createToast;
-      contextErrorManager.createToast = (message, toastArea, options) => {
+      contextErrorManager.createToast = (message, toastAreaParam, options) => {
         timeouts.push(options.timeout);
         return document.createElement('sp-toast');
       };
@@ -465,4 +447,4 @@ describe('ErrorManager', () => {
       contextErrorManager.createToast = originalCreateToast;
     });
   });
-}); 
+});
