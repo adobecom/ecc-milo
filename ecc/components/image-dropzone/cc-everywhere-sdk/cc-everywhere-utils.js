@@ -162,26 +162,14 @@ export function createMergeVideosDocConfig(data) {
 export function createDefaultExportConfig() {
   return [
     {
-      id: 'downloadExportOption',
-      // label: 'Download',
-      action: { target: 'download' },
-      style: { uiType: 'button' },
-      buttonStyle: {
-        variant: 'secondary',
-        treatment: 'fill',
-        size: 'xl',
+      action: {
+        target: 'publish',
+        outputype: 'Blob',
+        closeTargetOnExport: true,
       },
-    },
-    {
-      id: 'edit-in-express',
-      // label: 'Edit in Adobe Express for free',
-      action: { target: 'express' },
+      id: 'saveToHostApp',
+      label: 'Save cropped image',
       style: { uiType: 'button' },
-      buttonStyle: {
-        variant: 'primary',
-        treatment: 'fill',
-        size: 'xl',
-      },
     },
   ];
 }

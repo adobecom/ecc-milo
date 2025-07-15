@@ -9,16 +9,12 @@ import {
   loadAndInitializeCCEverywhere,
 } from './cc-everywhere-utils.js';
 
-const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
+const { getConfig } = await import(`${LIBS}/utils/utils.js`);
 
 let ccEverywhere;
-let quickActionContainer;
 
-export function runQuickAction(quickActionId, data) {
+export function runQuickAction(quickActionId, dropzone, data) {
   const exportConfig = createDefaultExportConfig();
-
-  quickActionContainer = createTag('div', { id: `${quickActionId}-container`, class: 'quick-action-container' });
-  document.body.append(quickActionContainer);
 
   const docConfig = createDocConfig(data[0], 'image');
   const videoDocConfig = quickActionId === 'merge-videos' ? createMergeVideosDocConfig(data) : createDocConfig(data[0], 'video');
@@ -27,7 +23,33 @@ export function runQuickAction(quickActionId, data) {
     receiveQuickActionErrors: true,
     callbacks: {
       onError: (error) => {
-        quickActionContainer.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error } }));
+        dropzone.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error } }));
+      },
+      onPublish: (params, result) => {
+        // Handle the cropped image result
+        if (result && result.asset && result.asset[0]) {
+          const asset = result.asset[0];
+
+          // Convert base64 to blob
+          const base64Data = asset.data.split(',')[1]; // Remove data:image/png;base64, prefix
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+
+          for (let i = 0; i < byteCharacters.length; i += 1) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: asset.fileType });
+
+          // Create a new File object
+          const croppedFile = new File([blob], asset.fileName || 'cropped-image.png', {
+            type: asset.fileType,
+            lastModified: Date.now(),
+          });
+
+          dropzone.handleCroppedFile(croppedFile);
+        }
       },
     },
   };
@@ -45,36 +67,35 @@ export function runQuickAction(quickActionId, data) {
   );
 }
 
-// eslint-disable-next-line default-param-last
-async function startSDK(data = [''], quickAction) {
+async function startSDK(quickAction, dropzone, data = ['']) {
   if (!ccEverywhere) {
     ccEverywhere = await loadAndInitializeCCEverywhere(getConfig);
   }
-  runQuickAction(quickAction, data);
+  runQuickAction(quickAction, dropzone, data);
 }
 
-async function startSDKWithUnconvertedFiles(files, quickAction, triggerElement) {
+async function startSDKWithUnconvertedFiles(files, quickAction, dropzone) {
   let data = await processFilesForQuickAction(files, quickAction);
   if (!data[0]) {
     const msg = await getErrorMsg(files, quickAction, getConfig);
-    triggerElement.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: msg } }));
+    dropzone.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: msg } }));
     return;
   }
 
   if (data.some((item) => !item)) {
     const msg = await getErrorMsg(files, quickAction, getConfig);
-    triggerElement.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: msg } }));
+    dropzone.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: msg } }));
     data = data.filter((item) => item);
   }
 
-  startSDK(data, quickAction);
+  startSDK(quickAction, dropzone, data);
 }
 
-export default async function init(dropzone, triggerElement) {
+export function initCropper(dropzone, triggerElement) {
   triggerElement.addEventListener('click', () => {
     console.log('dropzone', dropzone);
     console.log('file', dropzone.file);
     const { file } = dropzone;
-    startSDKWithUnconvertedFiles([file], 'crop-image', triggerElement);
+    startSDKWithUnconvertedFiles([file], 'crop-image', dropzone);
   });
 }

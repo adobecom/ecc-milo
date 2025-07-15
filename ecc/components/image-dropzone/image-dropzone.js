@@ -2,7 +2,7 @@
 import { isImageTypeValid, isImageSizeValid } from '../../scripts/image-validator.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './image-dropzone.css.js';
-import { initCropper } from '../../scripts/utils.js';
+import { initCropper } from './cc-everywhere-sdk/cc-everywhere-cropper.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
