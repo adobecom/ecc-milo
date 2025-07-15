@@ -27,9 +27,12 @@ export const IMS_ENVIRONMENTS = Object.freeze({
  */
 export const DOMAINS = Object.freeze({
   ADOBE_COM: 'www.adobe.com',
+  INTERNAL_ADOBE_COM: 'events-internal.adobe.com',
   STAGE_ADOBE_COM: 'www.stage.adobe.com',
+  STAGE_INTERNAL_ADOBE_COM: 'events-internal.stage.adobe.com',
   LOCALHOST: 'localhost',
   DEV_ADOBE_COM: 'dev.adobe.com',
+  DEV_INTERNAL_ADOBE_COM: 'events-internal.dev.adobe.com',
   DEV02_ADOBE_COM: 'dev02.adobe.com',
   STAGE02_ADOBE_COM: 'stage02.adobe.com',
   CORP_ADOBE_COM: 'corp.adobe.com',
@@ -42,13 +45,18 @@ export const DOMAINS = Object.freeze({
 export const HOST_PATTERNS = Object.freeze({
   [ENVIRONMENTS.LOCAL]: (host) => host.includes(DOMAINS.LOCALHOST),
   [ENVIRONMENTS.DEV02]: (host) => host.startsWith('dev02--') || host.includes(DOMAINS.DEV02_ADOBE_COM),
+  [ENVIRONMENTS.DEV]: (host) => host.startsWith('dev--')
+    || host.includes(DOMAINS.DEV_ADOBE_COM)
+    || host.includes(DOMAINS.DEV_INTERNAL_ADOBE_COM),
   [ENVIRONMENTS.STAGE]: (host) => host.startsWith('stage--')
     || host.includes(DOMAINS.STAGE_ADOBE_COM)
+    || host.includes(DOMAINS.STAGE_INTERNAL_ADOBE_COM)
     || host.includes(DOMAINS.CORP_ADOBE_COM)
     || host.includes(DOMAINS.GRAYBOX_ADOBE_COM),
   [ENVIRONMENTS.STAGE02]: (host) => host.startsWith('stage02--') || host.includes(DOMAINS.STAGE02_ADOBE_COM),
-  [ENVIRONMENTS.PROD]: (host) => host.startsWith('main--') || host.endsWith('adobe.com'),
-  [ENVIRONMENTS.DEV]: (host) => host.startsWith('dev--') || host.includes(DOMAINS.DEV_ADOBE_COM),
+  [ENVIRONMENTS.PROD]: (host) => host.startsWith('main--')
+    || host.endsWith('adobe.com')
+    || host.includes(DOMAINS.INTERNAL_ADOBE_COM),
 });
 
 export const LINK_REGEX = '^https:\\/\\/[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,63}(:[0-9]{1,5})?(\\/.*)?$';
@@ -57,7 +65,7 @@ export const SUPPORTED_CLOUDS = [{ id: 'CreativeCloud', name: 'Creative Cloud' }
 
 export const API_CONFIG = {
   esl: {
-    [ENVIRONMENTS.LOCAL]: { host: 'http://localhost:8499' },
+    [ENVIRONMENTS.LOCAL]: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
     [ENVIRONMENTS.DEV]: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-9c3ecd.stage.cloud.adobe.io' },
     [ENVIRONMENTS.DEV02]: { host: 'https://wcms-events-service-layer-deploy-ethos102-stage-va-d5dc93.stage.cloud.adobe.io' },
     [ENVIRONMENTS.STAGE]: { host: 'https://events-service-layer-stage.adobe.io' },
@@ -65,10 +73,10 @@ export const API_CONFIG = {
     [ENVIRONMENTS.PROD]: { host: 'https://events-service-layer.adobe.io' },
   },
   esp: {
-    [ENVIRONMENTS.LOCAL]: { host: 'http://localhost:8500' },
+    [ENVIRONMENTS.LOCAL]: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
     [ENVIRONMENTS.DEV]: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-caff5f.stage.cloud.adobe.io' },
     [ENVIRONMENTS.DEV02]: { host: 'https://wcms-events-service-platform-deploy-ethos102-stage-c81eb6.stage.cloud.adobe.io' },
-    [ENVIRONMENTS.STAGE]: { host: 'https://events-service-platform-stage-or2.adobe.io' },
+    [ENVIRONMENTS.STAGE]: { host: 'https://events-service-platform-stage.adobe.io' },
     [ENVIRONMENTS.STAGE02]: { host: 'https://wcms-events-service-platform-deploy-ethos105-stage-9a5fdc.stage.cloud.adobe.io' },
     [ENVIRONMENTS.PROD]: { host: 'https://events-service-platform.adobe.io' },
   },

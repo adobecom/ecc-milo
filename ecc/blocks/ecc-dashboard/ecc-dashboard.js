@@ -75,13 +75,22 @@ function buildThumbnail(data) {
 
     // TODO: Remember to remove the replace('https://www.adobe.com', '') once the images are returned with relative paths
     const imgSrc = (cardImage?.sharepointUrl
-      && `${getEventPageHost()}${cardImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+      && `${getEventPageHost()}${cardImage?.sharepointUrl
+        .replace('https://www.adobe.com', '')
+      }`.replace('.hlx.', '.aem.')
+        .replace('aem.page', 'aem.live'))
     || cardImage?.imageUrl
     || (heroImage?.sharepointUrl
-      && `${getEventPageHost()}${heroImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+      && `${getEventPageHost()}${heroImage?.sharepointUrl
+        .replace('https://www.adobe.com', '')
+      }`.replace('.hlx.', '.aem.')
+        .replace('aem.page', 'aem.live'))
     || heroImage?.imageUrl
     || (venueImage?.sharepointUrl
-      && `${getEventPageHost()}${venueImage?.sharepointUrl.replace('https://www.adobe.com', '')}`)
+      && `${getEventPageHost()}${venueImage?.sharepointUrl
+        .replace('https://www.adobe.com', '')
+      }`.replace('.hlx.', '.aem.')
+        .replace('aem.page', 'aem.live'))
     || venueImage?.imageUrl
     || images[0]?.imageUrl;
 
@@ -367,7 +376,9 @@ function initMoreOptions(props, config, eventObj, row) {
       e.preventDefault();
       const payload = { ...eventObj };
       const cloneTitle = `${getAttribute(eventObj, 'title', payload.defaultLocale || 'en-US')} - copy`;
+      const cloneEnTitle = `${getAttribute(eventObj, 'enTitle', payload.defaultLocale || 'en-US')} - copy`;
       setEventAttribute(payload, 'title', cloneTitle, payload.defaultLocale || 'en-US');
+      setEventAttribute(payload, 'enTitle', cloneEnTitle, payload.defaultLocale || 'en-US');
       toolBox.remove();
       row.classList.add('pending');
       const newEventJSON = await createEvent({ ...cloneFilter(payload), published: false }, payload.defaultLocale || 'en-US');
