@@ -53,6 +53,14 @@ export default class AgendaFieldsetGroup extends LitElement {
     }));
   }
 
+  getIncompleteAgendaItems() {
+    return this.agendaItems.filter((agenda) => {
+      const hasStartTime = agenda.startTime;
+      const hasTitleOrDescription = agenda.title || agenda.description;
+      return !hasStartTime || !hasTitleOrDescription;
+    });
+  }
+
   hasOnlyEmptyAgendaLeft() {
     return !this.agendaItems[0]?.startTime && !this.agendaItems[0]?.description;
   }

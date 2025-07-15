@@ -16,15 +16,28 @@ import {
 } from '../../scripts/utils.js';
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { quickFilter } from '../series-creation-form/data-handler.js';
+import { ErrorManager } from '../../scripts/error-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function showToast(props, msg, options = {}) {
-  const toastArea = props.el.querySelector('sp-theme.toast-area');
-  const toast = createTag('sp-toast', { open: true, ...options }, msg, { parent: toastArea });
-  toast.addEventListener('close', () => {
-    toast.remove();
-  });
+  const errorManager = ErrorManager.withContext(props);
+
+  // Use the appropriate method based on variant
+  const variant = options.variant || 'info';
+
+  switch (variant) {
+    case 'positive':
+      errorManager.showSuccess(msg, options);
+      break;
+    case 'negative':
+      errorManager.showError(msg, options);
+      break;
+    case 'info':
+    default:
+      errorManager.showInfo(msg, options);
+      break;
+  }
 }
 
 function formatLocaleDate(string) {
