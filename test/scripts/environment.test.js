@@ -88,6 +88,7 @@ describe('Environment Module', () => {
   describe('getEventServiceHost', () => {
     it('should return correct host for AEM/HLX environment', () => {
       locationStub.href = 'https://dev--events-milo--adobecom.aem.page';
+      locationStub.host = 'dev--events-milo--adobecom.aem.page';
       locationStub.hostname = 'dev--events-milo--adobecom.aem.page';
       locationStub.origin = 'https://dev--events-milo--adobecom.aem.page';
       expect(getEventServiceHost(undefined, locationStub)).to.equal('https://dev--events-milo--adobecom.aem.page');
