@@ -136,7 +136,7 @@ export function getEventServiceHost(relativeDomain, location = window.location) 
   }
 
   if (hostname.includes(DOMAINS.LOCALHOST)) {
-    return 'https://dev--events-milo--adobecom.hlx.page';
+    return 'https://dev--events-milo--adobecom.aem.page';
   }
 
   return `https://${DOMAINS.ADOBE_COM}`;
