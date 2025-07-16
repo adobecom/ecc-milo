@@ -66,10 +66,13 @@ export default class RsvpForm extends LitElement {
     const required = Array.from(this.required);
     const mandatedfields = this.data.filter((f) => f.Required === 'x').map((f) => f.Field);
 
+    const cleanVisible = Array.from(new Set([...mandatedfields, ...visible]));
+    const cleanRequired = Array.from(new Set([...mandatedfields, ...required]));
+
     return {
       rsvpFormFields: {
-        visible: [...mandatedfields, ...visible],
-        required: [...mandatedfields, ...required],
+        visible: cleanVisible,
+        required: cleanRequired,
       },
     };
   }
