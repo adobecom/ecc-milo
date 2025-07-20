@@ -179,12 +179,6 @@ function decorateRTETiptap(row) {
   row.append(rte);
 }
 
-function loadMarketoEventInfo(el) {
-  // register a iframe and load this url https://engage.adobe.com/mczac_114328.html?mkto_src=emc
-  const iframe = createTag('iframe', { src: 'https://engage.adobe.com/mcz114328.html?mkto_src=emc' });
-  el.append(iframe);
-}
-
 export default function init(el) {
   el.classList.add('form-component');
 
@@ -214,6 +208,4 @@ export default function init(el) {
   });
 
   buildUrlInput(el);
-
-  loadMarketoEventInfo(el);
 }

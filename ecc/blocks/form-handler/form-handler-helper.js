@@ -115,6 +115,7 @@ export const VANILLA_COMPONENTS = [
   'secondary-cta',
   'video-content',
   'marketo-integration',
+  'marketo-event-id',
 ];
 
 async function initVanillaComponents(props) {
