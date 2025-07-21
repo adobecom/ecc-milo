@@ -47,30 +47,77 @@ export async function onRespUpdate(component, props) {
   setMarketoId(props.eventDataResp, component, props.locale);
 }
 
-async function updateFormUsingMarketoData(params, component, props) {
+function convertDateToYYYYMMDD(date) {
+  // Converts input like "31st January 2025" to "YYYY-MM-DD"
+  // Returns null if input is invalid
+  if (!date || typeof date !== 'string') return null;
+  // Match groups: day, month, year
+  const match = date.trim().match(/^(\d{1,2})st\s(January|February|March|April|May|June|July|August|September|October|November|December)\s(\d{4})$/);
+  if (!match) return null;
+  const [, day, month, year] = match;
+  // Map month name to MM format
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const monthIndex = monthNames.indexOf(month);
+  if (monthIndex === -1) return null;
+  const mm = String(monthIndex + 1).padStart(2, '0');
+  const dd = String(day).padStart(2, '0');
+  return `${year}-${mm}-${dd}`;
+}
 
-  const eventInfo = {
-    title: params.profile['Event Name'],
-    description: params.profile['Event Description'],
-    localStartDate: params.profile['Event Start Date'],
-    // localStartTime: params.profile['Event Start Time'],
-    localEndDate: params.profile['Event End Date'],
-    // localEndTime: params.profile['Event End Time'],
-    timezone: params.dateTime.timezone,
-  };
+function convertTimeToHHMMSS(time) {
+  // Converts input like "11:00am", "3:15pm", or "11am" to "HH:MM:SS" 24-hour format (e.g., "11:00:00", "15:15:00", "11:00:00")
+  // Returns null if input is invalid
+  if (!time || typeof time !== 'string') return null;
+  // Match groups: hour, optional minute, am/pm
+  const match = time.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i);
+  if (!match) return null;
+  let [ , hour, minute, period ] = match;
+  hour = parseInt(hour, 10);
+  minute = minute !== undefined ? parseInt(minute, 10) : 0;
+  if (period.toLowerCase() === 'pm' && hour !== 12) hour += 12;
+  if (period.toLowerCase() === 'am' && hour === 12) hour = 0;
+  // Pad hour and minute
+  const hh = hour.toString().padStart(2, '0');
+  const mm = minute.toString().padStart(2, '0');
+  return `${hh}:${mm}:00`;
+}
+
+async function updateFormUsingMarketoData(params, component, props) {
 
   const seriesName = params.profile['Series Name'];
 
   // lookup seriesId from eventInfo.seriesName
   const series = await getSeriesForUser();
   const seriesId = series.find((s) => s.seriesName === seriesName)?.seriesId;
+
+  const localStartDate = convertDateToYYYYMMDD(params.profile['Event Start Date']);
+  const localEndDate = convertDateToYYYYMMDD(params.profile['Event End Date']);
+  const localStartTime = convertTimeToHHMMSS(params.profile['Event Start Time']);
+  const localEndTime = convertTimeToHHMMSS(params.profile['Event End Time']);
+
+  const eventInfo = {
+    title: params.profile['Event Name'],
+    description: params.profile['Event Description'],
+    localStartDate,
+    localStartTime,
+    localEndDate,
+    localEndTime,
+    timezone: params.dateTime.timezone,
+  };
+
   if (seriesId) {
     eventInfo.seriesId = seriesId;
   }
+  // series should not be locked.
 
+  
   // lookup eventId from eventInfo.title
   console.log('eventInfo : ', eventInfo);
   props.eventDataResp = { ...props.eventDataResp, ...eventInfo };
+  // this should be done only if data is not already present in the eventInfo
 }
 
 function onMczMessage(event, component, props) {
