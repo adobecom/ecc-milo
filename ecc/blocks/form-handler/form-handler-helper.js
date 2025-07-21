@@ -339,6 +339,11 @@ async function loadEventData(props) {
       props.el.classList.remove('loading');
     }
   }
+
+  const marketoEventId = urlParams.get('marketoEventId');
+  if (marketoEventId) {
+    props.payload.marketoId = marketoEventId;
+  }
 }
 
 async function gatherValues(props) {

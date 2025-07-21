@@ -37,6 +37,8 @@ function setMarketoId(data, component, locale) {
   if (!marketoIdField) return;
 
   marketoIdField.setAttribute('value', marketoId);
+
+  loadMarketoEventInfo(component, marketoId);
 }
 
 export async function onPayloadUpdate(component, props) {
@@ -159,11 +161,9 @@ function initMarketoIdFieldListener(component, props) {
     console.log('marketoId : ', marketoId);
 
     loadMarketoEventInfo(component, marketoId);
-    // setPropsPayload(props, { marketoId });
   });
 
   window.addEventListener('message', (event) => onMczMessage(event, component, props));
-
 }
 
 export default function init(component, props) {
