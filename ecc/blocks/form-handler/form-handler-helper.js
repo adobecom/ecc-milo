@@ -326,11 +326,10 @@ async function loadEventData(props) {
       }, 5000);
 
       props.el.classList.add('disabled');
-      const eventData = await getEvent(eventId);
-      if (!eventData.error && eventData) {
-        props.eventDataResp = eventData;
+      if (event && !event.error) {
+        props.eventDataResp = event;
       } else {
-        props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: eventData.error } }));
+        props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: event.error } }));
       }
       props.el.classList.remove('disabled');
     } else {

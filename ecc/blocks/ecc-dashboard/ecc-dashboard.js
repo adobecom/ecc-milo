@@ -77,17 +77,20 @@ function buildThumbnail(data) {
     const imgSrc = (cardImage?.sharepointUrl
       && `${getEventPageHost()}${cardImage?.sharepointUrl
         .replace('https://www.adobe.com', '')
-      }`.replace('aem.page', 'aem.live'))
+      }`.replace('.hlx.', '.aem.')
+        .replace('aem.page', 'aem.live'))
     || cardImage?.imageUrl
     || (heroImage?.sharepointUrl
       && `${getEventPageHost()}${heroImage?.sharepointUrl
         .replace('https://www.adobe.com', '')
-      }`.replace('aem.page', 'aem.live'))
+      }`.replace('.hlx.', '.aem.')
+        .replace('aem.page', 'aem.live'))
     || heroImage?.imageUrl
     || (venueImage?.sharepointUrl
       && `${getEventPageHost()}${venueImage?.sharepointUrl
         .replace('https://www.adobe.com', '')
-      }`.replace('aem.page', 'aem.live'))
+      }`.replace('.hlx.', '.aem.')
+        .replace('aem.page', 'aem.live'))
     || venueImage?.imageUrl
     || images[0]?.imageUrl;
 
