@@ -9,7 +9,7 @@ import { getCurrentEnvironment } from '../../scripts/environment.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { getAttribute, getVenuePayload } from '../../scripts/data-utils.js';
 import { ENVIRONMENTS } from '../../scripts/constants.js';
-import { ErrorManager } from '../../scripts/error-manager.js';
+import ErrorManager from '../../scripts/error-manager.js';
 
 const imageType = 'venue-additional-image';
 let imageFile = null;
@@ -443,7 +443,7 @@ export default async function init(component, props) {
 }
 
 export async function onTargetUpdate(component, props) {
-  const errorManager = ErrorManager.withContext(props);
+  const errorManager = new ErrorManager(props);
 
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 

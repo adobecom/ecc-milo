@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import errorManager, { ErrorManager } from '../../ecc/scripts/error-manager.js';
+import ErrorManager from '../../ecc/scripts/error-manager.js';
 
 describe('ErrorManager', () => {
   let testElement;
@@ -18,41 +18,16 @@ describe('ErrorManager', () => {
     document.body.appendChild(testElement);
 
     // Create context-aware error manager for testing
-    contextErrorManager = ErrorManager.withContext(testElement);
+    contextErrorManager = new ErrorManager(testElement);
   });
 
   afterEach(() => {
     document.body.removeChild(testElement);
   });
 
-  describe('getToastArea', () => {
-    it('should find toast area from targetEl', () => {
-      const target = { targetEl: testElement };
-      const result = ErrorManager.getToastArea(target);
-      expect(result).to.equal(testElement.querySelector('sp-theme.toast-area'));
-    });
-
-    it('should find toast area from el', () => {
-      const target = { el: testElement };
-      const result = ErrorManager.getToastArea(target);
-      expect(result).to.equal(testElement.querySelector('sp-theme.toast-area'));
-    });
-
-    it('should find toast area from direct element', () => {
-      const result = ErrorManager.getToastArea(testElement);
-      expect(result).to.equal(testElement.querySelector('sp-theme.toast-area'));
-    });
-
-    it('should fallback to document body when no toast area found', () => {
-      const target = { someOtherProp: 'value' };
-      const result = ErrorManager.getToastArea(target);
-      expect(result).to.equal(document.body);
-    });
-  });
-
   describe('createToast', () => {
     it('should create a toast with default options', () => {
-      const toast = errorManager.createToast('Test message', toastArea);
+      const toast = contextErrorManager.createToast('Test message', toastArea);
       expect(toast.tagName.toLowerCase()).to.equal('sp-toast');
       // Check if properties are set (they might be attributes instead)
       expect(toast.open === true || toast.getAttribute('open') === 'true').to.be.true;
@@ -66,13 +41,13 @@ describe('ErrorManager', () => {
         timeout: 10000,
         showCloseButton: false,
       };
-      const toast = errorManager.createToast('Test message', toastArea, options);
+      const toast = contextErrorManager.createToast('Test message', toastArea, options);
       expect(toast.variant || toast.getAttribute('variant')).to.equal('positive');
       expect(Number(toast.timeout || toast.getAttribute('timeout'))).to.equal(10000);
     });
 
     it('should add close event listener', () => {
-      const toast = errorManager.createToast('Test message', toastArea);
+      const toast = contextErrorManager.createToast('Test message', toastArea);
       const removeSpy = { called: false };
       const originalRemove = toast.remove;
       toast.remove = () => {

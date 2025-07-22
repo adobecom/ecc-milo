@@ -1,6 +1,6 @@
 import { getAttribute } from '../../scripts/data-utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
-import { ErrorManager } from '../../scripts/error-manager.js';
+import ErrorManager from '../../scripts/error-manager.js';
 
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
@@ -16,7 +16,7 @@ export function onSubmit(component, props) {
     const incompleteItems = agendaGroup.getIncompleteAgendaItems();
 
     if (incompleteItems.length > 0) {
-      const errorManager = ErrorManager.withContext(props);
+      const errorManager = new ErrorManager(props);
       const incompleteCount = incompleteItems.length;
       const message = incompleteCount === 1
         ? '1 incomplete agenda item was not saved. Please add a time and either a title or description to save it.'

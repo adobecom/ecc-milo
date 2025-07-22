@@ -6,7 +6,7 @@ import { changeInputValue, parse24HourFormat, convertTo24HourFormat } from '../.
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { getAttribute, isValidAttribute } from '../../scripts/data-utils.js';
 import initCalendar, { updateCalendarInput, parseFormattedDate } from './calendar.js';
-import { ErrorManager } from '../../scripts/error-manager.js';
+import ErrorManager from '../../scripts/error-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -91,7 +91,7 @@ function dateTimeStringToTimestamp(dateString, timeString) {
 }
 
 async function updateLanguagePicker(component, props) {
-  const errorManager = ErrorManager.withContext(props);
+  const errorManager = new ErrorManager(props);
   const languagePicker = component.querySelector('#language-picker');
   const eventUrlInput = component.querySelector('#event-info-url-input');
 

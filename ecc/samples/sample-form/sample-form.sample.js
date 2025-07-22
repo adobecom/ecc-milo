@@ -12,7 +12,7 @@ import {
 } from '../../scripts/esp-controller.js';
 import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.sample.js';
 import { initProfileLogicTree } from '../../scripts/profile.js';
-import { ErrorManager } from '../../scripts/error-manager.js';
+import ErrorManager from '../../scripts/error-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -322,12 +322,12 @@ function decorateForm(el) {
 }
 
 function showSaveSuccessMessage(props, detail = { message: 'Edits saved successfully' }) {
-  const errorManager = ErrorManager.withContext(props);
+  const errorManager = new ErrorManager(props);
   errorManager.showSuccess(detail.message || 'Edits saved successfully', { timeout: 6000 });
 }
 
 function updateDashboardLink(props) {
-  const errorManager = ErrorManager.withContext(props);
+  const errorManager = new ErrorManager(props);
   const url = new URL(window.location.href);
   url.searchParams.set('seriesId', props.response.seriesId);
   url.pathname = '/tools/series-dashboard';
@@ -490,7 +490,7 @@ function initFormCtas(props) {
             }
 
             if (resp?.error) {
-              const errorManager = ErrorManager.withContext(props);
+              const errorManager = new ErrorManager(props);
               errorManager.handleErrorResponse(resp);
             } else if (props.currentStep === props.maxStep) {
               const toastArea = props.el.querySelector('.toast-area');
@@ -506,7 +506,7 @@ function initFormCtas(props) {
           } else {
             const resp = await saveSeries(props);
             if (resp?.error) {
-              const errorManager = ErrorManager.withContext(props);
+              const errorManager = new ErrorManager(props);
               errorManager.handleErrorResponse(resp);
             }
           }
@@ -557,7 +557,7 @@ function initNavigation(props) {
 
         const resp = await saveSeries(props);
         if (resp?.error) {
-          const errorManager = ErrorManager.withContext(props);
+          const errorManager = new ErrorManager(props);
           errorManager.handleErrorResponse(resp);
         } else {
           navigateForm(props, i);
@@ -692,7 +692,7 @@ async function buildForm(el) {
   initDeepLink(proxyProps);
   updateStatusTag(proxyProps);
 
-  ErrorManager.withContext(proxyProps).initErrorListeners(el, proxyProps);
+  new ErrorManager(proxyProps).initErrorListeners(el, proxyProps);
 }
 
 function buildLoadingScreen(el) {

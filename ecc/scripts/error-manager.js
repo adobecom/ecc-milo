@@ -6,63 +6,47 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 /**
  * Centralized error manager for handling all error display patterns
  */
-class ErrorManager {
-  constructor(context = null) {
-    this.defaultOptions = {
+export default class ErrorManager {
+  constructor(context) {
+    this.options = {
       variant: 'negative',
       timeout: 6000,
       showCloseButton: true,
     };
     this.context = context;
+    this.postArea = this.getPostArea();
   }
 
-  /**
-   * Create a new error manager instance with a specific context
-   * @param {Object} context - Props object or target element
-   * @returns {ErrorManager} New error manager instance with context
-   */
-  static withContext(context) {
-    return new ErrorManager(context);
-  }
-
-  /**
-   * Get the toast area from the target element or fallback to a default
-   * @param {Object} target - Target element or props object (optional if context is set)
-   * @returns {HTMLElement} Toast area element
-   */
-  getToastArea(target = null) {
-    const context = target || this.context;
-
-    if (context?.targetEl?.querySelector('.toast-area')) {
-      return context.targetEl.querySelector('.toast-area');
+  getPostArea() {
+    if (this.context?.targetEl?.querySelector('.toast-area')) {
+      return this.context.targetEl.querySelector('.toast-area');
     }
 
-    if (context?.el?.querySelector('.toast-area')) {
-      return context.el.querySelector('.toast-area');
+    if (this.context?.el?.querySelector('.toast-area')) {
+      return this.context.el.querySelector('.toast-area');
     }
 
-    if (context?.querySelector?.('.toast-area')) {
-      return context.querySelector('.toast-area');
+    if (this.context?.querySelector?.('.toast-area')) {
+      return this.context.querySelector('.toast-area');
     }
 
-    // Fallback to document body if no toast area found
-    return document.body;
+    return document.body.querySelector('.toast-area') || document.body;
   }
 
   /**
    * Create a toast element with the given message and options
    * @param {string} message - Error message to display
-   * @param {HTMLElement} toastArea - Target toast area
+   * @param {HTMLElement} postArea - Target toast area
    * @param {Object} options - Toast options
    * @returns {HTMLElement} Created toast element
    */
-  createToast(message, toastArea, options = {}) {
-    const toastOptions = { ...this.defaultOptions, ...options };
+  createToast(message, postArea, options = {}) {
+    const toastOptions = { ...this.options, ...options };
 
     const toast = createTag('sp-toast', {
       open: true,
       ...toastOptions,
-    }, message, { parent: toastArea });
+    }, message, { parent: postArea });
 
     toast.addEventListener('close', (e) => {
       e.stopPropagation();
@@ -74,41 +58,37 @@ class ErrorManager {
 
   /**
    * Handle error response object (from API calls)
-   * @param {Object} resp - Response object with error
+   * @param {Object} resp - Response object with error or direct error object
    * @param {Object} options - Additional options
    * @param {Object} target - Optional target override
    */
-  handleErrorResponse(resp, options = {}, target = null) {
-    if (!resp?.error) return;
-
-    const context = target || this.context;
-    const toastArea = this.getToastArea(context);
+  handleErrorResponse(resp, options = {}) {
+    // Handle both response objects with error property and direct error objects
+    const error = resp.error || resp;
     const messages = [];
-    const errorBag = resp.error.errors;
-    const errorMessage = resp.error.message;
+    const errorBag = error.errors;
+    const errorMessage = error.message;
 
     // Handle validation errors (error bag)
     if (errorBag) {
-      errorBag.forEach((error) => {
-        const errorPathSegments = error.path.split('/');
-        const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${error.message}`;
+      errorBag.forEach((err) => {
+        const errorPathSegments = err.path.split('/');
+        const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${err.message}`;
         messages.push(text);
       });
 
       messages.forEach((msg, i) => {
-        this.createToast(msg, toastArea, {
+        this.createToast(msg, this.postArea, {
           timeout: 6000 + (i * 3000),
           ...options,
         });
       });
     } else if (errorMessage) {
       // Handle specific error types
-      if (resp.status === 409
-          || errorMessage.includes('Event update invalid')
-          || errorMessage.includes('Series update invalid')) {
-        this.handleConcurrencyError(resp, options, target);
+      if (resp.status === 409 || error.status === 409) {
+        this.handleConcurrencyError(error, options);
       } else {
-        this.createToast(errorMessage, toastArea, options);
+        this.createToast(errorMessage, this.postArea, options);
       }
     }
   }
@@ -119,32 +99,29 @@ class ErrorManager {
    * @param {Object} options - Additional options
    * @param {Object} target - Optional target override
    */
-  handleConcurrencyError(resp, options = {}, target = null) {
-    const context = target || this.context;
-    const toastArea = this.getToastArea(context);
-    const isEvent = resp.error.message.includes('Event update invalid');
-    const isSeries = resp.error.message.includes('Series update invalid');
+  handleConcurrencyError(error, options = {}) {
+    const isEvent = error.message.includes('Event update invalid');
+    const isSeries = error.message.includes('Series update invalid');
 
     const message = 'The item has been updated by a different session since your last save.';
     const url = new URL(window.location.href);
 
     if (isEvent) {
-      const eventId = context?.eventDataResp?.eventId || context?.eventId;
+      const eventId = this.context?.eventDataResp?.eventId || this.context?.eventId;
       if (eventId) {
         url.searchParams.set('eventId', eventId);
       }
     } else if (isSeries) {
-      const seriesId = context?.response?.seriesId || context?.seriesId;
+      const seriesId = this.context?.response?.seriesId || this.context?.seriesId;
       if (seriesId) {
         url.searchParams.set('seriesId', seriesId);
       }
     }
 
-    const toast = this.createToast(message, toastArea, options);
+    const toast = this.createToast(message, this.postArea, options);
 
     createTag('sp-button', {
       slot: 'action',
-      variant: 'overBackground',
       href: url.toString(),
     }, 'See the latest version', { parent: toast });
   }
@@ -156,10 +133,8 @@ class ErrorManager {
    * @param {Object} target - Optional target override
    * @returns {HTMLElement} Created toast element
    */
-  showError(message, options = {}, target = null) {
-    const context = target || this.context;
-    const toastArea = this.getToastArea(context);
-    return this.createToast(message, toastArea, options);
+  showError(message, options = {}) {
+    return this.createToast(message, this.postArea, options);
   }
 
   /**
@@ -169,10 +144,8 @@ class ErrorManager {
    * @param {Object} target - Optional target override
    * @returns {HTMLElement} Created toast element
    */
-  showSuccess(message, options = {}, target = null) {
-    const context = target || this.context;
-    const toastArea = this.getToastArea(context);
-    const toast = this.createToast(message, toastArea, {
+  showSuccess(message, options = {}) {
+    const toast = this.createToast(message, this.postArea, {
       variant: 'positive',
       ...options,
     });
@@ -198,10 +171,8 @@ class ErrorManager {
    * @param {Object} target - Optional target override
    * @returns {HTMLElement} Created toast element
    */
-  showInfo(message, options = {}, target = null) {
-    const context = target || this.context;
-    const toastArea = this.getToastArea(context);
-    return this.createToast(message, toastArea, {
+  showInfo(message, options = {}) {
+    return this.createToast(message, this.postArea, {
       variant: 'info',
       ...options,
     });
@@ -213,9 +184,9 @@ class ErrorManager {
    * @param {Object} options - Toast options
    * @param {Object} target - Optional target override
    */
-  handleException(error, options = {}, target = null) {
+  handleException(error, options = {}) {
     const message = error.message || 'An unexpected error occurred. Please try again.';
-    this.showError(message, options, target);
+    this.showError(message, options);
   }
 
   /**
@@ -223,13 +194,13 @@ class ErrorManager {
    * @param {CustomEvent} event - Custom error event
    * @param {Object} target - Optional target override
    */
-  handleCustomEvent(event, target = null) {
+  handleCustomEvent(event) {
     const { error, message, options = {} } = event.detail;
 
     if (error) {
-      this.handleErrorResponse({ error }, options, target);
+      this.handleErrorResponse({ error }, options);
     } else if (message) {
-      this.showError(message, options, target);
+      this.showError(message, options);
     }
   }
 
@@ -240,12 +211,12 @@ class ErrorManager {
    * @param {Object} target - Optional target override
    * @returns {Function} Wrapped function
    */
-  wrapAsyncFunction(fn, options = {}, target = null) {
+  wrapAsyncFunction(fn, options = {}) {
     return async (...args) => {
       try {
         return await fn(...args);
       } catch (error) {
-        this.handleException(error, options, target);
+        this.handleException(error, options);
         throw error; // Re-throw to maintain original behavior
       }
     };
@@ -302,16 +273,4 @@ class ErrorManager {
       this.showSuccess(e.detail.message || 'Success!', e.detail, props);
     });
   }
-
-  // Static methods for backward compatibility
-  static getToastArea(target) {
-    return new ErrorManager().getToastArea(target);
-  }
 }
-
-// Create singleton instance
-const errorManager = new ErrorManager();
-
-// Export both the class and singleton instance
-export { ErrorManager };
-export default errorManager;

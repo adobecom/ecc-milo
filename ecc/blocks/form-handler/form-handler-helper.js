@@ -41,7 +41,7 @@ import {
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
-import { ErrorManager } from '../../scripts/error-manager.js';
+import ErrorManager from '../../scripts/error-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -253,7 +253,7 @@ function enableSideNavForEditFlow(props) {
 }
 
 async function loadEventData(props) {
-  const errorManager = ErrorManager.withContext(props);
+  const errorManager = new ErrorManager(props);
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
@@ -351,7 +351,7 @@ async function updateComponentsOnRespChange(props) {
 }
 
 function showSaveSuccessMessage(props, detail = { message: 'Edits saved successfully' }) {
-  const errorManager = ErrorManager.withContext(props);
+  const errorManager = new ErrorManager(props);
   errorManager.showSuccess(detail.message || 'Edits saved successfully', { timeout: 6000 });
 }
 
@@ -376,7 +376,7 @@ async function saveEvent(props, toPublish = false) {
     await gatherValues(props);
   } catch (e) {
     const errorObj = { error: { message: e.message } };
-    const errorManager = ErrorManager.withContext(props);
+    const errorManager = new ErrorManager(props);
     errorManager.handleErrorResponse(errorObj);
     return errorObj;
   }
@@ -652,7 +652,7 @@ async function validatePreview(props, cta) {
             return;
           }
           if (metadataJson?.error) {
-            const errorManager = ErrorManager.withContext(props);
+            const errorManager = new ErrorManager(props);
             errorManager.handleErrorResponse(metadataJson.error);
             buildPreviewLoadingFailedDialog(props, previewHref);
             poll.cancel();
@@ -712,7 +712,7 @@ function initFormCtas(props) {
 
           const eventId = getAttribute(props.eventDataResp, 'eventId', props.locale);
           if (!eventId) {
-            const errorManager = ErrorManager.withContext(props);
+            const errorManager = new ErrorManager(props);
             errorManager.showError('Event ID is not found');
             toggleBtnsSubmittingState(false);
             return;
@@ -726,7 +726,7 @@ function initFormCtas(props) {
           );
 
           if (resp.error) {
-            const errorManager = ErrorManager.withContext(props);
+            const errorManager = new ErrorManager(props);
             errorManager.handleErrorResponse(resp.error);
             toggleBtnsSubmittingState(false);
             return;
@@ -1105,7 +1105,7 @@ export async function buildECCForm(el) {
   updateStatusTag(proxyProps);
   toggleSections(proxyProps);
 
-  ErrorManager.withContext(proxyProps).initErrorListeners(el, proxyProps);
+  new ErrorManager(proxyProps).initErrorListeners(el, proxyProps);
 }
 
 export function buildLoadingScreen(el) {
