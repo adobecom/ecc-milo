@@ -1,5 +1,7 @@
 import { getAttribute } from '../../scripts/data-utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
+import { getToastArea } from '../../scripts/utils.js';
+import ToastManager from '../../scripts/toast-manager.js';
 
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
@@ -10,7 +12,25 @@ export function onSubmit(component, props) {
 
   let agenda = [];
 
-  if (agendaGroup) agenda = agendaGroup.getCompleteAgenda();
+  if (agendaGroup) {
+    // Check for incomplete agenda items before getting complete agenda
+    const incompleteItems = agendaGroup.getIncompleteAgendaItems();
+
+    if (incompleteItems.length > 0) {
+      const toastManager = new ToastManager(getToastArea(props));
+      const incompleteCount = incompleteItems.length;
+      const message = incompleteCount === 1
+        ? '1 incomplete agenda item was not saved. Please add a time and either a title or description to save it.'
+        : `${incompleteCount} incomplete agenda items were not saved. Please add a time and either a title or description to save them.`;
+
+      toastManager.showInfo(message, {
+        timeout: 8000,
+        showCloseButton: true,
+      });
+    }
+
+    agenda = agendaGroup.getCompleteAgenda();
+  }
 
   const agendaInfo = {
     showAgendaPostEvent,

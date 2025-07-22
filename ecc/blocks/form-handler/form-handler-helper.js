@@ -26,7 +26,6 @@ import {
   getIcon,
   buildNoAccessScreen,
   generateToolTip,
-  camelToSentenceCase,
   getEventPageHost,
   replaceAnchorWithButton,
 } from '../../scripts/utils.js';
@@ -42,6 +41,7 @@ import {
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
+import ErrorManager from '../../scripts/error-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -145,57 +145,6 @@ const INPUT_TYPES = [
   'sp-checkbox[required]',
   'sp-picker[required]',
 ];
-
-export function buildErrorMessage(props, resp) {
-  if (!resp) return;
-
-  const toastArea = resp.targetEl ? resp.targetEl.querySelector('.toast-area') : props.el.querySelector('.toast-area');
-
-  if (resp.error) {
-    const messages = [];
-    const errorBag = resp.error.errors;
-    const errorMessage = resp.error.message;
-
-    if (errorBag) {
-      errorBag.forEach((error) => {
-        const errorPathSegments = error.path.split('/');
-        const text = `${camelToSentenceCase(errorPathSegments[errorPathSegments.length - 1])} ${error.message}`;
-        messages.push(text);
-      });
-
-      messages.forEach((msg, i) => {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 + (i * 3000) }, msg, { parent: toastArea });
-        toast.addEventListener('close', (e) => {
-          e.stopPropagation();
-          toast.remove();
-        }, { once: true });
-      });
-    } else if (errorMessage) {
-      if (resp.status === 409 || resp.error.message === 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}') {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative' }, 'The event has been updated by a different session since your last save.', { parent: toastArea });
-        const url = new URL(window.location.href);
-        url.searchParams.set('eventId', getAttribute(props.eventDataResp, 'eventId', props.locale));
-
-        createTag('sp-button', {
-          slot: 'action',
-          variant: 'overBackground',
-          href: `${url.toString()}`,
-        }, 'See the latest version', { parent: toast });
-
-        toast.addEventListener('close', (e) => {
-          e.stopPropagation();
-          toast.remove();
-        }, { once: true });
-      } else {
-        const toast = createTag('sp-toast', { open: true, variant: 'negative', timeout: 6000 }, errorMessage, { parent: toastArea });
-        toast.addEventListener('close', (e) => {
-          e.stopPropagation();
-          toast.remove();
-        }, { once: true });
-      }
-    }
-  }
-}
 
 export function getCurrentFragment(props) {
   const frags = props.el.querySelectorAll('.fragment');
@@ -304,6 +253,7 @@ function enableSideNavForEditFlow(props) {
 }
 
 async function loadEventData(props) {
+  const errorManager = new ErrorManager(props);
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const eventId = urlParams.get('eventId');
@@ -315,13 +265,7 @@ async function loadEventData(props) {
       || userHasAccessToBU(user, event.cloudType)) {
       setTimeout(() => {
         if (!props.eventDataResp.eventId) {
-          const toastArea = props.el.querySelector('.toast-area');
-          if (!toastArea) return;
-
-          const toast = createTag('sp-toast', { open: true, timeout: 10000 }, 'Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { parent: toastArea });
-          toast.addEventListener('close', () => {
-            toast.remove();
-          });
+          errorManager.showError('Event data is taking longer than usual to load. Please check if the Adobe corp. VPN is connected or if the eventId URL Param is valid.', { timeout: 10000 });
         }
       }, 5000);
 
@@ -406,19 +350,8 @@ async function updateComponentsOnRespChange(props) {
 }
 
 function showSaveSuccessMessage(props, detail = { message: 'Edits saved successfully' }) {
-  const toastArea = props.el.querySelector('.toast-area');
-  if (!toastArea) return;
-
-  const previousMsgs = toastArea.querySelectorAll('.save-success-msg');
-
-  previousMsgs.forEach((msg) => {
-    msg.remove();
-  });
-
-  const toast = createTag('sp-toast', { class: 'save-success-msg', open: true, variant: 'positive', timeout: 6000 }, detail.message || 'Edits saved successfully', { parent: toastArea });
-  toast.addEventListener('close', () => {
-    toast.remove();
-  });
+  const errorManager = new ErrorManager(props);
+  errorManager.showSuccess(detail.message || 'Edits saved successfully', { timeout: 6000 });
 }
 
 function updateDashboardLink(props) {
@@ -442,7 +375,8 @@ async function saveEvent(props, toPublish = false) {
     await gatherValues(props);
   } catch (e) {
     const errorObj = { error: { message: e.message } };
-    buildErrorMessage(props, errorObj);
+    const errorManager = new ErrorManager(props);
+    errorManager.handleErrorResponse(errorObj);
     return errorObj;
   }
 
@@ -717,7 +651,8 @@ async function validatePreview(props, cta) {
             return;
           }
           if (metadataJson?.error) {
-            buildErrorMessage(props, metadataJson.error);
+            const errorManager = new ErrorManager(props);
+            errorManager.handleErrorResponse(metadataJson.error);
             buildPreviewLoadingFailedDialog(props, previewHref);
             poll.cancel();
             return;
@@ -776,7 +711,8 @@ function initFormCtas(props) {
 
           const eventId = getAttribute(props.eventDataResp, 'eventId', props.locale);
           if (!eventId) {
-            buildErrorMessage(props, { error: { message: 'Event ID is not found' } });
+            const errorManager = new ErrorManager(props);
+            errorManager.showError('Event ID is not found');
             toggleBtnsSubmittingState(false);
             return;
           }
@@ -789,7 +725,8 @@ function initFormCtas(props) {
           );
 
           if (resp.error) {
-            buildErrorMessage(props, resp.error);
+            const errorManager = new ErrorManager(props);
+            errorManager.handleErrorResponse(resp.error);
             toggleBtnsSubmittingState(false);
             return;
           }
@@ -841,30 +778,15 @@ function initFormCtas(props) {
 
             if (resp && !resp.error) {
               if (props.currentStep === props.maxStep) {
-                const toastArea = props.el.querySelector('.toast-area');
                 cta.textContent = cta.dataset.doneStateText;
                 cta.classList.add('disabled');
 
-                if (toastArea) {
-                  const toast = createTag('sp-toast', { open: true, variant: 'positive' }, 'Success! This event has been published.', { parent: toastArea });
-                  const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
-
-                  createTag(
-                    'sp-button',
-                    {
-                      slot: 'action',
-                      variant: 'overBackground',
-                      treatment: 'outline',
-                      href: dashboardLink.href,
-                    },
-                    'Go to dashboard',
-                    { parent: toast },
-                  );
-
-                  toast.addEventListener('close', () => {
-                    toast.remove();
-                  });
-                }
+                showSaveSuccessMessage(props, 'Success! This event has been published.', {
+                  actionButton: {
+                    text: 'Go to dashboard',
+                    href: props.el.querySelector('.side-menu > ul > li > a')?.href,
+                  },
+                });
               } else {
                 navigateForm(props);
               }
@@ -1182,17 +1104,7 @@ export async function buildECCForm(el) {
   updateStatusTag(proxyProps);
   toggleSections(proxyProps);
 
-  el.addEventListener('show-error-toast', (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    buildErrorMessage(proxyProps, e.detail);
-  });
-
-  el.addEventListener('show-success-toast', (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    showSaveSuccessMessage(proxyProps, e.detail);
-  });
+  new ErrorManager(proxyProps).initErrorListeners(el, proxyProps);
 }
 
 export function buildLoadingScreen(el) {

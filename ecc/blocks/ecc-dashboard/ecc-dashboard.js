@@ -15,21 +15,42 @@ import {
   getEventPageHost,
   readBlockConfig,
   signIn,
+  getToastArea,
 } from '../../scripts/utils.js';
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
+import ToastManager from '../../scripts/toast-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
+// Create a single ToastManager instance for the dashboard
+let toastManager;
+
 function showToast(props, msg, options = {}) {
-  const toastArea = props.el.querySelector('sp-theme.toast-area');
-  const toast = createTag('sp-toast', { open: true, ...options }, msg, { parent: toastArea });
-  toast.addEventListener('close', () => {
-    toast.remove();
-  });
+  // Initialize toastManager if not already done
+  if (!toastManager) {
+    const toastArea = getToastArea(props);
+    toastManager = new ToastManager(toastArea);
+  }
+
+  // Use the appropriate method based on variant
+  const variant = options.variant || 'info';
+
+  switch (variant) {
+    case 'positive':
+      toastManager.showSuccess(msg, options);
+      break;
+    case 'negative':
+      toastManager.showError(msg, options);
+      break;
+    case 'info':
+    default:
+      toastManager.showInfo(msg, options);
+      break;
+  }
 }
 
 function formatLocaleDate(string) {
