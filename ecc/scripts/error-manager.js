@@ -92,43 +92,4 @@ export default class ErrorManager extends ToastManager {
       href: url.toString(),
     }, 'See the latest version', { parent: toast });
   }
-
-  /**
-   * Handle caught exceptions
-   * @param {Error} error - Caught error
-   * @param {Object} options - Toast options
-   */
-  handleException(error, options = {}) {
-    const message = error.message || 'An unexpected error occurred. Please try again.';
-    this.createToast(message, this.toastArea, {
-      variant: 'negative',
-      ...options,
-    });
-  }
-
-  /**
-   * Create a wrapped async function that automatically handles errors
-   * @param {Function} fn - Async function to wrap
-   * @param {Object} options - Error handling options
-   * @returns {Function} Wrapped function
-   */
-  wrapAsyncFunction(fn, options = {}) {
-    return async (...args) => {
-      try {
-        return await fn(...args);
-      } catch (error) {
-        this.handleException(error, options);
-        throw error; // Re-throw to maintain original behavior
-      }
-    };
-  }
-
-  /**
-   * Legacy compatibility method for buildErrorMessage
-   * @param {Object} props - Props object
-   * @param {Object} resp - Response object
-   */
-  buildErrorMessage(props, resp) {
-    this.handleErrorResponse(resp, {}, props);
-  }
 }
