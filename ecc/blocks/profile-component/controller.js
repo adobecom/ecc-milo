@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { getAttribute } from '../../scripts/data-utils.js';
+import { LIBS } from '../../scripts/scripts.js';
 import { getToastArea } from '../../scripts/utils.js';
 import ToastManager from '../../scripts/toast-manager.js';
 import {

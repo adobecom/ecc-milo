@@ -1,23 +1,15 @@
 import { expect } from '@esm-bundle/chai';
 import ErrorManager from '../../ecc/scripts/error-manager.js';
+import ToastManager from '../../ecc/scripts/toast-manager.js';
 
 describe('ErrorManager', () => {
   let testElement;
-  let toastArea;
   let contextErrorManager;
 
   beforeEach(() => {
-    // Create test DOM structure
     testElement = document.createElement('div');
-    const spTheme = document.createElement('sp-theme');
-    spTheme.className = 'toast-area';
-    toastArea = document.createElement('div');
-    toastArea.className = 'toast-area';
-    spTheme.appendChild(toastArea);
-    testElement.appendChild(spTheme);
+    testElement.innerHTML = '<sp-theme class="toast-area"></sp-theme>';
     document.body.appendChild(testElement);
-
-    // Create context-aware error manager for testing
     contextErrorManager = new ErrorManager(testElement);
   });
 
@@ -25,37 +17,10 @@ describe('ErrorManager', () => {
     document.body.removeChild(testElement);
   });
 
-  describe('createToast', () => {
-    it('should create a toast with default options', () => {
-      const toast = contextErrorManager.createToast('Test message', toastArea);
-      expect(toast.tagName.toLowerCase()).to.equal('sp-toast');
-      // Check if properties are set (they might be attributes instead)
-      expect(toast.open === true || toast.getAttribute('open') === 'true').to.be.true;
-      expect(toast.variant || toast.getAttribute('variant')).to.equal('negative');
-      expect(Number(toast.timeout || toast.getAttribute('timeout'))).to.equal(6000);
-    });
-
-    it('should create a toast with custom options', () => {
-      const options = {
-        variant: 'positive',
-        timeout: 10000,
-        showCloseButton: false,
-      };
-      const toast = contextErrorManager.createToast('Test message', toastArea, options);
-      expect(toast.variant || toast.getAttribute('variant')).to.equal('positive');
-      expect(Number(toast.timeout || toast.getAttribute('timeout'))).to.equal(10000);
-    });
-
-    it('should add close event listener', () => {
-      const toast = contextErrorManager.createToast('Test message', toastArea);
-      const removeSpy = { called: false };
-      const originalRemove = toast.remove;
-      toast.remove = () => {
-        removeSpy.called = true;
-      };
-      toast.dispatchEvent(new CustomEvent('close'));
-      expect(removeSpy.called).to.be.true;
-      toast.remove = originalRemove;
+  describe('constructor', () => {
+    it('should initialize with context and create internal toastManager', () => {
+      expect(contextErrorManager.context).to.equal(testElement);
+      expect(contextErrorManager.toastManager).to.be.instanceOf(ToastManager);
     });
   });
 
@@ -64,48 +29,51 @@ describe('ErrorManager', () => {
       const resp = {
         error: {
           errors: [
-            { path: '/title', message: 'Title is required' },
-            { path: '/description', message: 'Description is required' },
+            { path: '/field1', message: 'is required' },
+            { path: '/field2', message: 'is invalid' },
           ],
         },
       };
 
-      let toastCount = 0;
-      const originalCreateToast = contextErrorManager.createToast;
-      contextErrorManager.createToast = () => { toastCount += 1; return document.createElement('sp-toast'); };
-
-      contextErrorManager.handleErrorResponse(resp);
-      expect(toastCount).to.equal(2);
-
-      contextErrorManager.createToast = originalCreateToast;
-    });
-
-    it('should handle concurrency errors (409 status)', () => {
-      const resp = {
-        status: 409,
-        error: { message: 'Request to ESP failed: {"message":"Event update invalid, event has been modified since last fetch"}' },
-      };
-
       let toastCreated = false;
-      const originalCreateToast = contextErrorManager.createToast;
-      contextErrorManager.createToast = (message) => {
+      let messageReceived = '';
+      const originalCreateToast = contextErrorManager.toastManager.createToast;
+      contextErrorManager.toastManager.createToast = (message) => {
         toastCreated = true;
-        expect(message).to.include('updated by a different session');
+        messageReceived = message;
         return document.createElement('sp-toast');
       };
+
+              contextErrorManager.handleErrorResponse(resp);
+        expect(toastCreated).to.be.true;
+        expect(messageReceived).to.include('Field2 is invalid');
+
+      contextErrorManager.toastManager.createToast = originalCreateToast;
+    });
+
+          it('should handle concurrency errors (409 status)', () => {
+        const resp = { status: 409, error: { message: 'Event update invalid' } };
+
+        let toastCreated = false;
+        const originalCreateToast = contextErrorManager.toastManager.createToast;
+        contextErrorManager.toastManager.createToast = (message) => {
+          toastCreated = true;
+          expect(message).to.include('updated by a different session');
+          return document.createElement('sp-toast');
+        };
 
       contextErrorManager.handleErrorResponse(resp);
       expect(toastCreated).to.be.true;
 
-      contextErrorManager.createToast = originalCreateToast;
+      contextErrorManager.toastManager.createToast = originalCreateToast;
     });
 
     it('should handle general error messages', () => {
       const resp = { error: { message: 'General error occurred' } };
 
       let messageReceived = '';
-      const originalCreateToast = contextErrorManager.createToast;
-      contextErrorManager.createToast = (message) => {
+      const originalCreateToast = contextErrorManager.toastManager.createToast;
+      contextErrorManager.toastManager.createToast = (message) => {
         messageReceived = message;
         return document.createElement('sp-toast');
       };
@@ -113,19 +81,19 @@ describe('ErrorManager', () => {
       contextErrorManager.handleErrorResponse(resp);
       expect(messageReceived).to.equal('General error occurred');
 
-      contextErrorManager.createToast = originalCreateToast;
+      contextErrorManager.toastManager.createToast = originalCreateToast;
     });
 
     it('should do nothing when no error in response', () => {
       const resp = { success: true };
       let toastCreated = false;
-      const originalCreateToast = contextErrorManager.createToast;
-      contextErrorManager.createToast = () => { toastCreated = true; };
+      const originalCreateToast = contextErrorManager.toastManager.createToast;
+      contextErrorManager.toastManager.createToast = () => { toastCreated = true; };
 
       contextErrorManager.handleErrorResponse(resp);
       expect(toastCreated).to.be.false;
 
-      contextErrorManager.createToast = originalCreateToast;
+      contextErrorManager.toastManager.createToast = originalCreateToast;
     });
   });
 
@@ -134,8 +102,8 @@ describe('ErrorManager', () => {
       const resp = { error: { message: 'Integration test error' } };
 
       let toastCreated = false;
-      const originalCreateToast = contextErrorManager.createToast;
-      contextErrorManager.createToast = (message) => {
+      const originalCreateToast = contextErrorManager.toastManager.createToast;
+      contextErrorManager.toastManager.createToast = (message) => {
         toastCreated = true;
         expect(message).to.equal('Integration test error');
         return document.createElement('sp-toast');
@@ -144,7 +112,7 @@ describe('ErrorManager', () => {
       contextErrorManager.handleErrorResponse(resp);
       expect(toastCreated).to.be.true;
 
-      contextErrorManager.createToast = originalCreateToast;
+      contextErrorManager.toastManager.createToast = originalCreateToast;
     });
 
     it('should handle multiple validation errors with staggered timeouts', () => {
@@ -159,8 +127,8 @@ describe('ErrorManager', () => {
       };
 
       const timeouts = [];
-      const originalCreateToast = contextErrorManager.createToast;
-      contextErrorManager.createToast = (message, toastAreaParam, options) => {
+      const originalCreateToast = contextErrorManager.toastManager.createToast;
+      contextErrorManager.toastManager.createToast = (message, toastAreaParam, options) => {
         timeouts.push(options.timeout);
         return document.createElement('sp-toast');
       };
@@ -168,7 +136,7 @@ describe('ErrorManager', () => {
       contextErrorManager.handleErrorResponse(resp);
       expect(timeouts).to.deep.equal([6000, 9000, 12000]);
 
-      contextErrorManager.createToast = originalCreateToast;
+      contextErrorManager.toastManager.createToast = originalCreateToast;
     });
   });
 });

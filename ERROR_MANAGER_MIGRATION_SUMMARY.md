@@ -1,16 +1,16 @@
 # Error Manager Migration Summary
 
 ## Overview
-Successfully migrated from event-driven error handling to direct ToastManager calls throughout the entire codebase.
+Successfully migrated from event-driven error handling to a clean composition-based architecture. **ToastManager for general toasts, ErrorManager for complex error handling.**
 
 ## Files Modified
 
 ### Core Architecture
-- **`ecc/scripts/toast-manager.js`** - New ToastManager class for general toast functionality
-- **`ecc/scripts/error-manager.js`** - Refactored to extend ToastManager, focused on error-specific handling
+- **`ecc/scripts/toast-manager.js`** - Public API for all general toast functionality
+- **`ecc/scripts/error-manager.js`** - Uses ToastManager internally via composition for complex error scenarios
 - **`ecc/scripts/utils.js`** - Added `getToastArea` utility function
 
-### Components Refactored
+### Components (All Use ToastManager for General Toasts)
 - **`ecc/components/image-dropzone/image-dropzone.js`** - Direct ToastManager calls
 - **`ecc/components/partner-selector/partner-selector.js`** - Direct ToastManager calls
 - **`ecc/components/profile/profile.js`** - Direct ToastManager calls
@@ -19,11 +19,28 @@ Successfully migrated from event-driven error handling to direct ToastManager ca
 - **`ecc/blocks/profile-component/controller.js`** - Direct ToastManager calls
 - **`ecc/blocks/form-handler/form-handler-helper.js`** - Direct ToastManager calls
 
-### Dashboards Refactored
-- **`ecc/blocks/ecc-dashboard/ecc-dashboard.js`** - Uses ToastManager for general toasts
-- **`ecc/blocks/series-dashboard/series-dashboard.js`** - Uses ToastManager for general toasts
+### Dashboards (All Use ToastManager for General Toasts)
+- **`ecc/blocks/ecc-dashboard/ecc-dashboard.js`** - Uses ToastManager for all toasts
+- **`ecc/blocks/series-dashboard/series-dashboard.js`** - Uses ToastManager for all toasts
+- **`ecc/blocks/event-agenda-component/controller.js`** - Uses ToastManager for all toasts
+- **`ecc/blocks/event-partners-component/controller.js`** - Uses ToastManager for all toasts
+
+### Complex Error Handling (Use ErrorManager)
+- **`ecc/blocks/form-handler/form-handler-helper.js`** - ErrorManager for API error handling
+- **`ecc/blocks/series-creation-form/series-creation-form.js`** - ErrorManager for API error handling
+- **`ecc/blocks/event-info-component/controller.js`** - ErrorManager for API error handling
+- **`ecc/blocks/venue-info-component/controller.js`** - ErrorManager for API error handling
 
 ## Architecture Benefits
+
+### ✅ Clean Separation of Concerns
+- **ToastManager** - Public API for general toast functionality (`showInfo`, `showSuccess`, `showError`, `showWarning`)
+- **ErrorManager** - Complex error handling using ToastManager internally (`handleErrorResponse`, `handleConcurrencyError`)
+
+### ✅ Composition Over Inheritance
+- **ErrorManager** uses a **ToastManager instance** internally
+- **No inheritance** - cleaner, more flexible architecture
+- **Single Responsibility** - each class has one clear purpose
 
 ### ✅ Zero Custom Events
 - Eliminated all `show-error-toast`, `show-success-toast` custom events
@@ -35,19 +52,16 @@ Successfully migrated from event-driven error handling to direct ToastManager ca
 - Removed `handleException` - not used in codebase
 - Removed `buildErrorMessage` - not used in codebase
 
-### ✅ Clean Separation of Concerns
-- **ToastManager** - Handles general toast functionality (`showInfo`, `showSuccess`, `showError`, `showWarning`)
-- **ErrorManager** - Extends ToastManager, provides error-specific APIs (`handleErrorResponse`, `handleConcurrencyError`)
-
 ### ✅ Direct Control
 - Components have direct control over error/success display
 - No intermediate abstraction layers
 - Explicit dependencies and clear APIs
 
-## Current API
+## Current API (Composition-Based)
 
-### ToastManager
+### ToastManager (Public API for General Toasts)
 ```javascript
+// For simple toasts
 const toastManager = new ToastManager(toastArea);
 toastManager.showInfo('Information message');
 toastManager.showSuccess('Success message');
@@ -55,8 +69,9 @@ toastManager.showError('Error message');
 toastManager.showWarning('Warning message');
 ```
 
-### ErrorManager
+### ErrorManager (Complex Error Handling)
 ```javascript
+// For complex error scenarios (API responses, concurrency errors)
 const errorManager = new ErrorManager(context);
 errorManager.handleErrorResponse(resp, options);
 errorManager.handleConcurrencyError(error, options);
@@ -64,31 +79,38 @@ errorManager.handleConcurrencyError(error, options);
 
 ## Migration Patterns
 
-### Before (Event-Driven)
+### Before (Mixed Usage)
 ```javascript
-// Dispatch custom events
-component.dispatchEvent(new CustomEvent('show-error-toast', { 
-  detail: { error: { message: 'Error message' } } 
-}));
+// Some components used ToastManager
+const toastManager = new ToastManager(toastArea);
+toastManager.showError('Error message');
 
-// Listen for events
-el.addEventListener('show-error-toast', (e) => {
-  // Handle error display
-});
+// Others used ErrorManager
+const errorManager = new ErrorManager(context);
+errorManager.showError('Error message');
 ```
 
-### After (Direct Calls)
+### After (Clean Separation)
 ```javascript
-// Direct method calls
-getToastManager(component).showError('Error message');
-getToastManager(component).showSuccess('Success message');
+// General toasts use ToastManager
+const toastManager = new ToastManager(toastArea);
+toastManager.showError('Error message');
+toastManager.showSuccess('Success message');
+
+// Complex error handling uses ErrorManager
+const errorManager = new ErrorManager(context);
+errorManager.handleErrorResponse(resp);
 ```
 
 ## Testing
-- Updated all tests to reflect new architecture
+- Updated all tests to reflect composition-based architecture
 - Removed tests for unused methods (`wrapAsyncFunction`, `handleException`, `buildErrorMessage`)
-- Comprehensive test coverage for ToastManager and ErrorManager
+- Comprehensive test coverage for both ToastManager and ErrorManager
 
-## Migration Status: ✅ COMPLETE
+## Migration Status: ✅ COMPLETE & COMPOSITION-BASED
 
-All error handling patterns have been successfully migrated to use direct ToastManager calls. The architecture is now clean, efficient, and maintainable with zero custom events and zero unused methods. 
+All error handling patterns have been successfully migrated to use a **clean composition-based architecture**:
+- **ToastManager** - Public API for all general toast functionality
+- **ErrorManager** - Complex error handling using ToastManager internally
+- **Semantic Clarity** - Each class has a clear, single responsibility
+- **Flexible Architecture** - Composition over inheritance for better maintainability 

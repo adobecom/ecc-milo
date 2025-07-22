@@ -5,24 +5,19 @@ import ToastManager from './toast-manager.js';
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 /**
- * Error Manager for handling all error display patterns
- * Extends ToastManager to provide error-specific functionality
+ * Error Handler for handling complex error scenarios
+ * Uses ToastManager internally for toast creation
  */
-export default class ErrorManager extends ToastManager {
+export default class ErrorManager {
   constructor(context) {
-    // Extract toast area from context before calling super()
+    // Extract toast area from context
     const toastArea = getToastArea(context);
-    super(toastArea);
+
+    // Use composition - ErrorManager has a ToastManager
+    this.toastManager = new ToastManager(toastArea);
 
     // Store the full context for error handling
     this.context = context;
-
-    // Override default options for error manager
-    this.options = {
-      variant: 'negative',
-      timeout: 6000,
-      showCloseButton: true,
-    };
   }
 
   /**
@@ -46,7 +41,7 @@ export default class ErrorManager extends ToastManager {
       });
 
       messages.forEach((msg, i) => {
-        this.createToast(msg, this.toastArea, {
+        this.toastManager.createToast(msg, this.toastManager.toastArea, {
           timeout: 6000 + (i * 3000),
           ...options,
         });
@@ -56,7 +51,7 @@ export default class ErrorManager extends ToastManager {
       if (resp.status === 409 || error.status === 409) {
         this.handleConcurrencyError(error, options);
       } else {
-        this.createToast(errorMessage, this.toastArea, options);
+        this.toastManager.createToast(errorMessage, this.toastManager.toastArea, options);
       }
     }
   }
@@ -85,7 +80,7 @@ export default class ErrorManager extends ToastManager {
       }
     }
 
-    const toast = this.createToast(message, this.toastArea, options);
+    const toast = this.toastManager.createToast(message, this.toastManager.toastArea, options);
 
     createTag('sp-button', {
       slot: 'action',
