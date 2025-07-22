@@ -13,29 +13,37 @@ import {
   buildNoAccessScreen,
   readBlockConfig,
   signIn,
+  getToastArea,
 } from '../../scripts/utils.js';
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { quickFilter } from '../series-creation-form/data-handler.js';
-import ErrorManager from '../../scripts/error-manager.js';
+import ToastManager from '../../scripts/toast-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
+// Create a single ToastManager instance for the dashboard
+let toastManager;
+
 function showToast(props, msg, options = {}) {
-  const errorManager = new ErrorManager(props);
+  // Initialize toastManager if not already done
+  if (!toastManager) {
+    const toastArea = getToastArea(props);
+    toastManager = new ToastManager(toastArea);
+  }
 
   // Use the appropriate method based on variant
   const variant = options.variant || 'info';
 
   switch (variant) {
     case 'positive':
-      errorManager.showSuccess(msg, options);
+      toastManager.showSuccess(msg, options);
       break;
     case 'negative':
-      errorManager.showError(msg, options);
+      toastManager.showError(msg, options);
       break;
     case 'info':
     default:
-      errorManager.showInfo(msg, options);
+      toastManager.showInfo(msg, options);
       break;
   }
 }

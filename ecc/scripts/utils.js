@@ -426,3 +426,43 @@ export function replaceAnchorWithButton(anchor) {
   anchor.parentNode.replaceChild(button, anchor);
   return button;
 }
+
+/**
+ * Extract toast area from various context types
+ * @param {Object|HTMLElement} context - Context object or element
+ * @returns {HTMLElement} Toast area element
+ */
+export function getToastArea(context) {
+  if (context && typeof context === 'object') {
+    // Handle props object with targetEl or el
+    const element = context.targetEl || context.el || context;
+
+    if (element) {
+      // Look for toast area in the element or its parents
+      const toastArea = element.querySelector('.toast-area')
+        || element.querySelector('sp-theme.toast-area')
+        || element.closest('.toast-area')
+        || element.closest('sp-theme.toast-area');
+
+      if (toastArea) {
+        return toastArea;
+      }
+    }
+  } else if (context instanceof HTMLElement) {
+    // Direct element - check if it's already a toast area first
+    if (context.classList.contains('toast-area') || context.tagName === 'SP-THEME') {
+      return context;
+    }
+
+    // If not, look for toast area within it
+    const toastArea = context.querySelector('.toast-area')
+      || context.querySelector('sp-theme.toast-area');
+
+    if (toastArea) {
+      return toastArea;
+    }
+  }
+
+  // Fallback to document body
+  return document.body.querySelector('.toast-area') || document.body;
+}

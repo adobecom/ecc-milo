@@ -1,66 +1,34 @@
 import { LIBS } from './scripts.js';
-import { camelToSentenceCase } from './utils.js';
+import { camelToSentenceCase, getToastArea } from './utils.js';
+import ToastManager from './toast-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 /**
- * Centralized error manager for handling all error display patterns
+ * Error Manager for handling all error display patterns
+ * Extends ToastManager to provide error-specific functionality
  */
-export default class ErrorManager {
+export default class ErrorManager extends ToastManager {
   constructor(context) {
+    // Extract toast area from context before calling super()
+    const toastArea = getToastArea(context);
+    super(toastArea);
+
+    // Store the full context for error handling
+    this.context = context;
+
+    // Override default options for error manager
     this.options = {
       variant: 'negative',
       timeout: 6000,
       showCloseButton: true,
     };
-    this.context = context;
-    this.postArea = this.getPostArea();
-  }
-
-  getPostArea() {
-    if (this.context?.targetEl?.querySelector('.toast-area')) {
-      return this.context.targetEl.querySelector('.toast-area');
-    }
-
-    if (this.context?.el?.querySelector('.toast-area')) {
-      return this.context.el.querySelector('.toast-area');
-    }
-
-    if (this.context?.querySelector?.('.toast-area')) {
-      return this.context.querySelector('.toast-area');
-    }
-
-    return document.body.querySelector('.toast-area') || document.body;
-  }
-
-  /**
-   * Create a toast element with the given message and options
-   * @param {string} message - Error message to display
-   * @param {HTMLElement} postArea - Target toast area
-   * @param {Object} options - Toast options
-   * @returns {HTMLElement} Created toast element
-   */
-  createToast(message, postArea, options = {}) {
-    const toastOptions = { ...this.options, ...options };
-
-    const toast = createTag('sp-toast', {
-      open: true,
-      ...toastOptions,
-    }, message, { parent: postArea });
-
-    toast.addEventListener('close', (e) => {
-      e.stopPropagation();
-      toast.remove();
-    }, { once: true });
-
-    return toast;
   }
 
   /**
    * Handle error response object (from API calls)
    * @param {Object} resp - Response object with error or direct error object
    * @param {Object} options - Additional options
-   * @param {Object} target - Optional target override
    */
   handleErrorResponse(resp, options = {}) {
     // Handle both response objects with error property and direct error objects
@@ -78,7 +46,7 @@ export default class ErrorManager {
       });
 
       messages.forEach((msg, i) => {
-        this.createToast(msg, this.postArea, {
+        this.createToast(msg, this.toastArea, {
           timeout: 6000 + (i * 3000),
           ...options,
         });
@@ -88,16 +56,15 @@ export default class ErrorManager {
       if (resp.status === 409 || error.status === 409) {
         this.handleConcurrencyError(error, options);
       } else {
-        this.createToast(errorMessage, this.postArea, options);
+        this.createToast(errorMessage, this.toastArea, options);
       }
     }
   }
 
   /**
    * Handle concurrency errors (409 status)
-   * @param {Object} resp - Response object
+   * @param {Object} error - Error object
    * @param {Object} options - Additional options
-   * @param {Object} target - Optional target override
    */
   handleConcurrencyError(error, options = {}) {
     const isEvent = error.message.includes('Event update invalid');
@@ -118,7 +85,7 @@ export default class ErrorManager {
       }
     }
 
-    const toast = this.createToast(message, this.postArea, options);
+    const toast = this.createToast(message, this.toastArea, options);
 
     createTag('sp-button', {
       slot: 'action',
@@ -127,72 +94,21 @@ export default class ErrorManager {
   }
 
   /**
-   * Handle simple error messages
-   * @param {string} message - Error message
-   * @param {Object} options - Toast options
-   * @param {Object} target - Optional target override
-   * @returns {HTMLElement} Created toast element
-   */
-  showError(message, options = {}) {
-    return this.createToast(message, this.postArea, options);
-  }
-
-  /**
-   * Handle success messages
-   * @param {string} message - Success message
-   * @param {Object} options - Toast options
-   * @param {Object} target - Optional target override
-   * @returns {HTMLElement} Created toast element
-   */
-  showSuccess(message, options = {}) {
-    const toast = this.createToast(message, this.postArea, {
-      variant: 'positive',
-      ...options,
-    });
-
-    // Handle action button if provided
-    if (options.actionButton) {
-      const { text, href, variant = 'overBackground', treatment = 'outline' } = options.actionButton;
-      createTag('sp-button', {
-        slot: 'action',
-        variant,
-        treatment,
-        href,
-      }, text, { parent: toast });
-    }
-
-    return toast;
-  }
-
-  /**
-   * Handle info messages
-   * @param {string} message - Info message
-   * @param {Object} options - Toast options
-   * @param {Object} target - Optional target override
-   * @returns {HTMLElement} Created toast element
-   */
-  showInfo(message, options = {}) {
-    return this.createToast(message, this.postArea, {
-      variant: 'info',
-      ...options,
-    });
-  }
-
-  /**
    * Handle caught exceptions
    * @param {Error} error - Caught error
    * @param {Object} options - Toast options
-   * @param {Object} target - Optional target override
    */
   handleException(error, options = {}) {
     const message = error.message || 'An unexpected error occurred. Please try again.';
-    this.showError(message, options);
+    this.createToast(message, this.toastArea, {
+      variant: 'negative',
+      ...options,
+    });
   }
 
   /**
    * Handle custom error events
    * @param {CustomEvent} event - Custom error event
-   * @param {Object} target - Optional target override
    */
   handleCustomEvent(event) {
     const { error, message, options = {} } = event.detail;
@@ -200,7 +116,10 @@ export default class ErrorManager {
     if (error) {
       this.handleErrorResponse({ error }, options);
     } else if (message) {
-      this.showError(message, options);
+      this.createToast(message, this.toastArea, {
+        variant: 'negative',
+        ...options,
+      });
     }
   }
 
@@ -208,7 +127,6 @@ export default class ErrorManager {
    * Create a wrapped async function that automatically handles errors
    * @param {Function} fn - Async function to wrap
    * @param {Object} options - Error handling options
-   * @param {Object} target - Optional target override
    * @returns {Function} Wrapped function
    */
   wrapAsyncFunction(fn, options = {}) {
@@ -233,44 +151,19 @@ export default class ErrorManager {
   }
 
   /**
-   * Legacy compatibility method for showToast
-   * @param {Object} props - Props object
-   * @param {string} message - Message to show
-   * @param {Object} options - Toast options
-   */
-  showToast(props, message, options = {}) {
-    const variant = options.variant || 'info';
-
-    switch (variant) {
-      case 'positive':
-        this.showSuccess(message, options, props);
-        break;
-      case 'negative':
-        this.showError(message, options, props);
-        break;
-      case 'info':
-      default:
-        this.showInfo(message, options, props);
-        break;
-    }
-  }
-
-  /**
    * Initialize error event listeners on an element
    * @param {HTMLElement} element - Element to attach listeners to
    * @param {Object} props - Props object for context
    */
   initErrorListeners(element, props) {
+    // Call parent's initToastListeners for basic toast events
+    super.initToastListeners(element);
+
+    // Add error-specific listeners
     element.addEventListener('show-error-toast', (e) => {
       e.stopPropagation();
       e.preventDefault();
       this.handleCustomEvent(e, props);
-    });
-
-    element.addEventListener('show-success-toast', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      this.showSuccess(e.detail.message || 'Success!', e.detail, props);
     });
   }
 }

@@ -9,11 +9,14 @@ import {
   removeSponsorFromEvent,
   updateSponsorInEvent,
 } from '../../scripts/esp-controller.js';
+import ToastManager from '../../scripts/toast-manager.js';
 
 let PARTNERS_SERIES_ID;
 
 /* eslint-disable no-unused-vars */
 export async function onSubmit(component, props) {
+  const toastManager = new ToastManager(props);
+
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const showSponsors = component.querySelector('#checkbox-sponsors')?.checked;
@@ -32,7 +35,7 @@ export async function onSubmit(component, props) {
         }, eventId);
 
         if (resp.error) {
-          component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+          toastManager.showError(resp.error);
         }
       } else {
         const existingPartner = props.eventDataResp.sponsors.find((sponsor) => {
@@ -48,7 +51,7 @@ export async function onSubmit(component, props) {
           }, eventId);
 
           if (resp.error) {
-            component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+            toastManager.showError(resp.error);
             window.lana?.log(`Failed to add sponsor to event:\n${JSON.stringify(resp, null, 2)}`);
           }
         } else if (partner.hasUnsavedChanges) {
@@ -87,7 +90,7 @@ export async function onSubmit(component, props) {
     if (!updatedEventData.error && updatedEventData) {
       props.eventDataResp = updatedEventData;
     } else {
-      component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: updatedEventData.error } }));
+      toastManager.showError(updatedEventData.error);
     }
   }
 
