@@ -1,6 +1,8 @@
 /* eslint-disable class-methods-use-this */
 import { isImageTypeValid, isImageSizeValid } from '../../scripts/image-validator.js';
 import { LIBS } from '../../scripts/scripts.js';
+import { getToastArea } from '../../scripts/utils.js';
+import ToastManager from '../../scripts/toast-manager.js';
 import { style } from './image-dropzone.css.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
@@ -20,13 +22,22 @@ export default class ImageDropzone extends LitElement {
     this.file = null;
     this.handleImage = () => {};
     this.handleDelete = this.handleDelete || null;
+    this.toastManager = null;
+  }
+
+  getToastManager() {
+    if (!this.toastManager) {
+      const toastArea = getToastArea(this);
+      this.toastManager = new ToastManager(toastArea);
+    }
+    return this.toastManager;
   }
 
   async setFile(files) {
     const [file] = files;
 
     if (!isImageSizeValid(file, 26214400)) {
-      this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'File size should be less than 25MB' } }, bubbles: true, composed: true }));
+      this.getToastManager().showError('File size should be less than 25MB');
       return;
     }
 
@@ -36,7 +47,7 @@ export default class ImageDropzone extends LitElement {
       this.file.url = URL.createObjectURL(file);
       this.requestUpdate();
     } else {
-      this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Invalid file type. The image file should be in one of the following format: .jpeg, .jpg, .png, .svg' } }, bubbles: true, composed: true }));
+      this.getToastManager().showError('Invalid file type. The image file should be in one of the following format: .jpeg, .jpg, .png, .svg');
     }
   }
 

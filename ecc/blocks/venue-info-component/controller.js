@@ -4,17 +4,23 @@ import {
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
-import { changeInputValue, getSecret } from '../../scripts/utils.js';
+import { changeInputValue, getSecret, getToastArea } from '../../scripts/utils.js';
 import { getCurrentEnvironment } from '../../scripts/environment.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { getAttribute, getVenuePayload } from '../../scripts/data-utils.js';
 import { ENVIRONMENTS } from '../../scripts/constants.js';
 import ErrorManager from '../../scripts/error-manager.js';
+import ToastManager from '../../scripts/toast-manager.js';
 
 const imageType = 'venue-additional-image';
 let imageFile = null;
 let respImageId = null;
 let respImageConfigs = null;
+
+function getToastManager(component) {
+  const toastArea = getToastArea(component);
+  return new ToastManager(toastArea);
+}
 
 function togglePrefillableFieldsHiddenState(component) {
   const address = component.querySelector('#google-place-formatted-address');
@@ -182,7 +188,7 @@ function initAutocomplete(el) {
       changeInputValue(addressComponentsInput, 'value', JSON.stringify(components));
 
       if (Object.values(addressInfo).some((v) => !v)) {
-        el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'The selection is not a valid venue.' } }, bubbles: true, composed: true }));
+        getToastManager(el).showError('The selection is not a valid venue.');
         resetAllFields(el);
         togglePrefillableFieldsHiddenState(el);
         return;
@@ -256,7 +262,7 @@ async function uploadVenueAdditionalImage(component, props) {
       respImageConfigs = imageConfigs;
     }
   } catch (error) {
-    dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
+    getToastManager(component).showError('Failed to upload the image. Please try again later.');
     dz.deleteImage();
     dz.file = null;
   } finally {
@@ -391,13 +397,13 @@ export default async function init(component, props) {
         try {
           const resp = await deleteImage(imageConfigs, imageId);
           if (resp.error) {
-            dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+            getToastManager(component).showError('Failed to delete the image. Please try again later.');
           } else {
             resetImageState(dz);
           }
         } catch (error) {
           window.lana?.log(`Failed to perform image DELETE operation:\n${JSON.stringify(error, null, 2)}`);
-          dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+          getToastManager(component).showError('Failed to delete the image. Please try again later.');
         } finally {
           underlay.open = false;
           dialog.innerHTML = '';
@@ -450,7 +456,7 @@ export async function onTargetUpdate(component, props) {
   const venueDataInForm = getVenueDataInForm(component);
   const venueData = getVenuePayload(venueDataInForm, props.locale);
   if (!venueData.placeId) {
-    component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please select a valid venue.' } }, bubbles: true, composed: true }));
+    getToastManager(component).showError('Please select a valid venue.');
     return;
   }
 
@@ -465,7 +471,7 @@ export async function onTargetUpdate(component, props) {
         const { message } = resp.error;
         const parsedMsg = message.match(/"message":"(.*?)"/);
         const errorMessage = parsedMsg ? parsedMsg[1] : message;
-        component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: `Invalid address. ${errorMessage}` } }, bubbles: true, composed: true }));
+        getToastManager(component).showError(`Invalid address. ${errorMessage}`);
       } else {
         errorManager.handleErrorResponse(resp);
       }
@@ -501,7 +507,7 @@ export async function onTargetUpdate(component, props) {
     if (!updatedEventData.error && updatedEventData) {
       props.eventDataResp = updatedEventData;
     } else {
-      component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: updatedEventData.error } }));
+      getToastManager(component).showError(updatedEventData.error?.message || 'Failed to update event data');
     }
 
     props.payload = {

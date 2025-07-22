@@ -142,42 +142,4 @@ describe('ToastManager', () => {
       toastManager.createToast = originalCreateToast;
     });
   });
-
-  describe('initToastListeners', () => {
-    it('should initialize toast event listeners', () => {
-      const element = document.createElement('div');
-      let eventHandled = false;
-
-      toastManager.show = () => { eventHandled = true; };
-      toastManager.initToastListeners(element);
-
-      element.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Test', options: {} } }));
-
-      expect(eventHandled).to.be.true;
-    });
-
-    it('should handle different toast event types', () => {
-      const element = document.createElement('div');
-      let eventType = '';
-
-      toastManager.showInfo = () => { eventType = 'info'; };
-      toastManager.showSuccess = () => { eventType = 'success'; };
-      toastManager.showError = () => { eventType = 'error'; };
-      toastManager.showWarning = () => { eventType = 'warning'; };
-
-      toastManager.initToastListeners(element);
-
-      element.dispatchEvent(new CustomEvent('show-info-toast', { detail: { message: 'Test' } }));
-      expect(eventType).to.equal('info');
-
-      element.dispatchEvent(new CustomEvent('show-success-toast', { detail: { message: 'Test' } }));
-      expect(eventType).to.equal('success');
-
-      element.dispatchEvent(new CustomEvent('show-error-toast', { detail: { message: 'Test' } }));
-      expect(eventType).to.equal('error');
-
-      element.dispatchEvent(new CustomEvent('show-warning-toast', { detail: { message: 'Test' } }));
-      expect(eventType).to.equal('warning');
-    });
-  });
 });

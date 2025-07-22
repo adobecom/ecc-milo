@@ -1,9 +1,10 @@
 /* eslint-disable max-len */
 /* eslint-disable class-methods-use-this */
 import { LIBS } from '../../scripts/scripts.js';
+import { getToastArea, getServiceName } from '../../scripts/utils.js';
+import ToastManager from '../../scripts/toast-manager.js';
 import { style } from './profile.css.js';
 import { createSpeaker, deleteSpeakerImage, updateSpeaker, uploadImage } from '../../scripts/esp-controller.js';
-import { getServiceName } from '../../scripts/utils.js';
 import { icons } from '../../icons/icons.svg.js';
 import { LINK_REGEX } from '../../scripts/constants.js';
 import { getSpeakerPayload } from '../../scripts/data-utils.js';
@@ -45,6 +46,15 @@ export default class Profile extends LitElement {
 
     this.profile = this.profile ?? { socialLinks: [{ link: '' }], isPlaceholder: true };
     this.profileCopy = {};
+    this.toastManager = null;
+  }
+
+  getToastManager() {
+    if (!this.toastManager) {
+      const toastArea = getToastArea(this);
+      this.toastManager = new ToastManager(toastArea);
+    }
+    return this.toastManager;
   }
 
   addSocialLink(edited = false) {
@@ -112,8 +122,7 @@ export default class Profile extends LitElement {
       const correctSocialLinks = profile.socialLinks.filter((sm) => sm.link === '' || sm.link?.match(LINK_REGEX));
 
       if (correctSocialLinks.length < profile.socialLinks.length) {
-        const dialogToastParent = edited ? this.shadowRoot.querySelector('.edit-profile-dialog') : null;
-        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please enter a valid website address starting with "https://". For example: https://www.example.com' }, targetEl: dialogToastParent }, bubbles: true, composed: true }));
+        this.getToastManager().showError('Please enter a valid website address starting with "https://". For example: https://www.example.com');
         this.submitting = false;
         return false;
       }
@@ -134,8 +143,7 @@ export default class Profile extends LitElement {
         const { errors, message } = respJson.error;
         window.lana?.log(`Error occurred while saving profile: ${errors ?? message}`);
         this.submitting = false;
-        const dialogToastParent = edited ? this.shadowRoot.querySelector('.edit-profile-dialog') : null;
-        this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { errors, message }, targetEl: dialogToastParent }, bubbles: true, composed: true }));
+        this.getToastManager().showError(message || 'Failed to save profile');
         return false;
       }
 
@@ -159,7 +167,7 @@ export default class Profile extends LitElement {
           );
 
           if (speakerData.error) {
-            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
+            this.getToastManager().showError('Failed to upload the image. Please try again later.');
           }
 
           if (speakerData.modificationTime) profile.modificationTime = speakerData.modificationTime;
@@ -173,7 +181,7 @@ export default class Profile extends LitElement {
           if (!resp.ok) {
             imageDropzone.file = { url: lastPhoto.imageUrl };
             profile.photo = lastPhoto;
-            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
+            this.getToastManager().showError('Failed to upload the image. Please try again later.');
           }
         }
 

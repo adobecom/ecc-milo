@@ -114,50 +114,24 @@ export default class ToastManager {
   }
 
   /**
-   * Create a toast with custom action button
+   * Show a toast with action button
    * @param {string} message - Message to display
-   * @param {Object} actionButton - Action button configuration
-   * @param {Object} options - Toast options
-   * @returns {HTMLElement} Created toast element
+   * @param {Object} options - Toast options including actionButton
+   * @returns {HTMLElement} The created toast element
    */
-  showWithAction(message, actionButton, options = {}) {
-    return this.showSuccess(message, { ...options, actionButton });
-  }
+  showWithAction(message, options = {}) {
+    const { actionButton, ...toastOptions } = options;
+    const toast = this.createToast(message, this.toastArea, toastOptions);
 
-  /**
-   * Initialize toast event listeners on an element
-   * @param {HTMLElement} element - Element to attach listeners to
-   */
-  initToastListeners(element) {
-    element.addEventListener('show-toast', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      const { message, options = {} } = e.detail;
-      this.show(message, options);
-    });
+    if (actionButton) {
+      createTag('sp-button', {
+        slot: 'action',
+        href: actionButton.href,
+        variant: actionButton.variant || 'overBackground',
+        treatment: actionButton.treatment || 'outline',
+      }, actionButton.text, { parent: toast });
+    }
 
-    element.addEventListener('show-info-toast', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      this.showInfo(e.detail.message || 'Info', e.detail);
-    });
-
-    element.addEventListener('show-success-toast', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      this.showSuccess(e.detail.message || 'Success!', e.detail);
-    });
-
-    element.addEventListener('show-error-toast', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      this.showError(e.detail.message || 'Error occurred', e.detail);
-    });
-
-    element.addEventListener('show-warning-toast', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      this.showWarning(e.detail.message || 'Warning', e.detail);
-    });
+    return toast;
   }
 }

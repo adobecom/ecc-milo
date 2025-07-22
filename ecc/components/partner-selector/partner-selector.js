@@ -1,4 +1,6 @@
 import { LIBS } from '../../scripts/scripts.js';
+import { getToastArea } from '../../scripts/utils.js';
+import ToastManager from '../../scripts/toast-manager.js';
 import { style } from './partner-selector.css.js';
 import { createSponsor, deleteImage, updateSponsor, uploadImage } from '../../scripts/esp-controller.js';
 import { LINK_REGEX } from '../../scripts/constants.js';
@@ -25,9 +27,18 @@ export default class PartnerSelector extends LitElement {
       hasUnsavedChanges: false,
     };
     this.buttonStatePending = false;
+    this.toastManager = null;
   }
 
   static styles = style;
+
+  getToastManager() {
+    if (!this.toastManager) {
+      const toastArea = getToastArea(this);
+      this.toastManager = new ToastManager(toastArea);
+    }
+    return this.toastManager;
+  }
 
   getRequiredProps() {
     const nameFieldData = {
@@ -68,7 +79,7 @@ export default class PartnerSelector extends LitElement {
 
   async savePartner() {
     if (!this.checkValidity()) {
-      this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Please enter a valid website address starting with "https://". For example: https://www.example.com' } }, bubbles: true, composed: true }));
+      this.getToastManager().showError('Please enter a valid website address starting with "https://". For example: https://www.example.com');
       return;
     }
 
@@ -94,7 +105,7 @@ export default class PartnerSelector extends LitElement {
     }
 
     if (respJson.error) {
-      this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to save the partner. Please try again later.' } }, bubbles: true, composed: true }));
+      this.getToastManager().showError('Failed to save the partner. Please try again later.');
       this.buttonStatePending = false;
       return;
     }
@@ -114,7 +125,7 @@ export default class PartnerSelector extends LitElement {
 
         if (sponsorData) {
           if (sponsorData.error) {
-            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to updated the image. Please try again later.' } }, bubbles: true, composed: true }));
+            this.getToastManager().showError('Failed to updated the image. Please try again later.');
           }
 
           if (sponsorData.modificationTime) {
@@ -125,18 +136,18 @@ export default class PartnerSelector extends LitElement {
         try {
           const resp = await deleteImage({ targetUrl: `/v1/series/${this.seriesId}/sponsors/${this.partner.sponsorId}/images` }, respJson.image?.imageId);
           if (!resp.ok) {
-            this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+            this.getToastManager().showError('Failed to delete the image. Please try again later.');
           } else {
             this.partner.hasUnsavedChanges = false;
           }
         } catch (error) {
-          this.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+          this.getToastManager().showError('Failed to delete the image. Please try again later.');
         }
       }
 
       this.partner.hasUnsavedChanges = false;
       this.dispatchEvent(new CustomEvent('update-partner', { detail: { partner: this.partner } }));
-      this.dispatchEvent(new CustomEvent('show-success-toast', { detail: { message: 'Partner saved successfully' }, bubbles: true, composed: true }));
+      this.getToastManager().showSuccess('Partner saved successfully');
       this.buttonStatePending = false;
       this.requestUpdate();
     }

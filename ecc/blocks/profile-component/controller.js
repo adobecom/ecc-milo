@@ -1,5 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { getAttribute } from '../../scripts/data-utils.js';
+import { getToastArea } from '../../scripts/utils.js';
+import ToastManager from '../../scripts/toast-manager.js';
 import {
   addSpeakerToEvent,
   getSpeakers,
@@ -8,6 +10,11 @@ import {
   getEvent,
   getHydratedEventSpeaker,
 } from '../../scripts/esp-controller.js';
+
+function getToastManager(component) {
+  const toastArea = getToastArea(component);
+  return new ToastManager(toastArea);
+}
 
 export async function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -44,7 +51,7 @@ export async function onSubmit(component, props) {
         const resp = await addSpeakerToEvent(eventSpeaker, eventId);
 
         if (resp.error) {
-          component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+          getToastManager(component).showError(resp.error.message || 'Failed to add speaker to event');
           window.lana?.log(`Failed to add speaker to event:\n${JSON.stringify(resp, null, 2)}`);
         }
       } else {
@@ -93,7 +100,7 @@ export async function onSubmit(component, props) {
     if (!updatedEventData.error && updatedEventData) {
       props.eventDataResp = updatedEventData;
     } else {
-      component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: updatedEventData.error } }));
+      getToastManager(component).showError(updatedEventData.error?.message || 'Failed to update event data');
     }
   }
 }
@@ -135,7 +142,7 @@ async function prefillProfiles(component, props) {
       if (!d.error && d) {
         props.eventDataResp = d;
       } else {
-        component.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: d.error } }));
+        getToastManager(component).showError(d.error?.message || 'Failed to fetch speaker data');
       }
     } catch (e) {
       window.lana?.log(`Error fetching speaker data:\n${JSON.stringify(e, null, 2)}`);

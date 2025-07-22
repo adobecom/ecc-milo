@@ -107,23 +107,6 @@ export default class ErrorManager extends ToastManager {
   }
 
   /**
-   * Handle custom error events
-   * @param {CustomEvent} event - Custom error event
-   */
-  handleCustomEvent(event) {
-    const { error, message, options = {} } = event.detail;
-
-    if (error) {
-      this.handleErrorResponse({ error }, options);
-    } else if (message) {
-      this.createToast(message, this.toastArea, {
-        variant: 'negative',
-        ...options,
-      });
-    }
-  }
-
-  /**
    * Create a wrapped async function that automatically handles errors
    * @param {Function} fn - Async function to wrap
    * @param {Object} options - Error handling options
@@ -140,7 +123,6 @@ export default class ErrorManager extends ToastManager {
     };
   }
 
-  // Legacy compatibility methods - these maintain the old API
   /**
    * Legacy compatibility method for buildErrorMessage
    * @param {Object} props - Props object
@@ -148,22 +130,5 @@ export default class ErrorManager extends ToastManager {
    */
   buildErrorMessage(props, resp) {
     this.handleErrorResponse(resp, {}, props);
-  }
-
-  /**
-   * Initialize error event listeners on an element
-   * @param {HTMLElement} element - Element to attach listeners to
-   * @param {Object} props - Props object for context
-   */
-  initErrorListeners(element, props) {
-    // Call parent's initToastListeners for basic toast events
-    super.initToastListeners(element);
-
-    // Add error-specific listeners
-    element.addEventListener('show-error-toast', (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-      this.handleCustomEvent(e, props);
-    });
   }
 }

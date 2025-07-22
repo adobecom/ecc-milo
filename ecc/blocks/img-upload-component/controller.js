@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { deleteImage, getEventImages, uploadImage } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
+import { getToastArea } from '../../scripts/utils.js';
+import ToastManager from '../../scripts/toast-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -12,6 +14,11 @@ function getComponentImageType(component) {
   };
   const type = typeMap[component.classList[1]];
   return type;
+}
+
+function getToastManager(component) {
+  const toastArea = getToastArea(component);
+  return new ToastManager(toastArea);
 }
 
 export function onSubmit(component, props) {
@@ -79,7 +86,7 @@ export default async function init(component, props) {
 
         if (resp?.imageId) imageId = resp.imageId;
       } catch (error) {
-        dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to upload the image. Please try again later.' } }, bubbles: true, composed: true }));
+        getToastManager(component).showError('Failed to upload the image. Please try again later.');
         dz.deleteImage();
       } finally {
         progressWrapper.classList.add('hidden');
@@ -119,7 +126,7 @@ export default async function init(component, props) {
           dialogCancelBtn.disabled = true;
           const resp = await deleteImage(configs, imageId);
           if (resp.error) {
-            dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+            getToastManager(component).showError('Failed to delete the image. Please try again later.');
           } else {
             dz.file = null;
             imageId = null;
@@ -127,7 +134,7 @@ export default async function init(component, props) {
           }
         } catch (error) {
           window.lana?.log(`Failed to perform image DELETE operation:\n${JSON.stringify(error, null, 2)}`);
-          dz.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to delete the image. Please try again later.' } }, bubbles: true, composed: true }));
+          getToastManager(component).showError('Failed to delete the image. Please try again later.');
         }
 
         underlay.open = false;

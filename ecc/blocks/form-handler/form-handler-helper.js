@@ -28,6 +28,7 @@ import {
   generateToolTip,
   getEventPageHost,
   replaceAnchorWithButton,
+  getToastArea,
 } from '../../scripts/utils.js';
 
 import { getCurrentEnvironment } from '../../scripts/environment.js';
@@ -42,9 +43,15 @@ import {
 import { getAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
 import ErrorManager from '../../scripts/error-manager.js';
+import ToastManager from '../../scripts/toast-manager.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
+
+function getToastManager(component) {
+  const toastArea = getToastArea(component);
+  return new ToastManager(toastArea);
+}
 
 export function initCustomLitComponents() {
   customElements.define('image-dropzone', ImageDropzone);
@@ -274,7 +281,7 @@ async function loadEventData(props) {
       if (!eventData.error && eventData) {
         props.eventDataResp = eventData;
       } else {
-        props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: eventData.error } }));
+        getToastManager(props.el).showError(eventData.error?.message || 'Failed to load event data');
       }
       props.el.classList.remove('disabled');
     } else {
@@ -397,7 +404,7 @@ async function saveEvent(props, toPublish = false) {
       const newEventData = await getEvent(resp.eventId);
       props.eventDataResp = newEventData;
     } else {
-      props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+      getToastManager(props.el).showError(resp.error?.message || 'Failed to create event');
     }
     updateDashboardLink(props);
     await onEventSave();
@@ -411,7 +418,7 @@ async function saveEvent(props, toPublish = false) {
       const newEventData = await getEvent(resp.eventId);
       props.eventDataResp = newEventData;
     } else {
-      props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+      getToastManager(props.el).showError(resp.error?.message || 'Failed to update event');
     }
     await onEventSave();
   } else if (toPublish) {
@@ -424,7 +431,7 @@ async function saveEvent(props, toPublish = false) {
       const newEventData = await getEvent(resp.eventId);
       props.eventDataResp = newEventData;
     } else {
-      props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
+      getToastManager(props.el).showError(resp.error?.message || 'Failed to publish event');
     }
     if (resp?.eventId) await handleEventUpdate(props);
   }

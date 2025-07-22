@@ -159,62 +159,6 @@ describe('ErrorManager', () => {
     });
   });
 
-  describe('handleCustomEvent', () => {
-    it('should handle error in event detail', () => {
-      const event = new CustomEvent('test', { detail: { error: { message: 'Test error' } } });
-
-      let errorHandled = false;
-      const originalHandleErrorResponse = contextErrorManager.handleErrorResponse;
-      contextErrorManager.handleErrorResponse = () => { errorHandled = true; };
-
-      contextErrorManager.handleCustomEvent(event);
-      expect(errorHandled).to.be.true;
-
-      contextErrorManager.handleErrorResponse = originalHandleErrorResponse;
-    });
-
-    it('should handle message in event detail', () => {
-      const event = new CustomEvent('test', { detail: { message: 'Test message' } });
-
-      let messageReceived = '';
-      const originalCreateToast = contextErrorManager.createToast;
-      contextErrorManager.createToast = (message) => {
-        messageReceived = message;
-      };
-
-      contextErrorManager.handleCustomEvent(event);
-      expect(messageReceived).to.equal('Test message');
-
-      contextErrorManager.createToast = originalCreateToast;
-    });
-  });
-
-  describe('initErrorListeners', () => {
-    it('should add event listeners to element', () => {
-      const element = document.createElement('div');
-      const props = { el: element };
-
-      contextErrorManager.initErrorListeners(element, props);
-
-      const errorEvent = new CustomEvent('show-error-toast', {
-        detail: { error: { message: 'Test error' } },
-        bubbles: true,
-        composed: true,
-      });
-
-      let errorHandled = false;
-      const originalHandleCustomEvent = contextErrorManager.handleCustomEvent;
-      contextErrorManager.handleCustomEvent = () => {
-        errorHandled = true;
-      };
-
-      element.dispatchEvent(errorEvent);
-      expect(errorHandled).to.be.true;
-
-      contextErrorManager.handleCustomEvent = originalHandleCustomEvent;
-    });
-  });
-
   describe('wrapAsyncFunction', () => {
     it('should handle exceptions in wrapped function', async () => {
       const error = new Error('Test error');
