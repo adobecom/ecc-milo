@@ -99,8 +99,8 @@ function decorateMarketoIntegrationFields(el, fields) {
       const fieldSelect = createTag('sp-picker', {
         id: field.id,
         size: 'l',
+        required: field.required,
       });
-      if (field.required) fieldSelect.required = true;
       if (!field.masterField) fieldSelect.disabled = true;
       const label = createTag('span', { slot: 'label' }, field.placeholder);
       fieldSelect.appendChild(label);
