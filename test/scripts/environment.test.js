@@ -107,7 +107,7 @@ describe('Environment Module', () => {
 
     it('should return correct host for localhost', () => {
       locationStub.hostname = DOMAINS.LOCALHOST;
-      expect(getEventServiceHost(undefined, locationStub)).to.equal('https://dev--events-milo--adobecom.hlx.page');
+      expect(getEventServiceHost(undefined, locationStub)).to.equal('https://dev--events-milo--adobecom.aem.page');
     });
 
     it('should return adobe.com as fallback', () => {
