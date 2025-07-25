@@ -8,7 +8,15 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 async function decorateCloudTagSelect(column) {
   const phText = column.textContent.trim();
   const buSelectWrapper = createTag('div', { class: 'bu-picker-wrapper' });
-  const select = createTag('sp-picker', { id: 'bu-select-input', pending: true, class: 'select-input', size: 'm', label: phText });
+  const select = createTag('sp-picker', {
+    id: 'bu-select-input',
+    pending: true,
+    class: 'select-input',
+    size: 'm',
+    label: phText,
+    required: true,
+    'aria-required': true,
+  });
 
   column.innerHTML = '';
   buSelectWrapper.append(select);
@@ -30,7 +38,15 @@ async function decorateCloudTagSelect(column) {
 
 async function decorateSeriesSelect(column) {
   const seriesSelectWrapper = createTag('div', { class: 'series-picker-wrapper' });
-  const select = createTag('sp-picker', { id: 'series-select-input', class: 'select-input', pending: true, size: 'm', label: column.textContent.trim() });
+  const select = createTag('sp-picker', {
+    id: 'series-select-input',
+    class: 'select-input',
+    pending: true,
+    size: 'm',
+    label: column.textContent.trim(),
+    required: true,
+    'aria-required': true,
+  });
   seriesSelectWrapper.append(select);
 
   column.innerHTML = '';
