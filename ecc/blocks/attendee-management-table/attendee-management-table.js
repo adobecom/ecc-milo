@@ -291,8 +291,8 @@ function buildTableHeaders(props, config) {
     return 0;
   });
 
-  sortedColumns.forEach(({ key, label }, i, arr) => {
-    const thText = createTag('span', {}, label.toUpperCase());
+  sortedColumns.forEach(({ key }, i, arr) => {
+    const thText = createTag('span', {}, camelToSentenceCase(key).toUpperCase());
     const th = createTag('th', {}, thText, { parent: thRow });
     th.append(getIcon('chev-down'), getIcon('chev-up'));
     if (stickyColumns.includes(key)) {

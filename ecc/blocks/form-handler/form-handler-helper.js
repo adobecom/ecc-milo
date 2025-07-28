@@ -204,10 +204,8 @@ export function getCurrentFragment(props) {
 }
 
 function validateRequiredFields(fields) {
-  const enabledFields = Array.from(fields).filter((f) => !f.disabled);
-
-  return enabledFields.length === 0
-    || enabledFields.every((f) => f.value && !f.invalid);
+  const enabledFields = Array.from(fields).filter((f) => !f.disabled && f.offsetParent !== null);
+  return enabledFields.length === 0 || enabledFields.every((f) => f.value && !f.invalid);
 }
 
 function onStepValidate(props) {
@@ -228,9 +226,7 @@ function onStepValidate(props) {
     });
 
     sideNavs.forEach((nav, i) => {
-      if (i !== props.currentStep) {
-        nav.disabled = !stepValid;
-      }
+      if (i !== props.currentStep) nav.disabled = !stepValid;
     });
   };
 }
@@ -244,15 +240,20 @@ export function getUpdatedRequiredFields(props) {
 
 export function initRequiredFieldsValidation(props) {
   const currentFrag = getCurrentFragment(props);
-
   const currentRequiredFields = props[`required-fields-in-${currentFrag.id}`];
   const inputValidationCB = onStepValidate(props);
-  currentRequiredFields.forEach((field) => {
-    field.removeEventListener('change', inputValidationCB);
-  });
 
+  // Remove old event listeners
+  if (currentRequiredFields) {
+    currentRequiredFields.forEach((field) => {
+      field.removeEventListener('change', inputValidationCB);
+    });
+  }
+
+  // Get updated required fields
   props[`required-fields-in-${currentFrag.id}`] = getUpdatedRequiredFields(props);
 
+  // Add new event listeners
   props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
     field.addEventListener('change', inputValidationCB, { bubbles: true });
   });
