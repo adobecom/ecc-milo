@@ -20,7 +20,6 @@ on:
       test_environment:
         description: 'Environment to test against'
         required: true
-        default: 'dev'
         type: choice
         options:
           - e2e-tests # temporary
@@ -30,7 +29,6 @@ on:
       test_suite:
         description: 'Test suite to run'
         required: true
-        default: '@smoke'
         type: choice
         options:
           - '@smoke'
@@ -39,7 +37,6 @@ on:
       test_jobs:
         description: 'Browser jobs to run'
         required: true
-        default: 'chrome-desktop'
         type: choice
         options:
           - chrome-desktop
