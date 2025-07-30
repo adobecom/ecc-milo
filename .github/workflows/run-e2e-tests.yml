@@ -13,8 +13,55 @@ on:
   schedule:
     # Run daily at 10 PM PDT
     - cron: '0 5 * * *'
+  workflow_dispatch:
+    inputs:
+      test_environment:
+        description: 'Environment to test against'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - stage
+          - prod
+      test_suite:
+        description: 'Test suite to run'
+        required: true
+        default: '@smoke'
+        type: choice
+        options:
+          - '@smoke'
+          - '@regression'
+          - '@smoke or @regression'
+      test_jobs:
+        description: 'Browser jobs to run'
+        required: true
+        default: 'chrome-desktop'
+        type: string
+      source_branch:
+        description: 'Source branch for testing'
+        required: true
+        default: 'dev'
+        type: string
 
 jobs:
+  # ============================================================================
+  # MANUAL TESTING
+  # ============================================================================
+  
+  # Event  : Manual workflow dispatch
+  # Action : Run tests based on user inputs
+  manual-test:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'workflow_dispatch'
+    with:
+      environment: ${{ github.event.inputs.test_environment }}
+      test_suite: ${{ github.event.inputs.test_suite }}
+      test_jobs: ${{ github.event.inputs.test_jobs }}
+      ecbranch: ${{ github.event.inputs.source_branch }}
+      milobranch: main
+      job_name: Manual Test - ${{ github.event.inputs.test_environment }} Environment
+
   # ============================================================================
   # DAILY MONITORING
   # ============================================================================

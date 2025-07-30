@@ -1,0 +1,19 @@
+name: Test PR E2E (Temporary)
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches:
+      - dev
+
+jobs:
+  # Event  : When a PR is opened for dev branch
+  # Action : Run smoke tests on dev environment
+  dev-smoke-tests-pr:
+    uses: ./.github/workflows/trigger-circleci.yml
+    with:
+      environment: dev
+      test_suite: '@smoke'
+      test_jobs: chrome-desktop
+      ecbranch: ${{ github.head_ref || github.ref_name }}
+      milobranch: main
+      job_name: Dev Environment Smoke Tests (PR) 
