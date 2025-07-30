@@ -44,7 +44,7 @@ on:
           - all
       source_branch:
         description: 'Source branch for testing'
-        required: true
+        required: false
         type: string
 
 jobs:
@@ -61,7 +61,7 @@ jobs:
       environment: ${{ github.event.inputs.test_environment }}
       test_suite: ${{ github.event.inputs.test_suite }}
       test_jobs: ${{ github.event.inputs.test_jobs }}
-      ecbranch: ${{ github.event.inputs.source_branch }}
+      ecbranch: ${{ github.event.inputs.source_branch || github.ref_name }}
       milobranch: main
       job_name: Manual Test - ${{ github.event.inputs.test_environment }} Environment
 

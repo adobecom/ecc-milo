@@ -1,0 +1,24 @@
+name: Run E2E Tests (Simple)
+on:
+  workflow_dispatch:
+    inputs:
+      test_environment:
+        description: 'Environment to test against'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - stage
+          - prod
+
+jobs:
+  manual-test:
+    uses: ./.github/workflows/trigger-circleci.yml
+    with:
+      environment: ${{ github.event.inputs.test_environment }}
+      test_suite: '@smoke'
+      test_jobs: chrome-desktop
+      ecbranch: dev
+      milobranch: main
+      job_name: Simple Manual Test 
