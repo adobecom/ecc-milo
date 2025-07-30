@@ -2,6 +2,7 @@ name: Run E2E Tests
 on:
   push:
     branches:
+      - e2e-tests # temporary
       - dev
       - stage
       - main
