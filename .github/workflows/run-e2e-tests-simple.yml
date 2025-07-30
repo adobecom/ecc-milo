@@ -8,9 +8,9 @@ on:
         default: 'dev'
         type: choice
         options:
-          - dev
-          - stage
-          - prod
+          - 'dev'
+          - 'stage'
+          - 'prod'
 
 jobs:
   manual-test:

@@ -32,4 +32,4 @@ jobs:
       test_jobs: chrome-desktop
       ecbranch: ${{ github.head_ref || github.ref_name }}
       milobranch: main
-      job_name: Dev Environment Smoke Tests (PR) 
+      job_name: Dev Smoke Tests (PR) 

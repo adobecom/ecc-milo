@@ -21,9 +21,9 @@ on:
         default: 'dev'
         type: choice
         options:
-          - dev
-          - stage
-          - prod
+          - 'dev'
+          - 'stage'
+          - 'prod'
       test_suite:
         description: 'Test suite to run'
         required: true
@@ -39,9 +39,9 @@ on:
         default: 'chrome-desktop'
         type: choice
         options:
-          - chrome-desktop
-          - firefox-desktop
-          - all
+          - 'chrome-desktop'
+          - 'firefox-desktop'
+          - 'all'
       source_branch:
         description: 'Source branch for testing'
         required: false
@@ -84,7 +84,7 @@ jobs:
       test_jobs: chrome-desktop
       ecbranch: dev
       milobranch: main
-      job_name: Daily Dev Environment Full Test Suite
+      job_name: Daily Dev Full Testing
 
   # ============================================================================
   # DEV WORKFLOW
@@ -103,7 +103,7 @@ jobs:
       test_jobs: chrome-desktop
       ecbranch: ${{ github.head_ref || github.ref_name }}
       milobranch: main
-      job_name: Dev Environment Smoke Tests
+      job_name: Dev Smoke Tests
 
   # ============================================================================
   # STAGE WORKFLOW
@@ -122,7 +122,7 @@ jobs:
       test_jobs: chrome-desktop
       ecbranch: ${{ github.head_ref || github.ref_name }}
       milobranch: main
-      job_name: Dev Environment Full Test Suite (Stage PR)
+      job_name: Dev Full Test Suite (Stage PR)
 
   # Event  : When a PR is merged to stage branch
   # Action : Run regression tests on stage environment
@@ -137,7 +137,7 @@ jobs:
       test_jobs: chrome-desktop
       ecbranch: ${{ github.head_ref || github.ref_name }}
       milobranch: main
-      job_name: Stage Environment Regression Tests
+      job_name: Stage Regression Tests
 
   # ============================================================================
   # PRODUCTION WORKFLOW
@@ -156,7 +156,7 @@ jobs:
       test_jobs: chrome-desktop
       ecbranch: ${{ github.head_ref || github.ref_name }}
       milobranch: main
-      job_name: Stage Environment Full Test Suite (Main PR)
+      job_name: Stage Full Test Suite (Main PR)
 
   # Event  : When a PR is merged to main branch
   # Action : Run regression tests on production environment
@@ -171,4 +171,4 @@ jobs:
       test_jobs: chrome-desktop
       ecbranch: ${{ github.head_ref || github.ref_name }}
       milobranch: main
-      job_name: Prod Environment Regression Tests
+      job_name: Prod Regression Tests
