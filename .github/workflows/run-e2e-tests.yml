@@ -23,9 +23,9 @@ on:
         default: 'dev'
         type: choice
         options:
-          - 'dev'
-          - 'stage'
-          - 'prod'
+          - dev
+          - stage
+          - prod
       test_suite:
         description: 'Test suite to run'
         required: true
@@ -41,9 +41,9 @@ on:
         default: 'chrome-desktop'
         type: choice
         options:
-          - 'chrome-desktop'
-          - 'firefox-desktop'
-          - 'all'
+          - chrome-desktop
+          - firefox-desktop
+          - all
       source_branch:
         description: 'Source branch for testing'
         required: false
@@ -68,6 +68,25 @@ jobs:
       ecbranch: ${{ github.event.inputs.source_branch || github.ref_name }}
       milobranch: main
       job_name: Manual Test - ${{ github.event.inputs.test_environment }} Environment
+
+  # ============================================================================
+  # TEMPORARY E2E-TESTS BRANCH WORKFLOW
+  # ============================================================================
+  
+  # Event  : When changes are pushed to e2e-tests branch
+  # Action : Run smoke tests on dev environment
+  e2e-tests-smoke:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'push' && github.ref_name == 'e2e-tests'
+    secrets:
+      CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
+    with:
+      environment: dev
+      test_suite: '@smoke'
+      test_jobs: chrome-desktop
+      ecbranch: ${{ github.head_ref || github.ref_name }}
+      milobranch: main
+      job_name: E2E Tests Branch Smoke Tests
 
   # ============================================================================
   # DAILY MONITORING
