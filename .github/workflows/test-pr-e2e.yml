@@ -6,10 +6,26 @@ on:
       - dev
 
 jobs:
+  # Check if CCI_TOKEN secret exists
+  check-secret:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if CCI_TOKEN exists
+        run: |
+          if [ -n "${{ secrets.CCI_TOKEN }}" ]; then
+            echo "✅ CCI_TOKEN is set (length: ${#CCI_TOKEN})"
+          else
+            echo "❌ CCI_TOKEN is null or empty"
+            exit 1
+          fi
+
   # Event  : When a PR is opened for dev branch
   # Action : Run smoke tests on dev environment
   dev-smoke-tests-pr:
+    needs: check-secret
     uses: ./.github/workflows/trigger-circleci.yml
+    secrets:
+      CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
     with:
       environment: dev
       test_suite: '@smoke'

@@ -1,6 +1,10 @@
 name: Trigger CircleCI E2E Tests
 on:
   workflow_call:
+    secrets:
+      CCI_TOKEN:
+        description: 'CircleCI API token'
+        required: true
     inputs:
       environment:
         description: 'Target environment (dev, stage, prod)'

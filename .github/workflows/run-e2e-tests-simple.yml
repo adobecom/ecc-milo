@@ -15,6 +15,8 @@ on:
 jobs:
   manual-test:
     uses: ./.github/workflows/trigger-circleci.yml
+    secrets:
+      CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
     with:
       environment: ${{ github.event.inputs.test_environment }}
       test_suite: '@smoke'
