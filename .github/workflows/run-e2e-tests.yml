@@ -23,6 +23,7 @@ on:
         default: 'dev'
         type: choice
         options:
+          - e2e-tests # temporary
           - dev
           - stage
           - prod
