@@ -1,0 +1,110 @@
+name: Run E2E Tests
+on:
+  push:
+    branches:
+      - dev
+      - stage
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches:
+      - stage
+      - main
+  schedule:
+    # Run daily at 10 PM PDT
+    - cron: '0 5 * * *'
+
+jobs:
+  # ============================================================================
+  # DAILY MONITORING
+  # ============================================================================
+  
+  # Event  : Daily scheduled (10 PM PDT)
+  # Action : Run full test suite on dev environment
+  daily-dev-full-tests:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'schedule'
+    with:
+      environment: dev
+      test_suite: '@smoke or @regression'
+      test_jobs: chrome-desktop
+      ecbranch: dev
+      milobranch: main
+      job_name: Daily Dev Environment Full Test Suite
+
+  # ============================================================================
+  # DEV WORKFLOW
+  # ============================================================================
+  
+  # Event  : When a PR is merged to dev branch
+  # Action : Run smoke tests on dev environment
+  dev-smoke-tests:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'push' && github.ref_name == 'dev'
+    with:
+      environment: dev
+      test_suite: '@smoke'
+      test_jobs: chrome-desktop
+      ecbranch: ${{ github.head_ref || github.ref_name }}
+      milobranch: main
+      job_name: Dev Environment Smoke Tests
+
+  # ============================================================================
+  # STAGE WORKFLOW
+  # ============================================================================
+  
+  # Event  : When a PR is opened for stage branch
+  # Action : Run full test suite on dev environment
+  dev-full-tests-stage-pr:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'pull_request' && github.base_ref == 'stage'
+    with:
+      environment: dev
+      test_suite: '@smoke or @regression'
+      test_jobs: chrome-desktop
+      ecbranch: ${{ github.head_ref || github.ref_name }}
+      milobranch: main
+      job_name: Dev Environment Full Test Suite (Stage PR)
+
+  # Event  : When a PR is merged to stage branch
+  # Action : Run regression tests on stage environment
+  stage-regression-tests:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'push' && github.ref_name == 'stage'
+    with:
+      environment: stage
+      test_suite: '@regression'
+      test_jobs: chrome-desktop
+      ecbranch: ${{ github.head_ref || github.ref_name }}
+      milobranch: main
+      job_name: Stage Environment Regression Tests
+
+  # ============================================================================
+  # PRODUCTION WORKFLOW
+  # ============================================================================
+  
+  # Event  : When a PR is opened for main branch
+  # Action : Run full test suite on stage environment
+  stage-full-tests-main-pr:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    with:
+      environment: stage
+      test_suite: '@smoke or @regression'
+      test_jobs: chrome-desktop
+      ecbranch: ${{ github.head_ref || github.ref_name }}
+      milobranch: main
+      job_name: Stage Environment Full Test Suite (Main PR)
+
+  # Event  : When a PR is merged to main branch
+  # Action : Run regression tests on production environment
+  prod-regression-tests:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'push' && github.ref_name == 'main'
+    with:
+      environment: prod
+      test_suite: '@regression'
+      test_jobs: chrome-desktop
+      ecbranch: ${{ github.head_ref || github.ref_name }}
+      milobranch: main
+      job_name: Prod Environment Regression Tests
