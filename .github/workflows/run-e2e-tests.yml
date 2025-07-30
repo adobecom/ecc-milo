@@ -8,6 +8,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
     branches:
+      - e2e-tests # temporary
       - stage
       - main
   schedule:
