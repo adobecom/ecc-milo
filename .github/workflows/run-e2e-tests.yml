@@ -37,11 +37,14 @@ on:
         description: 'Browser jobs to run'
         required: true
         default: 'chrome-desktop'
-        type: string
+        type: choice
+        options:
+          - chrome-desktop
+          - firefox-desktop
+          - all
       source_branch:
         description: 'Source branch for testing'
         required: true
-        default: 'dev'
         type: string
 
 jobs:
