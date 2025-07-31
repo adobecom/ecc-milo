@@ -13,7 +13,7 @@ export function onSubmit(component, props) {
 
   if (!marketoIdField.value) {
     removeData.push({
-      key: 'marketoId',
+      key: 'externalEventId',
       path: '',
     });
   }
@@ -22,13 +22,16 @@ export function onSubmit(component, props) {
 }
 
 function loadMarketoEventInfo(component, marketoId) {
-  // register a iframe and load this url https://engage.adobe.com/mcz114328.html?mkto_src=emc
-  const iframe = createTag('iframe', { src: `https://engage.adobe.com/${marketoId}.html?mkto_src=emc`, class: 'hidden' });
-  component.append(iframe);
+  if (marketoId.startsWith('mcz-')) {
+    const marketoIdUri = marketoId.replace('-', '');
+    // register a iframe and load this url https://engage.adobe.com/mcz114328.html?mkto_src=emc
+    const iframe = createTag('iframe', { src: `https://engage.adobe.com/${marketoIdUri}.html?mkto_src=emc`, class: 'hidden' });
+    component.append(iframe);
+  }
 }
 
 function setMarketoId(data, component, locale) {
-  const marketoId = getAttribute(data, 'marketoId', locale);
+  const marketoId = getAttribute(data, 'externalEventId', locale);
 
   if (!marketoId) return;
 
