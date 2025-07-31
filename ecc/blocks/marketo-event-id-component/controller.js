@@ -123,7 +123,7 @@ async function updateFormUsingMarketoData(params, component, props) {
 }
 
 function onMczMessage(event, component, props) {
-  const config = { allowedOrigins: ['https://engage.adobe.com', 'https://business.adobe.com'] };
+  const config = { allowedOrigins: ['https://engage.adobe.com', 'https://business.adobe.com','http://localhost:3000'] };
   const eventOrigin = new URL(event.origin);
   let allowedToPass = false;
   for (let i = 0; i < config.allowedOrigins.length; i += 1) {
@@ -162,6 +162,22 @@ function initMarketoIdFieldListener(component, props) {
 
     loadMarketoEventInfo(component, marketoId);
   });
+
+  const isMczField = component.querySelector('div.marketo-event-id > sp-checkbox');
+
+  isMczField.addEventListener('change', (e) => {
+    const isChecked = e.target.checked;
+    const textfield = component.querySelector('div.marketo-event-id > sp-textfield');
+    setPropsPayload(props, { isMczEvent: isChecked }, []);
+    if(isChecked) {
+      textfield.value = 'mcz';
+      textfield.disabled = false;
+    } else {
+      textfield.value = '';
+      textfield.disabled = true;
+    }
+  })
+
 
   window.addEventListener('message', (event) => onMczMessage(event, component, props));
 }

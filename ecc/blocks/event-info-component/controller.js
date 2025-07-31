@@ -190,12 +190,40 @@ export function onSubmit(component, props) {
   setPropsPayload(props, eventInfo);
 }
 
+const disableMczEventFields = (component, disabled = true) => {
+  const fieldSelectors = [
+    '#info-field-event-title',
+    '#info-field-event-description', 
+    '#event-info-date-picker',
+    '#time-picker-start-time',
+    '#time-picker-end-time',
+    '#time-zone-select-input',
+    'ampm-picker-start-time',
+    'ampm-picker-end-time'
+  ];
+
+  fieldSelectors.forEach(selector => {
+    const element = component.querySelector(selector);
+    if (element) {
+      element.disabled = disabled;
+    }
+  });
+};
+
 export async function onPayloadUpdate(component, props) {
   const { cloudType } = props.payload;
 
   if (cloudType && cloudType !== component.dataset.cloudType) {
     component.dataset.cloudType = cloudType;
     await updateLanguagePicker(component, props);
+  }
+
+  //For MCZ Event
+  const isMczEvent = props.payload.isMczEvent;
+  if (isMczEvent && isMczEvent === true) {
+    disableMczEventFields(component);
+  } else {
+    disableMczEventFields(component, false);
   }
 }
 
