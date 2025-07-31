@@ -1514,3 +1514,24 @@ export async function fetchRsvpFormConfigs() {
     return { cloudType: id, config };
   }));
 }
+
+export async function getEventByExternalId(externalEventId) {
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/external/events/${externalEventId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to get event by external ID ${externalEventId}. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to get event by external ID ${externalEventId}:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
