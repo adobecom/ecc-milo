@@ -11,11 +11,13 @@ export function onSubmit(component, props) {
 
   const selectedPromotions = promotionGroup?.getSelectedPromotions();
 
-  if (selectedPromotions) {
+  if (selectedPromotions && selectedPromotions.length > 0) {
     const selectedPromotionsPayload = selectedPromotions.map((p) => p.name);
-    // TODO: Send selectedPromotions to the payload
-    // setPropsPayload(props, { selectedPromotions: selectedPromotionsPayload });
+    // setPropsPayload(props, { promotionItems: selectedPromotionsPayload });
     console.log('Will send selectedPromotions to the payload', selectedPromotionsPayload);
+  } else {
+    // setPropsPayload(props, {}, [{ key: 'promotionItems', path: '' }]);
+    console.log('Will remove promotionItems from the payload');
   }
 }
 
