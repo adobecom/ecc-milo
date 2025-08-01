@@ -10,6 +10,34 @@ import { buildErrorMessage } from '../form-handler/form-handler-helper.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
+const MCZ_EVENT_FIELD_SELECTORS = [
+  '#info-field-event-title',
+  '#info-field-event-description',
+  '#event-info-date-picker',
+  '#time-picker-start-time',
+  '#time-picker-end-time',
+  '#time-zone-select-input',
+  '#ampm-picker-start-time',
+  '#ampm-picker-end-time',
+];
+
+const setMczEventFieldsState = (component, disabled) => {
+  MCZ_EVENT_FIELD_SELECTORS.forEach((selector) => {
+    const element = component.querySelector(selector);
+    if (element) {
+      element.disabled = disabled;
+    }
+  });
+};
+
+const enableMczEventFields = (component) => {
+  setMczEventFieldsState(component, false);
+};
+
+const disableMczEventFields = (component) => {
+  setMczEventFieldsState(component, true);
+};
+
 function refillFields(component, props, eventData) {
   const eventTitleInput = component.querySelector('#info-field-event-title');
   const eventDescription = component.querySelector('#info-field-event-description');
@@ -190,26 +218,6 @@ export function onSubmit(component, props) {
   setPropsPayload(props, eventInfo);
 }
 
-const disableMczEventFields = (component, disabled = true) => {
-  const fieldSelectors = [
-    '#info-field-event-title',
-    '#info-field-event-description', 
-    '#event-info-date-picker',
-    '#time-picker-start-time',
-    '#time-picker-end-time',
-    '#time-zone-select-input',
-    'ampm-picker-start-time',
-    'ampm-picker-end-time'
-  ];
-
-  fieldSelectors.forEach(selector => {
-    const element = component.querySelector(selector);
-    if (element) {
-      element.disabled = disabled;
-    }
-  });
-};
-
 export async function onPayloadUpdate(component, props) {
   const { cloudType } = props.payload;
 
@@ -218,12 +226,12 @@ export async function onPayloadUpdate(component, props) {
     await updateLanguagePicker(component, props);
   }
 
-  //For MCZ Event
-  const isMczEvent = props.payload.isMczEvent;
-  if (isMczEvent && isMczEvent === true) {
+  // For MCZ Event
+  const { isMczEvent } = props.payload;
+  if (isMczEvent) {
     disableMczEventFields(component);
   } else {
-    disableMczEventFields(component, false);
+    enableMczEventFields(component);
   }
 }
 
