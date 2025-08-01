@@ -1,3 +1,17 @@
-.marketo-event-id-component .marketo-event-id .field-label {
-  width: 550px;
+.marketo-event-id-component {
+  sp-checkbox {
+    margin-bottom: 32px;
+  }
+
+  .marketo-event-id {
+    .field-label {
+      width: 550px;
+    }
+    
+    span {
+      font-size: large;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+  }
 }

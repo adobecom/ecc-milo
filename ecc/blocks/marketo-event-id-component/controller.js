@@ -8,8 +8,13 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 export function onSubmit(component, props) {
   const marketoIdField = component.querySelector('div.marketo-event-id > sp-textfield');
-  const marketoId = marketoIdField.value;
+  const marketoId = `mcz${marketoIdField.value}`;
+  const isMczEvent = component.querySelector('sp-checkbox').checked;
   const removeData = [];
+
+  if (isMczEvent && !marketoIdField.value) {
+    throw new Error('MCZ Program ID is required');
+  }
 
   if (!marketoIdField.value) {
     removeData.push({
@@ -41,15 +46,26 @@ function setMarketoId(data, component, locale) {
 
   marketoIdField.setAttribute('value', marketoId);
 
-  loadMarketoEventInfo(component, marketoId);
+  loadMarketoEventInfo(component, `mcz${marketoId}`);
+}
+
+function mczEventSideEffect(component, { isMczEvent }) {
+  const mczSection = component.querySelector('div.marketo-event-id');
+  if (isMczEvent) {
+    mczSection.style.display = 'block';
+  } else if (!isMczEvent && isMczEvent === false) {
+    mczSection.style.display = 'none';
+  }
 }
 
 export async function onPayloadUpdate(component, props) {
   setMarketoId(props.payload, component, props.locale);
+  mczEventSideEffect(component, props.payload);
 }
 
 export async function onRespUpdate(component, props) {
   setMarketoId(props.eventDataResp, component, props.locale);
+  mczEventSideEffect(component, props.payload);
 }
 
 function convertDateToYYYYMMDD(date) {
@@ -63,7 +79,7 @@ function convertDateToYYYYMMDD(date) {
   // Map month name to MM format
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'July', 'August', 'September', 'October', 'November', 'December',
   ];
   const monthIndex = monthNames.indexOf(month);
   if (monthIndex === -1) return null;
@@ -79,7 +95,7 @@ function convertTimeToHHMMSS(time) {
   // Match groups: hour, optional minute, am/pm
   const match = time.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i);
   if (!match) return null;
-  let [ , hour, minute, period ] = match;
+  let [, hour, minute, period] = match;
   hour = parseInt(hour, 10);
   minute = minute !== undefined ? parseInt(minute, 10) : 0;
   if (period.toLowerCase() === 'pm' && hour !== 12) hour += 12;
@@ -91,7 +107,6 @@ function convertTimeToHHMMSS(time) {
 }
 
 async function updateFormUsingMarketoData(params, component, props) {
-
   const seriesName = params.profile['Series Name'];
 
   // lookup seriesId from eventInfo.seriesName
@@ -118,7 +133,6 @@ async function updateFormUsingMarketoData(params, component, props) {
   }
   // series should not be locked.
 
-  
   // lookup eventId from eventInfo.title
   console.log('eventInfo : ', eventInfo);
   props.eventDataResp = { ...props.eventDataResp, ...eventInfo };
@@ -160,10 +174,17 @@ function initMarketoIdFieldListener(component, props) {
 
   // Listen for value changes on the textfield
   marketoIdField.addEventListener('change', (event) => {
-    const marketoId = event.target.value;
+    const marketoId = `mcz${event.target.value}`;
     console.log('marketoId : ', marketoId);
 
     loadMarketoEventInfo(component, marketoId);
+  });
+
+  const isMczField = component.querySelector('sp-checkbox');
+
+  isMczField.addEventListener('change', (e) => {
+    const isChecked = e.target.checked;
+    setPropsPayload(props, { isMczEvent: isChecked }, []);
   });
 
   window.addEventListener('message', (event) => onMczMessage(event, component, props));
