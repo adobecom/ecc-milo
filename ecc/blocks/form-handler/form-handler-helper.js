@@ -39,6 +39,7 @@ import {
   publishEvent,
   getEvent,
   previewEvent,
+  getEventByExternalId,
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
@@ -307,10 +308,21 @@ function enableSideNavForEditFlow(props) {
 async function loadEventData(props) {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  const eventId = urlParams.get('eventId');
+  let eventId = urlParams.get('eventId');
+
+  const marketoEventId = urlParams.get('externalEventId');
+
+  if (!eventId && marketoEventId && marketoEventId.startsWith('mcz-')) {
+    const eventObj = await getEventByExternalId(marketoEventId);
+    if (!eventObj.error) {
+      eventId = eventObj.eventId;
+      props.payload.externalEventId = marketoEventId;
+    }
+  }
 
   if (eventId) {
     const [user, event] = await Promise.all([getUser(), getEvent(eventId)]);
+
     if (userHasAccessToEvent(user, eventId)
       || userHasAccessToSeries(user, event.seriesId)
       || userHasAccessToBU(user, event.cloudType)) {
@@ -327,22 +339,16 @@ async function loadEventData(props) {
       }, 5000);
 
       props.el.classList.add('disabled');
-      const eventData = await getEvent(eventId);
-      if (!eventData.error && eventData) {
-        props.eventDataResp = eventData;
+      if (!event.error && event) {
+        props.eventDataResp = event;
       } else {
-        props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: eventData.error } }));
+        props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: event.error } }));
       }
       props.el.classList.remove('disabled');
     } else {
       buildNoAccessScreen(props.el);
       props.el.classList.remove('loading');
     }
-  }
-
-  const marketoEventId = urlParams.get('marketoEventId');
-  if (marketoEventId) {
-    props.payload.marketoId = marketoEventId;
   }
 }
 
