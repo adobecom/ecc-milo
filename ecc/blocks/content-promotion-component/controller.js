@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { getCaasTags } from '../../scripts/caas.js';
 import { getAttribute } from '../../scripts/data-utils.js';
-import { handlize } from '../../scripts/utils.js';
+import { getEventPageHost, handlize } from '../../scripts/utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 
 export function onSubmit(component, props) {
@@ -24,49 +24,16 @@ export function onSubmit(component, props) {
   }
 }
 
+async function getPromotionalContentSheet() {
+  const data = await fetch(`${getEventPageHost()}/events/default/promotional-content.json`).then((res) => res.json());
+
+  return data;
+}
+
 async function updateProductSelector(component, props) {
-  const supportedProducts = [
-    'Acrobat Pro',
-    'Acrobat Reader',
-    'Adobe Express',
-    'Adobe Firefly',
-    'Adobe Fonts',
-    'Adobe Photoshop',
-    'Adobe Substance 3D Collection',
-    'Adobe Stock',
-    'Aero',
-    'After Effects',
-    'AI Assistant for Acrobat',
-    'Animate',
-    'Audition',
-    'Behance',
-    'Bridge',
-    'Capture',
-    'Character Animator',
-    'Color',
-    'Creative Cloud Libraries',
-    'Dimension',
-    'Dreamweaver',
-    'Fill & Sign',
-    'Firefly',
-    'Frame.io',
-    'Fresco',
-    'Illustrator',
-    'InCopy',
-    'InDesign',
-    'Lightroom',
-    'Lightroom Classic',
-    'Media Encoder',
-    'Photoshop',
-    'Photoshop Express',
-    'Portfolio',
-    'Premiere Pro',
-    'Premiere Rush',
-    'Scan',
-    'Substance 3D Collection',
-  ];
-  const caasTags = await getCaasTags();
-  if (!caasTags) return;
+  const promotionalContent = await getPromotionalContentSheet();
+  console.log('promotionalContent', promotionalContent);
+  if (!promotionalContent) return;
 
   const productGroups = component.querySelectorAll('product-selector-group');
   const products = Object.values(caasTags.namespaces.caas.tags['product-categories'].tags)
