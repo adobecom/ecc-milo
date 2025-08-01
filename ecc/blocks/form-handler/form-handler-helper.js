@@ -5,8 +5,8 @@ import CustomTextfield from '../../components/custom-textfield/custom-textfield.
 import ImageDropzone from '../../components/image-dropzone/image-dropzone.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
-import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
-import ProductSelector from '../../components/product-selector/product-selector.js';
+import PromotionSelectorGroup from '../../components/promotion-selector-group/promotion-selector-group.js';
+import PromotionSelector from '../../components/promotion-selector/promotion-selector.js';
 import ProfileContainer from '../../components/profile-container/profile-container.js';
 import Profile from '../../components/profile/profile.js';
 import Repeater from '../../components/repeater/repeater.js';
@@ -54,8 +54,8 @@ export function initCustomLitComponents() {
   customElements.define('partner-selector-group', PartnerSelectorGroup);
   customElements.define('agenda-fieldset', AgendaFieldset);
   customElements.define('agenda-fieldset-group', AgendaFieldsetGroup);
-  customElements.define('product-selector', ProductSelector);
-  customElements.define('product-selector-group', ProductSelectorGroup);
+  customElements.define('promotion-selector', PromotionSelector);
+  customElements.define('promotion-selector-group', PromotionSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
   customElements.define('custom-search', CustomSearch);
@@ -115,6 +115,7 @@ export const VANILLA_COMPONENTS = [
   'secondary-cta',
   'video-content',
   'marketo-integration',
+  'content-promotion',
 ];
 
 async function initVanillaComponents(props) {

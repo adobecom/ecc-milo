@@ -11,13 +11,13 @@ fieldset {
   padding: 0;
 }
 
-.product-field-wrapper {
+.promotion-field-wrapper {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.product-field-wrapper img.product-img {
+.promotion-field-wrapper img.promotion-img {
   display: block;
   width: 40px;
   height: 40px;

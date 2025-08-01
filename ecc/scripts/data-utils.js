@@ -82,7 +82,7 @@ export const EVENT_DATA_FILTER = {
   venue: { type: 'object', localizable: false, cloneable: false, submittable: false },
   showSponsors: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
   rsvpFormFields: { type: 'object', localizable: false, cloneable: true, submittable: true },
-  relatedProducts: { type: 'array', localizable: false, cloneable: true, submittable: true },
+  promotionalItems: { type: 'array', localizable: true, cloneable: true, submittable: true },
   rsvpDescription: { type: 'string', localizable: true, cloneable: true, submittable: true },
   attendeeLimit: { type: 'number', localizable: false, cloneable: true, submittable: true },
   allowWaitlisting: { type: 'boolean', localizable: false, cloneable: true, submittable: true },
