@@ -13,11 +13,9 @@ export function onSubmit(component, props) {
 
   if (selectedPromotions && selectedPromotions.length > 0) {
     const selectedPromotionsPayload = selectedPromotions.map((p) => p.name);
-    // setPropsPayload(props, { promotionItems: selectedPromotionsPayload });
-    console.log('Will send selectedPromotions to the payload', selectedPromotionsPayload);
+    setPropsPayload(props, { promotionItems: selectedPromotionsPayload });
   } else {
-    // setPropsPayload(props, {}, [{ key: 'promotionItems', path: '' }]);
-    console.log('Will remove promotionItems from the payload');
+    setPropsPayload(props, {}, [{ key: 'promotionItems', path: '' }]);
   }
 }
 
