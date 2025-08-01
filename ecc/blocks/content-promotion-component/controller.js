@@ -7,59 +7,47 @@ import { setPropsPayload } from '../form-handler/data-handler.js';
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const productGroup = component.querySelector('product-selector-group');
+  const promotionGroup = component.querySelector('promotion-selector-group');
 
-  const selectedProducts = productGroup?.getSelectedProducts();
+  const selectedPromotions = promotionGroup?.getSelectedPromotions();
 
-  if (selectedProducts) {
-    const relatedProducts = selectedProducts
-      .map((p) => ({
-        name: p.title,
-        showProductBlade: !!p.showProductBlade,
-      }));
-
-    setPropsPayload(props, { relatedProducts });
-  } else {
-    setPropsPayload(props, { relatedProducts: null });
+  if (selectedPromotions) {
+    const selectedPromotionsPayload = selectedPromotions.map((p) => p.name);
+    // TODO: Send selectedPromotions to the payload
+    // setPropsPayload(props, { selectedPromotions: selectedPromotionsPayload });
+    console.log('Will send selectedPromotions to the payload', selectedPromotionsPayload);
   }
 }
 
 async function getPromotionalContentSheet() {
-  const data = await fetch(`${getEventPageHost()}/events/default/promotional-content.json`).then((res) => res.json());
+  const { data } = await fetch(`${getEventPageHost()}/events/default/promotional-content.json`).then((res) => res.json());
 
   return data;
 }
 
-async function updateProductSelector(component, props) {
+async function updatePromotionSelector(component, props) {
   const promotionalContent = await getPromotionalContentSheet();
-  console.log('promotionalContent', promotionalContent);
   if (!promotionalContent) return;
 
-  const productGroups = component.querySelectorAll('product-selector-group');
-  const products = Object.values(caasTags.namespaces.caas.tags['product-categories'].tags)
-    .map((x) => [...Object.values(x.tags).map((y) => y)])
-    .flat()
-    .filter(
-      (p) => supportedProducts?.includes(p.title),
-    );
+  const promotionGroups = component.querySelectorAll('promotion-selector-group');
 
-  productGroups.forEach((pg) => {
-    pg.setAttribute('data-products', JSON.stringify(products));
+  promotionGroups.forEach((pg) => {
+    pg.promotions = promotionalContent;
     pg.requestUpdate();
 
-    const selectedProducts = pg.getSelectedProducts();
+    const selectedPromotions = pg.getSelectedPromotions();
 
-    selectedProducts.forEach((sp, i) => {
-      const isProductAvailable = products.find((p) => p.name === sp.name);
+    selectedPromotions.forEach((sp, i) => {
+      const isPromotionAvailable = promotionalContent.find((p) => p.name === sp.name);
 
-      if (!isProductAvailable) {
-        pg.deleteProduct(i);
+      if (!isPromotionAvailable) {
+        pg.deletePromotion(i);
       }
     });
 
-    pg.shadowRoot.querySelectorAll('product-selector').forEach((ps) => {
-      ps.dispatchEvent(new CustomEvent('update-product', {
-        detail: { product: ps.selectedProduct },
+    pg.shadowRoot.querySelectorAll('promotion-selector').forEach((ps) => {
+      ps.dispatchEvent(new CustomEvent('update-promotion', {
+        detail: { promotion: ps.selectedPromotion },
         bubbles: true,
         composed: true,
       }));
@@ -73,8 +61,6 @@ export async function onPayloadUpdate(component, props) {
   if (cloudType && cloudType !== component.dataset.cloudType) {
     component.dataset.cloudType = cloudType;
   }
-
-  await updateProductSelector(component, props);
 }
 
 export async function onRespUpdate(_component, _props) {
@@ -82,28 +68,25 @@ export async function onRespUpdate(_component, _props) {
 }
 
 export default async function init(component, props) {
+  await updatePromotionSelector(component, props);
   const eventData = props.eventDataResp;
 
   const [
     cloudType,
-    relatedProducts,
+    relatedPromotions,
   ] = [
     getAttribute(eventData, 'cloudType', props.locale),
-    getAttribute(eventData, 'relatedProducts', props.locale),
+    getAttribute(eventData, 'relatedPromotions', props.locale),
   ];
 
   if (cloudType) component.dataset.cloudType = cloudType;
-  const productGroup = component.querySelector('product-selector-group');
+  const promotionGroup = component.querySelector('promotion-selector-group');
 
-  if (relatedProducts?.length) {
-    const selectedProducts = relatedProducts.map((p) => ({
-      name: handlize(p.name),
-      title: p.name,
-      showProductBlade: !!p.showProductBlade,
-    }));
+  if (relatedPromotions?.length) {
+    const selectedPromotions = relatedPromotions.map((p) => handlize(p.name));
 
-    productGroup.selectedProducts = selectedProducts;
-    productGroup.requestUpdate();
+    promotionGroup.selectedPromotions = selectedPromotions;
+    promotionGroup.requestUpdate();
     component.classList.add('prefilled');
   }
 }
