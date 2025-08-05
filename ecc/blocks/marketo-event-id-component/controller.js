@@ -3,11 +3,12 @@ import { setPropsPayload } from '../form-handler/data-handler.js';
 import { getAttribute } from '../../scripts/data-utils.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { getSeriesForUser } from '../../scripts/esp-controller.js';
+import { updateRequiredVisibleFieldsValidation } from '../form-handler/form-handler-helper.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 export function onSubmit(component, props) {
-  const marketoIdField = component.querySelector('div.marketo-event-id > sp-textfield');
+  const marketoIdField = component.querySelector('#mcz-textfield');
   const marketoId = `mcz${marketoIdField.value}`;
   const isMczEvent = component.querySelector('sp-checkbox').checked;
   const removeData = [];
@@ -40,32 +41,50 @@ function setMarketoId(data, component, locale) {
 
   if (!marketoId) return;
 
-  const marketoIdField = component.querySelector('div.marketo-event-id > sp-textfield');
+  const marketoIdField = component.querySelector('#mcz-textfield');
 
   if (!marketoIdField) return;
 
   marketoIdField.setAttribute('value', marketoId);
 
-  loadMarketoEventInfo(component, `mcz${marketoId}`);
+  loadMarketoEventInfo(component, `mcz-${marketoId}`);
 }
 
-function mczEventSideEffect(component, { isMczEvent }) {
+function mczEventSideEffect(component, props) {
+  const { eventDataResp } = props;
+  const { isMczEvent } = props.payload;
   const mczSection = component.querySelector('div.marketo-event-id');
-  if (isMczEvent) {
-    mczSection.style.display = 'block';
-  } else if (!isMczEvent && isMczEvent === false) {
-    mczSection.style.display = 'none';
+  if (props.eventDataResp?.eventId) {
+    // The event has already created. The marketer cannot change this section anymore.
+    if (props.eventDataResp?.externalEventId) {
+      // Disable this section
+      const checkbox = component.querySelector('sp-checkbox');
+      checkbox.checked = true;
+      checkbox.disabled = true;
+      mczSection.classList.remove('hidden');
+      component.querySelector('#mcz-textfield').disabled = true;
+    } else {
+      component.parentElement.remove();
+    }
+    return;
   }
+
+  if (isMczEvent) {
+    mczSection.classList.remove('hidden');
+  } else if (!isMczEvent && isMczEvent === false) {
+    mczSection.classList.add('hidden');
+  }
+  updateRequiredVisibleFieldsValidation(props);
 }
 
 export async function onPayloadUpdate(component, props) {
   setMarketoId(props.payload, component, props.locale);
-  mczEventSideEffect(component, props.payload);
+  mczEventSideEffect(component, props);
 }
 
 export async function onRespUpdate(component, props) {
   setMarketoId(props.eventDataResp, component, props.locale);
-  mczEventSideEffect(component, props.payload);
+  mczEventSideEffect(component, props);
 }
 
 function convertDateToYYYYMMDD(date) {
@@ -169,12 +188,12 @@ function onMczMessage(event, component, props) {
 }
 
 function initMarketoIdFieldListener(component, props) {
-  const marketoIdField = component.querySelector('div.marketo-event-id > sp-textfield');
+  const marketoIdField = component.querySelector('#mcz-textfield');
   if (!marketoIdField) return;
 
   // Listen for value changes on the textfield
   marketoIdField.addEventListener('change', (event) => {
-    const marketoId = `mcz${event.target.value}`;
+    const marketoId = `mcz-${event.target.value}`;
     console.log('marketoId : ', marketoId);
 
     loadMarketoEventInfo(component, marketoId);

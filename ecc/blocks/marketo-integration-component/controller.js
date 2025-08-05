@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { setPropsPayload } from '../form-handler/data-handler.js';
-import { initRequiredFieldsValidation } from '../form-handler/form-handler-helper.js';
+import { updateRequiredVisibleFieldsValidation } from '../form-handler/form-handler-helper.js';
 import { MARKETO_INTEGRATION_FIELDS } from './marketo-integration-component.js';
 
 export async function onPayloadUpdate(component, props) {
@@ -106,7 +106,7 @@ export default async function init(component, props) {
         });
       }
 
-      initRequiredFieldsValidation(props);
+      updateRequiredVisibleFieldsValidation(props);
     });
   }
 }

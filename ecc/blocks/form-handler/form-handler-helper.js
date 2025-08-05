@@ -239,12 +239,17 @@ function onStepValidate(props) {
 
 export function getUpdatedRequiredFields(props) {
   const currentFrag = getCurrentFragment(props);
-  const requiredFields = currentFrag.querySelectorAll(INPUT_TYPES.join());
+  const allRequiredFields = currentFrag.querySelectorAll(INPUT_TYPES.join());
 
-  return requiredFields;
+  const visibleRequiredFields = Array.from(allRequiredFields).filter((field) => {
+    const style = window.getComputedStyle(field);
+    return style.display !== 'none';
+  });
+
+  return visibleRequiredFields;
 }
 
-export function initRequiredFieldsValidation(props) {
+export function updateRequiredVisibleFieldsValidation(props) {
   const currentFrag = getCurrentFragment(props);
 
   const currentRequiredFields = props[`required-fields-in-${currentFrag.id}`];
@@ -272,7 +277,7 @@ export function navigateForm(props, stepIndex) {
   props.farthestStep = Math.max(props.farthestStep, index);
 
   window.scrollTo(0, 0);
-  initRequiredFieldsValidation(props);
+  updateRequiredVisibleFieldsValidation(props);
 }
 
 function initDeepLink(props) {
@@ -1119,7 +1124,7 @@ export async function buildECCForm(el) {
         {
           renderFormNavigation(target, oldValue, value);
           updateSideNav(target);
-          initRequiredFieldsValidation(target);
+          updateRequiredVisibleFieldsValidation(target);
           updateStatusTag(target);
           break;
         }
@@ -1132,7 +1137,7 @@ export async function buildECCForm(el) {
         case 'payload': {
           setPayloadCache(value, props.locale);
           updateComponentsOnPayloadChange(target);
-          initRequiredFieldsValidation(target);
+          updateRequiredVisibleFieldsValidation(target);
           toggleSections(target);
           break;
         }
@@ -1190,7 +1195,7 @@ export async function buildECCForm(el) {
   initNavigation(proxyProps);
   await initComponents(proxyProps);
   enableSideNavForEditFlow(proxyProps);
-  initRequiredFieldsValidation(proxyProps);
+  updateRequiredVisibleFieldsValidation(proxyProps);
   initDeepLink(proxyProps);
   updateStatusTag(proxyProps);
   toggleSections(proxyProps);

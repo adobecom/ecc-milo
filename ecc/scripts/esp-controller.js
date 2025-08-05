@@ -1516,7 +1516,6 @@ export async function fetchRsvpFormConfigs() {
 }
 
 export async function getEventByExternalId(externalEventId) {
-
   const { host } = API_CONFIG.esp[getCurrentEnvironment()];
   const options = await constructRequestOptions('GET');
 

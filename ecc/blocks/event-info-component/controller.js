@@ -11,7 +11,7 @@ import { buildErrorMessage } from '../form-handler/form-handler-helper.js';
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 const MCZ_EVENT_FIELD_SELECTORS = [
-  '#info-field-event-title',
+  '#event-info-url-input',
   '#info-field-event-description',
   '#event-info-date-picker',
   '#time-picker-start-time',
