@@ -1,0 +1,174 @@
+name: E2E Tests
+on:
+  push:
+    branches:
+      - dev
+      - stage
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches:
+      - stage
+      - main
+  schedule:
+    # Run daily at 10 PM PDT
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+    inputs:
+      test_environment:
+        description: 'Environment to test against'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - stage
+          - prod
+      test_suite:
+        description: 'Test suite to run'
+        required: true
+        default: '@smoke'
+        type: choice
+        options:
+          - '@smoke'
+          - '@regression'
+          - '@smoke or @regression'
+      test_jobs:
+        description: 'Browser jobs to run'
+        required: true
+        default: 'chrome-desktop'
+        type: choice
+        options:
+          - chrome-desktop
+          - firefox-desktop
+          - all
+      source_branch:
+        description: 'Source branch for testing'
+        required: false
+        type: string
+
+jobs:
+  # ============================================================================
+  # MANUAL TESTING
+  # ============================================================================
+  
+  # Event  : Manual workflow dispatch
+  # Action : Run tests based on user inputs
+  manual-test:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'workflow_dispatch'
+    secrets:
+      CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
+    with:
+      environment: ${{ github.event.inputs.test_environment }}
+      test_suite: ${{ github.event.inputs.test_suite }}
+      test_jobs: ${{ github.event.inputs.test_jobs }}
+      ecbranch: ${{ github.event.inputs.source_branch || github.ref_name }}
+      milobranch: main
+      job_name: Manual Test - ${{ github.event.inputs.test_environment }} Environment
+
+  # ============================================================================
+  # DAILY MONITORING
+  # ============================================================================
+  
+  # Event  : Daily scheduled (10 PM PDT)
+  # Action : Run full test suite on dev environment
+  daily-dev-full-tests:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'schedule'
+    secrets:
+      CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
+    with:
+      environment: dev
+      test_suite: '@smoke or @regression'
+      test_jobs: chrome-desktop
+      ecbranch: dev
+      milobranch: main
+      job_name: Daily Dev Full Testing
+
+  # ============================================================================
+  # DEV WORKFLOW
+  # ============================================================================
+  
+  # Event  : When a PR is merged to dev branch
+  # Action : Run smoke tests on dev environment
+  dev-smoke-tests:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'push' && github.ref_name == 'dev'
+    secrets:
+      CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
+    with:
+      environment: dev
+      test_suite: '@smoke'
+      test_jobs: chrome-desktop
+      ecbranch: ${{ github.head_ref || github.ref_name }}
+      milobranch: main
+      job_name: Dev Smoke Tests
+
+  # ============================================================================
+  # STAGE WORKFLOW
+  # ============================================================================
+  
+  # Event  : When a PR is opened for stage branch
+  # Action : Run full test suite on dev environment
+  dev-full-tests-stage-pr:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'pull_request' && github.base_ref == 'stage'
+    secrets:
+      CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
+    with:
+      environment: dev
+      test_suite: '@smoke or @regression'
+      test_jobs: chrome-desktop
+      ecbranch: ${{ github.head_ref || github.ref_name }}
+      milobranch: main
+      job_name: Dev Full Test Suite (Stage PR)
+
+  # Event  : When a PR is merged to stage branch
+  # Action : Run regression tests on stage environment
+  stage-regression-tests:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'push' && github.ref_name == 'stage'
+    secrets:
+      CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
+    with:
+      environment: stage
+      test_suite: '@regression'
+      test_jobs: chrome-desktop
+      ecbranch: ${{ github.head_ref || github.ref_name }}
+      milobranch: main
+      job_name: Stage Regression Tests
+
+  # ============================================================================
+  # PRODUCTION WORKFLOW
+  # ============================================================================
+  
+  # Event  : When a PR is opened for main branch
+  # Action : Run full test suite on stage environment
+  stage-full-tests-main-pr:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    secrets:
+      CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
+    with:
+      environment: stage
+      test_suite: '@smoke or @regression'
+      test_jobs: chrome-desktop
+      ecbranch: ${{ github.head_ref || github.ref_name }}
+      milobranch: main
+      job_name: Stage Full Test Suite (Main PR)
+
+  # Event  : When a PR is merged to main branch
+  # Action : Run regression tests on production environment
+  prod-regression-tests:
+    uses: ./.github/workflows/trigger-circleci.yml
+    if: github.event_name == 'push' && github.ref_name == 'main'
+    secrets:
+      CCI_TOKEN: ${{ secrets.CCI_TOKEN }}
+    with:
+      environment: prod
+      test_suite: '@regression'
+      test_jobs: chrome-desktop
+      ecbranch: ${{ github.head_ref || github.ref_name }}
+      milobranch: main
+      job_name: Prod Regression Tests

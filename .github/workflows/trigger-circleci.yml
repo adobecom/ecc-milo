@@ -1,0 +1,70 @@
+name: Trigger CircleCI E2E Tests
+on:
+  workflow_call:
+    secrets:
+      CCI_TOKEN:
+        description: 'CircleCI API token'
+        required: true
+    inputs:
+      environment:
+        description: 'Target environment (dev, stage, prod)'
+        required: true
+        type: string
+      test_suite:
+        description: 'Test suite to run (@smoke, @regression, @smoke or @regression: full test suite)'
+        required: true
+        type: string
+      test_jobs:
+        description: 'Browser jobs to run (chrome-desktop, all, etc.)'
+        required: true
+        type: string
+      ecbranch:
+        description: 'Source branch for testing'
+        required: true
+        type: string
+      milobranch:
+        description: 'Milo branch for testing'
+        required: true
+        type: string
+        default: 'main'
+      job_name:
+        description: 'Display name for the job'
+        required: true
+        type: string
+
+jobs:
+  trigger-circleci:
+    name: ${{ inputs.job_name }}
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Pass workflow event info
+        id: event-info
+        run: |
+          echo "event_name=${{ github.event_name }}" >> $GITHUB_OUTPUT
+          echo "pr_number=${{ github.event.pull_request.number || '' }}" >> $GITHUB_OUTPUT
+          echo "repository=${{ github.repository }}" >> $GITHUB_OUTPUT
+          echo "ref_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          echo "base_ref=${{ github.event.pull_request.base.ref || '' }}" >> $GITHUB_OUTPUT
+          echo "head_ref=${{ github.event.pull_request.head.ref || '' }}" >> $GITHUB_OUTPUT
+
+      - name: Trigger CircleCI Pipeline
+        run: |
+          curl -X POST 'https://circle.ci.adobe.com/api/v2/project/gh/wcms/Platform-UI-EC/pipeline' \
+              -H 'Circle-Token: ${{ secrets.CCI_TOKEN }}' \
+              -H 'content-type: application/json' \
+              -d "{\"branch\":\"main\", \
+                    \"parameters\":{ \
+                      \"env\":\"${{ inputs.environment }}\", \
+                      \"project\":\"t3\", \
+                      \"test_suite\":\"${{ inputs.test_suite }}\", \
+                      \"test_jobs\":\"${{ inputs.test_jobs }}\", \
+                      \"ecbranch\":\"${{ inputs.ecbranch }}\", \
+                      \"milobranch\":\"${{ inputs.milobranch }}\", \
+                      \"event_name\":\"${{ steps.event-info.outputs.event_name }}\", \
+                      \"pr_number\":\"${{ steps.event-info.outputs.pr_number }}\", \
+                      \"repository\":\"${{ steps.event-info.outputs.repository }}\", \
+                      \"ref_name\":\"${{ steps.event-info.outputs.ref_name }}\", \
+                      \"base_ref\":\"${{ steps.event-info.outputs.base_ref }}\", \
+                      \"head_ref\":\"${{ steps.event-info.outputs.head_ref }}\" \
+                    } \
+              }" 
