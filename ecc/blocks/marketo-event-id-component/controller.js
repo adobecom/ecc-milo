@@ -7,47 +7,73 @@ import { updateRequiredVisibleFieldsValidation } from '../form-handler/form-hand
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
+// Centralized prefix management
+const MCZ_PREFIX = 'mcz-';
+
+const addMczPrefix = (value) => {
+  if (!value) return '';
+  // Don't add prefix if it already exists
+  return value.startsWith(MCZ_PREFIX) ? value : `${MCZ_PREFIX}${value}`;
+};
+
+const removeMczPrefix = (value) => {
+  if (!value) return '';
+  // Remove prefix if it exists
+  return value.startsWith(MCZ_PREFIX) ? value.substring(MCZ_PREFIX.length) : value;
+};
+
+const formatMarketoUrl = (marketoId) => {
+  // Ensure consistent format for URL (without dash)
+  const idWithPrefix = addMczPrefix(marketoId);
+  return idWithPrefix.replace('-', '');
+};
+
 export function onSubmit(component, props) {
   const marketoIdField = component.querySelector('#mcz-textfield');
-  const marketoId = `mcz${marketoIdField.value}`;
+  const rawMarketoId = marketoIdField.value.trim();
   const isMczEvent = component.querySelector('sp-checkbox').checked;
   const removeData = [];
 
-  if (isMczEvent && !marketoIdField.value) {
+  if (isMczEvent && !rawMarketoId) {
     throw new Error('MCZ Program ID is required');
   }
 
-  if (!marketoIdField.value) {
+  if (!rawMarketoId) {
     removeData.push({
       key: 'externalEventId',
       path: '',
     });
   }
 
-  setPropsPayload(props, { marketoId }, removeData);
+  // Store with prefix for backend consistency
+  const marketoIdWithPrefix = addMczPrefix(rawMarketoId);
+  
+  setPropsPayload(props, { externalEventId: marketoIdWithPrefix }, removeData);
 }
 
 function loadMarketoEventInfo(component, marketoId) {
-  if (marketoId.startsWith('mcz-')) {
-    const marketoIdUri = marketoId.replace('-', '');
-    // register a iframe and load this url https://engage.adobe.com/mcz114328.html?mkto_src=emc
-    const iframe = createTag('iframe', { src: `https://engage.adobe.com/${marketoIdUri}.html?mkto_src=emc`, class: 'hidden' });
-    component.append(iframe);
-  }
+  const urlFormatId = formatMarketoUrl(marketoId);
+  const iframe = createTag('iframe', {
+    src: `https://engage.adobe.com/${urlFormatId}.html?mkto_src=emc`,
+    class: 'hidden',
+  });
+  component.append(iframe);
 }
 
 function setMarketoId(data, component, locale) {
-  const marketoId = getAttribute(data, 'externalEventId', locale);
+  const marketoIdFromDb = getAttribute(data, 'externalEventId', locale);
 
-  if (!marketoId) return;
+  if (!marketoIdFromDb) return;
 
   const marketoIdField = component.querySelector('#mcz-textfield');
 
   if (!marketoIdField) return;
 
-  marketoIdField.setAttribute('value', marketoId);
+  // Display without prefix in UI
+  const displayValue = removeMczPrefix(marketoIdFromDb);
+  marketoIdField.setAttribute('value', displayValue);
 
-  loadMarketoEventInfo(component, `mcz-${marketoId}`);
+  loadMarketoEventInfo(component, marketoIdFromDb);
 }
 
 function mczEventSideEffect(component, props) {
@@ -78,7 +104,7 @@ function mczEventSideEffect(component, props) {
 }
 
 export async function onPayloadUpdate(component, props) {
-  setMarketoId(props.payload, component, props.locale);
+  setMarketoId(props.eventDataResp, component, props.locale);
   mczEventSideEffect(component, props);
 }
 
