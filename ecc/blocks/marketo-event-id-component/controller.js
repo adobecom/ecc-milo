@@ -38,7 +38,7 @@ export function onSubmit(component, props) {
     throw new Error('MCZ Program ID is required');
   }
 
-  if (!rawMarketoId) {
+  if (!rawMarketoId || isMczEvent === false) {
     removeData.push({
       key: 'externalEventId',
       path: '',
@@ -47,7 +47,7 @@ export function onSubmit(component, props) {
 
   // Store with prefix for backend consistency
   const marketoIdWithPrefix = addMczPrefix(rawMarketoId);
-  
+
   setPropsPayload(props, { externalEventId: marketoIdWithPrefix }, removeData);
 }
 
@@ -219,7 +219,7 @@ function initMarketoIdFieldListener(component, props) {
 
   // Listen for value changes on the textfield
   marketoIdField.addEventListener('change', (event) => {
-    const marketoId = `mcz-${event.target.value}`;
+    const marketoId = addMczPrefix(event.target.value);
     console.log('marketoId : ', marketoId);
 
     loadMarketoEventInfo(component, marketoId);
