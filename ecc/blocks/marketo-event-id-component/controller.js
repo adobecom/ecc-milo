@@ -40,7 +40,7 @@ export function onSubmit(component, props) {
 
   if (!rawMarketoId || isMczEvent === false) {
     removeData.push({
-      key: 'externalEventId',
+      key: 'eventExternalId',
       path: '',
     });
   }
@@ -48,7 +48,7 @@ export function onSubmit(component, props) {
   // Store with prefix for backend consistency
   const marketoIdWithPrefix = addMczPrefix(rawMarketoId);
 
-  setPropsPayload(props, { externalEventId: marketoIdWithPrefix }, removeData);
+  setPropsPayload(props, { eventExternalId: marketoIdWithPrefix }, removeData);
 }
 
 function loadMarketoEventInfo(component, marketoId) {
@@ -61,7 +61,7 @@ function loadMarketoEventInfo(component, marketoId) {
 }
 
 function setMarketoId(data, component, locale) {
-  const marketoIdFromDb = getAttribute(data, 'externalEventId', locale);
+  const marketoIdFromDb = getAttribute(data, 'eventExternalId', locale);
 
   if (!marketoIdFromDb) return;
 
@@ -82,7 +82,7 @@ function mczEventSideEffect(component, props) {
   const mczSection = component.querySelector('div.marketo-event-id');
   if (props.eventDataResp?.eventId) {
     // The event has already created. The marketer cannot change this section anymore.
-    if (props.eventDataResp?.externalEventId) {
+    if (props.eventDataResp?.eventExternalId) {
       // Disable this section
       const checkbox = component.querySelector('sp-checkbox');
       checkbox.checked = true;

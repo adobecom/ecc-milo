@@ -41,8 +41,8 @@ const disableMczEventFields = (component) => {
 const mczEventSideEffect = (component, props) => {
   const { isMczEvent } = props.payload;
   const { eventDataResp } = props;
-  // in edit workflow, isMCZEvent will be undefined therefore we need to check for externalEventId.
-  if (isMczEvent || eventDataResp.externalEventId) {
+  // in edit workflow, isMCZEvent will be undefined therefore we need to check for eventExternalId.
+  if (isMczEvent || eventDataResp.eventExternalId) {
     disableMczEventFields(component);
   } else {
     enableMczEventFields(component);
@@ -63,7 +63,7 @@ function refillFields(component, props, eventData) {
   const datePicker = component.querySelector('#event-info-date-picker');
   const enTitleInput = component.querySelector('#event-info-url-input');
   const isPrivateInput = component.querySelector('#private-event');
-  const externalEventIdInput = component.querySelector('#mcz-textfield');
+  const eventExternalIdInput = component.querySelector('#mcz-textfield');
 
   const title = getAttribute(eventData, 'title', props.locale);
   const description = getAttribute(eventData, 'description', props.locale);
@@ -75,7 +75,7 @@ function refillFields(component, props, eventData) {
   const timezone = getAttribute(eventData, 'timezone', props.locale);
   const enTitle = getAttribute(eventData, 'enTitle', props.locale);
   const isPrivate = getAttribute(eventData, 'isPrivate', props.locale);
-  const externalEventId = getAttribute(eventData, 'externalEventId', props.locale);
+  const eventExternalId = getAttribute(eventData, 'eventExternalId', props.locale);
 
   if (isValidAttribute(title)) eventTitleInput.value = title;
   if (isValidAttribute(description)) eventDescription.value = description;
@@ -106,7 +106,7 @@ function refillFields(component, props, eventData) {
   if (isValidAttribute(timezone)) changeInputValue(component.querySelector('#time-zone-select-input'), 'value', `${timezone}` || '');
   if (isValidAttribute(enTitle)) changeInputValue(enTitleInput, 'value', enTitle || '');
   if (isValidAttribute(isPrivate)) changeInputValue(isPrivateInput, 'checked', isPrivate || false);
-  if (isValidAttribute(externalEventId)) changeInputValue(externalEventIdInput, 'value', externalEventId || '');
+  if (isValidAttribute(eventExternalId)) changeInputValue(eventExternalIdInput, 'value', eventExternalId || '');
 
   if (title && localStartDate && eventData.eventId) {
     BlockMediator.set('eventDupMetrics', {
@@ -207,8 +207,8 @@ export function onSubmit(component, props) {
   const localEndDate = datePicker.dataset.endDate;
 
   // Get raw external event ID value (without prefix for consistency with other form fields)
-  const externalEventIdField = component.querySelector('#mcz-textfield');
-  const externalEventId = externalEventIdField ? externalEventIdField.value.trim() : '';
+  const eventExternalIdField = component.querySelector('#mcz-textfield');
+  const eventExternalId = eventExternalIdField ? eventExternalIdField.value.trim() : '';
 
   const localStartTime = component.querySelector('#time-picker-start-time-value').value;
   const localEndTime = component.querySelector('#time-picker-end-time-value').value;
@@ -231,7 +231,7 @@ export function onSubmit(component, props) {
     timezone,
     enTitle,
     isPrivate,
-    externalEventId,
+    eventExternalId,
   };
 
   setPropsPayload(props, eventInfo);

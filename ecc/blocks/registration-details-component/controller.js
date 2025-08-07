@@ -245,9 +245,9 @@ function setMczEventFields(component, isDisabled) {
 function mczEventSideEffect(component, props) {
   const { isMczEvent } = props.payload;
   const { eventDataResp } = props;
-  const { externalEventId } = eventDataResp;
+  const { eventExternalId } = eventDataResp;
 
-  if (isMczEvent || externalEventId) {
+  if (isMczEvent || eventExternalId) {
     setMczEventFields(component, true);
   } else {
     setMczEventFields(component, false);
