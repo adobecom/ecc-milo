@@ -235,6 +235,25 @@ function updateHeadingTooltip(component) {
   tooltip.textContent = tooltipText;
 }
 
+function setMczEventFields(component, isDisabled) {
+  const fieldset = component.querySelector('fieldset');
+  const textfield = component.querySelector('sp-textfield');
+  if (fieldset) fieldset.disabled = isDisabled;
+  if (textfield) textfield.disabled = isDisabled;
+}
+
+function mczEventSideEffect(component, props) {
+  const { isMczEvent } = props.payload;
+  const { eventDataResp } = props;
+  const { eventExternalId } = eventDataResp;
+
+  if (isMczEvent || eventExternalId) {
+    setMczEventFields(component, true);
+  } else {
+    setMczEventFields(component, false);
+  }
+}
+
 export async function onPayloadUpdate(component, props) {
   const { cloudType, eventType } = props.payload;
   const eventTypeChange = eventType && eventType !== component.dataset.eventType;
@@ -267,6 +286,7 @@ export async function onPayloadUpdate(component, props) {
     }
 
     updateHeadingTooltip(component);
+    mczEventSideEffect(component, props);
   }
 }
 
@@ -274,6 +294,7 @@ export async function onRespUpdate(component, props) {
   if (!props.eventDataResp) return;
 
   prefillFields(component, props);
+  mczEventSideEffect(component, props);
 }
 
 export default function init(component, props) {
@@ -285,6 +306,7 @@ export default function init(component, props) {
       changeInputValue(descriptionRTEOutput, 'value', output);
     };
   }
+  mczEventSideEffect(component, props);
 }
 
 export function onTargetUpdate(component, props) {
