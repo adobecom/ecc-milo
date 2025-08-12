@@ -26,7 +26,6 @@ export default class CustomSearch extends LitElement {
     this.searchMap = { searchKeys: [], renderKeys: [] };
     this.searchInput = '';
     this.isPopoverOpen = false;
-    this.closeOverlay = () => {};
     this.searchTimeoutId = null;
     this.searchField = null;
     this.openPopoverLock = false;
@@ -34,7 +33,7 @@ export default class CustomSearch extends LitElement {
     this.searchResultsPopover = null;
   }
 
-  async updateSearchResults(searchField) {
+  async updateSearchResults() {
     const popover = this.shadowRoot.querySelector('sp-popover');
 
     if (this.isPopoverOpen || this.openPopoverLock) {
@@ -53,18 +52,19 @@ export default class CustomSearch extends LitElement {
 
     this.openPopoverLock = true;
     this.searchResultsPopover = popover;
-    const interaction = 'click';
-    const options = { placement: 'bottom-start', receivesFocus: 'false' };
-    // eslint-disable-next-line max-len, no-underscore-dangle
-    this.closeOverlay = await window.__merch__spectrum_Overlay.open(searchField, interaction, popover, options);
+
+    // Use direct sp-overlay approach instead of window.__merch__spectrum_Overlay
+    const overlay = this.shadowRoot.querySelector('sp-overlay');
+    if (overlay) {
+      overlay.open = true;
+    }
+
     await popover.updateComplete;
     this.openPopoverLock = false;
   }
 
   async onSearchInput(e) {
     this.searchInput = (e.detail.value);
-
-    const searchField = e.currentTarget;
 
     if (!this.searchInput || this.searchInput.length === 0) {
       this.closePopover();
@@ -78,13 +78,15 @@ export default class CustomSearch extends LitElement {
     }
 
     this.searchTimeoutId = setTimeout(() => {
-      this.updateSearchResults(searchField);
+      this.updateSearchResults();
     }, SEARCH_TIMEOUT_MS);
   }
 
   closePopover() {
-    if (this.closeOverlay) {
-      this.closeOverlay();
+    // Use direct sp-overlay approach instead of closeOverlay function
+    const overlay = this.shadowRoot.querySelector('sp-overlay');
+    if (overlay) {
+      overlay.open = false;
     }
   }
 
@@ -151,6 +153,7 @@ ${this.config.thumbnailType === 'circle' ? 'border-radius: 24px;' : ''}
   render() {
     return html`
       <custom-textfield 
+          id="search-trigger"
           fielddata=${JSON.stringify(this.fielddata)}
           config=${JSON.stringify(this.config)}
           @input-custom=${this.onSearchInput}
@@ -164,9 +167,11 @@ ${this.config.thumbnailType === 'circle' ? 'border-radius: 24px;' : ''}
   }}
           @keydown=${this.handleKeydown}
       ></custom-textfield>
-      <sp-popover dialog>
-          <sp-menu>${this.renderMenuItems()}</sp-menu>
-      </sp-popover>
+      <sp-overlay trigger="search-trigger@input" placement="bottom-start">
+        <sp-popover dialog>
+            <sp-menu>${this.renderMenuItems()}</sp-menu>
+        </sp-popover>
+      </sp-overlay>
   `;
   }
 }
