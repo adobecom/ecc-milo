@@ -167,7 +167,7 @@ ${this.config.thumbnailType === 'circle' ? 'border-radius: 24px;' : ''}
   }}
           @keydown=${this.handleKeydown}
       ></custom-textfield>
-      <sp-overlay trigger="search-trigger@input" placement="bottom-start">
+      <sp-overlay trigger="search-trigger" placement="bottom-start">
         <sp-popover dialog>
             <sp-menu>${this.renderMenuItems()}</sp-menu>
         </sp-popover>
