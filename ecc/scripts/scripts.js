@@ -77,7 +77,7 @@ export function decorateArea(area = document) {
 }
 
 export const LOCALES = {
-  '': { ietf: 'en-US', tk: 'hah7vzn.css' },
+  '': { ietf: 'en-US', tk: 'jdq5hay.css' },
   ae_ar: { ietf: 'ar', tk: 'qxw8hzm.css', dir: 'rtl' },
   ae_en: { ietf: 'en', tk: 'hah7vzn.css' },
   africa: { ietf: 'en', tk: 'hah7vzn.css' },
@@ -193,7 +193,7 @@ const CONFIG = {
   },
 };
 
-const RELEASE_VERSION = 'T3-25.28';
+const RELEASE_VERSION = 'T3-25.34';
 
 // Decorate the page with site specific needs.
 decorateArea();

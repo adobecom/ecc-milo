@@ -28,7 +28,11 @@ async function getPromotionalContentSheet(props) {
 
   const targetLocaleObject = Object.entries(LOCALES).find(([, v]) => v.ietf === locale) || {};
   const localePrefix = targetLocaleObject[0];
-  const { data } = await fetch(`${getEventPageHost()}${localePrefix ? `/${localePrefix}` : ''}/${sheetLocation}`).then((res) => res.json());
+  const sheetResp = await fetch(`${getEventPageHost()}${localePrefix ? `/${localePrefix}` : ''}/${sheetLocation}`);
+
+  if (!sheetResp.ok) return [];
+
+  const { data } = await sheetResp.json();
 
   return data || [];
 }
@@ -69,6 +73,8 @@ export async function onPayloadUpdate(component, props) {
   if (cloudType && cloudType !== component.dataset.cloudType) {
     component.dataset.cloudType = cloudType;
   }
+
+  await updatePromotionSelector(component, props);
 }
 
 export async function onRespUpdate(_component, _props) {
