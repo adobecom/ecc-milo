@@ -31,11 +31,11 @@ export default class CustomSearch extends LitElement {
     this.openPopoverLock = false;
     this.searchResults = [];
     this.searchResultsPopover = null;
+    this.isClickInsideMenu = false;
+    this.isKeyboardNavigation = false;
   }
 
   async updateSearchResults() {
-    const popover = this.shadowRoot.querySelector('sp-popover');
-
     if (this.isPopoverOpen || this.openPopoverLock) {
       return;
     }
@@ -51,15 +51,9 @@ export default class CustomSearch extends LitElement {
     }
 
     this.openPopoverLock = true;
-    this.searchResultsPopover = popover;
+    this.searchResultsPopover = this.shadowRoot.querySelector('.menu-overlay');
 
-    // Use direct sp-overlay approach instead of window.__merch__spectrum_Overlay
-    const overlay = this.shadowRoot.querySelector('sp-overlay');
-    if (overlay) {
-      overlay.open = true;
-    }
-
-    await popover.updateComplete;
+    await this.updateComplete;
     this.openPopoverLock = false;
   }
 
@@ -83,11 +77,62 @@ export default class CustomSearch extends LitElement {
   }
 
   closePopover() {
-    // Use direct sp-overlay approach instead of closeOverlay function
-    const overlay = this.shadowRoot.querySelector('sp-overlay');
-    if (overlay) {
-      overlay.open = false;
+    this.searchResults = [];
+  }
+
+  handleBlur() {
+    // Delay closing to allow for item selection and keyboard navigation
+    setTimeout(() => {
+      if (!this.isClickInsideMenu && !this.isKeyboardNavigation) {
+        this.closePopover();
+      }
+      this.isClickInsideMenu = false;
+      this.isKeyboardNavigation = false;
+    }, 150);
+  }
+
+  handleMouseDownOnMenu() {
+    this.isClickInsideMenu = true;
+  }
+
+  handleMenuFocus() {
+    this.isKeyboardNavigation = true;
+  }
+
+  handleMenuBlur() {
+    // When menu loses focus, check if we're still within the component
+    setTimeout(() => {
+      const { activeElement } = this.shadowRoot;
+      if (!activeElement || activeElement === this.shadowRoot.querySelector('custom-textfield')) {
+        this.closePopover();
+      }
+    }, 50);
+  }
+
+  handleClickOutside = (event) => {
+    if (!this.shadowRoot.contains(event.target)) {
+      this.closePopover();
     }
+  };
+
+  handleEscapeKey = (event) => {
+    if (event.key === 'Escape') {
+      this.closePopover();
+    }
+  };
+
+  connectedCallback() {
+    super.connectedCallback();
+    // Add global event listeners
+    document.addEventListener('click', this.handleClickOutside);
+    document.addEventListener('keydown', this.handleEscapeKey);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    // Remove global event listeners
+    document.removeEventListener('click', this.handleClickOutside);
+    document.removeEventListener('keydown', this.handleEscapeKey);
   }
 
   handleCommonActionsOnCLick() {
@@ -159,6 +204,7 @@ ${this.config.thumbnailType === 'circle' ? 'border-radius: 24px;' : ''}
           @input-custom=${this.onSearchInput}
           @submit=${this.onSubmitSearch}
           @change-custom=${(e) => { e.stopPropagation(); this.dispatchEvent(new CustomEvent('change-custom-search', { detail: { value: this.searchInput } })); }}
+          @blur=${this.handleBlur}
           @sp-opened=${() => {
     this.isPopoverOpen = true;
   }}
@@ -167,11 +213,9 @@ ${this.config.thumbnailType === 'circle' ? 'border-radius: 24px;' : ''}
   }}
           @keydown=${this.handleKeydown}
       ></custom-textfield>
-      <sp-overlay trigger="search-trigger@input" placement="bottom-start">
-        <sp-popover dialog>
-            <sp-menu>${this.renderMenuItems()}</sp-menu>
-        </sp-popover>
-      </sp-overlay>
+      <div class="menu-overlay ${this.searchResults.length > 0 ? 'open' : ''}" @mousedown=${this.handleMouseDownOnMenu}>
+        <sp-menu @focus=${this.handleMenuFocus} @blur=${this.handleMenuBlur}>${this.renderMenuItems()}</sp-menu>
+      </div>
   `;
   }
 }
