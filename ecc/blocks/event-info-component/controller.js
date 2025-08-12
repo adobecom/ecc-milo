@@ -63,7 +63,7 @@ function refillFields(component, props, eventData) {
   const datePicker = component.querySelector('#event-info-date-picker');
   const enTitleInput = component.querySelector('#event-info-url-input');
   const isPrivateInput = component.querySelector('#private-event');
-  const eventExternalIdInput = component.querySelector('#mcz-textfield');
+  const eventExternalIdInput = component.querySelector('#mcz-event-id-textfield');
 
   const title = getAttribute(eventData, 'title', props.locale);
   const description = getAttribute(eventData, 'description', props.locale);
@@ -207,7 +207,7 @@ export function onSubmit(component, props) {
   const localEndDate = datePicker.dataset.endDate;
 
   // Get raw external event ID value (without prefix for consistency with other form fields)
-  const eventExternalIdField = component.querySelector('#mcz-textfield');
+  const eventExternalIdField = component.querySelector('#mcz-event-id-textfield');
   const eventExternalId = eventExternalIdField ? eventExternalIdField.value.trim() : '';
 
   const localStartTime = component.querySelector('#time-picker-start-time-value').value;

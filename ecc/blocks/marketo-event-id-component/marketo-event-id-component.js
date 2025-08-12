@@ -9,7 +9,7 @@ async function decorateMarketoEventIdFields(el) {
   createTag('sp-field-label', { size: 'xl', class: 'field-label' }, 'Adobe Connect MCZ Program ID *', { parent: div });
   const wrapper = createTag('div', { id: 'mcz-event-textfield-wrapper' }, '', { parent: div });
   createTag('span', {}, 'MCZ -', { parent: wrapper });
-  createTag('sp-textfield', { id: 'mcz-textfield', class: 'field-label', placeholder: 'Enter Adobe Connect MCZ Program ID', size: 'l', required: true }, '', { parent: wrapper });
+  createTag('sp-textfield', { id: 'mcz-event-id-textfield', class: 'field-label', placeholder: 'Enter Adobe Connect MCZ Program ID', size: 'l', required: true }, '', { parent: wrapper });
 }
 
 export default async function init(el) {

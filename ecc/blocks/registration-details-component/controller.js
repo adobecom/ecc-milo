@@ -238,8 +238,8 @@ function updateHeadingTooltip(component) {
 function setMczEventFields(component, isDisabled) {
   const fieldset = component.querySelector('fieldset');
   const textfield = component.querySelector('sp-textfield');
-  if (fieldset)fieldset.disabled = isDisabled;
-  if (textfield)textfield.disabled = isDisabled;
+  if (fieldset) fieldset.disabled = isDisabled;
+  if (textfield) textfield.disabled = isDisabled;
 }
 
 function mczEventSideEffect(component, props) {

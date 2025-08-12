@@ -29,7 +29,7 @@ const formatMarketoUrl = (marketoId) => {
 };
 
 export function onSubmit(component, props) {
-  const marketoIdField = component.querySelector('#mcz-textfield');
+  const marketoIdField = component.querySelector('#mcz-event-id-textfield');
   const rawMarketoId = marketoIdField.value.trim();
   const isMczEvent = component.querySelector('sp-checkbox').checked;
   const removeData = [];
@@ -65,7 +65,7 @@ function setMarketoId(data, component, locale) {
 
   if (!marketoIdFromDb) return;
 
-  const marketoIdField = component.querySelector('#mcz-textfield');
+  const marketoIdField = component.querySelector('#mcz-event-id-textfield');
 
   if (!marketoIdField) return;
 
@@ -88,7 +88,7 @@ function mczEventSideEffect(component, props) {
       checkbox.checked = true;
       checkbox.disabled = true;
       mczSection.classList.remove('hidden');
-      component.querySelector('#mcz-textfield').disabled = true;
+      component.querySelector('#mcz-event-id-textfield').disabled = true;
     } else {
       component.parentElement.remove();
     }
@@ -214,7 +214,7 @@ function onMczMessage(event, component, props) {
 }
 
 function initMarketoIdFieldListener(component, props) {
-  const marketoIdField = component.querySelector('#mcz-textfield');
+  const marketoIdField = component.querySelector('#mcz-event-id-textfield');
   if (!marketoIdField) return;
 
   // Listen for value changes on the textfield
