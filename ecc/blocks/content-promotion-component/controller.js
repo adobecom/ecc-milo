@@ -9,7 +9,7 @@ export function onSubmit(component, props) {
 
   const promotionGroup = component.querySelector('promotion-selector-group');
 
-  const selectedPromotions = promotionGroup?.getSelectedPromotions();
+  const selectedPromotions = promotionGroup?.selectedPromotions;
 
   if (selectedPromotions && selectedPromotions.length > 0) {
     const selectedPromotionsPayload = selectedPromotions.map((p) => p.name);
@@ -37,8 +37,7 @@ async function getPromotionalContentSheet(props) {
   return data || [];
 }
 
-async function updatePromotionSelector(component, props) {
-  const promotionalContent = await getPromotionalContentSheet(props);
+function updatePromotionSelector(component, promotionalContent) {
   if (!promotionalContent) return;
 
   const promotionGroups = component.querySelectorAll('promotion-selector-group');
@@ -47,7 +46,7 @@ async function updatePromotionSelector(component, props) {
     pg.promotions = promotionalContent;
     pg.requestUpdate();
 
-    const selectedPromotions = pg.getSelectedPromotions();
+    const { selectedPromotions } = pg;
 
     selectedPromotions.forEach((sp, i) => {
       const isPromotionAvailable = promotionalContent.find((p) => p.name === sp.name);
@@ -73,8 +72,8 @@ export async function onPayloadUpdate(component, props) {
   if (cloudType && cloudType !== component.dataset.cloudType) {
     component.dataset.cloudType = cloudType;
   }
-
-  await updatePromotionSelector(component, props);
+  const promotionalContent = await getPromotionalContentSheet(props);
+  updatePromotionSelector(component, promotionalContent);
 }
 
 export async function onRespUpdate(_component, _props) {
@@ -82,7 +81,9 @@ export async function onRespUpdate(_component, _props) {
 }
 
 export default async function init(component, props) {
-  await updatePromotionSelector(component, props);
+  const promotionalContent = await getPromotionalContentSheet(props);
+
+  updatePromotionSelector(component, promotionalContent);
   const eventData = props.eventDataResp;
 
   const [
@@ -97,7 +98,8 @@ export default async function init(component, props) {
   const promotionGroup = component.querySelector('promotion-selector-group');
 
   if (promotionalItems?.length) {
-    const selectedPromotions = promotionalItems.map((p) => p.name);
+    const selectedPromotions = promotionalItems
+      .map((p) => promotionalContent.find((pc) => pc.name === p));
 
     promotionGroup.selectedPromotions = selectedPromotions;
     promotionGroup.requestUpdate();
