@@ -20,23 +20,51 @@ export function onSubmit(component, props) {
   setPropsPayload(props, agendaInfo);
 }
 
+function initTimeClamping(component, props) {
+  const checkbox = component.querySelector('.time-clamp-checkbox');
+  const { payload } = props;
+
+  if (!checkbox || !payload) return;
+
+  const agendaFieldSetGroup = component.querySelector('agenda-fieldset-group');
+  const currentTimeSlots = agendaFieldSetGroup.dataset.timeslots;
+
+  checkbox.addEventListener('change', (e) => {
+    console.log('e.target.checked', e.target.checked);
+    const agendaTimeClamped = e.target.checked;
+
+    const currentTimeSlots = agendaFieldSetGroup.dataset.timeslots;
+    // TODO: clamp the timeslots with payloadLocaleStartTime and payloadLocaleEndTime
+  });
+}
+
+function updateTimeClampOptions(component, props) {
+  const { payload } = props;
+
+  if (!payload) return;
+
+  const timeClampRow = component.querySelector('.time-clamp-options-row');
+  const checkbox = timeClampRow.querySelector('.time-clamp-checkbox');
+
+  if (!timeClampRow || !checkbox) return;
+
+  const sameDayEvent = payload.localStartDate === payload.localEndDate;
+
+  if (!sameDayEvent) {
+    checkbox.checked = false;
+    timeClampRow.classList.add('hidden');
+  }
+
+  console.log('payload.localStartTime', payload.localStartTime);
+  console.log('payload.localEndTime', payload.localEndTime);
+}
+
 export async function onPayloadUpdate(component, props) {
   const { payload } = props;
 
   if (!payload) return;
 
-  const sameDayEvent = payload.localStartDate === payload.localEndDate;
-
-  if (!sameDayEvent) {
-    const timeClampRow = component.querySelector('.time-clamp-options-row');
-    if (timeClampRow) {
-      const checkbox = timeClampRow.querySelector('.time-clamp-checkbox');
-      if (checkbox) {
-        checkbox.checked = false;
-      }
-      timeClampRow.classList.add('hidden');
-    }
-  }
+  updateTimeClampOptions(component, props);
 }
 
 export async function onRespUpdate(_component, _props) {
@@ -56,6 +84,8 @@ export default function init(component, props) {
   }
 
   showAgendaPostEventElement.checked = showAgendaPostEvent;
+
+  initTimeClamping(component, props);
 }
 
 export function onTargetUpdate(component, props) {

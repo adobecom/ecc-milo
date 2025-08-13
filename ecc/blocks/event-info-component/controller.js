@@ -90,6 +90,31 @@ function dateTimeStringToTimestamp(dateString, timeString) {
   return date.getTime();
 }
 
+function updatePayloadWithDateTimeValues(component, props) {
+  const datePicker = component.querySelector('#event-info-date-picker');
+  const localStartDate = datePicker.dataset.startDate;
+  const localEndDate = datePicker.dataset.endDate;
+  const localStartTime = component.querySelector('#time-picker-start-time-value').value;
+  const localEndTime = component.querySelector('#time-picker-end-time-value').value;
+
+  // Check if all required fields are filled
+  if (localStartDate && localEndDate && localStartTime && localEndTime) {
+    const localStartTimeMillis = dateTimeStringToTimestamp(localStartDate, localStartTime);
+    const localEndTimeMillis = dateTimeStringToTimestamp(localEndDate, localEndTime);
+
+    const eventInfo = {
+      localStartDate,
+      localEndDate,
+      localStartTime,
+      localEndTime,
+      localStartTimeMillis,
+      localEndTimeMillis,
+    };
+
+    setPropsPayload(props, eventInfo);
+  }
+}
+
 async function updateLanguagePicker(component, props) {
   const languagePicker = component.querySelector('#language-picker');
   const eventUrlInput = component.querySelector('#event-info-url-input');
@@ -342,6 +367,9 @@ export default async function init(component, props) {
         });
       }
     }
+
+    // Update payload when time values change
+    updatePayloadWithDateTimeValues(component, props);
   };
 
   const onStartTimeUpdate = () => {
@@ -391,6 +419,9 @@ export default async function init(component, props) {
         });
       }
     }
+
+    // Update payload when time values change
+    updatePayloadWithDateTimeValues(component, props);
   };
 
   const updateTimeOptionsBasedOnDate = () => {
@@ -406,6 +437,9 @@ export default async function init(component, props) {
 
       resetAllOptions();
     }
+
+    // Update payload when date changes (this will clear values if not all fields are filled)
+    updatePayloadWithDateTimeValues(component, props);
   };
 
   startTimeInput.addEventListener('change', onStartTimeUpdate);
@@ -416,6 +450,8 @@ export default async function init(component, props) {
   datePicker.addEventListener('change', (e) => {
     updateTimeOptionsBasedOnDate(e);
     BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), startDate: datePicker.dataset.startDate });
+    // Update payload when date values change
+    updatePayloadWithDateTimeValues(component, props);
   });
 
   if (descriptionRTE) {
