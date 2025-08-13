@@ -4,6 +4,18 @@
   gap: 27px;
 }
 
+.event-agenda-component .time-clamp-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-agenda-component .time-clamp-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .event-agenda-component .agenda-group-container {
   display: flex;
   flex-direction: column;

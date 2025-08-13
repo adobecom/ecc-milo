@@ -20,8 +20,23 @@ export function onSubmit(component, props) {
   setPropsPayload(props, agendaInfo);
 }
 
-export async function onPayloadUpdate(_component, _props) {
-  // Do nothing
+export async function onPayloadUpdate(component, props) {
+  const { payload } = props;
+
+  if (!payload) return;
+
+  const sameDayEvent = payload.localStartDate === payload.localEndDate;
+
+  if (!sameDayEvent) {
+    const timeClampRow = component.querySelector('.time-clamp-options-row');
+    if (timeClampRow) {
+      const checkbox = timeClampRow.querySelector('.time-clamp-checkbox');
+      if (checkbox) {
+        checkbox.checked = false;
+      }
+      timeClampRow.classList.add('hidden');
+    }
+  }
 }
 
 export async function onRespUpdate(_component, _props) {
