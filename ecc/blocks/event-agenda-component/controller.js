@@ -1,6 +1,33 @@
 import { getAttribute } from '../../scripts/data-utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 
+function timeToMinutes(timeString) {
+  // Handle both "HH:MM" and "HH:MM:SS" formats
+  const [hours, minutes] = timeString.split(':').map(Number);
+  return hours * 60 + minutes;
+}
+
+function clampTimeSlots(timeSlotsString, startTime, endTime) {
+  if (!timeSlotsString || !startTime || !endTime) {
+    return timeSlotsString;
+  }
+
+  // Parse the timeslots string into an array
+  const timeSlots = timeSlotsString.split(',');
+
+  // Convert start and end times to comparable format (minutes since midnight)
+  const startMinutes = timeToMinutes(startTime);
+  const endMinutes = timeToMinutes(endTime);
+
+  // Filter timeslots that fall within the time range
+  const clampedSlots = timeSlots.filter((slot) => {
+    const slotMinutes = timeToMinutes(slot);
+    return slotMinutes >= startMinutes && slotMinutes <= endMinutes;
+  });
+
+  return clampedSlots.join(',');
+}
+
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -22,19 +49,35 @@ export function onSubmit(component, props) {
 
 function initTimeClamping(component, props) {
   const checkbox = component.querySelector('.time-clamp-checkbox');
-  const { payload } = props;
+  const { payload, eventDataResp } = props;
 
   if (!checkbox || !payload) return;
 
   const agendaFieldSetGroup = component.querySelector('agenda-fieldset-group');
-  const currentTimeSlots = agendaFieldSetGroup.dataset.timeslots;
+
+  // Store the original timeslots for restoration
+  const originalTimeSlots = agendaFieldSetGroup.dataset.timeslots;
+  const eventStartTime = payload.localStartTime || eventDataResp.localStartTime;
+  const eventEndTime = payload.localEndTime || eventDataResp.localEndTime;
 
   checkbox.addEventListener('change', (e) => {
     console.log('e.target.checked', e.target.checked);
     const agendaTimeClamped = e.target.checked;
 
-    const currentTimeSlots = agendaFieldSetGroup.dataset.timeslots;
-    // TODO: clamp the timeslots with payloadLocaleStartTime and payloadLocaleEndTime
+    if (agendaTimeClamped && eventStartTime && eventEndTime) {
+      const clampedTimeSlots = clampTimeSlots(
+        originalTimeSlots,
+        eventStartTime,
+        eventEndTime,
+      );
+      agendaFieldSetGroup.dataset.timeslots = clampedTimeSlots;
+      console.log('Clamped timeslots:', clampedTimeSlots);
+    } else {
+      agendaFieldSetGroup.dataset.timeslots = originalTimeSlots;
+      console.log('Time clamping disabled, restored original timeslots');
+    }
+
+    agendaFieldSetGroup.requestUpdate();
   });
 }
 
@@ -54,9 +97,6 @@ function updateTimeClampOptions(component, props) {
     checkbox.checked = false;
     timeClampRow.classList.add('hidden');
   }
-
-  console.log('payload.localStartTime', payload.localStartTime);
-  console.log('payload.localEndTime', payload.localEndTime);
 }
 
 export async function onPayloadUpdate(component, props) {
