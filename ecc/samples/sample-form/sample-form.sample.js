@@ -232,14 +232,20 @@ async function initComponents(props) {
     if (!mappedComponents?.length) return;
 
     const componentInitPromises = Array.from(mappedComponents).map(async (component) => {
-      const { default: initComponent } = await import(`../${comp}-component/controller.js`);
-      await initComponent(component, props);
+      try {
+        const { default: initComponent } = await import(`../${comp}-component/controller.js`);
+        await initComponent(component, props);
+      } catch (error) {
+        console.warn(`Failed to load component ${comp}:`, error);
+        // Remove the failed component from the DOM
+        component.remove();
+      }
     });
 
-    await Promise.all(componentInitPromises);
+    await Promise.allSettled(componentInitPromises);
   });
 
-  await Promise.all(componentPromises);
+  await Promise.allSettled(componentPromises);
 }
 
 async function gatherValues(props) {
@@ -248,14 +254,19 @@ async function gatherValues(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onSubmit } = await import(`../${comp}-component/controller.js`);
-      return onSubmit(component, props);
+      try {
+        const { onSubmit } = await import(`../${comp}-component/controller.js`);
+        return onSubmit(component, props);
+      } catch (error) {
+        console.warn(`Failed to gather values for component ${comp}:`, error);
+        return {};
+      }
     });
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   });
 
-  await Promise.all(allComponentPromises);
+  await Promise.allSettled(allComponentPromises);
 }
 
 async function handleSeriesUpdate(props) {
@@ -264,14 +275,19 @@ async function handleSeriesUpdate(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
-      return onTargetUpdate(component, props);
+      try {
+        const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
+        return onTargetUpdate(component, props);
+      } catch (error) {
+        console.warn(`Failed to handle series update for component ${comp}:`, error);
+        return {};
+      }
     });
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   });
 
-  await Promise.all(allComponentPromises);
+  await Promise.allSettled(allComponentPromises);
 }
 
 async function updateComponentsOnPayloadChange(props) {
@@ -280,15 +296,20 @@ async function updateComponentsOnPayloadChange(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onPayloadUpdate } = await import(`../${comp}-component/controller.js`);
-      const componentPayload = await onPayloadUpdate(component, props);
-      return componentPayload;
+      try {
+        const { onPayloadUpdate } = await import(`../${comp}-component/controller.js`);
+        const componentPayload = await onPayloadUpdate(component, props);
+        return componentPayload;
+      } catch (error) {
+        console.warn(`Failed to update component ${comp} on payload change:`, error);
+        return {};
+      }
     });
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   });
 
-  await Promise.all(allComponentPromises);
+  await Promise.allSettled(allComponentPromises);
 }
 
 async function updateComponentsOnRespChange(props) {
@@ -297,15 +318,20 @@ async function updateComponentsOnRespChange(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onRespUpdate } = await import(`../${comp}-component/controller.js`);
-      const componentPayload = await onRespUpdate(component, props);
-      return componentPayload;
+      try {
+        const { onRespUpdate } = await import(`../${comp}-component/controller.js`);
+        const componentPayload = await onRespUpdate(component, props);
+        return componentPayload;
+      } catch (error) {
+        console.warn(`Failed to update component ${comp} on response change:`, error);
+        return {};
+      }
     });
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   });
 
-  await Promise.all(allComponentPromises);
+  await Promise.allSettled(allComponentPromises);
 }
 
 function decorateForm(el) {
