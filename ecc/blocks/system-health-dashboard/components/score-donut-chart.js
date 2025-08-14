@@ -163,7 +163,6 @@ export default class ScoreDonutChart extends LitElement {
       .attr('dy', '-0.5em')
       .style('font-size', '24px')
       .style('font-weight', 'bold')
-      .style('fill', '#333')
       .text(`${this.data.overall.health_score}`);
 
     centerGroup.append('text')

@@ -145,6 +145,14 @@ export default css`
     color: #999;
   }
 
+  .center-text text:first-child {
+    fill: #333;
+  }
+
+  :host(.dark-mode) .center-text text:first-child {
+    fill: #e1e5e9;
+  }
+
   .legend-score {
     font-weight: 600;
     color: #333;
@@ -178,10 +186,6 @@ export default css`
 
   /* Responsive adjustments */
   @media (max-width: 768px) {
-    .chart-container {
-      height: 300px;
-    }
-
     .legend {
       gap: 6px;
     }
@@ -208,10 +212,6 @@ export default css`
   @media (max-width: 480px) {
     .chart-card {
       padding: 16px;
-    }
-
-    .chart-container {
-      height: 250px;
     }
 
     .legend-content {
