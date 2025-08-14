@@ -1,7 +1,7 @@
 import { LIBS } from '../../scripts/scripts.js';
 import SystemHealthDashboard from './components/dashboard.js';
-import DashboardToolbar from './components/dashboard-toolbar.js';
 import MetricCard from './components/metric-card.js';
+import DateRangePicker from './components/date-range-picker.js';
 import { dashboardStore } from './store/dashboard-store.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -9,8 +9,8 @@ const { createTag } = await import(`${LIBS}/utils/utils.js`);
 export default async function init(el) {
   // Register custom elements
   customElements.define('system-health-dashboard', SystemHealthDashboard);
-  customElements.define('dashboard-toolbar', DashboardToolbar);
   customElements.define('metric-card', MetricCard);
+  customElements.define('date-range-picker', DateRangePicker);
 
   // Set loading state
   dashboardStore.setLoading(true);

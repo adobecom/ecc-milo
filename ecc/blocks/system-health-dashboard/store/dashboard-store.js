@@ -6,7 +6,7 @@ export class DashboardStore {
     this.state = {
       data: null,
       viewMode: 'score',
-      timeRange: '7d',
+      timeRange: 7, // Changed to number for flexible ranges
       loading: false,
       error: null,
     };
@@ -40,7 +40,13 @@ export class DashboardStore {
   }
 
   setTimeRange(timeRange) {
-    this.setState({ timeRange });
+    // Convert string format to number for backward compatibility
+    let days = timeRange;
+    if (typeof timeRange === 'string') {
+      const timeRangeMap = { '1d': 1, '3d': 3, '7d': 7 };
+      days = timeRangeMap[timeRange] || 7;
+    }
+    this.setState({ timeRange: days });
   }
 
   setLoading(loading) {

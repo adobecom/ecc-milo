@@ -66,14 +66,45 @@ export default class SystemHealthDashboard extends LitElement {
     this.requestUpdate(); // Use 'this' to satisfy linter
   }
 
+  handleDateRangeChanged(event) {
+    const { days } = event.detail;
+    dashboardStore.setTimeRange(days);
+    this.requestUpdate(); // Use 'this' to satisfy linter
+  }
+
+  getTimeRangeLabel() {
+    if (this.timeRange === 1) return '1 Day';
+    if (this.timeRange === 3) return '3 Days';
+    if (this.timeRange === 7) return '1 Week';
+    if (this.timeRange === 14) return '2 Weeks';
+    if (this.timeRange === 30) return '1 Month';
+    return `${this.timeRange} Days`;
+  }
+
   renderToolbar() {
     return html`
-      <dashboard-toolbar
-        .viewMode=${this.viewMode}
-        .timeRange=${this.timeRange}
-        @viewModeChanged=${this.handleViewModeChanged}
-        @timeRangeChanged=${this.handleTimeRangeChanged}
-      ></dashboard-toolbar>
+      <div class="toolbar">
+        <div class="toolbar-section">
+          <span class="toolbar-label">View Mode:</span>
+          <button 
+            class="toolbar-btn ${this.viewMode === 'score' ? 'active' : ''}"
+            @click=${() => this.handleViewModeChanged({ detail: { viewMode: 'score' } })}
+          >
+            Score
+          </button>
+          <button 
+            class="toolbar-btn ${this.viewMode === 'value' ? 'active' : ''}"
+            @click=${() => this.handleViewModeChanged({ detail: { viewMode: 'value' } })}
+          >
+            Value
+          </button>
+        </div>
+        
+        <date-range-picker
+          .selectedDays=${this.timeRange}
+          @dateRangeChanged=${this.handleDateRangeChanged}
+        ></date-range-picker>
+      </div>
     `;
   }
 
@@ -88,7 +119,7 @@ export default class SystemHealthDashboard extends LitElement {
         <div class="main-score ${color}">
           <div class="score-value">${score}</div>
           <div class="score-label">System Health Score</div>
-          <div class="score-subtitle">${this.timeRange.toUpperCase()} Average</div>
+          <div class="score-subtitle">${this.getTimeRangeLabel()} Average</div>
           
           <div class="meter-container">
             <div class="meter ${color}">

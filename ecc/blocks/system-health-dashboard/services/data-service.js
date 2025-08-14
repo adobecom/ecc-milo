@@ -5,22 +5,33 @@ export default class DashboardDataService {
   /**
    * Get aggregated data for a specific time range
    * @param {Array} days - Array of daily data
-   * @param {string} timeRange - '1d', '3d', '7d'
+   * @param {number|string} timeRange - Number of days or legacy string format
    * @returns {Object|null} Aggregated data
    */
   static getAggregatedData(days, timeRange) {
     if (!days || !days.length) return null;
 
-    switch (timeRange) {
-      case '1d':
-        return days[days.length - 1];
-      case '3d':
-        return this.aggregateData(days.slice(-3));
-      case '7d':
-        return this.aggregateData(days);
-      default:
-        return this.aggregateData(days);
+    // Handle legacy string format for backward compatibility
+    if (typeof timeRange === 'string') {
+      switch (timeRange) {
+        case '1d':
+          return days[days.length - 1];
+        case '3d':
+          return this.aggregateData(days.slice(-3));
+        case '7d':
+          return this.aggregateData(days);
+        default:
+          return this.aggregateData(days);
+      }
     }
+
+    // Handle numeric days
+    const daysToShow = Math.min(timeRange, days.length);
+    if (daysToShow === 1) {
+      return days[days.length - 1];
+    }
+
+    return this.aggregateData(days.slice(-daysToShow));
   }
 
   /**

@@ -2,11 +2,18 @@
 // Dashboard configuration - centralized settings for maintainability
 
 export const DASHBOARD_CONFIG = {
-  // Time range options
-  TIME_RANGES: {
-    '1d': { label: '1 Day', days: 1 },
-    '3d': { label: '3 Days', days: 3 },
-    '7d': { label: '1 Week', days: 7 },
+  // Date range configuration
+  DATE_RANGE: {
+    defaultDays: 7,
+    minDays: 1,
+    maxDays: 30,
+    presets: [
+      { label: 'Last 24 Hours', days: 1 },
+      { label: 'Last 3 Days', days: 3 },
+      { label: 'Last Week', days: 7 },
+      { label: 'Last 2 Weeks', days: 14 },
+      { label: 'Last Month', days: 30 },
+    ],
   },
 
   // View modes
