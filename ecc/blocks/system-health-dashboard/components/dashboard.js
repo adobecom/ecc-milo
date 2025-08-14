@@ -107,22 +107,6 @@ export default class SystemHealthDashboard extends LitElement {
         
         <div class="toolbar-content ${this.toolbarExpanded ? 'expanded' : ''}">
           <div class="toolbar-body">
-            <div class="toolbar-section">
-              <span class="toolbar-label">View Mode:</span>
-              <button 
-                class="toolbar-btn ${this.viewMode === 'score' ? 'active' : ''}"
-                @click=${() => this.handleViewModeChanged({ detail: { viewMode: 'score' } })}
-              >
-                Score
-              </button>
-              <button 
-                class="toolbar-btn ${this.viewMode === 'value' ? 'active' : ''}"
-                @click=${() => this.handleViewModeChanged({ detail: { viewMode: 'value' } })}
-              >
-                Value
-              </button>
-            </div>
-            
             <date-range-picker
               .selectedDays=${this.timeRange}
               @dateRangeChanged=${this.handleDateRangeChanged}
@@ -283,7 +267,21 @@ export default class SystemHealthDashboard extends LitElement {
           </div>
           
           <div class="grid-right">
-            <h3 class="sub-scores-title">Health Categories</h3>
+            <div class="sub-scores-header">
+              <h3 class="sub-scores-title">Health Categories</h3>
+              <div class="view-mode-toggle">
+                <span class="toggle-label">Score</span>
+                <label class="toggle-switch">
+                  <input 
+                    type="checkbox" 
+                    .checked=${this.viewMode === 'value'}
+                    @change=${(e) => this.handleViewModeChanged({ detail: { viewMode: e.target.checked ? 'value' : 'score' } })}
+                  >
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">Value</span>
+              </div>
+            </div>
             ${this.renderMetricCards(this.currentData)}
           </div>
         </div>

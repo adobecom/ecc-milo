@@ -381,11 +381,85 @@ export const style = css`
   }
 
   /* Sub-Scores Section */
+  .sub-scores-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
   .sub-scores-title {
-    margin: 0 0 20px 0;
+    margin: 0;
     font-size: 1.25rem;
     font-weight: 600;
     color: #333;
+  }
+
+  /* View Mode Toggle */
+  .view-mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toggle-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #666;
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    cursor: pointer;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.3s;
+    border-radius: 24px;
+  }
+
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background-color: #007bff;
+  }
+
+  .toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+  }
+
+  .toggle-switch:hover .toggle-slider {
+    background-color: #999;
+  }
+
+  .toggle-switch input:checked:hover + .toggle-slider {
+    background-color: #0056b3;
   }
 
   .sub-scores-grid {
@@ -520,6 +594,16 @@ export const style = css`
     .toolbar-section {
       flex-direction: column;
       gap: 8px;
+    }
+
+    .sub-scores-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .view-mode-toggle {
+      align-self: flex-end;
     }
   }
 
