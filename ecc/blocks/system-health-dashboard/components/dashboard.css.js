@@ -90,8 +90,9 @@ export const style = css`
   }
 
   .dark-mode-icon {
-    width: 20px;
-    height: 20px;
+    font-size: 18px;
+    line-height: 1;
+    flex-shrink: 0;
   }
 
   .toolbar-header:hover {
@@ -344,6 +345,23 @@ export const style = css`
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   }
 
+  /* Dark mode overrides for score color backgrounds */
+  .dark-mode .main-score.green {
+    background: #2d2d2d;
+  }
+
+  .dark-mode .main-score.yellow {
+    background: #2d2d2d;
+  }
+
+  .dark-mode .main-score.orange {
+    background: #2d2d2d;
+  }
+
+  .dark-mode .main-score.red {
+    background: #2d2d2d;
+  }
+
   .main-score.green {
     border-left-color: #28a745;
     background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
@@ -394,10 +412,18 @@ export const style = css`
     margin-bottom: 4px;
   }
 
+  .dark-mode .score-label {
+    color: #e1e5e9;
+  }
+
   .score-subtitle {
     font-size: 1rem;
     color: #666;
     font-weight: 500;
+  }
+
+  .dark-mode .score-subtitle {
+    color: #b0b0b0;
   }
 
   .score-details {
@@ -406,10 +432,18 @@ export const style = css`
     border-top: 1px solid rgba(0, 0, 0, 0.1);
   }
 
+  .dark-mode .score-details {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+
   .score-detail {
     font-size: 0.875rem;
     color: #666;
     margin-bottom: 4px;
+  }
+
+  .dark-mode .score-detail {
+    color: #999;
   }
 
   /* Meter Styles */
@@ -473,10 +507,18 @@ export const style = css`
     margin-bottom: 4px;
   }
 
+  .dark-mode .meter-label {
+    color: #999;
+  }
+
   .meter-value {
     font-size: 0.75rem;
     color: #999;
     margin-top: 4px;
+  }
+
+  .dark-mode .meter-value {
+    color: #b0b0b0;
   }
 
   /* Main Score Meter */
