@@ -4,6 +4,7 @@ import SystemHealthDashboard from './components/dashboard.js';
 import MetricCard from './components/metric-card.js';
 import DateRangePicker from './components/date-range-picker.js';
 import ScoreChart from './components/score-chart.js';
+import ScoreDonutChart from './components/score-donut-chart.js';
 import { dashboardStore } from './store/dashboard-store.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -14,6 +15,7 @@ export default async function init(el) {
   customElements.define('metric-card', MetricCard);
   customElements.define('date-range-picker', DateRangePicker);
   customElements.define('score-chart', ScoreChart);
+  customElements.define('score-donut-chart', ScoreDonutChart);
 
   // Set loading state
   dashboardStore.setLoading(true);
