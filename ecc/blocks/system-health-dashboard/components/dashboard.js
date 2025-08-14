@@ -27,6 +27,14 @@ export default class SystemHealthDashboard extends LitElement {
     this.loading = false;
     this.error = null;
     this.toolbarExpanded = false;
+    this.visibleComponents = {
+      mainScore: true,
+      scoreChart: true,
+      scoreDonutChart: true,
+      keyMetrics: true,
+      aiSuggestions: true,
+      healthCategories: true,
+    };
 
     // Subscribe to store changes
     this.unsubscribe = dashboardStore.subscribe(this.handleStateChange.bind(this));
@@ -74,6 +82,29 @@ export default class SystemHealthDashboard extends LitElement {
     this.requestUpdate(); // Use 'this' to satisfy linter
   }
 
+  handleComponentVisibilityChanged(componentKey) {
+    this.visibleComponents = {
+      ...this.visibleComponents,
+      [componentKey]: !this.visibleComponents[componentKey],
+    };
+    this.requestUpdate();
+  }
+
+  handleToggleAllComponents() {
+    const allVisible = Object.values(this.visibleComponents).every(Boolean);
+    const newState = !allVisible;
+
+    this.visibleComponents = {
+      mainScore: newState,
+      scoreChart: newState,
+      scoreDonutChart: newState,
+      keyMetrics: newState,
+      aiSuggestions: newState,
+      healthCategories: newState,
+    };
+    this.requestUpdate();
+  }
+
   getTimeRangeLabel() {
     if (this.timeRange === 1) return '1 Day';
     if (this.timeRange === 3) return '3 Days';
@@ -107,10 +138,83 @@ export default class SystemHealthDashboard extends LitElement {
         
         <div class="toolbar-content ${this.toolbarExpanded ? 'expanded' : ''}">
           <div class="toolbar-body">
-            <date-range-picker
-              .selectedDays=${this.timeRange}
-              @dateRangeChanged=${this.handleDateRangeChanged}
-            ></date-range-picker>
+            <div class="toolbar-section">
+              <date-range-picker
+                .selectedDays=${this.timeRange}
+                @dateRangeChanged=${this.handleDateRangeChanged}
+              ></date-range-picker>
+            </div>
+            
+            <div class="toolbar-section">
+              <span class="toolbar-label">Components:</span>
+              <button 
+                class="toolbar-btn toggle-all-btn"
+                @click=${this.handleToggleAllComponents}
+              >
+                ${Object.values(this.visibleComponents).every(Boolean) ? 'Hide All' : 'Show All'}
+              </button>
+              <div class="component-toggles">
+                <label class="component-toggle">
+                  <input 
+                    type="checkbox" 
+                    .checked=${this.visibleComponents.mainScore}
+                    @change=${() => this.handleComponentVisibilityChanged('mainScore')}
+                  >
+                  <span class="toggle-slider small"></span>
+                  <span class="toggle-text">Main Score</span>
+                </label>
+                
+                <label class="component-toggle">
+                  <input 
+                    type="checkbox" 
+                    .checked=${this.visibleComponents.scoreChart}
+                    @change=${() => this.handleComponentVisibilityChanged('scoreChart')}
+                  >
+                  <span class="toggle-slider small"></span>
+                  <span class="toggle-text">Score Chart</span>
+                </label>
+                
+                <label class="component-toggle">
+                  <input 
+                    type="checkbox" 
+                    .checked=${this.visibleComponents.scoreDonutChart}
+                    @change=${() => this.handleComponentVisibilityChanged('scoreDonutChart')}
+                  >
+                  <span class="toggle-slider small"></span>
+                  <span class="toggle-text">Donut Chart</span>
+                </label>
+                
+                <label class="component-toggle">
+                  <input 
+                    type="checkbox" 
+                    .checked=${this.visibleComponents.keyMetrics}
+                    @change=${() => this.handleComponentVisibilityChanged('keyMetrics')}
+                  >
+                  <span class="toggle-slider small"></span>
+                  <span class="toggle-text">Key Metrics</span>
+                </label>
+                
+                <label class="component-toggle">
+                  <input 
+                    type="checkbox" 
+                    .checked=${this.visibleComponents.aiSuggestions}
+                    @change=${() => this.handleComponentVisibilityChanged('aiSuggestions')}
+                  >
+                  <span class="toggle-slider small"></span>
+                  <span class="toggle-text">AI Suggestions</span>
+                </label>
+                
+                <label class="component-toggle">
+                  <input 
+                    type="checkbox" 
+                    .checked=${this.visibleComponents.healthCategories}
+                    @change=${() => this.handleComponentVisibilityChanged('healthCategories')}
+                  >
+                  <span class="toggle-slider small"></span>
+                  <span class="toggle-text">Health Categories</span>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -242,16 +346,16 @@ export default class SystemHealthDashboard extends LitElement {
       <div class="dashboard-container">
         ${this.renderToolbar()}
         
-        ${this.renderMainScore(this.currentData)}
+        ${this.visibleComponents.mainScore ? this.renderMainScore(this.currentData) : ''}
         
-        ${this.renderScoreChart()}
+        ${this.visibleComponents.scoreChart ? this.renderScoreChart() : ''}
         
-        ${this.renderScoreDonutChart()}
+        ${this.visibleComponents.scoreDonutChart ? this.renderScoreDonutChart() : ''}
         
         <div class="dashboard-grid">
           <div class="grid-left">
-            ${this.renderKeyMetrics()}
-            ${html`
+            ${this.visibleComponents.keyMetrics ? this.renderKeyMetrics() : ''}
+            ${this.visibleComponents.aiSuggestions ? html`
               <div class="ai-suggestions-card">
                 <h3>AI Suggestions</h3>
                 ${repeat(DASHBOARD_CONFIG.AI_SUGGESTIONS, (suggestion) => html`
@@ -263,27 +367,29 @@ export default class SystemHealthDashboard extends LitElement {
                   </div>
                 `)}
               </div>
-            `}
+            ` : ''}
           </div>
           
-          <div class="grid-right">
-            <div class="sub-scores-header">
-              <h3 class="sub-scores-title">Health Categories</h3>
-              <div class="view-mode-toggle">
-                <span class="toggle-label">Score</span>
-                <label class="toggle-switch">
-                  <input 
-                    type="checkbox" 
-                    .checked=${this.viewMode === 'value'}
-                    @change=${(e) => this.handleViewModeChanged({ detail: { viewMode: e.target.checked ? 'value' : 'score' } })}
-                  >
-                  <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-label">Value</span>
+          ${this.visibleComponents.healthCategories ? html`
+            <div class="grid-right">
+              <div class="sub-scores-header">
+                <h3 class="sub-scores-title">Health Categories</h3>
+                <div class="view-mode-toggle">
+                  <span class="toggle-label">Score</span>
+                  <label class="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      .checked=${this.viewMode === 'value'}
+                      @change=${(e) => this.handleViewModeChanged({ detail: { viewMode: e.target.checked ? 'value' : 'score' } })}
+                    >
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="toggle-label">Value</span>
+                </div>
               </div>
+              ${this.renderMetricCards(this.currentData)}
             </div>
-            ${this.renderMetricCards(this.currentData)}
-          </div>
+          ` : ''}
         </div>
       </div>
     `;

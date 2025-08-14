@@ -78,11 +78,10 @@ export const style = css`
   .toolbar-content {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease;
   }
 
   .toolbar-content.expanded {
-    max-height: 200px;
+    max-height: max-content;
   }
 
   .toolbar-body {
@@ -98,6 +97,90 @@ export const style = css`
     display: flex;
     align-items: center;
     gap: 12px;
+  }
+
+  .component-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .component-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #555;
+    transition: color 0.2s ease;
+  }
+
+  .component-toggle:hover {
+    color: #333;
+  }
+
+  .component-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider.small {
+    position: relative;
+    display: inline-block;
+    width: 32px;
+    height: 18px;
+    background-color: #ccc;
+    transition: 0.3s;
+    border-radius: 18px;
+  }
+
+  .toggle-slider.small:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+  }
+
+  .component-toggle input:checked + .toggle-slider.small {
+    background-color: #007bff;
+  }
+
+  .component-toggle input:checked + .toggle-slider.small:before {
+    transform: translateX(14px);
+  }
+
+  .component-toggle:hover .toggle-slider.small {
+    background-color: #999;
+  }
+
+  .component-toggle input:checked:hover + .toggle-slider.small {
+    background-color: #0056b3;
+  }
+
+  .toggle-text {
+    white-space: nowrap;
+  }
+
+  .toggle-all-btn {
+    background: #f8f9fa;
+    border-color: #dee2e6;
+    color: #495057;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+
+  .toggle-all-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    color: #212529;
   }
 
   .toolbar-label {
@@ -564,6 +647,10 @@ export const style = css`
     .toolbar-section {
       justify-content: center;
     }
+
+    .component-toggles {
+      justify-content: center;
+    }
   }
 
   @media (max-width: 768px) {
@@ -594,6 +681,16 @@ export const style = css`
     .toolbar-section {
       flex-direction: column;
       gap: 8px;
+    }
+
+    .component-toggles {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .component-toggle {
+      width: 100%;
     }
 
     .sub-scores-header {
