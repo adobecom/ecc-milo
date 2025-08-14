@@ -138,6 +138,18 @@ export const style = css`
     font-weight: 500;
   }
 
+  .score-details {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .score-detail {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 4px;
+  }
+
   /* Dashboard Grid */
   .dashboard-grid {
     display: grid;
@@ -280,6 +292,9 @@ export const style = css`
 
   .metric-header {
     margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .metric-title {
@@ -288,6 +303,15 @@ export const style = css`
     font-weight: 600;
     color: #333;
     line-height: 1.3;
+  }
+
+  .metric-weight {
+    font-size: 0.75rem;
+    color: #666;
+    font-weight: 500;
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 4px;
   }
 
   .metric-value {

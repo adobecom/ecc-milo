@@ -29,79 +29,182 @@ export default class SystemHealthDashboard extends LitElement {
 
     if (this.timeRange === '3d') {
       const last3Days = this.data.days.slice(-3);
-      return this.aggregateData(last3Days);
+      return SystemHealthDashboard.aggregateData(last3Days);
     }
 
-    // 7d - use pre-computed aggregates
-    return this.data.aggregates?.['7d'] || this.aggregateData(this.data.days.slice(-7));
+    // 7d - aggregate all available days
+    return SystemHealthDashboard.aggregateData(this.data.days);
   }
 
-  aggregateData(days) {
+  static aggregateData(days) {
     if (!days.length) return null;
 
-    const metrics = {};
-    const subScores = {};
-    const metricKeys = Object.keys(days[0].metrics);
-    const subScoreKeys = Object.keys(days[0].sub_scores);
+    const aggregatedTabs = {};
+    const tabKeys = Object.keys(days[0].tabs);
 
-    // Average metrics
-    metricKeys.forEach((key) => {
-      metrics[key] = days.reduce((sum, day) => sum + day.metrics[key], 0) / days.length;
+    // Initialize aggregated structure
+    tabKeys.forEach((tabKey) => {
+      if (tabKey !== 'new_relic') {
+        aggregatedTabs[tabKey] = {
+          inputs: {},
+          score: 0,
+          weight: days[0].tabs[tabKey].weight,
+          weighted_contribution: 0,
+        };
+      }
     });
 
-    // Average sub-scores
-    subScoreKeys.forEach((key) => {
-      subScores[key] = days.reduce((sum, day) => sum + day.sub_scores[key], 0) / days.length;
+    // Aggregate scores and inputs
+    tabKeys.forEach((tabKey) => {
+      if (tabKey === 'new_relic') return;
+
+      const scores = days.map((day) => day.tabs[tabKey].score);
+      const avgScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+
+      aggregatedTabs[tabKey].score = Math.round(avgScore * 10) / 10;
+      aggregatedTabs[tabKey].weighted_contribution = Math.round(avgScore * aggregatedTabs[tabKey].weight * 10) / 10;
+
+      // Aggregate inputs (average numeric values, sum counts)
+      const inputs = days.map((day) => day.tabs[tabKey].inputs);
+      aggregatedTabs[tabKey].inputs = SystemHealthDashboard.aggregateInputs(inputs, tabKey);
     });
 
-    // Calculate health score
-    const weights = this.data.weights || {};
-    const healthScore = Object.keys(subScores).reduce((score, key) => score + (subScores[key] * (weights[key] || 0)), 0);
+    // Calculate overall health score
+    const rawWeightedSum = Object.values(aggregatedTabs)
+      .reduce((sum, tab) => sum + tab.weighted_contribution, 0);
+
+    // Use average New Relic multiplier
+    const newRelicMultipliers = days.map((day) => day.tabs.new_relic.multiplier);
+    const avgMultiplier = newRelicMultipliers.reduce((sum, mult) => sum + mult, 0) / newRelicMultipliers.length;
+
+    const healthScore = Math.round(rawWeightedSum * avgMultiplier * 10) / 10;
 
     return {
-      metrics,
-      sub_scores: subScores,
-      health_score: Math.round(healthScore * 10) / 10,
+      timestamp: days[days.length - 1].timestamp,
+      overall: {
+        raw_weighted_sum: Math.round(rawWeightedSum * 10) / 10,
+        new_relic_multiplier: Math.round(avgMultiplier * 10000) / 10000,
+        health_score: healthScore,
+      },
+      tabs: aggregatedTabs,
     };
   }
 
-  static getMetricDisplayName(key) {
+  static aggregateInputs(inputs, tabKey) {
+    const aggregated = {};
+
+    if (tabKey === 'splunk') {
+      // Sum requests, average baseline, sum errors
+      aggregated.requests = inputs.reduce((sum, input) => sum + (input.requests || 0), 0);
+      aggregated.baseline_requests = inputs.reduce((sum, input) => sum + (input.baseline_requests || 0), 0) / inputs.length;
+      aggregated.errors = {
+        500: inputs.reduce((sum, input) => sum + (input.errors?.[500] || 0), 0),
+        503: inputs.reduce((sum, input) => sum + (input.errors?.[503] || 0), 0),
+        418: inputs.reduce((sum, input) => sum + (input.errors?.[418] || 0), 0),
+        401: inputs.reduce((sum, input) => sum + (input.errors?.[401] || 0), 0),
+        404: inputs.reduce((sum, input) => sum + (input.errors?.[404] || 0), 0),
+      };
+    } else if (tabKey === 'cwv') {
+      // Average CWV pass rate
+      aggregated.cwv_pass_rate_percent = Math.round(
+        inputs.reduce((sum, input) => sum + (input.cwv_pass_rate_percent || 0), 0) / inputs.length,
+      );
+    } else if (tabKey === 'api') {
+      // Average failure rate and coverage
+      aggregated.failure_rate = Math.round(
+        (inputs.reduce((sum, input) => sum + (input.failure_rate || 0), 0) / inputs.length) * 1000,
+      ) / 1000;
+      aggregated.coverage = Math.round(
+        (inputs.reduce((sum, input) => sum + (input.coverage || 0), 0) / inputs.length) * 100,
+      ) / 100;
+    } else if (tabKey === 'prod') {
+      // Combine all incidents
+      aggregated.incidents = inputs.reduce((all, input) => {
+        if (input.incidents && input.incidents.length > 0) {
+          return all.concat(input.incidents);
+        }
+        return all;
+      }, []);
+    } else if (tabKey === 'a11y') {
+      // Average a11y score
+      aggregated.a11y_score = Math.round(
+        inputs.reduce((sum, input) => sum + (input.a11y_score || 0), 0) / inputs.length,
+      );
+    } else if (tabKey === 'escape') {
+      // Sum escape count
+      aggregated.count = inputs.reduce((sum, input) => sum + (input.count || 0), 0);
+    } else if (tabKey === 'e2e') {
+      // Average failure rate
+      aggregated.failure_rate = Math.round(
+        (inputs.reduce((sum, input) => sum + (input.failure_rate || 0), 0) / inputs.length) * 1000,
+      ) / 1000;
+    } else if (tabKey === 'down') {
+      // Sum downtime minutes
+      aggregated.downtime_minutes = inputs.reduce((sum, input) => sum + (input.downtime_minutes || 0), 0);
+    }
+
+    return aggregated;
+  }
+
+  static getTabDisplayName(key) {
     const names = {
-      splunk_error_rate: 'Splunk Error Rate',
-      prod_incidents: 'Production Incidents',
-      stage_to_prod_regressions: 'Stage to Prod Regressions',
-      automation_failures_api: 'API Automation Failures',
-      automation_failures_ui: 'UI Automation Failures',
-      downtime: 'Downtime',
-      unit_test_coverage: 'Unit Test Coverage',
-      regression_pass_rate: 'Regression Pass Rate',
-      deployment_success_rate: 'Deployment Success Rate',
+      splunk: 'Splunk Errors',
+      cwv: 'Core Web Vitals',
+      api: 'API Health',
+      prod: 'Production Incidents',
+      a11y: 'Accessibility',
+      escape: 'Escape Velocity',
+      e2e: 'End-to-End Tests',
+      down: 'Downtime',
     };
     return names[key] || key;
   }
 
-  getMetricValue(key, data) {
+  getTabValue(key, data) {
+    if (!data?.tabs?.[key]) return 0;
+
     if (this.viewMode === 'score') {
-      return data.sub_scores?.[key] || 0;
+      return data.tabs[key].score;
     }
-    return data.metrics?.[key] || 0;
+
+    // Return appropriate input value based on tab type
+    const { inputs } = data.tabs[key];
+    switch (key) {
+      case 'splunk':
+        return inputs.requests?.toLocaleString() || 'N/A';
+      case 'cwv':
+        return `${inputs.cwv_pass_rate_percent || 0}%`;
+      case 'api':
+        return `${((inputs.failure_rate || 0) * 100).toFixed(1)}%`;
+      case 'prod':
+        return inputs.incidents?.length || 0;
+      case 'a11y':
+        return inputs.a11y_score || 0;
+      case 'escape':
+        return inputs.count || 0;
+      case 'e2e':
+        return `${((inputs.failure_rate || 0) * 100).toFixed(1)}%`;
+      case 'down':
+        return `${inputs.downtime_minutes || 0} min`;
+      default:
+        return 'N/A';
+    }
   }
 
-  getMetricUnit(key) {
+  getTabUnit(key) {
     if (this.viewMode === 'score') {
       return '';
     }
 
     const units = {
-      splunk_errors_per_1k_requests: ' per 1k',
-      prod_incidents: '',
-      stage_to_prod_regressions: '',
-      automation_failures_api: '',
-      automation_failures_ui: '',
-      downtime_minutes: ' min',
-      unit_test_coverage_percent: '%',
-      regression_pass_rate_percent: '%',
-      deployment_success_rate_percent: '%',
+      splunk: ' requests',
+      cwv: '',
+      api: '',
+      prod: ' incidents',
+      a11y: '',
+      escape: ' escapes',
+      e2e: '',
+      down: '',
     };
     return units[key] || '';
   }
@@ -168,7 +271,7 @@ export default class SystemHealthDashboard extends LitElement {
   renderMainScore(data) {
     if (!data) return nothing;
 
-    const score = data.health_score;
+    const score = data.overall.health_score;
     const color = SystemHealthDashboard.getScoreColor(score);
 
     return html`
@@ -177,23 +280,29 @@ export default class SystemHealthDashboard extends LitElement {
           <div class="score-value">${score}</div>
           <div class="score-label">System Health Score</div>
           <div class="score-subtitle">${this.timeRange.toUpperCase()} Average</div>
+          <div class="score-details">
+            <div class="score-detail">Raw Score: ${data.overall.raw_weighted_sum}</div>
+            <div class="score-detail">Multiplier: ${data.overall.new_relic_multiplier}</div>
+          </div>
         </div>
       </div>
     `;
   }
 
-  renderMetricCard(key, data) {
-    if (!data) return nothing;
+  renderTabCard(key, data) {
+    if (!data?.tabs?.[key]) return nothing;
 
-    const value = this.getMetricValue(key, data);
-    const displayName = SystemHealthDashboard.getMetricDisplayName(key);
-    const unit = this.getMetricUnit(key);
-    const color = this.viewMode === 'score' ? SystemHealthDashboard.getScoreColor(value) : 'neutral';
+    const value = this.getTabValue(key, data);
+    const displayName = SystemHealthDashboard.getTabDisplayName(key);
+    const unit = this.getTabUnit(key);
+    const color = this.viewMode === 'score' ? SystemHealthDashboard.getScoreColor(data.tabs[key].score) : 'neutral';
+    const { weight } = data.tabs[key];
 
     return html`
       <div class="metric-card ${color}">
         <div class="metric-header">
           <h3 class="metric-title">${displayName}</h3>
+          <span class="metric-weight">${(weight * 100).toFixed(0)}%</span>
         </div>
         <div class="metric-value">
           ${value}${unit}
@@ -209,10 +318,22 @@ export default class SystemHealthDashboard extends LitElement {
     if (!data) return nothing;
 
     const keyMetrics = [
-      { label: 'Total Requests', value: data.metrics?.requests?.toLocaleString() || 'N/A' },
-      { label: 'Error Rate', value: `${data.metrics?.splunk_errors_per_1k_requests || 0} per 1k` },
-      { label: 'Uptime', value: `${((100 - ((data.metrics?.downtime_minutes || 0) / 1440) * 100)).toFixed(2)}%` },
-      { label: 'Test Coverage', value: `${data.metrics?.unit_test_coverage_percent || 0}%` },
+      {
+        label: 'Total Requests',
+        value: data.tabs?.splunk?.inputs?.requests?.toLocaleString() || 'N/A',
+      },
+      {
+        label: 'CWV Pass Rate',
+        value: `${data.tabs?.cwv?.inputs?.cwv_pass_rate_percent || 0}%`,
+      },
+      {
+        label: 'API Coverage',
+        value: `${((data.tabs?.api?.inputs?.coverage || 0) * 100).toFixed(1)}%`,
+      },
+      {
+        label: 'Active Incidents',
+        value: data.tabs?.prod?.inputs?.incidents?.length || 0,
+      },
     ];
 
     return html`
@@ -243,13 +364,13 @@ export default class SystemHealthDashboard extends LitElement {
         <div class="suggestion">
           <div class="suggestion-icon">⚡</div>
           <div class="suggestion-content">
-            <strong>Improve Test Coverage:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Focus on critical user journey test cases.
+            <strong>Improve Core Web Vitals:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Focus on critical user journey test cases.
           </div>
         </div>
         <div class="suggestion">
           <div class="suggestion-icon">🔧</div>
           <div class="suggestion-content">
-            <strong>Deployment Optimization:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Consider implementing blue-green deployments.
+            <strong>Reduce Production Incidents:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Consider implementing blue-green deployments.
           </div>
         </div>
       </div>
@@ -267,16 +388,15 @@ export default class SystemHealthDashboard extends LitElement {
       `;
     }
 
-    const metricKeys = [
-      'splunk_error_rate',
-      'prod_incidents',
-      'stage_to_prod_regressions',
-      'automation_failures_api',
-      'automation_failures_ui',
-      'downtime',
-      'unit_test_coverage',
-      'regression_pass_rate',
-      'deployment_success_rate',
+    const tabKeys = [
+      'splunk',
+      'cwv',
+      'api',
+      'prod',
+      'a11y',
+      'escape',
+      'e2e',
+      'down',
     ];
 
     return html`
@@ -292,9 +412,9 @@ export default class SystemHealthDashboard extends LitElement {
           </div>
           
           <div class="grid-right">
-            <h3 class="sub-scores-title">Sub-Scores</h3>
+            <h3 class="sub-scores-title">Health Categories</h3>
             <div class="sub-scores-grid">
-              ${repeat(metricKeys, (key) => this.renderMetricCard(key, currentData))}
+              ${repeat(tabKeys, (key) => this.renderTabCard(key, currentData))}
             </div>
           </div>
         </div>

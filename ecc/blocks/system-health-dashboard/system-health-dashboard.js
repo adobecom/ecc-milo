@@ -13,7 +13,7 @@ export default async function init(el) {
   // Create and configure the dashboard
   const dashboard = createTag('system-health-dashboard');
   dashboard.data = json;
-  
+
   // Append to the element
   el.append(dashboard);
 }
