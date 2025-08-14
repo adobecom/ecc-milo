@@ -17,6 +17,9 @@ export default class SystemHealthDashboard extends LitElement {
     toolbarExpanded: { type: Boolean },
   };
 
+  // Unique sessionStorage key for dashboard settings
+  static SESSION_STORAGE_KEY = 'emc-system-health-dashboard-settings';
+
   static styles = style;
 
   constructor() {
@@ -37,6 +40,9 @@ export default class SystemHealthDashboard extends LitElement {
     };
     this.darkMode = false;
 
+    // Load settings from sessionStorage
+    this.loadSettingsFromSessionStorage();
+
     // Subscribe to store changes
     this.unsubscribe = dashboardStore.subscribe(this.handleStateChange.bind(this));
 
@@ -49,6 +55,49 @@ export default class SystemHealthDashboard extends LitElement {
     super.disconnectedCallback();
     if (this.unsubscribe) {
       this.unsubscribe();
+    }
+  }
+
+  // SessionStorage methods
+  loadSettingsFromSessionStorage() {
+    try {
+      const savedSettings = sessionStorage.getItem(SystemHealthDashboard.SESSION_STORAGE_KEY);
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+
+        // Load dark mode setting
+        if (typeof settings.darkMode === 'boolean') {
+          this.darkMode = settings.darkMode;
+        }
+
+        // Load component visibility settings
+        if (settings.visibleComponents && typeof settings.visibleComponents === 'object') {
+          this.visibleComponents = {
+            ...this.visibleComponents, // Keep defaults for any missing properties
+            ...settings.visibleComponents,
+          };
+        }
+
+        // Load toolbar expanded state
+        if (typeof settings.toolbarExpanded === 'boolean') {
+          this.toolbarExpanded = settings.toolbarExpanded;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load dashboard settings from sessionStorage:', error);
+    }
+  }
+
+  saveSettingsToSessionStorage() {
+    try {
+      const settings = {
+        darkMode: this.darkMode,
+        visibleComponents: this.visibleComponents,
+        toolbarExpanded: this.toolbarExpanded,
+      };
+      sessionStorage.setItem(SystemHealthDashboard.SESSION_STORAGE_KEY, JSON.stringify(settings));
+    } catch (error) {
+      console.warn('Failed to save dashboard settings to sessionStorage:', error);
     }
   }
 
@@ -88,6 +137,7 @@ export default class SystemHealthDashboard extends LitElement {
       ...this.visibleComponents,
       [componentKey]: !this.visibleComponents[componentKey],
     };
+    this.saveSettingsToSessionStorage();
     this.requestUpdate();
   }
 
@@ -103,11 +153,13 @@ export default class SystemHealthDashboard extends LitElement {
       aiSuggestions: newState,
       healthCategories: newState,
     };
+    this.saveSettingsToSessionStorage();
     this.requestUpdate();
   }
 
   handleDarkModeToggle() {
     this.darkMode = !this.darkMode;
+    this.saveSettingsToSessionStorage();
     this.requestUpdate();
   }
 
@@ -122,6 +174,7 @@ export default class SystemHealthDashboard extends LitElement {
 
   toggleToolbar() {
     this.toolbarExpanded = !this.toolbarExpanded;
+    this.saveSettingsToSessionStorage();
     this.requestUpdate();
   }
 
