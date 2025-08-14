@@ -32,9 +32,8 @@ export default class DateRangePicker extends LitElement {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - this.selectedDays);
-    
-    this.customEndDate = endDate.toISOString().split('T')[0];
-    this.customStartDate = startDate.toISOString().split('T')[0];
+
+    [this.customStartDate, this.customEndDate] = [startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0]];
   }
 
   handlePresetClick(days) {
@@ -95,7 +94,7 @@ export default class DateRangePicker extends LitElement {
   renderPresets() {
     return html`
       <div class="preset-buttons">
-        ${DASHBOARD_CONFIG.DATE_RANGE.presets.map(preset => html`
+        ${DASHBOARD_CONFIG.DATE_RANGE.presets.map((preset) => html`
           <button 
             class="preset-btn ${this.selectedDays === preset.days ? 'active' : ''}"
             @click=${() => this.handlePresetClick(preset.days)}
@@ -118,9 +117,9 @@ export default class DateRangePicker extends LitElement {
               id="start-date"
               .value=${this.customStartDate}
               @change=${(e) => {
-                this.customStartDate = e.target.value;
-                this.handleDateChange();
-              }}
+    this.customStartDate = e.target.value;
+    this.handleDateChange();
+  }}
               max=${this.customEndDate || new Date().toISOString().split('T')[0]}
             >
           </div>
@@ -131,9 +130,9 @@ export default class DateRangePicker extends LitElement {
               id="end-date"
               .value=${this.customEndDate}
               @change=${(e) => {
-                this.customEndDate = e.target.value;
-                this.handleDateChange();
-              }}
+    this.customEndDate = e.target.value;
+    this.handleDateChange();
+  }}
               min=${this.customStartDate}
               max=${new Date().toISOString().split('T')[0]}
             >
