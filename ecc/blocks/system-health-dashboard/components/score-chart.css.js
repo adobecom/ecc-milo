@@ -144,10 +144,6 @@ export default css`
       padding: 16px;
     }
 
-    .chart-container {
-      height: 300px;
-    }
-
     .legend {
       flex-direction: column;
       gap: 8px;
@@ -159,10 +155,6 @@ export default css`
   }
 
   @media (max-width: 480px) {
-    .chart-container {
-      height: 250px;
-    }
-
     .legend-item {
       font-size: 0.8rem;
     }
