@@ -162,6 +162,28 @@ export default class SystemHealthDashboard extends LitElement {
     `;
   }
 
+  renderScoreChart() {
+    if (!this.data?.days) return nothing;
+
+    return html`
+      <score-chart
+        .data=${this.data.days}
+        .timeRange=${this.timeRange}
+      ></score-chart>
+    `;
+  }
+
+  renderScoreDonutChart() {
+    if (!this.currentData) return nothing;
+
+    return html`
+      <score-donut-chart
+        .data=${this.currentData}
+        .viewMode=${this.viewMode}
+      ></score-donut-chart>
+    `;
+  }
+
   renderMetricCards(data) {
     if (!data) return nothing;
 
@@ -237,6 +259,10 @@ export default class SystemHealthDashboard extends LitElement {
         ${this.renderToolbar()}
         
         ${this.renderMainScore(this.currentData)}
+        
+        ${this.renderScoreChart()}
+        
+        ${this.renderScoreDonutChart()}
         
         <div class="dashboard-grid">
           <div class="grid-left">

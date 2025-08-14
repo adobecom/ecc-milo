@@ -1,7 +1,9 @@
+/* eslint-disable import/no-unresolved */
 import { LIBS } from '../../scripts/scripts.js';
 import SystemHealthDashboard from './components/dashboard.js';
 import MetricCard from './components/metric-card.js';
 import DateRangePicker from './components/date-range-picker.js';
+import ScoreChart from './components/score-chart.js';
 import { dashboardStore } from './store/dashboard-store.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -11,6 +13,7 @@ export default async function init(el) {
   customElements.define('system-health-dashboard', SystemHealthDashboard);
   customElements.define('metric-card', MetricCard);
   customElements.define('date-range-picker', DateRangePicker);
+  customElements.define('score-chart', ScoreChart);
 
   // Set loading state
   dashboardStore.setLoading(true);
