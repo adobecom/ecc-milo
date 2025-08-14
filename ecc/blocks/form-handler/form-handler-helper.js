@@ -5,8 +5,8 @@ import CustomTextfield from '../../components/custom-textfield/custom-textfield.
 import ImageDropzone from '../../components/image-dropzone/image-dropzone.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
-import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
-import ProductSelector from '../../components/product-selector/product-selector.js';
+import PromotionSelectorGroup from '../../components/promotion-selector-group/promotion-selector-group.js';
+import PromotionSelector from '../../components/promotion-selector/promotion-selector.js';
 import ProfileContainer from '../../components/profile-container/profile-container.js';
 import Profile from '../../components/profile/profile.js';
 import Repeater from '../../components/repeater/repeater.js';
@@ -54,8 +54,8 @@ export function initCustomLitComponents() {
   customElements.define('partner-selector-group', PartnerSelectorGroup);
   customElements.define('agenda-fieldset', AgendaFieldset);
   customElements.define('agenda-fieldset-group', AgendaFieldsetGroup);
-  customElements.define('product-selector', ProductSelector);
-  customElements.define('product-selector-group', ProductSelectorGroup);
+  customElements.define('promotion-selector', PromotionSelector);
+  customElements.define('promotion-selector-group', PromotionSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
   customElements.define('custom-search', CustomSearch);
@@ -115,6 +115,7 @@ export const VANILLA_COMPONENTS = [
   'secondary-cta',
   'video-content',
   'marketo-integration',
+  'content-promotion',
 ];
 
 async function initVanillaComponents(props) {
@@ -123,14 +124,20 @@ async function initVanillaComponents(props) {
     if (!mappedComponents?.length) return;
 
     const componentInitPromises = Array.from(mappedComponents).map(async (component) => {
-      const { default: initComponent } = await import(`../${comp}-component/controller.js`);
-      await initComponent(component, props);
+      try {
+        const { default: initComponent } = await import(`../${comp}-component/controller.js`);
+        await initComponent(component, props);
+      } catch (error) {
+        console.warn(`Failed to load component ${comp}:`, error);
+        // Remove the failed component from the DOM
+        component.remove();
+      }
     });
 
-    await Promise.all(componentInitPromises);
+    await Promise.allSettled(componentInitPromises);
   });
 
-  await Promise.all(componentPromises);
+  await Promise.allSettled(componentPromises);
 }
 
 export async function initComponents(props) {
@@ -346,14 +353,19 @@ async function gatherValues(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onSubmit } = await import(`../${comp}-component/controller.js`);
-      return onSubmit(component, props);
+      try {
+        const { onSubmit } = await import(`../${comp}-component/controller.js`);
+        return onSubmit(component, props);
+      } catch (error) {
+        console.warn(`Failed to gather values for component ${comp}:`, error);
+        return {};
+      }
     });
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   });
 
-  await Promise.all(allComponentPromises);
+  await Promise.allSettled(allComponentPromises);
 }
 
 async function handleEventUpdate(props) {
@@ -362,14 +374,19 @@ async function handleEventUpdate(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
-      return onTargetUpdate(component, props);
+      try {
+        const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
+        return onTargetUpdate(component, props);
+      } catch (error) {
+        console.warn(`Failed to handle event update for component ${comp}:`, error);
+        return {};
+      }
     });
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   });
 
-  await Promise.all(allComponentPromises);
+  await Promise.allSettled(allComponentPromises);
 }
 
 async function updateComponentsOnPayloadChange(props) {
@@ -378,15 +395,20 @@ async function updateComponentsOnPayloadChange(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onPayloadUpdate } = await import(`../${comp}-component/controller.js`);
-      const componentPayload = await onPayloadUpdate(component, props);
-      return componentPayload;
+      try {
+        const { onPayloadUpdate } = await import(`../${comp}-component/controller.js`);
+        const componentPayload = await onPayloadUpdate(component, props);
+        return componentPayload;
+      } catch (error) {
+        console.warn(`Failed to update component ${comp} on payload change:`, error);
+        return {};
+      }
     });
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   });
 
-  await Promise.all(allComponentPromises);
+  await Promise.allSettled(allComponentPromises);
 }
 
 async function updateComponentsOnRespChange(props) {
@@ -395,15 +417,20 @@ async function updateComponentsOnRespChange(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onRespUpdate } = await import(`../${comp}-component/controller.js`);
-      const componentPayload = await onRespUpdate(component, props);
-      return componentPayload;
+      try {
+        const { onRespUpdate } = await import(`../${comp}-component/controller.js`);
+        const componentPayload = await onRespUpdate(component, props);
+        return componentPayload;
+      } catch (error) {
+        console.warn(`Failed to update component ${comp} on response change:`, error);
+        return {};
+      }
     });
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   });
 
-  await Promise.all(allComponentPromises);
+  await Promise.allSettled(allComponentPromises);
 }
 
 function showSaveSuccessMessage(props, detail = { message: 'Edits saved successfully' }) {
