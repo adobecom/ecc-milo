@@ -41,7 +41,6 @@
     "stylelint-config-standard": "25.0.0"
   },
   "dependencies": {
-    "@adobecom/milo": "github:adobecom/milo#main",
-    "@open-wc/testing": "^4.0.0"
+    "@adobecom/milo": "github:adobecom/milo#main"
   }
 }
