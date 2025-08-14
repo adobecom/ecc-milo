@@ -189,17 +189,7 @@ export default class ScoreChart extends LitElement {
       .style('font-size', '12px');
 
     // Add lines
-    const lineColors = {
-      overall: '#2c3e50',
-      splunk: '#3498db',
-      cwv: '#e74c3c',
-      api: '#f39c12',
-      prod: '#9b59b6',
-      a11y: '#1abc9c',
-      escape: '#e67e22',
-      e2e: '#34495e',
-      down: '#95a5a6',
-    };
+    const lineColors = DASHBOARD_CONFIG.CHART_COLORS;
 
     lineData.forEach(({ key, data: linePoints, label }) => {
       if (!this.visibleLines[key]) return;
@@ -316,17 +306,7 @@ export default class ScoreChart extends LitElement {
   }
 
   renderLegend() {
-    const lineColors = {
-      overall: '#2c3e50',
-      splunk: '#3498db',
-      cwv: '#e74c3c',
-      api: '#f39c12',
-      prod: '#9b59b6',
-      a11y: '#1abc9c',
-      escape: '#e67e22',
-      e2e: '#34495e',
-      down: '#95a5a6',
-    };
+    const lineColors = DASHBOARD_CONFIG.CHART_COLORS;
 
     const legendItems = [
       { key: 'overall', label: 'Overall Health Score' },

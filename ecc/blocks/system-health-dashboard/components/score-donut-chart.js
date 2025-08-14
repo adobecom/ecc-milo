@@ -3,7 +3,7 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 import { LIBS } from '../../../scripts/scripts.js';
 import style from './score-donut-chart.css.js';
-import { DASHBOARD_CONFIG } from '../config/dashboard-config.js';
+import { DASHBOARD_CONFIG, getTabColor } from '../config/dashboard-config.js';
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
 
@@ -110,16 +110,7 @@ export default class ScoreDonutChart extends LitElement {
     // Color scale
     const colorScale = d3.scaleOrdinal()
       .domain(chartData.map((d) => d.key))
-      .range([
-        '#3498db', // splunk
-        '#e74c3c', // cwv
-        '#f39c12', // api
-        '#9b59b6', // prod
-        '#1abc9c', // a11y
-        '#e67e22', // escape
-        '#34495e', // e2e
-        '#95a5a6', // down
-      ]);
+      .range(chartData.map((d) => getTabColor(d.key)));
 
     // Arc generator
     const arc = d3.arc()
@@ -251,18 +242,12 @@ export default class ScoreDonutChart extends LitElement {
     if (!this.data?.tabs) return html``;
 
     const chartData = this.prepareDonutData();
-    const colorScale = d3.scaleOrdinal()
-      .domain(chartData.map((d) => d.key))
-      .range([
-        '#3498db', '#e74c3c', '#f39c12', '#9b59b6',
-        '#1abc9c', '#e67e22', '#34495e', '#95a5a6',
-      ]);
 
     return html`
       <div class="legend">
         ${chartData.map((item) => html`
           <div class="legend-item">
-            <div class="legend-color" style="background-color: ${colorScale(item.key)}"></div>
+            <div class="legend-color" style="background-color: ${getTabColor(item.key)}"></div>
             <div class="legend-content">
               <div class="legend-label">${item.label}</div>
               <div class="legend-details">

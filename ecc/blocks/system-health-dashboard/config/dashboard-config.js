@@ -228,6 +228,19 @@ export const DASHBOARD_CONFIG = {
     orange: { min: 50, color: 'orange' },
     red: { min: 0, color: 'red' },
   },
+
+  // Unified color scheme for charts
+  CHART_COLORS: {
+    overall: '#2c3e50',
+    splunk: '#3498db',
+    cwv: '#e74c3c',
+    api: '#f39c12',
+    prod: '#9b59b6',
+    a11y: '#1abc9c',
+    escape: '#e67e22',
+    e2e: '#34495e',
+    down: '#95a5a6',
+  },
 };
 
 // Helper functions
@@ -254,3 +267,7 @@ export const getTabValue = (tabKey, data, viewMode) => {
 
   return `${formatter(inputs)}${unit}`;
 };
+
+export const getTabColor = (tabKey) => DASHBOARD_CONFIG.CHART_COLORS[tabKey] || '#95a5a6';
+
+export const getChartColors = () => DASHBOARD_CONFIG.CHART_COLORS;
