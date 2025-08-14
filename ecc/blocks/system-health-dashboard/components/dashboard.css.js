@@ -150,6 +150,83 @@ export const style = css`
     margin-bottom: 4px;
   }
 
+  /* Meter Styles */
+  .meter-container {
+    margin: 16px 0;
+    text-align: center;
+  }
+
+  .meter {
+    width: 100%;
+    height: 12px;
+    background: #e9ecef;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    margin: 8px 0;
+  }
+
+  .meter-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.8s ease-in-out;
+    position: relative;
+  }
+
+  .meter-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .meter.green .meter-fill {
+    background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+  }
+
+  .meter.yellow .meter-fill {
+    background: linear-gradient(90deg, #ffc107 0%, #ffca2c 100%);
+  }
+
+  .meter.orange .meter-fill {
+    background: linear-gradient(90deg, #fd7e14 0%, #ff8c42 100%);
+  }
+
+  .meter.red .meter-fill {
+    background: linear-gradient(90deg, #dc3545 0%, #e74c3c 100%);
+  }
+
+  .meter-label {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 4px;
+  }
+
+  .meter-value {
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 4px;
+  }
+
+  /* Main Score Meter */
+  .main-score .meter {
+    height: 16px;
+    margin: 20px 0;
+  }
+
+  .main-score .meter-fill {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
   /* Dashboard Grid */
   .dashboard-grid {
     display: grid;

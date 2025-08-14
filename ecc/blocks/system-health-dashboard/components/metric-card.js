@@ -3,7 +3,7 @@ import { LIBS } from '../../../scripts/scripts.js';
 import { style } from './metric-card.css.js';
 import { getTabConfig, getTabValue, getScoreColor } from '../config/dashboard-config.js';
 
-const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 export default class MetricCard extends LitElement {
   static properties = {
@@ -46,6 +46,16 @@ export default class MetricCard extends LitElement {
           <span class="metric-weight">${(weight * 100).toFixed(0)}%</span>
         </div>
         <div class="metric-value">${value}</div>
+        
+        ${this.viewMode === 'score' ? html`
+          <div class="meter-container">
+            <div class="meter ${color}">
+              <div class="meter-fill" style="width: ${tabData.score}%"></div>
+            </div>
+            <div class="meter-value">${tabData.score}/100</div>
+          </div>
+        ` : nothing}
+        
         <div class="metric-footer">
           ${this.viewMode === 'score' ? 'Score' : 'Raw Value'}
         </div>

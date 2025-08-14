@@ -89,6 +89,14 @@ export default class SystemHealthDashboard extends LitElement {
           <div class="score-value">${score}</div>
           <div class="score-label">System Health Score</div>
           <div class="score-subtitle">${this.timeRange.toUpperCase()} Average</div>
+          
+          <div class="meter-container">
+            <div class="meter ${color}">
+              <div class="meter-fill" style="width: ${score}%"></div>
+            </div>
+            <div class="meter-value">${score}/100</div>
+          </div>
+          
           <div class="score-details">
             <div class="score-detail">Raw Score: ${data.overall.raw_weighted_sum}</div>
             <div class="score-detail">Multiplier: ${data.overall.new_relic_multiplier}</div>
