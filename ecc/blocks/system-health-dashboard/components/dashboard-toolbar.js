@@ -66,5 +66,3 @@ export default class DashboardToolbar extends LitElement {
     `;
   }
 }
-
-customElements.define('dashboard-toolbar', DashboardToolbar);

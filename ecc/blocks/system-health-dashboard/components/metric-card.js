@@ -54,5 +54,3 @@ export default class MetricCard extends LitElement {
     `;
   }
 }
-
-customElements.define('metric-card', MetricCard);
