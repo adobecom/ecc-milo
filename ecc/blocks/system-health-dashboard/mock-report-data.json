@@ -1,0 +1,350 @@
+{
+  "meta": {
+    "service": "orion-api",
+    "environment": "prod",
+    "timezone": "America/Los_Angeles",
+    "generated_at": "2025-08-13T21:15:00-07:00",
+    "scoring_version": "1.0",
+    "notes": "Higher is better. Sub-scores are normalized 0-100, then combined via weights."
+  },
+  "weights": {
+    "splunk_error_rate": 0.15,
+    "prod_incidents": 0.22,
+    "stage_to_prod_regressions": 0.12,
+    "automation_failures_api": 0.08,
+    "automation_failures_ui": 0.08,
+    "downtime": 0.15,
+    "unit_test_coverage": 0.07,
+    "regression_pass_rate": 0.07,
+    "deployment_success_rate": 0.06
+  },
+  "defaults_and_bounds": {
+    "max_error_rate_per_1k": 80,
+    "max_downtime_minutes": 120,
+    "target_unit_test_coverage": 85,
+    "target_regression_pass_rate": 98
+  },
+  "window_options": ["1d", "3d", "7d"],
+  "days": [
+    {
+      "date": "2025-08-07",
+      "metrics": {
+        "splunk_errors_per_1k_requests": 42,
+        "prod_incidents": 1,
+        "stage_to_prod_regressions": 0,
+        "automation_failures_api": 2,
+        "automation_failures_ui": 3,
+        "downtime_minutes": 0,
+        "unit_test_coverage_percent": 82.3,
+        "regression_pass_rate_percent": 97.4,
+        "deployment_success_rate_percent": 100,
+        "requests": 215000
+      },
+      "sub_scores": {
+        "splunk_error_rate": 47.5,
+        "prod_incidents": 80,
+        "stage_to_prod_regressions": 100,
+        "automation_failures_api": 85,
+        "automation_failures_ui": 80,
+        "downtime": 100,
+        "unit_test_coverage": 96.5,
+        "regression_pass_rate": 92.9,
+        "deployment_success_rate": 100
+      },
+      "health_score": 86.8,
+      "events": {
+        "splunk": [
+          {"ts": "2025-08-07T09:12:31-07:00", "severity": "warn", "count": 120},
+          {"ts": "2025-08-07T11:05:09-07:00", "severity": "error", "count": 35}
+        ],
+        "new_relic": [
+          {"ts": "2025-08-07T14:32:12-07:00", "type": "apdex_drop", "delta": -0.07}
+        ],
+        "deployments": [
+          {"ts": "2025-08-07T08:05:00-07:00", "env": "prod", "result": "success", "sha": "7e3c1b2"}
+        ],
+        "automation": [
+          {"ts": "2025-08-07T07:40:00-07:00", "suite": "api", "result": "fail", "failed_tests": 2},
+          {"ts": "2025-08-07T07:55:00-07:00", "suite": "ui", "result": "partial", "failed_tests": 3}
+        ]
+      }
+    },
+    {
+      "date": "2025-08-08",
+      "metrics": {
+        "splunk_errors_per_1k_requests": 28,
+        "prod_incidents": 0,
+        "stage_to_prod_regressions": 1,
+        "automation_failures_api": 0,
+        "automation_failures_ui": 1,
+        "downtime_minutes": 8,
+        "unit_test_coverage_percent": 82.6,
+        "regression_pass_rate_percent": 98.1,
+        "deployment_success_rate_percent": 100,
+        "requests": 228400
+      },
+      "sub_scores": {
+        "splunk_error_rate": 65.0,
+        "prod_incidents": 100,
+        "stage_to_prod_regressions": 70,
+        "automation_failures_api": 100,
+        "automation_failures_ui": 95,
+        "downtime": 93.3,
+        "unit_test_coverage": 97.2,
+        "regression_pass_rate": 98.6,
+        "deployment_success_rate": 100
+      },
+      "health_score": 94.1,
+      "events": {
+        "splunk": [
+          {"ts": "2025-08-08T10:01:10-07:00", "severity": "warn", "count": 90}
+        ],
+        "new_relic": [
+          {"ts": "2025-08-08T15:22:51-07:00", "type": "throughput_spike", "pct": 18}
+        ],
+        "deployments": [
+          {"ts": "2025-08-08T08:00:00-07:00", "env": "prod", "result": "success", "sha": "b6d9a7f"}
+        ],
+        "automation": [
+          {"ts": "2025-08-08T07:35:00-07:00", "suite": "ui", "result": "fail", "failed_tests": 1}
+        ]
+      }
+    },
+    {
+      "date": "2025-08-09",
+      "metrics": {
+        "splunk_errors_per_1k_requests": 55,
+        "prod_incidents": 1,
+        "stage_to_prod_regressions": 2,
+        "automation_failures_api": 3,
+        "automation_failures_ui": 4,
+        "downtime_minutes": 12,
+        "unit_test_coverage_percent": 82.8,
+        "regression_pass_rate_percent": 96.9,
+        "deployment_success_rate_percent": 50,
+        "requests": 201200
+      },
+      "sub_scores": {
+        "splunk_error_rate": 31.3,
+        "prod_incidents": 80,
+        "stage_to_prod_regressions": 40,
+        "automation_failures_api": 70,
+        "automation_failures_ui": 60,
+        "downtime": 90.0,
+        "unit_test_coverage": 97.6,
+        "regression_pass_rate": 84.7,
+        "deployment_success_rate": 50
+      },
+      "health_score": 69.1,
+      "events": {
+        "splunk": [
+          {"ts": "2025-08-09T12:44:03-07:00", "severity": "error", "count": 62}
+        ],
+        "new_relic": [
+          {"ts": "2025-08-09T13:15:18-07:00", "type": "manual_prod_regression_note", "desc": "Checkout latency spike > P95 1.8s"}
+        ],
+        "deployments": [
+          {"ts": "2025-08-09T09:10:00-07:00", "env": "prod", "result": "failure", "sha": "3c12ef0"},
+          {"ts": "2025-08-09T11:25:00-07:00", "env": "prod", "result": "success", "sha": "3c12ef0-hotfix"}
+        ],
+        "automation": [
+          {"ts": "2025-08-09T07:30:00-07:00", "suite": "api", "result": "fail", "failed_tests": 3},
+          {"ts": "2025-08-09T07:45:00-07:00", "suite": "ui", "result": "fail", "failed_tests": 4}
+        ]
+      }
+    },
+    {
+      "date": "2025-08-10",
+      "metrics": {
+        "splunk_errors_per_1k_requests": 19,
+        "prod_incidents": 0,
+        "stage_to_prod_regressions": 0,
+        "automation_failures_api": 0,
+        "automation_failures_ui": 0,
+        "downtime_minutes": 0,
+        "unit_test_coverage_percent": 82.9,
+        "regression_pass_rate_percent": 98.6,
+        "deployment_success_rate_percent": 100,
+        "requests": 210350
+      },
+      "sub_scores": {
+        "splunk_error_rate": 76.3,
+        "prod_incidents": 100,
+        "stage_to_prod_regressions": 100,
+        "automation_failures_api": 100,
+        "automation_failures_ui": 100,
+        "downtime": 100,
+        "unit_test_coverage": 97.8,
+        "regression_pass_rate": 99.2,
+        "deployment_success_rate": 100
+      },
+      "health_score": 98.0,
+      "events": {
+        "splunk": [
+          {"ts": "2025-08-10T08:55:41-07:00", "severity": "warn", "count": 55}
+        ],
+        "new_relic": [],
+        "deployments": [
+          {"ts": "2025-08-10T08:02:00-07:00", "env": "prod", "result": "success", "sha": "a1d3f90"}
+        ],
+        "automation": [
+          {"ts": "2025-08-10T07:30:00-07:00", "suite": "api", "result": "pass"},
+          {"ts": "2025-08-10T07:45:00-07:00", "suite": "ui", "result": "pass"}
+        ]
+      }
+    },
+    {
+      "date": "2025-08-11",
+      "metrics": {
+        "splunk_errors_per_1k_requests": 33,
+        "prod_incidents": 0,
+        "stage_to_prod_regressions": 0,
+        "automation_failures_api": 1,
+        "automation_failures_ui": 2,
+        "downtime_minutes": 5,
+        "unit_test_coverage_percent": 83.1,
+        "regression_pass_rate_percent": 97.9,
+        "deployment_success_rate_percent": 100,
+        "requests": 224900
+      },
+      "sub_scores": {
+        "splunk_error_rate": 58.8,
+        "prod_incidents": 100,
+        "stage_to_prod_regressions": 100,
+        "automation_failures_api": 95,
+        "automation_failures_ui": 90,
+        "downtime": 95.8,
+        "unit_test_coverage": 98.1,
+        "regression_pass_rate": 98.4,
+        "deployment_success_rate": 100
+      },
+      "health_score": 94.8,
+      "events": {
+        "splunk": [
+          {"ts": "2025-08-11T10:10:22-07:00", "severity": "error", "count": 25}
+        ],
+        "new_relic": [],
+        "deployments": [
+          {"ts": "2025-08-11T08:01:00-07:00", "env": "prod", "result": "success", "sha": "5ff2b1c"}
+        ],
+        "automation": [
+          {"ts": "2025-08-11T07:35:00-07:00", "suite": "api", "result": "fail", "failed_tests": 1},
+          {"ts": "2025-08-11T07:50:00-07:00", "suite": "ui", "result": "fail", "failed_tests": 2}
+        ]
+      }
+    },
+    {
+      "date": "2025-08-12",
+      "metrics": {
+        "splunk_errors_per_1k_requests": 61,
+        "prod_incidents": 2,
+        "stage_to_prod_regressions": 1,
+        "automation_failures_api": 4,
+        "automation_failures_ui": 3,
+        "downtime_minutes": 28,
+        "unit_test_coverage_percent": 83.0,
+        "regression_pass_rate_percent": 96.1,
+        "deployment_success_rate_percent": 50,
+        "requests": 199300
+      },
+      "sub_scores": {
+        "splunk_error_rate": 23.8,
+        "prod_incidents": 60,
+        "stage_to_prod_regressions": 70,
+        "automation_failures_api": 60,
+        "automation_failures_ui": 70,
+        "downtime": 76.7,
+        "unit_test_coverage": 97.9,
+        "regression_pass_rate": 80.7,
+        "deployment_success_rate": 50
+      },
+      "health_score": 62.8,
+      "events": {
+        "splunk": [
+          {"ts": "2025-08-12T09:47:33-07:00", "severity": "error", "count": 75},
+          {"ts": "2025-08-12T12:03:10-07:00", "severity": "error", "count": 41}
+        ],
+        "new_relic": [
+          {"ts": "2025-08-12T09:50:00-07:00", "type": "prod_incident_open", "id": "INC-9012"},
+          {"ts": "2025-08-12T10:25:00-07:00", "type": "prod_incident_resolved", "id": "INC-9012", "mttr_minutes": 35}
+        ],
+        "deployments": [
+          {"ts": "2025-08-12T08:00:00-07:00", "env": "prod", "result": "failure", "sha": "d0aa73e"},
+          {"ts": "2025-08-12T11:20:00-07:00", "env": "prod", "result": "success", "sha": "d0aa73e-fix"}
+        ],
+        "automation": [
+          {"ts": "2025-08-12T07:30:00-07:00", "suite": "api", "result": "fail", "failed_tests": 4},
+          {"ts": "2025-08-12T07:50:00-07:00", "suite": "ui", "result": "fail", "failed_tests": 3}
+        ]
+      }
+    },
+    {
+      "date": "2025-08-13",
+      "metrics": {
+        "splunk_errors_per_1k_requests": 24,
+        "prod_incidents": 0,
+        "stage_to_prod_regressions": 0,
+        "automation_failures_api": 0,
+        "automation_failures_ui": 1,
+        "downtime_minutes": 0,
+        "unit_test_coverage_percent": 83.2,
+        "regression_pass_rate_percent": 98.4,
+        "deployment_success_rate_percent": 100,
+        "requests": 236100
+      },
+      "sub_scores": {
+        "splunk_error_rate": 70.0,
+        "prod_incidents": 100,
+        "stage_to_prod_regressions": 100,
+        "automation_failures_api": 100,
+        "automation_failures_ui": 95,
+        "downtime": 100,
+        "unit_test_coverage": 98.2,
+        "regression_pass_rate": 98.9,
+        "deployment_success_rate": 100
+      },
+      "health_score": 97.0,
+      "events": {
+        "splunk": [
+          {"ts": "2025-08-13T10:22:54-07:00", "severity": "warn", "count": 68}
+        ],
+        "new_relic": [],
+        "deployments": [
+          {"ts": "2025-08-13T08:03:00-07:00", "env": "prod", "result": "success", "sha": "6a77cd2"}
+        ],
+        "automation": [
+          {"ts": "2025-08-13T07:35:00-07:00", "suite": "ui", "result": "fail", "failed_tests": 1}
+        ]
+      }
+    }
+  ],
+  "aggregates": {
+    "7d": {
+      "range_start": "2025-08-07",
+      "range_end": "2025-08-13",
+      "averages": {
+        "splunk_errors_per_1k_requests": 37.4,
+        "prod_incidents": 0.57,
+        "stage_to_prod_regressions": 0.57,
+        "automation_failures_api": 1.43,
+        "automation_failures_ui": 2.00,
+        "downtime_minutes": 7.6,
+        "unit_test_coverage_percent": 82.99,
+        "regression_pass_rate_percent": 97.62,
+        "deployment_success_rate_percent": 85.7
+      },
+      "aggregate_sub_scores": {
+        "splunk_error_rate": 53.3,
+        "prod_incidents": 88.6,
+        "stage_to_prod_regressions": 82.9,
+        "automation_failures_api": 85.7,
+        "automation_failures_ui": 77.1,
+        "downtime": 93.7,
+        "unit_test_coverage": 97.6,
+        "regression_pass_rate": 95.7,
+        "deployment_success_rate": 85.7
+      },
+      "health_score": 86.9
+    }
+  }
+}
