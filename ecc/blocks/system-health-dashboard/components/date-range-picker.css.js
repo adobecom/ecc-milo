@@ -11,7 +11,7 @@ export const style = css`
   .date-range-picker {
     background: white;
     border-radius: 12px;
-    padding: 20px;
+    padding: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border: 1px solid #e1e5e9;
   }
@@ -20,7 +20,7 @@ export const style = css`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
 
   .picker-title {
@@ -57,21 +57,21 @@ export const style = css`
   .preset-buttons {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
   }
 
   .preset-btn {
-    padding: 8px 16px;
+    padding: 6px 12px;
     border: 2px solid #e1e5e9;
     background: white;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     font-weight: 500;
     transition: all 0.2s ease;
     color: #555;
     flex: 1;
-    min-width: 120px;
+    min-width: 100px;
   }
 
   .preset-btn:hover {
@@ -89,32 +89,38 @@ export const style = css`
   .custom-range {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
   }
 
   .date-inputs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    display: flex;
+    align-items: end;
+    gap: 12px;
   }
 
   .date-input-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .date-inputs .range-summary {
+    flex: 0 0 auto;
+    margin-left: 8px;
   }
 
   .date-input-group label {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     font-weight: 500;
     color: #555;
   }
 
   .date-input-group input {
-    padding: 8px 12px;
+    padding: 6px 10px;
     border: 2px solid #e1e5e9;
     border-radius: 6px;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     transition: border-color 0.2s ease;
   }
 
@@ -127,10 +133,10 @@ export const style = css`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
+    padding: 8px 12px;
     background: #f8f9fa;
     border-radius: 6px;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
   }
 
   .range-days {
@@ -145,7 +151,8 @@ export const style = css`
   /* Responsive Design */
   @media (max-width: 768px) {
     .date-inputs {
-      grid-template-columns: 1fr;
+      flex-direction: column;
+      align-items: stretch;
     }
 
     .preset-buttons {

@@ -20,14 +20,76 @@ export const style = css`
 
   /* Toolbar Styles */
   .toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     background: white;
-    padding: 16px 24px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 24px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .toolbar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e1e5e9;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .toolbar-header:hover {
+    background: #e9ecef;
+  }
+
+  .toolbar-title {
+    font-weight: 600;
+    color: #333;
+    font-size: 16px;
+    margin: 0;
+  }
+
+  .toolbar-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    color: #666;
+  }
+
+  .toolbar-toggle:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #333;
+  }
+
+  .toolbar-toggle-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+  }
+
+  .toolbar-toggle-icon.rotated {
+    transform: rotate(180deg);
+  }
+
+  .toolbar-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .toolbar-content.expanded {
+    max-height: 200px;
+  }
+
+  .toolbar-body {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     flex-wrap: wrap;
     gap: 16px;
   }

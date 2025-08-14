@@ -112,7 +112,7 @@ export default class DateRangePicker extends LitElement {
       <div class="custom-range">
         <div class="date-inputs">
           <div class="date-input-group">
-            <label for="start-date">Start Date</label>
+            <label for="start-date">Start</label>
             <input 
               type="date" 
               id="start-date"
@@ -125,7 +125,7 @@ export default class DateRangePicker extends LitElement {
             >
           </div>
           <div class="date-input-group">
-            <label for="end-date">End Date</label>
+            <label for="end-date">End</label>
             <input 
               type="date" 
               id="end-date"
@@ -138,12 +138,9 @@ export default class DateRangePicker extends LitElement {
               max=${new Date().toISOString().split('T')[0]}
             >
           </div>
-        </div>
-        <div class="range-summary">
-          <span class="range-days">${this.selectedDays} days</span>
-          <span class="range-dates">
-            ${this.customStartDate} to ${this.customEndDate}
-          </span>
+          <div class="range-summary">
+            <span class="range-days">${this.selectedDays} days</span>
+          </div>
         </div>
       </div>
     `;

@@ -14,6 +14,7 @@ export default class SystemHealthDashboard extends LitElement {
     timeRange: { type: String },
     loading: { type: Boolean },
     error: { type: String },
+    toolbarExpanded: { type: Boolean },
   };
 
   static styles = style;
@@ -25,6 +26,7 @@ export default class SystemHealthDashboard extends LitElement {
     this.timeRange = '7d';
     this.loading = false;
     this.error = null;
+    this.toolbarExpanded = false;
 
     // Subscribe to store changes
     this.unsubscribe = dashboardStore.subscribe(this.handleStateChange.bind(this));
@@ -81,29 +83,52 @@ export default class SystemHealthDashboard extends LitElement {
     return `${this.timeRange} Days`;
   }
 
+  toggleToolbar() {
+    this.toolbarExpanded = !this.toolbarExpanded;
+    this.requestUpdate();
+  }
+
+  handleToggleClick(e) {
+    e.stopPropagation();
+    this.toggleToolbar();
+  }
+
   renderToolbar() {
     return html`
       <div class="toolbar">
-        <div class="toolbar-section">
-          <span class="toolbar-label">View Mode:</span>
-          <button 
-            class="toolbar-btn ${this.viewMode === 'score' ? 'active' : ''}"
-            @click=${() => this.handleViewModeChanged({ detail: { viewMode: 'score' } })}
-          >
-            Score
-          </button>
-          <button 
-            class="toolbar-btn ${this.viewMode === 'value' ? 'active' : ''}"
-            @click=${() => this.handleViewModeChanged({ detail: { viewMode: 'value' } })}
-          >
-            Value
+        <div class="toolbar-header" @click=${this.toggleToolbar}>
+          <h3 class="toolbar-title">Dashboard Controls</h3>
+          <button class="toolbar-toggle" @click=${this.handleToggleClick}>
+            <svg class="toolbar-toggle-icon ${this.toolbarExpanded ? 'rotated' : ''}" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 10l5 5 5-5z"/>
+            </svg>
           </button>
         </div>
         
-        <date-range-picker
-          .selectedDays=${this.timeRange}
-          @dateRangeChanged=${this.handleDateRangeChanged}
-        ></date-range-picker>
+        <div class="toolbar-content ${this.toolbarExpanded ? 'expanded' : ''}">
+          <div class="toolbar-body">
+            <div class="toolbar-section">
+              <span class="toolbar-label">View Mode:</span>
+              <button 
+                class="toolbar-btn ${this.viewMode === 'score' ? 'active' : ''}"
+                @click=${() => this.handleViewModeChanged({ detail: { viewMode: 'score' } })}
+              >
+                Score
+              </button>
+              <button 
+                class="toolbar-btn ${this.viewMode === 'value' ? 'active' : ''}"
+                @click=${() => this.handleViewModeChanged({ detail: { viewMode: 'value' } })}
+              >
+                Value
+              </button>
+            </div>
+            
+            <date-range-picker
+              .selectedDays=${this.timeRange}
+              @dateRangeChanged=${this.handleDateRangeChanged}
+            ></date-range-picker>
+          </div>
+        </div>
       </div>
     `;
   }
