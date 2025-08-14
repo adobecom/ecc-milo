@@ -23,7 +23,7 @@ export default class SystemHealthDashboard extends LitElement {
     super();
     this.data = null;
     this.viewMode = 'score';
-    this.timeRange = '7d';
+    this.timeRange = 7;
     this.loading = false;
     this.error = null;
     this.toolbarExpanded = false;
