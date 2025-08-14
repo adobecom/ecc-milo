@@ -13,6 +13,12 @@ export default css`
     padding: 24px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 24px;
+    transition: all 0.3s ease;
+  }
+
+  :host(.dark-mode) .chart-card {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
   .chart-card h3 {
@@ -22,11 +28,19 @@ export default css`
     color: #333;
   }
 
+  :host(.dark-mode) .chart-card h3 {
+    color: #e1e5e9;
+  }
+
   .chart-description {
     margin: 0 0 20px 0;
     font-size: 0.875rem;
     color: #666;
     line-height: 1.4;
+  }
+
+  :host(.dark-mode) .chart-description {
+    color: #b0b0b0;
   }
 
   .chart-container {
@@ -55,6 +69,10 @@ export default css`
     font-size: 1rem;
   }
 
+  :host(.dark-mode) .no-data {
+    color: #999;
+  }
+
   /* Legend Styles */
   .legend {
     display: flex;
@@ -62,6 +80,10 @@ export default css`
     gap: 8px;
     padding: 16px 0;
     border-top: 1px solid #f0f0f0;
+  }
+
+  :host(.dark-mode) .legend {
+    border-top-color: #404040;
   }
 
   .legend-item {
@@ -78,12 +100,20 @@ export default css`
     background: #f8f9fa;
   }
 
+  :host(.dark-mode) .legend-item:hover {
+    background: #404040;
+  }
+
   .legend-color {
     width: 16px;
     height: 16px;
     border-radius: 3px;
     flex-shrink: 0;
     border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  :host(.dark-mode) .legend-color {
+    border-color: rgba(255, 255, 255, 0.2);
   }
 
   .legend-content {
@@ -99,12 +129,20 @@ export default css`
     flex: 1;
   }
 
+  :host(.dark-mode) .legend-label {
+    color: #e1e5e9;
+  }
+
   .legend-details {
     display: flex;
     gap: 8px;
     align-items: center;
     font-size: 0.8rem;
     color: #666;
+  }
+
+  :host(.dark-mode) .legend-details {
+    color: #999;
   }
 
   .legend-score {
@@ -114,9 +152,17 @@ export default css`
     text-align: right;
   }
 
+  :host(.dark-mode) .legend-score {
+    color: #e1e5e9;
+  }
+
   .legend-weight {
     color: #999;
     font-style: italic;
+  }
+
+  :host(.dark-mode) .legend-weight {
+    color: #b0b0b0;
   }
 
   .legend-contribution {
@@ -124,6 +170,10 @@ export default css`
     color: #007bff;
     min-width: 40px;
     text-align: right;
+  }
+
+  :host(.dark-mode) .legend-contribution {
+    color: #4dabf7;
   }
 
   /* Responsive adjustments */

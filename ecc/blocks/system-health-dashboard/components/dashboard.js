@@ -135,37 +135,41 @@ export default class SystemHealthDashboard extends LitElement {
       <div class="toolbar">
         <div class="toolbar-header" @click=${this.toggleToolbar}>
           <h3 class="toolbar-title">Dashboard Controls</h3>
-          <div class="toolbar-controls">
-            <button 
-              class="dark-mode-toggle"
-              @click=${this.handleDarkModeToggle}
-              title="Toggle dark mode"
-            >
-              <svg class="dark-mode-icon" viewBox="0 0 24 24" fill="currentColor">
-                ${this.darkMode ? html`
-                  <!-- Sun icon for light mode -->
-                  <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                ` : html`
-                  <!-- Moon icon for dark mode -->
-                  <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                `}
-              </svg>
-            </button>
-            <button class="toolbar-toggle" @click=${this.handleToggleClick}>
-              <svg class="toolbar-toggle-icon ${this.toolbarExpanded ? 'rotated' : ''}" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M7 10l5 5 5-5z"/>
-              </svg>
-            </button>
-          </div>
+          <button class="toolbar-toggle" @click=${this.handleToggleClick}>
+            <svg class="toolbar-toggle-icon ${this.toolbarExpanded ? 'rotated' : ''}" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 10l5 5 5-5z"/>
+            </svg>
+          </button>
         </div>
         
         <div class="toolbar-content ${this.toolbarExpanded ? 'expanded' : ''}">
           <div class="toolbar-body">
             <div class="toolbar-section">
               <date-range-picker
+                class=${this.darkMode ? 'dark-mode' : ''}
                 .selectedDays=${this.timeRange}
                 @dateRangeChanged=${this.handleDateRangeChanged}
               ></date-range-picker>
+            </div>
+            
+            <div class="toolbar-section">
+              <span class="toolbar-label">Theme:</span>
+              <button 
+                class="dark-mode-toggle"
+                @click=${this.handleDarkModeToggle}
+                title="Toggle dark mode"
+              >
+                <svg class="dark-mode-icon" viewBox="0 0 24 24" fill="currentColor">
+                  ${this.darkMode ? html`
+                    <!-- Sun icon for light mode -->
+                    <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                  ` : html`
+                    <!-- Moon icon for dark mode -->
+                    <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                  `}
+                </svg>
+                <span class="toggle-text">${this.darkMode ? 'Light' : 'Dark'} Mode</span>
+              </button>
             </div>
             
             <div class="toolbar-section">
@@ -278,6 +282,7 @@ export default class SystemHealthDashboard extends LitElement {
 
     return html`
       <score-chart
+        class=${this.darkMode ? 'dark-mode' : ''}
         .data=${this.data.days}
         .timeRange=${this.timeRange}
       ></score-chart>
@@ -289,6 +294,7 @@ export default class SystemHealthDashboard extends LitElement {
 
     return html`
       <score-donut-chart
+        class=${this.darkMode ? 'dark-mode' : ''}
         .data=${this.currentData}
         .viewMode=${this.viewMode}
       ></score-donut-chart>
@@ -304,6 +310,7 @@ export default class SystemHealthDashboard extends LitElement {
       <div class="sub-scores-grid">
         ${repeat(tabKeys, (tabKey) => html`
           <metric-card
+            class=${this.darkMode ? 'dark-mode' : ''}
             .tabKey=${tabKey}
             .data=${data}
             .viewMode=${this.viewMode}

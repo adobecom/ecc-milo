@@ -17,9 +17,18 @@ export const style = css`
     transition: all 0.2s ease;
   }
 
+  :host(.dark-mode) .metric-card {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
   .metric-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  :host(.dark-mode) .metric-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   }
 
   .metric-card.green {
@@ -73,6 +82,10 @@ export const style = css`
     gap: 8px;
   }
 
+  :host(.dark-mode) .metric-title {
+    color: #e1e5e9;
+  }
+
   .metric-icon {
     font-size: 1rem;
   }
@@ -86,11 +99,20 @@ export const style = css`
     border-radius: 4px;
   }
 
+  :host(.dark-mode) .metric-weight {
+    color: #999;
+    background: #404040;
+  }
+
   .metric-value {
     font-size: 1.5rem;
     font-weight: 700;
     color: #333;
     margin-bottom: 8px;
+  }
+
+  :host(.dark-mode) .metric-value {
+    color: #e1e5e9;
   }
 
   .metric-footer {
@@ -100,6 +122,10 @@ export const style = css`
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 8px;
+  }
+
+  :host(.dark-mode) .metric-footer {
+    color: #999;
   }
 
   .metric-description {

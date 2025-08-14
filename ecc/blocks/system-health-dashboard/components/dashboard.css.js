@@ -19,9 +19,13 @@ export const style = css`
   }
 
   .dashboard-container {
-    max-width: 1400px;
+    max-width: calc(100% - 80px);
     margin: 0 auto;
-    padding: 20px;
+    padding: 20px 40px;
+  }
+
+  .dashboard-container.dark-mode {
+    background: #1a1a1a;
   }
 
   /* Toolbar Styles */
@@ -55,37 +59,34 @@ export const style = css`
     border-bottom-color: #404040;
   }
 
-  .toolbar-controls {
+  .dark-mode-toggle {
+    background: none;
+    border: 2px solid #e1e5e9;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    color: #555;
     display: flex;
     align-items: center;
     gap: 8px;
-  }
-
-  .dark-mode-toggle {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-    color: #666;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
   }
 
   .dark-mode-toggle:hover {
-    background: rgba(0, 0, 0, 0.1);
-    color: #333;
+    border-color: #007bff;
+    color: #007bff;
   }
 
   .dark-mode .dark-mode-toggle {
-    color: #999;
+    border-color: #404040;
+    color: #b0b0b0;
   }
 
   .dark-mode .dark-mode-toggle:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #e1e5e9;
+    border-color: #4dabf7;
+    color: #4dabf7;
   }
 
   .dark-mode-icon {

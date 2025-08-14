@@ -13,6 +13,12 @@ export default css`
     padding: 24px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 24px;
+    transition: all 0.3s ease;
+  }
+
+  :host(.dark-mode) .chart-card {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
   .chart-card h3 {
@@ -20,6 +26,10 @@ export default css`
     font-size: 1.25rem;
     font-weight: 600;
     color: #333;
+  }
+
+  :host(.dark-mode) .chart-card h3 {
+    color: #e1e5e9;
   }
 
   .chart-container {
@@ -41,6 +51,10 @@ export default css`
     font-size: 1rem;
   }
 
+  :host(.dark-mode) .no-data {
+    color: #999;
+  }
+
   /* Legend Styles */
   .legend {
     display: flex;
@@ -48,6 +62,10 @@ export default css`
     gap: 12px;
     padding: 16px 0;
     border-top: 1px solid #f0f0f0;
+  }
+
+  :host(.dark-mode) .legend {
+    border-top-color: #404040;
   }
 
   .legend-item {
@@ -66,8 +84,16 @@ export default css`
     background: #f8f9fa;
   }
 
+  :host(.dark-mode) .legend-item:hover {
+    background: #404040;
+  }
+
   .legend-item.active {
     background: #f8f9fa;
+  }
+
+  :host(.dark-mode) .legend-item.active {
+    background: #404040;
   }
 
   .legend-item.inactive {
@@ -90,14 +116,26 @@ export default css`
     white-space: nowrap;
   }
 
+  :host(.dark-mode) .legend-label {
+    color: #e1e5e9;
+  }
+
   .legend-toggle {
     font-size: 14px;
     color: #666;
     margin-left: 4px;
   }
 
+  :host(.dark-mode) .legend-toggle {
+    color: #999;
+  }
+
   .legend-item.active .legend-toggle {
     color: #007bff;
+  }
+
+  :host(.dark-mode) .legend-item.active .legend-toggle {
+    color: #4dabf7;
   }
 
   /* Responsive Design */

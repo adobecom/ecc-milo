@@ -14,6 +14,13 @@ export const style = css`
     padding: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border: 1px solid #e1e5e9;
+    transition: all 0.3s ease;
+  }
+
+  :host(.dark-mode) .date-range-picker {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border-color: #404040;
   }
 
   .picker-header {
@@ -30,6 +37,10 @@ export const style = css`
     color: #333;
   }
 
+  :host(.dark-mode) .picker-title {
+    color: #e1e5e9;
+  }
+
   .custom-toggle {
     padding: 6px 12px;
     border: 2px solid #e1e5e9;
@@ -42,15 +53,31 @@ export const style = css`
     color: #555;
   }
 
+  :host(.dark-mode) .custom-toggle {
+    border-color: #404040;
+    background: #2d2d2d;
+    color: #b0b0b0;
+  }
+
   .custom-toggle:hover {
     border-color: #007bff;
     color: #007bff;
+  }
+
+  :host(.dark-mode) .custom-toggle:hover {
+    border-color: #4dabf7;
+    color: #4dabf7;
   }
 
   .custom-toggle.active {
     background: #007bff;
     border-color: #007bff;
     color: white;
+  }
+
+  :host(.dark-mode) .custom-toggle.active {
+    background: #4dabf7;
+    border-color: #4dabf7;
   }
 
   /* Preset Buttons */
@@ -74,15 +101,31 @@ export const style = css`
     min-width: 100px;
   }
 
+  :host(.dark-mode) .preset-btn {
+    border-color: #404040;
+    background: #2d2d2d;
+    color: #b0b0b0;
+  }
+
   .preset-btn:hover {
     border-color: #007bff;
     color: #007bff;
+  }
+
+  :host(.dark-mode) .preset-btn:hover {
+    border-color: #4dabf7;
+    color: #4dabf7;
   }
 
   .preset-btn.active {
     background: #007bff;
     border-color: #007bff;
     color: white;
+  }
+
+  :host(.dark-mode) .preset-btn.active {
+    background: #4dabf7;
+    border-color: #4dabf7;
   }
 
   /* Custom Range */
