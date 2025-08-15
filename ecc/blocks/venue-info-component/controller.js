@@ -17,8 +17,10 @@ let respImageId = null;
 let respImageConfigs = null;
 
 function togglePrefillableFieldsHiddenState(component) {
+  const input = component.querySelector('#venue-info-venue-name');
   const address = component.querySelector('#google-place-formatted-address');
 
+  input.classList.toggle('hidden', !input.value);
   address.classList.toggle('hidden', !address.value);
 }
 
@@ -35,6 +37,7 @@ async function loadGoogleMapsAPI(callback) {
 
   const script = document.createElement('script');
   const apiKey = await getSecret(`${currentEnv}-google-places-api`);
+
   script.src = `https://maps.googleapis.com/maps/api/js?loading=async&key=${apiKey}&libraries=places&callback=onGoogleMapsApiLoaded`;
   script.async = true;
   script.defer = true;
@@ -135,12 +138,31 @@ function getVenueDataInForm(component) {
   return venueData;
 }
 
-function initAutocomplete(el) {
-  const venueName = el.querySelector('#venue-info-venue-name');
-  // eslint-disable-next-line no-undef
-  if (!google) return;
-  // eslint-disable-next-line no-undef
-  const autocomplete = new google.maps.places.Autocomplete(venueName.shadowRoot.querySelector('input'));
+/**
+ * NEW: Place Autocomplete (New) integration.
+ * Replaces legacy google.maps.places.Autocomplete with PlaceAutocompleteElement.
+ * - Only one visible input (the new element).
+ * - Writes chosen values back to your existing hidden fields.
+ */
+async function initAutocomplete(el, props) {
+  if (!window.google || !window.google.maps) return;
+
+  await window.google.maps.importLibrary('places');
+
+  // Host element you previously used to read/write the "venue name" value.
+  const venueNameHost = el.querySelector('#venue-info-venue-name');
+
+  const autoCompleteInput = new window.google.maps.places.PlaceAutocompleteElement();
+
+  autoCompleteInput.setAttribute('placeholder', 'Enter a venue');
+
+  const venueNameHostContainer = venueNameHost.closest('.text-field-row');
+  if (venueNameHostContainer) {
+    venueNameHostContainer.insertAdjacentElement('beforebegin', autoCompleteInput);
+  } else {
+    // This would never happen, but just in case
+    venueNameHost.insertAdjacentElement('beforebegin', autoCompleteInput);
+  }
 
   const placeId = el.querySelector('#google-place-id');
   const placeLAT = el.querySelector('#google-place-lat');
@@ -149,62 +171,78 @@ function initAutocomplete(el) {
   const addressComponentsInput = el.querySelector('#google-place-address-components');
   const formattedAddress = el.querySelector('#google-place-formatted-address');
 
-  autocomplete.setFields(['formatted_address', 'name', 'address_components', 'geometry', 'place_id', 'utc_offset_minutes', 'url']);
+  // Helper: take new v1 addressComponents and convert to your camel-cased structure
+  const normalizeComponents = (components) => {
+    if (!Array.isArray(components)) return [];
+    return components.map((c) => ({
+      longName: c.longText,
+      shortName: c.shortText,
+      types: c.types,
+    }));
+  };
 
-  autocomplete.addListener('place_changed', () => {
-    const place = autocomplete.getPlace();
+  // Helper: find "city" from new components using your candidate list
+  const findCity = (components) => {
+    const cityCandidates = ['locality', 'postal_town', 'administrative_area_level_2', 'sublocality_level_1'];
+    const cityComponent = components.find((c) => c.types?.some((t) => cityCandidates.includes(t)));
+    return cityComponent?.longName || '';
+  };
 
-    if (place.address_components) {
-      let components = place.address_components;
+  // Handle selection
+  autoCompleteInput.addEventListener('gmp-select', async ({ placePrediction }) => {
+    try {
+      const place = placePrediction.toPlace();
+      await place.fetchFields({ fields: ['id', 'displayName', 'formattedAddress', 'location', 'addressComponents', 'utcOffsetMinutes'] });
 
-      const addressInfo = { city: '' };
+      // Normalize and validate components
+      const comps = normalizeComponents(place.addressComponents);
+      const city = findCity(comps);
 
-      const cityCandidates = ['locality', 'postal_town', 'administrative_area_level_2', 'sublocality_level_1'];
+      changeInputValue(addressComponentsInput, 'value', JSON.stringify(comps));
 
-      components.forEach((component) => {
-        if (!addressInfo.city
-          && cityCandidates.some((type) => component.types.includes(type))) {
-          addressInfo.city = component.long_name;
-        }
-      });
-
-      components = components.map((component) => {
-        const obj = {};
-
-        Object.keys(component).forEach((key) => {
-          const newKey = key.replace(/_(.)/g, (_, match) => match.toUpperCase());
-          obj[newKey] = component[key];
-        });
-
-        return obj;
-      });
-
-      changeInputValue(addressComponentsInput, 'value', JSON.stringify(components));
-
-      if (Object.values(addressInfo).some((v) => !v)) {
+      if (!city) {
         el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'The selection is not a valid venue.' } }, bubbles: true, composed: true }));
         resetAllFields(el);
         togglePrefillableFieldsHiddenState(el);
         return;
       }
 
-      if (place.name) changeInputValue(venueName, 'value', place.name);
-      changeInputValue(placeId, 'value', place.place_id);
+      // Write values back to your existing hidden/known inputs
+      if (place.displayName?.text) changeInputValue(venueNameHost, 'value', place.displayName.text);
+      changeInputValue(placeId, 'value', place.id || placePrediction?.placeId);
 
-      BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city: addressInfo.city });
+      if (place.location) {
+        const lat = typeof place.location.lat === 'function' ? place.location.lat() : place.location.lat;
+        const lng = typeof place.location.lng === 'function' ? place.location.lng() : place.location.lng;
+        placeLAT.value = lat;
+        placeLNG.value = lng;
+      } else {
+        placeLAT.value = '';
+        placeLNG.value = '';
+      }
+
+      placeGmtOffset.value = (place.utcOffsetMinutes ?? 0) / 60;
+
+      if (place.formattedAddress) {
+        changeInputValue(formattedAddress, 'value', place.formattedAddress);
+      } else {
+        changeInputValue(formattedAddress, 'value', '');
+      }
+
+      BlockMediator.set('eventDupMetrics', { ...BlockMediator.get('eventDupMetrics'), city });
+      togglePrefillableFieldsHiddenState(el);
+    } catch (err) {
+      window.lana?.log(`Places selection failed: ${err?.message || err}`);
+      el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'Failed to fetch place details.' } }, bubbles: true, composed: true }));
     }
+  });
 
-    if (place.geometry) {
-      placeGmtOffset.value = place.utc_offset_minutes / 60;
-      placeLAT.value = place.geometry.location.lat();
-      placeLNG.value = place.geometry.location.lng();
+  // Keep your clear/reset behavior when user empties the field via the new input
+  autoCompleteInput.addEventListener('change', () => {
+    if (!autoCompleteInput.value) {
+      resetAllFields(el);
+      togglePrefillableFieldsHiddenState(el);
     }
-
-    if (place.formatted_address) {
-      changeInputValue(formattedAddress, 'value', place.formatted_address);
-    }
-
-    togglePrefillableFieldsHiddenState(el);
   });
 }
 
@@ -290,7 +328,7 @@ export default async function init(component, props) {
   const { createTag } = await import(`${LIBS}/utils/utils.js`);
   const eventData = props.eventDataResp;
 
-  await loadGoogleMapsAPI(() => initAutocomplete(component));
+  await loadGoogleMapsAPI(() => initAutocomplete(component, props));
 
   const [
     venue,
@@ -307,15 +345,15 @@ export default async function init(component, props) {
   const venueRTEOutput = component.querySelector('#venue-additional-info-rte-output');
   const venuePostEventCheckbox = component.querySelector('#checkbox-venue-info-visible');
   const venueAdditionalInfoPostEventCheckbox = component.querySelector('#checkbox-venue-additional-info-visible');
+  const venueFormattedAddress = component.querySelector('#google-place-formatted-address');
   const dz = component.querySelector('image-dropzone');
 
   togglePrefillableFieldsHiddenState(component);
 
-  venueNameInput.addEventListener('change', () => {
-    if (!venueNameInput.value) {
-      resetAllFields(component);
-      togglePrefillableFieldsHiddenState(component);
-    }
+  // Add error helper error text to encourage user to use the autocomplete to select a venue
+  venueNameInput.invalid = venueNameInput.value && !venueFormattedAddress.value;
+  venueNameInput.addEventListener('input', () => {
+    venueNameInput.invalid = venueNameInput.value && !venueFormattedAddress.value;
   });
 
   if (venuePostEventCheckbox && venueAdditionalInfoPostEventCheckbox) {
