@@ -7,14 +7,14 @@ function decorateSWCTextField(row, extraOptions) {
   row.classList.add('text-field-row');
 
   const cols = row.querySelectorAll(':scope > div');
-  if (!cols.length) return;
+  if (!cols.length) return null;
   const [placeholderCol, maxLengthCol] = cols;
   const text = placeholderCol.textContent.trim();
 
   let maxCharNum; let
     attrTextEl;
   if (maxLengthCol) {
-    attrTextEl = createTag('div', { class: 'attr-text' }, maxLengthCol.textContent.trim());
+    attrTextEl = createTag('sp-help-text', { slot: 'help-text' }, maxLengthCol.textContent.trim());
     maxCharNum = maxLengthCol.querySelector('strong')?.textContent.trim();
   }
 
@@ -29,8 +29,10 @@ function decorateSWCTextField(row, extraOptions) {
   const wrapper = createTag('div', { class: 'info-field-wrapper' });
   row.innerHTML = '';
   wrapper.append(input);
-  if (attrTextEl) wrapper.append(attrTextEl);
+  if (attrTextEl) input.append(attrTextEl);
   row.append(wrapper);
+
+  return input;
 }
 
 function decorateImageDropzones(row) {
@@ -136,11 +138,15 @@ export default function init(el) {
         generateToolTip(r);
         break;
       case 1:
-        decorateSWCTextField(r, {
-          id: 'venue-info-venue-name',
-          quiet: true,
-          size: 'xl',
-        });
+        (() => {
+          const venueNameInput = decorateSWCTextField(r, {
+            id: 'venue-info-venue-name',
+            quiet: true,
+            size: 'xl',
+          });
+          const inputError = createTag('sp-help-text', { slot: 'negative-help-text' }, 'Please use the autocomplete to select a venue. Once you\'ve selected a venue, you may then update the venue name.', { parent: venueNameInput });
+          venueNameInput.appendChild(inputError);
+        })();
         break;
       case 2:
         decorateSWCTextField(r, {

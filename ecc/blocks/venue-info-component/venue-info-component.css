@@ -110,6 +110,10 @@
   top: 0;
 }
 
+.venue-info-component .text-field-row sp-help-text {
+  justify-content: flex-end;
+}
+
 .venue-info-component .progress-wrapper.hidden {
   display: none;
 }

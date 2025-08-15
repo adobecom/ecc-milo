@@ -35,8 +35,6 @@ async function loadGoogleMapsAPI(callback) {
   const script = document.createElement('script');
   const apiKey = await getSecret(`${currentEnv}-google-places-api`);
 
-  // Keep libraries=places for the new Places UI; callback will run initAutocomplete.
-  // You can add &language=en if you always want English field text.
   script.src = `https://maps.googleapis.com/maps/api/js?loading=async&key=${apiKey}&libraries=places&callback=onGoogleMapsApiLoaded`;
   script.async = true;
   script.defer = true;
@@ -144,36 +142,25 @@ function getVenueDataInForm(component) {
  * - Writes chosen values back to your existing hidden fields.
  */
 async function initAutocomplete(el, props) {
-  // Ensure Places library is present for the new UI.
-  // eslint-disable-next-line no-undef
-  await google.maps.importLibrary('places');
+  if (!window.google || !window.google.maps) return;
+
+  await window.google.maps.importLibrary('places');
 
   // Host element you previously used to read/write the "venue name" value.
   const venueNameHost = el.querySelector('#venue-info-venue-name');
 
-  // Hide the old visible input (if it exists) so we don't have 2 visible inputs.
-  try {
-    const oldInput = venueNameHost?.shadowRoot?.querySelector('input') || venueNameHost?.querySelector('input');
-    if (oldInput) oldInput.style.display = 'none';
-  } catch (e) {
-    // Non-fatal if host has no shadow input.
+  const autoCompleteInput = new window.google.maps.places.PlaceAutocompleteElement();
+
+  autoCompleteInput.setAttribute('placeholder', 'Enter a venue');
+
+  const venueNameHostContainer = venueNameHost.closest('.text-field-row');
+  if (venueNameHostContainer) {
+    venueNameHostContainer.insertAdjacentElement('beforebegin', autoCompleteInput);
+  } else {
+    // This would never happen, but just in case
+    venueNameHost.insertAdjacentElement('beforebegin', autoCompleteInput);
   }
 
-  // Build the new Autocomplete UI
-  // eslint-disable-next-line no-undef
-  const ac = new google.maps.places.PlaceAutocompleteElement();
-
-  // Optional: biasing or restrictions—uncomment or set dynamically if needed
-  // ac.country = 'ca';     // limit suggestions to Canada
-  // ac.types = ['geocode']; // or ['establishment'] / ['address'] if you want typed filtering
-
-  // Basic UX: placeholder that mirrors your existing field label
-  ac.setAttribute('placeholder', 'Enter a venue');
-
-  // Insert the new element right after the old host
-  venueNameHost.insertAdjacentElement('afterend', ac);
-
-  // Cache hidden inputs you already use
   const placeId = el.querySelector('#google-place-id');
   const placeLAT = el.querySelector('#google-place-lat');
   const placeLNG = el.querySelector('#google-place-lng');
@@ -199,7 +186,7 @@ async function initAutocomplete(el, props) {
   };
 
   // Handle selection
-  ac.addEventListener('gmp-select', async ({ placePrediction }) => {
+  autoCompleteInput.addEventListener('gmp-select', async ({ placePrediction }) => {
     try {
       const place = placePrediction.toPlace();
       await place.fetchFields({ fields: ['id', 'displayName', 'formattedAddress', 'location', 'addressComponents', 'utcOffsetMinutes'] });
@@ -248,8 +235,8 @@ async function initAutocomplete(el, props) {
   });
 
   // Keep your clear/reset behavior when user empties the field via the new input
-  ac.addEventListener('input', () => {
-    if (!ac.value) {
+  autoCompleteInput.addEventListener('change', () => {
+    if (!autoCompleteInput.value) {
       resetAllFields(el);
       togglePrefillableFieldsHiddenState(el);
     }
@@ -355,16 +342,15 @@ export default async function init(component, props) {
   const venueRTEOutput = component.querySelector('#venue-additional-info-rte-output');
   const venuePostEventCheckbox = component.querySelector('#checkbox-venue-info-visible');
   const venueAdditionalInfoPostEventCheckbox = component.querySelector('#checkbox-venue-additional-info-visible');
+  const venueFormattedAddress = component.querySelector('#google-place-formatted-address');
   const dz = component.querySelector('image-dropzone');
 
   togglePrefillableFieldsHiddenState(component);
 
-  // When legacy host value is cleared (via programmatic reset), ensure hidden fields reset as well.
-  venueNameInput.addEventListener('change', () => {
-    if (!venueNameInput.value) {
-      resetAllFields(component);
-      togglePrefillableFieldsHiddenState(component);
-    }
+  // Add error helper error text to encourage user to use the autocomplete to select a venue
+  venueNameInput.invalid = venueNameInput.value && !venueFormattedAddress.value;
+  venueNameInput.addEventListener('input', () => {
+    venueNameInput.invalid = venueNameInput.value && !venueFormattedAddress.value;
   });
 
   if (venuePostEventCheckbox && venueAdditionalInfoPostEventCheckbox) {
