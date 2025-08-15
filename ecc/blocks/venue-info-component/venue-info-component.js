@@ -20,7 +20,7 @@ function decorateSWCTextField(row, extraOptions) {
 
   const isRequired = extraOptions.required || attrTextEl?.textContent.trim().endsWith('*');
 
-  const input = createTag('sp-textfield', { ...extraOptions, class: 'venue-info-text text-input', placeholder: text });
+  const input = createTag('sp-textfield', { ...extraOptions, class: `venue-info-text text-input ${extraOptions.class}`, placeholder: text });
 
   if (isRequired) input.required = true;
 
@@ -141,6 +141,7 @@ export default function init(el) {
         (() => {
           const venueNameInput = decorateSWCTextField(r, {
             id: 'venue-info-venue-name',
+            class: 'hidden',
             quiet: true,
             size: 'xl',
           });

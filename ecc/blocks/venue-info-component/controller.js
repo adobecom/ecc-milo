@@ -17,7 +17,10 @@ let respImageId = null;
 let respImageConfigs = null;
 
 function togglePrefillableFieldsHiddenState(component) {
+  const input = component.querySelector('#venue-info-venue-name');
   const address = component.querySelector('#google-place-formatted-address');
+
+  input.classList.toggle('hidden', !input.value);
   address.classList.toggle('hidden', !address.value);
 }
 
