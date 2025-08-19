@@ -183,18 +183,39 @@ export function getFilteredCachedResponse() {
   return filteredResponse;
 }
 
+// Deep merge function that handles nested objects generically
+function deepMerge(target, source) {
+  const result = { ...target };
+
+  Object.keys(source).forEach((key) => {
+    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      // If both target and source have the same key as an object, merge them
+      if (target[key] && typeof target[key] === 'object' && !Array.isArray(target[key])) {
+        result[key] = deepMerge(target[key], source[key]);
+      } else {
+        // If target doesn't have the key or it's not an object, use source
+        result[key] = { ...source[key] };
+      }
+    } else {
+      // For non-objects or arrays, source takes precedence
+      result[key] = source[key];
+    }
+  });
+
+  return result;
+}
+
 export default function getJoinedData() {
   runDelete();
 
   const filteredResponse = getFilteredCachedResponse();
   const filteredPayload = getFilteredCachedPayload();
 
-  // Combine global and localized data
-  const finalPayload = {
-    ...filteredResponse,
-    ...filteredPayload,
-    modificationTime: filteredResponse.modificationTime,
-  };
+  // Deep merge response and payload, with payload taking precedence for conflicts
+  const finalPayload = deepMerge(filteredResponse, filteredPayload);
+
+  // Ensure modificationTime comes from response
+  finalPayload.modificationTime = filteredResponse.modificationTime;
 
   return finalPayload;
 }
