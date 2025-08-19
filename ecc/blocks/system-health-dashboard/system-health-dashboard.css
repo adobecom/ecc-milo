@@ -1,0 +1,13 @@
+/* System Health Dashboard Styles */
+.system-health-dashboard {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+/* Ensure the dashboard takes full width */
+system-health-dashboard {
+  display: block;
+  width: 100%;
+}
