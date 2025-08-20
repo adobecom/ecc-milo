@@ -1514,3 +1514,26 @@ export async function fetchRsvpFormConfigs() {
     return { cloudType: id, config };
   }));
 }
+
+export async function getSchedules() {
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    // const response = await safeFetch(`${host}/v1/schedules`, options);
+    const response = await fetch(`${host}/v1/schedules`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.log('response not ok');
+      window.lana?.log(`Failed to get schedules. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    console.log('error');
+    window.lana?.log(`Failed to get schedules:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
