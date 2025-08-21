@@ -98,7 +98,6 @@ export const EVENT_DATA_FILTER = {
   video: { type: 'object', localizable: false, cloneable: true, submittable: true, ref: VIDEO_DATA_REF_FILTER },
   registration: { type: 'object', localizable: false, cloneable: true, submittable: true, ref: REGISTRATION_DATA_REF_FILTER },
   marketoIntegration: { type: 'object', localizable: false, cloneable: false, submittable: true, ref: MARKETO_INTEGRATION_DATA_REF_FILTER },
-  externalEventId: { type: 'string', localizable: false, cloneable: false, submittable: true },
 };
 
 /**

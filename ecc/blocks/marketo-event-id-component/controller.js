@@ -40,7 +40,7 @@ export function onSubmit(component, props) {
 
   if (!rawMarketoId || isMczEvent === false) {
     removeData.push({
-      key: 'eventExternalId',
+      key: 'externalEventId',
       path: '',
     });
   }
@@ -48,7 +48,7 @@ export function onSubmit(component, props) {
   // Store with prefix for backend consistency
   const marketoIdWithPrefix = addMczPrefix(rawMarketoId);
 
-  setPropsPayload(props, { eventExternalId: marketoIdWithPrefix }, removeData);
+  setPropsPayload(props, { externalEventId: marketoIdWithPrefix }, removeData);
 }
 
 function loadMarketoEventInfo(component, marketoId) {
@@ -57,11 +57,11 @@ function loadMarketoEventInfo(component, marketoId) {
     src: `https://engage.adobe.com/${urlFormatId}.html?mkto_src=emc`,
     class: 'hidden',
   });
-  component.append(iframe);
+    component.append(iframe);
 }
 
 function setMarketoId(data, component, locale) {
-  const marketoIdFromDb = getAttribute(data, 'eventExternalId', locale);
+  const marketoIdFromDb = getAttribute(data, 'externalEventId', locale);
 
   if (!marketoIdFromDb) return;
 
@@ -82,7 +82,7 @@ function mczEventSideEffect(component, props) {
   const mczSection = component.querySelector('div.marketo-event-id');
   if (props.eventDataResp?.eventId) {
     // The event has already created. The marketer cannot change this section anymore.
-    if (props.eventDataResp?.eventExternalId) {
+    if (props.eventDataResp?.externalEventId) {
       // Disable this section
       const checkbox = component.querySelector('sp-checkbox');
       checkbox.checked = true;
@@ -158,10 +158,18 @@ async function updateFormUsingMarketoData(params, component, props) {
   const series = await getSeriesForUser();
   const seriesId = series.find((s) => s.seriesName === seriesName)?.seriesId;
 
-  const localStartDate = convertDateToYYYYMMDD(params.profile['Event Start Date']);
-  const localEndDate = convertDateToYYYYMMDD(params.profile['Event End Date']);
-  const localStartTime = convertTimeToHHMMSS(params.profile['Event Start Time']);
-  const localEndTime = convertTimeToHHMMSS(params.profile['Event End Time']);
+  const eventStartDateTime = params.profile['Event Start Date Time ISO'];
+  const eventEndDateTime = params.profile['Event End Date Time ISO'];
+
+  const localStartDate = eventStartDateTime.split('T')[0];
+  const localEndDate = eventEndDateTime.split('T')[0];
+  const localStartTime = eventStartDateTime.split('T')[1].split(':')[0];
+  const localEndTime = eventEndDateTime.split('T')[1].split(':')[0];
+
+  // const localStartDate = convertDateToYYYYMMDD(params.profile['Event Start Date']);
+  // const localEndDate = convertDateToYYYYMMDD(params.profile['Event End Date']);
+  // const localStartTime = convertTimeToHHMMSS(params.profile['Event Start Time']);
+  // const localEndTime = convertTimeToHHMMSS(params.profile['Event End Time']);
 
   const eventInfo = {
     title: params.profile['Event Name'],
@@ -175,9 +183,7 @@ async function updateFormUsingMarketoData(params, component, props) {
 
   if (seriesId) {
     eventInfo.seriesId = seriesId;
-  }
-  // series should not be locked.
-
+  }  
   // lookup eventId from eventInfo.title
   console.log('eventInfo : ', eventInfo);
   props.eventDataResp = { ...props.eventDataResp, ...eventInfo };
