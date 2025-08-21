@@ -64,7 +64,7 @@ export const EVENT_DATA_FILTER = {
   seriesId: { type: 'string', localizable: false, cloneable: true, submittable: true },
   communityTopicUrl: { type: 'string', localizable: false, cloneable: true, submittable: true },
   cta: { type: 'array', localizable: true, cloneable: true, submittable: true },
-  eventExternalId: { type: 'string', localizable: false, cloneable: false, submittable: true },
+  externalEventId: { type: 'string', localizable: false, cloneable: false, submittable: true },
   title: { type: 'string', localizable: true, cloneable: true, submittable: true },
   enTitle: { type: 'string', localizable: false, cloneable: true, submittable: true },
   defaultLocale: { type: 'string', localizable: false, cloneable: true, submittable: true },
@@ -98,6 +98,7 @@ export const EVENT_DATA_FILTER = {
   video: { type: 'object', localizable: false, cloneable: true, submittable: true, ref: VIDEO_DATA_REF_FILTER },
   registration: { type: 'object', localizable: false, cloneable: true, submittable: true, ref: REGISTRATION_DATA_REF_FILTER },
   marketoIntegration: { type: 'object', localizable: false, cloneable: false, submittable: true, ref: MARKETO_INTEGRATION_DATA_REF_FILTER },
+  externalEventId: { type: 'string', localizable: false, cloneable: false, submittable: true },
 };
 
 /**

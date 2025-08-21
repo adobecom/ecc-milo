@@ -315,13 +315,13 @@ async function loadEventData(props) {
   const urlParams = new URLSearchParams(queryString);
   let eventId = urlParams.get('eventId');
 
-  const marketoEventId = urlParams.get('eventExternalId');
+  const marketoEventId = urlParams.get('externalEventId');
 
   if (!eventId && marketoEventId && marketoEventId.startsWith('mcz-')) {
     const eventObj = await getEventByExternalId(marketoEventId);
     if (!eventObj.error) {
       eventId = eventObj.eventId;
-      props.payload.eventExternalId = marketoEventId;
+      props.payload.externalEventId = marketoEventId;
     }
   }
 
