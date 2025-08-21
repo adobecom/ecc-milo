@@ -151,6 +151,41 @@ function convertTimeToHHMMSS(time) {
   return `${hh}:${mm}:00`;
 }
 
+/**
+ * Convert time from hhmmss format to hh:mm:ss format
+ * @param {string|number} time - Time in hhmmss format (e.g., 101010)
+ * @returns {string} Time in hh:mm:ss format (e.g., 10:10:10)
+ */
+function formatDate(date) {
+  // Ensure input is a string
+  const str = String(date).padStart(6, '0'); // pad in case of missing leading zeros
+
+  // Extract hh, mm, ss
+  const year = str.substring(0, 4);
+  const mm = str.substring(4, 6);
+  const dd = str.substring(6, 8);
+
+  return `${year}-${mm}-${dd}`;
+}
+
+/**
+ * Convert time from hhmmss format to hh:mm:ss format
+ * @param {string|number} time - Time in hhmmss format (e.g., 101010)
+ * @returns {string} Time in hh:mm:ss format (e.g., 10:10:10)
+ */
+function formatTime(time) {
+  // Ensure input is a string
+  const str = String(time).padStart(6, '0'); // pad in case of missing leading zeros
+
+  // Extract hh, mm, ss
+  const hh = str.substring(0, 2);
+  const mm = str.substring(2, 4);
+  const ss = str.substring(4, 6);
+
+  return `${hh}:${mm}:00`;
+}
+
+
 async function updateFormUsingMarketoData(params, component, props) {
   const seriesName = params.profile['Series Name'];
 
@@ -158,18 +193,20 @@ async function updateFormUsingMarketoData(params, component, props) {
   const series = await getSeriesForUser();
   const seriesId = series.find((s) => s.seriesName === seriesName)?.seriesId;
 
-  const eventStartDateTime = params.profile['Event Start Date Time ISO'];
-  const eventEndDateTime = params.profile['Event End Date Time ISO'];
+  // const eventStartDateTime = params.profile['Event Start Date Time ISO'];
+  // const eventEndDateTime = params.profile['Event End Date Time ISO'];
 
-  const localStartDate = eventStartDateTime.split('T')[0];
-  const localEndDate = eventEndDateTime.split('T')[0];
-  const localStartTime = eventStartDateTime.split('T')[1].split(':')[0];
-  const localEndTime = eventEndDateTime.split('T')[1].split(':')[0];
+  // const localStartDate = eventStartDateTime.split('T')[0];
+  // const localEndDate = eventEndDateTime.split('T')[0];
+  // // convert to hh:mm:ss format from hhmmss
+  
+  // const localStartTime = formatTime(eventStartDateTime.split('T')[1]);
+  // const localEndTime = formatTime(eventEndDateTime.split('T')[1]);
 
-  // const localStartDate = convertDateToYYYYMMDD(params.profile['Event Start Date']);
-  // const localEndDate = convertDateToYYYYMMDD(params.profile['Event End Date']);
-  // const localStartTime = convertTimeToHHMMSS(params.profile['Event Start Time']);
-  // const localEndTime = convertTimeToHHMMSS(params.profile['Event End Time']);
+  const localStartDate = convertDateToYYYYMMDD(params.profile['Event Start Date']);
+  const localEndDate = convertDateToYYYYMMDD(params.profile['Event End Date']);
+  const localStartTime = convertTimeToHHMMSS(params.profile['Event Start Time']);
+  const localEndTime = convertTimeToHHMMSS(params.profile['Event End Time']);
 
   const eventInfo = {
     title: params.profile['Event Name'],
@@ -178,7 +215,7 @@ async function updateFormUsingMarketoData(params, component, props) {
     localStartTime,
     localEndDate,
     localEndTime,
-    timezone: params.dateTime.timezone,
+    timezone: params.profile['Event Timezone'],
   };
 
   if (seriesId) {
