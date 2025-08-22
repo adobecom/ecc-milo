@@ -42,6 +42,11 @@ export async function onRespUpdate(component, props) {
       mczProgramNameInput.disabled = true;
       coMarketingPartnerInput.disabled = true;
       eventPoiInput.disabled = true;
+
+      if (!marketoIntegration) {
+        eventTypeSelect.value = 'No Marketo integration';
+        eventTypeSelect.dispatchEvent(new Event('change'));
+      }
     }
   }
 }
