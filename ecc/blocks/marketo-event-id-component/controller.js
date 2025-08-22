@@ -113,44 +113,6 @@ export async function onRespUpdate(component, props) {
   mczEventSideEffect(component, props);
 }
 
-function convertDateToYYYYMMDD(date) {
-  // Converts input like "31st January 2025" to "YYYY-MM-DD"
-  // Returns null if input is invalid
-  if (!date || typeof date !== 'string') return null;
-  // Match groups: day, month, year
-  const match = date.trim().match(/^(\d{1,2})st\s(January|February|March|April|May|June|July|August|September|October|November|December)\s(\d{4})$/);
-  if (!match) return null;
-  const [, day, month, year] = match;
-  // Map month name to MM format
-  const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ];
-  const monthIndex = monthNames.indexOf(month);
-  if (monthIndex === -1) return null;
-  const mm = String(monthIndex + 1).padStart(2, '0');
-  const dd = String(day).padStart(2, '0');
-  return `${year}-${mm}-${dd}`;
-}
-
-function convertTimeToHHMMSS(time) {
-  // Converts input like "11:00am", "3:15pm", or "11am" to "HH:MM:SS" 24-hour format (e.g., "11:00:00", "15:15:00", "11:00:00")
-  // Returns null if input is invalid
-  if (!time || typeof time !== 'string') return null;
-  // Match groups: hour, optional minute, am/pm
-  const match = time.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i);
-  if (!match) return null;
-  let [, hour, minute, period] = match;
-  hour = parseInt(hour, 10);
-  minute = minute !== undefined ? parseInt(minute, 10) : 0;
-  if (period.toLowerCase() === 'pm' && hour !== 12) hour += 12;
-  if (period.toLowerCase() === 'am' && hour === 12) hour = 0;
-  // Pad hour and minute
-  const hh = hour.toString().padStart(2, '0');
-  const mm = minute.toString().padStart(2, '0');
-  return `${hh}:${mm}:00`;
-}
-
 /**
  * Convert time from hhmmss format to hh:mm:ss format
  * @param {string|number} time - Time in hhmmss format (e.g., 101010)
@@ -182,7 +144,7 @@ function formatTime(time) {
   const mm = str.substring(2, 4);
   const ss = str.substring(4, 6);
 
-  return `${hh}:${mm}:00`;
+  return `${hh}:${mm}:${ss}`;
 }
 
 
@@ -193,20 +155,13 @@ async function updateFormUsingMarketoData(params, component, props) {
   const series = await getSeriesForUser();
   const seriesId = series.find((s) => s.seriesName === seriesName)?.seriesId;
 
-  // const eventStartDateTime = params.profile['Event Start Date Time ISO'];
-  // const eventEndDateTime = params.profile['Event End Date Time ISO'];
+  const eventStartDateTime = params.profile['Event Start Date Time ISO'];
+  const eventEndDateTime = params.profile['Event End Date Time ISO'];
 
-  // const localStartDate = eventStartDateTime.split('T')[0];
-  // const localEndDate = eventEndDateTime.split('T')[0];
-  // // convert to hh:mm:ss format from hhmmss
-  
-  // const localStartTime = formatTime(eventStartDateTime.split('T')[1]);
-  // const localEndTime = formatTime(eventEndDateTime.split('T')[1]);
-
-  const localStartDate = convertDateToYYYYMMDD(params.profile['Event Start Date']);
-  const localEndDate = convertDateToYYYYMMDD(params.profile['Event End Date']);
-  const localStartTime = convertTimeToHHMMSS(params.profile['Event Start Time']);
-  const localEndTime = convertTimeToHHMMSS(params.profile['Event End Time']);
+  const localStartDate = formatDate(eventStartDateTime.split('T')[0]);
+  const localEndDate = formatDate(eventEndDateTime.split('T')[0]);
+  const localStartTime = formatTime(eventStartDateTime.split('T')[1]);
+  const localEndTime = formatTime(eventEndDateTime.split('T')[1]);
 
   const eventInfo = {
     title: params.profile['Event Name'],
@@ -220,7 +175,7 @@ async function updateFormUsingMarketoData(params, component, props) {
 
   if (seriesId) {
     eventInfo.seriesId = seriesId;
-  }  
+  }
   // lookup eventId from eventInfo.title
   console.log('eventInfo : ', eventInfo);
   props.eventDataResp = { ...props.eventDataResp, ...eventInfo };
