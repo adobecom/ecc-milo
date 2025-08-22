@@ -1,7 +1,27 @@
-import { LIBS } from './scripts.js';
+import { LIBS, CONFIG } from './scripts.js';
 import { getEventServiceHost } from './environment.js';
 
-const { createTag, getConfig } = await import(`${LIBS}/utils/utils.js`);
+export function createTag(tag, attributes, html, options = {}) {
+  const el = document.createElement(tag);
+  if (html) {
+    if (html.nodeType === Node.ELEMENT_NODE
+      || html instanceof SVGElement
+      || html instanceof DocumentFragment) {
+      el.append(html);
+    } else if (Array.isArray(html)) {
+      el.append(...html);
+    } else {
+      el.insertAdjacentHTML('beforeend', html);
+    }
+  }
+  if (attributes) {
+    Object.entries(attributes).forEach(([key, val]) => {
+      el.setAttribute(key, val);
+    });
+  }
+  options.parent?.append(el);
+  return el;
+}
 
 let secretCache = [];
 
@@ -17,7 +37,7 @@ export async function getSystemConfig(configType = '') {
 export function getIcon(tag) {
   const img = document.createElement('img');
   img.className = `icon icon-${tag}`;
-  img.src = `${getConfig().codeRoot}/icons/${tag}.svg`;
+  img.src = `${CONFIG.codeRoot}/icons/${tag}.svg`;
   img.alt = tag;
 
   return img;
@@ -318,7 +338,10 @@ export function getServiceName(link) {
 
 export async function miloReplaceKey(key) {
   try {
-    const placeholders = await import(`${LIBS}/features/placeholders.js`);
+    const [{ getConfig }, placeholders] = await Promise.all([
+      import(`${LIBS}/utils/utils.js`),
+      import(`${LIBS}/features/placeholders.js`),
+    ]);
 
     const { replaceKey } = placeholders;
     const config = getConfig();
