@@ -1,22 +1,39 @@
 import { useState } from '../../../scripts/libs/preact-hook.js';
 import { html } from '../htm-wrapper.js';
 import BuildTableIcon from '../components/BuildTableIcon.js';
+import useNavigation from '../hooks/useNavigation.js';
+import CreateScheduleModal from '../components/CreateScheduleModal.js';
 
-export default function Home({ schedules, setActiveTab, setActiveSchedule }) {
+export default function Home({ schedules, setActiveSchedule }) {
+  const { goToEditSchedule, goToSheetImport } = useNavigation();
   const [filteredSchedules, setFilteredSchedules] = useState(schedules);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const handleCreateManually = () => {
     console.log('handleCreateManually');
-    setActiveTab('manual-creation');
+    setIsCreateModalOpen(true);
   };
 
   const handleCreateFromSheet = () => {
     console.log('handleCreateFromSheet');
-    setActiveTab('sheet-importer');
+    goToSheetImport();
   };
 
   const handleSelectSchedule = (schedule) => {
     setActiveSchedule(schedule);
-    setActiveTab('manual-creation');
+    goToEditSchedule();
+  };
+
+  const handleCreateSchedule = async (scheduleName) => {
+    console.log('Creating schedule with name:', scheduleName);
+    // Here you would typically create the schedule
+    // For now, we'll just navigate to edit mode
+    // You could add API call here to create the schedule
+    goToEditSchedule();
+  };
+
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
   };
 
   const handleSearch = (e) => {
@@ -31,13 +48,12 @@ export default function Home({ schedules, setActiveTab, setActiveSchedule }) {
     setFilteredSchedules(localFilteredSchedules);
   };
 
+  // Use single-line template to avoid newline issues
   return html`
     <div class="home-tab">
       <h1>Schedule Maker</h1>
       <div class="home-quick-actions">
-        <div class="home-quick-actions-icon">
-          ${html`<${BuildTableIcon} />`}
-        </div>
+        <div class="home-quick-actions-icon">${html`<${BuildTableIcon} />`}</div>
         <div class="home-quick-actions-content">
           <h2>Create a new schedule</h2>
           <div class="home-quick-actions-content-buttons">
@@ -61,10 +77,9 @@ export default function Home({ schedules, setActiveTab, setActiveSchedule }) {
               <sp-action-button quiet size="l" onClick=${() => handleSelectSchedule(schedule)}>
                 ${schedule.title}
               </sp-action-button>
-            </li>
-          `)}
+            </li>`)}
         </ul>
       </div>
-    </div>
-  `;
+      <${CreateScheduleModal} isOpen=${isCreateModalOpen} onClose=${handleCloseCreateModal} onConfirm=${handleCreateSchedule} />
+    </div>`;
 }

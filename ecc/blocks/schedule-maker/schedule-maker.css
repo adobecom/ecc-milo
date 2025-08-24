@@ -1,3 +1,7 @@
+/* Modal Styles */
+@import url('./components/Modal.css');
+@import url('./components/CreateScheduleModal.css');
+
 .schedule-maker-progress-circle {
   display: flex;
   justify-content: center;

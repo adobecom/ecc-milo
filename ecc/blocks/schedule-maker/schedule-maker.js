@@ -4,6 +4,7 @@ import { html } from './htm-wrapper.js';
 import ScheduleMaker from './ScheduleMaker.js';
 import { buildNoAccessScreen, signIn } from '../../scripts/utils.js';
 import { LIBS } from '../../scripts/scripts.js';
+import { NavigationProvider } from './context/NavigationContext.js';
 
 export default async function init(el) {
   el.innerHTML = '';
@@ -16,6 +17,8 @@ export default async function init(el) {
     import(`${LIBS}/features/spectrum-web-components/dist/search.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/action-button.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/progress-circle.js`),
+    import(`${LIBS}/features/spectrum-web-components/dist/icon.js`),
+    import(`${LIBS}/features/spectrum-web-components/dist/textfield.js`),
   ]);
 
   initProfileLogicTree('schedule-maker', {
@@ -26,7 +29,14 @@ export default async function init(el) {
       buildNoAccessScreen(el);
     },
     validProfile: () => {
-      render(html`<${ScheduleMaker} />`, el);
+      render(
+        html`
+          <${NavigationProvider}>
+            <${ScheduleMaker} />
+          </${NavigationProvider}>
+        `,
+        el,
+      );
     },
   });
 }

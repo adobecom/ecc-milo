@@ -1,0 +1,47 @@
+/* Create Schedule Form */
+.create-schedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.form-help-text {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1rem;
+}
+
+/* Focus styles for form elements */
+.create-schedule-form sp-textfield:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Disabled state */
+.create-schedule-form sp-textfield[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .create-schedule-form {
+    gap: 0.75rem;
+  }
+  
+  .form-label {
+    font-size: 0.875rem;
+  }
+  
+  .form-help-text {
+    font-size: 0.75rem;
+  }
+}
