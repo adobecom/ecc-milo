@@ -10,25 +10,26 @@
   padding: 40px;
 }
 
-.home-tab {
+/* Page Styles */
+.home-page, .schedules-page {
   font-family: var(--body-font-family);
   padding: 40px;
   width: var(--grid-container-width);
   margin: auto;
 }
 
-.home-tab h1 {
+.home-page h1, .schedules-page h1 {
   margin-bottom: 20px;
   color: #333;
 }
 
-/* Home Tab Styles */
+/* Home Page Styles */
 .home-quick-actions {
   display: flex;
   align-items: center;
   margin: 40px 0;
   padding: 30px;
-  background-color: #f8f9fa;
+  background-color: white;
   border-radius: 8px;
 }
 
@@ -50,7 +51,7 @@
   margin-top: 40px;
   padding: 30px 50px;
   overflow: hidden;
-  background-color: #f8f9fa;
+  background-color: white;
   border-radius: 8px;
 }
 
@@ -112,9 +113,10 @@
   background: #a8a8a8;
 }
 
-/* Custom Tab System Styles */
+/* Schedule Maker Styles */
 .schedule-maker {
   font-family: var(--body-font-family);
+  background-color: #f8f8f8;
 }
 
 .schedule-maker-tabs {
@@ -151,20 +153,28 @@
 
 .schedule-maker-content {
   padding: 20px;
+}
+
+/* Schedules Page Styles */
+.schedules-page-content-container {
+  display: flex;
+  flex-direction: row;
   background-color: white;
+  border-radius: 8px;
 }
 
-/* Tab Content Styles */
-.manual-creation,
-.sheet-importer {
-  font-family: var(--body-font-family);
-  padding: 40px;
-  width: var(--grid-container-width);
-  margin: auto;
+.schedules-page-sidebar {
+  width: 250px;
+  padding: 32px 24px;
+  border-bottom-left-radius: 8px;
+  border-top-left-radius: 8px;
+  border: 1px solid rgba(217 217 217 / 100%);
 }
 
-.manual-creation h1,
-.sheet-importer h1 {
-  color: #333;
-  margin-bottom: 20px;
+.schedules-page-content {
+  flex: 1;
+  padding: 32px 24px;
+  border-bottom-right-radius: 8px;
+  border-top-right-radius: 8px;
+  border: 1px solid rgba(217 217 217 / 100%);
 }

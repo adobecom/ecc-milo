@@ -1,16 +1,24 @@
 import { html } from '../htm-wrapper.js';
 import Sidebar from '../components/Sidebar.js';
+import ScheduleEditor from '../components/ScheduleEditor.js';
+import SheetImporter from '../components/SheetImporter.js';
+import useNavigation from '../hooks/useNavigation.js';
 
 function Schedules({ schedules }) {
   console.log('Schedules', schedules);
+  const { activePage } = useNavigation();
 
   return html`
     <div class="schedules-page">
-      <div class="schedules-page-sidebar">
-        ${html`<${Sidebar} />`}
-      </div>
-      <div class="schedules-page-content">
-        <h1>Schedules</h1>
+      <h1>Schedule Maker</h1>
+      <div class="schedules-page-content-container">
+        <div class="schedules-page-sidebar">
+          ${html`<${Sidebar} />`}
+        </div>
+        <div class="schedules-page-content">
+          <h2>Schedules</h2>
+          ${activePage.mode === 'edit' ? html`<${ScheduleEditor} />` : html`<${SheetImporter} />`}
+        </div>
       </div>
     </div>
   `;

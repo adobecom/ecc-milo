@@ -10,12 +10,10 @@ export default function Home({ schedules, setActiveSchedule }) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const handleCreateManually = () => {
-    console.log('handleCreateManually');
     setIsCreateModalOpen(true);
   };
 
   const handleCreateFromSheet = () => {
-    console.log('handleCreateFromSheet');
     goToSheetImport();
   };
 
@@ -26,9 +24,6 @@ export default function Home({ schedules, setActiveSchedule }) {
 
   const handleCreateSchedule = async (scheduleName) => {
     console.log('Creating schedule with name:', scheduleName);
-    // Here you would typically create the schedule
-    // For now, we'll just navigate to edit mode
-    // You could add API call here to create the schedule
     goToEditSchedule();
   };
 
@@ -48,9 +43,8 @@ export default function Home({ schedules, setActiveSchedule }) {
     setFilteredSchedules(localFilteredSchedules);
   };
 
-  // Use single-line template to avoid newline issues
   return html`
-    <div class="home-tab">
+    <div class="home-page">
       <h1>Schedule Maker</h1>
       <div class="home-quick-actions">
         <div class="home-quick-actions-icon">${html`<${BuildTableIcon} />`}</div>

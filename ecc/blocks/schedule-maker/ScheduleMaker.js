@@ -19,16 +19,14 @@ export default function ScheduleMaker() {
   const [activeSchedule, setActiveSchedule] = useState(null);
   const { activePage, setActivePage } = useNavigation();
 
+  // TODO: Decide if we want to manage schedules with context or not
+
   useEffect(() => {
     getSchedules().then((schedulesResponse) => {
       setSchedules(schedulesResponse);
       setIsLoading(false);
     });
   }, []);
-
-  console.log('PAGES_COMPONENTS', PAGES_COMPONENTS);
-  console.log('activePage', activePage);
-  console.log('activePage.pageComponent', activePage.pageComponent);
 
   return html`
   <sp-theme color="light" scale="medium">

@@ -14,7 +14,7 @@ export default function CreateScheduleModal({ isOpen, onClose, onConfirm }) {
 
   const handleConfirm = async () => {
     if (!scheduleName.trim()) {
-      return; // Don't submit if name is empty
+      return;
     }
 
     setIsSubmitting(true);
@@ -23,7 +23,6 @@ export default function CreateScheduleModal({ isOpen, onClose, onConfirm }) {
       handleClose();
     } catch (error) {
       console.error('Error creating schedule:', error);
-      // You could add error handling here
     } finally {
       setIsSubmitting(false);
     }
@@ -36,7 +35,6 @@ export default function CreateScheduleModal({ isOpen, onClose, onConfirm }) {
     }
   };
 
-  // Use single-line template to avoid newline issues
   return html`
     <${Modal} isOpen=${isOpen} onClose=${handleClose} title="Enter schedule title" confirmText=${isSubmitting ? 'Creating...' : 'Next'} cancelText="Cancel" onConfirm=${handleConfirm} size="small">
       <div class="create-schedule-form">
