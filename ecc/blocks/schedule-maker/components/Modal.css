@@ -49,7 +49,6 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid #e5e7eb;
 }
 
 .modal-title {
@@ -78,8 +77,6 @@
   gap: 0.75rem;
   justify-content: flex-end;
   padding: 1rem 1.5rem 1.5rem;
-  border-top: 1px solid #e5e7eb;
-  background-color: #f9fafb;
 }
 
 /* Animation */

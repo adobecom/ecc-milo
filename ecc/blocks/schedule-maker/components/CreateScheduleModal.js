@@ -38,15 +38,9 @@ export default function CreateScheduleModal({ isOpen, onClose, onConfirm }) {
 
   // Use single-line template to avoid newline issues
   return html`
-    <${Modal} isOpen=${isOpen} onClose=${handleClose} title="Create New Schedule" confirmText=${isSubmitting ? 'Creating...' : 'Create Schedule'} cancelText="Cancel" onConfirm=${handleConfirm} size="small">
+    <${Modal} isOpen=${isOpen} onClose=${handleClose} title="Enter schedule title" confirmText=${isSubmitting ? 'Creating...' : 'Next'} cancelText="Cancel" onConfirm=${handleConfirm} size="small">
       <div class="create-schedule-form">
-        <label for="schedule-name" class="form-label">
-          Schedule Name
-        </label>
-        <sp-textfield id="schedule-name" placeholder="Enter schedule name" value=${scheduleName} onInput=${(e) => setScheduleName(e.target.value)} onKeyDown=${handleKeyDown} size="l" required disabled=${isSubmitting}></sp-textfield>
-        <p class="form-help-text">
-          Give your schedule a descriptive name to help you identify it later.
-        </p>
+        <sp-textfield id="schedule-name" class="create-schedule-form-textfield" placeholder="Enter schedule name" value=${scheduleName} onInput=${(e) => setScheduleName(e.target.value)} onKeyDown=${handleKeyDown} size="l" required disabled=${isSubmitting}></sp-textfield>
       </div>
     </${Modal}>`;
 }

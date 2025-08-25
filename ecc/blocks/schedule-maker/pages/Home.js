@@ -60,7 +60,7 @@ export default function Home({ schedules, setActiveSchedule }) {
             <sp-button size="xl" static-color="black" treatment="outline" onClick=${handleCreateManually}>
               Create Manually
             </sp-button>
-            <sp-button size="xl" onClick=${handleCreateFromSheet}>
+            <sp-button size="xl" static-color="black" treatment="outline" onClick=${handleCreateFromSheet}>
               Create from Sheet
             </sp-button>
           </div>

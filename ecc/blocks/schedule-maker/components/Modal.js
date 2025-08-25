@@ -91,10 +91,10 @@ export default function Modal({
     if (!showActions) return null;
     return html`
       <div class="modal-actions">
-        <sp-button treatment="outline" size="m" onClick=${onClose}>
+        <sp-button treatment="outline" static-color="black" size="l" onClick=${onClose}>
           ${cancelText}
         </sp-button>
-        <sp-button size="m" onClick=${onConfirm}>
+        <sp-button size="l" static-color="black" onClick=${onConfirm}>
           ${confirmText}
         </sp-button>
       </div>`;
