@@ -171,6 +171,8 @@ async function updateFormUsingMarketoData(params, component, props) {
     localEndDate,
     localEndTime,
     timezone: params.profile['Event Timezone'],
+    enTitle: params.profile['Event Name'],
+    eventDetails: params.profile['Event Description'],
   };
 
   if (seriesId) {
@@ -178,7 +180,7 @@ async function updateFormUsingMarketoData(params, component, props) {
   }
   // lookup eventId from eventInfo.title
   console.log('eventInfo : ', eventInfo);
-  props.eventDataResp = { ...props.eventDataResp, ...eventInfo };
+  // props.eventDataResp = { ...props.eventDataResp, ...eventInfo };
   // this should be done only if data is not already present in the eventInfo
 }
 
