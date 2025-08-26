@@ -24,6 +24,10 @@ export default function Home({ schedules, setActiveSchedule }) {
 
   const handleCreateSchedule = async (scheduleName) => {
     console.log('Creating schedule with name:', scheduleName);
+    // TODO: Create schedule
+    // TODO: Add schedule to schedules
+    // TODO: Set active schedule
+    // TODO: Go to edit schedule
     goToEditSchedule();
   };
 

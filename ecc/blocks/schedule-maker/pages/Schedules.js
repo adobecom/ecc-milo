@@ -15,9 +15,8 @@ function Schedules({ schedules, activeSchedule, setActiveSchedule }) {
           ${html`<${Sidebar} schedules=${schedules} activeSchedule=${activeSchedule} setActiveSchedule=${setActiveSchedule} />`}
         </div>
         <div class="schedules-page-content">
-          <h2>Schedules</h2>
           ${activePage.mode === 'edit' ? html`
-            <${ScheduleEditor} />` : html`
+            <${ScheduleEditor} activeSchedule=${activeSchedule} />` : html`
             <${SheetImporter} />`}
         </div>
       </div>
