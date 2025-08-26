@@ -3,7 +3,7 @@ import { EVENT_TYPES } from '../../scripts/constants.js';
 import { style } from './rsvp-form.css.js';
 import { getIcon } from '../../scripts/utils.js';
 
-const { LitElement, html, repeat } = await import(`${LIBS}/deps/lit-all.min.js`);
+const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
 
 /**
  * Converts a camelCase or PascalCase string into an uppercase string with spaces between words.
@@ -26,6 +26,7 @@ export default class RsvpForm extends LitElement {
     required: { type: Set },
     eventType: { type: String },
     formUrl: { type: String },
+    disableRsvpForm: { type: Boolean },
   };
 
   constructor() {
@@ -35,6 +36,7 @@ export default class RsvpForm extends LitElement {
     this.visible = new Set();
     this.required = new Set();
     this.formUrl = '';
+    this.disableRsvpForm = true;
   }
 
   static styles = style;
@@ -112,6 +114,10 @@ export default class RsvpForm extends LitElement {
   }
 
   getRegistrationPayload() {
+    if (this.disableRsvpForm) {
+      return {};
+    }
+
     const registration = { type: this.formType === 'basic' ? 'ESP' : 'Marketo' };
 
     if (this.formType === 'basic') {
@@ -162,6 +168,9 @@ export default class RsvpForm extends LitElement {
   }
 
   renderWebinarForm() {
+    if (this.disableRsvpForm) {
+      return nothing;
+    }
     return html`
       <div class="rsvp-form">
       <fieldset class="form-type" @change=${(e) => { this.handleFormTypeChange(e); }} >

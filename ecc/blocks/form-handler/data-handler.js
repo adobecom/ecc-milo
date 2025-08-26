@@ -198,3 +198,19 @@ export default function getJoinedData() {
 
   return finalPayload;
 }
+
+export function getEditablePayload() {
+  const payload = getJoinedData();
+  const editableFields = Object.entries(EVENT_DATA_FILTER)
+    .filter(([, attr]) => attr.editable)
+    .map(([key]) => key);
+
+  const filteredPayload = editableFields.reduce((acc, key) => {
+    if (isValidAttribute(payload[key])) {
+      acc[key] = payload[key];
+    }
+    return acc;
+  }, {});
+
+  return filteredPayload;
+}

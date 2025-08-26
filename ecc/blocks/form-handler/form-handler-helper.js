@@ -17,6 +17,7 @@ import getJoinedData, {
   setPayloadCache,
   setResponseCache,
   setDeleteList,
+  getEditablePayload,
 } from './data-handler.js';
 
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
@@ -485,7 +486,7 @@ async function saveEvent(props, toPublish = false) {
     updateDashboardLink(props);
     await onEventSave();
   } else if (props.currentStep <= props.maxStep && !toPublish) {
-    const payload = getJoinedData();
+    const payload = getEditablePayload();
     resp = await updateEvent(
       payload.eventId,
       payload,

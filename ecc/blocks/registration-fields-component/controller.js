@@ -66,7 +66,34 @@ function filterRsvpConfigData(rsvpConfigData, eventData, props) {
   return data;
 }
 
+function updateDescription(component, props) {
+  const rsvpFormConfigs = JSON.parse(component.dataset.rsvpFormConfigs);
+  const cloudType = getAttribute(props.eventDataResp, 'cloudType', props.locale);
+
+  if (!cloudType) return;
+
+  const config = rsvpFormConfigs.find(({ cloudType: cType }) => cType === cloudType);
+  const requiredFields = config?.config?.data?.filter(({ Required }) => Required === 'x');
+
+  const descriptionDiv = component.querySelector(':scope > div:nth-of-type(2)');
+  const existingDescription = descriptionDiv.querySelector('p');
+
+  if (existingDescription) {
+    existingDescription.remove();
+  }
+
+  const requiredFieldsDescription = requiredFields?.map(({ Label }) => `<strong>${Label}</strong>`).join(', ').replace(/, ([^,]*)$/, ' and $1') || '';
+  createTag('p', { class: 'description' }, `Note: <strong>${SUPPORTED_CLOUDS.find(({ id }) => id === cloudType)?.name}</strong> required fields include ${requiredFieldsDescription}`, { parent: descriptionDiv });
+}
+
 async function setRsvpFormAttributes(props, eventData, component) {
+  if (props.eventDataResp.externalEventId?.startsWith('mcz-')) {
+    component.querySelector('div > rsvp-form').setAttribute('disableRsvpForm', true);
+    component.classList.add('hidden');
+  }
+
+  updateDescription(component, props);
+
   const rsvpFormConfigs = JSON.parse(component.dataset.rsvpFormConfigs);
   const cloudType = getAttribute(eventData, 'cloudType', props.locale);
   const eventType = getAttribute(eventData, 'eventType', props.locale);
@@ -93,38 +120,15 @@ async function setRsvpFormAttributes(props, eventData, component) {
   }
 }
 
-function updateDescription(component, props) {
-  const rsvpFormConfigs = JSON.parse(component.dataset.rsvpFormConfigs);
-  const cloudType = getAttribute(props.eventDataResp, 'cloudType', props.locale);
-
-  if (!cloudType) return;
-
-  const config = rsvpFormConfigs.find(({ cloudType: cType }) => cType === cloudType);
-  const requiredFields = config?.config?.data?.filter(({ Required }) => Required === 'x');
-
-  const descriptionDiv = component.querySelector(':scope > div:nth-of-type(2)');
-  const existingDescription = descriptionDiv.querySelector('p');
-
-  if (existingDescription) {
-    existingDescription.remove();
-  }
-
-  const requiredFieldsDescription = requiredFields?.map(({ Label }) => `<strong>${Label}</strong>`).join(', ').replace(/, ([^,]*)$/, ' and $1') || '';
-  createTag('p', { class: 'description' }, `Note: <strong>${SUPPORTED_CLOUDS.find(({ id }) => id === cloudType)?.name}</strong> required fields include ${requiredFieldsDescription}`, { parent: descriptionDiv });
-}
-
 export async function onPayloadUpdate(component, props) {
-  updateDescription(component, props);
   await setRsvpFormAttributes(props, props.payload, component);
 }
 
 export async function onRespUpdate(component, props) {
-  updateDescription(component, props);
   await setRsvpFormAttributes(props, props.eventDataResp, component);
 }
 
 export default async function init(component, props) {
-  updateDescription(component, props);
   await setRsvpFormAttributes(props, props.eventDataResp, component);
 }
 
