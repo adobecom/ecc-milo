@@ -6,7 +6,7 @@ import { PAGES_CONFIG } from '../constants.js';
 const NavigationContext = createContext();
 
 const NavigationProvider = ({ children }) => {
-  const [activePage, setActivePage] = useState(PAGES_CONFIG.home);
+  const [activePage, setActivePage] = useState(PAGES_CONFIG.editSchedule);
 
   const goToEditSchedule = () => {
     setActivePage(PAGES_CONFIG.editSchedule);

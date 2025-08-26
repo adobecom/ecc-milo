@@ -4,8 +4,7 @@ import ScheduleEditor from '../components/ScheduleEditor.js';
 import SheetImporter from '../components/SheetImporter.js';
 import useNavigation from '../hooks/useNavigation.js';
 
-function Schedules({ schedules }) {
-  console.log('Schedules', schedules);
+function Schedules({ schedules, activeSchedule, setActiveSchedule }) {
   const { activePage } = useNavigation();
 
   return html`
@@ -13,11 +12,13 @@ function Schedules({ schedules }) {
       <h1>Schedule Maker</h1>
       <div class="schedules-page-content-container">
         <div class="schedules-page-sidebar">
-          ${html`<${Sidebar} />`}
+          ${html`<${Sidebar} schedules=${schedules} activeSchedule=${activeSchedule} setActiveSchedule=${setActiveSchedule} />`}
         </div>
         <div class="schedules-page-content">
           <h2>Schedules</h2>
-          ${activePage.mode === 'edit' ? html`<${ScheduleEditor} />` : html`<${SheetImporter} />`}
+          ${activePage.mode === 'edit' ? html`
+            <${ScheduleEditor} />` : html`
+            <${SheetImporter} />`}
         </div>
       </div>
     </div>

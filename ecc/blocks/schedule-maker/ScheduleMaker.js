@@ -15,7 +15,6 @@ const PAGES_COMPONENTS = {
 export default function ScheduleMaker() {
   const [schedules, setSchedules] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  // eslint-disable-next-line no-unused-vars
   const [activeSchedule, setActiveSchedule] = useState(null);
   const { activePage, setActivePage } = useNavigation();
 
@@ -39,14 +38,13 @@ export default function ScheduleMaker() {
         `)}
       </div>
       ${isLoading ? html`
-        <div class="schedule-maker-progress-circle">
-          <sp-progress-circle size="l" indeterminate label="Loading schedules" />
-        </div>` : null}
+      <div class="schedule-maker-progress-circle">
+        <sp-progress-circle size="l" indeterminate label="Loading schedules" />
+      </div>` : null}
       ${!isLoading ? html`
-        <div class="schedule-maker-content">
-          ${html`<${PAGES_COMPONENTS[activePage.pageComponent]} schedules=${schedules} setActivePage=${setActivePage} setActiveSchedule=${setActiveSchedule} activePage=${activePage} />`}
-          </div>` : null}
-      </div>
-    </sp-theme>
-  `;
+      <div class="schedule-maker-content">
+        ${html`<${PAGES_COMPONENTS[activePage.pageComponent]} schedules=${schedules} setActivePage=${setActivePage} setActiveSchedule=${setActiveSchedule} activePage=${activePage} activeSchedule=${activeSchedule} />`}
+      </div>` : null}
+    </div>
+  </sp-theme>`;
 }
