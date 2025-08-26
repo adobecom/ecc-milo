@@ -176,7 +176,7 @@ export const LOCALES = {
 const STYLES = '';
 
 // Add any config options.
-const CONFIG = {
+export const CONFIG = {
   codeRoot: '/ecc',
   contentRoot: '/ecc',
   imsClientId: 'acom_event_mgmt_console',
