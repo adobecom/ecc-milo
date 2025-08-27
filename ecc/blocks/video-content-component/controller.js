@@ -17,8 +17,13 @@ export function onSubmit(component, props) {
   setPropsPayload(props, { video }, removeData);
 }
 
-function setVideoUrl(data, component, locale) {
-  const video = getAttribute(data, 'video', locale);
+function setVideoUrl(data, component, props) {
+  if (props.eventDataResp.externalEventId?.startsWith('mcz-')) {
+    component.classList.add('hidden');
+    return;
+  }
+
+  const video = getAttribute(data, 'video', props.locale);
 
   if (!video) return;
 
@@ -30,15 +35,15 @@ function setVideoUrl(data, component, locale) {
 }
 
 export async function onPayloadUpdate(component, props) {
-  setVideoUrl(props.payload, component, props.locale);
+  setVideoUrl(props.payload, component, props);
 }
 
 export async function onRespUpdate(component, props) {
-  setVideoUrl(props.eventDataResp, component, props.locale);
+  setVideoUrl(props.eventDataResp, component, props);
 }
 
 export default function init(component, props) {
-  setVideoUrl(props.eventDataResp, component, props.locale);
+  setVideoUrl(props.eventDataResp, component, props);
 }
 
 export function onTargetUpdate(_component, _props) {
