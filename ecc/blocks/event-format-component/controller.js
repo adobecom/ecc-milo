@@ -9,8 +9,10 @@ import { getAttribute } from '../../scripts/data-utils.js';
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function filterSeries(series, payload, currentCloud) {
-  const { externalEventId } = payload;
-  const hasNonSplashThatExternalThemeId = externalEventId && !externalEventId.startsWith('st-');
+  let hasNonSplashThatExternalThemeId = false;
+  if (payload?.externalEventId) {
+    hasNonSplashThatExternalThemeId = payload.externalEventId && !payload.externalEventId.startsWith('st-');
+  }
 
   return Object.values(series).filter((s) => {
     const hasRequiredVals = s.seriesId && s.seriesName;
