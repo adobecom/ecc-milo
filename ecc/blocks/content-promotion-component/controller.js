@@ -38,7 +38,8 @@ async function getPromotionalContentSheet(props) {
     const locales = await getLocales().then((resp) => resp.localeNames) || {};
     const lName = locales[locale];
 
-    const targetLocaleObject = Object.entries(LOCALES).find(([, v]) => v.longName === lName) || {};
+    const targetLocaleObject = Object.entries(LOCALES)
+      .find(([, v]) => v.longName.toLowerCase() === lName.toLowerCase()) || {};
     const localePrefix = targetLocaleObject[0];
 
     const sheetResp = await fetch(`${getEventPageHost()}${localePrefix ? `/${localePrefix}` : ''}/${sheetLocation}`);
