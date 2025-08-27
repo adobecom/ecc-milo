@@ -8,12 +8,16 @@ import { getAttribute } from '../../scripts/data-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
-function filterSeries(series, currentCloud) {
+function filterSeries(series, payload, currentCloud) {
+  const { externalEventId } = payload;
+  const hasNonSplashThatExternalThemeId = externalEventId && !externalEventId.startsWith('st-');
+
   return Object.values(series).filter((s) => {
     const hasRequiredVals = s.seriesId && s.seriesName;
     const isPublished = s.seriesStatus?.toLowerCase() === 'published';
     const isInCurrentCloud = s.cloudType === currentCloud;
-    return hasRequiredVals && isPublished && isInCurrentCloud;
+    const hasUnwantedExternalThemeId = !(hasNonSplashThatExternalThemeId && s.externalThemeId);
+    return hasRequiredVals && isPublished && isInCurrentCloud && hasUnwantedExternalThemeId;
   });
 }
 
@@ -85,7 +89,7 @@ async function populateSeriesOptions(props, component) {
   const existingOptions = seriesSelect.querySelectorAll('sp-menu-item');
   existingOptions.forEach((opt) => opt.remove());
 
-  const filteredSeries = filterSeries(series, component.dataset.cloudType);
+  const filteredSeries = filterSeries(series, props.payload, component.dataset.cloudType);
   filteredSeries.forEach((val) => {
     if (!val.seriesId || !val.seriesName) return;
     if (val.seriesStatus?.toLowerCase() !== 'published') return;
@@ -159,7 +163,7 @@ async function initDupCheck(props, component) {
     return;
   }
 
-  const filteredSeries = filterSeries(series, currentCloudType);
+  const filteredSeries = filterSeries(series, props.payload, currentCloudType);
 
   filteredSeries.forEach((val) => {
     if (!val.seriesId || !val.seriesName) return;
