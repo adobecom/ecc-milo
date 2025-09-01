@@ -14,11 +14,18 @@ const PAGES_COMPONENTS = {
 
 export default function ScheduleMaker() {
   const { activePage, setActivePage } = useNavigation();
-  const { schedules, isLoading, activeSchedule, setActiveSchedule } = useSchedules();
+  const {
+    schedules,
+    isInitialLoading,
+    activeSchedule,
+    setActiveSchedule,
+    toastError,
+    clearToastError,
+  } = useSchedules();
 
   return html`
   <sp-theme color="light" scale="medium">
-    <div class="schedule-maker">
+    <div class="schedule-maker-app">
       <div class="schedule-maker-tabs">
         ${Object.values(PAGES_CONFIG).map((page) => html`
           <button class="schedule-maker-tab ${activePage.pageComponent === page.pageComponent ? 'schedule-maker-tab-active' : ''}" onclick=${() => setActivePage(page)}>
@@ -26,14 +33,23 @@ export default function ScheduleMaker() {
           </button>
         `)}
       </div>
-      ${isLoading ? html`
+      
+      ${isInitialLoading && html`
       <div class="schedule-maker-progress-circle">
         <sp-progress-circle size="l" indeterminate label="Loading schedules" />
-      </div>` : null}
-      ${!isLoading ? html`
+      </div>`}
+      
+      ${!isInitialLoading && html`
       <div class="schedule-maker-content">
         ${html`<${PAGES_COMPONENTS[activePage.pageComponent]} schedules=${schedules} setActivePage=${setActivePage} setActiveSchedule=${setActiveSchedule} activePage=${activePage} activeSchedule=${activeSchedule} />`}
-      </div>` : null}
+      </div>`}
+      
+      ${toastError && html`
+      <div class="schedule-maker-toast schedule-maker-toast-error">
+        <sp-toast variant="negative" open onclose=${clearToastError}>
+          ${toastError}
+        </sp-toast>
+      </div>`}
     </div>
   </sp-theme>`;
 }

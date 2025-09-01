@@ -28,7 +28,10 @@ function Sidebar({ schedules, activeSchedule, setActiveSchedule }) {
 
   return html`
     <div class="side-bar">
-      <sp-button class="side-bar-button" icon="add" size="xl" static-color="black" onclick=${handleAddSchedule}>Add Schedule</sp-button>
+      <sp-button class="side-bar-button" size="xl" static-color="black" onclick=${handleAddSchedule}>
+        <span slot="icon" class="icon icon-add-circle"></span>
+        Add Schedule
+      </sp-button>
       <sp-search class="side-bar-search" placeholder="Search schedules" oninput=${handleSearch}></sp-search>
       <h2>Select schedule</h2>
       <div class="side-bar-schedules">

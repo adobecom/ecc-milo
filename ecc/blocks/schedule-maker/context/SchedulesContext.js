@@ -8,28 +8,87 @@ const SchedulesContext = createContext();
 const SchedulesProvider = ({ children }) => {
   const [schedules, setSchedules] = useState([]);
   const [activeSchedule, setActiveSchedule] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+
+  // Granular loading states
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Error states
   const [error, setError] = useState(null);
+  const [toastError, setToastError] = useState(null);
 
   // Get all schedules
   const getSchedules = useCallback(async () => {
-    setIsLoading(true);
+    setIsInitialLoading(true);
+    setError(null);
     try {
-      const response = await getSchedulesController();
-      setSchedules(response.schedules);
+      const { schedules: responseSchedules } = await getSchedulesController();
+      // eslint-disable-next-line max-len
+      const sortedByModificationTime = responseSchedules.sort((a, b) => new Date(b.modificationTime) - new Date(a.modificationTime));
+      setSchedules(sortedByModificationTime);
     } catch (err) {
       setError(err);
     } finally {
-      setIsLoading(false);
+      setIsInitialLoading(false);
     }
   }, []);
 
   // Create a new schedule and add it to the schedules list
   const createAndAddSchedule = useCallback(async (schedule) => {
-    const newSchedule = await createScheduleController(schedule);
-    setSchedules([...schedules, newSchedule]);
-    return newSchedule;
+    setIsCreating(true);
+    setToastError(null);
+    try {
+      const newSchedule = await createScheduleController(schedule);
+      setSchedules([newSchedule, ...schedules]);
+      return newSchedule;
+    } catch (err) {
+      setToastError(err.message || 'Failed to create schedule');
+      throw err;
+    } finally {
+      setIsCreating(false);
+    }
   }, [schedules]);
+
+  // Update schedule (placeholder for future implementation)
+  const updateSchedule = useCallback(async (scheduleId, updates) => {
+    setIsUpdating(true);
+    setToastError(null);
+    try {
+      // TODO: Implement updateScheduleController when available
+      console.log('Update schedule:', scheduleId, updates);
+      setToastError('Update functionality not yet implemented');
+      throw new Error('Update functionality not yet implemented');
+    } catch (err) {
+      setToastError(err.message || 'Failed to update schedule');
+      throw err;
+    } finally {
+      setIsUpdating(false);
+    }
+  }, []);
+
+  // Delete schedule (placeholder for future implementation)
+  const deleteSchedule = useCallback(async (scheduleId) => {
+    setIsDeleting(true);
+    setToastError(null);
+    try {
+      // TODO: Implement deleteScheduleController when available
+      console.log('Delete schedule:', scheduleId);
+      setToastError('Delete functionality not yet implemented');
+      throw new Error('Delete functionality not yet implemented');
+    } catch (err) {
+      setToastError(err.message || 'Failed to delete schedule');
+      throw err;
+    } finally {
+      setIsDeleting(false);
+    }
+  }, []);
+
+  // Clear toast error
+  const clearToastError = useCallback(() => {
+    setToastError(null);
+  }, []);
 
   // On mount, get schedules
   useEffect(() => {
@@ -41,11 +100,16 @@ const SchedulesProvider = ({ children }) => {
     setSchedules,
     activeSchedule,
     setActiveSchedule,
-    isLoading,
-    setIsLoading,
+    isInitialLoading,
+    isCreating,
+    isUpdating,
+    isDeleting,
     error,
-    setError,
+    toastError,
+    clearToastError,
     createAndAddSchedule,
+    updateSchedule,
+    deleteSchedule,
   };
 
   return html`
@@ -56,29 +120,8 @@ const SchedulesProvider = ({ children }) => {
 };
 
 const useSchedules = () => {
-  const {
-    schedules,
-    setSchedules,
-    activeSchedule,
-    setActiveSchedule,
-    isLoading,
-    setIsLoading,
-    error,
-    setError,
-    createAndAddSchedule,
-  } = useContext(SchedulesContext);
-
-  return {
-    schedules,
-    setSchedules,
-    activeSchedule,
-    setActiveSchedule,
-    isLoading,
-    setIsLoading,
-    error,
-    setError,
-    createAndAddSchedule,
-  };
+  const context = useContext(SchedulesContext);
+  return context;
 };
 
 export { SchedulesContext, SchedulesProvider, useSchedules };
