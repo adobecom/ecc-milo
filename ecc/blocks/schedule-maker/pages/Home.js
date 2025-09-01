@@ -1,19 +1,21 @@
 import { useState } from '../../../scripts/libs/preact-hook.js';
 import { html } from '../htm-wrapper.js';
 import BuildTableIcon from '../components/BuildTableIcon.js';
-import useNavigation from '../hooks/useNavigation.js';
 import CreateScheduleModal from '../components/CreateScheduleModal.js';
+import { useNavigation } from '../context/NavigationContext.js';
+import { useSchedules } from '../context/SchedulesContext.js';
 
-export default function Home({ schedules, setActiveSchedule }) {
+export default function Home({ schedules }) {
   const { goToEditSchedule, goToSheetImport } = useNavigation();
   const [filteredSchedules, setFilteredSchedules] = useState(schedules);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { createAndAddSchedule, setActiveSchedule } = useSchedules();
 
-  const handleCreateManually = () => {
+  const handleCreateManuallyBtn = () => {
     setIsCreateModalOpen(true);
   };
 
-  const handleCreateFromSheet = () => {
+  const handleCreateFromSheetBtn = () => {
     goToSheetImport();
   };
 
@@ -23,11 +25,12 @@ export default function Home({ schedules, setActiveSchedule }) {
   };
 
   const handleCreateSchedule = async (scheduleName) => {
-    console.log('Creating schedule with name:', scheduleName);
-    // TODO: Create schedule
-    // TODO: Add schedule to schedules
-    // TODO: Set active schedule
-    // TODO: Go to edit schedule
+    const newSchedule = {
+      title: scheduleName,
+      blocks: [],
+    };
+    const newScheduleResponse = await createAndAddSchedule(newSchedule);
+    setActiveSchedule(newScheduleResponse);
     goToEditSchedule();
   };
 
@@ -36,7 +39,6 @@ export default function Home({ schedules, setActiveSchedule }) {
   };
 
   const handleSearch = (e) => {
-    console.log('handleSearch');
     e.preventDefault();
     const searchValue = e.target.value;
     const localFilteredSchedules = schedules.filter((schedule) => {
@@ -55,10 +57,10 @@ export default function Home({ schedules, setActiveSchedule }) {
         <div class="home-quick-actions-content">
           <h2>Create a new schedule</h2>
           <div class="home-quick-actions-content-buttons">
-            <sp-button size="xl" static-color="black" treatment="outline" onClick=${handleCreateManually}>
+            <sp-button size="xl" static-color="black" treatment="outline" onClick=${handleCreateManuallyBtn}>
               Create Manually
             </sp-button>
-            <sp-button size="xl" static-color="black" treatment="outline" onClick=${handleCreateFromSheet}>
+            <sp-button size="xl" static-color="black" treatment="outline" onClick=${handleCreateFromSheetBtn}>
               Create from Sheet
             </sp-button>
           </div>

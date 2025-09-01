@@ -1,11 +1,11 @@
-// import { getSchedules } from '../../scripts/esp-controller.js';
-import { getSchedules } from './mockAPI/schedules-controller.js';
+// import { getEvents, getSchedules } from '../../scripts/esp-controller.js';
+// import { getSchedules } from './mockAPI/schedules-controller.js';
 import { html } from './htm-wrapper.js';
-import { useEffect, useState } from '../../scripts/libs/preact-hook.js';
-import useNavigation from './hooks/useNavigation.js';
 import Home from './pages/Home.js';
 import Schedules from './pages/Schedules.js';
 import { PAGES, PAGES_CONFIG } from './constants.js';
+import { useNavigation } from './context/NavigationContext.js';
+import { useSchedules } from './context/SchedulesContext.js';
 
 const PAGES_COMPONENTS = {
   [PAGES.home]: Home,
@@ -13,19 +13,8 @@ const PAGES_COMPONENTS = {
 };
 
 export default function ScheduleMaker() {
-  const [schedules, setSchedules] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeSchedule, setActiveSchedule] = useState(null);
   const { activePage, setActivePage } = useNavigation();
-
-  // TODO: Decide if we want to manage schedules with context or not
-
-  useEffect(() => {
-    getSchedules().then((schedulesResponse) => {
-      setSchedules(schedulesResponse);
-      setIsLoading(false);
-    });
-  }, []);
+  const { schedules, isLoading, activeSchedule, setActiveSchedule } = useSchedules();
 
   return html`
   <sp-theme color="light" scale="medium">

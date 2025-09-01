@@ -1521,8 +1521,10 @@ export async function getSchedules() {
 
   try {
     // const response = await safeFetch(`${host}/v1/schedules`, options);
-    const response = await fetch(`${host}/v1/schedules`, options);
+    const response = await fetch(`${host}/v1/page-schedules`, options);
+    console.log('response', response);
     const data = await response.json();
+    console.log('data', data);
 
     if (!response.ok) {
       console.log('response not ok');
@@ -1534,6 +1536,29 @@ export async function getSchedules() {
   } catch (error) {
     console.log('error');
     window.lana?.log(`Failed to get schedules:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function createSchedule(schedule) {
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const raw = JSON.stringify(schedule);
+  const options = await constructRequestOptions('POST', raw);
+
+  try {
+    const response = await safeFetch(`${host}/v1/page-schedules`, options);
+    console.log('response from createSchedule controller', response);
+    const data = await response.json();
+    console.log('data from createSchedule controller', data);
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to create schedule. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to create schedule:\n${JSON.stringify(error, null, 2)}`);
     return { status: 'Network Error', error: error.message };
   }
 }

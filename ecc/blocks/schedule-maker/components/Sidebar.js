@@ -33,7 +33,7 @@ function Sidebar({ schedules, activeSchedule, setActiveSchedule }) {
       <h2>Select schedule</h2>
       <div class="side-bar-schedules">
           ${filteredSchedules?.map((schedule) => html`
-            <button key="${schedule.id}" class="side-bar-schedule ${activeSchedule?.id === schedule.id ? 'active' : ''}" onclick=${() => handleSelectSchedule(schedule)}>${schedule.title}</button>
+            <button key="${schedule.id}" class="side-bar-schedule ${activeSchedule?.scheduleId === schedule.scheduleId ? 'active' : ''}" onclick=${() => handleSelectSchedule(schedule)}>${schedule.title}</button>
           `)}
       </div>
     </div>

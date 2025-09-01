@@ -1,4 +1,4 @@
-import { useState } from '../../../scripts/libs/preact-hook.js';
+import { useState, useContext } from '../../../scripts/libs/preact-hook.js';
 import { createContext } from '../../../scripts/libs/preact.js';
 import { html } from '../htm-wrapper.js';
 import { PAGES_CONFIG } from '../constants.js';
@@ -35,4 +35,10 @@ const NavigationProvider = ({ children }) => {
   `;
 };
 
-export { NavigationContext, NavigationProvider };
+// A custom hook to use the NavigationContext
+const useNavigation = () => {
+  const context = useContext(NavigationContext);
+  return context;
+};
+
+export { NavigationContext, NavigationProvider, useNavigation };

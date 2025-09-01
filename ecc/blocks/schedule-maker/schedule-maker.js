@@ -5,6 +5,7 @@ import ScheduleMaker from './ScheduleMaker.js';
 import { buildNoAccessScreen, signIn } from '../../scripts/utils.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { NavigationProvider } from './context/NavigationContext.js';
+import { SchedulesProvider } from './context/SchedulesContext.js';
 
 export default async function init(el) {
   el.innerHTML = '';
@@ -32,7 +33,9 @@ export default async function init(el) {
       render(
         html`
           <${NavigationProvider}>
-            <${ScheduleMaker} />
+            <${SchedulesProvider}>
+              <${ScheduleMaker} />
+            </${SchedulesProvider}>
           </${NavigationProvider}>
         `,
         el,

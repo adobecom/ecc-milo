@@ -2,7 +2,7 @@ import { html } from '../htm-wrapper.js';
 import Sidebar from '../components/Sidebar.js';
 import ScheduleEditor from '../components/ScheduleEditor.js';
 import SheetImporter from '../components/SheetImporter.js';
-import useNavigation from '../hooks/useNavigation.js';
+import { useNavigation } from '../context/NavigationContext.js';
 
 function Schedules({ schedules, activeSchedule, setActiveSchedule }) {
   const { activePage } = useNavigation();
