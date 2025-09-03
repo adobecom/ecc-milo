@@ -3,6 +3,7 @@ import { getAttribute } from '../../scripts/data-utils.js';
 import { getEventPageHost } from '../../scripts/utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { LOCALES } from '../../scripts/scripts.js';
+import { getLocales } from '../../scripts/esp-controller.js';
 
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
@@ -34,8 +35,11 @@ async function getPromotionalContentSheet(props) {
     }
 
     const sheetLocation = 'events/default/promotional-content.json';
+    const locales = await getLocales().then((resp) => resp.localeNames) || {};
+    const lName = locales[locale];
 
-    const targetLocaleObject = Object.entries(LOCALES).find(([, v]) => v.ietf === locale) || {};
+    const targetLocaleObject = Object.entries(LOCALES)
+      .find(([, v]) => v.longName.toLowerCase() === lName?.toLowerCase()) || {};
     const localePrefix = targetLocaleObject[0];
 
     const sheetResp = await fetch(`${getEventPageHost()}${localePrefix ? `/${localePrefix}` : ''}/${sheetLocation}`);
