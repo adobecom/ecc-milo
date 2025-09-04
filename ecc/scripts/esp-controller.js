@@ -1520,23 +1520,18 @@ export async function getSchedules() {
   const options = await constructRequestOptions('GET');
 
   try {
-    // const response = await safeFetch(`${host}/v1/schedules`, options);
-    const response = await fetch(`${host}/v1/page-schedules`, options);
-    console.log('response', response);
+    const response = await safeFetch(`${host}/v1/page-schedules`, options);
     const data = await response.json();
-    console.log('data', data);
 
     if (!response.ok) {
-      console.log('response not ok');
       window.lana?.log(`Failed to get schedules. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
-      return { status: response.status, error: data };
+      throw new Error('Failed to get schedules', data);
     }
 
     return data;
   } catch (error) {
-    console.log('error');
     window.lana?.log(`Failed to get schedules:\n${JSON.stringify(error, null, 2)}`);
-    return { status: 'Network Error', error: error.message };
+    throw new Error('Failed to get schedules', error);
   }
 }
 
@@ -1547,18 +1542,60 @@ export async function createSchedule(schedule) {
 
   try {
     const response = await safeFetch(`${host}/v1/page-schedules`, options);
-    console.log('response from createSchedule controller', response);
     const data = await response.json();
-    console.log('data from createSchedule controller', data);
 
     if (!response.ok) {
       window.lana?.log(`Failed to create schedule. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
-      return { status: response.status, error: data };
+      throw new Error('Failed to create schedule', data);
     }
 
     return data;
   } catch (error) {
     window.lana?.log(`Failed to create schedule:\n${JSON.stringify(error, null, 2)}`);
-    return { status: 'Network Error', error: error.message };
+    throw new Error('Failed to create schedule', error);
+  }
+}
+
+export async function updateSchedule(scheduleId, schedule) {
+  if (!scheduleId || typeof scheduleId !== 'string') throw new Error('Invalid schedule ID');
+  if (!schedule || typeof schedule !== 'object') throw new Error('Invalid schedule');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const raw = JSON.stringify(schedule);
+  const options = await constructRequestOptions('PUT', raw);
+
+  try {
+    const response = await safeFetch(`${host}/v1/page-schedules/${scheduleId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to update schedule. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      throw new Error('Failed to update schedule', data);
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to update schedule:\n${JSON.stringify(error, null, 2)}`);
+    throw new Error('Failed to update schedule', error);
+  }
+}
+
+export async function deleteSchedule(scheduleId) {
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('DELETE');
+
+  try {
+    const response = await safeFetch(`${host}/v1/page-schedules/${scheduleId}`, options);
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to delete schedule. Status: ${response.status}\nError: ${JSON.stringify(response, null, 2)}`);
+      throw new Error('Failed to delete schedule', response);
+    }
+
+    // 204 no content
+    return true;
+  } catch (error) {
+    window.lana?.log(`Failed to delete schedule:\n${JSON.stringify(error, null, 2)}`);
+    throw new Error('Failed to delete schedule', error);
   }
 }

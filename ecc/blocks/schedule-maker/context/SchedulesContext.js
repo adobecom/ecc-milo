@@ -2,8 +2,13 @@
 import { createContext } from '../../../scripts/libs/preact.js';
 import { useState, useContext, useCallback, useEffect, useMemo } from '../../../scripts/libs/preact-hook.js';
 import { html } from '../htm-wrapper.js';
-import { getSchedules as getSchedulesController, createSchedule as createScheduleController } from '../../../scripts/esp-controller.js';
-import { decorateSchedules, assignIdToBlocks } from '../utils.js';
+import {
+  getSchedules as getSchedulesController,
+  createSchedule as createScheduleController,
+  updateSchedule as updateScheduleController,
+  deleteSchedule as deleteScheduleController,
+} from '../../../scripts/esp-controller.js';
+import { decorateSchedules, assignIdToBlocks, isBlockComplete, isScheduleComplete, createServerFriendlySchedule } from '../utils.js';
 
 const SchedulesContext = createContext();
 
@@ -37,7 +42,7 @@ const SchedulesProvider = ({ children }) => {
       const decoratedSchedules = decorateSchedules(responseSchedules);
       setSchedules(decoratedSchedules);
     } catch (err) {
-      setError(err);
+      setError(err.message || 'Failed to get schedules');
     } finally {
       setIsInitialLoading(false);
     }
@@ -59,74 +64,88 @@ const SchedulesProvider = ({ children }) => {
       return newSchedule;
     } catch (err) {
       setToastError(err.message || 'Failed to create schedule');
-      throw err;
+      return err;
     } finally {
       setIsCreating(false);
     }
   }, [schedules]);
 
-  // Update schedule (placeholder for future implementation)
-  const updateSchedule = useCallback(async (scheduleId, updates) => {
+  // Update schedule
+  const updateSchedule = useCallback(async (scheduleId, schedule) => {
     setIsUpdating(true);
     setToastError(null);
     try {
-      // TODO: Implement updateScheduleController when available
-      console.log('Update schedule:', scheduleId, updates);
-      setToastError('Update functionality not yet implemented');
-      throw new Error('Update functionality not yet implemented');
+      const serverFriendlySchedule = createServerFriendlySchedule(schedule);
+      const updatedScheduleResponse = await updateScheduleController(scheduleId, serverFriendlySchedule);
+      const updatedSchedule = { ...schedule, modificationTime: updatedScheduleResponse.modificationTime };
+      setSchedules(schedules.map((s) => (s.scheduleId === scheduleId ? updatedSchedule : s)));
+      setActiveScheduleWithOriginal(updatedSchedule);
+      setToastError(null);
+      return updatedSchedule;
     } catch (err) {
       setToastError(err.message || 'Failed to update schedule');
-      throw err;
+      return err;
     } finally {
       setIsUpdating(false);
     }
-  }, []);
+  }, [schedules]);
 
-  const addBlock = useCallback((block) => {
-    console.log('Add block from context:', block);
-    try {
-      console.log('Active schedule from context:', activeSchedule);
-      if (!activeSchedule) return;
-      console.log('Active schedule from context:', activeSchedule);
-      const updatedBlocks = [...activeSchedule.blocks, block];
-      console.log('Updated blocks from context:', updatedBlocks);
-      setActiveSchedule({ ...activeSchedule, blocks: updatedBlocks });
-      setToastError(null);
-    } catch (err) {
-      setToastError(err.message || 'Failed to add block');
-      throw err;
-    }
-  }, [activeSchedule]);
-
-  const updateBlock = useCallback((blockId, updates) => {
-    if (!activeSchedule) return;
-    setToastError(null);
-    try {
-      console.log('Update block:', blockId, updates);
-      setToastError('Update block functionality not yet implemented');
-      throw new Error('Update block functionality not yet implemented');
-    } catch (err) {
-      setToastError(err.message || 'Failed to update block');
-      throw err;
-    }
-  }, [activeSchedule]);
-
-  // Delete schedule (placeholder for future implementation)
+  // Delete schedule
   const deleteSchedule = useCallback(async (scheduleId) => {
     setIsDeleting(true);
     setToastError(null);
     try {
-      // TODO: Implement deleteScheduleController when available
-      console.log('Delete schedule:', scheduleId);
-      setToastError('Delete functionality not yet implemented');
-      throw new Error('Delete functionality not yet implemented');
+      await deleteScheduleController(scheduleId);
+      setSchedules(schedules.filter((schedule) => schedule.scheduleId !== scheduleId));
+      setActiveSchedule(null);
+      setOriginalActiveSchedule(null);
+      setToastError(null);
+      return true;
     } catch (err) {
       setToastError(err.message || 'Failed to delete schedule');
-      throw err;
+      return err;
     } finally {
       setIsDeleting(false);
     }
-  }, []);
+  }, [schedules]);
+
+  // Update schedule locally
+  const updateScheduleLocally = useCallback((title) => {
+    setToastError(null);
+    const updatedSchedule = { ...activeSchedule, title };
+    const isScheduleCompleted = isScheduleComplete(updatedSchedule);
+    setActiveSchedule({ ...updatedSchedule, isComplete: isScheduleCompleted });
+    setToastError(null);
+  }, [activeSchedule]);
+
+  // Discard changes locally
+  const discardChangesToActiveSchedule = useCallback(() => {
+    setActiveSchedule(originalActiveSchedule);
+    setToastError(null);
+  }, [originalActiveSchedule]);
+
+  // Add block locally
+  const addBlockLocally = useCallback((block) => {
+    if (!activeSchedule) return;
+    setToastError(null);
+    block.isComplete = isBlockComplete(block);
+    const updatedBlocks = [...activeSchedule.blocks, block];
+    const isScheduleCompleted = isScheduleComplete(activeSchedule);
+    setActiveSchedule({ ...activeSchedule, blocks: updatedBlocks, isComplete: isScheduleCompleted });
+    setToastError(null);
+  }, [activeSchedule]);
+
+  // Update block locally
+  const updateBlockLocally = useCallback((blockId, updates) => {
+    if (!activeSchedule) return;
+    const blockToUpdate = activeSchedule.blocks.find((b) => b.id === blockId);
+    if (!blockToUpdate) return;
+    blockToUpdate.isComplete = isBlockComplete(blockToUpdate);
+    const updatedBlocks = activeSchedule.blocks.map((b) => (b.id === blockId ? { ...blockToUpdate, ...updates } : b));
+    const isScheduleCompleted = isScheduleComplete(activeSchedule);
+    setActiveSchedule({ ...activeSchedule, blocks: updatedBlocks, isComplete: isScheduleCompleted });
+    setToastError(null);
+  }, [activeSchedule]);
 
   // Clear toast error
   const clearToastError = useCallback(() => {
@@ -152,8 +171,10 @@ const SchedulesProvider = ({ children }) => {
     clearToastError,
     createAndAddSchedule,
     updateSchedule,
-    addBlock,
-    updateBlock,
+    discardChangesToActiveSchedule,
+    updateScheduleLocally,
+    addBlockLocally,
+    updateBlockLocally,
     deleteSchedule,
     hasUnsavedChanges,
   };

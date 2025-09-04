@@ -6,11 +6,14 @@ export default function ScheduleEditor() {
   const {
     isUpdating,
     isDeleting,
-    updateSchedule,
+    updateScheduleLocally,
     deleteSchedule,
     activeSchedule,
     hasUnsavedChanges,
-    addBlock,
+    addBlockLocally,
+    updateBlockLocally,
+    updateSchedule,
+    discardChangesToActiveSchedule,
   } = useSchedules();
   useIcons();
 
@@ -25,7 +28,7 @@ export default function ScheduleEditor() {
   };
 
   const handleCopyLink = () => {
-    console.log('handleCopyLink');
+    // TODO: Add logic to copy link
   };
 
   const handleAddBlock = () => {
@@ -39,11 +42,8 @@ export default function ScheduleEditor() {
       mobileRiderSessionId: '',
     };
 
-    console.log({ newBlock });
-    addBlock(newBlock);
+    addBlockLocally(newBlock);
   };
-
-  console.log({ activeSchedule });
 
   const handleSave = async () => {
     if (!activeSchedule) return;
@@ -56,26 +56,27 @@ export default function ScheduleEditor() {
   };
 
   const handleDiscardChanges = () => {
-    console.log('handleDiscardChanges');
+    discardChangesToActiveSchedule();
   };
 
-  const handleTitleChange = (event) => {
-    console.log('handleTitleChange', event.target.value);
+  const handleScheduleTitleChange = (event) => {
+    updateScheduleLocally(activeSchedule.scheduleId, { title: event.target.value });
   };
 
-  const handleFragmentPathChange = (event) => {
-    console.log('handleFragmentPathChange', event.target.value);
+  const handleTitleChange = (blockId, event) => {
+    updateBlockLocally(blockId, { title: event.target.value });
   };
 
-  const handleStartDateTimeChange = (event) => {
-    console.log('handleStartDateTimeChange', event.target.value);
+  const handleFragmentPathChange = (blockId, event) => {
+    updateBlockLocally(blockId, { fragmentPath: event.target.value });
+  };
+
+  const handleStartDateTimeChange = (blockId, event) => {
     // Add Z to make it a UTC date
     const date = new Date(`${event.target.value}Z`);
     const timestamp = date.getTime() || 0;
-    console.log('timestamp', timestamp);
+    updateBlockLocally(blockId, { startDateTime: timestamp });
   };
-
-  console.log({ activeSchedule, hasUnsavedChanges });
 
   const displayAsIsoString = (timestamp) => {
     if (!timestamp) return '';
@@ -94,7 +95,7 @@ export default function ScheduleEditor() {
     <section class="schedule-editor">
       <header class="schedule-editor-header">
         <div class="schedule-editor-header-title">
-          <input type="text" value=${activeSchedule?.title || ''} onInput=${handleTitleChange} class="schedule-title-input" placeholder="Enter schedule title"/>
+          <input type="text" value=${activeSchedule?.title || ''} onInput=${handleScheduleTitleChange} class="schedule-title-input" placeholder="Enter schedule title"/>
           ${hasUnsavedChanges ? html`
             <span class="unsaved-indicator" title="You have unsaved changes">
               <span class="icon icon-alert-circle icon-extra-small"></span>
@@ -123,10 +124,10 @@ export default function ScheduleEditor() {
         <section class="schedule-editor-content-blocks">
           ${activeSchedule?.blocks?.map((block) => html`
             <div class="schedule-editor-content-block">
-              <input type="text" value=${block.title} onInput=${handleTitleChange} class="schedule-title-input" placeholder="Enter block title"/>
+              <input type="text" value=${block.title} onInput=${(event) => handleTitleChange(block.id, event)} class="schedule-title-input" placeholder="Enter block title"/>
               <sp-field-label for="${block.id}-start-datetime-input">Start date and time UTC</sp-field-label>
-              <input type="datetime-local" id="${block.id}-start-datetime-input" value=${displayAsIsoString(block.startDateTime)} onInput=${handleStartDateTimeChange} class="schedule-start-datetime-input" placeholder="Enter block start date and time"/>
-              <input type="text" value=${block.fragmentPath} onInput=${handleFragmentPathChange} class="schedule-fragment-path-input" placeholder="Enter fragment path"/>
+              <input type="datetime-local" id="${block.id}-start-datetime-input" value=${displayAsIsoString(block.startDateTime)} onInput=${(e) => handleStartDateTimeChange(block.id, e)} class="schedule-start-datetime-input" placeholder="Enter block start date and time"/>
+              <input type="text" value=${block.fragmentPath} onInput=${(event) => handleFragmentPathChange(block.id, event)} class="schedule-fragment-path-input" placeholder="Enter fragment path"/>
             </div>
           `) || ''}
         </section>
