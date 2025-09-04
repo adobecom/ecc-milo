@@ -21,6 +21,8 @@ export default async function init(el) {
     import(`${LIBS}/features/spectrum-web-components/dist/icon.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/textfield.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/toast.js`),
+    import(`${LIBS}/features/spectrum-web-components/dist/checkbox.js`),
+    import(`${LIBS}/features/spectrum-web-components/dist/field-label.js`),
   ]);
 
   initProfileLogicTree('schedule-maker', {
@@ -33,11 +35,11 @@ export default async function init(el) {
     validProfile: () => {
       render(
         html`
-          <${NavigationProvider}>
-            <${SchedulesProvider}>
-              <${ScheduleMaker} />
-            </${SchedulesProvider}>
-          </${NavigationProvider}>
+          <${SchedulesProvider}>
+            <${NavigationProvider}>
+                <${ScheduleMaker} />
+            </${NavigationProvider}>
+          </${SchedulesProvider}>
         `,
         el,
       );

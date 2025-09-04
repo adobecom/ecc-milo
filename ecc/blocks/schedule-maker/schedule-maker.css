@@ -267,6 +267,60 @@ sp-action-button[disabled] {
   border-bottom: 1px solid #e0e0e0;
 }
 
+.schedule-editor-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.schedule-title-input {
+  border: none;
+  background: none;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  font-family: var(--body-font-family);
+  padding: 0;
+  margin: 0;
+  outline: none;
+  min-width: 200px;
+}
+
+.schedule-title-input:focus {
+  border-bottom: 2px solid #007bff;
+}
+
+.schedule-title-input::placeholder {
+  color: #999;
+  font-weight: 400;
+}
+
+.unsaved-indicator {
+  display: flex;
+  align-items: center;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.save-button-unsaved {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+.save-button-unsaved:hover {
+  background-color: #0056b3 !important;
+}
+
 .schedule-editor-header h2 {
   margin: 0;
   color: #333;

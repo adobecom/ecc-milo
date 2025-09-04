@@ -3,14 +3,9 @@ import Sidebar from '../components/Sidebar.js';
 import ScheduleEditor from '../components/ScheduleEditor.js';
 import SheetImporter from '../components/SheetImporter.js';
 import { useNavigation } from '../context/NavigationContext.js';
-import { useEffect } from '../../../scripts/libs/preact-hook.js';
 
 function Schedules({ schedules, activeSchedule, setActiveSchedule }) {
   const { activePage } = useNavigation();
-
-  useEffect(() => {
-    console.log('Schedules');
-  }, []);
 
   return html`
     <div class="schedules-page">

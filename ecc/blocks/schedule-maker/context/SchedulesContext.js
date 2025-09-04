@@ -1,13 +1,22 @@
+/* eslint-disable max-len */
 import { createContext } from '../../../scripts/libs/preact.js';
-import { useState, useContext, useCallback, useEffect } from '../../../scripts/libs/preact-hook.js';
+import { useState, useContext, useCallback, useEffect, useMemo } from '../../../scripts/libs/preact-hook.js';
 import { html } from '../htm-wrapper.js';
 import { getSchedules as getSchedulesController, createSchedule as createScheduleController } from '../../../scripts/esp-controller.js';
+import { decorateSchedules, assignIdToBlocks } from '../utils.js';
 
 const SchedulesContext = createContext();
 
 const SchedulesProvider = ({ children }) => {
   const [schedules, setSchedules] = useState([]);
+  const [originalActiveSchedule, setOriginalActiveSchedule] = useState(null);
   const [activeSchedule, setActiveSchedule] = useState(null);
+
+  const hasUnsavedChanges = useMemo(() => {
+    const originalStringifiedSchedule = JSON.stringify(originalActiveSchedule);
+    const currentStringifiedSchedule = JSON.stringify(activeSchedule);
+    return originalStringifiedSchedule !== currentStringifiedSchedule;
+  }, [originalActiveSchedule, activeSchedule]);
 
   // Granular loading states
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -25,14 +34,19 @@ const SchedulesProvider = ({ children }) => {
     setError(null);
     try {
       const { schedules: responseSchedules } = await getSchedulesController();
-      // eslint-disable-next-line max-len
-      const sortedByModificationTime = responseSchedules.sort((a, b) => new Date(b.modificationTime) - new Date(a.modificationTime));
-      setSchedules(sortedByModificationTime);
+      const decoratedSchedules = decorateSchedules(responseSchedules);
+      setSchedules(decoratedSchedules);
     } catch (err) {
       setError(err);
     } finally {
       setIsInitialLoading(false);
     }
+  }, []);
+
+  const setActiveScheduleWithOriginal = useCallback((schedule) => {
+    assignIdToBlocks(schedule);
+    setOriginalActiveSchedule(schedule);
+    setActiveSchedule(schedule);
   }, []);
 
   // Create a new schedule and add it to the schedules list
@@ -68,6 +82,35 @@ const SchedulesProvider = ({ children }) => {
     }
   }, []);
 
+  const addBlock = useCallback((block) => {
+    console.log('Add block from context:', block);
+    try {
+      console.log('Active schedule from context:', activeSchedule);
+      if (!activeSchedule) return;
+      console.log('Active schedule from context:', activeSchedule);
+      const updatedBlocks = [...activeSchedule.blocks, block];
+      console.log('Updated blocks from context:', updatedBlocks);
+      setActiveSchedule({ ...activeSchedule, blocks: updatedBlocks });
+      setToastError(null);
+    } catch (err) {
+      setToastError(err.message || 'Failed to add block');
+      throw err;
+    }
+  }, [activeSchedule]);
+
+  const updateBlock = useCallback((blockId, updates) => {
+    if (!activeSchedule) return;
+    setToastError(null);
+    try {
+      console.log('Update block:', blockId, updates);
+      setToastError('Update block functionality not yet implemented');
+      throw new Error('Update block functionality not yet implemented');
+    } catch (err) {
+      setToastError(err.message || 'Failed to update block');
+      throw err;
+    }
+  }, [activeSchedule]);
+
   // Delete schedule (placeholder for future implementation)
   const deleteSchedule = useCallback(async (scheduleId) => {
     setIsDeleting(true);
@@ -99,7 +142,7 @@ const SchedulesProvider = ({ children }) => {
     schedules,
     setSchedules,
     activeSchedule,
-    setActiveSchedule,
+    setActiveSchedule: setActiveScheduleWithOriginal,
     isInitialLoading,
     isCreating,
     isUpdating,
@@ -109,7 +152,10 @@ const SchedulesProvider = ({ children }) => {
     clearToastError,
     createAndAddSchedule,
     updateSchedule,
+    addBlock,
+    updateBlock,
     deleteSchedule,
+    hasUnsavedChanges,
   };
 
   return html`

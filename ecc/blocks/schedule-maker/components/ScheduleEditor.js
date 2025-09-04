@@ -3,7 +3,15 @@ import { useSchedules } from '../context/SchedulesContext.js';
 import useIcons from '../useIcons.js';
 
 export default function ScheduleEditor() {
-  const { isUpdating, isDeleting, updateSchedule, deleteSchedule, activeSchedule } = useSchedules();
+  const {
+    isUpdating,
+    isDeleting,
+    updateSchedule,
+    deleteSchedule,
+    activeSchedule,
+    hasUnsavedChanges,
+    addBlock,
+  } = useSchedules();
   useIcons();
 
   const handleDeleteAll = async () => {
@@ -21,7 +29,21 @@ export default function ScheduleEditor() {
   };
 
   const handleAddBlock = () => {
+    if (!activeSchedule) return;
+
+    const newBlock = {
+      id: `block-${Math.random().toString(36).substring(2, 15)}`,
+      title: '',
+      fragmentPath: '',
+      startDateTime: 0,
+      mobileRiderSessionId: '',
+    };
+
+    console.log({ newBlock });
+    addBlock(newBlock);
   };
+
+  console.log({ activeSchedule });
 
   const handleSave = async () => {
     if (!activeSchedule) return;
@@ -33,7 +55,32 @@ export default function ScheduleEditor() {
     }
   };
 
-  console.log({ activeSchedule });
+  const handleDiscardChanges = () => {
+    console.log('handleDiscardChanges');
+  };
+
+  const handleTitleChange = (event) => {
+    console.log('handleTitleChange', event.target.value);
+  };
+
+  const handleFragmentPathChange = (event) => {
+    console.log('handleFragmentPathChange', event.target.value);
+  };
+
+  const handleStartDateTimeChange = (event) => {
+    console.log('handleStartDateTimeChange', event.target.value);
+    // Add Z to make it a UTC date
+    const date = new Date(`${event.target.value}Z`);
+    const timestamp = date.getTime() || 0;
+    console.log('timestamp', timestamp);
+  };
+
+  console.log({ activeSchedule, hasUnsavedChanges });
+
+  const displayAsIsoString = (timestamp) => {
+    if (!timestamp) return '';
+    return new Date(timestamp).toISOString().slice(0, 16);
+  };
 
   if (!activeSchedule) {
     return html`
@@ -46,13 +93,25 @@ export default function ScheduleEditor() {
   return html`
     <section class="schedule-editor">
       <header class="schedule-editor-header">
-        <h2>${activeSchedule?.title}</h2>
+        <div class="schedule-editor-header-title">
+          <input type="text" value=${activeSchedule?.title || ''} onInput=${handleTitleChange} class="schedule-title-input" placeholder="Enter schedule title"/>
+          ${hasUnsavedChanges ? html`
+            <span class="unsaved-indicator" title="You have unsaved changes">
+              <span class="icon icon-alert-circle icon-extra-small"></span>
+            </span>
+          ` : ''}
+        </div>
         <div class="schedule-editor-header-actions">
+          ${hasUnsavedChanges ? html`
+            <sp-action-button icon="close-circle" size="m" onclick=${handleDiscardChanges} title="Discard unsaved changes">
+              Discard
+            </sp-action-button>
+          ` : ''}
           <sp-action-button icon="delete" size="m" onclick=${handleDeleteAll} disabled=${isDeleting}>
             ${isDeleting ? 'Deleting...' : 'Delete All'}
           </sp-action-button>
           <sp-action-button icon="copy" size="m" onclick=${handleCopyLink}>Copy link</sp-action-button>
-          <sp-action-button icon="save" size="m" onclick=${handleSave} disabled=${isUpdating}>
+          <sp-action-button icon="save" size="m" onclick=${handleSave} disabled=${isUpdating || !hasUnsavedChanges} class=${hasUnsavedChanges ? 'save-button-unsaved' : ''}>
             ${isUpdating ? 'Saving...' : 'Save'}
           </sp-action-button>
         </div>
@@ -62,12 +121,14 @@ export default function ScheduleEditor() {
           Placeholder for tags
         </div>
         <section class="schedule-editor-content-blocks">
-          ${activeSchedule?.blocks.map((block) => html`
+          ${activeSchedule?.blocks?.map((block) => html`
             <div class="schedule-editor-content-block">
-              <h3>${block.title}</h3>
-              <p>${block.fragmentPath}</p>
+              <input type="text" value=${block.title} onInput=${handleTitleChange} class="schedule-title-input" placeholder="Enter block title"/>
+              <sp-field-label for="${block.id}-start-datetime-input">Start date and time UTC</sp-field-label>
+              <input type="datetime-local" id="${block.id}-start-datetime-input" value=${displayAsIsoString(block.startDateTime)} onInput=${handleStartDateTimeChange} class="schedule-start-datetime-input" placeholder="Enter block start date and time"/>
+              <input type="text" value=${block.fragmentPath} onInput=${handleFragmentPathChange} class="schedule-fragment-path-input" placeholder="Enter fragment path"/>
             </div>
-          `)}
+          `) || ''}
         </section>
         <button class="schedule-editor-content-add-block" onClick=${handleAddBlock}>
           <p>Add block</p>
