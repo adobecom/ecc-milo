@@ -127,11 +127,6 @@ export default function ScheduleEditor() {
       <header class="schedule-editor-header">
         <div class="schedule-editor-header-title">
           <input type="text" value=${activeSchedule?.title || ''} onInput=${handleScheduleTitleChange} class="schedule-title-input" placeholder="Enter schedule title"/>
-          ${hasUnsavedChanges && html`
-            <span class="unsaved-indicator" title="You have unsaved changes">
-              <span class="icon icon-alert-circle icon-extra-small"></span>
-            </span>
-          `}
         </div>
         <div class="schedule-editor-header-actions">
           ${hasUnsavedChanges && html`

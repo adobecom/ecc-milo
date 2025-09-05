@@ -77,7 +77,7 @@ const SchedulesProvider = ({ children }) => {
     try {
       const serverFriendlySchedule = createServerFriendlySchedule(schedule);
       const updatedScheduleResponse = await updateScheduleController(scheduleId, serverFriendlySchedule);
-      const updatedSchedule = { ...schedule, modificationTime: updatedScheduleResponse.modificationTime };
+      const updatedSchedule = { ...schedule, modificationTime: updatedScheduleResponse.modificationTime, isComplete: isScheduleComplete(schedule) };
       setSchedules(schedules.map((s) => (s.scheduleId === scheduleId ? updatedSchedule : s)));
       setActiveScheduleWithOriginal(updatedSchedule);
       setToastError(null);

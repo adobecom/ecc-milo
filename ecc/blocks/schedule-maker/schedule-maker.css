@@ -241,6 +241,8 @@ sp-action-button[disabled] {
   color: #131313;
   font-family: var(--body-font-family);
   font-weight: 500;
+  display: flex;
+  justify-content: space-between;
 }
 
 .side-bar-schedule:hover {
