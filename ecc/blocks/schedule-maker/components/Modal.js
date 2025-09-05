@@ -88,8 +88,6 @@ export default function Modal({
     large: 'modal-large',
   };
 
-  console.log('showActions', showActions);
-  console.log('showActions type', typeof showActions);
   // Render actions separately to avoid nested html templates
   const renderActions = () => {
     if (!showActions) return null;

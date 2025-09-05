@@ -2,6 +2,7 @@ import { html } from '../htm-wrapper.js';
 import { useSchedules } from '../context/SchedulesContext.js';
 import useIcons from '../useIcons.js';
 import { useState } from '../../../scripts/libs/preact-hook.js';
+import { createServerFriendlySchedule } from '../utils.js';
 
 export default function ScheduleEditor() {
   const {
@@ -16,10 +17,12 @@ export default function ScheduleEditor() {
     updateBlockLocally,
     updateSchedule,
     discardChangesToActiveSchedule,
+    setToastSuccess,
   } = useSchedules();
   useIcons();
 
   const [editingBlockId, setEditingBlockId] = useState(null);
+  const [isEditingScheduleTitle, setIsEditingScheduleTitle] = useState(false);
 
   const handleDeleteAll = async () => {
     if (!activeSchedule) return;
@@ -32,7 +35,14 @@ export default function ScheduleEditor() {
   };
 
   const handleCopyLink = () => {
-    // TODO: Add logic to copy link
+    if (hasUnsavedChanges) {
+      alert('You have unsaved changes. Please save or discard them before copying the link.');
+      return;
+    }
+    const jsonSchedule = JSON.stringify(createServerFriendlySchedule(activeSchedule));
+    navigator.clipboard.writeText(jsonSchedule);
+    setToastSuccess('Link copied to clipboard');
+    // TODO: ADD the actual logic to copy the link
   };
 
   const handleAddBlock = () => {
@@ -69,6 +79,15 @@ export default function ScheduleEditor() {
 
   const handleScheduleTitleChange = (event) => {
     updateScheduleLocally(activeSchedule.scheduleId, { title: event.target.value });
+  };
+
+  const handleEditScheduleTitle = () => {
+    setIsEditingScheduleTitle(true);
+    const scheduleTitleInput = document.getElementById('schedule-title-input');
+    if (!scheduleTitleInput) return;
+    requestAnimationFrame(() => {
+      scheduleTitleInput.focus();
+    });
   };
 
   const handleEditBlockTitle = (blockId) => {
@@ -126,7 +145,24 @@ export default function ScheduleEditor() {
     <section class="schedule-editor">
       <header class="schedule-editor-header">
         <div class="schedule-editor-header-title">
-          <input type="text" value=${activeSchedule?.title || ''} onInput=${handleScheduleTitleChange} class="schedule-title-input" placeholder="Enter schedule title"/>
+          <sp-textfield \
+            type="text" \
+            size="xl" \
+            id="schedule-title-input" \
+            value=${activeSchedule?.title || ''} \
+            onInput=${handleScheduleTitleChange} \
+            class="schedule-title-input ${isEditingScheduleTitle ? '' : 'schedule-block-hide'}" \
+            onBlur=${() => setIsEditingScheduleTitle(false)} \
+            onFocusIn=${() => setIsEditingScheduleTitle(true)} \
+            placeholder="Enter schedule title" \
+          ></sp-textfield>
+          <button \
+            class="schedule-editor-header-title-button ${isEditingScheduleTitle ? 'schedule-block-hide' : ''}" \
+            onclick=${() => handleEditScheduleTitle()} \
+          >
+            ${activeSchedule?.title || ''}
+            <span class="icon icon-edit"></span>
+          </button>
         </div>
         <div class="schedule-editor-header-actions">
           ${hasUnsavedChanges && html`

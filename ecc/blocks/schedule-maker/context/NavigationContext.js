@@ -12,7 +12,7 @@ const NavigationProvider = ({ children }) => {
 
   const goToEditSchedule = () => {
     if (hasUnsavedChanges) {
-      console.log('Has unsaved changes');
+      alert('You have unsaved changes. Please save or discard them before editing a schedule.');
       return;
     }
     setActivePage(PAGES_CONFIG.editSchedule);
@@ -20,7 +20,7 @@ const NavigationProvider = ({ children }) => {
 
   const goToSheetImport = () => {
     if (hasUnsavedChanges) {
-      console.log('Has unsaved changes');
+      alert('You have unsaved changes. Please save or discard them before importing a sheet.');
       return;
     }
     setActivePage(PAGES_CONFIG.importSheet);
@@ -28,7 +28,7 @@ const NavigationProvider = ({ children }) => {
 
   const goToHome = () => {
     if (hasUnsavedChanges) {
-      console.log('Has unsaved changes');
+      alert('You have unsaved changes. Please save or discard them before going to home.');
       return;
     }
     setActivePage(PAGES_CONFIG.home);

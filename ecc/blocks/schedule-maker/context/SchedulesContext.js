@@ -61,6 +61,7 @@ const SchedulesProvider = ({ children }) => {
     setToastError(null);
     try {
       const newSchedule = await createScheduleController(schedule);
+      newSchedule.isComplete = isScheduleComplete(newSchedule);
       setSchedules([newSchedule, ...schedules]);
       setToastSuccess('Schedule created successfully');
       return newSchedule;
@@ -195,6 +196,7 @@ const SchedulesProvider = ({ children }) => {
     hasUnsavedChanges,
     toastSuccess,
     clearToastSuccess,
+    setToastSuccess,
   };
 
   return html`

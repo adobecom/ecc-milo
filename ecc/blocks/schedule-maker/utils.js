@@ -6,6 +6,7 @@ function isBlockComplete(block) {
 }
 
 function isScheduleComplete(schedule) {
+  if (schedule.blocks.length === 0) return false;
   return schedule.blocks?.every((block) => isBlockComplete(block));
 }
 

@@ -297,16 +297,7 @@ sp-action-button[disabled] {
 }
 
 .schedule-title-input {
-  border: none;
-  background: none;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #333;
-  font-family: var(--body-font-family);
-  padding: 0;
-  margin: 0;
-  outline: none;
-  min-width: 200px;
+  min-width: 295px;
 }
 
 .schedule-title-input::placeholder {
@@ -337,7 +328,7 @@ sp-action-button[disabled] {
 
 .schedule-editor-content-block-incomplete-indicator {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 8px;
 }
 
@@ -346,6 +337,7 @@ sp-action-button[disabled] {
   font-weight: 400;
   font-family: var(--body-font-family);
   color: #333;
+  margin: 0;
 }
 
 .schedule-editor-content-block-incomplete-indicator-circle {
@@ -377,8 +369,39 @@ sp-action-button[disabled] {
   padding: 10px 8px 10px 0;
 }
 
+.schedule-editor-header-title-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--body-font-family);
+  width: 238px;
+  border-radius: 10px;
+  padding: 10px 8px 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 295px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.schedule-editor-header-title-button:hover {
+  background-color: #E8E8E8;
+  padding: 10px 12px;
+}
+
+
+.schedule-editor-header-title-button .icon {
+  display: none;
+}
+
 .schedule-editor-content-block-title-button .icon {
   display: none;
+}
+
+.schedule-editor-header-title-button:hover .icon {
+  display: block;
 }
 
 .schedule-block-hide {
