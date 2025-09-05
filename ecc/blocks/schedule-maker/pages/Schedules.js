@@ -15,10 +15,10 @@ function Schedules({ schedules, activeSchedule, setActiveSchedule }) {
   };
 
   return html`
-    <div class="schedules-page">
-      <h1>Schedule Maker</h1>
-      <div class="schedules-page-content-container">
-        <div class="schedules-page-sidebar">
+    <div class="sm-page">
+      <h1 class="sm-page__title">Schedule Maker</h1>
+      <div class="sm-schedules__container">
+        <div class="sm-schedules__sidebar">
           <${Sidebar} \
             schedules=${schedules} \
             activeSchedule=${activeSchedule} \
@@ -26,7 +26,7 @@ function Schedules({ schedules, activeSchedule, setActiveSchedule }) {
             setIsAddScheduleModalOpen=${setIsAddScheduleModalOpen} \
           />
         </div>
-        <div class="schedules-page-content">
+        <div class="sm-schedules__content">
           ${activePage.mode === 'edit' ? html`
             <${ScheduleEditor} />` : html`
             <${SheetImporter} />`}

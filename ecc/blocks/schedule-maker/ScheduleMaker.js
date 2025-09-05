@@ -27,33 +27,33 @@ export default function ScheduleMaker() {
 
   return html`
   <sp-theme color="light" scale="medium">
-    <div class="schedule-maker-app">
-      <div class="schedule-maker-tabs">
+    <div class="sm-app">
+      <div class="sm-tabs">
         ${Object.values(PAGES_CONFIG).map((page) => html`
-          <button class="schedule-maker-tab ${activePage.pageComponent === page.pageComponent ? 'schedule-maker-tab-active' : ''}" onclick=${() => setActivePage(page)}>
+          <button class="sm-tab ${activePage.pageComponent === page.pageComponent ? 'sm-tab--active' : ''}" onclick=${() => setActivePage(page)}>
             ${page.label}
           </button>
         `)}
       </div>
       
       ${isInitialLoading && html`
-      <div class="schedule-maker-progress-circle">
+      <div class="sm-loading">
         <sp-progress-circle size="l" indeterminate label="Loading schedules" />
       </div>`}
       
       ${!isInitialLoading && html`
-      <div class="schedule-maker-content">
+      <div class="sm-content">
         ${html`<${PAGES_COMPONENTS[activePage.pageComponent]} schedules=${schedules} setActivePage=${setActivePage} setActiveSchedule=${setActiveSchedule} activePage=${activePage} activeSchedule=${activeSchedule} />`}
       </div>`}
       
       ${toastError && html`
-      <div class="schedule-maker-toast schedule-maker-toast-error">
+      <div class="sm-toast sm-toast--error">
         <sp-toast variant="negative" open onclose=${clearToastError} timeout=${6000}>
           ${toastError}
         </sp-toast>
       </div>`}
       ${toastSuccess && html`
-      <div class="schedule-maker-toast schedule-maker-toast-success">
+      <div class="sm-toast sm-toast--success">
         <sp-toast variant="positive" open onclose=${clearToastSuccess} timeout=${6000}>
           ${toastSuccess}
         </sp-toast>

@@ -39,18 +39,18 @@ function Sidebar({ schedules, activeSchedule, setActiveSchedule, setIsAddSchedul
   );
 
   return html`
-    <div class="side-bar">
-      <sp-button class="side-bar-button" size="l" static-color="black" onclick=${handleAddSchedule}>
+    <div class="sm-sidebar">
+      <sp-button class="sm-sidebar__button" size="l" static-color="black" onclick=${handleAddSchedule}>
         <span slot="icon" class="icon icon-add-circle"></span>
         Add Schedule
       </sp-button>
-      <sp-search class="side-bar-search" placeholder="Search schedules" oninput=${handleSearch}></sp-search>
+      <sp-search class="sm-sidebar__search" placeholder="Search schedules" oninput=${handleSearch}></sp-search>
       <h2>Select schedule</h2>
-      <div class="side-bar-schedules">
+      <div class="sm-sidebar__schedules">
           ${filteredSchedules?.map((schedule) => html`
             <button \
               key="${schedule.id}" \
-              class="side-bar-schedule ${activeSchedule?.scheduleId === schedule.scheduleId ? 'active' : ''}" \
+              class="sm-sidebar__schedule ${activeSchedule?.scheduleId === schedule.scheduleId ? 'sm-sidebar__schedule--active' : ''}" \
               onclick=${() => handleSelectSchedule(schedule)} \
             >
               ${schedule.title}

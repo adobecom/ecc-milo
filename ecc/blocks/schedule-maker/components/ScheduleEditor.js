@@ -134,7 +134,7 @@ export default function ScheduleEditor() {
 
   if (!activeSchedule) {
     return html`
-      <section class="schedule-editor">
+      <section class="sm-editor">
         <h2>No schedule selected</h2>
       </section>
     `;
@@ -142,29 +142,29 @@ export default function ScheduleEditor() {
   console.log({ activeSchedule });
 
   return html`
-    <section class="schedule-editor">
-      <header class="schedule-editor-header">
-        <div class="schedule-editor-header-title">
+    <section class="sm-editor">
+      <header class="sm-editor__header">
+        <div class="sm-editor__header-title">
           <sp-textfield \
             type="text" \
             size="xl" \
             id="schedule-title-input" \
             value=${activeSchedule?.title || ''} \
             onInput=${handleScheduleTitleChange} \
-            class="schedule-title-input ${isEditingScheduleTitle ? '' : 'schedule-block-hide'}" \
+            class="sm-input--title ${isEditingScheduleTitle ? '' : 'sm-hidden'}" \
             onBlur=${() => setIsEditingScheduleTitle(false)} \
             onFocusIn=${() => setIsEditingScheduleTitle(true)} \
             placeholder="Enter schedule title" \
           ></sp-textfield>
           <button \
-            class="schedule-editor-header-title-button ${isEditingScheduleTitle ? 'schedule-block-hide' : ''}" \
+            class="sm-title-button sm-title-button--header ${isEditingScheduleTitle ? 'sm-hidden' : ''}" \
             onclick=${() => handleEditScheduleTitle()} \
           >
             ${activeSchedule?.title || ''}
             <span class="icon icon-edit"></span>
           </button>
         </div>
-        <div class="schedule-editor-header-actions">
+        <div class="sm-editor__header-actions">
           ${hasUnsavedChanges && html`
             <sp-action-button icon="close-circle" size="m" onclick=${discardChangesToActiveSchedule} title="Discard unsaved changes">
               Discard
@@ -174,20 +174,20 @@ export default function ScheduleEditor() {
             ${isDeleting ? 'Deleting...' : 'Delete All'}
           </sp-action-button>
           <sp-action-button icon="copy" size="m" onclick=${handleCopyLink}>Copy link</sp-action-button>
-          <sp-action-button icon="save" size="m" onclick=${handleSave} disabled=${isUpdating || !hasUnsavedChanges} class=${hasUnsavedChanges ? 'save-button-unsaved' : ''}>
+          <sp-action-button icon="save" size="m" onclick=${handleSave} disabled=${isUpdating || !hasUnsavedChanges} class=${hasUnsavedChanges ? 'sm-button--unsaved' : ''}>
             ${isUpdating ? 'Saving...' : 'Save'}
           </sp-action-button>
         </div>
       </header>
-      <section class="schedule-editor-content">
-        <section class="schedule-editor-content-blocks">
+      <section class="sm-editor__content">
+        <section class="sm-editor__blocks">
           ${activeSchedule?.blocks?.map((block) => html`
             <div \
-              class="schedule-editor-content-block ${editingBlockId === block.id ? 'editing' : ''} ${!block.isComplete ? 'incomplete' : ''}" \
+              class="sm-editor__block ${editingBlockId === block.id ? 'sm-editor__block--editing' : ''} ${!block.isComplete ? 'sm-editor__block--incomplete' : ''}" \
               onFocusIn=${() => setEditingBlockId(block.id)} \
               onFocusOut=${() => setEditingBlockId(null)} \
             >
-              <div class="schedule-editor-content-block-header-row">
+              <div class="sm-editor__block-header">
                 <sp-textfield \
                   aria-label="Block title" \
                   label="Block title" \
@@ -196,21 +196,21 @@ export default function ScheduleEditor() {
                   oninput=${(event) => handleBlockTitleChange(block.id, event)} \
                   onBlur=${() => updateBlockLocally(block.id, { isEditingBlockTitle: false })} \
                   id="${block.id}-block-title-input" \
-                  class="schedule-title-input ${block.isEditingBlockTitle || !block.title ? '' : 'schedule-block-hide'}" \
+                  class="sm-input--title ${block.isEditingBlockTitle || !block.title ? '' : 'sm-hidden'}" \
                   size="l" \
                   placeholder="Add block title" \
                 />
                 <button \
-                  class="schedule-editor-content-block-title-button ${block.isEditingBlockTitle || !block.title ? 'schedule-block-hide' : ''}" \
+                  class="sm-title-button ${block.isEditingBlockTitle || !block.title ? 'sm-hidden' : ''}" \
                   onclick=${() => handleEditBlockTitle(block.id)} \
                 >
                   ${block.title}
                   <span class="icon icon-edit"></span>
                 </button>
-                <div class="schedule-editor-content-block-header-actions">
+                <div class="sm-editor__block-header-actions">
                   ${!block.isComplete && editingBlockId !== block.id && html`
-                    <div class="schedule-editor-content-block-incomplete-indicator">
-                      <div class="schedule-editor-content-block-incomplete-indicator-circle"></div>
+                    <div class="sm-editor__block-incomplete">
+                      <div class="sm-editor__block-incomplete-circle"></div>
                       <p>Incomplete</p>
                     </div>
                   `}
@@ -225,19 +225,19 @@ export default function ScheduleEditor() {
                   </sp-action-button>
                 </div>
               </div>
-              <div class="schedule-editor-content-block-date-time-row">
-                <div class="schedule-editor-content-block-date-time-wrapper">
+              <div class="sm-editor__block-datetime">
+                <div class="sm-editor__block-datetime-wrapper">
                   <sp-field-label size="l" for="${block.id}-start-datetime-input">Start Date and Time UTC</sp-field-label>
                   <input \
                     type="datetime-local" \
                     id="${block.id}-start-datetime-input" \
                     value=${displayAsIsoString(block.startDateTime)} \
                     onInput=${(e) => handleStartDateTimeChange(block.id, e)} \
-                    class="schedule-start-datetime-input" \
+                    class="sm-input--datetime" \
                     placeholder="Enter block start date and time" \
                   />
                 </div>
-                <div class="schedule-editor-content-block-live-stream-wrapper">
+                <div class="sm-editor__block-livestream">
                   <sp-checkbox \
                     id="${block.id}-live-stream-checkbox" \
                     name="${block.id}-live-stream-checkbox" \
@@ -253,7 +253,6 @@ export default function ScheduleEditor() {
                     id="${block.id}-mobile-rider-session-id-input" \
                     value=${block.mobileRiderSessionId} \
                     oninput=${(event) => handleMobileRiderSessionIdChange(block.id, event)} \
-                    class="schedule-mobile-rider-session-id-input" \
                     placeholder="Enter Mobile Rider Stream ID" \
                   />
                   `}
@@ -265,15 +264,14 @@ export default function ScheduleEditor() {
                 id="${block.id}-fragment-path-input" \
                 value=${block.fragmentPath} \
                 oninput=${(event) => handleFragmentPathChange(block.id, event)} \
-                class="schedule-fragment-path-input" \
                 placeholder="Enter fragment path" \
               />
             </div>
           `) || ''}
         </section>
-        <button class="schedule-editor-content-add-block" onClick=${handleAddBlock}>
+        <button class="sm-editor__add-block" onClick=${handleAddBlock}>
           <p>Add block</p>
-          <span class="icon icon-add-circle icon-extra-small"></span>
+          <span class="icon icon-add-circle sm-icon-xs"></span>
         </button>
       </section>
     </section>

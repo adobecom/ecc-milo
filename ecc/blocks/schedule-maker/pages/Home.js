@@ -50,13 +50,13 @@ export default function Home({ schedules }) {
   };
 
   return html`
-    <div class="home-page">
-      <h1>Schedule Maker</h1>
-      <div class="home-quick-actions">
-        <div class="home-quick-actions-icon"><${BuildTableIcon} /></div>
-        <div class="home-quick-actions-content">
+    <div class="sm-page">
+      <h1 class="sm-page__title">Schedule Maker</h1>
+      <div class="sm-home__quick-actions">
+        <div class="sm-home__quick-actions-icon"><${BuildTableIcon} /></div>
+        <div class="sm-home__quick-actions-content">
           <h2>Create a new schedule</h2>
-          <div class="home-quick-actions-content-buttons">
+          <div class="sm-home__quick-actions-buttons">
             <sp-button size="xl" static-color="black" treatment="outline" onClick=${handleCreateManuallyBtn}>
               Create Manually
             </sp-button>
@@ -66,14 +66,14 @@ export default function Home({ schedules }) {
           </div>
         </div>
       </div>
-      <div class="home-schedules">
-        <div class="home-schedules-header">
+      <div class="sm-home__schedules">
+        <div class="sm-home__schedules-header">
           <h2>Select Schedule</h2>
           <sp-search placeholder="Search schedules" size="l" oninput=${handleSearch} onsubmit=${handleSearch} />
         </div>
-        <ul class="home-schedules-list">
+        <ul class="sm-home__schedules-list">
           ${filteredSchedules.map((schedule) => html`
-            <li class="home-schedules-list-item">
+            <li class="sm-home__schedules-item">
               <sp-action-button quiet size="l" onClick=${() => handleSelectSchedule(schedule)}>
                 ${schedule.title}
               </sp-action-button>
