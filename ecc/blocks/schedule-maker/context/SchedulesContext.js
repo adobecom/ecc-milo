@@ -127,8 +127,6 @@ const SchedulesProvider = ({ children }) => {
   // Add block locally
   const addBlockLocally = useCallback((block) => {
     if (!activeSchedule) return;
-    setToastError(null);
-    block.isComplete = isBlockComplete(block);
     const updatedBlocks = [...activeSchedule.blocks, block];
     const isScheduleCompleted = isScheduleComplete(activeSchedule);
     setActiveSchedule({ ...activeSchedule, blocks: updatedBlocks, isComplete: isScheduleCompleted });
@@ -140,11 +138,19 @@ const SchedulesProvider = ({ children }) => {
     if (!activeSchedule) return;
     const blockToUpdate = activeSchedule.blocks.find((b) => b.id === blockId);
     if (!blockToUpdate) return;
-    blockToUpdate.isComplete = isBlockComplete(blockToUpdate);
-    const updatedBlocks = activeSchedule.blocks.map((b) => (b.id === blockId ? { ...blockToUpdate, ...updates } : b));
+    const updatedBlock = { ...blockToUpdate, ...updates };
+    updatedBlock.isComplete = isBlockComplete(updatedBlock);
+    const updatedBlocks = activeSchedule.blocks.map((b) => (b.id === blockId ? updatedBlock : b));
     const isScheduleCompleted = isScheduleComplete(activeSchedule);
     setActiveSchedule({ ...activeSchedule, blocks: updatedBlocks, isComplete: isScheduleCompleted });
     setToastError(null);
+  }, [activeSchedule]);
+
+  // Delete block locally
+  const deleteBlockLocally = useCallback((blockId) => {
+    if (!activeSchedule) return;
+    const updatedBlocks = activeSchedule.blocks.filter((b) => b.id !== blockId);
+    setActiveSchedule({ ...activeSchedule, blocks: updatedBlocks });
   }, [activeSchedule]);
 
   // Clear toast error
@@ -175,6 +181,7 @@ const SchedulesProvider = ({ children }) => {
     updateScheduleLocally,
     addBlockLocally,
     updateBlockLocally,
+    deleteBlockLocally,
     deleteSchedule,
     hasUnsavedChanges,
   };

@@ -1,11 +1,15 @@
 import { useState } from '../../../scripts/libs/preact-hook.js';
 import { html } from '../htm-wrapper.js';
+import { useSchedules } from '../context/SchedulesContext.js';
 
 function Sidebar({ schedules, activeSchedule, setActiveSchedule }) {
   const [search, setSearch] = useState('');
+  const { hasUnsavedChanges } = useSchedules();
 
   const handleAddSchedule = () => {
-    console.log('handleAddSchedule');
+    if (hasUnsavedChanges) {
+      alert('You have unsaved changes. Please save or discard them before adding a new schedule.');
+    }
   };
 
   const handleSearch = (e) => {
@@ -15,6 +19,10 @@ function Sidebar({ schedules, activeSchedule, setActiveSchedule }) {
   };
 
   const handleSelectSchedule = (schedule) => {
+    if (hasUnsavedChanges) {
+      alert('You have unsaved changes. Please save or discard them before selecting a new schedule.');
+      return;
+    }
     setActiveSchedule(schedule);
   };
 

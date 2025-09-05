@@ -1,5 +1,8 @@
 function isBlockComplete(block) {
-  return block.fragmentPath && block.startDateTime && block.title;
+  if (block.liveStream && !block.mobileRiderSessionId) {
+    return false;
+  }
+  return Boolean(block.fragmentPath && block.startDateTime && block.title);
 }
 
 function isScheduleComplete(schedule) {
@@ -10,6 +13,7 @@ function decorateBlock(block) {
   return {
     ...block,
     isComplete: isBlockComplete(block),
+    liveStream: Boolean(block.mobileRiderSessionId),
   };
 }
 
@@ -49,6 +53,7 @@ function createServerFriendlySchedule(schedule) {
   deepCopyOfSchedule.blocks.forEach((block) => {
     delete block.id;
     delete block.isComplete;
+    delete block.liveStream;
   });
   return deepCopyOfSchedule;
 }
