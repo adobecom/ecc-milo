@@ -1,15 +1,19 @@
 import { useState } from '../../../scripts/libs/preact-hook.js';
 import { html } from '../htm-wrapper.js';
 import { useSchedules } from '../context/SchedulesContext.js';
+import { useNavigation } from '../context/NavigationContext.js';
 
-function Sidebar({ schedules, activeSchedule, setActiveSchedule }) {
+function Sidebar({ schedules, activeSchedule, setActiveSchedule, setIsAddScheduleModalOpen }) {
   const [search, setSearch] = useState('');
   const { hasUnsavedChanges } = useSchedules();
+  const { goToEditSchedule } = useNavigation();
 
   const handleAddSchedule = () => {
     if (hasUnsavedChanges) {
       alert('You have unsaved changes. Please save or discard them before adding a new schedule.');
+      return;
     }
+    setIsAddScheduleModalOpen(true);
   };
 
   const handleSearch = (e) => {
@@ -24,6 +28,7 @@ function Sidebar({ schedules, activeSchedule, setActiveSchedule }) {
       return;
     }
     setActiveSchedule(schedule);
+    goToEditSchedule();
   };
 
   const filteredSchedules = schedules?.filter(
@@ -34,11 +39,9 @@ function Sidebar({ schedules, activeSchedule, setActiveSchedule }) {
     },
   );
 
-  console.log('filteredSchedules', filteredSchedules);
-
   return html`
     <div class="side-bar">
-      <sp-button class="side-bar-button" size="xl" static-color="black" onclick=${handleAddSchedule}>
+      <sp-button class="side-bar-button" size="l" static-color="black" onclick=${handleAddSchedule}>
         <span slot="icon" class="icon icon-add-circle"></span>
         Add Schedule
       </sp-button>

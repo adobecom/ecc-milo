@@ -21,6 +21,8 @@ export default function ScheduleMaker() {
     setActiveSchedule,
     toastError,
     clearToastError,
+    toastSuccess,
+    clearToastSuccess,
   } = useSchedules();
 
   return html`
@@ -46,8 +48,14 @@ export default function ScheduleMaker() {
       
       ${toastError && html`
       <div class="schedule-maker-toast schedule-maker-toast-error">
-        <sp-toast variant="negative" open onclose=${clearToastError}>
+        <sp-toast variant="negative" open onclose=${clearToastError} timeout=${6000}>
           ${toastError}
+        </sp-toast>
+      </div>`}
+      ${toastSuccess && html`
+      <div class="schedule-maker-toast schedule-maker-toast-success">
+        <sp-toast variant="positive" open onclose=${clearToastSuccess} timeout=${6000}>
+          ${toastSuccess}
         </sp-toast>
       </div>`}
     </div>

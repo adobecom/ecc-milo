@@ -1,7 +1,7 @@
 import { useState } from '../../../scripts/libs/preact-hook.js';
 import { html } from '../htm-wrapper.js';
 import BuildTableIcon from '../components/BuildTableIcon.js';
-import CreateScheduleModal from '../components/CreateScheduleModal.js';
+import CreateManuallyScheduleModal from '../components/CreateManuallyScheduleModal.js';
 import { useNavigation } from '../context/NavigationContext.js';
 import { useSchedules } from '../context/SchedulesContext.js';
 
@@ -53,7 +53,7 @@ export default function Home({ schedules }) {
     <div class="home-page">
       <h1>Schedule Maker</h1>
       <div class="home-quick-actions">
-        <div class="home-quick-actions-icon">${html`<${BuildTableIcon} />`}</div>
+        <div class="home-quick-actions-icon"><${BuildTableIcon} /></div>
         <div class="home-quick-actions-content">
           <h2>Create a new schedule</h2>
           <div class="home-quick-actions-content-buttons">
@@ -80,6 +80,6 @@ export default function Home({ schedules }) {
             </li>`)}
         </ul>
       </div>
-      <${CreateScheduleModal} isOpen=${isCreateModalOpen} onClose=${handleCloseCreateModal} onConfirm=${handleCreateSchedule} />
+      <${CreateManuallyScheduleModal} isOpen=${isCreateModalOpen} onClose=${handleCloseCreateModal} onConfirm=${handleCreateSchedule} />
     </div>`;
 }

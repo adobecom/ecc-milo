@@ -1,5 +1,6 @@
 import { useEffect, useRef } from '../../../scripts/libs/preact-hook.js';
 import { html } from '../htm-wrapper.js';
+import useIcons from '../useIcons.js';
 
 export default function Modal({
   isOpen,
@@ -15,6 +16,7 @@ export default function Modal({
   const modalRef = useRef(null);
   const firstFocusableRef = useRef(null);
   const lastFocusableRef = useRef(null);
+  useIcons();
 
   // Handle escape key
   useEffect(() => {
@@ -86,6 +88,8 @@ export default function Modal({
     large: 'modal-large',
   };
 
+  console.log('showActions', showActions);
+  console.log('showActions type', typeof showActions);
   // Render actions separately to avoid nested html templates
   const renderActions = () => {
     if (!showActions) return null;
@@ -105,11 +109,11 @@ export default function Modal({
     <div class="modal-overlay" onClick=${handleBackdropClick} role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal ${sizeClasses[size]}" ref=${modalRef} tabindex="-1" onKeyDown=${handleKeyDown} role="document">
         <div class="modal-header">
-          <h2 id="modal-title" class="modal-title">
+          ${title && html`<h2 id="modal-title" class="modal-title">
             ${title}
-          </h2>
+          </h2>`}
           <sp-action-button quiet size="s" onClick=${onClose} aria-label="Close modal" class="modal-close">
-            <sp-icon name="close" size="s"></sp-icon>
+            <span class="icon icon-close" slot="icon"></span>
           </sp-action-button>
         </div>
         <div class="modal-content">

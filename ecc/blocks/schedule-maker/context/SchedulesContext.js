@@ -16,6 +16,7 @@ const SchedulesProvider = ({ children }) => {
   const [schedules, setSchedules] = useState([]);
   const [originalActiveSchedule, setOriginalActiveSchedule] = useState(null);
   const [activeSchedule, setActiveSchedule] = useState(null);
+  const [toastSuccess, setToastSuccess] = useState(null);
 
   const hasUnsavedChanges = useMemo(() => {
     const originalStringifiedSchedule = JSON.stringify(createServerFriendlySchedule(originalActiveSchedule));
@@ -61,6 +62,7 @@ const SchedulesProvider = ({ children }) => {
     try {
       const newSchedule = await createScheduleController(schedule);
       setSchedules([newSchedule, ...schedules]);
+      setToastSuccess('Schedule created successfully');
       return newSchedule;
     } catch (err) {
       setToastError(err.message || 'Failed to create schedule');
@@ -81,6 +83,7 @@ const SchedulesProvider = ({ children }) => {
       setSchedules(schedules.map((s) => (s.scheduleId === scheduleId ? updatedSchedule : s)));
       setActiveScheduleWithOriginal(updatedSchedule);
       setToastError(null);
+      setToastSuccess('Schedule updated successfully');
       return updatedSchedule;
     } catch (err) {
       setToastError(err.message || 'Failed to update schedule');
@@ -100,6 +103,7 @@ const SchedulesProvider = ({ children }) => {
       setActiveSchedule(null);
       setOriginalActiveSchedule(null);
       setToastError(null);
+      setToastSuccess('Schedule deleted successfully');
       return true;
     } catch (err) {
       setToastError(err.message || 'Failed to delete schedule');
@@ -158,6 +162,11 @@ const SchedulesProvider = ({ children }) => {
     setToastError(null);
   }, []);
 
+  // Clear toast success
+  const clearToastSuccess = useCallback(() => {
+    setToastSuccess(null);
+  }, []);
+
   // On mount, get schedules
   useEffect(() => {
     getSchedules();
@@ -184,6 +193,8 @@ const SchedulesProvider = ({ children }) => {
     deleteBlockLocally,
     deleteSchedule,
     hasUnsavedChanges,
+    toastSuccess,
+    clearToastSuccess,
   };
 
   return html`

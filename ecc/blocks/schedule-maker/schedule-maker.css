@@ -1,6 +1,7 @@
 /* Modal Styles */
 @import url('./components/Modal.css');
-@import url('./components/CreateScheduleModal.css');
+@import url('./components/CreateManuallyScheduleModal.css');
+@import url('./components/AddScheduleModal.css');
 
 .icon-extra-small svg.icon-milo {
   height: var(--icon-size-xs);
