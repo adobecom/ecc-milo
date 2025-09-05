@@ -18,7 +18,6 @@ function Sidebar({ schedules, activeSchedule, setActiveSchedule, setIsAddSchedul
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log('handleSearch', e.target.value);
     setSearch(e.target.value);
   };
 
