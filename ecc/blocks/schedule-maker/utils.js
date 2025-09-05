@@ -21,7 +21,7 @@ function decorateBlock(block) {
 // Add isComplete to each block
 function decorateBlocks(blocks) {
   // eslint-disable-next-line max-len
-  const sortedBlocks = blocks?.sort((a, b) => new Date(b.startDateTime) - new Date(a.startDateTime));
+  const sortedBlocks = blocks?.sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
   return sortedBlocks?.map((block) => decorateBlock(block));
 }
 

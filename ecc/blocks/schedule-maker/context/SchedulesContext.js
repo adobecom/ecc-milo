@@ -8,7 +8,14 @@ import {
   updateSchedule as updateScheduleController,
   deleteSchedule as deleteScheduleController,
 } from '../../../scripts/esp-controller.js';
-import { decorateSchedules, assignIdToBlocks, isBlockComplete, isScheduleComplete, createServerFriendlySchedule } from '../utils.js';
+import {
+  decorateSchedules,
+  decorateSchedule,
+  assignIdToBlocks,
+  isBlockComplete,
+  isScheduleComplete,
+  createServerFriendlySchedule,
+} from '../utils.js';
 
 const SchedulesContext = createContext();
 
@@ -81,11 +88,12 @@ const SchedulesProvider = ({ children }) => {
       const serverFriendlySchedule = createServerFriendlySchedule(schedule);
       const updatedScheduleResponse = await updateScheduleController(scheduleId, serverFriendlySchedule);
       const updatedSchedule = { ...schedule, modificationTime: updatedScheduleResponse.modificationTime, isComplete: isScheduleComplete(schedule) };
-      setSchedules(schedules.map((s) => (s.scheduleId === scheduleId ? updatedSchedule : s)));
-      setActiveScheduleWithOriginal(updatedSchedule);
+      const decoratedUpdatedSchedule = decorateSchedule(updatedSchedule);
+      setSchedules(schedules.map((s) => (s.scheduleId === scheduleId ? decoratedUpdatedSchedule : s)));
+      setActiveScheduleWithOriginal(decoratedUpdatedSchedule);
       setToastError(null);
       setToastSuccess('Schedule updated successfully');
-      return updatedSchedule;
+      return decoratedUpdatedSchedule;
     } catch (err) {
       setToastError(err.message || 'Failed to update schedule');
       return err;
