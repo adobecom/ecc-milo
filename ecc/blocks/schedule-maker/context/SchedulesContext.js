@@ -18,8 +18,8 @@ const SchedulesProvider = ({ children }) => {
   const [activeSchedule, setActiveSchedule] = useState(null);
 
   const hasUnsavedChanges = useMemo(() => {
-    const originalStringifiedSchedule = JSON.stringify(originalActiveSchedule);
-    const currentStringifiedSchedule = JSON.stringify(activeSchedule);
+    const originalStringifiedSchedule = JSON.stringify(createServerFriendlySchedule(originalActiveSchedule));
+    const currentStringifiedSchedule = JSON.stringify(createServerFriendlySchedule(activeSchedule));
     return originalStringifiedSchedule !== currentStringifiedSchedule;
   }, [originalActiveSchedule, activeSchedule]);
 

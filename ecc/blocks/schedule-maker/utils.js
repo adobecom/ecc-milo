@@ -48,12 +48,14 @@ function assignIdToBlocks(schedule) {
 }
 
 function createServerFriendlySchedule(schedule) {
+  if (!schedule) return null;
   const deepCopyOfSchedule = JSON.parse(JSON.stringify(schedule));
   delete deepCopyOfSchedule.isComplete;
   deepCopyOfSchedule.blocks.forEach((block) => {
     delete block.id;
     delete block.isComplete;
     delete block.liveStream;
+    delete block.isEditingBlockTitle;
   });
   return deepCopyOfSchedule;
 }
