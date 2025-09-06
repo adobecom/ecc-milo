@@ -67,11 +67,12 @@ const SchedulesProvider = ({ children }) => {
     setIsCreating(true);
     setToastError(null);
     try {
-      const newSchedule = await createScheduleController(schedule);
-      newSchedule.isComplete = isScheduleComplete(newSchedule);
-      setSchedules([newSchedule, ...schedules]);
+      const serverFriendlySchedule = createServerFriendlySchedule(schedule);
+      const newSchedule = await createScheduleController(serverFriendlySchedule);
+      const decoratedNewSchedule = decorateSchedule(newSchedule);
+      setSchedules([decoratedNewSchedule, ...schedules]);
       setToastSuccess('Schedule created successfully');
-      return newSchedule;
+      return decoratedNewSchedule;
     } catch (err) {
       setToastError(err.message || 'Failed to create schedule');
       return err;

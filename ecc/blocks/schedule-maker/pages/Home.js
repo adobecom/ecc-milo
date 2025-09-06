@@ -9,19 +9,26 @@ export default function Home({ schedules }) {
   const { goToEditSchedule, goToSheetImport } = useNavigation();
   const [filteredSchedules, setFilteredSchedules] = useState(schedules);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createModalMode, setCreateModalMode] = useState('manually');
   const { createAndAddSchedule, setActiveSchedule } = useSchedules();
 
   const handleCreateManuallyBtn = () => {
     setIsCreateModalOpen(true);
+    setCreateModalMode('manually');
   };
 
   const handleCreateFromSheetBtn = () => {
-    goToSheetImport();
+    setIsCreateModalOpen(true);
+    setCreateModalMode('sheet');
   };
 
   const handleSelectSchedule = (schedule) => {
     setActiveSchedule(schedule);
     goToEditSchedule();
+  };
+
+  const handleCreateFromSheet = (scheduleName) => {
+    goToSheetImport(scheduleName);
   };
 
   const handleCreateSchedule = async (scheduleName) => {
@@ -80,6 +87,10 @@ export default function Home({ schedules }) {
             </li>`)}
         </ul>
       </div>
-      <${CreateManuallyScheduleModal} isOpen=${isCreateModalOpen} onClose=${handleCloseCreateModal} onConfirm=${handleCreateSchedule} />
+      <${CreateManuallyScheduleModal} \
+        isOpen=${isCreateModalOpen} \
+        onClose=${handleCloseCreateModal} \
+        onConfirm=${createModalMode === 'manually' ? handleCreateSchedule : handleCreateFromSheet} \
+      />
     </div>`;
 }

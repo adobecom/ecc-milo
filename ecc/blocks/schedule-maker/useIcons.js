@@ -9,8 +9,8 @@ export default function useIcons() {
   useEffect(() => {
     const fetchIcons = async () => {
       const { default: loadIcons } = await import(`${LIBS}/features/icons/icons.js`);
-      const icons = document.querySelectorAll('span.icon');
-      if (!icons) return;
+      const icons = document.querySelectorAll('span.icon:not([data-svg-injected="true"])');
+      if (icons.length === 0) return;
       loadIcons(icons);
     };
     fetchIcons();

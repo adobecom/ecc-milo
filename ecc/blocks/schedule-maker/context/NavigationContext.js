@@ -9,6 +9,7 @@ const NavigationContext = createContext();
 const NavigationProvider = ({ children }) => {
   const [activePage, setActivePage] = useState(PAGES_CONFIG.editSchedule);
   const { hasUnsavedChanges } = useSchedules();
+  const [importSheetScheduleName, setImportSheetScheduleName] = useState(null);
 
   const goToEditSchedule = () => {
     if (hasUnsavedChanges) {
@@ -18,12 +19,13 @@ const NavigationProvider = ({ children }) => {
     setActivePage(PAGES_CONFIG.editSchedule);
   };
 
-  const goToSheetImport = () => {
+  const goToSheetImport = (scheduleName) => {
     if (hasUnsavedChanges) {
       alert('You have unsaved changes. Please save or discard them before importing a sheet.');
       return;
     }
     setActivePage(PAGES_CONFIG.importSheet);
+    setImportSheetScheduleName(scheduleName);
   };
 
   const goToHome = () => {
@@ -34,12 +36,18 @@ const NavigationProvider = ({ children }) => {
     setActivePage(PAGES_CONFIG.home);
   };
 
+  const clearImportSheetScheduleName = () => {
+    setImportSheetScheduleName(null);
+  };
+
   const value = {
     activePage,
     setActivePage,
+    importSheetScheduleName,
     goToEditSchedule,
     goToSheetImport,
     goToHome,
+    clearImportSheetScheduleName,
   };
 
   return html`

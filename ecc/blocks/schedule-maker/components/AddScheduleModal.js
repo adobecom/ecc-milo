@@ -8,7 +8,7 @@ import { useNavigation } from '../context/NavigationContext.js';
 export default function AddScheduleModal({ isOpen, onClose }) {
   const [scheduleName, setScheduleName] = useState('');
   const { createAndAddSchedule, setActiveSchedule } = useSchedules();
-  const { goToEditSchedule } = useNavigation();
+  const { goToEditSchedule, goToSheetImport } = useNavigation();
   const handleClose = () => {
     setScheduleName('');
     onClose();
@@ -21,12 +21,15 @@ export default function AddScheduleModal({ isOpen, onClose }) {
     };
     const newScheduleResponse = await createAndAddSchedule(newSchedule);
     setActiveSchedule(newScheduleResponse);
+    setScheduleName('');
     goToEditSchedule();
     onClose();
   };
 
   const handleCreateFromSheet = () => {
     if (!scheduleName.trim()) return;
+    goToSheetImport(scheduleName);
+    setScheduleName('');
     onClose();
   };
 
