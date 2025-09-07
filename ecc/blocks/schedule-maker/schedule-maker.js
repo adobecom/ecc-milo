@@ -23,6 +23,7 @@ export default async function init(el) {
     import(`${LIBS}/features/spectrum-web-components/dist/toast.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/checkbox.js`),
     import(`${LIBS}/features/spectrum-web-components/dist/field-label.js`),
+    import(`${LIBS}/features/spectrum-web-components/dist/picker.js`),
   ]);
 
   initProfileLogicTree('schedule-maker', {

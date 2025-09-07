@@ -197,38 +197,42 @@ export default function SheetImporter() {
       <!-- Sheet Selection -->
       ${workbook ? html`
         <div class="sheet-importer__sheet-selection">
-          <label for="sheet-select">Select a sheet</label>
-          <select \
+          <sp-field-label for="sheet-select" size="l">Select a sheet</sp-field-label>
+          <sp-picker\
             id="sheet-select" \
+            class="sheet-importer__sheet-select" \
+            size="l" \
             value=${selectedSheet} \
             onChange=${(e) => handleSheetSelection(e.target.value)} \
           >
-            <option value="">Choose a sheet...</option>
+            <span slot="label">Choose a sheet...</span>
             ${workbook.SheetNames.map((sheetName) => html`
-              <option value=${sheetName}>${sheetName}</option>
+              <sp-menu-item value=${sheetName}>${sheetName}</sp-menu-item>
             `)}
-          </select>
+          </sp-picker>
         </div>
       ` : ''}
 
       <!-- Column Mapping -->
       ${selectedSheet && sheetData.length > 0 ? html`
         <div class="sheet-importer__mapping">
-          <h3>Map Columns to Properties</h3>
-          <div class="sheet-importer__mapping-grid">
+          <h3>Map fields to columns</h3>
+          <div class="sheet-importer__mapping-items">
             ${Object.entries(columnMapping).map(([property, selectedColumn]) => html`
               <div class="sheet-importer__mapping-item">
-                <label for=${`mapping-${property}`}>${property}:</label>
-                <select \
+                <sp-field-label for=${`mapping-${property}`} size="l">${property}:</sp-field-label>
+                <sp-picker \
                   id=${`mapping-${property}`} \
+                  class="sheet-importer__mapping-picker" \
+                  size="l" \
                   value=${selectedColumn} \
                   onChange=${(e) => handleColumnMappingChange(property, e.target.value)} \
                 >
-                  <option value="">Select column...</option>
+                  <span slot="label">Select column...</span>
                   ${getAvailableColumns().map((column) => html`
-                    <option value=${column}>${column}</option>
+                    <sp-menu-item value=${column}>${column}</sp-menu-item>
                   `)}
-                </select>
+                </sp-picker>
               </div>
             `)}
           </div>
@@ -259,14 +263,26 @@ export default function SheetImporter() {
       <!-- Add Schedule Button -->
       ${selectedSheet && sheetData.length > 0 ? html`
         <div class="sheet-importer__actions">
-          <button \
+          <sp-button \
             class="sheet-importer__add-button" \
+            size="l" \
+            static-color="black" \
             onClick=${handleAddSchedule} \
             disabled=${!Object.values(columnMapping).some((v) => v)} \
           >
-            <span class="icon icon-add-circle sm-icon-sm"></span>
-            Add ${convertToBlocks().length} blocks to schedule
-          </button>
+            <sp-icon slot="icon">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <mask id="mask0_2489_9865" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="22" height="22">
+                    <path d="M11 20.6572C5.69228 20.6572 1.375 16.3399 1.375 11.0322C1.375 5.72451 5.69228 1.40723 11 1.40723C16.3077 1.40723 20.625 5.72451 20.625 11.0322C20.625 16.3399 16.3077 20.6572 11 20.6572ZM11 3.05723C6.60215 3.05723 3.025 6.63437 3.025 11.0322C3.025 15.4301 6.60215 19.0072 11 19.0072C15.3979 19.0072 18.975 15.4301 18.975 11.0322C18.975 6.63437 15.3979 3.05723 11 3.05723Z" fill="#292929"/>
+                    <path d="M14.5751 10.1751H11.8251V7.4251C11.8251 6.96963 11.4556 6.6001 11.0001 6.6001C10.5446 6.6001 10.1751 6.96963 10.1751 7.4251V10.1751H7.4251C6.96963 10.1751 6.6001 10.5446 6.6001 11.0001C6.6001 11.4556 6.96963 11.8251 7.4251 11.8251H10.1751V14.5751C10.1751 15.0306 10.5446 15.4001 11.0001 15.4001C11.4556 15.4001 11.8251 15.0306 11.8251 14.5751V11.8251H14.5751C15.0306 11.8251 15.4001 11.4556 15.4001 11.0001C15.4001 10.5446 15.0306 10.1751 14.5751 10.1751Z" fill="#292929"/>
+                </mask>
+                <g mask="url(#mask0_2489_9865)">
+                    <rect width="22" height="22" fill="white"/>
+                </g>
+              </svg>
+            </sp-icon>
+            Add schedule
+          </sp-button>
         </div>
       ` : ''}
     </div>

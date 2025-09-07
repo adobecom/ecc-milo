@@ -660,16 +660,16 @@ sp-action-button[disabled] {
 
 .sheet-importer h2 {
   margin: 0 0 var(--sm-spacing-xl) 0;
-  color: var(--sm-color-text-primary);
-  font-size: 1.5rem;
-  font-weight: 600;
+  color: #131313;
+  font-size: 22px;
+  font-weight: 700;
 }
 
 .sheet-importer h3 {
   margin: var(--sm-spacing-lg) 0 var(--sm-spacing-md) 0;
-  color: var(--sm-color-text-primary);
-  font-size: 1.2rem;
-  font-weight: 500;
+  color: #131313;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 /* File Upload Section */
@@ -720,22 +720,8 @@ sp-action-button[disabled] {
   margin-bottom: var(--sm-spacing-xl);
 }
 
-.sheet-importer__sheet-selection label {
-  display: block;
-  margin-bottom: var(--sm-spacing-sm);
-  color: var(--sm-color-text-primary);
-  font-weight: 500;
-}
-
-.sheet-importer__sheet-selection select {
+.sheet-importer__sheet-select {
   width: 100%;
-  padding: var(--sm-spacing-sm);
-  border: 1px solid var(--sm-color-border);
-  border-radius: var(--sm-border-radius);
-  background: var(--sm-color-surface);
-  color: var(--sm-color-text-primary);
-  font-size: 1rem;
-  transition: var(--sm-transition);
 }
 
 /* Column Mapping */
@@ -743,39 +729,14 @@ sp-action-button[disabled] {
   margin-bottom: var(--sm-spacing-xl);
 }
 
-.sheet-importer__mapping-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+.sheet-importer__mapping-items {
+  display: flex;
+  flex-direction: column;
   gap: var(--sm-spacing-md);
 }
 
-.sheet-importer__mapping-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sm-spacing-xs);
-}
-
-.sheet-importer__mapping-item label {
-  color: var(--sm-color-text-primary);
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.sheet-importer__mapping-item select {
-  padding: var(--sm-spacing-sm);
-  border: 1px solid var(--sm-color-border);
-  border-radius: var(--sm-border-radius);
-  background: var(--sm-color-surface);
-  color: var(--sm-color-text-primary);
-  font-size: 0.9rem;
-  transition: var(--sm-transition);
-}
-
-.sheet-importer__sheet-selection select:focus,
-.sheet-importer__mapping-item select:focus {
-  outline: none;
-  border-color: var(--sm-color-primary);
-  box-shadow: 0 0 0 2px rgb(0 123 255 / 20%);
+.sheet-importer__mapping-picker {
+  width: 100%;
 }
 
 /* Preview Table */
@@ -818,37 +779,9 @@ sp-action-button[disabled] {
 
 /* Actions */
 .sheet-importer__actions {
-  text-align: center;
+  text-align: right;
   padding-top: var(--sm-spacing-lg);
   border-top: 1px solid var(--sm-color-border-light);
-}
-
-.sheet-importer__add-button {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sm-spacing-sm);
-  padding: var(--sm-spacing-md) var(--sm-spacing-xl);
-  background: var(--sm-color-primary);
-  color: white;
-  border: none;
-  border-radius: var(--sm-border-radius);
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--sm-transition);
-}
-
-.sheet-importer__add-button:disabled {
-  background: var(--sm-color-text-muted);
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.sheet-importer__add-button:hover:not(:disabled) {
-  background: var(--sm-color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgb(0 123 255 / 30%);
 }
 
 /* Responsive Design for Sheet Importer */
@@ -857,12 +790,13 @@ sp-action-button[disabled] {
     padding: var(--sm-spacing-lg);
   }
   
-  .sheet-importer__mapping-grid {
-    grid-template-columns: 1fr;
+  .sheet-importer__mapping-items {
+    flex-direction: column;
   }
   
-  .sheet-importer__add-button {
+  .sheet-importer__actions {
     width: 100%;
-    justify-content: center;
+    justify-content: right;
+    text-align: right;
   }
 }
