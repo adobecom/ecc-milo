@@ -6,6 +6,8 @@ import Schedules from './pages/Schedules.js';
 import { PAGES, PAGES_CONFIG } from './constants.js';
 import { useNavigation } from './context/NavigationContext.js';
 import { useSchedules } from './context/SchedulesContext.js';
+import { useEffect } from '../../scripts/libs/preact-hook.js';
+import LZString from '../../scripts/libs/lz-string.js';
 
 const PAGES_COMPONENTS = {
   [PAGES.home]: Home,
@@ -13,7 +15,7 @@ const PAGES_COMPONENTS = {
 };
 
 export default function ScheduleMaker() {
-  const { activePage, setActivePage } = useNavigation();
+  const { activePage, setActivePage, goToEditSchedule } = useNavigation();
   const {
     schedules,
     isInitialLoading,
@@ -24,6 +26,24 @@ export default function ScheduleMaker() {
     toastSuccess,
     clearToastSuccess,
   } = useSchedules();
+
+  // On load, check if there is a schedule in the URL
+  useEffect(() => {
+    function handleScheduleInUrl() {
+      if (isInitialLoading) return;
+      const urlParams = new URLSearchParams(window.location.search);
+      const scheduleParam = urlParams.get('schedule');
+      if (scheduleParam) {
+        goToEditSchedule();
+        const scheduleData = JSON.parse(LZString.decompressFromEncodedURIComponent(scheduleParam));
+        const { scheduleId } = scheduleData;
+        const schedule = schedules.find((s) => s.scheduleId === scheduleId);
+        setActiveSchedule(schedule);
+      }
+    }
+
+    handleScheduleInUrl();
+  }, [isInitialLoading]);
 
   return html`
   <sp-theme color="light" scale="medium">

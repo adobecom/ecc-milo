@@ -1,6 +1,8 @@
 import { html } from '../../htm-wrapper.js';
 import { useSchedules } from '../../context/SchedulesContext.js';
 import { useState } from '../../../../scripts/libs/preact-hook.js';
+import { createServerFriendlySchedule } from '../../utils.js';
+import LZString from '../../../../scripts/libs/lz-string.js';
 
 export default function ScheduleHeader() {
   const {
@@ -28,8 +30,43 @@ export default function ScheduleHeader() {
   };
 
   const handleCopyLink = () => {
-    // TODO: Implement actual link copying logic
-    setToastSuccess('Link copied to clipboard');
+    if (!activeSchedule) return;
+
+    try {
+      // Create a server-friendly version of the schedule (removes client-only properties)
+      const serverFriendlySchedule = createServerFriendlySchedule(activeSchedule);
+
+      // Convert schedule to base64 string
+      const scheduleJson = JSON.stringify(serverFriendlySchedule);
+      const uriEncodeVersion = encodeURIComponent(scheduleJson);
+      const base64Version = encodeURIComponent(btoa(scheduleJson));
+      const encodedSchedule = LZString.compressToEncodedURIComponent(scheduleJson);
+      console.log('original scheduleJson', scheduleJson.length);
+      console.log('uriEncodeVersion', uriEncodeVersion.length);
+      console.log('base64Version', base64Version.length);
+      console.log('encodedSchedule with LZString', encodedSchedule.length);
+
+      // Create URL with base64 schedule as query parameter
+      const currentUrl = window.location.href.split('?')[0]; // Remove existing query params
+      const shareableUrl = `${currentUrl}?schedule=${encodedSchedule}`;
+
+      // Copy to clipboard
+      navigator.clipboard.writeText(shareableUrl).then(() => {
+        setToastSuccess('Link copied to clipboard');
+      }).catch(() => {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = shareableUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        setToastSuccess('Link copied to clipboard');
+      });
+    } catch (error) {
+      console.error('Error copying link:', error);
+      setToastSuccess('Failed to copy link');
+    }
   };
 
   const handleSave = async () => {
