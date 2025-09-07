@@ -28,10 +28,6 @@ export default function ScheduleHeader() {
   };
 
   const handleCopyLink = () => {
-    if (hasUnsavedChanges) {
-      alert('You have unsaved changes. Please save or discard them before copying the link.');
-      return;
-    }
     // TODO: Implement actual link copying logic
     setToastSuccess('Link copied to clipboard');
   };
@@ -98,7 +94,7 @@ export default function ScheduleHeader() {
         <sp-action-button icon="delete" size="m" onclick=${handleDeleteAll} disabled=${isDeleting}>
           ${isDeleting ? 'Deleting...' : 'Delete All'}
         </sp-action-button>
-        <sp-action-button icon="copy" size="m" onclick=${handleCopyLink}>Copy link</sp-action-button>
+        <sp-action-button icon="copy" size="m" disabled=${hasUnsavedChanges} onclick=${handleCopyLink}>Copy link</sp-action-button>
         <sp-action-button icon="save" size="m" onclick=${handleSave} disabled=${isUpdating || !hasUnsavedChanges} class=${hasUnsavedChanges ? 'sm-button--unsaved' : ''}>
           ${isUpdating ? 'Saving...' : 'Save'}
         </sp-action-button>
