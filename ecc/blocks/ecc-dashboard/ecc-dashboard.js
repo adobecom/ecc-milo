@@ -752,23 +752,24 @@ function initSorting(props, config) {
   const thRow = thead.querySelector('tr');
 
   const headers = {
-    thumbnail: '',
-    title: 'EVENT NAME',
-    published: 'PUBLISH STATUS',
-    contributor: 'CONTRIBUTOR',
-    series: 'SERIES',
-    startDate: 'DATE RUN | (MM/DD/YYYY)',
-    venueName: 'VENUE NAME',
-    language: 'LANGUAGE',
-    attendeeCount: 'RSVP DATA',
-    createdBy: 'CREATOR',
-    modifiedBy: 'MODIFIER',
-    modificationTime: 'LAST MODIFIED | (MM/DD/YYYY)',
-    publishTime: 'PUBLISHED AT | (MM/DD/YYYY)',
-    manage: 'MANAGE',
+    thumbnail: { text: '', sortable: false },
+    title: { text: 'EVENT NAME', sortable: true },
+    published: { text: 'PUBLISH STATUS', sortable: true },
+    contributor: { text: 'CONTRIBUTOR', sortable: false },
+    series: { text: 'SERIES', sortable: false },
+    startDate: { text: 'DATE RUN | (MM/DD/YYYY)', sortable: true },
+    venueName: { text: 'VENUE NAME', sortable: false },
+    language: { text: 'LANGUAGE', sortable: true },
+    attendeeCount: { text: 'RSVP DATA', sortable: true },
+    createdBy: { text: 'CREATOR', sortable: false },
+    modifiedBy: { text: 'MODIFIER', sortable: false },
+    modificationTime: { text: 'LAST MODIFIED | (MM/DD/YYYY)', sortable: true },
+    publishTime: { text: 'PUBLISHED AT | (MM/DD/YYYY)', sortable: false },
+    manage: { text: 'MANAGE', sortable: false },
   };
 
-  Object.entries(headers).forEach(([key, val]) => {
+  Object.entries(headers).forEach(([key, headerConfig]) => {
+    const { text: val, sortable } = headerConfig;
     const [firstRow, secondRow] = val.split(' | ');
 
     const thTextWrapper = createTag('span', {}, '');
@@ -781,7 +782,7 @@ function initSorting(props, config) {
     }
     const th = createTag('th', {}, thTextWrapper, { parent: thRow });
 
-    if (['thumbnail', 'manage', 'venueName', 'contributor', 'series'].includes(key)) return;
+    if (!sortable) return;
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
     th.classList.add('sortable', key);
