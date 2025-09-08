@@ -1,7 +1,7 @@
 import { html } from '../../htm-wrapper.js';
 import { useSchedulesData, useSchedulesOperations, useSchedulesUI } from '../../context/SchedulesContext.js';
 import { useState } from '../../../../scripts/libs/preact-hook.js';
-import { encodeSchedule } from '../../utils.js';
+import { ScheduleURLUtility } from '../../utils.js';
 
 export default function ScheduleHeader() {
   const { activeSchedule, hasUnsavedChanges } = useSchedulesData();
@@ -11,7 +11,7 @@ export default function ScheduleHeader() {
     updateSchedule,
     discardChangesToActiveSchedule,
   } = useSchedulesOperations();
-  const { isUpdating, isDeleting, setToastSuccess } = useSchedulesUI();
+  const { isUpdating, isDeleting, setToastSuccess, setToastError } = useSchedulesUI();
 
   const [isEditingScheduleTitle, setIsEditingScheduleTitle] = useState(false);
 
@@ -25,30 +25,18 @@ export default function ScheduleHeader() {
     }
   };
 
-  const handleCopyLink = () => {
+  const handleCopyLink = async () => {
     if (!activeSchedule) return;
 
     try {
       // Create a server-friendly version of the schedule (removes client-only properties)
-      const base64Version = encodeSchedule(activeSchedule);
+      const didCopy = await ScheduleURLUtility.copyScheduleToClipboard(activeSchedule);
 
-      // Create URL with base64 schedule as query parameter
-      const currentUrl = window.location.href.split('?')[0]; // Remove existing query params
-      const shareableUrl = `${currentUrl}?schedule=${base64Version}`;
-
-      // Copy to clipboard
-      navigator.clipboard.writeText(shareableUrl).then(() => {
+      if (didCopy) {
         setToastSuccess('Link copied to clipboard');
-      }).catch(() => {
-        // Fallback for older browsers
-        const textArea = document.createElement('textarea');
-        textArea.value = shareableUrl;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        setToastSuccess('Link copied to clipboard');
-      });
+      } else {
+        setToastError('Failed to copy link to clipboard');
+      }
     } catch (error) {
       window.lana?.log(`Error copying link: ${error}`);
       setToastSuccess('Failed to copy link');

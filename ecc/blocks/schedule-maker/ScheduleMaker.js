@@ -5,7 +5,7 @@ import { PAGES, PAGES_CONFIG } from './constants.js';
 import { useNavigation } from './context/NavigationContext.js';
 import { useSchedulesData, useSchedulesUI } from './context/SchedulesContext.js';
 import { useEffect } from '../../scripts/libs/preact-hook.js';
-import { decodeSchedule } from './utils.js';
+import { ScheduleURLUtility } from './utils.js';
 
 const PAGES_COMPONENTS = {
   [PAGES.home]: Home,
@@ -24,13 +24,13 @@ export default function ScheduleMaker() {
   const { activePage, setActivePage, goToEditSchedule } = useNavigation();
   // On load, check if there is a schedule in the URL
   useEffect(() => {
-    function handleScheduleInUrl() {
+    async function handleScheduleInUrl() {
       if (isInitialLoading) return;
       const urlParams = new URLSearchParams(window.location.search);
       const scheduleParam = urlParams.get('schedule');
       if (scheduleParam) {
         goToEditSchedule();
-        const scheduleData = decodeSchedule(scheduleParam);
+        const scheduleData = await ScheduleURLUtility.extractScheduleFromURL(window.location.href);
         const { scheduleId } = scheduleData;
         const schedule = schedules.find((s) => s.scheduleId === scheduleId);
         if (schedule) {
