@@ -61,6 +61,19 @@ function createServerFriendlySchedule(schedule) {
   return deepCopyOfSchedule;
 }
 
+function encodeSchedule(schedule) {
+  const serverFriendlySchedule = createServerFriendlySchedule(schedule);
+  const scheduleJson = JSON.stringify(serverFriendlySchedule);
+  const base64Version = encodeURIComponent(btoa(scheduleJson));
+  return base64Version;
+}
+
+function decodeSchedule(schedule) {
+  const scheduleJson = atob(decodeURIComponent(schedule));
+  const serverFriendlySchedule = JSON.parse(scheduleJson);
+  return serverFriendlySchedule;
+}
+
 export {
   isBlockComplete,
   isScheduleComplete,
@@ -69,4 +82,6 @@ export {
   decorateSchedules,
   assignIdToBlocks,
   createServerFriendlySchedule,
+  encodeSchedule,
+  decodeSchedule,
 };

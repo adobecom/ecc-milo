@@ -1,11 +1,11 @@
 import { useState } from '../../../scripts/libs/preact-hook.js';
 import { html } from '../htm-wrapper.js';
 import Modal from './Modal.js';
-import { useSchedules } from '../context/SchedulesContext.js';
+import { useSchedulesUI } from '../context/SchedulesContext.js';
 
 export default function CreateManuallyScheduleModal({ isOpen, onClose, onConfirm }) {
   const [scheduleName, setScheduleName] = useState('');
-  const { isCreating } = useSchedules();
+  const { isCreating } = useSchedulesUI();
 
   const handleClose = () => {
     setScheduleName('');
@@ -21,7 +21,7 @@ export default function CreateManuallyScheduleModal({ isOpen, onClose, onConfirm
       await onConfirm(scheduleName.trim());
       handleClose();
     } catch (error) {
-      console.error('Error creating schedule:', error);
+      window.lana?.log(`Error creating schedule: ${error}`);
     }
   };
 

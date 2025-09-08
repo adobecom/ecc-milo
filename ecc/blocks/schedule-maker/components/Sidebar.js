@@ -1,12 +1,13 @@
 import { useState } from '../../../scripts/libs/preact-hook.js';
 import { html } from '../htm-wrapper.js';
-import { useSchedules } from '../context/SchedulesContext.js';
+import { useSchedulesUI, useSchedulesData } from '../context/SchedulesContext.js';
 import { useNavigation } from '../context/NavigationContext.js';
 
-function Sidebar({ schedules, activeSchedule, setActiveSchedule, setIsAddScheduleModalOpen }) {
+function Sidebar({ setIsAddScheduleModalOpen }) {
   const [search, setSearch] = useState('');
-  const { hasUnsavedChanges } = useSchedules();
+  const { hasUnsavedChanges } = useSchedulesUI();
   const { goToEditSchedule } = useNavigation();
+  const { schedules, activeSchedule, setActiveSchedule } = useSchedulesData();
 
   const handleAddSchedule = () => {
     if (hasUnsavedChanges) {

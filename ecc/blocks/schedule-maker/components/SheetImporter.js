@@ -1,13 +1,14 @@
 import { html } from '../htm-wrapper.js';
 import { useState, useEffect } from '../../../scripts/libs/preact-hook.js';
-import { useSchedules } from '../context/SchedulesContext.js';
+import { useSchedulesOperations, useSchedulesData } from '../context/SchedulesContext.js';
 import { decorateBlocks } from '../utils.js';
 import { useNavigation } from '../context/NavigationContext.js';
 import useIcons from '../useIcons.js';
 
 export default function SheetImporter() {
   const { importSheetScheduleName } = useNavigation();
-  const { createAndAddSchedule, setActiveSchedule } = useSchedules();
+  const { createAndAddSchedule } = useSchedulesOperations();
+  const { setActiveSchedule } = useSchedulesData();
   const { goToEditSchedule, clearImportSheetScheduleName } = useNavigation();
   const [xlsx, setXlsx] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,8 +55,7 @@ export default function SheetImporter() {
           fragmentPath: '',
         });
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error reading file:', error);
+        window.lana?.log(`Error reading file: ${error}`);
         // eslint-disable-next-line no-alert
         alert('Error reading file. Please make sure it\'s a valid Excel file.');
       }

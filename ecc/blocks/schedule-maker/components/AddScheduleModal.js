@@ -2,12 +2,13 @@ import { useState } from '../../../scripts/libs/preact-hook.js';
 import { html } from '../htm-wrapper.js';
 import Modal from './Modal.js';
 import BuildTableIcon from './BuildTableIcon.js';
-import { useSchedules } from '../context/SchedulesContext.js';
+import { useSchedulesOperations, useSchedulesData } from '../context/SchedulesContext.js';
 import { useNavigation } from '../context/NavigationContext.js';
 
 export default function AddScheduleModal({ isOpen, onClose }) {
   const [scheduleName, setScheduleName] = useState('');
-  const { createAndAddSchedule, setActiveSchedule } = useSchedules();
+  const { createAndAddSchedule } = useSchedulesOperations();
+  const { setActiveSchedule } = useSchedulesData();
   const { goToEditSchedule, goToSheetImport } = useNavigation();
   const handleClose = () => {
     setScheduleName('');

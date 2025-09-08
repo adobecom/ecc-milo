@@ -1,44 +1,44 @@
-import { useState, useContext } from '../../../scripts/libs/preact-hook.js';
+import { useState, useContext, useCallback } from '../../../scripts/libs/preact-hook.js';
 import { createContext } from '../../../scripts/libs/preact.js';
 import { html } from '../htm-wrapper.js';
 import { PAGES_CONFIG } from '../constants.js';
-import { useSchedules } from './SchedulesContext.js';
+import { useSchedulesUI } from './SchedulesContext.js';
 
 const NavigationContext = createContext();
 
 const NavigationProvider = ({ children }) => {
   const [activePage, setActivePage] = useState(PAGES_CONFIG.editSchedule);
-  const { hasUnsavedChanges } = useSchedules();
+  const { hasUnsavedChanges } = useSchedulesUI();
   const [importSheetScheduleName, setImportSheetScheduleName] = useState(null);
 
-  const goToEditSchedule = () => {
+  const goToEditSchedule = useCallback(() => {
     if (hasUnsavedChanges) {
       alert('You have unsaved changes. Please save or discard them before editing a schedule.');
       return;
     }
     setActivePage(PAGES_CONFIG.editSchedule);
-  };
+  }, [hasUnsavedChanges]);
 
-  const goToSheetImport = (scheduleName) => {
+  const goToSheetImport = useCallback((scheduleName) => {
     if (hasUnsavedChanges) {
       alert('You have unsaved changes. Please save or discard them before importing a sheet.');
       return;
     }
     setActivePage(PAGES_CONFIG.importSheet);
     setImportSheetScheduleName(scheduleName);
-  };
+  }, [hasUnsavedChanges]);
 
-  const goToHome = () => {
+  const goToHome = useCallback(() => {
     if (hasUnsavedChanges) {
       alert('You have unsaved changes. Please save or discard them before going to home.');
       return;
     }
     setActivePage(PAGES_CONFIG.home);
-  };
+  }, [hasUnsavedChanges]);
 
-  const clearImportSheetScheduleName = () => {
+  const clearImportSheetScheduleName = useCallback(() => {
     setImportSheetScheduleName(null);
-  };
+  }, []);
 
   const value = {
     activePage,

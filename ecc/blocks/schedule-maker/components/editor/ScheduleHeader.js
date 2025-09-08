@@ -1,21 +1,17 @@
 import { html } from '../../htm-wrapper.js';
-import { useSchedules } from '../../context/SchedulesContext.js';
+import { useSchedulesData, useSchedulesOperations, useSchedulesUI } from '../../context/SchedulesContext.js';
 import { useState } from '../../../../scripts/libs/preact-hook.js';
-import { createServerFriendlySchedule } from '../../utils.js';
-import LZString from '../../../../scripts/libs/lz-string.js';
+import { encodeSchedule } from '../../utils.js';
 
 export default function ScheduleHeader() {
+  const { activeSchedule, hasUnsavedChanges } = useSchedulesData();
   const {
-    isUpdating,
-    isDeleting,
     updateScheduleLocally,
     deleteSchedule,
-    activeSchedule,
-    hasUnsavedChanges,
     updateSchedule,
     discardChangesToActiveSchedule,
-    setToastSuccess,
-  } = useSchedules();
+  } = useSchedulesOperations();
+  const { isUpdating, isDeleting, setToastSuccess } = useSchedulesUI();
 
   const [isEditingScheduleTitle, setIsEditingScheduleTitle] = useState(false);
 
@@ -25,7 +21,7 @@ export default function ScheduleHeader() {
     try {
       await deleteSchedule(activeSchedule.scheduleId);
     } catch (error) {
-      console.error('Error deleting schedule:', error);
+      window.lana?.log(`Error deleting schedule: ${error}`);
     }
   };
 
@@ -34,21 +30,11 @@ export default function ScheduleHeader() {
 
     try {
       // Create a server-friendly version of the schedule (removes client-only properties)
-      const serverFriendlySchedule = createServerFriendlySchedule(activeSchedule);
-
-      // Convert schedule to base64 string
-      const scheduleJson = JSON.stringify(serverFriendlySchedule);
-      const uriEncodeVersion = encodeURIComponent(scheduleJson);
-      const base64Version = encodeURIComponent(btoa(scheduleJson));
-      const encodedSchedule = LZString.compressToEncodedURIComponent(scheduleJson);
-      console.log('original scheduleJson', scheduleJson.length);
-      console.log('uriEncodeVersion', uriEncodeVersion.length);
-      console.log('base64Version', base64Version.length);
-      console.log('encodedSchedule with LZString', encodedSchedule.length);
+      const base64Version = encodeSchedule(activeSchedule);
 
       // Create URL with base64 schedule as query parameter
       const currentUrl = window.location.href.split('?')[0]; // Remove existing query params
-      const shareableUrl = `${currentUrl}?schedule=${encodedSchedule}`;
+      const shareableUrl = `${currentUrl}?schedule=${base64Version}`;
 
       // Copy to clipboard
       navigator.clipboard.writeText(shareableUrl).then(() => {
@@ -64,7 +50,7 @@ export default function ScheduleHeader() {
         setToastSuccess('Link copied to clipboard');
       });
     } catch (error) {
-      console.error('Error copying link:', error);
+      window.lana?.log(`Error copying link: ${error}`);
       setToastSuccess('Failed to copy link');
     }
   };
@@ -75,7 +61,7 @@ export default function ScheduleHeader() {
     try {
       await updateSchedule(activeSchedule.scheduleId, activeSchedule);
     } catch (error) {
-      console.error('Error saving schedule:', error);
+      window.lana?.log(`Error saving schedule: ${error}`);
     }
   };
 

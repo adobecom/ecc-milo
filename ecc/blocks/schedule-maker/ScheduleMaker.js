@@ -5,9 +5,9 @@ import Home from './pages/Home.js';
 import Schedules from './pages/Schedules.js';
 import { PAGES, PAGES_CONFIG } from './constants.js';
 import { useNavigation } from './context/NavigationContext.js';
-import { useSchedules } from './context/SchedulesContext.js';
+import { useSchedulesData, useSchedulesUI } from './context/SchedulesContext.js';
 import { useEffect } from '../../scripts/libs/preact-hook.js';
-import LZString from '../../scripts/libs/lz-string.js';
+import { decodeSchedule } from './utils.js';
 
 const PAGES_COMPONENTS = {
   [PAGES.home]: Home,
@@ -15,18 +15,15 @@ const PAGES_COMPONENTS = {
 };
 
 export default function ScheduleMaker() {
-  const { activePage, setActivePage, goToEditSchedule } = useNavigation();
+  const { schedules, setActiveSchedule } = useSchedulesData();
   const {
-    schedules,
-    isInitialLoading,
-    activeSchedule,
-    setActiveSchedule,
     toastError,
     clearToastError,
     toastSuccess,
     clearToastSuccess,
-  } = useSchedules();
-
+    isInitialLoading,
+  } = useSchedulesUI();
+  const { activePage, setActivePage, goToEditSchedule } = useNavigation();
   // On load, check if there is a schedule in the URL
   useEffect(() => {
     function handleScheduleInUrl() {
@@ -35,7 +32,7 @@ export default function ScheduleMaker() {
       const scheduleParam = urlParams.get('schedule');
       if (scheduleParam) {
         goToEditSchedule();
-        const scheduleData = JSON.parse(LZString.decompressFromEncodedURIComponent(scheduleParam));
+        const scheduleData = decodeSchedule(scheduleParam);
         const { scheduleId } = scheduleData;
         const schedule = schedules.find((s) => s.scheduleId === scheduleId);
         setActiveSchedule(schedule);
@@ -63,7 +60,7 @@ export default function ScheduleMaker() {
       
       ${!isInitialLoading && html`
       <div class="sm-content">
-        ${html`<${PAGES_COMPONENTS[activePage.pageComponent]} schedules=${schedules} setActivePage=${setActivePage} setActiveSchedule=${setActiveSchedule} activePage=${activePage} activeSchedule=${activeSchedule} />`}
+        ${html`<${PAGES_COMPONENTS[activePage.pageComponent]} />`}
       </div>`}
       
       ${toastError && html`

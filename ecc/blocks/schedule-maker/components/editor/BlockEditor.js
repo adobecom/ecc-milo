@@ -1,8 +1,8 @@
 import { html } from '../../htm-wrapper.js';
-import { useSchedules } from '../../context/SchedulesContext.js';
+import { useSchedulesOperations } from '../../context/SchedulesContext.js';
 
 export default function BlockEditor({ block, editingBlockId, setEditingBlockId }) {
-  const { updateBlockLocally, deleteBlockLocally } = useSchedules();
+  const { updateBlockLocally, deleteBlockLocally } = useSchedulesOperations();
 
   const handleEditBlockTitle = (blockId) => {
     updateBlockLocally(blockId, { isEditingBlockTitle: true });

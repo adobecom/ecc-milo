@@ -3,14 +3,15 @@ import { html } from '../htm-wrapper.js';
 import BuildTableIcon from '../components/BuildTableIcon.js';
 import CreateManuallyScheduleModal from '../components/CreateManuallyScheduleModal.js';
 import { useNavigation } from '../context/NavigationContext.js';
-import { useSchedules } from '../context/SchedulesContext.js';
+import { useSchedulesOperations, useSchedulesData } from '../context/SchedulesContext.js';
 
-export default function Home({ schedules }) {
+export default function Home() {
   const { goToEditSchedule, goToSheetImport } = useNavigation();
+  const { schedules, setActiveSchedule } = useSchedulesData();
   const [filteredSchedules, setFilteredSchedules] = useState(schedules);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createModalMode, setCreateModalMode] = useState('manually');
-  const { createAndAddSchedule, setActiveSchedule } = useSchedules();
+  const { createAndAddSchedule } = useSchedulesOperations();
 
   const handleCreateManuallyBtn = () => {
     setIsCreateModalOpen(true);

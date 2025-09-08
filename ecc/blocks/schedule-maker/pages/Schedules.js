@@ -6,7 +6,7 @@ import { useNavigation } from '../context/NavigationContext.js';
 import AddScheduleModal from '../components/AddScheduleModal.js';
 import { useState } from '../../../scripts/libs/preact-hook.js';
 
-function Schedules({ schedules, activeSchedule, setActiveSchedule }) {
+function Schedules() {
   const { activePage } = useNavigation();
   const [isAddScheduleModalOpen, setIsAddScheduleModalOpen] = useState(false);
 
@@ -19,12 +19,7 @@ function Schedules({ schedules, activeSchedule, setActiveSchedule }) {
       <h1 class="sm-page__title">Schedule Maker</h1>
       <div class="sm-schedules__container">
         <div class="sm-schedules__sidebar">
-          <${Sidebar} \
-            schedules=${schedules} \
-            activeSchedule=${activeSchedule} \
-            setActiveSchedule=${setActiveSchedule} \
-            setIsAddScheduleModalOpen=${setIsAddScheduleModalOpen} \
-          />
+          <${Sidebar} setIsAddScheduleModalOpen=${setIsAddScheduleModalOpen} />
         </div>
         <div class="sm-schedules__content">
           ${activePage.mode === 'edit' ? html`

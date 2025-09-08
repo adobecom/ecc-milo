@@ -70,7 +70,7 @@ const SchedulesProvider = ({ children }) => {
       const serverFriendlySchedule = createServerFriendlySchedule(schedule);
       const newSchedule = await createScheduleController(serverFriendlySchedule);
       const decoratedNewSchedule = decorateSchedule(newSchedule);
-      setSchedules([decoratedNewSchedule, ...schedules]);
+      setSchedules((prevSchedules) => [decoratedNewSchedule, ...prevSchedules]);
       setToastSuccess('Schedule created successfully');
       return decoratedNewSchedule;
     } catch (err) {
@@ -79,7 +79,7 @@ const SchedulesProvider = ({ children }) => {
     } finally {
       setIsCreating(false);
     }
-  }, [schedules]);
+  }, []); // Removed schedules dependency - using functional update instead
 
   // Update schedule
   const updateSchedule = useCallback(async (scheduleId, schedule) => {
@@ -90,7 +90,7 @@ const SchedulesProvider = ({ children }) => {
       const updatedScheduleResponse = await updateScheduleController(scheduleId, serverFriendlySchedule);
       const updatedSchedule = { ...schedule, modificationTime: updatedScheduleResponse.modificationTime, isComplete: isScheduleComplete(schedule) };
       const decoratedUpdatedSchedule = decorateSchedule(updatedSchedule);
-      setSchedules(schedules.map((s) => (s.scheduleId === scheduleId ? decoratedUpdatedSchedule : s)));
+      setSchedules((prevSchedules) => prevSchedules.map((s) => (s.scheduleId === scheduleId ? decoratedUpdatedSchedule : s)));
       setActiveScheduleWithOriginal(decoratedUpdatedSchedule);
       setToastError(null);
       setToastSuccess('Schedule updated successfully');
@@ -101,7 +101,7 @@ const SchedulesProvider = ({ children }) => {
     } finally {
       setIsUpdating(false);
     }
-  }, [schedules]);
+  }, []); // Removed schedules dependency - using functional update instead
 
   // Delete schedule
   const deleteSchedule = useCallback(async (scheduleId) => {
@@ -109,7 +109,7 @@ const SchedulesProvider = ({ children }) => {
     setToastError(null);
     try {
       await deleteScheduleController(scheduleId);
-      setSchedules(schedules.filter((schedule) => schedule.scheduleId !== scheduleId));
+      setSchedules((prevSchedules) => prevSchedules.filter((schedule) => schedule.scheduleId !== scheduleId));
       setActiveSchedule(null);
       setOriginalActiveSchedule(null);
       setToastError(null);
@@ -121,16 +121,19 @@ const SchedulesProvider = ({ children }) => {
     } finally {
       setIsDeleting(false);
     }
-  }, [schedules]);
+  }, []); // Removed schedules dependency - using functional update instead
 
   // Update schedule locally
   const updateScheduleLocally = useCallback((title) => {
     setToastError(null);
-    const updatedSchedule = { ...activeSchedule, title };
-    const isScheduleCompleted = isScheduleComplete(updatedSchedule);
-    setActiveSchedule({ ...updatedSchedule, isComplete: isScheduleCompleted });
+    setActiveSchedule((prevSchedule) => {
+      if (!prevSchedule) return prevSchedule;
+      const updatedSchedule = { ...prevSchedule, title };
+      const isScheduleCompleted = isScheduleComplete(updatedSchedule);
+      return { ...updatedSchedule, isComplete: isScheduleCompleted };
+    });
     setToastError(null);
-  }, [activeSchedule]);
+  }, []); // Removed activeSchedule dependency - using functional update instead
 
   // Discard changes locally
   const discardChangesToActiveSchedule = useCallback(() => {
@@ -140,32 +143,40 @@ const SchedulesProvider = ({ children }) => {
 
   // Add block locally
   const addBlockLocally = useCallback((block) => {
-    if (!activeSchedule) return;
-    const updatedBlocks = [...activeSchedule.blocks, block];
-    const isScheduleCompleted = isScheduleComplete(activeSchedule);
-    setActiveSchedule({ ...activeSchedule, blocks: updatedBlocks, isComplete: isScheduleCompleted });
+    setActiveSchedule((prevSchedule) => {
+      if (!prevSchedule) return prevSchedule;
+      const updatedBlocks = [...prevSchedule.blocks, block];
+      const isScheduleCompleted = isScheduleComplete({ ...prevSchedule, blocks: updatedBlocks });
+      return { ...prevSchedule, blocks: updatedBlocks, isComplete: isScheduleCompleted };
+    });
     setToastError(null);
-  }, [activeSchedule]);
+  }, []); // Removed activeSchedule dependency - using functional update instead
 
   // Update block locally
   const updateBlockLocally = useCallback((blockId, updates) => {
-    if (!activeSchedule) return;
-    const blockToUpdate = activeSchedule.blocks.find((b) => b.id === blockId);
-    if (!blockToUpdate) return;
-    const updatedBlock = { ...blockToUpdate, ...updates };
-    updatedBlock.isComplete = isBlockComplete(updatedBlock);
-    const updatedBlocks = activeSchedule.blocks.map((b) => (b.id === blockId ? updatedBlock : b));
-    const isScheduleCompleted = isScheduleComplete(activeSchedule);
-    setActiveSchedule({ ...activeSchedule, blocks: updatedBlocks, isComplete: isScheduleCompleted });
+    setActiveSchedule((prevSchedule) => {
+      if (!prevSchedule) return prevSchedule;
+      const blockToUpdate = prevSchedule.blocks.find((b) => b.id === blockId);
+      if (!blockToUpdate) return prevSchedule;
+
+      const updatedBlock = { ...blockToUpdate, ...updates };
+      updatedBlock.isComplete = isBlockComplete(updatedBlock);
+      const updatedBlocks = prevSchedule.blocks.map((b) => (b.id === blockId ? updatedBlock : b));
+      const isScheduleCompleted = isScheduleComplete({ ...prevSchedule, blocks: updatedBlocks });
+      return { ...prevSchedule, blocks: updatedBlocks, isComplete: isScheduleCompleted };
+    });
     setToastError(null);
-  }, [activeSchedule]);
+  }, []); // Removed activeSchedule dependency - using functional update instead
 
   // Delete block locally
   const deleteBlockLocally = useCallback((blockId) => {
-    if (!activeSchedule) return;
-    const updatedBlocks = activeSchedule.blocks.filter((b) => b.id !== blockId);
-    setActiveSchedule({ ...activeSchedule, blocks: updatedBlocks });
-  }, [activeSchedule]);
+    setActiveSchedule((prevSchedule) => {
+      if (!prevSchedule) return prevSchedule;
+      const updatedBlocks = prevSchedule.blocks.filter((b) => b.id !== blockId);
+      const isScheduleCompleted = isScheduleComplete({ ...prevSchedule, blocks: updatedBlocks });
+      return { ...prevSchedule, blocks: updatedBlocks, isComplete: isScheduleCompleted };
+    });
+  }, []); // Removed activeSchedule dependency - using functional update instead
 
   // Clear toast error
   const clearToastError = useCallback(() => {
@@ -218,6 +229,49 @@ const SchedulesProvider = ({ children }) => {
 const useSchedules = () => {
   const context = useContext(SchedulesContext);
   return context;
+};
+
+// Selective hooks for better performance - components only re-render when specific data changes
+export const useSchedulesData = () => {
+  const context = useContext(SchedulesContext);
+  return {
+    schedules: context.schedules,
+    activeSchedule: context.activeSchedule,
+    originalActiveSchedule: context.originalActiveSchedule,
+    setSchedules: context.setSchedules,
+    setActiveSchedule: context.setActiveSchedule,
+    hasUnsavedChanges: context.hasUnsavedChanges,
+  };
+};
+
+export const useSchedulesOperations = () => {
+  const context = useContext(SchedulesContext);
+  return {
+    createAndAddSchedule: context.createAndAddSchedule,
+    updateSchedule: context.updateSchedule,
+    deleteSchedule: context.deleteSchedule,
+    updateScheduleLocally: context.updateScheduleLocally,
+    addBlockLocally: context.addBlockLocally,
+    updateBlockLocally: context.updateBlockLocally,
+    deleteBlockLocally: context.deleteBlockLocally,
+    discardChangesToActiveSchedule: context.discardChangesToActiveSchedule,
+  };
+};
+
+export const useSchedulesUI = () => {
+  const context = useContext(SchedulesContext);
+  return {
+    isInitialLoading: context.isInitialLoading,
+    isCreating: context.isCreating,
+    isUpdating: context.isUpdating,
+    isDeleting: context.isDeleting,
+    error: context.error,
+    toastError: context.toastError,
+    toastSuccess: context.toastSuccess,
+    clearToastError: context.clearToastError,
+    clearToastSuccess: context.clearToastSuccess,
+    setToastSuccess: context.setToastSuccess,
+  };
 };
 
 export { SchedulesContext, SchedulesProvider, useSchedules };
