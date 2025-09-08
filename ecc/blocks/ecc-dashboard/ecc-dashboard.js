@@ -6,11 +6,11 @@ import {
   getSpeaker,
   getEventSpeakers,
   getEventVenue,
+  getEventHistory,
   getLocales,
   publishEvent,
   unpublishEvent,
   getSeriesById,
-  getEventHistory,
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
@@ -505,11 +505,37 @@ async function buildContributorTag(event) {
   return contributorTag;
 }
 
+function buildContributorCell(event) {
+  const container = createTag('td', { class: 'contributor-container' });
+  const loader = createSwipingLoader('single-line-loader');
+  const wrapper = createTag('div', { class: 'td-wrapper' }, loader, { parent: container });
+
+  buildContributorTag(event).then((contributorTag) => {
+    wrapper.innerHTML = '';
+    wrapper.append(contributorTag);
+  });
+
+  return container;
+}
+
 async function buildSeriesTag(event) {
   const series = await getSeriesById(event.seriesId);
   const seriesTag = createTag('div', { class: 'series' });
   seriesTag.textContent = series.seriesName;
   return seriesTag;
+}
+
+function buildSeriesCell(event) {
+  const container = createTag('td', { class: 'series-container' });
+  const loader = createSwipingLoader('single-line-loader');
+  const wrapper = createTag('div', { class: 'td-wrapper' }, loader, { parent: container });
+
+  buildSeriesTag(event).then((seriesTag) => {
+    wrapper.innerHTML = '';
+    wrapper.append(seriesTag);
+  });
+
+  return container;
 }
 
 function buildEventTitleTag(config, eventObj) {
@@ -530,6 +556,19 @@ function buildVenueTag(eventObj) {
   });
 }
 
+function buildVenueCell(event) {
+  const container = createTag('td', { class: 'venue-container' });
+  const loader = createSwipingLoader('single-line-loader');
+  const wrapper = createTag('div', { class: 'td-wrapper' }, loader, { parent: container });
+
+  buildVenueTag(event).then((venueTag) => {
+    wrapper.innerHTML = '';
+    wrapper.append(venueTag);
+  });
+
+  return container;
+}
+
 function buildRSVPTag(config, eventObj) {
   const text = `${eventObj.attendeeCount} / ${eventObj.attendeeLimit}`;
 
@@ -540,39 +579,89 @@ function buildRSVPTag(config, eventObj) {
   return rsvpTag;
 }
 
+function buildRSVPCell(config, event) {
+  const container = createTag('td', { class: 'rsvp-container' });
+  const rsvpTag = buildRSVPTag(config, event);
+  container.append(createTag('div', { class: 'td-wrapper' }, rsvpTag));
+  return container;
+}
+
+function buildHistoryInfoCell(event, type) {
+  const container = createTag('td', { class: `${type}-container` });
+  const loader = createSwipingLoader('single-line-loader');
+  const wrapper = createTag('div', { class: 'td-wrapper' }, loader, { parent: container });
+
+  if (!event.eventId || !type) return container;
+
+  getEventHistory(event.eventId).then((response) => {
+    if (response.error || !response.history || !response.history.length) {
+      wrapper.innerHTML = 'N/A';
+      return;
+    }
+
+    const { history } = response;
+
+    // Validate history data structure
+    if (!Array.isArray(history) || history.length === 0) {
+      wrapper.innerHTML = 'N/A';
+      return;
+    }
+
+    const historyMap = {
+      creator: {
+        target: history[0],
+        getValue: (target) => target?.user?.name || 'Unknown',
+      },
+      modifier: {
+        target: history[history.length - 1],
+        getValue: (target) => target?.user?.name || 'Unknown',
+      },
+      publishedTime: {
+        target: history.find((h) => h.diff?.updated?.published),
+        getValue: (target) => (target?.timestamp ? formatLocaleDate(target.timestamp) : 'N/A'),
+      },
+    };
+
+    const { target, getValue } = historyMap[type];
+    if (!target || !getValue) {
+      wrapper.innerHTML = 'N/A';
+      return;
+    }
+
+    try {
+      const value = getValue(target);
+      const historyUserNameTag = createTag('span', { class: 'creator-tag' }, value || 'N/A');
+      wrapper.innerHTML = '';
+      wrapper.append(historyUserNameTag);
+    } catch (error) {
+      window.lana?.log(`Error processing history data for event ${event.eventId}, type ${type}: ${error.message}`);
+      wrapper.innerHTML = 'N/A';
+    }
+  });
+
+  return container;
+}
+
 async function populateRow(props, config, index) {
   const event = props.paginatedData[index];
-  const eventHistory = await getEventHistory(event.eventId);
-  console.log('eventHistory', eventHistory);
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   const sp = new URLSearchParams(window.location.search);
-  const shortLoader = createSwipingLoader('single-line-loader');
 
   const row = createTag('tr', { class: 'event-row', 'data-event-id': event.eventId }, '', { parent: tBody });
   const thumbnailCell = buildThumbnail(event);
   const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(config, event)));
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
-  const contributorCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, shortLoader.cloneNode(true)));
-  const seriesCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, shortLoader.cloneNode(true)));
+  const contributorCell = buildContributorCell(event);
+  const seriesCell = buildSeriesCell(event);
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, shortLoader.cloneNode(true)));
+  const venueCell = buildVenueCell(event);
   const langCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getEventDefaultLanguage(event, config.locales)));
-  const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
+  const rsvpCell = buildRSVPCell(config, event);
+  const creatorCell = buildHistoryInfoCell(event, 'creator');
+  const modifierCell = buildHistoryInfoCell(event, 'modifier');
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const createdByCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.creationTime)));
+  const createdByCell = buildHistoryInfoCell(event, 'publishedTime');
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
-
-  buildVenueTag(event).then((venueTag) => {
-    venueCell.querySelector('.single-line-loader').replaceWith(venueTag);
-  });
-
-  buildContributorTag(event).then((contributorTag) => {
-    contributorCell.querySelector('.single-line-loader').replaceWith(contributorTag);
-  });
-
-  buildSeriesTag(event).then((seriesTag) => {
-    seriesCell.querySelector('.single-line-loader').replaceWith(seriesTag);
-  });
 
   row.append(
     thumbnailCell,
@@ -583,7 +672,9 @@ async function populateRow(props, config, index) {
     startDateCell,
     venueCell,
     langCell,
-    externalEventId,
+    rsvpCell,
+    creatorCell,
+    modifierCell,
     modDateCell,
     createdByCell,
     moreOptionsCell,
@@ -680,7 +771,7 @@ function initSorting(props, config) {
   Object.entries(headers).forEach(([key, val]) => {
     const [firstRow, secondRow] = val.split(' | ');
 
-    const thTextWrapper = createTag('div', {}, '');
+    const thTextWrapper = createTag('span', {}, '');
 
     if (secondRow) {
       createTag('div', { class: 'ecc-table-header-row' }, firstRow, { parent: thTextWrapper });
