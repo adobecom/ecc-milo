@@ -769,8 +769,8 @@ function initSorting(props, config) {
   };
 
   Object.entries(headers).forEach(([key, headerConfig]) => {
-    const { text: val, sortable } = headerConfig;
-    const [firstRow, secondRow] = val.split(' | ');
+    const { text, sortable } = headerConfig;
+    const [firstRow, secondRow] = text.split(' | ');
 
     const thTextWrapper = createTag('span', {}, '');
 
@@ -778,7 +778,7 @@ function initSorting(props, config) {
       createTag('div', { class: 'ecc-table-header-row' }, firstRow, { parent: thTextWrapper });
       createTag('div', { class: 'ecc-table-header-row' }, secondRow, { parent: thTextWrapper });
     } else {
-      createTag('div', { class: 'ecc-table-header-row' }, val, { parent: thTextWrapper });
+      createTag('div', { class: 'ecc-table-header-row' }, text, { parent: thTextWrapper });
     }
     const th = createTag('th', {}, thTextWrapper, { parent: thRow });
 
