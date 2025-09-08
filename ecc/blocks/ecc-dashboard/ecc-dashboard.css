@@ -218,9 +218,10 @@
   white-space: nowrap;
 }
 
-.ecc-dashboard table .table-header-row th span {
+.ecc-dashboard table .table-header-row th div.ecc-table-header-row {
   white-space: nowrap;
   width: 60px;
+  line-height: 1.5;
 }
 
 .ecc-dashboard table .table-header-row th.sortable {
@@ -285,7 +286,7 @@
   box-shadow: 0 4px 2px 0 rgb(0 0 0 / 10%);
 }
 
-.ecc-dashboard table .event-row .thumbnail-loader {
+.ecc-dashboard table .event-row .full-height-loader {
   width: 90px;
   height: 90px;
   position: absolute;

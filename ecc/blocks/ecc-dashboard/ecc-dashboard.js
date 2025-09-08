@@ -3,10 +3,14 @@ import {
   deleteEvent,
   getEventImages,
   getEventsForUser,
+  getSpeaker,
+  getEventSpeakers,
   getEventVenue,
   getLocales,
   publishEvent,
   unpublishEvent,
+  getSeriesById,
+  getEventHistory,
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
@@ -33,10 +37,11 @@ function showToast(props, msg, options = {}) {
 }
 
 function formatLocaleDate(string) {
+  // MM/DD/YYYY
   const options = {
     year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   };
 
@@ -65,7 +70,7 @@ function createSwipingLoader(extraClass = '') {
 
 function buildThumbnail(data) {
   const container = createTag('td', { class: 'thumbnail-container' });
-  const thumbnailLoader = createSwipingLoader('thumbnail-loader');
+  const thumbnailLoader = createSwipingLoader('full-height-loader');
   container.append(thumbnailLoader);
 
   const buildThumbnailContainer = (images) => {
@@ -486,6 +491,27 @@ function buildStatusTag(event) {
   return statusTag;
 }
 
+async function buildContributorTag(event) {
+  const eventSpeakers = await getEventSpeakers(event.eventId);
+
+  const contributorTag = createTag('div', { class: 'contributor' });
+  const contributor = eventSpeakers.speakers?.[0];
+
+  if (!contributor) return 'N/A';
+
+  const contributorDets = await getSpeaker(event.seriesId, contributor.speakerId);
+
+  contributorTag.textContent = `${contributorDets.firstName || ''} ${contributorDets.lastName || ''}`;
+  return contributorTag;
+}
+
+async function buildSeriesTag(event) {
+  const series = await getSeriesById(event.seriesId);
+  const seriesTag = createTag('div', { class: 'series' });
+  seriesTag.textContent = series.seriesName;
+  return seriesTag;
+}
+
 function buildEventTitleTag(config, eventObj) {
   const url = getEventEditUrl(config, eventObj);
 
@@ -516,34 +542,50 @@ function buildRSVPTag(config, eventObj) {
 
 async function populateRow(props, config, index) {
   const event = props.paginatedData[index];
+  const eventHistory = await getEventHistory(event.eventId);
+  console.log('eventHistory', eventHistory);
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   const sp = new URLSearchParams(window.location.search);
-  const venueLoader = createSwipingLoader('venue-loader');
+  const shortLoader = createSwipingLoader('single-line-loader');
 
   const row = createTag('tr', { class: 'event-row', 'data-event-id': event.eventId }, '', { parent: tBody });
   const thumbnailCell = buildThumbnail(event);
   const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(config, event)));
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
+  const contributorCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, shortLoader.cloneNode(true)));
+  const seriesCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, shortLoader.cloneNode(true)));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
-  const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, venueLoader));
+  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, shortLoader.cloneNode(true)));
   const langCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getEventDefaultLanguage(event, config.locales)));
   const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
+  const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
+  const createdByCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.creationTime)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
   buildVenueTag(event).then((venueTag) => {
-    venueLoader.replaceWith(venueTag);
+    venueCell.querySelector('.single-line-loader').replaceWith(venueTag);
+  });
+
+  buildContributorTag(event).then((contributorTag) => {
+    contributorCell.querySelector('.single-line-loader').replaceWith(contributorTag);
+  });
+
+  buildSeriesTag(event).then((seriesTag) => {
+    seriesCell.querySelector('.single-line-loader').replaceWith(seriesTag);
   });
 
   row.append(
     thumbnailCell,
     titleCell,
     statusCell,
+    contributorCell,
+    seriesCell,
     startDateCell,
-    modDateCell,
     venueCell,
     langCell,
     externalEventId,
+    modDateCell,
+    createdByCell,
     moreOptionsCell,
   );
 
@@ -622,19 +664,33 @@ function initSorting(props, config) {
     thumbnail: '',
     title: 'EVENT NAME',
     published: 'PUBLISH STATUS',
-    startDate: 'DATE RUN',
-    modificationTime: 'LAST MODIFIED',
+    contributor: 'CONTRIBUTOR',
+    series: 'SERIES',
+    startDate: 'DATE RUN | (MM/DD/YYYY)',
     venueName: 'VENUE NAME',
     language: 'LANGUAGE',
     attendeeCount: 'RSVP DATA',
+    createdBy: 'CREATOR',
+    modifiedBy: 'MODIFIER',
+    modificationTime: 'LAST MODIFIED | (MM/DD/YYYY)',
+    publishTime: 'PUBLISHED AT | (MM/DD/YYYY)',
     manage: 'MANAGE',
   };
 
   Object.entries(headers).forEach(([key, val]) => {
-    const thText = createTag('span', {}, val);
-    const th = createTag('th', {}, thText, { parent: thRow });
+    const [firstRow, secondRow] = val.split(' | ');
 
-    if (['thumbnail', 'manage', 'venueName'].includes(key)) return;
+    const thTextWrapper = createTag('div', {}, '');
+
+    if (secondRow) {
+      createTag('div', { class: 'ecc-table-header-row' }, firstRow, { parent: thTextWrapper });
+      createTag('div', { class: 'ecc-table-header-row' }, secondRow, { parent: thTextWrapper });
+    } else {
+      createTag('div', { class: 'ecc-table-header-row' }, val, { parent: thTextWrapper });
+    }
+    const th = createTag('th', {}, thTextWrapper, { parent: thRow });
+
+    if (['thumbnail', 'manage', 'venueName', 'contributor', 'series'].includes(key)) return;
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
     th.classList.add('sortable', key);
