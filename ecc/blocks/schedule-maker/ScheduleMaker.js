@@ -1,5 +1,3 @@
-// import { getEvents, getSchedules } from '../../scripts/esp-controller.js';
-// import { getSchedules } from './mockAPI/schedules-controller.js';
 import { html } from './htm-wrapper.js';
 import Home from './pages/Home.js';
 import Schedules from './pages/Schedules.js';
@@ -35,7 +33,9 @@ export default function ScheduleMaker() {
         const scheduleData = decodeSchedule(scheduleParam);
         const { scheduleId } = scheduleData;
         const schedule = schedules.find((s) => s.scheduleId === scheduleId);
-        setActiveSchedule(schedule);
+        if (schedule) {
+          setActiveSchedule(schedule);
+        }
       }
     }
 
