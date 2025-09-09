@@ -760,7 +760,8 @@ async function loadRowData(row, event) {
           getValue: (target) => target?.user?.name || 'Unknown',
         },
         publishedTime: {
-          target: history.find((h) => h.diff?.updated?.published),
+          // find the last item that has the published updated to true
+          target: history.reverse().find((h) => h.diff?.updated?.published),
           getValue: (target) => (target?.timestamp ? formatLocaleDate(target.timestamp) : 'N/A'),
         },
       };
