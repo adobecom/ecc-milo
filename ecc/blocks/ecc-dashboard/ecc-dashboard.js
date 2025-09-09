@@ -26,70 +26,65 @@ import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
 
-// API Cache and Throttling System
-class APICache {
-  constructor() {
-    this.cache = new Map();
-    this.pendingRequests = new Map();
-    this.cacheTimeout = 10000; // 10 seconds
-  }
+// API Cache and Throttling System (functional approach)
+const apiCache = (() => {
+  const cache = new Map();
+  const pendingRequests = new Map();
+  const cacheTimeout = 10000; // 10 seconds
 
-  static generateKey(apiFunction, ...args) {
-    return `${apiFunction.name}_${JSON.stringify(args)}`;
-  }
+  const generateKey = (apiFunction, ...args) => `${apiFunction.name}_${JSON.stringify(args)}`;
+  const isExpired = (timestamp) => Date.now() - timestamp > cacheTimeout;
 
-  isExpired(timestamp) {
-    return Date.now() - timestamp > this.cacheTimeout;
-  }
+  return {
+    async get(apiFunction, ...args) {
+      const key = generateKey(apiFunction, ...args);
 
-  async get(apiFunction, ...args) {
-    const key = APICache.generateKey(apiFunction, ...args);
-
-    // Return cached result if valid
-    if (this.cache.has(key)) {
-      const { data, timestamp } = this.cache.get(key);
-      if (!this.isExpired(timestamp)) {
-        return data;
+      // Return cached result if valid
+      if (cache.has(key)) {
+        const { data, timestamp } = cache.get(key);
+        if (!isExpired(timestamp)) {
+          return data;
+        }
+        cache.delete(key);
       }
-      this.cache.delete(key);
-    }
 
-    // Return pending request if exists
-    if (this.pendingRequests.has(key)) {
-      return this.pendingRequests.get(key);
-    }
+      // Return pending request if exists
+      if (pendingRequests.has(key)) {
+        return pendingRequests.get(key);
+      }
 
-    // Make new request
-    const request = apiFunction(...args)
-      .then((data) => {
-        this.cache.set(key, { data, timestamp: Date.now() });
-        this.pendingRequests.delete(key);
-        return data;
-      })
-      .catch((error) => {
-        this.pendingRequests.delete(key);
-        throw error;
+      // Make new request
+      const request = apiFunction(...args)
+        .then((data) => {
+          cache.set(key, { data, timestamp: Date.now() });
+          pendingRequests.delete(key);
+          return data;
+        })
+        .catch((error) => {
+          pendingRequests.delete(key);
+          throw error;
+        });
+
+      pendingRequests.set(key, request);
+      return request;
+    },
+
+    clear() {
+      cache.clear();
+      pendingRequests.clear();
+    },
+
+    invalidate(pattern) {
+      const keysToDelete = [];
+      cache.forEach((value, key) => {
+        if (key.includes(pattern)) {
+          keysToDelete.push(key);
+        }
       });
-
-    this.pendingRequests.set(key, request);
-    return request;
-  }
-
-  clear() {
-    this.cache.clear();
-    this.pendingRequests.clear();
-  }
-
-  invalidate(pattern) {
-    const keysToDelete = [];
-    this.cache.forEach((value, key) => {
-      if (key.includes(pattern)) {
-        keysToDelete.push(key);
-      }
-    });
-    keysToDelete.forEach((key) => this.cache.delete(key));
-  }
-}
+      keysToDelete.forEach((key) => cache.delete(key));
+    },
+  };
+})();
 
 // Throttling utility
 function throttle(func, delay) {
@@ -121,9 +116,6 @@ function debounce(func, delay) {
     timeoutId = setTimeout(() => func.apply(this, args), delay);
   };
 }
-
-// Global API cache instance
-const apiCache = new APICache();
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
