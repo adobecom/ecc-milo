@@ -164,23 +164,9 @@
   }
 }
 
-/* ==========================================================================
-    Button States
-   ========================================================================== */
 
-sp-action-button[disabled] {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 
-.sm-button--unsaved {
-  background-color: var(--sm-color-primary) !important;
-  color: white !important;
-}
 
-.sm-button--unsaved:hover {
-  background-color: var(--sm-color-primary-hover) !important;
-}
 
 /* ==========================================================================
    Page Layouts
