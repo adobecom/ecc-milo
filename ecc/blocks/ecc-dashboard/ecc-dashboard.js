@@ -26,6 +26,105 @@ import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
 
+// API Cache and Throttling System
+class APICache {
+  constructor() {
+    this.cache = new Map();
+    this.pendingRequests = new Map();
+    this.cacheTimeout = 10000; // 10 seconds
+  }
+
+  static generateKey(apiFunction, ...args) {
+    return `${apiFunction.name}_${JSON.stringify(args)}`;
+  }
+
+  isExpired(timestamp) {
+    return Date.now() - timestamp > this.cacheTimeout;
+  }
+
+  async get(apiFunction, ...args) {
+    const key = APICache.generateKey(apiFunction, ...args);
+
+    // Return cached result if valid
+    if (this.cache.has(key)) {
+      const { data, timestamp } = this.cache.get(key);
+      if (!this.isExpired(timestamp)) {
+        return data;
+      }
+      this.cache.delete(key);
+    }
+
+    // Return pending request if exists
+    if (this.pendingRequests.has(key)) {
+      return this.pendingRequests.get(key);
+    }
+
+    // Make new request
+    const request = apiFunction(...args)
+      .then((data) => {
+        this.cache.set(key, { data, timestamp: Date.now() });
+        this.pendingRequests.delete(key);
+        return data;
+      })
+      .catch((error) => {
+        this.pendingRequests.delete(key);
+        throw error;
+      });
+
+    this.pendingRequests.set(key, request);
+    return request;
+  }
+
+  clear() {
+    this.cache.clear();
+    this.pendingRequests.clear();
+  }
+
+  invalidate(pattern) {
+    const keysToDelete = [];
+    this.cache.forEach((value, key) => {
+      if (key.includes(pattern)) {
+        keysToDelete.push(key);
+      }
+    });
+    keysToDelete.forEach((key) => this.cache.delete(key));
+  }
+}
+
+// Throttling utility
+function throttle(func, delay) {
+  let timeoutId;
+  let lastExecTime = 0;
+
+  return function throttledFunction(...args) {
+    const currentTime = Date.now();
+
+    if (currentTime - lastExecTime > delay) {
+      func.apply(this, args);
+      lastExecTime = currentTime;
+    } else {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func.apply(this, args);
+        lastExecTime = Date.now();
+      }, delay - (currentTime - lastExecTime));
+    }
+  };
+}
+
+// Debouncing utility
+function debounce(func, delay) {
+  let timeoutId;
+
+  return function debouncedFunction(...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+// Global API cache instance
+const apiCache = new APICache();
+
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function showToast(props, msg, options = {}) {
@@ -120,7 +219,7 @@ function buildThumbnail(data) {
       thumbnailLoader.remove();
     });
   } else {
-    getEventImages(data.eventId).then(({ images }) => {
+    apiCache.get(getEventImages, data.eventId).then(({ images }) => {
       if (!images) {
         thumbnailLoader.remove();
         return;
@@ -144,6 +243,9 @@ function buildThumbnail(data) {
 
 function updateDashboardData(newPayload, props) {
   if (!newPayload) return;
+
+  // Invalidate cache for this specific event
+  apiCache.invalidate(newPayload.eventId);
 
   props.data = props.data.map((event) => {
     if (event.eventId === newPayload.eventId) {
@@ -440,6 +542,9 @@ function initMoreOptions(props, config, eventObj, row) {
           return;
         }
 
+        // Invalidate cache for deleted event
+        apiCache.invalidate(eventObj.eventId);
+
         const newJson = props.data.filter((event) => event.eventId !== eventObj.eventId);
 
         props.data = newJson;
@@ -492,50 +597,24 @@ function buildStatusTag(event) {
 }
 
 async function buildContributorTag(event) {
-  const eventSpeakers = await getEventSpeakers(event.eventId);
+  const eventSpeakers = await apiCache.get(getEventSpeakers, event.eventId);
 
   const contributorTag = createTag('div', { class: 'contributor' });
   const contributor = eventSpeakers.speakers?.[0];
 
   if (!contributor) return 'N/A';
 
-  const contributorDets = await getSpeaker(event.seriesId, contributor.speakerId);
+  const contributorDets = await apiCache.get(getSpeaker, event.seriesId, contributor.speakerId);
 
   contributorTag.textContent = `${contributorDets.firstName || ''} ${contributorDets.lastName || ''}`;
   return contributorTag;
 }
 
-function buildContributorCell(event) {
-  const container = createTag('td', { class: 'contributor-container' });
-  const loader = createSwipingLoader('single-line-loader');
-  const wrapper = createTag('div', { class: 'td-wrapper' }, loader, { parent: container });
-
-  buildContributorTag(event).then((contributorTag) => {
-    wrapper.innerHTML = '';
-    wrapper.append(contributorTag);
-  });
-
-  return container;
-}
-
 async function buildSeriesTag(event) {
-  const series = await getSeriesById(event.seriesId);
+  const series = await apiCache.get(getSeriesById, event.seriesId);
   const seriesTag = createTag('div', { class: 'series' });
   seriesTag.textContent = series.seriesName;
   return seriesTag;
-}
-
-function buildSeriesCell(event) {
-  const container = createTag('td', { class: 'series-container' });
-  const loader = createSwipingLoader('single-line-loader');
-  const wrapper = createTag('div', { class: 'td-wrapper' }, loader, { parent: container });
-
-  buildSeriesTag(event).then((seriesTag) => {
-    wrapper.innerHTML = '';
-    wrapper.append(seriesTag);
-  });
-
-  return container;
 }
 
 function buildEventTitleTag(config, eventObj) {
@@ -548,25 +627,12 @@ function buildEventTitleTag(config, eventObj) {
 }
 
 function buildVenueTag(eventObj) {
-  return getEventVenue(eventObj.eventId).then((venue) => {
+  return apiCache.get(getEventVenue, eventObj.eventId).then((venue) => {
     if (!venue) return 'N/A';
 
     const venueTag = createTag('span', { class: 'vanue-name' }, venue.venueName);
     return venueTag;
   });
-}
-
-function buildVenueCell(event) {
-  const container = createTag('td', { class: 'venue-container' });
-  const loader = createSwipingLoader('single-line-loader');
-  const wrapper = createTag('div', { class: 'td-wrapper' }, loader, { parent: container });
-
-  buildVenueTag(event).then((venueTag) => {
-    wrapper.innerHTML = '';
-    wrapper.append(venueTag);
-  });
-
-  return container;
 }
 
 function buildRSVPTag(config, eventObj) {
@@ -586,81 +652,27 @@ function buildRSVPCell(config, event) {
   return container;
 }
 
-function buildHistoryInfoCell(event, type) {
-  const container = createTag('td', { class: `${type}-container` });
-  const loader = createSwipingLoader('single-line-loader');
-  const wrapper = createTag('div', { class: 'td-wrapper' }, loader, { parent: container });
-
-  if (!event.eventId || !type) return container;
-
-  getEventHistory(event.eventId).then((response) => {
-    if (response.error || !response.history || !response.history.length) {
-      wrapper.innerHTML = 'N/A';
-      return;
-    }
-
-    const { history } = response;
-
-    // Validate history data structure
-    if (!Array.isArray(history) || history.length === 0) {
-      wrapper.innerHTML = 'N/A';
-      return;
-    }
-
-    const historyMap = {
-      creator: {
-        target: history[0],
-        getValue: (target) => target?.user?.name || 'Unknown',
-      },
-      modifier: {
-        target: history[history.length - 1],
-        getValue: (target) => target?.user?.name || 'Unknown',
-      },
-      publishedTime: {
-        target: history.find((h) => h.diff?.updated?.published),
-        getValue: (target) => (target?.timestamp ? formatLocaleDate(target.timestamp) : 'N/A'),
-      },
-    };
-
-    const { target, getValue } = historyMap[type];
-    if (!target || !getValue) {
-      wrapper.innerHTML = 'N/A';
-      return;
-    }
-
-    try {
-      const value = getValue(target);
-      const historyUserNameTag = createTag('span', { class: 'creator-tag' }, value || 'N/A');
-      wrapper.innerHTML = '';
-      wrapper.append(historyUserNameTag);
-    } catch (error) {
-      window.lana?.log(`Error processing history data for event ${event.eventId}, type ${type}: ${error.message}`);
-      wrapper.innerHTML = 'N/A';
-    }
-  });
-
-  return container;
-}
-
-async function populateRow(props, config, index) {
-  const event = props.paginatedData[index];
+// Lazy loading for table rows
+function createLazyRow(props, config, event) {
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   const sp = new URLSearchParams(window.location.search);
 
   const row = createTag('tr', { class: 'event-row', 'data-event-id': event.eventId }, '', { parent: tBody });
-  const thumbnailCell = buildThumbnail(event);
+
+  // Create basic cells first (no API calls)
+  const thumbnailCell = createTag('td', { class: 'thumbnail-container' }, createSwipingLoader('full-height-loader'));
   const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(config, event)));
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
-  const contributorCell = buildContributorCell(event);
-  const seriesCell = buildSeriesCell(event);
+  const contributorCell = createTag('td', { class: 'contributor-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
+  const seriesCell = createTag('td', { class: 'series-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
-  const venueCell = buildVenueCell(event);
+  const venueCell = createTag('td', { class: 'venue-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
   const langCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getEventDefaultLanguage(event, config.locales)));
   const rsvpCell = buildRSVPCell(config, event);
-  const creatorCell = buildHistoryInfoCell(event, 'creator');
-  const modifierCell = buildHistoryInfoCell(event, 'modifier');
+  const creatorCell = createTag('td', { class: 'creator-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
+  const modifierCell = createTag('td', { class: 'modifier-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
   const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const createdByCell = buildHistoryInfoCell(event, 'publishedTime');
+  const createdByCell = createTag('td', { class: 'publishedTime-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
   row.append(
@@ -685,12 +697,99 @@ async function populateRow(props, config, index) {
   if (event.eventId === sp.get('newEventId')) {
     if (!props.el.classList.contains('toast-shown')) {
       showToast(props, buildToastMsgWithEventTitle(event, config['new-event-toast-msg']), { variant: 'positive' });
-
       props.el.classList.add('toast-shown');
     }
-
     if (props.el.querySelector('.new-event-confirmation-toast')?.open === true) highlightRow(row);
   }
+
+  return row;
+}
+
+// Load data for a specific row
+async function loadRowData(row, event) {
+  const thumbnailCell = row.querySelector('.thumbnail-container');
+  const contributorCell = row.querySelector('.contributor-container .td-wrapper');
+  const seriesCell = row.querySelector('.series-container .td-wrapper');
+  const venueCell = row.querySelector('.venue-container .td-wrapper');
+  const creatorCell = row.querySelector('.creator-container .td-wrapper');
+  const modifierCell = row.querySelector('.modifier-container .td-wrapper');
+  const createdByCell = row.querySelector('.publishedTime-container .td-wrapper');
+
+  // Load thumbnail
+  const thumbnail = buildThumbnail(event);
+  thumbnailCell.innerHTML = '';
+  thumbnailCell.append(thumbnail);
+
+  // Load contributor data
+  buildContributorTag(event).then((contributorTag) => {
+    contributorCell.innerHTML = '';
+    contributorCell.append(contributorTag);
+  });
+
+  // Load series data
+  buildSeriesTag(event).then((seriesTag) => {
+    seriesCell.innerHTML = '';
+    seriesCell.append(seriesTag);
+  });
+
+  // Load venue data
+  buildVenueTag(event).then((venueTag) => {
+    venueCell.innerHTML = '';
+    venueCell.append(venueTag);
+  });
+
+  // Load history data
+  const historyPromises = [
+    { cell: creatorCell, type: 'creator' },
+    { cell: modifierCell, type: 'modifier' },
+    { cell: createdByCell, type: 'publishedTime' },
+  ];
+
+  historyPromises.forEach(({ cell, type }) => {
+    apiCache.get(getEventHistory, event.eventId).then((response) => {
+      if (response.error || !response.history || !response.history.length) {
+        cell.innerHTML = 'N/A';
+        return;
+      }
+
+      const { history } = response;
+      if (!Array.isArray(history) || history.length === 0) {
+        cell.innerHTML = 'N/A';
+        return;
+      }
+
+      const historyMap = {
+        creator: {
+          target: history[0],
+          getValue: (target) => target?.user?.name || 'Unknown',
+        },
+        modifier: {
+          target: history[history.length - 1],
+          getValue: (target) => target?.user?.name || 'Unknown',
+        },
+        publishedTime: {
+          target: history.find((h) => h.diff?.updated?.published),
+          getValue: (target) => (target?.timestamp ? formatLocaleDate(target.timestamp) : 'N/A'),
+        },
+      };
+
+      const { target, getValue } = historyMap[type];
+      if (!target || !getValue) {
+        cell.innerHTML = 'N/A';
+        return;
+      }
+
+      try {
+        const value = getValue(target);
+        const historyUserNameTag = createTag('span', { class: 'creator-tag' }, value || 'N/A');
+        cell.innerHTML = '';
+        cell.append(historyUserNameTag);
+      } catch (error) {
+        window.lana?.log(`Error processing history data for event ${event.eventId}, type ${type}: ${error.message}`);
+        cell.innerHTML = 'N/A';
+      }
+    });
+  });
 }
 
 function updatePaginationControl(pagination, currentPage, totalPages) {
@@ -786,7 +885,8 @@ function initSorting(props, config) {
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
     th.classList.add('sortable', key);
-    th.addEventListener('click', () => {
+    // Throttled sorting to prevent rapid API calls
+    const throttledSort = throttle(() => {
       if (!props.filteredData.length) return;
 
       thead.querySelectorAll('th').forEach((h) => {
@@ -800,7 +900,9 @@ function initSorting(props, config) {
         field: key,
       };
       sortData(props, config);
-    });
+    }, 300); // Throttle sorting to max once per 300ms
+
+    th.addEventListener('click', throttledSort);
   });
 }
 
@@ -813,7 +915,8 @@ function buildNoSearchResultsScreen(el, config) {
   el.append(noSearchResultsRow);
 }
 
-function populateTable(props, config) {
+// Batch loading for better performance
+async function populateTable(props, config) {
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   tBody.innerHTML = '';
 
@@ -821,10 +924,54 @@ function populateTable(props, config) {
     buildNoSearchResultsScreen(tBody, config);
   } else {
     const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
+    const batchSize = 5; // Load 5 rows at a time
 
+    // Create all rows first (with loaders)
     for (let i = 0; i < endOfPage; i += 1) {
-      populateRow(props, config, i);
+      createLazyRow(props, config, props.paginatedData[i]);
     }
+
+    // Load data in batches to prevent overwhelming the API
+    const loadBatches = async () => {
+      const batches = [];
+      for (let i = 0; i < endOfPage; i += batchSize) {
+        const batchEnd = Math.min(i + batchSize, endOfPage);
+        const batchPromises = [];
+
+        for (let j = i; j < batchEnd; j += 1) {
+          const row = tBody.children[j];
+          const event = props.paginatedData[j];
+          batchPromises.push(loadRowData(row, event));
+        }
+
+        batches.push(batchPromises);
+      }
+
+      // Process batches sequentially with delays
+      const processBatches = async () => {
+        let currentBatch = 0;
+        const processNextBatch = async () => {
+          if (currentBatch >= batches.length) return;
+
+          await Promise.allSettled(batches[currentBatch]);
+          currentBatch += 1;
+
+          // Small delay between batches to prevent overwhelming the server
+          if (currentBatch < batches.length) {
+            setTimeout(processNextBatch, 100);
+          }
+        };
+
+        await processNextBatch();
+      };
+
+      await processBatches();
+    };
+
+    // Start batch loading asynchronously
+    loadBatches().catch((error) => {
+      window.lana?.log(`Error in batch loading: ${error.message}`);
+    });
 
     props.el.querySelector('.pagination-container')?.remove();
     decoratePagination(props, config);
@@ -877,15 +1024,14 @@ function buildDashboardHeader(props, config) {
     }
   });
 
-  let debounceTimer;
-  const handleSearch = () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      filterData(props, config, searchInput.value);
-    }, 1000);
-  };
+  // Improved debouncing for search
+  const debouncedSearch = debounce((query) => {
+    filterData(props, config, query);
+  }, 500); // Reduced from 1000ms to 500ms for better UX
 
-  searchInput.addEventListener('input', handleSearch);
+  searchInput.addEventListener('input', (e) => {
+    debouncedSearch(e.target.value);
+  });
 
   dashboardHeader.append(textContainer, actionsContainer);
   props.el.prepend(dashboardHeader);
@@ -896,14 +1042,16 @@ function updateEventsCount(props) {
   eventsCount.textContent = `(${props.data.length} events)`;
 }
 
-function buildDashboardTable(props, config) {
+async function buildDashboardTable(props, config) {
   const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
   const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
   const thead = createTag('thead', {}, '', { parent: table });
   createTag('tbody', {}, '', { parent: table });
   createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
   initSorting(props, config);
-  populateTable(props, config);
+
+  // Populate table asynchronously
+  await populateTable(props, config);
 
   const usp = new URLSearchParams(window.location.search);
   if (usp.get('newEventId')) {
@@ -952,7 +1100,10 @@ async function buildDashboard(el, config) {
       set(target, prop, value, receiver) {
         target[prop] = value;
 
-        populateTable(receiver, { ...config, locales });
+        // Use async populateTable but don't await to avoid blocking
+        populateTable(receiver, { ...config, locales }).catch((error) => {
+          window.lana?.log(`Error populating table: ${error.message}`);
+        });
         updateEventsCount(receiver);
 
         return true;
@@ -960,7 +1111,11 @@ async function buildDashboard(el, config) {
     };
     const proxyProps = new Proxy(props, dataHandler);
     buildDashboardHeader(proxyProps, config);
-    buildDashboardTable(proxyProps, { ...config, locales });
+
+    // Build table asynchronously
+    buildDashboardTable(proxyProps, { ...config, locales }).catch((error) => {
+      window.lana?.log(`Error building dashboard table: ${error.message}`);
+    });
   }
 
   setTimeout(() => {
