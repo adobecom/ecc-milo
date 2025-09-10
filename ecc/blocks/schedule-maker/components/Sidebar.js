@@ -1,17 +1,22 @@
 import { useState } from '../../../scripts/libs/preact-hook.js';
 import { html } from '../htm-wrapper.js';
-import { useSchedulesUI, useSchedulesData } from '../context/SchedulesContext.js';
+import { useSchedulesData, useSchedulesOperations } from '../context/SchedulesContext.js';
 import { useNavigation } from '../context/NavigationContext.js';
+import UnsavedChangesModal from './UnsavedChangesModal.js';
 
 function Sidebar({ setIsAddScheduleModalOpen }) {
   const [search, setSearch] = useState('');
-  const { hasUnsavedChanges } = useSchedulesUI();
+  const [isUnsavedChangesModalOpen, setIsUnsavedChangesModalOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+  const [pendingSchedule, setPendingSchedule] = useState(null);
   const { goToEditSchedule } = useNavigation();
-  const { schedules, activeSchedule, setActiveSchedule } = useSchedulesData();
+  const { schedules, activeSchedule, setActiveSchedule, hasUnsavedChanges } = useSchedulesData();
+  const { discardChangesToActiveSchedule } = useSchedulesOperations();
 
   const handleAddSchedule = () => {
     if (hasUnsavedChanges) {
-      alert('You have unsaved changes. Please save or discard them before adding a new schedule.');
+      setPendingAction('add');
+      setIsUnsavedChangesModalOpen(true);
       return;
     }
     setIsAddScheduleModalOpen(true);
@@ -24,11 +29,32 @@ function Sidebar({ setIsAddScheduleModalOpen }) {
 
   const handleSelectSchedule = (schedule) => {
     if (hasUnsavedChanges) {
-      alert('You have unsaved changes. Please save or discard them before selecting a new schedule.');
+      setPendingAction('switch');
+      setPendingSchedule(schedule);
+      setIsUnsavedChangesModalOpen(true);
       return;
     }
     setActiveSchedule(schedule);
     goToEditSchedule();
+  };
+
+  const handleProceedWithAction = () => {
+    discardChangesToActiveSchedule();
+    if (pendingAction === 'add') {
+      setIsAddScheduleModalOpen(true);
+    } else if (pendingAction === 'switch' && pendingSchedule) {
+      setActiveSchedule(pendingSchedule);
+      goToEditSchedule();
+    }
+    // Reset pending state
+    setPendingAction(null);
+    setPendingSchedule(null);
+  };
+
+  const handleCloseUnsavedChangesModal = () => {
+    setIsUnsavedChangesModalOpen(false);
+    setPendingAction(null);
+    setPendingSchedule(null);
   };
 
   const filteredSchedules = schedules?.filter(
@@ -75,6 +101,12 @@ function Sidebar({ setIsAddScheduleModalOpen }) {
             </button>
           `)}
       </div>
+      
+      <${UnsavedChangesModal} \
+        isOpen=${isUnsavedChangesModalOpen} \
+        onClose=${handleCloseUnsavedChangesModal} \
+        onProceed=${handleProceedWithAction} \
+      />
     </div>
   `;
 }

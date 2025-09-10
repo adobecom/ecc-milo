@@ -2,6 +2,7 @@ import { html } from '../../htm-wrapper.js';
 import { useSchedulesData, useSchedulesOperations, useSchedulesUI } from '../../context/SchedulesContext.js';
 import { useState } from '../../../../scripts/libs/preact-hook.js';
 import { ScheduleURLUtility } from '../../utils.js';
+import DeleteConfirmationModal from '../DeleteConfirmationModal.js';
 
 export default function ScheduleHeader() {
   const { activeSchedule, hasUnsavedChanges } = useSchedulesData();
@@ -14,8 +15,13 @@ export default function ScheduleHeader() {
   const { isUpdating, isDeleting, setToastSuccess, setToastError } = useSchedulesUI();
 
   const [isEditingScheduleTitle, setIsEditingScheduleTitle] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
-  const handleDeleteAll = async () => {
+  const handleDeleteClick = () => {
+    setShowDeleteConfirmation(true);
+  };
+
+  const handleDeleteConfirm = async () => {
     if (!activeSchedule) return;
 
     try {
@@ -24,6 +30,10 @@ export default function ScheduleHeader() {
     } catch (error) {
       window.lana?.log(`Error deleting schedule: ${error}`);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirmation(false);
   };
 
   const handleCopyLink = async () => {
@@ -109,7 +119,7 @@ export default function ScheduleHeader() {
             Discard
           </sp-action-button>
         `}
-        <sp-action-button icon="delete" size="m" onclick=${handleDeleteAll} disabled=${isDeleting}>
+        <sp-action-button icon="delete" size="m" onclick=${handleDeleteClick} disabled=${isDeleting}>
           <sp-icon slot="icon">
               <svg width="20" height="21" viewBox="0 0 20 21" fill="currentColor">
                 <path d="M8.24903 15.5215C7.84864 15.5215 7.51563 15.2041 7.50098 14.8008L7.25098 8.30078C7.23438 7.88672 7.55762 7.53808 7.97071 7.52246C7.98145 7.52148 7.99122 7.52148 8.00098 7.52148C8.40137 7.52148 8.73438 7.83886 8.74903 8.24218L8.99903 14.7422C9.01563 15.1562 8.69239 15.5049 8.2793 15.5205C8.26856 15.5215 8.25879 15.5215 8.24903 15.5215Z"/>
@@ -137,5 +147,11 @@ export default function ScheduleHeader() {
         </sp-action-button>
       </div>
     </header>
+    <${DeleteConfirmationModal} \
+      isOpen=${showDeleteConfirmation} \
+      onClose=${handleDeleteCancel} \
+      onConfirm=${handleDeleteConfirm} \
+      scheduleTitle=${activeSchedule?.title} \
+    />
   `;
 }
