@@ -1,4 +1,4 @@
-import { useState } from '../../../scripts/libs/preact-hook.js';
+import { useState } from '../../../scripts/deps/preact-hook.js';
 import { html } from '../htm-wrapper.js';
 import { useSchedulesData, useSchedulesOperations } from '../context/SchedulesContext.js';
 import { useNavigation } from '../context/NavigationContext.js';

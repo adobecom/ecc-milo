@@ -1,4 +1,4 @@
-import { useState } from '../../../scripts/libs/preact-hook.js';
+import { useState } from '../../../scripts/deps/preact-hook.js';
 import { html } from '../htm-wrapper.js';
 import BuildTableIcon from '../components/BuildTableIcon.js';
 import CreateManuallyScheduleModal from '../components/CreateManuallyScheduleModal.js';

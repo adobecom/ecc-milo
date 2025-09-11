@@ -4,7 +4,7 @@ import Schedules from './pages/Schedules.js';
 import { PAGES } from './constants.js';
 import { useNavigation } from './context/NavigationContext.js';
 import { useSchedulesData, useSchedulesUI } from './context/SchedulesContext.js';
-import { useEffect } from '../../scripts/libs/preact-hook.js';
+import { useEffect } from '../../scripts/deps/preact-hook.js';
 import { ScheduleURLUtility } from './utils.js';
 
 const PAGES_COMPONENTS = {

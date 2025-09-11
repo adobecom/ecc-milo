@@ -1,5 +1,5 @@
 import { html } from '../htm-wrapper.js';
-import { useState, useEffect } from '../../../scripts/libs/preact-hook.js';
+import { useState, useEffect } from '../../../scripts/deps/preact-hook.js';
 import { useSchedulesOperations, useSchedulesData } from '../context/SchedulesContext.js';
 import { decorateBlocks } from '../utils.js';
 import { useNavigation } from '../context/NavigationContext.js';
@@ -25,7 +25,7 @@ export default function SheetImporter() {
 
   useEffect(() => {
     const fetchLibrary = async () => {
-      const { default: XLSX } = await import('../../../scripts/libs/xlsx.js');
+      const { default: XLSX } = await import('../../../scripts/deps/xlsx.js');
       setXlsx(XLSX);
       setIsLoading(false);
     };

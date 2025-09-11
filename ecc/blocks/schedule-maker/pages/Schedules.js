@@ -4,7 +4,7 @@ import ScheduleEditor from '../components/ScheduleEditor.js';
 import SheetImporter from '../components/SheetImporter.js';
 import { useNavigation } from '../context/NavigationContext.js';
 import AddScheduleModal from '../components/AddScheduleModal.js';
-import { useState } from '../../../scripts/libs/preact-hook.js';
+import { useState } from '../../../scripts/deps/preact-hook.js';
 
 function Schedules() {
   const { activePage } = useNavigation();

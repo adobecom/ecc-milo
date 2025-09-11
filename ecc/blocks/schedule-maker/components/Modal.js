@@ -1,4 +1,4 @@
-import { useEffect, useRef } from '../../../scripts/libs/preact-hook.js';
+import { useEffect, useRef } from '../../../scripts/deps/preact-hook.js';
 import { html } from '../htm-wrapper.js';
 import useIcons from '../useIcons.js';
 

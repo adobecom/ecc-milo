@@ -1,4 +1,4 @@
-import { render } from '../../scripts/libs/preact.js';
+import { render } from '../../scripts/deps/preact.js';
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { html } from './htm-wrapper.js';
 import ScheduleMaker from './ScheduleMaker.js';

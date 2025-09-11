@@ -1,6 +1,6 @@
 /* eslint-disable */
-import htm from '../../scripts/libs/htm.js';
-import { h } from '../../scripts/libs/preact.js';
+import htm from '../../scripts/deps/htm.js';
+import { h } from '../../scripts/deps/preact.js';
 
 export { h };
 export const html = htm.bind(h);

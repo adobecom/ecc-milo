@@ -1,5 +1,5 @@
-import { useState, useContext, useCallback } from '../../../scripts/libs/preact-hook.js';
-import { createContext } from '../../../scripts/libs/preact.js';
+import { useState, useContext, useCallback } from '../../../scripts/deps/preact-hook.js';
+import { createContext } from '../../../scripts/deps/preact.js';
 import { html } from '../htm-wrapper.js';
 import { PAGES_CONFIG } from '../constants.js';
 import { useSchedulesUI } from './SchedulesContext.js';

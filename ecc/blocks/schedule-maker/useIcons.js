@@ -1,5 +1,5 @@
 import { LIBS } from '../../scripts/scripts.js';
-import { useEffect } from '../../scripts/libs/preact-hook.js';
+import { useEffect } from '../../scripts/deps/preact-hook.js';
 
 /**
  * useIcons is a hook that loads the icons from the icons.js file

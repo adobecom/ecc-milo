@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
-import { createContext } from '../../../scripts/libs/preact.js';
-import { useState, useContext, useCallback, useEffect, useMemo } from '../../../scripts/libs/preact-hook.js';
+import { createContext } from '../../../scripts/deps/preact.js';
+import { useState, useContext, useCallback, useEffect, useMemo } from '../../../scripts/deps/preact-hook.js';
 import { html } from '../htm-wrapper.js';
 import {
   getSchedules as getSchedulesController,

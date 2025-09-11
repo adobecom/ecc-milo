@@ -1,6 +1,6 @@
 import { html } from '../../htm-wrapper.js';
 import { useSchedulesData, useSchedulesOperations, useSchedulesUI } from '../../context/SchedulesContext.js';
-import { useState } from '../../../../scripts/libs/preact-hook.js';
+import { useState } from '../../../../scripts/deps/preact-hook.js';
 import { ScheduleURLUtility } from '../../utils.js';
 import DeleteConfirmationModal from '../DeleteConfirmationModal.js';
 
