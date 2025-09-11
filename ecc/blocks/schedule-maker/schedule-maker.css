@@ -194,7 +194,11 @@
   margin: var(--sm-spacing-xxxl) 0;
   padding: var(--sm-spacing-xxl);
   background-color: var(--sm-color-surface);
-  border-radius: var(--sm-border-radius);
+  border-radius: 16px;
+  border: 1px dashed #555;
+  padding-left: 60px;
+  padding-top: 40px;
+  gap: 50px;
 }
 
 .sm-home__quick-actions-icon {
@@ -202,8 +206,11 @@
 }
 
 .sm-home__quick-actions-content h2 {
-  margin: 0 0 var(--sm-spacing-lg);
+  margin: 0 0 40px;
   color: var(--sm-color-text-primary);
+  font-size: 22px;
+  font-weight: 700;
+  font-family: var(--body-font-family);
 }
 
 .sm-home__quick-actions-buttons {
@@ -216,14 +223,27 @@
   padding: var(--sm-spacing-xxl) 50px;
   overflow: hidden;
   background-color: var(--sm-color-surface);
-  border-radius: var(--sm-border-radius);
+  border-radius: 16px;
 }
 
 .sm-home__schedules-header {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   margin-bottom: var(--sm-spacing-lg);
-  gap: var(--sm-spacing-md);
+  gap: 120px;
+}
+
+.sm-home__schedules-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  font-family: var(--body-font-family);
+  color: #131313;
+}
+
+
+.sm-home__schedules-search.sm-search-input {
+  margin-bottom: 0;
 }
 
 .sm-home__schedules-list {
@@ -321,7 +341,7 @@
 /* Custom Search Input Component */
 .sm-search-input {
   position: relative;
-  width: 100%;
+  width: 239px;
   margin-bottom: 35px;
 }
 

@@ -4,6 +4,7 @@ import BuildTableIcon from '../components/BuildTableIcon.js';
 import CreateManuallyScheduleModal from '../components/CreateManuallyScheduleModal.js';
 import { useNavigation } from '../context/NavigationContext.js';
 import { useSchedulesOperations, useSchedulesData } from '../context/SchedulesContext.js';
+import SearchInput from '../components/SearchInput.js';
 
 export default function Home() {
   const { goToEditSchedule, goToSheetImport } = useNavigation();
@@ -12,7 +13,7 @@ export default function Home() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createModalMode, setCreateModalMode] = useState('manually');
   const { createAndAddSchedule } = useSchedulesOperations();
-
+  const [search, setSearch] = useState('');
   const handleCreateManuallyBtn = () => {
     setIsCreateModalOpen(true);
     setCreateModalMode('manually');
@@ -48,10 +49,10 @@ export default function Home() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const searchValue = e.target.value;
+    setSearch(e.target.value);
     const localFilteredSchedules = schedules.filter((schedule) => {
       const lowerCaseTitle = schedule.title.toLowerCase();
-      const lowerCaseSearchValue = searchValue.toLowerCase();
+      const lowerCaseSearchValue = search.toLowerCase();
       return lowerCaseTitle.includes(lowerCaseSearchValue);
     });
     setFilteredSchedules(localFilteredSchedules);
@@ -77,10 +78,15 @@ export default function Home() {
       <div class="sm-home__schedules">
         <div class="sm-home__schedules-header">
           <h2>Select Schedule</h2>
-          <sp-search placeholder="Search schedules" size="l" oninput=${handleSearch} onsubmit=${handleSearch} />
+          <${SearchInput} \
+            placeholder="Search schedules" \
+            value=${search} \
+            onInput="${handleSearch}" \
+            className="sm-home__schedules-search" \
+          />
         </div>
         <ul class="sm-home__schedules-list">
-          ${filteredSchedules.map((schedule) => html`
+          ${filteredSchedules?.map((schedule) => html`
             <li class="sm-home__schedules-item">
               <sp-action-button quiet size="l" onClick=${() => handleSelectSchedule(schedule)}>
                 ${schedule.title}

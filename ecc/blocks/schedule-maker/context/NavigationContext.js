@@ -7,7 +7,7 @@ import { useSchedulesUI } from './SchedulesContext.js';
 const NavigationContext = createContext();
 
 const NavigationProvider = ({ children }) => {
-  const [activePage, setActivePage] = useState(PAGES_CONFIG.editSchedule);
+  const [activePage, setActivePage] = useState(PAGES_CONFIG.home);
   const { hasUnsavedChanges } = useSchedulesUI();
   const [importSheetScheduleName, setImportSheetScheduleName] = useState(null);
 
