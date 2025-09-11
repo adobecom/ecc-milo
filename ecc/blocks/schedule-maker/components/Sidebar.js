@@ -3,6 +3,7 @@ import { html } from '../htm-wrapper.js';
 import { useSchedulesData, useSchedulesOperations } from '../context/SchedulesContext.js';
 import { useNavigation } from '../context/NavigationContext.js';
 import UnsavedChangesModal from './UnsavedChangesModal.js';
+import SearchInput from './SearchInput.js';
 
 function Sidebar({ setIsAddScheduleModalOpen }) {
   const [search, setSearch] = useState('');
@@ -81,8 +82,13 @@ function Sidebar({ setIsAddScheduleModalOpen }) {
         </sp-icon>
         Add Schedule
       </sp-button>
-      <sp-search class="sm-sidebar__search" placeholder="Search schedules" oninput=${handleSearch}></sp-search>
-      <h2>Select schedule</h2>
+      <${SearchInput} \
+        placeholder="Search schedules" \
+        value="${search}" \
+        onInput="${handleSearch}" \
+        className="sm-sidebar__search" \
+      />
+      <p class="sm-sidebar__select-schedule">Select schedule</p>
       <div class="sm-sidebar__schedules">
           ${filteredSchedules?.map((schedule) => html`
             <button \

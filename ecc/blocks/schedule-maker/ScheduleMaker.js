@@ -1,7 +1,7 @@
 import { html } from './htm-wrapper.js';
 import Home from './pages/Home.js';
 import Schedules from './pages/Schedules.js';
-import { PAGES, PAGES_CONFIG } from './constants.js';
+import { PAGES } from './constants.js';
 import { useNavigation } from './context/NavigationContext.js';
 import { useSchedulesData, useSchedulesUI } from './context/SchedulesContext.js';
 import { useEffect } from '../../scripts/libs/preact-hook.js';
@@ -21,7 +21,7 @@ export default function ScheduleMaker() {
     clearToastSuccess,
     isInitialLoading,
   } = useSchedulesUI();
-  const { activePage, setActivePage, goToEditSchedule } = useNavigation();
+  const { activePage, goToEditSchedule } = useNavigation();
   // On load, check if there is a schedule in the URL
   useEffect(() => {
     async function handleScheduleInUrl() {
@@ -45,14 +45,6 @@ export default function ScheduleMaker() {
   return html`
   <sp-theme color="light" scale="medium">
     <div class="sm-app">
-      <div class="sm-tabs">
-        ${Object.values(PAGES_CONFIG).map((page) => html`
-          <button class="sm-tab ${activePage.pageComponent === page.pageComponent ? 'sm-tab--active' : ''}" onclick=${() => setActivePage(page)}>
-            ${page.label}
-          </button>
-        `)}
-      </div>
-      
       ${isInitialLoading && html`
       <div class="sm-loading">
         <sp-progress-circle size="l" indeterminate label="Loading schedules" />

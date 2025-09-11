@@ -289,8 +289,8 @@
 }
 
 .sm-schedules__sidebar {
-  width: 250px;
-  padding: var(--sm-spacing-xxl) var(--sm-spacing-xl);
+  width: 237px;
+  padding: 32px 24px 40px;
   border-bottom-left-radius: var(--sm-border-radius);
   border-top-left-radius: var(--sm-border-radius);
   border: 1px solid rgb(217 217 217 / 100%);
@@ -310,7 +310,7 @@
 
 .sm-sidebar__button {
   width: 100%;
-  margin-bottom: var(--sm-spacing-lg);
+  margin-bottom: 40px;
 }
 
 .sm-sidebar__search {
@@ -318,30 +318,77 @@
   margin-bottom: var(--sm-spacing-lg);
 }
 
-.sm-sidebar h2 {
-  margin: 0 0 var(--sm-spacing-md);
-  color: var(--sm-color-text-primary);
-  font-size: 1.125rem;
+/* Custom Search Input Component */
+.sm-search-input {
+  position: relative;
+  width: 100%;
+  margin-bottom: 35px;
+}
+
+.sm-search-input__icon {
+  position: absolute;
+  left: 17px;
+  top: 57%;
+  transform: translateY(-50%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.sm-search-input__field {
+  width: 100%;
+  padding: 6px 12px 8px 43px;
+  border: 2px solid rgb(144 144 144);
+  border-radius: 40px;
+  background-color: #FFF;
+  font-size: 16px;
+  font-weight: 400;
+  font-family: var(--body-font-family);
+  color: #292929;
+  outline: none;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.sm-search-input__field::placeholder {
+  color: #666;
+}
+
+.sm-search-input__field:focus {
+  background-color: #fff;
+  outline: 2px solid #4b75ff;
+  outline-offset: 2px;
+}
+
+.sm-search-input__field:hover {
+  border: 2px solid rgb(109 109 109);
+}
+
+.sm-sidebar__select-schedule {
+  font-weight: 700;
+  font-size: 16px;
+  font-family: var(--body-font-family);
+  color: #2C2C2C;
+  margin: 0;
 }
 
 .sm-sidebar__schedules {
   display: flex;
   flex-direction: column;
-  gap: var(--sm-spacing-xs);
+  gap: 2px;
 }
 
 .sm-sidebar__schedule {
   background: none;
   border: none;
   text-align: left;
-  padding: var(--sm-spacing-sm) var(--sm-spacing-md);
+  padding: 10px 14px;
   border-radius: 6px;
   cursor: pointer;
   transition: var(--sm-transition);
-  font-size: var(--type-body-s-size);
-  color: #131313;
+  font-size: 16px;
+  color: #2C2C2C;
   font-family: var(--body-font-family);
-  font-weight: 500;
+  font-weight: 700;
   display: flex;
   justify-content: space-between;
 }
