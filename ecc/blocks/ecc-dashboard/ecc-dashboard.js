@@ -3,10 +3,14 @@ import {
   deleteEvent,
   getEventImages,
   getEventsForUser,
+  getSpeaker,
+  getEventSpeakers,
   getEventVenue,
+  getEventHistory,
   getLocales,
   publishEvent,
   unpublishEvent,
+  getSeriesById,
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
@@ -22,6 +26,97 @@ import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
 
+// API Cache and Throttling System (functional approach)
+const apiCache = (() => {
+  const cache = new Map();
+  const pendingRequests = new Map();
+  const cacheTimeout = 10000; // 10 seconds
+
+  const generateKey = (apiFunction, ...args) => `${apiFunction.name}_${JSON.stringify(args)}`;
+  const isExpired = (timestamp) => Date.now() - timestamp > cacheTimeout;
+
+  return {
+    async get(apiFunction, ...args) {
+      const key = generateKey(apiFunction, ...args);
+
+      // Return cached result if valid
+      if (cache.has(key)) {
+        const { data, timestamp } = cache.get(key);
+        if (!isExpired(timestamp)) {
+          return data;
+        }
+        cache.delete(key);
+      }
+
+      // Return pending request if exists
+      if (pendingRequests.has(key)) {
+        return pendingRequests.get(key);
+      }
+
+      // Make new request
+      const request = apiFunction(...args)
+        .then((data) => {
+          cache.set(key, { data, timestamp: Date.now() });
+          pendingRequests.delete(key);
+          return data;
+        })
+        .catch((error) => {
+          pendingRequests.delete(key);
+          throw error;
+        });
+
+      pendingRequests.set(key, request);
+      return request;
+    },
+
+    clear() {
+      cache.clear();
+      pendingRequests.clear();
+    },
+
+    invalidate(pattern) {
+      const keysToDelete = [];
+      cache.forEach((value, key) => {
+        if (key.includes(pattern)) {
+          keysToDelete.push(key);
+        }
+      });
+      keysToDelete.forEach((key) => cache.delete(key));
+    },
+  };
+})();
+
+// Throttling utility
+function throttle(func, delay) {
+  let timeoutId;
+  let lastExecTime = 0;
+
+  return function throttledFunction(...args) {
+    const currentTime = Date.now();
+
+    if (currentTime - lastExecTime > delay) {
+      func.apply(this, args);
+      lastExecTime = currentTime;
+    } else {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func.apply(this, args);
+        lastExecTime = Date.now();
+      }, delay - (currentTime - lastExecTime));
+    }
+  };
+}
+
+// Debouncing utility
+function debounce(func, delay) {
+  let timeoutId;
+
+  return function debouncedFunction(...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 function showToast(props, msg, options = {}) {
@@ -33,10 +128,11 @@ function showToast(props, msg, options = {}) {
 }
 
 function formatLocaleDate(string) {
+  // MM/DD/YYYY
   const options = {
     year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   };
 
@@ -65,7 +161,7 @@ function createSwipingLoader(extraClass = '') {
 
 function buildThumbnail(data) {
   const container = createTag('td', { class: 'thumbnail-container' });
-  const thumbnailLoader = createSwipingLoader('thumbnail-loader');
+  const thumbnailLoader = createSwipingLoader('full-height-loader');
   container.append(thumbnailLoader);
 
   const buildThumbnailContainer = (images) => {
@@ -115,7 +211,7 @@ function buildThumbnail(data) {
       thumbnailLoader.remove();
     });
   } else {
-    getEventImages(data.eventId).then(({ images }) => {
+    apiCache.get(getEventImages, data.eventId).then(({ images }) => {
       if (!images) {
         thumbnailLoader.remove();
         return;
@@ -139,6 +235,9 @@ function buildThumbnail(data) {
 
 function updateDashboardData(newPayload, props) {
   if (!newPayload) return;
+
+  // Invalidate cache for this specific event
+  apiCache.invalidate(newPayload.eventId);
 
   props.data = props.data.map((event) => {
     if (event.eventId === newPayload.eventId) {
@@ -435,6 +534,9 @@ function initMoreOptions(props, config, eventObj, row) {
           return;
         }
 
+        // Invalidate cache for deleted event
+        apiCache.invalidate(eventObj.eventId);
+
         const newJson = props.data.filter((event) => event.eventId !== eventObj.eventId);
 
         props.data = newJson;
@@ -486,6 +588,27 @@ function buildStatusTag(event) {
   return statusTag;
 }
 
+async function buildContributorTag(event) {
+  const eventSpeakers = await apiCache.get(getEventSpeakers, event.eventId);
+
+  const contributorTag = createTag('div', { class: 'contributor' });
+  const contributor = eventSpeakers.speakers?.[0];
+
+  if (!contributor) return 'N/A';
+
+  const contributorDets = await apiCache.get(getSpeaker, event.seriesId, contributor.speakerId);
+
+  contributorTag.textContent = `${contributorDets.firstName || ''} ${contributorDets.lastName || ''}`;
+  return contributorTag;
+}
+
+async function buildSeriesTag(event) {
+  const series = await apiCache.get(getSeriesById, event.seriesId);
+  const seriesTag = createTag('div', { class: 'series' });
+  seriesTag.textContent = series.seriesName;
+  return seriesTag;
+}
+
 function buildEventTitleTag(config, eventObj) {
   const url = getEventEditUrl(config, eventObj);
 
@@ -496,7 +619,7 @@ function buildEventTitleTag(config, eventObj) {
 }
 
 function buildVenueTag(eventObj) {
-  return getEventVenue(eventObj.eventId).then((venue) => {
+  return apiCache.get(getEventVenue, eventObj.eventId).then((venue) => {
     if (!venue) return 'N/A';
 
     const venueTag = createTag('span', { class: 'vanue-name' }, venue.venueName);
@@ -514,36 +637,50 @@ function buildRSVPTag(config, eventObj) {
   return rsvpTag;
 }
 
-async function populateRow(props, config, index) {
-  const event = props.paginatedData[index];
+function buildRSVPCell(config, event) {
+  const container = createTag('td', { class: 'rsvp-container' });
+  const rsvpTag = buildRSVPTag(config, event);
+  container.append(createTag('div', { class: 'td-wrapper' }, rsvpTag));
+  return container;
+}
+
+// Lazy loading for table rows
+function createLazyRow(props, config, event) {
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   const sp = new URLSearchParams(window.location.search);
-  const venueLoader = createSwipingLoader('venue-loader');
 
   const row = createTag('tr', { class: 'event-row', 'data-event-id': event.eventId }, '', { parent: tBody });
-  const thumbnailCell = buildThumbnail(event);
+
+  // Create basic cells first (no API calls)
+  const thumbnailCell = createTag('td', { class: 'thumbnail-container' }, createSwipingLoader('full-height-loader'));
   const titleCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventTitleTag(config, event)));
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(event)));
+  const contributorCell = createTag('td', { class: 'contributor-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
+  const seriesCell = createTag('td', { class: 'series-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
   const startDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.startDate)));
-  const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
-  const venueCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, venueLoader));
+  const venueCell = createTag('td', { class: 'venue-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
   const langCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, getEventDefaultLanguage(event, config.locales)));
-  const externalEventId = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildRSVPTag(config, event)));
+  const rsvpCell = buildRSVPCell(config, event);
+  const creatorCell = createTag('td', { class: 'creator-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
+  const modifierCell = createTag('td', { class: 'modifier-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
+  const modDateCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(event.modificationTime)));
+  const createdByCell = createTag('td', { class: 'publishedTime-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
-
-  buildVenueTag(event).then((venueTag) => {
-    venueLoader.replaceWith(venueTag);
-  });
 
   row.append(
     thumbnailCell,
     titleCell,
     statusCell,
+    contributorCell,
+    seriesCell,
     startDateCell,
-    modDateCell,
     venueCell,
     langCell,
-    externalEventId,
+    rsvpCell,
+    creatorCell,
+    modifierCell,
+    modDateCell,
+    createdByCell,
     moreOptionsCell,
   );
 
@@ -552,12 +689,100 @@ async function populateRow(props, config, index) {
   if (event.eventId === sp.get('newEventId')) {
     if (!props.el.classList.contains('toast-shown')) {
       showToast(props, buildToastMsgWithEventTitle(event, config['new-event-toast-msg']), { variant: 'positive' });
-
       props.el.classList.add('toast-shown');
     }
-
     if (props.el.querySelector('.new-event-confirmation-toast')?.open === true) highlightRow(row);
   }
+
+  return row;
+}
+
+// Load data for a specific row
+async function loadRowData(row, event) {
+  const thumbnailCell = row.querySelector('.thumbnail-container');
+  const contributorCell = row.querySelector('.contributor-container .td-wrapper');
+  const seriesCell = row.querySelector('.series-container .td-wrapper');
+  const venueCell = row.querySelector('.venue-container .td-wrapper');
+  const creatorCell = row.querySelector('.creator-container .td-wrapper');
+  const modifierCell = row.querySelector('.modifier-container .td-wrapper');
+  const createdByCell = row.querySelector('.publishedTime-container .td-wrapper');
+
+  // Load thumbnail
+  const thumbnail = buildThumbnail(event);
+  thumbnailCell.innerHTML = '';
+  thumbnailCell.append(thumbnail);
+
+  // Load contributor data
+  buildContributorTag(event).then((contributorTag) => {
+    contributorCell.innerHTML = '';
+    contributorCell.append(contributorTag);
+  });
+
+  // Load series data
+  buildSeriesTag(event).then((seriesTag) => {
+    seriesCell.innerHTML = '';
+    seriesCell.append(seriesTag);
+  });
+
+  // Load venue data
+  buildVenueTag(event).then((venueTag) => {
+    venueCell.innerHTML = '';
+    venueCell.append(venueTag);
+  });
+
+  // Load history data
+  const historyPromises = [
+    { cell: creatorCell, type: 'creator' },
+    { cell: modifierCell, type: 'modifier' },
+    { cell: createdByCell, type: 'publishedTime' },
+  ];
+
+  historyPromises.forEach(({ cell, type }) => {
+    apiCache.get(getEventHistory, event.eventId).then((response) => {
+      if (response.error || !response.history || !response.history.length) {
+        cell.innerHTML = 'N/A';
+        return;
+      }
+
+      const { history } = response;
+      if (!Array.isArray(history) || history.length === 0) {
+        cell.innerHTML = 'N/A';
+        return;
+      }
+
+      const historyMap = {
+        creator: {
+          target: history[0],
+          getValue: (target) => target?.user?.name || 'Unknown',
+        },
+        modifier: {
+          target: history[history.length - 1],
+          getValue: (target) => target?.user?.name || 'Unknown',
+        },
+        publishedTime: {
+          // find the last item that has the published updated to true
+          target: history.reverse().find((h) => h.diff?.updated?.published),
+          getValue: (target) => (target?.timestamp ? formatLocaleDate(target.timestamp) : 'N/A'),
+        },
+      };
+
+      const { target, getValue } = historyMap[type];
+      if (!target || !getValue) {
+        cell.innerHTML = 'N/A';
+        return;
+      }
+
+      try {
+        const value = getValue(target);
+        const historyUserNameTag = createTag('span', { class: 'creator-tag' }, value || 'N/A');
+        cell.innerHTML = '';
+        cell.append(historyUserNameTag);
+      } catch (error) {
+        window.lana?.log(`Error processing history data for event ${event.eventId}, type ${type}: ${error.message}`);
+        cell.innerHTML = 'N/A';
+      }
+    });
+  });
 }
 
 function updatePaginationControl(pagination, currentPage, totalPages) {
@@ -619,26 +844,42 @@ function initSorting(props, config) {
   const thRow = thead.querySelector('tr');
 
   const headers = {
-    thumbnail: '',
-    title: 'EVENT NAME',
-    published: 'PUBLISH STATUS',
-    startDate: 'DATE RUN',
-    modificationTime: 'LAST MODIFIED',
-    venueName: 'VENUE NAME',
-    language: 'LANGUAGE',
-    attendeeCount: 'RSVP DATA',
-    manage: 'MANAGE',
+    thumbnail: { text: '', sortable: false },
+    title: { text: 'EVENT NAME', sortable: true },
+    published: { text: 'PUBLISH STATUS', sortable: true },
+    contributor: { text: 'CONTRIBUTOR', sortable: false },
+    series: { text: 'SERIES', sortable: false },
+    startDate: { text: 'DATE RUN | (MM/DD/YYYY)', sortable: true },
+    venueName: { text: 'VENUE NAME', sortable: false },
+    language: { text: 'LANGUAGE', sortable: true },
+    attendeeCount: { text: 'RSVP DATA', sortable: true },
+    createdBy: { text: 'CREATOR', sortable: false },
+    modifiedBy: { text: 'MODIFIER', sortable: false },
+    modificationTime: { text: 'LAST MODIFIED | (MM/DD/YYYY)', sortable: true },
+    publishTime: { text: 'PUBLISHED AT | (MM/DD/YYYY)', sortable: false },
+    manage: { text: 'MANAGE', sortable: false },
   };
 
-  Object.entries(headers).forEach(([key, val]) => {
-    const thText = createTag('span', {}, val);
-    const th = createTag('th', {}, thText, { parent: thRow });
+  Object.entries(headers).forEach(([key, headerConfig]) => {
+    const { text, sortable } = headerConfig;
+    const [firstRow, secondRow] = text.split(' | ');
 
-    if (['thumbnail', 'manage', 'venueName'].includes(key)) return;
+    const thTextWrapper = createTag('span', {}, '');
+
+    if (secondRow) {
+      createTag('div', { class: 'ecc-table-header-row' }, firstRow, { parent: thTextWrapper });
+      createTag('div', { class: 'ecc-table-header-row' }, secondRow, { parent: thTextWrapper });
+    } else {
+      createTag('div', { class: 'ecc-table-header-row' }, text, { parent: thTextWrapper });
+    }
+    const th = createTag('th', {}, thTextWrapper, { parent: thRow });
+
+    if (!sortable) return;
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
     th.classList.add('sortable', key);
-    th.addEventListener('click', () => {
+    // Throttled sorting to prevent rapid API calls
+    const throttledSort = throttle(() => {
       if (!props.filteredData.length) return;
 
       thead.querySelectorAll('th').forEach((h) => {
@@ -652,7 +893,9 @@ function initSorting(props, config) {
         field: key,
       };
       sortData(props, config);
-    });
+    }, 300); // Throttle sorting to max once per 300ms
+
+    th.addEventListener('click', throttledSort);
   });
 }
 
@@ -665,7 +908,8 @@ function buildNoSearchResultsScreen(el, config) {
   el.append(noSearchResultsRow);
 }
 
-function populateTable(props, config) {
+// Batch loading for better performance
+async function populateTable(props, config) {
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   tBody.innerHTML = '';
 
@@ -673,10 +917,54 @@ function populateTable(props, config) {
     buildNoSearchResultsScreen(tBody, config);
   } else {
     const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
+    const batchSize = 5; // Load 5 rows at a time
 
+    // Create all rows first (with loaders)
     for (let i = 0; i < endOfPage; i += 1) {
-      populateRow(props, config, i);
+      createLazyRow(props, config, props.paginatedData[i]);
     }
+
+    // Load data in batches to prevent overwhelming the API
+    const loadBatches = async () => {
+      const batches = [];
+      for (let i = 0; i < endOfPage; i += batchSize) {
+        const batchEnd = Math.min(i + batchSize, endOfPage);
+        const batchPromises = [];
+
+        for (let j = i; j < batchEnd; j += 1) {
+          const row = tBody.children[j];
+          const event = props.paginatedData[j];
+          batchPromises.push(loadRowData(row, event));
+        }
+
+        batches.push(batchPromises);
+      }
+
+      // Process batches sequentially with delays
+      const processBatches = async () => {
+        let currentBatch = 0;
+        const processNextBatch = async () => {
+          if (currentBatch >= batches.length) return;
+
+          await Promise.allSettled(batches[currentBatch]);
+          currentBatch += 1;
+
+          // Small delay between batches to prevent overwhelming the server
+          if (currentBatch < batches.length) {
+            setTimeout(processNextBatch, 100);
+          }
+        };
+
+        await processNextBatch();
+      };
+
+      await processBatches();
+    };
+
+    // Start batch loading asynchronously
+    loadBatches().catch((error) => {
+      window.lana?.log(`Error in batch loading: ${error.message}`);
+    });
 
     props.el.querySelector('.pagination-container')?.remove();
     decoratePagination(props, config);
@@ -729,15 +1017,14 @@ function buildDashboardHeader(props, config) {
     }
   });
 
-  let debounceTimer;
-  const handleSearch = () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      filterData(props, config, searchInput.value);
-    }, 1000);
-  };
+  // Improved debouncing for search
+  const debouncedSearch = debounce((query) => {
+    filterData(props, config, query);
+  }, 500); // Reduced from 1000ms to 500ms for better UX
 
-  searchInput.addEventListener('input', handleSearch);
+  searchInput.addEventListener('input', (e) => {
+    debouncedSearch(e.target.value);
+  });
 
   dashboardHeader.append(textContainer, actionsContainer);
   props.el.prepend(dashboardHeader);
@@ -748,14 +1035,16 @@ function updateEventsCount(props) {
   eventsCount.textContent = `(${props.data.length} events)`;
 }
 
-function buildDashboardTable(props, config) {
+async function buildDashboardTable(props, config) {
   const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
   const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
   const thead = createTag('thead', {}, '', { parent: table });
   createTag('tbody', {}, '', { parent: table });
   createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
   initSorting(props, config);
-  populateTable(props, config);
+
+  // Populate table asynchronously
+  await populateTable(props, config);
 
   const usp = new URLSearchParams(window.location.search);
   if (usp.get('newEventId')) {
@@ -804,7 +1093,10 @@ async function buildDashboard(el, config) {
       set(target, prop, value, receiver) {
         target[prop] = value;
 
-        populateTable(receiver, { ...config, locales });
+        // Use async populateTable but don't await to avoid blocking
+        populateTable(receiver, { ...config, locales }).catch((error) => {
+          window.lana?.log(`Error populating table: ${error.message}`);
+        });
         updateEventsCount(receiver);
 
         return true;
@@ -812,7 +1104,11 @@ async function buildDashboard(el, config) {
     };
     const proxyProps = new Proxy(props, dataHandler);
     buildDashboardHeader(proxyProps, config);
-    buildDashboardTable(proxyProps, { ...config, locales });
+
+    // Build table asynchronously
+    buildDashboardTable(proxyProps, { ...config, locales }).catch((error) => {
+      window.lana?.log(`Error building dashboard table: ${error.message}`);
+    });
   }
 
   setTimeout(() => {
