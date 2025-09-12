@@ -1,7 +1,10 @@
 .ecc-dashboard {
   font-family: var(--body-font-family);
   padding: 40px;
-  width: var(--grid-container-width);
+  max-width: 100vw;
+  box-sizing: border-box;
+  width: max-content;
+  overflow: auto;
   margin: auto;
 }
 
@@ -214,13 +217,20 @@
   font-size: var(--type-body-xxs-size);
   color: var(--spectrum-color-gray-500);
   user-select: none;
-  width: 100px;
+  min-width: 100px;
   white-space: nowrap;
 }
 
 .ecc-dashboard table .table-header-row th span {
   white-space: nowrap;
+  display: inline-block;
+  width: 100%;
+}
+
+.ecc-dashboard table .table-header-row th div.ecc-table-header-row {
+  white-space: nowrap;
   width: 60px;
+  line-height: 1.5;
 }
 
 .ecc-dashboard table .table-header-row th.sortable {
@@ -285,7 +295,7 @@
   box-shadow: 0 4px 2px 0 rgb(0 0 0 / 10%);
 }
 
-.ecc-dashboard table .event-row .thumbnail-loader {
+.ecc-dashboard table .event-row .full-height-loader {
   width: 90px;
   height: 90px;
   position: absolute;
