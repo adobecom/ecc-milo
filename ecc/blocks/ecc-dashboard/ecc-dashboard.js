@@ -873,11 +873,11 @@ function initSorting(props, config) {
       createTag('div', { class: 'ecc-table-header-row' }, text, { parent: thTextWrapper });
     }
     const th = createTag('th', {}, thTextWrapper, { parent: thRow });
-
+    th.classList.add(key);
     if (!sortable) return;
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
-    th.classList.add('sortable', key);
+    th.classList.add('sortable');
     // Throttled sorting to prevent rapid API calls
     const throttledSort = throttle(() => {
       if (!props.filteredData.length) return;

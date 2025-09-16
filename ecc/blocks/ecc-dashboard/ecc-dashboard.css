@@ -91,6 +91,7 @@
 }
 
 .ecc-dashboard .dashboard-table-container {
+  overflow: auto;
   max-width: 100%;
 }
 
@@ -239,6 +240,10 @@
 
 .ecc-dashboard table .table-header-row th.active {
   color: var(--color-black);
+}
+
+.ecc-dashboard table .table-header-row th.manage {
+  min-width: 200px;
 }
 
 .ecc-dashboard table .table-header-row th .icon {
