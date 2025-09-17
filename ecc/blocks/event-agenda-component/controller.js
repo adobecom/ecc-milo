@@ -1,12 +1,13 @@
 import { getAttribute } from '../../scripts/data-utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
+import { changeInputValue } from '../../scripts/utils.js';
 
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const agendaGroup = component.querySelector('agenda-fieldset-group');
-  const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info')?.checked;
+  const showAgendaPostEvent = component.querySelector('#checkbox-agenda-info')?.checked || false; // fallback to boolean false on falsy value
 
   let agenda = [];
 
@@ -40,7 +41,7 @@ export default function init(component, props) {
     component.classList.add('prefilled');
   }
 
-  showAgendaPostEventElement.checked = showAgendaPostEvent;
+  changeInputValue(showAgendaPostEventElement, 'checked', showAgendaPostEvent);
 }
 
 export function onTargetUpdate(component, props) {
