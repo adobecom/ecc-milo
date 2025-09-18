@@ -83,11 +83,11 @@ export default async function init(component, props) {
     if (cloudType) {
       cloudTypeEl.value = cloudType;
       cloudTypeEl.disabled = true;
+      if (targetCmsEl) targetCmsEl.disabled = true;
     }
     if (targetCms && targetCmsEl) {
       const code = typeof targetCms === 'object' ? targetCms.code : targetCms;
       targetCmsEl.value = code || '';
-      // Allow editing targetCms even when cloudType is locked; remove disable intentionally
     }
     if (seriesName) seriesNameEl.value = seriesName;
     if (seriesDescription) seriesDescriptionEl.value = seriesDescription;
