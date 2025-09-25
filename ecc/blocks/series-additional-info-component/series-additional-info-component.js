@@ -21,10 +21,6 @@ export default function init(el) {
     }
 
     if (ri === 3) {
-      await decorateLabeledTextfield(r, { id: 'info-field-series-content-root' });
-    }
-
-    if (ri === 4) {
       await decorateLabeledTextfield(r, { id: 'info-field-series-ext-id' });
     }
   });

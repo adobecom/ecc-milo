@@ -9,21 +9,12 @@ export function onSubmit(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
   const cloudType = component.querySelector('#bu-select-input');
-  const targetCms = component.querySelector('#targetcms-select-input');
   const seriesName = component.querySelector('#info-field-series-name');
   const seriesDescription = component.querySelector('#info-field-series-description');
 
   const seriesInfo = {};
 
   if (cloudType.value) seriesInfo.cloudType = cloudType.value;
-  if (targetCms?.value) {
-    const code = targetCms.value;
-    const [prefix, ...rest] = code.split('-');
-    const instance = rest.join('-');
-    const providerMap = { sp: 'sharepoint', da: 'documentAuthoring' };
-    const provider = providerMap[prefix] || prefix;
-    seriesInfo.targetCms = { provider, instance, code };
-  }
   if (seriesName.value) seriesInfo.seriesName = seriesName.value.trim();
   if (seriesDescription.value) seriesInfo.seriesDescription = seriesDescription.value.trim();
 
@@ -40,16 +31,13 @@ export async function onRespUpdate(_component, _props) {
 
 export default async function init(component, props) {
   const cloudTypeEl = component.querySelector('#bu-select-input');
-  const targetCmsEl = component.querySelector('#targetcms-select-input');
   const seriesNameEl = component.querySelector('#info-field-series-name');
   const seriesDescriptionEl = component.querySelector('#info-field-series-description');
 
   const user = await getUser();
   const clouds = await getClouds(user);
 
-  const filteredClouds = clouds.filter(({ cloudType }) => (
-    userHasAccessToBU(user, cloudType)
-  ));
+  const filteredClouds = clouds.filter(({ cloudType }) => userHasAccessToBU(user, cloudType));
   filteredClouds.forEach(({ cloudType, cloudName }) => {
     const opt = createTag('sp-menu-item', { value: cloudType }, cloudName);
     cloudTypeEl.append(opt);
@@ -57,25 +45,11 @@ export default async function init(component, props) {
 
   if (cloudTypeEl) cloudTypeEl.removeAttribute('pending');
 
-  // Populate Target CMS picker from clouds list
-  if (targetCmsEl) {
-    const cmsValues = filteredClouds
-      .map(({ targetCms }) => targetCms)
-      .filter(Boolean);
-    const uniqueCms = Array.from(new Set(cmsValues));
-    uniqueCms.forEach((cms) => {
-      const opt = createTag('sp-menu-item', { value: cms }, cms);
-      targetCmsEl.append(opt);
-    });
-    targetCmsEl.removeAttribute('pending');
-  }
-
   const data = props.response;
 
   if (data) {
     const {
       cloudType,
-      targetCms,
       seriesName,
       seriesDescription,
     } = data;
@@ -83,11 +57,6 @@ export default async function init(component, props) {
     if (cloudType) {
       cloudTypeEl.value = cloudType;
       cloudTypeEl.disabled = true;
-      if (targetCmsEl) targetCmsEl.disabled = true;
-    }
-    if (targetCms && targetCmsEl) {
-      const code = typeof targetCms === 'object' ? targetCms.code : targetCms;
-      targetCmsEl.value = code || '';
     }
     if (seriesName) seriesNameEl.value = seriesName;
     if (seriesDescription) seriesDescriptionEl.value = seriesDescription;
