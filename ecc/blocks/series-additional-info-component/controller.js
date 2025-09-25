@@ -4,12 +4,14 @@ export function onSubmit(component, props) {
 
   const susiContextId = component.querySelector('#info-field-series-susi');
   const relatedDomain = component.querySelector('#info-field-series-related-domain');
+  const contentRoot = component.querySelector('#info-field-series-content-root');
   const externalThemeId = component.querySelector('#info-field-series-ext-id');
 
   const seriesInfo = {};
 
   if (susiContextId.value) seriesInfo.susiContextId = susiContextId.value;
   if (relatedDomain.value) seriesInfo.relatedDomain = relatedDomain.value;
+  if (contentRoot?.value) seriesInfo.contentRoot = contentRoot.value;
   if (externalThemeId.value) seriesInfo.externalThemeId = externalThemeId.value;
 
   props.payload = { ...props.payload, ...seriesInfo };
@@ -29,10 +31,12 @@ export default function init(component, props) {
   if (data) {
     const susiContextId = component.querySelector('#info-field-series-susi');
     const relatedDomain = component.querySelector('#info-field-series-related-domain');
+    const contentRoot = component.querySelector('#info-field-series-content-root');
     const externalThemeId = component.querySelector('#info-field-series-ext-id');
 
     susiContextId.value = data.susiContextId || '';
     relatedDomain.value = data.relatedDomain || '';
+    if (contentRoot) contentRoot.value = data.contentRoot || '';
     externalThemeId.value = data.externalThemeId || '';
 
     component.classList.add('prefilled');
