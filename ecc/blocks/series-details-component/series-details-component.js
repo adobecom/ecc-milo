@@ -12,9 +12,10 @@ async function decorateCloudTagSelect(column) {
   const phText = column.textContent.trim();
   const buSelectWrapper = createTag('div', { class: 'bu-picker-wrapper' });
   const select = createTag('sp-picker', { id: 'bu-select-input', pending: true, class: 'select-input', size: 'm', label: phText });
+  const targetCmsSelect = createTag('sp-picker', { id: 'targetcms-select-input', pending: true, class: 'select-input', size: 'm', label: 'Target CMS' });
 
   column.innerHTML = '';
-  buSelectWrapper.append(select);
+  buSelectWrapper.append(select, targetCmsSelect);
   column.append(buSelectWrapper);
 }
 
