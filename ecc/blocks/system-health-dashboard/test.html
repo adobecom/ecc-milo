@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Health Dashboard Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .test-container {
+            width: 100%;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container" id="dashboard-container">
+        <!-- Dashboard will be loaded here -->
+    </div>
+
+    <script type="module">
+        import init from './system-health-dashboard.js';
+        
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('dashboard-container');
+            await init(container);
+        });
+    </script>
+</body>
+</html>
