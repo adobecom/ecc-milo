@@ -1525,6 +1525,28 @@ export async function getEventHistory(eventId) {
   }
 }
 
+export async function getSeriesHistory(seriesId) {
+  if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/series/${seriesId}/history`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to get series history for series ${seriesId}. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to get series history for series ${seriesId}:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
 export async function deleteSpeakerImage(speakerId, seriesId, imageId) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!speakerId || typeof speakerId !== 'string') throw new Error('Invalid speaker ID');
