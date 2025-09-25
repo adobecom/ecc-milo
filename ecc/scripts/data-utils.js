@@ -46,32 +46,6 @@ export const MARKETO_INTEGRATION_DATA_REF_FILTER = {
 };
 
 /**
- * @typedef {Object} SeriesDataFilter
- * @property {string} type - The type of the attribute.
- * @property {boolean} submittable - Whether the attribute can be submitted.
- * @property {boolean} cloneable - Whether the attribute can be cloned.
- * @property {boolean} updatable - Whether the attribute can be updated after creation.
- */
-
-export const SERIES_DATA_FILTER = {
-  seriesName: { type: 'string', submittable: true, cloneable: true, updatable: true },
-  seriesDescription: { type: 'string', submittable: true, cloneable: true, updatable: true },
-  seriesStatus: { type: 'string', submittable: true, cloneable: true, updatable: true },
-  susiContextId: { type: 'string', submittable: true, cloneable: true, updatable: true },
-  externalThemeId: { type: 'string', submittable: true, cloneable: true, updatable: true },
-  cloudType: { type: 'string', submittable: true, cloneable: true, updatable: true },
-  targetCms: { type: 'object', submittable: true, cloneable: true, updatable: false },
-  templateId: { type: 'string', submittable: true, cloneable: true, updatable: true },
-  relatedDomain: { type: 'string', submittable: true, cloneable: true, updatable: true },
-  contentRoot: { type: 'string', submittable: true, cloneable: true, updatable: true },
-  modificationTime: { type: 'string', submittable: true, cloneable: false, updatable: true },
-  createdBy: { type: 'string', submittable: false, cloneable: false, updatable: false },
-  modifiedBy: { type: 'string', submittable: false, cloneable: false, updatable: false },
-  seriesId: { type: 'string', submittable: false, cloneable: true, updatable: false },
-  creationTime: { type: 'string', submittable: false, cloneable: false, updatable: false },
-};
-
-/**
  * @typedef {Object} EventDataFilter
  * @property {string} type - The type of the attribute.
  * @property {boolean} localizable - Whether the attr should be in payload or payload.localizations.
@@ -183,32 +157,6 @@ export const VENUE_DATA_FILTER = {
 
 export function isValidAttribute(attr) {
   return (attr !== undefined && attr !== null && attr !== '') || attr === false;
-}
-
-const SERIES_FILTER_STRATEGIES = {
-  submission: (descriptor) => descriptor?.submittable === true,
-  clone: (descriptor) => descriptor?.submittable === true && descriptor?.cloneable !== false,
-  update: (descriptor) => descriptor?.submittable === true && descriptor?.updatable !== false,
-};
-
-export function filterSeriesData(data, mode = 'submission', options = {}) {
-  if (!data || typeof data !== 'object') return {};
-
-  const strategy = SERIES_FILTER_STRATEGIES[mode] || SERIES_FILTER_STRATEGIES.submission;
-  const { excludeKeys = [] } = options;
-
-  return Object.entries(data).reduce((acc, [key, value]) => {
-    if (excludeKeys.includes(key)) return acc;
-
-    const descriptor = SERIES_DATA_FILTER[key];
-
-    if (!descriptor) return acc;
-    if (!strategy(descriptor)) return acc;
-    if (!isValidAttribute(value)) return acc;
-
-    acc[key] = value;
-    return acc;
-  }, {});
 }
 
 export function setEventAttribute(data, key, value, locale) {

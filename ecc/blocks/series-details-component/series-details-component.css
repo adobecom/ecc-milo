@@ -16,16 +16,6 @@
   gap: 64px;
 }
 
-.series-details-component .bu-picker-wrapper {
-  display: flex;
-  gap: 8px;
-}
-
-.series-details-component .bu-picker-wrapper sp-picker {
-  flex: 1;
-  min-width: 200px;
-}
-
 .series-details-component .format-picker-wrapper {
   display: flex;
   gap: 12px;
