@@ -34,8 +34,32 @@ export async function onPayloadUpdate(_component, _props) {
   // Do nothing
 }
 
-export async function onRespUpdate(_component, _props) {
-  // Do nothing
+export async function onRespUpdate(component, props) {
+  const { response } = props;
+  const cloudTypeEl = component.querySelector('#bu-select-input');
+  const targetCmsEl = component.querySelector('#targetcms-select-input');
+  const seriesNameEl = component.querySelector('#info-field-series-name');
+  const seriesDescriptionEl = component.querySelector('#info-field-series-description');
+
+  const hasResponse = Boolean(response);
+  const hasCloudType = Boolean(response?.cloudType);
+
+  if (cloudTypeEl) {
+    cloudTypeEl.value = response?.cloudType || '';
+    cloudTypeEl.disabled = hasCloudType;
+  }
+
+  if (targetCmsEl) {
+    const targetCms = response?.targetCms;
+    const code = typeof targetCms === 'object' ? targetCms?.code : targetCms;
+    targetCmsEl.value = code || '';
+    targetCmsEl.disabled = hasCloudType;
+  }
+
+  if (seriesNameEl) seriesNameEl.value = response?.seriesName || '';
+  if (seriesDescriptionEl) seriesDescriptionEl.value = response?.seriesDescription || '';
+
+  component.classList.toggle('prefilled', hasResponse);
 }
 
 export default async function init(component, props) {
@@ -68,31 +92,6 @@ export default async function init(component, props) {
       targetCmsEl.append(opt);
     });
     targetCmsEl.removeAttribute('pending');
-  }
-
-  const data = props.response;
-
-  if (data) {
-    const {
-      cloudType,
-      targetCms,
-      seriesName,
-      seriesDescription,
-    } = data;
-
-    if (cloudType) {
-      cloudTypeEl.value = cloudType;
-      cloudTypeEl.disabled = true;
-      if (targetCmsEl) targetCmsEl.disabled = true;
-    }
-    if (targetCms && targetCmsEl) {
-      const code = typeof targetCms === 'object' ? targetCms.code : targetCms;
-      targetCmsEl.value = code || '';
-    }
-    if (seriesName) seriesNameEl.value = seriesName;
-    if (seriesDescription) seriesDescriptionEl.value = seriesDescription;
-
-    component.classList.add('prefilled');
   }
 }
 
