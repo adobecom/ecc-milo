@@ -34,8 +34,57 @@ export async function onPayloadUpdate(_component, _props) {
   // Do nothing
 }
 
-export async function onRespUpdate(_component, _props) {
-  // Do nothing
+export async function onRespUpdate(component, props) {
+  const { response } = props;
+  if (!response) return;
+  const cloudTypeEl = component.querySelector('#bu-select-input');
+  const targetCmsEl = component.querySelector('#targetcms-select-input');
+  const seriesNameEl = component.querySelector('#info-field-series-name');
+  const seriesDescriptionEl = component.querySelector('#info-field-series-description');
+
+  const setPickerValueWhenReady = (pickerEl, value, disable) => {
+    if (!pickerEl) return;
+    const apply = () => {
+      pickerEl.value = value || '';
+      pickerEl.disabled = Boolean(disable);
+    };
+
+    if (!value) {
+      apply();
+      return;
+    }
+
+    const hasOption = !!pickerEl.querySelector(`sp-menu-item[value="${value}"]`);
+    const isPending = pickerEl.hasAttribute('pending');
+    if (!isPending && hasOption) {
+      apply();
+      return;
+    }
+
+    const observer = new MutationObserver(() => {
+      const ready = !pickerEl.hasAttribute('pending')
+        && !!pickerEl.querySelector(`sp-menu-item[value="${value}"]`);
+      if (ready) {
+        observer.disconnect();
+        apply();
+      }
+    });
+    observer.observe(pickerEl, { attributes: true, childList: true, subtree: true });
+    setTimeout(() => observer.disconnect(), 3000);
+  };
+
+  setPickerValueWhenReady(cloudTypeEl, response?.cloudType, response?.seriesId);
+
+  if (targetCmsEl) {
+    const targetCms = response?.targetCms;
+    const code = typeof targetCms === 'object' ? targetCms?.code : targetCms;
+    setPickerValueWhenReady(targetCmsEl, code || '', response?.seriesId);
+  }
+
+  if (seriesNameEl) seriesNameEl.value = response?.seriesName || '';
+  if (seriesDescriptionEl) seriesDescriptionEl.value = response?.seriesDescription || '';
+
+  component.classList.toggle('prefilled', Boolean(response));
 }
 
 export default async function init(component, props) {
@@ -68,31 +117,6 @@ export default async function init(component, props) {
       targetCmsEl.append(opt);
     });
     targetCmsEl.removeAttribute('pending');
-  }
-
-  const data = props.response;
-
-  if (data) {
-    const {
-      cloudType,
-      targetCms,
-      seriesName,
-      seriesDescription,
-    } = data;
-
-    if (cloudType) {
-      cloudTypeEl.value = cloudType;
-      cloudTypeEl.disabled = true;
-      if (targetCmsEl) targetCmsEl.disabled = true;
-    }
-    if (targetCms && targetCmsEl) {
-      const code = typeof targetCms === 'object' ? targetCms.code : targetCms;
-      targetCmsEl.value = code || '';
-    }
-    if (seriesName) seriesNameEl.value = seriesName;
-    if (seriesDescription) seriesDescriptionEl.value = seriesDescription;
-
-    component.classList.add('prefilled');
   }
 }
 
