@@ -36,30 +36,55 @@ export async function onPayloadUpdate(_component, _props) {
 
 export async function onRespUpdate(component, props) {
   const { response } = props;
+  if (!response) return;
   const cloudTypeEl = component.querySelector('#bu-select-input');
   const targetCmsEl = component.querySelector('#targetcms-select-input');
   const seriesNameEl = component.querySelector('#info-field-series-name');
   const seriesDescriptionEl = component.querySelector('#info-field-series-description');
 
-  const hasResponse = Boolean(response);
-  const hasCloudType = Boolean(response?.cloudType);
+  const setPickerValueWhenReady = (pickerEl, value, disable) => {
+    if (!pickerEl) return;
+    const apply = () => {
+      pickerEl.value = value || '';
+      pickerEl.disabled = Boolean(disable);
+    };
 
-  if (cloudTypeEl) {
-    cloudTypeEl.value = response?.cloudType || '';
-    cloudTypeEl.disabled = hasCloudType;
-  }
+    if (!value) {
+      apply();
+      return;
+    }
+
+    const hasOption = !!pickerEl.querySelector(`sp-menu-item[value="${value}"]`);
+    const isPending = pickerEl.hasAttribute('pending');
+    if (!isPending && hasOption) {
+      apply();
+      return;
+    }
+
+    const observer = new MutationObserver(() => {
+      const ready = !pickerEl.hasAttribute('pending')
+        && !!pickerEl.querySelector(`sp-menu-item[value="${value}"]`);
+      if (ready) {
+        observer.disconnect();
+        apply();
+      }
+    });
+    observer.observe(pickerEl, { attributes: true, childList: true, subtree: true });
+    setTimeout(() => observer.disconnect(), 3000);
+  };
+
+  setPickerValueWhenReady(cloudTypeEl, response?.cloudType, response?.seriesId);
 
   if (targetCmsEl) {
     const targetCms = response?.targetCms;
     const code = typeof targetCms === 'object' ? targetCms?.code : targetCms;
-    targetCmsEl.value = code || '';
-    targetCmsEl.disabled = hasCloudType;
+    setPickerValueWhenReady(targetCmsEl, code || '', response?.seriesId);
   }
 
   if (seriesNameEl) seriesNameEl.value = response?.seriesName || '';
   if (seriesDescriptionEl) seriesDescriptionEl.value = response?.seriesDescription || '';
 
-  component.classList.toggle('prefilled', hasResponse);
+  component.classList.toggle('prefilled', Boolean(response));
 }
 
 export default async function init(component, props) {
