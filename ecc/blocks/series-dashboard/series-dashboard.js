@@ -6,6 +6,7 @@ import {
   archiveSeries,
   getSeriesForUser,
   getEventsForUser,
+  getSeriesHistory,
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
@@ -18,6 +19,96 @@ import { initProfileLogicTree } from '../../scripts/profile.js';
 import { quickFilter } from '../series-creation-form/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
+
+const apiCache = (() => {
+  const cache = new Map();
+  const pendingRequests = new Map();
+  const cacheTimeout = 10000; // 10 seconds
+
+  const generateKey = (apiFunction, ...args) => `${apiFunction.name}_${JSON.stringify(args)}`;
+  const isExpired = (timestamp) => Date.now() - timestamp > cacheTimeout;
+
+  return {
+    async get(apiFunction, ...args) {
+      const key = generateKey(apiFunction, ...args);
+
+      // Return cached result if valid
+      if (cache.has(key)) {
+        const { data, timestamp } = cache.get(key);
+        if (!isExpired(timestamp)) {
+          return data;
+        }
+        cache.delete(key);
+      }
+
+      // Return pending request if exists
+      if (pendingRequests.has(key)) {
+        return pendingRequests.get(key);
+      }
+
+      // Make new request
+      const request = apiFunction(...args)
+        .then((data) => {
+          cache.set(key, { data, timestamp: Date.now() });
+          pendingRequests.delete(key);
+          return data;
+        })
+        .catch((error) => {
+          pendingRequests.delete(key);
+          throw error;
+        });
+
+      pendingRequests.set(key, request);
+      return request;
+    },
+
+    clear() {
+      cache.clear();
+      pendingRequests.clear();
+    },
+
+    invalidate(pattern) {
+      const keysToDelete = [];
+      cache.forEach((value, key) => {
+        if (key.includes(pattern)) {
+          keysToDelete.push(key);
+        }
+      });
+      keysToDelete.forEach((key) => cache.delete(key));
+    },
+  };
+})();
+
+// Throttling utility
+function throttle(func, delay) {
+  let timeoutId;
+  let lastExecTime = 0;
+
+  return function throttledFunction(...args) {
+    const currentTime = Date.now();
+
+    if (currentTime - lastExecTime > delay) {
+      func.apply(this, args);
+      lastExecTime = currentTime;
+    } else {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func.apply(this, args);
+        lastExecTime = Date.now();
+      }, delay - (currentTime - lastExecTime));
+    }
+  };
+}
+
+// Debouncing utility
+function debounce(func, delay) {
+  let timeoutId;
+
+  return function debouncedFunction(...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+}
 
 function showToast(props, msg, options = {}) {
   const toastArea = props.el.querySelector('sp-theme.toast-area');
@@ -48,8 +139,21 @@ function highlightRow(row) {
   }, 1000);
 }
 
+function createSwipingLoader(extraClass = '') {
+  const loader = createTag('div', { class: `swiping-loader ${extraClass}` });
+
+  requestAnimationFrame(() => {
+    loader.classList.add('animate');
+  });
+
+  return loader;
+}
+
 function updateDashboardData(newPayload, props) {
   if (!newPayload) return;
+
+  // Invalidate cache for this specific series
+  apiCache.invalidate(newPayload.seriesId);
 
   props.data = props.data.map((series) => {
     if (series.seriesId === newPayload.seriesId) {
@@ -236,6 +340,9 @@ function initMoreOptions(props, config, seriesObj, row) {
             return;
           }
 
+          // Invalidate cache for archived series
+          apiCache.invalidate(seriesObj.seriesId);
+
           const newJson = await getAllSeries();
           props.data = newJson.series;
           props.filteredData = newJson.series;
@@ -268,6 +375,9 @@ function initMoreOptions(props, config, seriesObj, row) {
         showToast(props, newSeriesObj.error.message || 'Unknown error while cloning the series.', { variant: 'negative' });
         return;
       }
+
+      // Invalidate cache for cloned series
+      apiCache.invalidate(seriesObj.seriesId);
 
       const newJson = await getAllSeries();
       props.data = newJson.series;
@@ -341,18 +451,16 @@ function buildEventsCountTag(series, events) {
   return eventsCountTag;
 }
 
-async function populateRow(props, config, index) {
-  const series = props.paginatedData[index];
+function createLazyRow(props, config, series) {
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   const sp = new URLSearchParams(window.location.search);
 
-  // TODO: build each column's element specifically rather than just text
   const row = createTag('tr', { class: 'row', 'data-id': series.seriesId }, '', { parent: tBody });
   const nameCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildSeriesNameTag(config, series)));
   const statusCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildStatusTag(series)));
   const modificationTimeCall = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, formatLocaleDate(series.modificationTime)));
-  const createdByCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, series.createdBy));
-  const modifiedByCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, series.modifiedBy));
+  const createdByCell = createTag('td', { class: 'creator-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
+  const modifiedByCell = createTag('td', { class: 'modifier-container' }, createTag('div', { class: 'td-wrapper' }, createSwipingLoader('single-line-loader')));
   const eventsCountCell = createTag('td', {}, createTag('div', { class: 'td-wrapper' }, buildEventsCountTag(series, props.events)));
   const moreOptionsCell = createTag('td', { class: 'option-col' }, createTag('div', { class: 'td-wrapper' }, getIcon('more-small-list')));
 
@@ -377,6 +485,62 @@ async function populateRow(props, config, index) {
 
     if (props.el.querySelector('.new-confirmation-toast')?.open === true) highlightRow(row);
   }
+
+  return row;
+}
+
+// Load data for a specific row
+async function loadRowData(row, series) {
+  const createdByCell = row.querySelector('.creator-container .td-wrapper');
+  const modifiedByCell = row.querySelector('.modifier-container .td-wrapper');
+
+  // Load history data for creator and modifier
+  const historyPromises = [
+    { cell: createdByCell, type: 'creator' },
+    { cell: modifiedByCell, type: 'modifier' },
+  ];
+
+  historyPromises.forEach(({ cell, type }) => {
+    apiCache.get(getSeriesHistory, series.seriesId).then((response) => {
+      if (response.error || !response.history || !response.history.length) {
+        cell.innerHTML = 'N/A';
+        return;
+      }
+
+      const { history } = response;
+      if (!Array.isArray(history) || history.length === 0) {
+        cell.innerHTML = 'N/A';
+        return;
+      }
+
+      const historyMap = {
+        creator: {
+          target: history[0],
+          getValue: (target) => target?.user?.name || 'Unknown',
+        },
+        modifier: {
+          target: history[history.length - 1],
+          getValue: (target) => target?.user?.name || 'Unknown',
+        },
+      };
+
+      const { target, getValue } = historyMap[type];
+      if (!target || !getValue) {
+        cell.innerHTML = 'N/A';
+        return;
+      }
+
+      try {
+        const value = getValue(target);
+        const historyUserNameTag = createTag('span', { class: 'creator-tag' }, value || 'N/A');
+        cell.innerHTML = '';
+        cell.append(historyUserNameTag);
+      } catch (error) {
+        window.lana?.log(`Error processing history data for series ${series.seriesId}, type ${type}: ${error.message}`);
+        cell.innerHTML = 'N/A';
+      }
+    });
+  });
 }
 
 function updatePaginationControl(pagination, currentPage, totalPages) {
@@ -439,7 +603,7 @@ function initHeaderRow(props, config) {
 
   const headers = {
     seriesName: 'SERIES NAME',
-    status: 'STATUS',
+    seriesStatus: 'STATUS',
     modificationTime: 'LAST MODIFIED',
     createdBy: 'CREATED BY',
     modifiedBy: 'MODIFIED BY',
@@ -455,7 +619,8 @@ function initHeaderRow(props, config) {
 
     th.append(getIcon('chev-down'), getIcon('chev-up'));
     th.classList.add('sortable', key);
-    th.addEventListener('click', () => {
+    // Throttled sorting to prevent rapid API calls
+    const throttledSort = throttle(() => {
       if (!props.filteredData.length) return;
 
       thead.querySelectorAll('th').forEach((h) => {
@@ -469,7 +634,9 @@ function initHeaderRow(props, config) {
         field: key,
       };
       sortData(props, config);
-    });
+    }, 300); // Throttle sorting to max once per 300ms
+
+    th.addEventListener('click', throttledSort);
   });
 }
 
@@ -482,7 +649,8 @@ function buildNoSearchResultsScreen(el, config) {
   el.append(noSearchResultsRow);
 }
 
-function populateTable(props, config) {
+// Batch loading for better performance
+async function populateTable(props, config) {
   const tBody = props.el.querySelector('table.dashboard-table tbody');
   tBody.innerHTML = '';
 
@@ -490,10 +658,54 @@ function populateTable(props, config) {
     buildNoSearchResultsScreen(tBody, config);
   } else {
     const endOfPage = Math.min(+config['page-size'], props.paginatedData.length);
+    const batchSize = 5; // Load 5 rows at a time
 
+    // Create all rows first (with loaders)
     for (let i = 0; i < endOfPage; i += 1) {
-      populateRow(props, config, i);
+      createLazyRow(props, config, props.paginatedData[i]);
     }
+
+    // Load data in batches to prevent overwhelming the API
+    const loadBatches = async () => {
+      const batches = [];
+      for (let i = 0; i < endOfPage; i += batchSize) {
+        const batchEnd = Math.min(i + batchSize, endOfPage);
+        const batchPromises = [];
+
+        for (let j = i; j < batchEnd; j += 1) {
+          const row = tBody.children[j];
+          const series = props.paginatedData[j];
+          batchPromises.push(loadRowData(row, series));
+        }
+
+        batches.push(batchPromises);
+      }
+
+      // Process batches sequentially with delays
+      const processBatches = async () => {
+        let currentBatch = 0;
+        const processNextBatch = async () => {
+          if (currentBatch >= batches.length) return;
+
+          await Promise.allSettled(batches[currentBatch]);
+          currentBatch += 1;
+
+          // Small delay between batches to prevent overwhelming the server
+          if (currentBatch < batches.length) {
+            setTimeout(processNextBatch, 100);
+          }
+        };
+
+        await processNextBatch();
+      };
+
+      await processBatches();
+    };
+
+    // Start batch loading asynchronously
+    loadBatches().catch((error) => {
+      window.lana?.log(`Error in batch loading: ${error.message}`);
+    });
 
     props.el.querySelector('.pagination-container')?.remove();
     decoratePagination(props, config);
@@ -520,7 +732,14 @@ function buildDashboardHeader(props, config) {
   const searchInput = createTag('input', { type: 'text', placeholder: 'Search' }, '', { parent: searchInputWrapper });
   searchInputWrapper.append(getIcon('search'));
   createTag('a', { class: 'con-button blue', href: config['create-form-url'] }, config['create-cta-text'], { parent: actionsContainer });
-  searchInput.addEventListener('input', () => filterData(props, config, searchInput.value));
+  // Improved debouncing for search
+  const debouncedSearch = debounce((query) => {
+    filterData(props, config, query);
+  }, 500); // Reduced from 1000ms to 500ms for better UX
+
+  searchInput.addEventListener('input', (e) => {
+    debouncedSearch(e.target.value);
+  });
 
   dashboardHeader.append(textContainer, actionsContainer);
   props.el.prepend(dashboardHeader);
@@ -531,14 +750,16 @@ function updateDataCount(props) {
   seriesCount.textContent = `(${props.data.length} series)`;
 }
 
-function buildDashboardTable(props, config) {
+async function buildDashboardTable(props, config) {
   const tableContainer = createTag('div', { class: 'dashboard-table-container' }, '', { parent: props.el });
   const table = createTag('table', { class: 'dashboard-table' }, '', { parent: tableContainer });
   const thead = createTag('thead', {}, '', { parent: table });
   createTag('tbody', {}, '', { parent: table });
   createTag('tr', { class: 'table-header-row' }, '', { parent: thead });
   initHeaderRow(props, config);
-  populateTable(props, config);
+
+  // Populate table asynchronously
+  await populateTable(props, config);
 
   const usp = new URLSearchParams(window.location.search);
   if (usp.get('newEventId')) {
@@ -587,14 +808,23 @@ async function buildDashboard(el, config) {
     const dataHandler = {
       set(target, prop, value, receiver) {
         target[prop] = value;
-        populateTable(receiver, config);
+
+        // Use async populateTable but don't await to avoid blocking
+        populateTable(receiver, config).catch((error) => {
+          window.lana?.log(`Error populating table: ${error.message}`);
+        });
         updateDataCount(receiver);
+
         return true;
       },
     };
     const proxyProps = new Proxy(props, dataHandler);
     buildDashboardHeader(proxyProps, config);
-    buildDashboardTable(proxyProps, config);
+
+    // Build table asynchronously
+    buildDashboardTable(proxyProps, config).catch((error) => {
+      window.lana?.log(`Error building dashboard table: ${error.message}`);
+    });
   }
 
   setTimeout(() => {
