@@ -6,7 +6,9 @@ import { TARGET_CMS_ENDPOINT } from '../../scripts/constants.js';
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 let targetCmsMapCache = null;
 
-const toTrimmedString = (value) => (value == null ? '' : String(value).trim());
+function toTrimmedString(value) {
+  return value == null ? '' : String(value).trim();
+}
 
 function normalizeTargetCmsRow(row) {
   if (!row || typeof row !== 'object') return null;
@@ -48,14 +50,16 @@ async function loadTargetCmsMap() {
       }
     });
   } catch (error) {
-    window.lana?.log?.(`Unable to load Target CMS map:\n${error?.message ?? error}`);
+    window.lana?.log?.(`Unable to load Target CMS map:\n${JSON.stringify(error)}`);
   }
 
   targetCmsMapCache = map;
   return targetCmsMapCache;
 }
 
-const getTargetCmsEntry = (code) => (targetCmsMapCache ? targetCmsMapCache.get(code) : null);
+function getTargetCmsEntry(code) {
+  return targetCmsMapCache ? targetCmsMapCache.get(code) : null;
+}
 
 /* eslint-disable no-unused-vars */
 export function onSubmit(component, props) {
