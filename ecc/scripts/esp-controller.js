@@ -1220,8 +1220,11 @@ export async function unpublishSeries(seriesId, seriesData) {
   if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
   if (!seriesData || typeof seriesData !== 'object') throw new Error('Invalid series data');
 
+  const { targetCms, ...sanitizedData } = seriesData;
+  const payload = { ...sanitizedData, seriesId, seriesStatus: 'draft' };
+
   const { host } = API_CONFIG.esp[getCurrentEnvironment()];
-  const raw = JSON.stringify({ ...seriesData, seriesId, seriesStatus: 'draft' });
+  const raw = JSON.stringify(payload);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
