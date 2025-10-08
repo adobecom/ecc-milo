@@ -709,7 +709,7 @@ async function getNonProdPreviewDataById(props) {
   const resp = await fetch(`${getEventPageHost()}/events/default/${esEnv === ENVIRONMENTS.PROD ? '' : `${esEnv}/`}metadata-preview.json`);
   if (resp.ok) {
     const json = await resp.json();
-    const pageData = json.data.find((d) => d['event-id'] === eventId);
+    const pageData = json.data.reverse().find((d) => d['event-id'] === eventId);
 
     if (pageData) return pageData;
 
