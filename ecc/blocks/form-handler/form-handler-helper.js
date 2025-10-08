@@ -41,7 +41,7 @@ import {
   previewEvent,
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
-import { EVENT_TYPES } from '../../scripts/constants.js';
+import { ENVIRONMENTS, EVENT_TYPES } from '../../scripts/constants.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -465,7 +465,21 @@ function updateDashboardLink(props) {
   dashboardLink.href = url.toString();
 }
 
-async function saveEvent(props, toPublish = false) {
+function setEventSavePolicies(changedPolicies = {}) {
+  // default to only save ESP data to preview with BE driven SP update logics
+  const policies = {
+    forceSpWrite: false,
+    liveUpdate: false,
+  };
+
+  Object.entries(changedPolicies).forEach(([key, value]) => {
+    policies[key] = value;
+  });
+
+  return policies;
+}
+
+async function saveEvent(props, policies = setEventSavePolicies()) {
   try {
     await gatherValues(props);
   } catch (e) {
@@ -494,11 +508,12 @@ async function saveEvent(props, toPublish = false) {
     }
     updateDashboardLink(props);
     await onEventSave();
-  } else if (props.currentStep <= props.maxStep && !toPublish) {
+  } else if (props.currentStep <= props.maxStep && !policies.liveUpdate) {
     const payload = getJoinedData();
     resp = await updateEvent(
       payload.eventId,
       payload,
+      policies,
     );
     if (!resp.error && resp) {
       const newEventData = await getEvent(resp.eventId);
@@ -507,7 +522,7 @@ async function saveEvent(props, toPublish = false) {
       props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
     }
     await onEventSave();
-  } else if (toPublish) {
+  } else if (policies.liveUpdate) {
     const payload = getJoinedData();
     resp = await publishEvent(
       payload.eventId,
@@ -688,8 +703,10 @@ async function getNonProdPreviewDataById(props) {
 
   if (!eventId) return null;
 
-  const esEnv = getCurrentEnvironment();
-  const resp = await fetch(`${getEventPageHost()}/events/default/${esEnv === 'prod' ? '' : `${esEnv}/`}metadata-preview.json`);
+  const esEnv = getCurrentEnvironment() === ENVIRONMENTS.LOCAL
+    ? ENVIRONMENTS.DEV
+    : getCurrentEnvironment();
+  const resp = await fetch(`${getEventPageHost()}/events/default/${esEnv === ENVIRONMENTS.PROD ? '' : `${esEnv}/`}metadata-preview.json`);
   if (resp.ok) {
     const json = await resp.json();
     const pageData = json.data.find((d) => d['event-id'] === eventId);
@@ -862,7 +879,7 @@ function initFormCtas(props) {
             let resp;
 
             if (props.currentStep === props.maxStep) {
-              resp = await saveEvent(props, true);
+              resp = await saveEvent(props, setEventSavePolicies({ liveUpdate: true }));
             } else {
               resp = await saveEvent(props);
             }
@@ -898,7 +915,7 @@ function initFormCtas(props) {
               }
             }
           } else {
-            await saveEvent(props);
+            await saveEvent(props, { forceSpWrite: true });
           }
 
           toggleBtnsSubmittingState(false);
