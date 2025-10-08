@@ -20,6 +20,13 @@ import { quickFilter } from '../series-creation-form/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
+const filterSeriesForSubmission = (series) => {
+  if (!series) return {};
+  const filtered = quickFilter(series, 'submission');
+  delete filtered.targetCms;
+  return filtered;
+};
+
 const apiCache = (() => {
   const cache = new Map();
   const pendingRequests = new Map();
@@ -275,7 +282,10 @@ function initMoreOptions(props, config, seriesObj, row) {
           e.preventDefault();
           toolBox.remove();
           row.classList.add('pending');
-          const resp = await unpublishSeries(seriesObj.seriesId, seriesObj);
+          const resp = await unpublishSeries(
+            seriesObj.seriesId,
+            filterSeriesForSubmission(seriesObj),
+          );
           updateDashboardData(resp, props);
 
           sortData(props, config, { resort: true });
@@ -288,7 +298,10 @@ function initMoreOptions(props, config, seriesObj, row) {
           e.preventDefault();
           toolBox.remove();
           row.classList.add('pending');
-          const resp = await publishSeries(seriesObj.seriesId, seriesObj);
+          const resp = await publishSeries(
+            seriesObj.seriesId,
+            filterSeriesForSubmission(seriesObj),
+          );
           updateDashboardData(resp, props);
 
           sortData(props, config, { resort: true });

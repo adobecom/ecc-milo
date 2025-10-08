@@ -1,10 +1,9 @@
 import { getClouds } from '../../scripts/esp-controller.js';
 import { getUser, userHasAccessToBU } from '../../scripts/profile.js';
 import { LIBS } from '../../scripts/scripts.js';
+import { TARGET_CMS_ENDPOINT } from '../../scripts/constants.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
-
-const TARGET_CMS_ENDPOINT = '/ecc/system/target-cms-map.json';
 let targetCmsMapCache = null;
 
 const toTrimmedString = (value) => (value == null ? '' : String(value).trim());
