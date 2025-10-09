@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import AgendaFieldsetGroup from '../../components/agenda-fieldset-group/agenda-fieldset-group.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
 import CustomSearch from '../../components/custom-search/custom-search.js';
@@ -29,6 +30,7 @@ import {
   camelToSentenceCase,
   getEventPageHost,
   replaceAnchorWithButton,
+  getMetadata,
 } from '../../scripts/utils.js';
 
 import { getCurrentEnvironment } from '../../scripts/environment.js';
@@ -39,6 +41,7 @@ import {
   publishEvent,
   getEvent,
   previewEvent,
+  getSeriesById,
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
 import { ENVIRONMENTS, EVENT_TYPES } from '../../scripts/constants.js';
@@ -722,13 +725,20 @@ async function getNonProdPreviewDataById(props) {
 }
 
 async function validatePreview(props, cta) {
+  const series = await getSeriesById(props.eventDataResp.seriesId);
+
+  if (series.error) {
+    buildErrorMessage(props, series.error);
+    return Promise.resolve();
+  }
+
   let retryCount = 0;
   const previewHref = cta.href;
 
-  const modificationTimeMatch = (metadataObj) => {
-    const metadataModTimestamp = new Date(metadataObj['modification-time']).getTime();
-    return metadataModTimestamp === props.eventDataResp.modificationTime;
-  };
+  const { targetCms } = series;
+  const { provider } = targetCms;
+
+  const modificationTimeMatch = (modTime) => modTime === props.eventDataResp.modificationTime;
 
   return new Promise((resolve) => {
     let cancelled = false;
@@ -753,16 +763,29 @@ async function validatePreview(props, cta) {
         await new Promise((r) => setTimeout(r, delay));
         if (cancelled) break;
         try {
-          // eslint-disable-next-line no-await-in-loop
-          const metadataJson = await getNonProdPreviewDataById(props);
-          if (metadataJson && modificationTimeMatch(metadataJson)) {
+          let modTime;
+          if (provider === 'sharepoint') {
+            const metadataJson = await getNonProdPreviewDataById(props);
+            if (metadataJson['modification-time']) {
+              modTime = new Date(metadataJson['modification-time']).getTime();
+            }
+          } else {
+            const pageData = await fetch(previewHref);
+            if (pageData.ok) {
+              const dom = new DOMParser().parseFromString(await pageData.text(), 'text/html');
+              const modTimeMetadata = getMetadata('modification-time', dom);
+              modTime = new Date(modTimeMetadata).getTime();
+            }
+          }
+
+          if (modTime && modificationTimeMatch(modTime)) {
             closeDialog(props);
             window.open(previewHref);
             poll.cancel();
             return;
           }
-          if (metadataJson?.error) {
-            buildErrorMessage(props, metadataJson.error);
+          if (!modTime) {
+            buildErrorMessage(props, { error: { message: 'Failed to get latest modification time. Please try again later or view the page directly.' } });
             buildPreviewLoadingFailedDialog(props, previewHref);
             poll.cancel();
             return;
