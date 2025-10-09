@@ -20,6 +20,11 @@ import { quickFilter } from '../series-creation-form/data-handler.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
+function filterSeriesForUpdate(series) {
+  if (!series) return {};
+  return quickFilter(series, 'update');
+}
+
 const apiCache = (() => {
   const cache = new Map();
   const pendingRequests = new Map();
@@ -275,7 +280,10 @@ function initMoreOptions(props, config, seriesObj, row) {
           e.preventDefault();
           toolBox.remove();
           row.classList.add('pending');
-          const resp = await unpublishSeries(seriesObj.seriesId, seriesObj);
+          const resp = await unpublishSeries(
+            seriesObj.seriesId,
+            filterSeriesForUpdate(seriesObj),
+          );
           updateDashboardData(resp, props);
 
           sortData(props, config, { resort: true });
@@ -288,7 +296,10 @@ function initMoreOptions(props, config, seriesObj, row) {
           e.preventDefault();
           toolBox.remove();
           row.classList.add('pending');
-          const resp = await publishSeries(seriesObj.seriesId, seriesObj);
+          const resp = await publishSeries(
+            seriesObj.seriesId,
+            filterSeriesForUpdate(seriesObj),
+          );
           updateDashboardData(resp, props);
 
           sortData(props, config, { resort: true });
@@ -332,7 +343,10 @@ function initMoreOptions(props, config, seriesObj, row) {
           underlay.open = false;
           dialog.innerHTML = '';
           row.classList.add('pending');
-          const resp = await archiveSeries(seriesObj.seriesId, seriesObj);
+          const resp = await archiveSeries(
+            seriesObj.seriesId,
+            filterSeriesForUpdate(seriesObj),
+          );
 
           if (resp.error) {
             row.classList.remove('pending');
