@@ -938,7 +938,7 @@ function initFormCtas(props) {
               }
             }
           } else {
-            await saveEvent(props, { forceSpWrite: true });
+            await saveEvent(props, setEventSavePolicies({ forceSpWrite: true }));
           }
 
           toggleBtnsSubmittingState(false);
