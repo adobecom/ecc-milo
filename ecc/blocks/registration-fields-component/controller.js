@@ -115,7 +115,9 @@ function updateDescription(component, props) {
 
 export async function onPayloadUpdate(component, props) {
   updateDescription(component, props);
-  await setRsvpFormAttributes(props, props.payload, component);
+  if (getAttribute(props.payload, 'rsvpFormFields', props.locale)) {
+    await setRsvpFormAttributes(props, props.payload, component);
+  }
 }
 
 export async function onRespUpdate(component, props) {

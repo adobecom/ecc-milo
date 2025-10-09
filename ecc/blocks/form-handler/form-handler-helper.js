@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import AgendaFieldsetGroup from '../../components/agenda-fieldset-group/agenda-fieldset-group.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
 import CustomSearch from '../../components/custom-search/custom-search.js';
@@ -5,8 +6,8 @@ import CustomTextfield from '../../components/custom-textfield/custom-textfield.
 import ImageDropzone from '../../components/image-dropzone/image-dropzone.js';
 import PartnerSelectorGroup from '../../components/partner-selector-group/partner-selector-group.js';
 import PartnerSelector from '../../components/partner-selector/partner-selector.js';
-import ProductSelectorGroup from '../../components/product-selector-group/product-selector-group.js';
-import ProductSelector from '../../components/product-selector/product-selector.js';
+import PromotionSelectorGroup from '../../components/promotion-selector-group/promotion-selector-group.js';
+import PromotionSelector from '../../components/promotion-selector/promotion-selector.js';
 import ProfileContainer from '../../components/profile-container/profile-container.js';
 import Profile from '../../components/profile/profile.js';
 import Repeater from '../../components/repeater/repeater.js';
@@ -29,6 +30,7 @@ import {
   getEventPageHost,
   replaceAnchorWithButton,
   getToastArea,
+  getMetadata,
 } from '../../scripts/utils.js';
 
 import { getCurrentEnvironment } from '../../scripts/environment.js';
@@ -39,9 +41,10 @@ import {
   publishEvent,
   getEvent,
   previewEvent,
+  getSeriesById,
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
-import { EVENT_TYPES } from '../../scripts/constants.js';
+import { EVENT_TYPES, ENVIRONMENTS } from '../../scripts/constants.js';
 import ErrorManager from '../../scripts/error-manager.js';
 import ToastManager from '../../scripts/toast-manager.js';
 
@@ -61,8 +64,8 @@ export function initCustomLitComponents() {
   customElements.define('partner-selector-group', PartnerSelectorGroup);
   customElements.define('agenda-fieldset', AgendaFieldset);
   customElements.define('agenda-fieldset-group', AgendaFieldsetGroup);
-  customElements.define('product-selector', ProductSelector);
-  customElements.define('product-selector-group', ProductSelectorGroup);
+  customElements.define('promotion-selector', PromotionSelector);
+  customElements.define('promotion-selector-group', PromotionSelectorGroup);
   customElements.define('profile-container', ProfileContainer);
   customElements.define('custom-textfield', CustomTextfield);
   customElements.define('custom-search', CustomSearch);
@@ -122,6 +125,7 @@ export const VANILLA_COMPONENTS = [
   'secondary-cta',
   'video-content',
   'marketo-integration',
+  'content-promotion',
 ];
 
 async function initVanillaComponents(props) {
@@ -130,14 +134,20 @@ async function initVanillaComponents(props) {
     if (!mappedComponents?.length) return;
 
     const componentInitPromises = Array.from(mappedComponents).map(async (component) => {
-      const { default: initComponent } = await import(`../${comp}-component/controller.js`);
-      await initComponent(component, props);
+      try {
+        const { default: initComponent } = await import(`../${comp}-component/controller.js`);
+        await initComponent(component, props);
+      } catch (error) {
+        console.warn(`Failed to load component ${comp}:`, error);
+        // Remove the failed component from the DOM
+        component.remove();
+      }
     });
 
-    await Promise.all(componentInitPromises);
+    await Promise.allSettled(componentInitPromises);
   });
 
-  await Promise.all(componentPromises);
+  await Promise.allSettled(componentPromises);
 }
 
 export async function initComponents(props) {
@@ -160,10 +170,8 @@ export function getCurrentFragment(props) {
 }
 
 function validateRequiredFields(fields) {
-  const enabledFields = Array.from(fields).filter((f) => !f.disabled);
-
-  return enabledFields.length === 0
-    || enabledFields.every((f) => f.value && !f.invalid);
+  const enabledFields = Array.from(fields).filter((f) => !f.disabled && f.offsetParent !== null);
+  return enabledFields.length === 0 || enabledFields.every((f) => f.value && !f.invalid);
 }
 
 function onStepValidate(props) {
@@ -184,9 +192,7 @@ function onStepValidate(props) {
     });
 
     sideNavs.forEach((nav, i) => {
-      if (i !== props.currentStep) {
-        nav.disabled = !stepValid;
-      }
+      if (i !== props.currentStep) nav.disabled = !stepValid;
     });
   };
 }
@@ -200,15 +206,20 @@ export function getUpdatedRequiredFields(props) {
 
 export function initRequiredFieldsValidation(props) {
   const currentFrag = getCurrentFragment(props);
-
   const currentRequiredFields = props[`required-fields-in-${currentFrag.id}`];
   const inputValidationCB = onStepValidate(props);
-  currentRequiredFields.forEach((field) => {
-    field.removeEventListener('change', inputValidationCB);
-  });
 
+  // Remove old event listeners
+  if (currentRequiredFields) {
+    currentRequiredFields.forEach((field) => {
+      field.removeEventListener('change', inputValidationCB);
+    });
+  }
+
+  // Get updated required fields
   props[`required-fields-in-${currentFrag.id}`] = getUpdatedRequiredFields(props);
 
+  // Add new event listeners
   props[`required-fields-in-${currentFrag.id}`].forEach((field) => {
     field.addEventListener('change', inputValidationCB, { bubbles: true });
   });
@@ -277,11 +288,10 @@ async function loadEventData(props) {
       }, 5000);
 
       props.el.classList.add('disabled');
-      const eventData = await getEvent(eventId);
-      if (!eventData.error && eventData) {
-        props.eventDataResp = eventData;
+      if (event && !event.error) {
+        props.eventDataResp = event;
       } else {
-        getToastManager(props.el).showError(eventData.error?.message || 'Failed to load event data');
+        errorManager.showError(event.error?.message || 'Failed to load event data');
       }
       props.el.classList.remove('disabled');
     } else {
@@ -297,14 +307,19 @@ async function gatherValues(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onSubmit } = await import(`../${comp}-component/controller.js`);
-      return onSubmit(component, props);
+      try {
+        const { onSubmit } = await import(`../${comp}-component/controller.js`);
+        return onSubmit(component, props);
+      } catch (error) {
+        console.warn(`Failed to gather values for component ${comp}:`, error);
+        return {};
+      }
     });
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   });
 
-  await Promise.all(allComponentPromises);
+  await Promise.allSettled(allComponentPromises);
 }
 
 async function handleEventUpdate(props) {
@@ -313,14 +328,19 @@ async function handleEventUpdate(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
-      return onTargetUpdate(component, props);
+      try {
+        const { onTargetUpdate } = await import(`../${comp}-component/controller.js`);
+        return onTargetUpdate(component, props);
+      } catch (error) {
+        console.warn(`Failed to handle event update for component ${comp}:`, error);
+        return {};
+      }
     });
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   });
 
-  await Promise.all(allComponentPromises);
+  await Promise.allSettled(allComponentPromises);
 }
 
 async function updateComponentsOnPayloadChange(props) {
@@ -329,15 +349,20 @@ async function updateComponentsOnPayloadChange(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onPayloadUpdate } = await import(`../${comp}-component/controller.js`);
-      const componentPayload = await onPayloadUpdate(component, props);
-      return componentPayload;
+      try {
+        const { onPayloadUpdate } = await import(`../${comp}-component/controller.js`);
+        const componentPayload = await onPayloadUpdate(component, props);
+        return componentPayload;
+      } catch (error) {
+        console.warn(`Failed to update component ${comp} on payload change:`, error);
+        return {};
+      }
     });
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   });
 
-  await Promise.all(allComponentPromises);
+  await Promise.allSettled(allComponentPromises);
 }
 
 async function updateComponentsOnRespChange(props) {
@@ -346,15 +371,20 @@ async function updateComponentsOnRespChange(props) {
     if (!mappedComponents.length) return {};
 
     const promises = Array.from(mappedComponents).map(async (component) => {
-      const { onRespUpdate } = await import(`../${comp}-component/controller.js`);
-      const componentPayload = await onRespUpdate(component, props);
-      return componentPayload;
+      try {
+        const { onRespUpdate } = await import(`../${comp}-component/controller.js`);
+        const componentPayload = await onRespUpdate(component, props);
+        return componentPayload;
+      } catch (error) {
+        console.warn(`Failed to update component ${comp} on response change:`, error);
+        return {};
+      }
     });
 
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   });
 
-  await Promise.all(allComponentPromises);
+  await Promise.allSettled(allComponentPromises);
 }
 
 function showSaveSuccessMessage(props, detail = { message: 'Edits saved successfully' }) {
@@ -378,7 +408,21 @@ function updateDashboardLink(props) {
   dashboardLink.href = url.toString();
 }
 
-async function saveEvent(props, toPublish = false) {
+function setEventSavePolicies(changedPolicies = {}) {
+  // default to only save ESP data to preview with BE driven SP update logics
+  const policies = {
+    forceSpWrite: false,
+    liveUpdate: false,
+  };
+
+  Object.entries(changedPolicies).forEach(([key, value]) => {
+    policies[key] = value;
+  });
+
+  return policies;
+}
+
+async function saveEvent(props, policies = setEventSavePolicies()) {
   try {
     await gatherValues(props);
   } catch (e) {
@@ -408,11 +452,12 @@ async function saveEvent(props, toPublish = false) {
     }
     updateDashboardLink(props);
     await onEventSave();
-  } else if (props.currentStep <= props.maxStep && !toPublish) {
+  } else if (props.currentStep <= props.maxStep && !policies.liveUpdate) {
     const payload = getJoinedData();
     resp = await updateEvent(
       payload.eventId,
       payload,
+      policies,
     );
     if (!resp.error && resp) {
       const newEventData = await getEvent(resp.eventId);
@@ -421,7 +466,7 @@ async function saveEvent(props, toPublish = false) {
       getToastManager(props.el).showError(resp.error?.message || 'Failed to update event');
     }
     await onEventSave();
-  } else if (toPublish) {
+  } else if (policies.liveUpdate) {
     const payload = getJoinedData();
     resp = await publishEvent(
       payload.eventId,
@@ -602,11 +647,13 @@ async function getNonProdPreviewDataById(props) {
 
   if (!eventId) return null;
 
-  const esEnv = getCurrentEnvironment();
-  const resp = await fetch(`${getEventPageHost()}/events/default/${esEnv === 'prod' ? '' : `${esEnv}/`}metadata-preview.json`);
+  const esEnv = getCurrentEnvironment() === ENVIRONMENTS.LOCAL
+    ? ENVIRONMENTS.DEV
+    : getCurrentEnvironment();
+  const resp = await fetch(`${getEventPageHost()}/events/default/${esEnv === ENVIRONMENTS.PROD ? '' : `${esEnv}/`}metadata-preview.json`);
   if (resp.ok) {
     const json = await resp.json();
-    const pageData = json.data.find((d) => d['event-id'] === eventId);
+    const pageData = json.data.reverse().find((d) => d['event-id'] === eventId);
 
     if (pageData) return pageData;
 
@@ -619,13 +666,21 @@ async function getNonProdPreviewDataById(props) {
 }
 
 async function validatePreview(props, cta) {
+  const series = await getSeriesById(props.eventDataResp.seriesId);
+
+  if (series.error) {
+    const errorManager = new ErrorManager(props);
+    errorManager.handleErrorResponse(series.error);
+    return Promise.resolve();
+  }
+
   let retryCount = 0;
   const previewHref = cta.href;
 
-  const modificationTimeMatch = (metadataObj) => {
-    const metadataModTimestamp = new Date(metadataObj['modification-time']).getTime();
-    return metadataModTimestamp === props.eventDataResp.modificationTime;
-  };
+  const { targetCms } = series;
+  const { provider } = targetCms;
+
+  const modificationTimeMatch = (modTime) => modTime === props.eventDataResp.modificationTime;
 
   return new Promise((resolve) => {
     let cancelled = false;
@@ -650,17 +705,30 @@ async function validatePreview(props, cta) {
         await new Promise((r) => setTimeout(r, delay));
         if (cancelled) break;
         try {
-          // eslint-disable-next-line no-await-in-loop
-          const metadataJson = await getNonProdPreviewDataById(props);
-          if (metadataJson && modificationTimeMatch(metadataJson)) {
+          let modTime;
+          if (provider === 'sharepoint') {
+            const metadataJson = await getNonProdPreviewDataById(props);
+            if (metadataJson['modification-time']) {
+              modTime = new Date(metadataJson['modification-time']).getTime();
+            }
+          } else {
+            const pageData = await fetch(previewHref);
+            if (pageData.ok) {
+              const dom = new DOMParser().parseFromString(await pageData.text(), 'text/html');
+              const modTimeMetadata = getMetadata('modification-time', dom);
+              modTime = new Date(modTimeMetadata).getTime();
+            }
+          }
+
+          if (modTime && modificationTimeMatch(modTime)) {
             closeDialog(props);
             window.open(previewHref);
             poll.cancel();
             return;
           }
-          if (metadataJson?.error) {
+          if (!modTime) {
             const errorManager = new ErrorManager(props);
-            errorManager.handleErrorResponse(metadataJson.error);
+            errorManager.showError('Failed to get latest modification time. Please try again later or view the page directly.');
             buildPreviewLoadingFailedDialog(props, previewHref);
             poll.cancel();
             return;
@@ -779,7 +847,7 @@ function initFormCtas(props) {
             let resp;
 
             if (props.currentStep === props.maxStep) {
-              resp = await saveEvent(props, true);
+              resp = await saveEvent(props, setEventSavePolicies({ liveUpdate: true }));
             } else {
               resp = await saveEvent(props);
             }
@@ -800,7 +868,7 @@ function initFormCtas(props) {
               }
             }
           } else {
-            await saveEvent(props);
+            await saveEvent(props, { forceSpWrite: true });
           }
 
           toggleBtnsSubmittingState(false);

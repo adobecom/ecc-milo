@@ -100,8 +100,10 @@ function decorateMarketoIntegrationFields(el, fields) {
         id: field.id,
         size: 'l',
       });
-      if (field.required) fieldSelect.required = true;
-      if (!field.masterField) fieldSelect.disabled = true;
+
+      if (field.required) fieldSelect.setAttribute('required', '');
+      if (!field.masterField) fieldSelect.setAttribute('disabled', '');
+
       const label = createTag('span', { slot: 'label' }, field.placeholder);
       fieldSelect.appendChild(label);
       field.options.forEach((option) => {
@@ -116,8 +118,8 @@ function decorateMarketoIntegrationFields(el, fields) {
         type: field.type,
         placeholder: field.placeholder,
       });
-      if (field.required) fieldInput.required = true;
-      if (!field.masterField) fieldInput.disabled = true;
+      if (field.required) fieldInput.setAttribute('required', '');
+      if (!field.masterField) fieldInput.setAttribute('disabled', '');
       fieldContainer.appendChild(fieldInput);
     }
 
