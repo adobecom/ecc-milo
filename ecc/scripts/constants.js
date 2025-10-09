@@ -116,3 +116,8 @@ export const CONTENT_TYPE_TAGS = {
     caasId: 'caas:content-type/in-person-event',
   },
 };
+// Default save policies - only save ESP data to preview with BE driven SP update logics
+export const DEFAULT_SAVE_POLICIES = {
+  forceSpWrite: false,
+  liveUpdate: false,
+};
