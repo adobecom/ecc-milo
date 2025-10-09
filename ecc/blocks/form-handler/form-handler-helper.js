@@ -44,7 +44,7 @@ import {
   getSeriesById,
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
-import { ENVIRONMENTS, EVENT_TYPES } from '../../scripts/constants.js';
+import { ENVIRONMENTS, EVENT_TYPES, DEFAULT_SAVE_POLICIES } from '../../scripts/constants.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -469,11 +469,7 @@ function updateDashboardLink(props) {
 }
 
 function setEventSavePolicies(changedPolicies = {}) {
-  // default to only save ESP data to preview with BE driven SP update logics
-  const policies = {
-    forceSpWrite: false,
-    liveUpdate: false,
-  };
+  const policies = { ...DEFAULT_SAVE_POLICIES };
 
   Object.entries(changedPolicies).forEach(([key, value]) => {
     policies[key] = value;
@@ -482,7 +478,7 @@ function setEventSavePolicies(changedPolicies = {}) {
   return policies;
 }
 
-async function saveEvent(props, policies = setEventSavePolicies()) {
+async function saveEvent(props, policies = DEFAULT_SAVE_POLICIES) {
   try {
     await gatherValues(props);
   } catch (e) {

@@ -841,7 +841,13 @@ export async function updateEvent(eventId, payload, policies = {
   if (!payload || typeof payload !== 'object') throw new Error('Invalid event payload');
 
   const { host } = API_CONFIG.esl[getCurrentEnvironment()];
-  const raw = JSON.stringify({ ...payload, ...policies });
+
+  const finalPayload = { ...payload };
+  Object.keys(policies).forEach((key) => {
+    finalPayload[key] = policies[key];
+  });
+
+  const raw = JSON.stringify(finalPayload);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
