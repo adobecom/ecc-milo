@@ -12,7 +12,13 @@ import {
   publishSeries,
   getSeriesById,
 } from '../../scripts/esp-controller.js';
-import getJoinedData, { getFilteredCachedResponse, quickFilter, setPayloadCache, setResponseCache } from './data-handler.js';
+import getJoinedData, {
+  getFilteredCachedResponse,
+  quickFilter,
+  setDeleteList,
+  setPayloadCache,
+  setResponseCache,
+} from './data-handler.js';
 import { getUser, initProfileLogicTree, userHasAccessToBU, userHasAccessToSeries } from '../../scripts/profile.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -729,6 +735,7 @@ async function buildForm(el) {
     maxStep: el.querySelectorAll('.fragment').length - 1,
     payload: {},
     response: {},
+    deleteList: [],
   };
 
   const dataHandler = {
@@ -772,6 +779,11 @@ async function buildForm(el) {
           } else {
             props.el.classList.remove('show-error');
           }
+          break;
+        }
+
+        case 'deleteList': {
+          setDeleteList(value);
           break;
         }
 
