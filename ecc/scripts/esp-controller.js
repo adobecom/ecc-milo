@@ -833,12 +833,21 @@ export async function updateSpeaker(profile, seriesId) {
   }
 }
 
-export async function updateEvent(eventId, payload) {
+export async function updateEvent(eventId, payload, policies = {
+  forceSpWrite: false,
+  liveUpdate: false,
+}) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!payload || typeof payload !== 'object') throw new Error('Invalid event payload');
 
   const { host } = API_CONFIG.esl[getCurrentEnvironment()];
-  const raw = JSON.stringify({ ...payload, liveUpdate: false, forceSpWrite: false });
+
+  const finalPayload = { ...payload };
+  Object.keys(policies).forEach((key) => {
+    finalPayload[key] = policies[key];
+  });
+
+  const raw = JSON.stringify(finalPayload);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
