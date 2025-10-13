@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import AgendaFieldsetGroup from '../../components/agenda-fieldset-group/agenda-fieldset-group.js';
 import AgendaFieldset from '../../components/agenda-fieldset/agenda-fieldset.js';
 import CustomSearch from '../../components/custom-search/custom-search.js';
@@ -29,6 +30,7 @@ import {
   camelToSentenceCase,
   getEventPageHost,
   replaceAnchorWithButton,
+  getMetadata,
 } from '../../scripts/utils.js';
 
 import { getCurrentEnvironment } from '../../scripts/environment.js';
@@ -39,9 +41,10 @@ import {
   publishEvent,
   getEvent,
   previewEvent,
+  getSeriesById,
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
-import { EVENT_TYPES } from '../../scripts/constants.js';
+import { ENVIRONMENTS, EVENT_TYPES, DEFAULT_SAVE_POLICIES } from '../../scripts/constants.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -465,7 +468,17 @@ function updateDashboardLink(props) {
   dashboardLink.href = url.toString();
 }
 
-async function saveEvent(props, toPublish = false) {
+function setEventSavePolicies(changedPolicies = {}) {
+  const policies = { ...DEFAULT_SAVE_POLICIES };
+
+  Object.entries(changedPolicies).forEach(([key, value]) => {
+    policies[key] = value;
+  });
+
+  return policies;
+}
+
+async function saveEvent(props, policies = DEFAULT_SAVE_POLICIES) {
   try {
     await gatherValues(props);
   } catch (e) {
@@ -494,11 +507,12 @@ async function saveEvent(props, toPublish = false) {
     }
     updateDashboardLink(props);
     await onEventSave();
-  } else if (props.currentStep <= props.maxStep && !toPublish) {
+  } else if (props.currentStep <= props.maxStep && !policies.liveUpdate) {
     const payload = getJoinedData();
     resp = await updateEvent(
       payload.eventId,
       payload,
+      policies,
     );
     if (!resp.error && resp) {
       const newEventData = await getEvent(resp.eventId);
@@ -507,7 +521,7 @@ async function saveEvent(props, toPublish = false) {
       props.el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: resp.error } }));
     }
     await onEventSave();
-  } else if (toPublish) {
+  } else if (policies.liveUpdate) {
     const payload = getJoinedData();
     resp = await publishEvent(
       payload.eventId,
@@ -688,11 +702,13 @@ async function getNonProdPreviewDataById(props) {
 
   if (!eventId) return null;
 
-  const esEnv = getCurrentEnvironment();
-  const resp = await fetch(`${getEventPageHost()}/events/default/${esEnv === 'prod' ? '' : `${esEnv}/`}metadata-preview.json`);
+  const esEnv = getCurrentEnvironment() === ENVIRONMENTS.LOCAL
+    ? ENVIRONMENTS.DEV
+    : getCurrentEnvironment();
+  const resp = await fetch(`${getEventPageHost()}/events/default/${esEnv === ENVIRONMENTS.PROD ? '' : `${esEnv}/`}metadata-preview.json`);
   if (resp.ok) {
     const json = await resp.json();
-    const pageData = json.data.find((d) => d['event-id'] === eventId);
+    const pageData = json.data.reverse().find((d) => d['event-id'] === eventId);
 
     if (pageData) return pageData;
 
@@ -705,13 +721,20 @@ async function getNonProdPreviewDataById(props) {
 }
 
 async function validatePreview(props, cta) {
+  const series = await getSeriesById(props.eventDataResp.seriesId);
+
+  if (series.error) {
+    buildErrorMessage(props, series.error);
+    return Promise.resolve();
+  }
+
   let retryCount = 0;
   const previewHref = cta.href;
 
-  const modificationTimeMatch = (metadataObj) => {
-    const metadataModTimestamp = new Date(metadataObj['modification-time']).getTime();
-    return metadataModTimestamp === props.eventDataResp.modificationTime;
-  };
+  const { targetCms } = series;
+  const { provider } = targetCms;
+
+  const modificationTimeMatch = (modTime) => modTime === props.eventDataResp.modificationTime;
 
   return new Promise((resolve) => {
     let cancelled = false;
@@ -736,16 +759,29 @@ async function validatePreview(props, cta) {
         await new Promise((r) => setTimeout(r, delay));
         if (cancelled) break;
         try {
-          // eslint-disable-next-line no-await-in-loop
-          const metadataJson = await getNonProdPreviewDataById(props);
-          if (metadataJson && modificationTimeMatch(metadataJson)) {
+          let modTime;
+          if (provider === 'sharepoint') {
+            const metadataJson = await getNonProdPreviewDataById(props);
+            if (metadataJson['modification-time']) {
+              modTime = new Date(metadataJson['modification-time']).getTime();
+            }
+          } else {
+            const pageData = await fetch(previewHref);
+            if (pageData.ok) {
+              const dom = new DOMParser().parseFromString(await pageData.text(), 'text/html');
+              const modTimeMetadata = getMetadata('modification-time', dom);
+              modTime = new Date(modTimeMetadata).getTime();
+            }
+          }
+
+          if (modTime && modificationTimeMatch(modTime)) {
             closeDialog(props);
             window.open(previewHref);
             poll.cancel();
             return;
           }
-          if (metadataJson?.error) {
-            buildErrorMessage(props, metadataJson.error);
+          if (!modTime) {
+            buildErrorMessage(props, { error: { message: 'Failed to get latest modification time. Please try again later or view the page directly.' } });
             buildPreviewLoadingFailedDialog(props, previewHref);
             poll.cancel();
             return;
@@ -862,7 +898,7 @@ function initFormCtas(props) {
             let resp;
 
             if (props.currentStep === props.maxStep) {
-              resp = await saveEvent(props, true);
+              resp = await saveEvent(props, setEventSavePolicies({ liveUpdate: true }));
             } else {
               resp = await saveEvent(props);
             }
@@ -898,7 +934,7 @@ function initFormCtas(props) {
               }
             }
           } else {
-            await saveEvent(props);
+            await saveEvent(props, setEventSavePolicies({ forceSpWrite: true }));
           }
 
           toggleBtnsSubmittingState(false);

@@ -833,12 +833,21 @@ export async function updateSpeaker(profile, seriesId) {
   }
 }
 
-export async function updateEvent(eventId, payload) {
+export async function updateEvent(eventId, payload, policies = {
+  forceSpWrite: false,
+  liveUpdate: false,
+}) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!payload || typeof payload !== 'object') throw new Error('Invalid event payload');
 
   const { host } = API_CONFIG.esl[getCurrentEnvironment()];
-  const raw = JSON.stringify({ ...payload, liveUpdate: false, forceSpWrite: false });
+
+  const finalPayload = { ...payload };
+  Object.keys(policies).forEach((key) => {
+    finalPayload[key] = policies[key];
+  });
+
+  const raw = JSON.stringify(finalPayload);
   const options = await constructRequestOptions('PUT', raw);
 
   try {
@@ -1521,6 +1530,28 @@ export async function getEventHistory(eventId) {
     return data;
   } catch (error) {
     window.lana?.log(`Failed to get event history for event ${eventId}:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function getSeriesHistory(seriesId) {
+  if (!seriesId || typeof seriesId !== 'string') throw new Error('Invalid series ID');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/series/${seriesId}/history`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to get series history for series ${seriesId}. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to get series history for series ${seriesId}:\n${JSON.stringify(error, null, 2)}`);
     return { status: 'Network Error', error: error.message };
   }
 }

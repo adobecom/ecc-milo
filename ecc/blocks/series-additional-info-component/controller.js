@@ -4,15 +4,43 @@ export function onSubmit(component, props) {
 
   const susiContextId = component.querySelector('#info-field-series-susi');
   const relatedDomain = component.querySelector('#info-field-series-related-domain');
+  const contentRoot = component.querySelector('#info-field-series-content-root');
   const externalThemeId = component.querySelector('#info-field-series-ext-id');
 
-  const seriesInfo = {};
+  const prevPayload = props.payload || {};
+  const prevResponse = props.response || {};
+  const nextPayload = { ...prevPayload };
+  const removeData = [];
 
-  if (susiContextId.value) seriesInfo.susiContextId = susiContextId.value;
-  if (relatedDomain.value) seriesInfo.relatedDomain = relatedDomain.value;
-  if (externalThemeId.value) seriesInfo.externalThemeId = externalThemeId.value;
+  const markForRemoval = (key) => {
+    delete nextPayload[key];
+    removeData.push({ key, path: '' });
+  };
 
-  props.payload = { ...props.payload, ...seriesInfo };
+  const assignField = (key, input) => {
+    if (!input) return;
+
+    const rawValue = typeof input.value === 'string' ? input.value.trim() : input.value;
+    const hasValue = rawValue !== undefined && rawValue !== null && rawValue !== '';
+    const prevValue = prevPayload?.[key] ?? prevResponse?.[key];
+    const hadValue = prevValue !== undefined && prevValue !== null && prevValue !== '';
+
+    if (hasValue) {
+      nextPayload[key] = rawValue;
+    } else if (hadValue) {
+      markForRemoval(key);
+    } else {
+      delete nextPayload[key];
+    }
+  };
+
+  assignField('susiContextId', susiContextId);
+  assignField('relatedDomain', relatedDomain);
+  assignField('contentRoot', contentRoot);
+  assignField('externalThemeId', externalThemeId);
+
+  props.payload = nextPayload;
+  props.deleteList = removeData;
 }
 
 export async function onPayloadUpdate(_component, _props) {
@@ -29,10 +57,12 @@ export default function init(component, props) {
   if (data) {
     const susiContextId = component.querySelector('#info-field-series-susi');
     const relatedDomain = component.querySelector('#info-field-series-related-domain');
+    const contentRoot = component.querySelector('#info-field-series-content-root');
     const externalThemeId = component.querySelector('#info-field-series-ext-id');
 
     susiContextId.value = data.susiContextId || '';
     relatedDomain.value = data.relatedDomain || '';
+    if (contentRoot) contentRoot.value = data.contentRoot || '';
     externalThemeId.value = data.externalThemeId || '';
 
     component.classList.add('prefilled');
