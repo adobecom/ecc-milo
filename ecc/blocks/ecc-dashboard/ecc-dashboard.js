@@ -17,6 +17,8 @@ import {
   signIn,
 } from '../../scripts/utils.js';
 
+import MarketoEventModal from '../../components/marketo-event-modal/marketo-event-modal.js';
+
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
@@ -714,11 +716,19 @@ function buildDashboardHeader(props, config) {
   const createCta = createTag('a', { class: 'con-button blue' }, config['create-event-cta-text'], { parent: dropdown });
   const dropdownContent = createTag('div', { class: 'dropdown-content hidden' }, '', { parent: dropdown });
 
-  createTag('a', { class: 'dropdown-item', href: config['webinar-form-url'] }, 'Webinar', { parent: dropdownContent });
+  // createTag('a', { class: 'dropdown-item', href: config['webinar-form-url'] }, 'Webinar', { parent: dropdownContent });
+  const webinarCta = createTag('a', { class: 'dropdown-item' }, 'Webinar', { parent: dropdownContent });
   createTag('a', { class: 'dropdown-item', href: config['create-form-url'] }, 'In-Person', { parent: dropdownContent });
+
+  const webinarModal = createTag('marketo-event-modal', { id: 'marketo-event-modal' }, '', { parent: actionsContainer });
 
   createCta.addEventListener('click', (e) => {
     e.preventDefault();
+  });
+
+  webinarCta.addEventListener('click', (e) => {
+    e.preventDefault();
+    webinarModal.openModal();
   });
 
   document.addEventListener('click', (e) => {
