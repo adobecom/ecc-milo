@@ -350,9 +350,27 @@
   align-items: center;
   gap: 8px;
 }
+.event-info-component .title-container .right-wrapper{
+    display: flex;
+    flex-direction: column;
+    gap: 45px;
+}
 
 @media screen and (min-width: 900px) {
   .event-info-component .date-time-row > p {
     margin-left: 24px;
   }
+}
+.marketo-linked-badge-wrapper{
+  display:flex;
+  gap:10px;
+}
+.marketo-linked-badge{
+  background-color: #656464;
+  padding: 0px 10px;
+  border-radius: 5px;
+  border: 1px solid #656464;
+  font-weight: 600;
+  color: #fff;
+  height: fit-content;
 }

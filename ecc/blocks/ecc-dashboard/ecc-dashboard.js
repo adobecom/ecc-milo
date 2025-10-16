@@ -720,7 +720,7 @@ function buildDashboardHeader(props, config) {
   const webinarCta = createTag('a', { class: 'dropdown-item' }, 'Webinar', { parent: dropdownContent });
   createTag('a', { class: 'dropdown-item', href: config['create-form-url'] }, 'In-Person', { parent: dropdownContent });
 
-  const webinarModal = createTag('marketo-event-modal', { id: 'marketo-event-modal' }, '', { parent: actionsContainer });
+  const webinarModal = createTag('marketo-event-modal', { id: 'marketo-event-modal', "data-redirection": config['webinar-form-url'] }, '', { parent: actionsContainer });
 
   createCta.addEventListener('click', (e) => {
     e.preventDefault();
@@ -731,6 +731,17 @@ function buildDashboardHeader(props, config) {
     webinarModal.openModal();
   });
 
+  webinarModal.addEventListener('marketo-connect', (event) => {
+    event.preventDefault();
+    if (event.detail.connect && event.detail.marketoId) {
+      // User provided Marketo ID - proceed with integration
+      console.log('Connecting to Marketo ID:', event.detail.marketoId);
+      // showMarketoIntegrationForm(event.detail.marketoId);
+    } else {
+      // User declined or canceled - proceed without integration  
+      window.location.href = config['webinar-form-url'];
+    }
+  })
   document.addEventListener('click', (e) => {
     if (!dropdown.contains(e.target) && !createCta.contains(e.target)) {
       dropdownContent.classList.add('hidden');

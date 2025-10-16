@@ -31,12 +31,16 @@ export const style = css`
     transform: translate(-50%, -50%);
     z-index: 1002;
     background: var(--spectrum-gray-100, #ffffff);
-    min-width: 480px;
-    max-width: 600px;
+    min-width: 360px;
+    max-width: 420px;
     border-radius: 8px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
     padding: 0;
     --mod-dialog-confirm-buttongroup-padding-top: 0;
+    --mod-dialog-confirm-padding-grid: 2rem;
+    --spectrum-dialog-confirm-divider-block-spacing-end: 0px;
+    --mod-dialog-confirm-title-text-size: 20px;
+    display: flex;
   }
 
   sp-dialog:not([open]) {
@@ -44,15 +48,11 @@ export const style = css`
   }
 
   sp-dialog h1 {
-    font-size: var(--type-heading-s-size, 24px);
-    font-weight: 700;
-    line-height: 1.25;
-    margin: 0;
-    color: var(--spectrum-gray-900, #2c2c2c);
+   --type-heading-s-size: 20px;
   }
 
   .modal-content {
-    padding: 0 32px 24px;
+    padding-bottom: 1.5rem
   }
 
   .modal-description {
@@ -66,9 +66,6 @@ export const style = css`
     display: flex;
     justify-content: flex-end;
     gap: 16px;
-    padding: 24px 32px 32px;
-    border-top: 1px solid var(--spectrum-gray-300, #e1e1e1);
-    margin-top: 8px;
   }
 
   .button-container sp-button {

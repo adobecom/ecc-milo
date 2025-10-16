@@ -7,7 +7,6 @@ import {
   addTooltipToEl,
   decorateTextarea,
 } from '../../scripts/utils.js';
-
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 const privateEventString = 'Set as a private event';
@@ -30,6 +29,13 @@ async function addLanguagePicker(row) {
 
   picker.disabled = true;
   row.append(pickerWrapper);
+}
+
+function addMarketoLinkedBadge(row){
+  const MarketoBadgeWrapper = createTag('div', { class: 'marketo-linked-badge-wrapper' });
+  createTag('sp-label', { for: 'marketo-linked-badge' }, 'Linked to Marketo', { parent: MarketoBadgeWrapper });
+  createTag('span', { id: 'marketo-linked-badge', class: 'marketo-linked-badge' }, 'Event Id: 123456', { parent: MarketoBadgeWrapper });
+  row.append(MarketoBadgeWrapper);
 }
 
 function buildTimePicker(column, wrapper) {
@@ -150,6 +156,7 @@ function buildTitleContainer(row) {
   row.append(leftWrapper, rightWrapper);
 
   addPrivateEventToggle(leftWrapper);
+  addMarketoLinkedBadge(rightWrapper);
   addLanguagePicker(rightWrapper);
 }
 

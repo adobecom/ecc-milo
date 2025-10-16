@@ -1,6 +1,7 @@
+import { getSeriesForUser } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './marketo-id-modal.css.js';
-
+const { createTag } = await import(`${LIBS}/utils/utils.js`);
 // Import Spectrum Web Components
 const loadSpectrumComponents = async () => {
   await Promise.all([
@@ -14,7 +15,7 @@ const loadSpectrumComponents = async () => {
 };
 
 const { LitElement, html } = await import(`${LIBS}/deps/lit-all.min.js`);
-
+const MCZ_PREFIX = 'mcz-';
 // Initialize Spectrum Components
 await loadSpectrumComponents();
 
@@ -36,6 +37,46 @@ export default class MarketoIdModal extends LitElement {
     this.marketoId = '';
     this.isValid = false;
     this.errorMessage = '';
+  }
+
+  formatMarketoUrl = (marketoId) => {
+    // Ensure consistent format for URL (without dash)
+    const idWithPrefix = this.addMczPrefix(marketoId);
+    return idWithPrefix.replace('-', '');
+  }
+
+  updateFormUsingMarketoData = async(params) =>{
+    const seriesName = params.profile['Series Name'];
+  
+    // lookup seriesId from eventInfo.seriesName
+    const series = await getSeriesForUser();
+    const seriesId = series.find((s) => s.seriesName === seriesName)?.seriesId;
+  
+    const eventStartDateTime = params.profile['Event Start Date Time ISO'];
+    const eventEndDateTime = params.profile['Event End Date Time ISO'];
+  
+    const localStartDate = formatDate(eventStartDateTime.split('T')[0]);
+    const localEndDate = formatDate(eventEndDateTime.split('T')[0]);
+    const localStartTime = formatTime(eventStartDateTime.split('T')[1]);
+    const localEndTime = formatTime(eventEndDateTime.split('T')[1]);
+  
+    const eventInfo = {
+      title: params.profile['Event Name'],
+      description: params.profile['Event Description'],
+      localStartDate,
+      localStartTime,
+      localEndDate,
+      localEndTime,
+      timezone: params.profile['Event Timezone'],
+      enTitle: params.profile['Event Name'],
+      eventDetails: params.profile['Event Description'],
+    };
+  
+    if (seriesId) {
+      eventInfo.seriesId = seriesId;
+    }
+    console.log('eventInfo : ', eventInfo);
+    return eventInfo
   }
 
   openModal() {
@@ -82,6 +123,66 @@ export default class MarketoIdModal extends LitElement {
     this.isValid = this.validateMarketoId(this.marketoId);
   }
 
+  formatMarketoUrl = (marketoId) => {
+    // Ensure consistent format for URL (without dash)
+    const idWithPrefix = this.addMczPrefix(marketoId);
+    return idWithPrefix.replace('-', '');
+  }
+
+  loadMarketoEventInfo(marketoId) {
+    const urlFormatId = this.formatMarketoUrl(marketoId);
+    const iframe = createTag('iframe', {
+      src: `https://engage.adobe.com/${urlFormatId}.html?mkto_src=emc`,
+      class: 'hidden',
+    });
+    document.getElementById("marketo-event-modal")?.append(iframe);
+    console.log("===iframe===>",iframe);
+    let that = this;
+    window.addEventListener('message', (event) => {
+      console.log("==addEventListener====>",event.data.data);
+      that.onMczMessage(event)
+    });
+  }
+
+  onMczMessage(event) {
+    const config = { allowedOrigins: ['https://engage.adobe.com', 'https://business.adobe.com'] };
+    const eventOrigin = new URL(event.origin);
+    let allowedToPass = false;
+    for (let i = 0; i < config.allowedOrigins.length; i += 1) {
+      const allowedOriginURL = new URL(config.allowedOrigins[i]);
+      if (
+        eventOrigin.host === allowedOriginURL.host
+          && eventOrigin.protocol === allowedOriginURL.protocol
+          && eventOrigin.port === allowedOriginURL.port
+      ) {
+        allowedToPass = true;
+        break;
+      }
+    }
+    if (event.data && event.data.type !== 'mcz_marketoForm_pref_sync') {
+      allowedToPass = false;
+    }
+    if (!allowedToPass) {
+      return;
+    }
+    // eslint-disable-next-line no-console
+    console.log('MCZ RefData Received:', event.data);
+    if (event.data && event.data.target_path !== null && event.data.target_attribute !== null) {
+      console.log("======>",event.data.data);
+      const eventData = this.updateFormUsingMarketoData(event.data.data);
+      this.dispatchEvent(new CustomEvent('marketo-id-submit', {
+        bubbles: true,
+        composed: true,
+        detail: { 
+          marketoId: this.marketoId.trim(),
+          action: 'connect',
+          eventData: eventData
+        }
+      }));
+      this.closeModal();
+    }
+  }
+
   handleInputKeyDown(event) {
     // Handle Enter key to submit
     if (event.key === 'Enter' && this.isValid) {
@@ -93,22 +194,31 @@ export default class MarketoIdModal extends LitElement {
     }
   }
 
+  addMczPrefix = (value) => {
+    if (!value) return '';
+    // Don't add prefix if it already exists
+    return value.startsWith(MCZ_PREFIX) ? value : `${MCZ_PREFIX}${value}`;
+  };
+
   handleConnectClick() {
     if (!this.isValid) {
       // Trigger validation to show error message
-      this.isValid = this.validateMarketoId(this.marketoId);
+      // this.isValid = this.validateMarketoId(this.marketoId);
+      const marketoId = this.addMczPrefix(this.marketoId);
+      this.loadMarketoEventInfo(marketoId)
       return;
     }
-
-    this.dispatchEvent(new CustomEvent('marketo-id-submit', {
-      bubbles: true,
-      composed: true,
-      detail: { 
-        marketoId: this.marketoId.trim(),
-        action: 'connect'
-      }
-    }));
-    this.closeModal();
+    const marketoId = this.addMczPrefix(this.marketoId);
+    this.loadMarketoEventInfo(marketoId)
+    // this.dispatchEvent(new CustomEvent('marketo-id-submit', {
+    //   bubbles: true,
+    //   composed: true,
+    //   detail: { 
+    //     marketoId: this.marketoId.trim(),
+    //     action: 'connect'
+    //   }
+    // }));
+    // this.closeModal();
   }
 
   handleCancelClick() {
@@ -165,12 +275,14 @@ export default class MarketoIdModal extends LitElement {
           <div class="button-container" slot="button">
             <sp-button 
               variant="secondary" 
+              treatment="outline"
               @click=${this.handleCancelClick}
             >
               Cancel
             </sp-button>
             <sp-button 
               variant="cta"
+              static-color="black"
               ?disabled=${!this.isValid}
               @click=${this.handleConnectClick}
             >
