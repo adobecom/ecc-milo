@@ -8,7 +8,7 @@ import {
   decorateTextarea,
 } from '../../scripts/utils.js';
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
-let marketoEventData = null;
+let marketoEventData = {};
 const privateEventString = 'Set as a private event';
 const privateEventToolTip = 'By setting this to private, your event won\'t be publicly found online or published to the events hub.';
 
@@ -33,8 +33,8 @@ async function addLanguagePicker(row) {
 
 function addMarketoLinkedBadge(row){
   const MarketoBadgeWrapper = createTag('div', { class: 'marketo-linked-badge-wrapper' });
-  createTag('sp-label', { for: 'marketo-linked-badge' }, 'Linked to Marketo', { parent: MarketoBadgeWrapper });
-  createTag('span', { id: 'marketo-linked-badge', class: 'marketo-linked-badge' }, `Event Id: ${marketoEventData.marketoId}`, { parent: MarketoBadgeWrapper });
+  createTag('sp-label', { for: 'marketo-linked-badge', class:"marketo-linked-badge-label" }, 'Linked to Marketo', { parent: MarketoBadgeWrapper });
+  createTag('span', { id: 'marketo-linked-badge', class: 'marketo-linked-badge' }, `Event Id: ${marketoEventData?.marketoId}`, { parent: MarketoBadgeWrapper });
   row.append(MarketoBadgeWrapper);
 }
 
@@ -172,11 +172,13 @@ function decorateRTETiptap(row) {
   const rteProps = {
     id: 'event-info-details-rte',
     ...(isRequired && { required: true }),
+    content:marketoEventData?.description || "",
+    disabled:!!marketoEventData?.description
   };
 
   const rteHeading = createTag('sp-label', { for: 'event-info-details-rte' }, 'Event Details', { parent: row });
   const rte = createTag('rte-tiptap', rteProps);
-  const rteOutput = createTag('input', { id: 'event-info-details-rte-output', type: 'hidden' });
+  const rteOutput = createTag('input', { id: 'event-info-details-rte-output', type: 'hidden', value:marketoEventData?.description || "", });
 
   addTooltipToEl('Add rich text to your event description. This will be the copy displayed on the event page.', rteHeading);
 
@@ -209,7 +211,7 @@ export default function init(el) {
         buildTitleContainer(r);
         break;
       case 1:
-        await decorateTextfield(r, { id: 'info-field-event-title' }, await miloReplaceKey('duplicate-event-title-error'));
+        await decorateTextfield(r, { id: 'info-field-event-title', value:marketoEventData?.enTitle || "", disabled:!!marketoEventData?.enTitle}, await miloReplaceKey('duplicate-event-title-error'));
         break;
       case 2: {
         const clonedRow = r.cloneNode(true);

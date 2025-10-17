@@ -1,3 +1,7 @@
+.event-info-component {
+  --mod-textfield-border-color-disabled: var(--spectrum-gray-600);
+  --highcontrast-textfield-text-color-disabled: var(--spectrum-gray-600);
+}
 .event-info-component .info-field-wrapper {
   margin-bottom: 24px;
 }
@@ -335,7 +339,7 @@
 .event-info-component .title-container {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .event-info-component .title-container .left-wrapper {
@@ -363,11 +367,15 @@
 }
 .marketo-linked-badge-wrapper{
   display:flex;
-  gap:10px;
+  gap:20px;
+}
+.marketo-linked-badge-label{
+  font-weight: 600;
+  font-size: 16px;
 }
 .marketo-linked-badge{
   background-color: #656464;
-  padding: 0px 10px;
+  padding: 0px 20px;
   border-radius: 5px;
   border: 1px solid #656464;
   font-weight: 600;

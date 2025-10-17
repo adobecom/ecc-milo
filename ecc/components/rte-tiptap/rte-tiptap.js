@@ -24,6 +24,7 @@ export default class RteTiptap extends LitElement {
     characterLimit: { type: Number },
     required: { type: Boolean },
     size: { type: String },
+    disabled: {type: Boolean},
   };
 
   static styles = style;
@@ -47,6 +48,7 @@ export default class RteTiptap extends LitElement {
     this.linkDialogError = false;
     this.isEditingLink = false;
     this.size = this.size ?? 'm';
+    this.disabled = this.disabled || false;
   }
 
   updateButtonStates(editor) {
@@ -95,6 +97,7 @@ export default class RteTiptap extends LitElement {
     this.editor = new Editor({
       content: this.content,
       element: editorEl,
+      editable: !this.disabled, 
       extensions: [
         StarterKit,
         Placeholder.configure({ placeholder: this.placeholder }),
@@ -218,49 +221,50 @@ export default class RteTiptap extends LitElement {
     this.selectWordAtCursor();
   }
 
+ 
   render() {
     /* eslint-disable indent */
     return html`
             <div class="rte-tiptap-editor size-${this.size}"></div>
             <div class="rte-tiptap-toolbar-bottom-wrapper">
               <div class="rte-tiptap-toolbar">
-                <sp-picker class="rte-format-input select-input" label="Format" value=${this.rteFormat} @change=${(event) => { this.toggleFormat(event.target.value); }}>
+                <sp-picker class="rte-format-input select-input" .disabled=${this.disabled} label="Format" value=${this.rteFormat} @change=${(event) => { this.toggleFormat(event.target.value); }}>
                   ${repeat(['Paragraph', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6'], (p) => html`<sp-menu-item value=${p}>${p}</sp-menu-item>`)}
                 </sp-picker>
-                <button aria-label="Bold" class=${this.isBold ? 'active' : ''} @click=${() => {
+                <button aria-label="Bold" class=${this.isBold ? 'active' : ''} .disabled=${this.disabled} @click=${() => {
                   this.selectWordAtCursor();
                   this.editor.chain().focus().toggleBold().run();
                   this.updateButtonStates(this.editor);
                 }}>
                   <img class="icon icon-rte-bold" src="/ecc/icons/rte-bold.svg" alt="rte-bold" />
                 </button>
-                <button aria-label="Italic" class=${this.isItalic ? 'active' : ''} @click=${() => {
+                <button aria-label="Italic" class=${this.isItalic ? 'active' : ''} .disabled=${this.disabled} @click=${() => {
                   this.selectWordAtCursor();
                   this.editor.chain().focus().toggleItalic().run();
                   this.updateButtonStates(this.editor);
                 }}>
                   <img class="icon icon-rte-italic" src="/ecc/icons/rte-italic.svg" alt="rte-italic" />
                 </button>
-                <button aria-label="Underline" class=${this.isUnderline ? 'active' : ''} @click=${() => {
+                <button aria-label="Underline" class=${this.isUnderline ? 'active' : ''} .disabled=${this.disabled} @click=${() => {
                   this.selectWordAtCursor();
                   this.editor.chain().focus().toggleUnderline().run();
                   this.updateButtonStates(this.editor);
                 }}>
                   <img class="icon icon-rte-underline" src="/ecc/icons/rte-underline.svg" alt="rte-underline" />
                 </button>
-                <button aria-label="Bullet List" class=${this.isBulletList ? 'active' : ''} @click=${() => {
+                <button aria-label="Bullet List" class=${this.isBulletList ? 'active' : ''} .disabled=${this.disabled} @click=${() => {
                   this.editor.chain().focus().toggleBulletList().run();
                   this.updateButtonStates(this.editor);
                 }}>
                   <img class="icon icon-rte-bullet-list" src="/ecc/icons/rte-bullet-list.svg" alt="rte-bullet-list" />
                 </button>
-                <button aria-label="Ordered List" class=${this.isOrderedList ? 'active' : ''} @click=${() => {
+                <button aria-label="Ordered List" class=${this.isOrderedList ? 'active' : ''} .disabled=${this.disabled} @click=${() => {
                   this.editor.chain().focus().toggleOrderedList().run();
                   this.updateButtonStates(this.editor);
                 }}>
                   <img class="icon icon-rte-ordered-list" src="/ecc/icons/rte-ordered-list.svg" alt="rte-ordered-list" />
                 </button>
-                <button aria-label="Link" class=${this.isLink ? 'active' : ''} @click=${() => {
+                <button aria-label="Link" class=${this.isLink ? 'active' : ''} .disabled=${this.disabled} @click=${() => {
                   this.selectLinkAtCursor();
                   this.rteAddLink();
                   this.updateButtonStates(this.editor);
@@ -290,6 +294,7 @@ export default class RteTiptap extends LitElement {
                   .value=${this.linkDialogUrl}
                   .invalid=${this.linkDialogError}
                   @input=${this.handleLinkDialogInput}
+                  .disabled=${this.disabled}
                 ></sp-textfield>
                 
                 ${this.linkDialogError ? html`
@@ -302,6 +307,7 @@ export default class RteTiptap extends LitElement {
                   <sp-button 
                     variant="secondary"
                     @click=${this.handleLinkDialogCancel}
+                    .disabled=${this.disabled}
                   >
                     Cancel
                   </sp-button>
@@ -309,6 +315,7 @@ export default class RteTiptap extends LitElement {
                     <sp-button 
                       variant="negative"
                       @click=${this.handleLinkUnlink}
+                      .disabled=${this.disabled}
                     >
                       Remove Link
                     </sp-button>
@@ -316,6 +323,7 @@ export default class RteTiptap extends LitElement {
                   <sp-button 
                     variant="cta"
                     @click=${this.handleLinkDialogConfirm}
+                    .disabled=${this.disabled}
                   >
                     ${this.isEditingLink ? 'Update' : 'Add'} Link
                   </sp-button>
