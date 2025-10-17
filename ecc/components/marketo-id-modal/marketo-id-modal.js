@@ -44,6 +44,34 @@ export default class MarketoIdModal extends LitElement {
     const idWithPrefix = this.addMczPrefix(marketoId);
     return idWithPrefix.replace('-', '');
   }
+  /**
+   * Convert time from hhmmss format to hh:mm:ss format
+   * @param {string|number} time - Time in hhmmss format (e.g., 101010)
+   * @returns {string} Time in hh:mm:ss format (e.g., 10:10:10)
+   */
+  formatDate(date) {
+    // Ensure input is a string
+    const str = String(date).padStart(6, '0'); // pad in case of missing leading zeros
+
+    // Extract hh, mm, ss
+    const year = str.substring(0, 4);
+    const mm = str.substring(4, 6);
+    const dd = str.substring(6, 8);
+
+    return `${year}-${mm}-${dd}`;
+  }
+  formatTime(time) {
+    // Ensure input is a string
+    const str = String(time).padStart(6, '0'); // pad in case of missing leading zeros
+
+    // Extract hh, mm, ss
+    const hh = str.substring(0, 2);
+    const mm = str.substring(2, 4);
+    const ss = str.substring(4, 6);
+
+    return `${hh}:${mm}:${ss}`;
+  }
+
 
   updateFormUsingMarketoData = async(params) =>{
     const seriesName = params.profile['Series Name'];
@@ -55,10 +83,10 @@ export default class MarketoIdModal extends LitElement {
     const eventStartDateTime = params.profile['Event Start Date Time ISO'];
     const eventEndDateTime = params.profile['Event End Date Time ISO'];
   
-    const localStartDate = formatDate(eventStartDateTime.split('T')[0]);
-    const localEndDate = formatDate(eventEndDateTime.split('T')[0]);
-    const localStartTime = formatTime(eventStartDateTime.split('T')[1]);
-    const localEndTime = formatTime(eventEndDateTime.split('T')[1]);
+    const localStartDate = this.formatDate(eventStartDateTime.split('T')[0]);
+    const localEndDate = this.formatDate(eventEndDateTime.split('T')[0]);
+    const localStartTime = this.formatTime(eventStartDateTime.split('T')[1]);
+    const localEndTime = this.formatTime(eventEndDateTime.split('T')[1]);
   
     const eventInfo = {
       title: params.profile['Event Name'],
@@ -136,15 +164,14 @@ export default class MarketoIdModal extends LitElement {
       class: 'hidden',
     });
     document.getElementById("marketo-event-modal")?.append(iframe);
-    console.log("===iframe===>",iframe);
     let that = this;
     window.addEventListener('message', (event) => {
-      console.log("==addEventListener====>",event.data.data);
+      console.log("iframe message recieved",event.data.data);
       that.onMczMessage(event)
     });
   }
 
-  onMczMessage(event) {
+  onMczMessage = async(event) =>{
     const config = { allowedOrigins: ['https://engage.adobe.com', 'https://business.adobe.com'] };
     const eventOrigin = new URL(event.origin);
     let allowedToPass = false;
@@ -168,8 +195,7 @@ export default class MarketoIdModal extends LitElement {
     // eslint-disable-next-line no-console
     console.log('MCZ RefData Received:', event.data);
     if (event.data && event.data.target_path !== null && event.data.target_attribute !== null) {
-      console.log("======>",event.data.data);
-      const eventData = this.updateFormUsingMarketoData(event.data.data);
+      const eventData = await this.updateFormUsingMarketoData(event.data.data);
       this.dispatchEvent(new CustomEvent('marketo-id-submit', {
         bubbles: true,
         composed: true,
@@ -203,22 +229,11 @@ export default class MarketoIdModal extends LitElement {
   handleConnectClick() {
     if (!this.isValid) {
       // Trigger validation to show error message
-      // this.isValid = this.validateMarketoId(this.marketoId);
-      const marketoId = this.addMczPrefix(this.marketoId);
-      this.loadMarketoEventInfo(marketoId)
-      return;
+      this.isValid = this.validateMarketoId(this.marketoId);
+      return this.isValid;
     }
     const marketoId = this.addMczPrefix(this.marketoId);
     this.loadMarketoEventInfo(marketoId)
-    // this.dispatchEvent(new CustomEvent('marketo-id-submit', {
-    //   bubbles: true,
-    //   composed: true,
-    //   detail: { 
-    //     marketoId: this.marketoId.trim(),
-    //     action: 'connect'
-    //   }
-    // }));
-    // this.closeModal();
   }
 
   handleCancelClick() {

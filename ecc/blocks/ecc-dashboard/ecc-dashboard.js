@@ -23,6 +23,7 @@ import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
+import BlockMediator from '../../scripts/deps/block-mediator.min.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -733,14 +734,12 @@ function buildDashboardHeader(props, config) {
 
   webinarModal.addEventListener('marketo-connect', (event) => {
     event.preventDefault();
-    if (event.detail.connect && event.detail.marketoId) {
-      // User provided Marketo ID - proceed with integration
-      console.log('Connecting to Marketo ID:', event.detail.marketoId);
-      // showMarketoIntegrationForm(event.detail.marketoId);
-    } else {
-      // User declined or canceled - proceed without integration  
-      window.location.href = config['webinar-form-url'];
+    const {connect, marketoId, eventData} = event.detail;
+    if (connect && marketoId && eventData) {
+      console.log('Connecting to Marketo ID:', marketoId);
+      localStorage.setItem(`marketo-event-data-${marketoId}`, JSON.stringify(eventData));
     }
+    window.location.href = config['webinar-form-url'] + (marketoId ? `?marketoId=${marketoId}`:  "");
   })
   document.addEventListener('click', (e) => {
     if (!dropdown.contains(e.target) && !createCta.contains(e.target)) {

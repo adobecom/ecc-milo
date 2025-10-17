@@ -90,7 +90,7 @@ export default class MarketoEventModal extends LitElement {
   }
 
   handleIdModalSubmit(event) {
-    const { marketoId, action } = event.detail;
+    const { marketoId, action, eventData } = event.detail;
 
     if (action === 'connect' && marketoId) {
       // Simulate validation - for demo purposes, make certain IDs fail
@@ -104,6 +104,7 @@ export default class MarketoEventModal extends LitElement {
           detail: {
             connect: true,
             marketoId,
+            eventData,
           },
         }));
       } else {

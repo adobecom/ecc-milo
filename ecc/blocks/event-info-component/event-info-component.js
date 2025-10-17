@@ -8,7 +8,7 @@ import {
   decorateTextarea,
 } from '../../scripts/utils.js';
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
-
+let marketoEventData = null;
 const privateEventString = 'Set as a private event';
 const privateEventToolTip = 'By setting this to private, your event won\'t be publicly found online or published to the events hub.';
 
@@ -34,7 +34,7 @@ async function addLanguagePicker(row) {
 function addMarketoLinkedBadge(row){
   const MarketoBadgeWrapper = createTag('div', { class: 'marketo-linked-badge-wrapper' });
   createTag('sp-label', { for: 'marketo-linked-badge' }, 'Linked to Marketo', { parent: MarketoBadgeWrapper });
-  createTag('span', { id: 'marketo-linked-badge', class: 'marketo-linked-badge' }, 'Event Id: 123456', { parent: MarketoBadgeWrapper });
+  createTag('span', { id: 'marketo-linked-badge', class: 'marketo-linked-badge' }, `Event Id: ${marketoEventData.marketoId}`, { parent: MarketoBadgeWrapper });
   row.append(MarketoBadgeWrapper);
 }
 
@@ -186,9 +186,21 @@ function decorateRTETiptap(row) {
   row.append(rte);
 }
 
+function getMarketoData(){
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('marketoId')) {
+    const marketoString = localStorage.getItem(`marketo-event-data-${urlParams.get('marketoId')}`);
+    if(marketoString){
+      localStorage.removeItem(`marketo-event-data-${urlParams.get('marketoId')}`);
+      marketoEventData = JSON.parse(marketoString);
+      marketoEventData = {...marketoEventData,marketoId:urlParams.get('marketoId')};
+    }
+  }
+}
+
 export default function init(el) {
   el.classList.add('form-component');
-
+  getMarketoData();
   const rows = el.querySelectorAll(':scope > div');
   rows.forEach(async (r, i) => {
     switch (i) {
