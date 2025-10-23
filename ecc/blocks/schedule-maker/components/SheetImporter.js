@@ -1,7 +1,6 @@
 import { html } from '../htm-wrapper.js';
 import { useState, useEffect } from '../../../scripts/deps/preact-hook.js';
 import { useSchedulesOperations, useSchedulesData } from '../context/SchedulesContext.js';
-import { decorateBlocks } from '../utils.js';
 import { useNavigation } from '../context/NavigationContext.js';
 import useIcons from '../useIcons.js';
 
@@ -116,7 +115,7 @@ export default function SheetImporter() {
 
       // Ensure we have an id for the block
       block.id = `block-${Math.random().toString(36).substring(2, 15)}`;
-      block.liveStream = Boolean(block.mobileRiderSessionId);
+      block.includeLiveStream = Boolean(block.mobileRiderSessionId);
       if (!block.fragmentPath) {
         block.fragmentPath = '/remember/to/add/fragment/path';
       }
@@ -130,9 +129,8 @@ export default function SheetImporter() {
 
   const handleAddSchedule = async () => {
     const blocks = convertToBlocks();
-    const decoratedBlocks = decorateBlocks(blocks);
 
-    if (decoratedBlocks.length === 0) {
+    if (blocks.length === 0) {
       // eslint-disable-next-line no-alert
       alert('No valid blocks found. Please check your column mapping.');
       return;
@@ -140,7 +138,7 @@ export default function SheetImporter() {
 
     const newSchedule = await createAndAddSchedule({
       title: importSheetScheduleName,
-      blocks: decoratedBlocks,
+      blocks,
     });
 
     // Reset the form and go to edit schedule

@@ -9,12 +9,12 @@ import {
   deleteSchedule as deleteScheduleController,
 } from '../../../scripts/esp-controller.js';
 import {
-  decorateSchedules,
-  decorateSchedule,
+  processSchedules,
   assignIdToBlocks,
   isBlockComplete,
   isScheduleComplete,
-  createServerFriendlySchedule,
+  prepareScheduleForServer,
+  prepareScheduleForClient,
 } from '../utils.js';
 
 const SchedulesContext = createContext();
@@ -26,8 +26,8 @@ const SchedulesProvider = ({ children }) => {
   const [toastSuccess, setToastSuccess] = useState(null);
 
   const hasUnsavedChanges = useMemo(() => {
-    const originalStringifiedSchedule = JSON.stringify(createServerFriendlySchedule(originalActiveSchedule));
-    const currentStringifiedSchedule = JSON.stringify(createServerFriendlySchedule(activeSchedule));
+    const originalStringifiedSchedule = JSON.stringify(prepareScheduleForServer(originalActiveSchedule));
+    const currentStringifiedSchedule = JSON.stringify(prepareScheduleForServer(activeSchedule));
     return originalStringifiedSchedule !== currentStringifiedSchedule;
   }, [originalActiveSchedule, activeSchedule]);
 
@@ -47,8 +47,8 @@ const SchedulesProvider = ({ children }) => {
     setError(null);
     try {
       const { schedules: responseSchedules } = await getSchedulesController();
-      const decoratedSchedules = decorateSchedules(responseSchedules);
-      setSchedules(decoratedSchedules);
+      const sortedSchedules = processSchedules(responseSchedules);
+      setSchedules(sortedSchedules);
     } catch (err) {
       setError(err.message || 'Failed to get schedules');
     } finally {
@@ -67,9 +67,9 @@ const SchedulesProvider = ({ children }) => {
     setIsCreating(true);
     setToastError(null);
     try {
-      const serverFriendlySchedule = createServerFriendlySchedule(schedule);
+      const serverFriendlySchedule = prepareScheduleForServer(schedule);
       const newSchedule = await createScheduleController(serverFriendlySchedule);
-      const decoratedNewSchedule = decorateSchedule(newSchedule);
+      const decoratedNewSchedule = prepareScheduleForClient(newSchedule);
       setSchedules((prevSchedules) => [decoratedNewSchedule, ...prevSchedules]);
       setToastSuccess('Schedule created successfully');
       return decoratedNewSchedule;
@@ -86,10 +86,9 @@ const SchedulesProvider = ({ children }) => {
     setIsUpdating(true);
     setToastError(null);
     try {
-      const serverFriendlySchedule = createServerFriendlySchedule(schedule);
+      const serverFriendlySchedule = prepareScheduleForServer(schedule);
       const updatedScheduleResponse = await updateScheduleController(scheduleId, serverFriendlySchedule);
-      const updatedSchedule = { ...schedule, modificationTime: updatedScheduleResponse.modificationTime, isComplete: isScheduleComplete(schedule) };
-      const decoratedUpdatedSchedule = decorateSchedule(updatedSchedule);
+      const decoratedUpdatedSchedule = prepareScheduleForClient(updatedScheduleResponse);
       setSchedules((prevSchedules) => prevSchedules.map((s) => (s.scheduleId === scheduleId ? decoratedUpdatedSchedule : s)));
       setActiveScheduleWithOriginal(decoratedUpdatedSchedule);
       setToastError(null);

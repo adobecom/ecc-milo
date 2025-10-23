@@ -18,6 +18,7 @@ export default function AddScheduleModal({ isOpen, onClose }) {
   const handleCreateManuallySchedule = async () => {
     const newSchedule = {
       title: scheduleName,
+      isComplete: false,
       blocks: [],
     };
     const newScheduleResponse = await createAndAddSchedule(newSchedule);

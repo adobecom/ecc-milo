@@ -31,10 +31,10 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
 
   const handleLiveStreamChange = (blockId, event) => {
     if (!event.target.checked) {
-      updateBlockLocally(blockId, { mobileRiderSessionId: '', liveStream: false });
+      updateBlockLocally(blockId, { mobileRiderSessionId: '', includeLiveStream: false });
       return;
     }
-    updateBlockLocally(blockId, { liveStream: event.target.checked });
+    updateBlockLocally(blockId, { includeLiveStream: event.target.checked });
   };
 
   const handleMobileRiderSessionIdChange = (blockId, event) => {
@@ -106,12 +106,12 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
           <sp-checkbox \
             id="${block.id}-live-stream-checkbox" \
             name="${block.id}-live-stream-checkbox" \
-            checked=${block.liveStream} \
+            checked=${block.includeLiveStream} \
             onchange=${(event) => handleLiveStreamChange(block.id, event)} \
           >
             Live stream
           </sp-checkbox>
-          ${block.liveStream && html`
+          ${block.includeLiveStream && html`
           <sp-textfield \
             aria-label="Mobile rider session id" \
             type="text" \

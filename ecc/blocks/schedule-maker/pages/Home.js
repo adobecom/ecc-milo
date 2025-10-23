@@ -36,6 +36,7 @@ export default function Home() {
   const handleCreateSchedule = async (scheduleName) => {
     const newSchedule = {
       title: scheduleName,
+      isComplete: false,
       blocks: [],
     };
     const newScheduleResponse = await createAndAddSchedule(newSchedule);

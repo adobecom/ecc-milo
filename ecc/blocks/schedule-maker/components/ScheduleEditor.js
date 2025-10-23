@@ -20,8 +20,8 @@ export default function ScheduleEditor() {
       title: '',
       fragmentPath: '',
       startDateTime: 0,
-      liveStream: false,
-      mobileRiderSessionId: '',
+      includeLiveStream: false,
+      liveStream: { provider: 'MobileRider', streamId: '' }, // {provider: 'MobileRider' | 'YouTube', url?: string, streamId?: string}
       isComplete: false,
       isEditingBlockTitle: false,
     };
