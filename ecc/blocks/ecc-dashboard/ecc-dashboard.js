@@ -26,6 +26,9 @@ import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
 
+// Import resource history component
+import '../../components/resource-history/resource-history.js';
+
 // API Cache and Throttling System (functional approach)
 const apiCache = (() => {
   const cache = new Map();
@@ -405,6 +408,7 @@ function initMoreOptions(props, config, eventObj, row) {
     const copyUrl = buildTool(toolBox, 'Copy URL', 'copy');
     const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
     const clone = buildTool(toolBox, 'Clone', 'clone');
+    const history = buildTool(toolBox, 'Version History', 'version-history');
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
     if (eventObj.detailPagePath) {
@@ -502,6 +506,41 @@ function initMoreOptions(props, config, eventObj, row) {
       const newRow = props.el.querySelector(`tr[data-event-id="${newEventJSON.eventId}"]`);
       highlightRow(newRow);
       showToast(props, buildToastMsgWithEventTitle(newEventJSON, config['clone-event-toast-msg']), { variant: 'info' });
+    });
+
+    // history
+    history.addEventListener('click', async (e) => {
+      e.preventDefault();
+      toolBox.remove();
+
+      // Get or create the resource-history component
+      let historyPanel = props.el.querySelector('resource-history');
+      if (!historyPanel) {
+        historyPanel = createTag('resource-history');
+        props.el.appendChild(historyPanel);
+      }
+
+      // Set loading state
+      historyPanel.loading = true;
+      historyPanel.isOpen = true;
+      historyPanel.resourceTitle = getAttribute(eventObj, 'title', eventObj.defaultLocale || 'en-US') || 'Event';
+
+      try {
+        // Fetch history data from API
+        const historyData = await apiCache.get(getEventHistory, eventObj.eventId);
+
+        if (historyData && historyData.history) {
+          historyPanel.history = historyData.history;
+        } else {
+          historyPanel.history = [];
+        }
+      } catch (error) {
+        window.lana?.log(`Error fetching event history: ${error.message}`);
+        showToast(props, 'Failed to load event history. Please try again later.', { variant: 'negative' });
+        historyPanel.history = [];
+      } finally {
+        historyPanel.loading = false;
+      }
     });
 
     // delete
