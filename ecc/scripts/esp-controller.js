@@ -1527,7 +1527,6 @@ export async function getEventHistory(eventId) {
       return { status: response.status, error: data };
     }
 
-    console.log('getEventHistory data', data);
     return data;
   } catch (error) {
     window.lana?.log(`Failed to get event history for event ${eventId}:\n${JSON.stringify(error, null, 2)}`);

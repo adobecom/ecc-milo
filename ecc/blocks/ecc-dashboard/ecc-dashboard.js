@@ -405,7 +405,6 @@ function initMoreOptions(props, config, eventObj, row) {
     const copyUrl = buildTool(toolBox, 'Copy URL', 'copy');
     const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
     const clone = buildTool(toolBox, 'Clone', 'clone');
-    const history = buildTool(toolBox, 'View history', 'version-history');
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
     if (eventObj.detailPagePath) {
@@ -503,30 +502,6 @@ function initMoreOptions(props, config, eventObj, row) {
       const newRow = props.el.querySelector(`tr[data-event-id="${newEventJSON.eventId}"]`);
       highlightRow(newRow);
       showToast(props, buildToastMsgWithEventTitle(newEventJSON, config['clone-event-toast-msg']), { variant: 'info' });
-    });
-
-    // history
-    history.addEventListener('click', async (e) => {
-      e.preventDefault();
-      toolBox.remove();
-
-      const historyPanel = props.el.querySelector('resource-history');
-      if (!historyPanel) return;
-
-      historyPanel.loading = true;
-      historyPanel.resourceId = eventObj.eventId;
-      historyPanel.resourceType = 'event';
-      historyPanel.open();
-
-      try {
-        const historyData = await apiCache.get(getEventHistory, eventObj.eventId);
-        historyPanel.history = historyData.history || [];
-      } catch (error) {
-        showToast(props, 'Failed to load event history. Please try again later.', { variant: 'negative' });
-        window.lana?.log(`Error loading event history: ${error.message}`);
-      } finally {
-        historyPanel.loading = false;
-      }
     });
 
     // delete
@@ -1098,10 +1073,6 @@ async function buildDashboard(el, config) {
   const spTheme = createTag('sp-theme', { color: 'light', scale: 'medium', class: 'toast-area' }, '', { parent: el });
   createTag('sp-underlay', {}, '', { parent: spTheme });
   createTag('sp-dialog', { size: 's' }, '', { parent: spTheme });
-  
-  // Add resource history panel
-  const historyPanel = document.createElement('resource-history');
-  el.append(historyPanel);
 
   const props = {
     el,
@@ -1164,7 +1135,6 @@ export default async function init(el) {
     import(`${miloLibs}/features/spectrum-web-components/dist/dialog.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/underlay.js`),
     import(`${miloLibs}/features/spectrum-web-components/dist/progress-circle.js`),
-    import('../../components/resource-history/resource-history.js'),
   ]);
 
   const config = readBlockConfig(el);
