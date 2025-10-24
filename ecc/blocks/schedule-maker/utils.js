@@ -117,59 +117,17 @@ class ScheduleURLUtility {
    * @param {Object} scheduleObject - The schedule object to encode
    * @returns {string} - The complete shareable URL
    */
-  static async createScheduleURL(scheduleObject) {
-    if (!window.CompressionStream) {
-      await import('../../scripts/deps/compression-polyfill.js');
-    }
+  static createScheduleURL(scheduleObject) {
     try {
       // Convert object to JSON string
       const jsonString = JSON.stringify(scheduleObject);
 
-      // Convert string to Uint8Array for compression
-      const encoder = new TextEncoder();
-      const data = encoder.encode(jsonString);
-
-      // Compress the data using gzip
-      // eslint-disable-next-line no-undef
-      const compressionStream = new CompressionStream('gzip');
-      const writer = compressionStream.writable.getWriter();
-      const reader = compressionStream.readable.getReader();
-
-      // Write data to compression stream
-      writer.write(data);
-      writer.close();
-
-      // Read compressed data
-      const chunks = [];
-      let done = false;
-      while (!done) {
-        // eslint-disable-next-line no-await-in-loop
-        const { value, done: readerDone } = await reader.read();
-        done = readerDone;
-        if (value) {
-          chunks.push(value);
-        }
-      }
-
-      // Combine chunks into single Uint8Array
-      const compressedLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-      const compressedData = new Uint8Array(compressedLength);
-      let offset = 0;
-      // eslint-disable-next-line no-restricted-syntax
-      for (const chunk of chunks) {
-        compressedData.set(chunk, offset);
-        offset += chunk.length;
-      }
-
-      // Convert to base64 for URL safety
-      const base64String = btoa(String.fromCharCode(...compressedData));
-
-      // URL encode the base64 string
-      const encodedPayload = encodeURIComponent(base64String);
+      const base64JsonString = btoa(jsonString);
+      const encodedBase64JsonString = encodeURIComponent(base64JsonString);
 
       // Create URL with current location as base
       const currentURL = new URL(window.location.origin + window.location.pathname);
-      currentURL.searchParams.set('schedule', encodedPayload);
+      currentURL.searchParams.set('schedule', encodedBase64JsonString);
 
       return currentURL.toString();
     } catch (error) {
@@ -187,63 +145,17 @@ class ScheduleURLUtility {
     try {
       // Parse the URL
       const url = new URL(urlString);
-      const encodedPayload = url.searchParams.get('schedule');
+      const encodedBase64JsonString = url.searchParams.get('schedule');
 
-      if (!encodedPayload) {
+      if (!encodedBase64JsonString) {
         throw new Error('No schedule parameter found in URL');
       }
 
       // Decode the URL-encoded payload
-      const base64String = decodeURIComponent(encodedPayload);
-
-      // Convert base64 back to Uint8Array
-      const binaryString = atob(base64String);
-      const compressedData = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i += 1) {
-        compressedData[i] = binaryString.charCodeAt(i);
-      }
-
-      // Decompress the data
-      if (!window.DecompressionStream) {
-        await import('../../scripts/deps/compression-polyfill.js');
-      }
-
-      // eslint-disable-next-line no-undef
-      const decompressionStream = new DecompressionStream('gzip');
-      const writer = decompressionStream.writable.getWriter();
-      const reader = decompressionStream.readable.getReader();
-
-      // Write compressed data to decompression stream
-      writer.write(compressedData);
-      writer.close();
-
-      // Read decompressed data
-      const chunks = [];
-      let done = false;
-      while (!done) {
-        // eslint-disable-next-line no-await-in-loop
-        const { value, done: readerDone } = await reader.read();
-        done = readerDone;
-        if (value) {
-          chunks.push(value);
-        }
-      }
-
-      // Combine chunks and decode to string
-      const decompressedLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-      const decompressedData = new Uint8Array(decompressedLength);
-      let offset = 0;
-      // eslint-disable-next-line no-restricted-syntax
-      for (const chunk of chunks) {
-        decompressedData.set(chunk, offset);
-        offset += chunk.length;
-      }
-
-      const decoder = new TextDecoder();
-      const jsonString = decoder.decode(decompressedData);
-
-      // Parse JSON back to object
-      return JSON.parse(jsonString);
+      const decodedBase64JsonString = decodeURIComponent(encodedBase64JsonString);
+      const decodedJsonString = atob(decodedBase64JsonString);
+      const decodedScheduleObject = JSON.parse(decodedJsonString);
+      return decodedScheduleObject;
     } catch (error) {
       window.lana?.log(`Error extracting schedule from URL: ${error}`);
       throw new Error('Failed to extract schedule from URL');
@@ -258,7 +170,7 @@ class ScheduleURLUtility {
   static async copyScheduleToClipboard(scheduleObject) {
     try {
       // Generate the URL using createScheduleURL
-      const scheduleURL = await this.createScheduleURL(scheduleObject);
+      const scheduleURL = this.createScheduleURL(scheduleObject);
 
       // Extract title and scheduleId from options
       const { title, scheduleId } = scheduleObject;
