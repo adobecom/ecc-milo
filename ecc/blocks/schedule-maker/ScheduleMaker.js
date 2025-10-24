@@ -28,11 +28,24 @@ export default function ScheduleMaker() {
       if (isInitialLoading) return;
       const urlParams = new URLSearchParams(window.location.search);
       const scheduleParam = urlParams.get('schedule');
+      const scheduleIdParam = urlParams.get('scheduleId');
+
+      // Priority 1: Check for 'schedule' param (compressed schedule data from shared links)
       if (scheduleParam) {
         goToEditSchedule();
         const scheduleData = await ScheduleURLUtility.extractScheduleFromURL(window.location.href);
         const { scheduleId } = scheduleData;
         const schedule = schedules.find((s) => s.scheduleId === scheduleId);
+        if (schedule) {
+          setActiveSchedule(schedule);
+        }
+        return;
+      }
+
+      // Priority 2: Check for 'scheduleId' param (simple ID from internal navigation)
+      if (scheduleIdParam) {
+        goToEditSchedule();
+        const schedule = schedules.find((s) => s.scheduleId === scheduleIdParam);
         if (schedule) {
           setActiveSchedule(schedule);
         }

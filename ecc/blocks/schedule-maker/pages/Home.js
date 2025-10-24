@@ -25,9 +25,10 @@ export default function Home() {
   };
 
   const handleSelectSchedule = (schedule) => {
-    // Clear schedule query param when manually switching schedules
+    // Remove schedule query param and set scheduleId when manually switching
     const url = new URL(window.location);
     url.searchParams.delete('schedule');
+    url.searchParams.set('scheduleId', schedule.scheduleId);
     window.history.replaceState({}, '', url);
 
     setActiveSchedule(schedule);

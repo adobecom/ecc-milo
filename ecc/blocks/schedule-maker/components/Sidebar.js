@@ -35,9 +35,10 @@ function Sidebar({ setIsAddScheduleModalOpen }) {
       setIsUnsavedChangesModalOpen(true);
       return;
     }
-    // Clear schedule query param when manually switching schedules
+    // Remove schedule query param and set scheduleId when manually switching
     const url = new URL(window.location);
     url.searchParams.delete('schedule');
+    url.searchParams.set('scheduleId', schedule.scheduleId);
     window.history.replaceState({}, '', url);
 
     setActiveSchedule(schedule);
@@ -49,9 +50,10 @@ function Sidebar({ setIsAddScheduleModalOpen }) {
     if (pendingAction === 'add') {
       setIsAddScheduleModalOpen(true);
     } else if (pendingAction === 'switch' && pendingSchedule) {
-      // Clear schedule query param when manually switching schedules
+      // Remove schedule query param and set scheduleId when manually switching
       const url = new URL(window.location);
       url.searchParams.delete('schedule');
+      url.searchParams.set('scheduleId', pendingSchedule.scheduleId);
       window.history.replaceState({}, '', url);
 
       setActiveSchedule(pendingSchedule);
