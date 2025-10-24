@@ -22,6 +22,14 @@ export default function SheetImporter() {
     fragmentPath: '',
   });
 
+  // Map property names to user-facing labels (matching BlockEditor.js)
+  const propertyLabels = {
+    startDateTime: 'Timestamp / Servertime',
+    title: 'Block title',
+    streamId: 'Mobile Rider Stream ID',
+    fragmentPath: 'Fragment path',
+  };
+
   useEffect(() => {
     const fetchLibrary = async () => {
       const { default: XLSX } = await import('../../../scripts/deps/xlsx.js');
@@ -235,7 +243,7 @@ export default function SheetImporter() {
           <div class="sheet-importer__mapping-items">
             ${Object.entries(columnMapping).map(([property, selectedColumn]) => html`
               <div class="sheet-importer__mapping-item">
-                <sp-field-label for=${`mapping-${property}`} size="l">${property}:</sp-field-label>
+                <sp-field-label for=${`mapping-${property}`} size="l">${propertyLabels[property]}:</sp-field-label>
                 <sp-picker \
                   id=${`mapping-${property}`} \
                   class="sheet-importer__mapping-picker" \
@@ -263,7 +271,7 @@ export default function SheetImporter() {
               <thead>
                 <tr>
                   ${Object.entries(columnMapping).filter(([, col]) => col).map(([prop]) => html`
-                    <th>${prop}</th>
+                    <th>${propertyLabels[prop]}</th>
                   `)}
                 </tr>
               </thead>

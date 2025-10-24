@@ -74,7 +74,7 @@ export default function ScheduleHeader() {
   };
 
   const handleScheduleTitleChange = (event) => {
-    updateScheduleLocally(activeSchedule.scheduleId, { title: event.target.value });
+    updateScheduleLocally(event.target.value);
   };
 
   const handleEditScheduleTitle = () => {
