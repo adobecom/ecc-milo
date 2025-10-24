@@ -10,6 +10,54 @@ function isScheduleComplete(schedule) {
   return schedule.blocks?.every((block) => isBlockComplete(block));
 }
 
+// Validation functions for submission
+function isValidUrl(url) {
+  if (!url || url.trim() === '') return true; // Empty is valid (optional field)
+  // Check if it's a relative path (starts with /)
+  if (url.startsWith('/')) {
+    // Basic validation for relative paths
+    return /^\/[\w\-./]*$/.test(url);
+  }
+  // Check if it's an absolute URL
+  try {
+    const urlObject = new URL(url);
+    return Boolean(urlObject);
+  } catch {
+    return false;
+  }
+}
+
+function validateBlock(block, blockIndex) {
+  const errors = [];
+
+  if (!block.title || block.title.trim() === '') {
+    errors.push(`Block ${blockIndex + 1}: Title is required`);
+  }
+
+  if (block.fragmentPath && !isValidUrl(block.fragmentPath)) {
+    errors.push(`Block ${blockIndex + 1} ("${block.title || 'Untitled'}"): Fragment path must be a valid relative or absolute URL`);
+  }
+
+  return errors;
+}
+
+function validateSchedule(schedule) {
+  const errors = [];
+
+  if (!schedule.title || schedule.title.trim() === '') {
+    errors.push('Schedule title is required');
+  }
+
+  if (schedule.blocks && schedule.blocks.length > 0) {
+    schedule.blocks.forEach((block, index) => {
+      const blockErrors = validateBlock(block, index);
+      errors.push(...blockErrors);
+    });
+  }
+
+  return errors;
+}
+
 function sortBlocks(blocks) {
   return blocks?.sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
 }
@@ -258,4 +306,5 @@ export {
   assignIdToBlocks,
   prepareScheduleForServer,
   ScheduleURLUtility,
+  validateSchedule,
 };

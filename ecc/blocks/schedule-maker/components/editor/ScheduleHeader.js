@@ -1,7 +1,7 @@
 import { html } from '../../htm-wrapper.js';
 import { useSchedulesData, useSchedulesOperations, useSchedulesUI } from '../../context/SchedulesContext.js';
 import { useState } from '../../../../scripts/deps/preact-hook.js';
-import { ScheduleURLUtility } from '../../utils.js';
+import { ScheduleURLUtility, validateSchedule } from '../../utils.js';
 import DeleteConfirmationModal from '../DeleteConfirmationModal.js';
 
 export default function ScheduleHeader() {
@@ -56,6 +56,14 @@ export default function ScheduleHeader() {
 
   const handleSave = async () => {
     if (!activeSchedule) return;
+
+    // Validate schedule before submission
+    const validationErrors = validateSchedule(activeSchedule);
+    if (validationErrors.length > 0) {
+      const errorMessage = validationErrors.join('\n');
+      setToastError(errorMessage);
+      return;
+    }
 
     try {
       await updateSchedule(activeSchedule.scheduleId, activeSchedule);

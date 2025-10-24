@@ -130,9 +130,6 @@ export default function SheetImporter() {
         block.includeLiveStream = false;
       }
 
-      if (!block.fragmentPath) {
-        block.fragmentPath = '/remember/to/add/fragment/path';
-      }
       // ensure startDateTime is a timestamp
       block.startDateTime = new Date(block.startDateTime).getTime() || 0;
       block.isComplete = false;
@@ -154,6 +151,12 @@ export default function SheetImporter() {
       title: importSheetScheduleName,
       blocks,
     });
+
+    // Check if validation failed
+    if (newSchedule.error) {
+      // Error is already displayed via toast, just return
+      return;
+    }
 
     // Reset the form and go to edit schedule
     setUploadedFile(null);

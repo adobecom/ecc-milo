@@ -40,6 +40,13 @@ export default function Home() {
       blocks: [],
     };
     const newScheduleResponse = await createAndAddSchedule(newSchedule);
+
+    // Check if validation failed
+    if (newScheduleResponse.error) {
+      // Error is already displayed via toast, just return
+      return;
+    }
+
     setActiveSchedule(newScheduleResponse);
     goToEditSchedule();
   };

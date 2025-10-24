@@ -15,6 +15,7 @@ import {
   isScheduleComplete,
   prepareScheduleForServer,
   prepareScheduleForClient,
+  validateSchedule,
 } from '../utils.js';
 
 const SchedulesContext = createContext();
@@ -67,6 +68,15 @@ const SchedulesProvider = ({ children }) => {
     setIsCreating(true);
     setToastError(null);
     try {
+      // Validate schedule before creation
+      const validationErrors = validateSchedule(schedule);
+      if (validationErrors.length > 0) {
+        const errorMessage = validationErrors.join('\n');
+        setToastError(errorMessage);
+        setIsCreating(false);
+        return { error: errorMessage };
+      }
+
       const serverFriendlySchedule = prepareScheduleForServer(schedule);
       const newSchedule = await createScheduleController(serverFriendlySchedule);
       const decoratedNewSchedule = prepareScheduleForClient(newSchedule);
@@ -204,6 +214,7 @@ const SchedulesProvider = ({ children }) => {
     error,
     toastError,
     clearToastError,
+    setToastError,
     createAndAddSchedule,
     updateSchedule,
     discardChangesToActiveSchedule,
@@ -270,6 +281,7 @@ export const useSchedulesUI = () => {
     clearToastError: context.clearToastError,
     clearToastSuccess: context.clearToastSuccess,
     setToastSuccess: context.setToastSuccess,
+    setToastError: context.setToastError,
   };
 };
 
