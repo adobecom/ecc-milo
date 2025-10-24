@@ -168,7 +168,7 @@ class ScheduleURLUtility {
       const encodedPayload = encodeURIComponent(base64String);
 
       // Create URL with current location as base
-      const currentURL = new URL(window.location.href);
+      const currentURL = new URL(window.location.origin + window.location.pathname);
       currentURL.searchParams.set('schedule', encodedPayload);
 
       return currentURL.toString();
