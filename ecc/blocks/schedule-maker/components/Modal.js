@@ -1,6 +1,5 @@
 import { useEffect, useRef } from '../../../scripts/deps/preact-hook.js';
 import { html } from '../htm-wrapper.js';
-import useIcons from '../useIcons.js';
 
 export default function Modal({
   isOpen,
@@ -16,7 +15,6 @@ export default function Modal({
   const modalRef = useRef(null);
   const firstFocusableRef = useRef(null);
   const lastFocusableRef = useRef(null);
-  useIcons();
 
   // Handle escape key
   useEffect(() => {
@@ -111,7 +109,9 @@ export default function Modal({
             ${title}
           </h2>`}
           <sp-action-button quiet size="s" onClick=${onClose} aria-label="Close modal" class="modal-close">
-            <span class="icon icon-close" slot="icon"></span>
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18" slot="icon">
+              <path fill="currentColor" fill-rule="evenodd" d="M13.243,3.343,9,7.586,4.757,3.343a.5.5,0,0,0-.707,0l-.707.707a.5.5,0,0,0,0,.707L7.586,9,3.343,13.243a.5.5,0,0,0,0,.707l.707.707a.5.5,0,0,0,.707,0L9,10.414l4.243,4.243a.5.5,0,0,0,.707,0l.707-.707a.5.5,0,0,0,0-.707L10.414,9l4.243-4.243a.5.5,0,0,0,0-.707l-.707-.707A.5.5,0,0,0,13.243,3.343Z"/>
+            </svg>
           </sp-action-button>
         </div>
         <div class="modal-content">

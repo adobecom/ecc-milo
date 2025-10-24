@@ -2,7 +2,6 @@ import { html } from '../htm-wrapper.js';
 import { useState, useEffect } from '../../../scripts/deps/preact-hook.js';
 import { useSchedulesOperations, useSchedulesData } from '../context/SchedulesContext.js';
 import { useNavigation } from '../context/NavigationContext.js';
-import useIcons from '../useIcons.js';
 
 export default function SheetImporter() {
   const { importSheetScheduleName } = useNavigation();
@@ -189,7 +188,6 @@ export default function SheetImporter() {
     setSelectedSheet('');
     setSheetData([]);
   };
-  useIcons();
 
   if (isLoading) {
     return html`<div class="sheet-importer"><p>Loading...</p></div>`;
@@ -213,7 +211,9 @@ export default function SheetImporter() {
         />` : html`
           <button class="sheet-importer__file-remove" onClick=${handleRemoveFile} aria-label="Remove file">
             ${uploadedFile.name}
-            <span class="icon icon-close"></span>
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18">
+              <path fill="currentColor" fill-rule="evenodd" d="M13.243,3.343,9,7.586,4.757,3.343a.5.5,0,0,0-.707,0l-.707.707a.5.5,0,0,0,0,.707L7.586,9,3.343,13.243a.5.5,0,0,0,0,.707l.707.707a.5.5,0,0,0,.707,0L9,10.414l4.243,4.243a.5.5,0,0,0,.707,0l.707-.707a.5.5,0,0,0,0-.707L10.414,9l4.243-4.243a.5.5,0,0,0,0-.707l-.707-.707A.5.5,0,0,0,13.243,3.343Z"/>
+            </svg>
           </button>
         `}
 

@@ -5,6 +5,8 @@ import { useEffect } from '../../scripts/deps/preact-hook.js';
  * useIcons is a hook that loads the icons from the icons.js file
  * and makes them available to the components
  */
+// We switched to inline svgs everywhere
+// Keeping the code here so we can see where to import icons from when needed
 export default function useIcons() {
   useEffect(() => {
     const fetchIcons = async () => {

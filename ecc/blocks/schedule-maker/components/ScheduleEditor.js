@@ -1,6 +1,5 @@
 import { html } from '../htm-wrapper.js';
 import { useSchedulesData, useSchedulesOperations } from '../context/SchedulesContext.js';
-import useIcons from '../useIcons.js';
 import { useState } from '../../../scripts/deps/preact-hook.js';
 import ScheduleHeader from './editor/ScheduleHeader.js';
 import BlockEditor from './editor/BlockEditor.js';
@@ -8,7 +7,6 @@ import BlockEditor from './editor/BlockEditor.js';
 export default function ScheduleEditor() {
   const { activeSchedule } = useSchedulesData();
   const { addBlockLocally } = useSchedulesOperations();
-  useIcons();
 
   const [editingBlockId, setEditingBlockId] = useState(null);
 
