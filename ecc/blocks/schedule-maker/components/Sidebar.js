@@ -35,6 +35,11 @@ function Sidebar({ setIsAddScheduleModalOpen }) {
       setIsUnsavedChangesModalOpen(true);
       return;
     }
+    // Clear schedule query param when manually switching schedules
+    const url = new URL(window.location);
+    url.searchParams.delete('schedule');
+    window.history.replaceState({}, '', url);
+
     setActiveSchedule(schedule);
     goToEditSchedule();
   };
@@ -44,6 +49,11 @@ function Sidebar({ setIsAddScheduleModalOpen }) {
     if (pendingAction === 'add') {
       setIsAddScheduleModalOpen(true);
     } else if (pendingAction === 'switch' && pendingSchedule) {
+      // Clear schedule query param when manually switching schedules
+      const url = new URL(window.location);
+      url.searchParams.delete('schedule');
+      window.history.replaceState({}, '', url);
+
       setActiveSchedule(pendingSchedule);
       goToEditSchedule();
     }
