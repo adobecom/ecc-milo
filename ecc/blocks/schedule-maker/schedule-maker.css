@@ -633,11 +633,11 @@
   padding: 10px var(--sm-spacing-sm);
 }
 
-.sm-title-button .icon {
+.sm-title-button svg {
   display: none;
 }
 
-.sm-title-button:hover .icon {
+.sm-title-button:hover svg {
   display: block;
 }
 

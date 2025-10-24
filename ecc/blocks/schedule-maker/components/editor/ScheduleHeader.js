@@ -113,7 +113,9 @@ export default function ScheduleHeader() {
           onclick=${() => handleEditScheduleTitle()} \
         >
           ${activeSchedule?.title || ''}
-          <span class="icon icon-edit"></span>
+          <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18">
+            <path fill="currentColor" fill-rule="evenodd" d="M16.783,4.1,13.9,1.216a.607.607,0,0,0-.433-.176h-.019a.687.687,0,0,0-.464.2L2.542,11.686a.5.5,0,0,0-.126.211L1.028,16.55c-.057.188.229.425.391.425a.155.155,0,0,0,.031,0c.138-.032,3.933-1.172,4.656-1.39a.489.489,0,0,0,.207-.124L16.756,5.014a.684.684,0,0,0-.2-.442A.616.616,0,0,0,16.783,4.1ZM5.7,14.658c-1.08.325-2.431.733-3.364,1.011l1-3.365Z"/>
+          </svg>
         </button>
       </div>
       <div class="sm-editor__header-actions">
