@@ -54,10 +54,10 @@ export default function AddScheduleModal({ isOpen, onClose }) {
           onInput=${(e) => setScheduleName(e.target.value)} \
         ></sp-textfield>
         <div class="add-schedule-form-buttons">
-          <sp-button size="l" static-color="black" treatment="outline" onClick=${handleCreateManuallySchedule}>
+          <sp-button size="l" static-color="black" treatment="outline" onClick=${handleCreateManuallySchedule} disabled=${!scheduleName.trim()}>
             Create Manually
           </sp-button>
-          <sp-button size="l" static-color="black" treatment="outline" onClick=${handleCreateFromSheet}>
+          <sp-button size="l" static-color="black" treatment="outline" onClick=${handleCreateFromSheet} disabled=${!scheduleName.trim()}>
             Create from Sheet
           </sp-button>
         </div>
