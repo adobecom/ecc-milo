@@ -31,14 +31,14 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
 
   const handleLiveStreamChange = (blockId, event) => {
     if (!event.target.checked) {
-      updateBlockLocally(blockId, { mobileRiderSessionId: '', includeLiveStream: false });
+      updateBlockLocally(blockId, { liveStream: { provider: 'MobileRider', streamId: '' }, includeLiveStream: false });
       return;
     }
     updateBlockLocally(blockId, { includeLiveStream: event.target.checked });
   };
 
-  const handleMobileRiderSessionIdChange = (blockId, event) => {
-    updateBlockLocally(blockId, { mobileRiderSessionId: event.target.value });
+  const handleLiveStreamIdChange = (blockId, event) => {
+    updateBlockLocally(blockId, { liveStream: { provider: 'MobileRider', streamId: event.target.value } });
   };
 
   const displayAsIsoString = (timestamp) => {
@@ -113,11 +113,11 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
           </sp-checkbox>
           ${block.includeLiveStream && html`
           <sp-textfield \
-            aria-label="Mobile rider session id" \
+            aria-label="Mobile rider stream id" \
             type="text" \
-            id="${block.id}-mobile-rider-session-id-input" \
-            value=${block.mobileRiderSessionId} \
-            oninput=${(event) => handleMobileRiderSessionIdChange(block.id, event)} \
+            id="${block.id}-mobile-rider-stream-id-input" \
+            value=${block.liveStream?.streamId || ''} \
+            oninput=${(event) => handleLiveStreamIdChange(block.id, event)} \
             placeholder="Enter Mobile Rider Stream ID" \
           />
           `}

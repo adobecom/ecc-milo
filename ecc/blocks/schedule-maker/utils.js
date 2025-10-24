@@ -1,5 +1,5 @@
 function isBlockComplete(block) {
-  if (block.includeLiveStream && !block.mobileRiderSessionId) {
+  if (block.includeLiveStream && !block.liveStream?.streamId) {
     return false;
   }
   return Boolean(block.fragmentPath && block.startDateTime && block.title);
@@ -31,6 +31,9 @@ function prepareScheduleForServer(schedule) {
     if (!block.includeLiveStream) {
       delete block.liveStream;
     }
+    if (!block.fragmentPath) {
+      delete block.fragmentPath;
+    }
   });
   return deepCopyOfSchedule;
 }
@@ -44,8 +47,12 @@ function prepareScheduleForClient(schedule) {
     if (!block.liveStream) {
       block.liveStream = { provider: 'MobileRider', streamId: '' }; // {provider: 'MobileRider' | 'YouTube', url?: string, streamId?: string}
     }
+    // Recalculate block's isComplete status
+    block.isComplete = isBlockComplete(block);
   });
   schedule.blocks = sortBlocks(schedule.blocks);
+  // Recalculate schedule's isComplete status based on all blocks
+  schedule.isComplete = isScheduleComplete(schedule);
   return schedule;
 }
 // Prepare schedules loaded from the server for client consumption

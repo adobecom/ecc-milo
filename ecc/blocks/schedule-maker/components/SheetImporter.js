@@ -18,7 +18,7 @@ export default function SheetImporter() {
   const [columnMapping, setColumnMapping] = useState({
     startDateTime: '',
     title: '',
-    mobileRiderSessionId: '',
+    streamId: '',
     fragmentPath: '',
   });
 
@@ -50,7 +50,7 @@ export default function SheetImporter() {
         setColumnMapping({
           startDateTime: '',
           title: '',
-          mobileRiderSessionId: '',
+          streamId: '',
           fragmentPath: '',
         });
       } catch (error) {
@@ -109,13 +109,27 @@ export default function SheetImporter() {
       Object.entries(columnMapping).forEach(([property, columnName]) => {
         if (columnName && headers.includes(columnName)) {
           const columnIndex = headers.indexOf(columnName);
-          block[property] = row[columnIndex] || '';
+          const value = row[columnIndex] || '';
+
+          // Handle streamId separately to build the liveStream object
+          if (property === 'streamId') {
+            block.liveStream = { provider: 'MobileRider', streamId: value };
+            block.includeLiveStream = Boolean(value);
+          } else {
+            block[property] = value;
+          }
         }
       });
 
       // Ensure we have an id for the block
       block.id = `block-${Math.random().toString(36).substring(2, 15)}`;
-      block.includeLiveStream = Boolean(block.mobileRiderSessionId);
+
+      // Initialize liveStream if not set
+      if (!block.liveStream) {
+        block.liveStream = { provider: 'MobileRider', streamId: '' };
+        block.includeLiveStream = false;
+      }
+
       if (!block.fragmentPath) {
         block.fragmentPath = '/remember/to/add/fragment/path';
       }
@@ -149,7 +163,7 @@ export default function SheetImporter() {
     setColumnMapping({
       startDateTime: '',
       title: '',
-      mobileRiderSessionId: '',
+      streamId: '',
       fragmentPath: '',
     });
 
