@@ -26,6 +26,98 @@ import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
 import BlockMediator from '../../scripts/deps/block-mediator.min.js';
+import { showEventShareDialog } from '../../components/social-share-dialog/social-share-dialog.js';
+
+// API Cache and Throttling System (functional approach)
+const apiCache = (() => {
+  const cache = new Map();
+  const pendingRequests = new Map();
+  const cacheTimeout = 10000; // 10 seconds
+
+  const generateKey = (apiFunction, ...args) => `${apiFunction.name}_${JSON.stringify(args)}`;
+  const isExpired = (timestamp) => Date.now() - timestamp > cacheTimeout;
+
+  return {
+    async get(apiFunction, ...args) {
+      const key = generateKey(apiFunction, ...args);
+
+      // Return cached result if valid
+      if (cache.has(key)) {
+        const { data, timestamp } = cache.get(key);
+        if (!isExpired(timestamp)) {
+          return data;
+        }
+        cache.delete(key);
+      }
+
+      // Return pending request if exists
+      if (pendingRequests.has(key)) {
+        return pendingRequests.get(key);
+      }
+
+      // Make new request
+      const request = apiFunction(...args)
+        .then((data) => {
+          cache.set(key, { data, timestamp: Date.now() });
+          pendingRequests.delete(key);
+          return data;
+        })
+        .catch((error) => {
+          pendingRequests.delete(key);
+          throw error;
+        });
+
+      pendingRequests.set(key, request);
+      return request;
+    },
+
+    clear() {
+      cache.clear();
+      pendingRequests.clear();
+    },
+
+    invalidate(pattern) {
+      const keysToDelete = [];
+      cache.forEach((value, key) => {
+        if (key.includes(pattern)) {
+          keysToDelete.push(key);
+        }
+      });
+      keysToDelete.forEach((key) => cache.delete(key));
+    },
+  };
+})();
+
+// Throttling utility
+function throttle(func, delay) {
+  let timeoutId;
+  let lastExecTime = 0;
+
+  return function throttledFunction(...args) {
+    const currentTime = Date.now();
+
+    if (currentTime - lastExecTime > delay) {
+      func.apply(this, args);
+      lastExecTime = currentTime;
+    } else {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func.apply(this, args);
+        lastExecTime = Date.now();
+      }, delay - (currentTime - lastExecTime));
+    }
+  };
+}
+
+// Debouncing utility
+function debounce(func, delay) {
+  let timeoutId;
+
+  return function debouncedFunction(...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+}
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
@@ -428,7 +520,21 @@ function initMoreOptions(props, config, eventObj, row) {
     const copyUrl = buildTool(toolBox, 'Copy URL', 'copy');
     const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
     const clone = buildTool(toolBox, 'Clone', 'clone');
+    const shareBtn = buildTool(toolBox, 'Share', 'share');
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
+
+    // Share button that opens a dialog
+    shareBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      showEventShareDialog({
+        targetElement: props.el,
+        eventObj,
+        onClose: () => {
+          toolBox.remove();
+        },
+      });
+    });
 
     if (eventObj.detailPagePath) {
       previewPre.href = (() => {
