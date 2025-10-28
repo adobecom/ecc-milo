@@ -91,7 +91,7 @@ export async function constructRequestOptions(method, body = null) {
     'x-api-key': 'acom_event_service',
     'content-type': 'application/json',
     'x-request-id': await getUuid(new Date().getTime()),
-    'x-client-identity': clientIdentity,
+    /*'x-client-identity': clientIdentity,*/
   };
 
   Object.entries(sanitizedHeaders).forEach(([key, value]) => {

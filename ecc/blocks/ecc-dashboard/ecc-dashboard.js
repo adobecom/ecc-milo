@@ -25,6 +25,7 @@ import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES } from '../../scripts/constants.js';
+import { showEventShareDialog } from '../../components/social-share-dialog/social-share-dialog.js';
 
 // API Cache and Throttling System (functional approach)
 const apiCache = (() => {
@@ -405,7 +406,21 @@ function initMoreOptions(props, config, eventObj, row) {
     const copyUrl = buildTool(toolBox, 'Copy URL', 'copy');
     const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
     const clone = buildTool(toolBox, 'Clone', 'clone');
+    const shareBtn = buildTool(toolBox, 'Share', 'share');
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
+
+    // Share button that opens a dialog
+    shareBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      showEventShareDialog({
+        targetElement: props.el,
+        eventObj,
+        onClose: () => {
+          toolBox.remove();
+        },
+      });
+    });
 
     if (eventObj.detailPagePath) {
       previewPre.href = (() => {

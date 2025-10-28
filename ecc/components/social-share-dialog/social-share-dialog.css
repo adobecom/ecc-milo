@@ -1,0 +1,49 @@
+/**
+ * Social Share Dialog Styles
+ *
+ * Note: These styles are automatically injected by the social-share-dialog.js component.
+ * This file is kept for reference and documentation purposes.
+ * The actual styles used are defined in social-share-dialog.js
+ */
+
+/* Social share icons container */
+.social-share-icons {
+  display: flex;
+  gap: 36px;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 0;
+  /* margin: 16px 0; */
+}
+
+.social-share-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--color-gray-200);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  padding: 0;
+}
+
+.social-share-icon:hover {
+  background-color: var(--color-gray-300);
+  transform: scale(1.1);
+}
+
+.social-share-icon:focus {
+  outline: 2px solid var(--color-info-accent);
+  outline-offset: 2px;
+}
+
+.social-share-icon img.icon {
+  width: 28px;
+  height: 28px;
+  pointer-events: none;
+}
+
