@@ -140,7 +140,10 @@ function initAutocomplete(el) {
   // eslint-disable-next-line no-undef
   if (!google) return;
   // eslint-disable-next-line no-undef
-  const autocomplete = new google.maps.places.Autocomplete(venueName.shadowRoot.querySelector('input'));
+  const autocomplete = new google.maps.places.Autocomplete(
+    venueName.shadowRoot.querySelector('input'),
+    { types: ['establishment'] },
+  );
 
   const placeId = el.querySelector('#google-place-id');
   const placeLAT = el.querySelector('#google-place-lat');
