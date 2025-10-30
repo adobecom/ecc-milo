@@ -1,0 +1,31 @@
+/* Create Schedule Form */
+.create-schedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Disabled state */
+.create-schedule-form sp-textfield[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.create-schedule-form-textfield {
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .create-schedule-form {
+    gap: 0.75rem;
+  }
+  
+  .form-label {
+    font-size: 0.875rem;
+  }
+  
+  .form-help-text {
+    font-size: 0.75rem;
+  }
+}
