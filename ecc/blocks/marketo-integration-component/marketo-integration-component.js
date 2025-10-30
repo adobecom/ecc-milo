@@ -63,6 +63,7 @@ export const MARKETO_INTEGRATION_FIELDS = [
     type: 'select',
     placeholder: 'Select POI',
     options: [
+      { label: 'No Event POI', value: 'No Event POI' },
       { label: 'Adobe Analytics', value: 'Adobe Analytics' },
       { label: 'Adobe Audience Manager', value: 'Adobe Audience Manager' },
       { label: 'Adobe Campaign', value: 'Adobe Campaign' },

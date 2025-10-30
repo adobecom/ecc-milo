@@ -68,7 +68,7 @@ export function onSubmit(component, props) {
     if (salesforceCampaignId) marketoIntegration.salesforceCampaignId = salesforceCampaignId;
     if (mczProgramName) marketoIntegration.mczProgramName = mczProgramName;
     if (coMarketingPartner) marketoIntegration.coMarketingPartner = coMarketingPartner;
-    if (eventPoi) marketoIntegration.eventPoi = eventPoi;
+    if (eventPoi && eventPoi !== 'No Event POI') marketoIntegration.eventPoi = eventPoi;
     setPropsPayload(props, { marketoIntegration });
   } else {
     removeData.push({
