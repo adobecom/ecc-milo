@@ -33,11 +33,7 @@ export async function onRespUpdate(component, props) {
       if (salesforceCampaignId) salesforceCampaignIdInput.value = salesforceCampaignId;
       if (mczProgramName) mczProgramNameInput.value = mczProgramName;
       if (coMarketingPartner) coMarketingPartnerInput.value = coMarketingPartner;
-      if (eventPoi && eventPoi !== 'No Event POI') {
-        eventPoiInput.value = eventPoi;
-      } else {
-        eventPoiInput.value = '';
-      }
+      if (eventPoi) eventPoiInput.value = eventPoi;
     }
 
     if (eventId) {
