@@ -33,7 +33,11 @@ export async function onRespUpdate(component, props) {
       if (salesforceCampaignId) salesforceCampaignIdInput.value = salesforceCampaignId;
       if (mczProgramName) mczProgramNameInput.value = mczProgramName;
       if (coMarketingPartner) coMarketingPartnerInput.value = coMarketingPartner;
-      if (eventPoi && eventPoi !== 'No Event POI') marketoIntegration.eventPoi = eventPoi;
+      if (eventPoi && eventPoi !== 'No Event POI') {
+        eventPoiInput.value = eventPoi;
+      } else {
+        eventPoiInput.value = '';
+      }
     }
 
     if (eventId) {
@@ -68,7 +72,7 @@ export function onSubmit(component, props) {
     if (salesforceCampaignId) marketoIntegration.salesforceCampaignId = salesforceCampaignId;
     if (mczProgramName) marketoIntegration.mczProgramName = mczProgramName;
     if (coMarketingPartner) marketoIntegration.coMarketingPartner = coMarketingPartner;
-    if (eventPoi) marketoIntegration.eventPoi = eventPoi;
+    if (eventPoi && eventPoi !== 'No Event POI') marketoIntegration.eventPoi = eventPoi;
     setPropsPayload(props, { marketoIntegration });
   } else {
     removeData.push({
