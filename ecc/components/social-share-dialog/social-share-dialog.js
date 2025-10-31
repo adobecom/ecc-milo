@@ -29,7 +29,7 @@
  */
 
 import { LIBS } from '../../scripts/scripts.js';
-import { getIcon, getEventPageHost } from '../../scripts/utils.js';
+import { getIcon } from '../../scripts/utils.js';
 import { getAttribute } from '../../scripts/data-utils.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
@@ -69,9 +69,9 @@ function openSharePopup(shareType, url, title = '') {
   }
 
   // Copy title to clipboard for user convenience
-  const prefilledText = `Can’t keep calm — heading to the Adobe event! 🎉\nAlways inspired by the creativity, innovation, and people that make Adobe what it is. Can’t wait to connect, learn, and bring back a spark of that creative energy! 🚀`;
+  const prefilledText = 'Join us at our Adobe meetup — connect, learn, and build what\'s next together.';
   navigator.clipboard.writeText(prefilledText).catch((err) => {
-    console.warn('Failed to copy to clipboard:', err);
+    window.lana?.log(`Failed to copy to clipboard: ${err}`, { tags: 'errorType=warn,module=social-share-dialog' });
   });
 
   // Open popup window
@@ -262,7 +262,7 @@ export function showEventShareDialog(options) {
   // Get event URL for sharing
   let eventUrl = '';
   try {
-    eventUrl = 'https://www.adobe.com/events/virtual-learn-events/virtual-learn-event-photoshop/2025-10-14.html';//eventObj.detailPagePath?.startsWith('http')
+    eventUrl = 'https://www.adobe.com/events/create-now/create-now-portland-design-month/portland/or/us/2025-10-16.html';//eventObj.detailPagePath?.startsWith('http')
       //? `${eventObj.detailPagePath}.html`
       //: `${getEventPageHost()}${eventObj.detailPagePath}.html`;
   } catch (err) {
