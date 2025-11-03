@@ -1,0 +1,16 @@
+.add-schedule-form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.add-schedule-form-container sp-textfield {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.add-schedule-form-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 46px;
+}
