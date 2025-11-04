@@ -110,6 +110,8 @@ export default class MarketoIdModal extends LitElement {
 
   openModal() {
     this.open = true;
+    this.errorMessage = null;
+    this.isValid = true;
     // Focus the input field when modal opens
     this.updateComplete.then(() => {
       const input = this.shadowRoot.querySelector('#marketo-id-input');
@@ -159,7 +161,7 @@ export default class MarketoIdModal extends LitElement {
   }
 
   loadMarketoEventInfo(marketoId) {
-    this.errorMessage = null;
+    this.errorMessage = '';
     const urlFormatId = this.formatMarketoUrl(marketoId);
     const iframe = createTag('iframe', {
       src: `https://engage.adobe.com/${urlFormatId}.html?mkto_src=emc`,
