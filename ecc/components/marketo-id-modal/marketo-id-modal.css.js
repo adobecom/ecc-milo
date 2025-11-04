@@ -94,7 +94,27 @@ export const style = css`
     color: var(--spectrum-gray-500, #9f9f9f);
     cursor: not-allowed;
   }
-
+  .loader {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #ccc;
+    border-top-color: #007bff;
+    border-radius: 50%;
+    animation: spin 1s 
+    linear infinite;
+    margin-bottom: 1rem;
+    position: fixed;
+    z-index: 999;
+    opacity: 1;
+    margin: auto;
+    left: 0;
+    right: 0;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
   @media (max-width: 600px) {
     sp-dialog {
       min-width: 320px;

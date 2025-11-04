@@ -26,7 +26,8 @@ export default class MarketoIdModal extends LitElement {
     marketoId: { type: String },
     isValid: { type: Boolean },
     errorMessage: { type: String },
-    timeoutId: { type: Number}
+    timeoutId: { type: Number},
+    loading: { type: Boolean}
   };
 
   static styles = style;
@@ -191,10 +192,12 @@ export default class MarketoIdModal extends LitElement {
       }
     }
     if (event.data && event.data.type !== 'mcz_marketoForm_pref_sync') {
+      this.loading = false;
       allowedToPass = false;
     }
     if (!allowedToPass) {
       this.timeoutId = setTimeout(() => {
+       this.loading = false;
        this.errorMessage = 'Invaid Marketo Id';
       }, 3000);
       return;
@@ -215,6 +218,7 @@ export default class MarketoIdModal extends LitElement {
       }));
       this.closeModal();
     }
+    this.loading = false;
     this.errorMessage = 'Invaid Marketo Id';
   }
 
@@ -242,6 +246,7 @@ export default class MarketoIdModal extends LitElement {
       return this.isValid;
     }
     const marketoId = this.addMczPrefix(this.marketoId);
+    this.loading = true;
     this.loadMarketoEventInfo(marketoId)
   }
 
@@ -268,6 +273,7 @@ export default class MarketoIdModal extends LitElement {
           aria-labelledby="modal-heading"
         >
           <h1 slot="heading" id="modal-heading">${this.heading}</h1>
+          <div class="loader"></div>
           <div class="modal-content">
             <div class="input-container">
               <sp-textfield
@@ -280,6 +286,7 @@ export default class MarketoIdModal extends LitElement {
                 autocomplete="off"
                 inputmode="numeric"
                 pattern="[0-9]*"
+                .disabled=${this.loading}
               ></sp-textfield>
               ${this.errorMessage ? html`
                 <div class="error-message" role="alert">
@@ -293,6 +300,7 @@ export default class MarketoIdModal extends LitElement {
               variant="secondary" 
               treatment="outline"
               @click=${this.handleCancelClick}
+              .disabled=${this.loading}
             >
               Cancel
             </sp-button>
@@ -301,6 +309,7 @@ export default class MarketoIdModal extends LitElement {
               static-color="black"
               ?disabled=${!this.isValid}
               @click=${this.handleConnectClick}
+              .disabled=${this.loading}
             >
               Connect
             </sp-button>
