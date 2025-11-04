@@ -26,6 +26,7 @@ export default class MarketoIdModal extends LitElement {
     marketoId: { type: String },
     isValid: { type: Boolean },
     errorMessage: { type: String },
+    timeoutId: { type: Number}
   };
 
   static styles = style;
@@ -191,12 +192,15 @@ export default class MarketoIdModal extends LitElement {
       allowedToPass = false;
     }
     if (!allowedToPass) {
-      this.errorMessage = 'Invaid Marketo Id';
+      this.timeoutId = setTimeout(() => {
+       this.errorMessage = 'Invaid Marketo Id';
+      }, 3000);
       return;
     }
     // eslint-disable-next-line no-console
     console.log('MCZ RefData Received:', event.data);
     if (event.data && event.data.target_path !== null && event.data.target_attribute !== null) {
+      clearTimeout(this.timeoutId);
       const eventData = await this.updateFormUsingMarketoData(event.data.data);
       this.dispatchEvent(new CustomEvent('marketo-id-submit', {
         bubbles: true,
