@@ -110,7 +110,7 @@ export default class MarketoIdModal extends LitElement {
 
   openModal() {
     this.open = true;
-    this.errorMessage = null;
+    this.errorMessage = '';
     this.isValid = true;
     // Focus the input field when modal opens
     this.updateComplete.then(() => {
