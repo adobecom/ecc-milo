@@ -273,7 +273,7 @@ export default class MarketoIdModal extends LitElement {
           aria-labelledby="modal-heading"
         >
           <h1 slot="heading" id="modal-heading">${this.heading}</h1>
-          <div class="loader"></div>
+          <div class="loader" style="display:  ${this.loading ? 'block': 'none'}"></div>
           <div class="modal-content">
             <div class="input-container">
               <sp-textfield
