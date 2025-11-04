@@ -158,6 +158,7 @@ export default class MarketoIdModal extends LitElement {
   }
 
   loadMarketoEventInfo(marketoId) {
+    this.errorMessage = null;
     const urlFormatId = this.formatMarketoUrl(marketoId);
     const iframe = createTag('iframe', {
       src: `https://engage.adobe.com/${urlFormatId}.html?mkto_src=emc`,
@@ -190,6 +191,7 @@ export default class MarketoIdModal extends LitElement {
       allowedToPass = false;
     }
     if (!allowedToPass) {
+      this.errorMessage = 'Invaid Marketo Id';
       return;
     }
     // eslint-disable-next-line no-console
@@ -207,6 +209,7 @@ export default class MarketoIdModal extends LitElement {
       }));
       this.closeModal();
     }
+    this.errorMessage = 'Invaid Marketo Id';
   }
 
   handleInputKeyDown(event) {
@@ -237,14 +240,6 @@ export default class MarketoIdModal extends LitElement {
   }
 
   handleCancelClick() {
-    this.dispatchEvent(new CustomEvent('marketo-id-submit', {
-      bubbles: true,
-      composed: true,
-      detail: { 
-        marketoId: null,
-        action: 'cancel'
-      }
-    }));
     this.closeModal();
   }
 

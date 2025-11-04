@@ -191,7 +191,7 @@ function decorateRTETiptap(row) {
 function getMarketoData(){
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('marketoId')) {
-    const marketoString = localStorage.getItem(`marketo-event-data-${urlParams.get('marketoId')}`);
+    const marketoString = localStorage.getItem(`marketo-event-data-${urlParams.get('externalEventId')}`);
     if(marketoString){
       localStorage.removeItem(`marketo-event-data-${urlParams.get('marketoId')}`);
       marketoEventData = JSON.parse(marketoString);

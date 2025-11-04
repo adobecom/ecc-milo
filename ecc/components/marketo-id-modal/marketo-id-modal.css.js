@@ -66,13 +66,10 @@ export const style = css`
   }
 
   .error-message {
-    position: absolute;
-    top: 100%;
-    left: 0;
     margin-top: 4px;
-    font-size: 12px;
-    color: var(--spectrum-red-600, #d73027);
-    line-height: 1.3;
+    font-size: 14px;
+    color: #d73027;
+    font-weight: 600;
   }
 
   .button-container {

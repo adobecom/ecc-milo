@@ -739,7 +739,7 @@ function buildDashboardHeader(props, config) {
       console.log('Connecting to Marketo ID:', marketoId);
       localStorage.setItem(`marketo-event-data-${marketoId}`, JSON.stringify(eventData));
     }
-    window.location.href = config['webinar-form-url'] + (marketoId ? `?marketoId=${marketoId}`:  "");
+    window.location.href = config['webinar-form-url'] + (marketoId ? `?externalEventId=mcz-${marketoId}`:  "");
   })
   document.addEventListener('click', (e) => {
     if (!dropdown.contains(e.target) && !createCta.contains(e.target)) {
