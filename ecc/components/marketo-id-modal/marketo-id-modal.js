@@ -192,7 +192,6 @@ export default class MarketoIdModal extends LitElement {
       }
     }
     if (event.data && event.data.type !== 'mcz_marketoForm_pref_sync') {
-      this.loading = false;
       allowedToPass = false;
     }
     if (!allowedToPass) {
