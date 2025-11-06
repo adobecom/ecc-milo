@@ -737,7 +737,7 @@ function buildDashboardHeader(props, config) {
     const {connect, marketoId, eventData} = event.detail;
     if (connect && marketoId && eventData) {
       console.log('Connecting to Marketo ID:', marketoId);
-      localStorage.setItem(`marketo-event-data-${marketoId}`, JSON.stringify(eventData));
+      localStorage.setItem(`marketo-event-data-mcz-${marketoId}`, JSON.stringify(eventData));
     }
     window.location.href = config['webinar-form-url'] + (marketoId ? `?externalEventId=mcz-${marketoId}`:  "");
   })

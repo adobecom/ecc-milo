@@ -94,13 +94,12 @@ export const style = css`
     cursor: not-allowed;
   }
   .loader {
-    width: 48px;
-    height: 48px;
-    border: 4px solid #ccc;
-    border-top-color: #007bff;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #868585;
+    border-top-color: #393a3b;
     border-radius: 50%;
-    animation: spin 1s 
-    linear infinite;
+    animation: spin 1s linear infinite;
     margin-bottom: 1rem;
     position: fixed;
     z-index: 999;
@@ -108,6 +107,9 @@ export const style = css`
     margin: auto;
     left: 0;
     right: 0;
+    top: 0;
+    bottom: 0;
+    position: absolute;
   }
   @keyframes spin {
     to {
