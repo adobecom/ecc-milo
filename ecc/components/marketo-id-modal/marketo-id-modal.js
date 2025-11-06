@@ -112,8 +112,7 @@ export default class MarketoIdModal extends LitElement {
 
   openModal() {
     this.open = true;
-    this.errorMessage = '';
-    this.isValid = true;
+    this.resetForm();
     // Focus the input field when modal opens
     this.updateComplete.then(() => {
       const input = this.shadowRoot.querySelector('#marketo-id-input');
@@ -130,7 +129,7 @@ export default class MarketoIdModal extends LitElement {
 
   resetForm() {
     this.marketoId = '';
-    this.isValid = false;
+    this.isValid = true;
     this.errorMessage = '';
   }
 
@@ -139,11 +138,17 @@ export default class MarketoIdModal extends LitElement {
     const trimmed = value.trim();
     if (!trimmed) {
       this.errorMessage = 'Marketo ID is required';
+      this.isValid = false;
       return false;
     }
-    
+    if(/^\d+$/.test(trimmed) && trimmed.length < 6){
+      this.errorMessage = 'Marketo ID should be 6-10 digits';
+      this.isValid = true;
+      return false;
+    }
     if (!/^\d{6,10}$/.test(trimmed)) {
       this.errorMessage = 'Marketo ID should be 6-10 digits';
+      this.isValid = false;
       return false;
     }
     
@@ -158,7 +163,7 @@ export default class MarketoIdModal extends LitElement {
       this.errorMessage = '';
       return;
     }
-    this.isValid = this.validateMarketoId(this.marketoId);
+    this.validateMarketoId(this.marketoId);
   }
 
   formatMarketoUrl = (marketoId) => {
@@ -204,6 +209,7 @@ export default class MarketoIdModal extends LitElement {
       this.timeoutId = setTimeout(() => {
        this.loading = false;
        this.errorMessage = 'Invalid Marketo Id';
+        this.isValid = false;
        clearTimeout(this.timeoutId);
       }, 7000);
       return;
@@ -226,7 +232,8 @@ export default class MarketoIdModal extends LitElement {
       this.closeModal();
     }
     this.loading = false;
-    this.errorMessage = 'Invaid Marketo Id';
+    this.isValid = false;
+    this.errorMessage = 'Invalid Marketo Id';
   }
 
   handleInputKeyDown(event) {
@@ -298,7 +305,7 @@ export default class MarketoIdModal extends LitElement {
                 .disabled=${this.loading}
               ></sp-textfield>
               ${this.errorMessage ? html`
-                <div class="error-message" role="alert">
+                <div class="error-message ${this.isValid ? '':'invalid'}" role="alert">
                   ${this.errorMessage}
                 </div>
               ` : ''}

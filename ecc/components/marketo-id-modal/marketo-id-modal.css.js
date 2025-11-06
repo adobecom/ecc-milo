@@ -67,8 +67,11 @@ export const style = css`
   .error-message {
     margin-top: 4px;
     font-size: 14px;
-    color: #d73027;
+    color: #000;
     font-weight: 600;
+  }
+  .error-message.invalid{
+    color: #d73027;
   }
 
   .button-container {
