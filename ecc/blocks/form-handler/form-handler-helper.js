@@ -21,7 +21,7 @@ import getJoinedData, {
 } from './data-handler.js';
 
 import { getUser, userHasAccessToBU, userHasAccessToEvent, userHasAccessToSeries } from '../../scripts/profile.js';
-import { LIBS } from '../../scripts/scripts.js';
+import { LIBS, LOCALES } from '../../scripts/scripts.js';
 
 import {
   getIcon,
@@ -42,6 +42,7 @@ import {
   getEvent,
   previewEvent,
   getSeriesById,
+  getLocales,
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
 import { ENVIRONMENTS, EVENT_TYPES, DEFAULT_SAVE_POLICIES } from '../../scripts/constants.js';
@@ -705,7 +706,17 @@ async function getNonProdPreviewDataById(props) {
   const esEnv = getCurrentEnvironment() === ENVIRONMENTS.LOCAL
     ? ENVIRONMENTS.DEV
     : getCurrentEnvironment();
-  const resp = await fetch(`${getEventPageHost()}/events/default/${esEnv === ENVIRONMENTS.PROD ? '' : `${esEnv}/`}metadata-preview.json?limit=999999`);
+
+  // Get locale prefix
+  const { locale } = props;
+  const locales = await getLocales().then((resp) => resp.localeNames) || {};
+  const lName = locales[locale];
+
+  const targetLocaleObject = Object.entries(LOCALES)
+    .find(([, v]) => v.longName.toLowerCase() === lName?.toLowerCase()) || {};
+  const localePrefix = targetLocaleObject[0];
+
+  const resp = await fetch(`${getEventPageHost()}${localePrefix ? `/${localePrefix}` : ''}/events/default/${esEnv === ENVIRONMENTS.PROD ? '' : `${esEnv}/`}metadata-preview.json?limit=999999`);
   if (resp.ok) {
     const json = await resp.json();
     const pageData = json.data.reverse().find((d) => d['event-id'] === eventId);
