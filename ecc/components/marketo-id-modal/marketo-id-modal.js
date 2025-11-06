@@ -27,7 +27,8 @@ export default class MarketoIdModal extends LitElement {
     isValid: { type: Boolean },
     errorMessage: { type: String },
     timeoutId: { type: Number},
-    loading: { type: Boolean}
+    loading: { type: Boolean},
+    iframe: {type: HTMLIFrameElement}
   };
 
   static styles = style;
@@ -152,6 +153,11 @@ export default class MarketoIdModal extends LitElement {
 
   handleInputChange(event) {
     this.marketoId = event.target.value;
+    if(!this.marketoId){
+      this.isValid = true;
+      this.errorMessage = '';
+      return;
+    }
     this.isValid = this.validateMarketoId(this.marketoId);
   }
 
@@ -164,11 +170,11 @@ export default class MarketoIdModal extends LitElement {
   loadMarketoEventInfo(marketoId) {
     this.errorMessage = '';
     const urlFormatId = this.formatMarketoUrl(marketoId);
-    const iframe = createTag('iframe', {
+    this.iframe = createTag('iframe', {
       src: `https://engage.adobe.com/${urlFormatId}.html?mkto_src=emc`,
       class: 'hidden',
     });
-    document.getElementById("marketo-event-modal")?.append(iframe);
+    document.getElementById("marketo-event-modal")?.append(this.iframe);
     let that = this;
     window.addEventListener('message', (event) => {
       console.log("iframe message recieved",event.data.data);
@@ -197,8 +203,9 @@ export default class MarketoIdModal extends LitElement {
     if (!allowedToPass) {
       this.timeoutId = setTimeout(() => {
        this.loading = false;
-       this.errorMessage = 'Invaid Marketo Id';
-      }, 3000);
+       this.errorMessage = 'Invalid Marketo Id';
+       clearTimeout(this.timeoutId);
+      }, 7000);
       return;
     }
     // eslint-disable-next-line no-console
@@ -215,6 +222,7 @@ export default class MarketoIdModal extends LitElement {
           eventData: eventData
         }
       }));
+      this.iframe.remove();
       this.closeModal();
     }
     this.loading = false;
@@ -223,6 +231,9 @@ export default class MarketoIdModal extends LitElement {
 
   handleInputKeyDown(event) {
     // Handle Enter key to submit
+    if(this.iframe){
+      this.iframe.remove();
+    }
     if (event.key === 'Enter' && this.isValid) {
       this.handleConnectClick();
     }
@@ -272,7 +283,6 @@ export default class MarketoIdModal extends LitElement {
           aria-labelledby="modal-heading"
         >
           <h1 slot="heading" id="modal-heading">${this.heading}</h1>
-          <div class="loader" style="display:  ${this.loading ? 'block': 'none'}"></div>
           <div class="modal-content">
             <div class="input-container">
               <sp-textfield
@@ -300,6 +310,7 @@ export default class MarketoIdModal extends LitElement {
               treatment="outline"
               @click=${this.handleCancelClick}
               .disabled=${this.loading}
+              class
             >
               Cancel
             </sp-button>
@@ -308,7 +319,8 @@ export default class MarketoIdModal extends LitElement {
               static-color="black"
               ?disabled=${!this.isValid}
               @click=${this.handleConnectClick}
-              .disabled=${this.loading}
+              .disabled=${this.marketoId.length < 6 || !this.isValid}
+              .pending=${this.loading}
             >
               Connect
             </sp-button>

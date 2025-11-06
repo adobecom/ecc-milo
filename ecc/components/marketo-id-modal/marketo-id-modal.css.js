@@ -56,7 +56,6 @@ export const style = css`
     width: 100%;
     font-size: 16px;
     --mod-textfield-border-radius: 8px;
-    --mod-textfield-height: 48px;
     --mod-textfield-padding-inline: 16px;
     --mod-textfield-font-size: 16px;
   }
