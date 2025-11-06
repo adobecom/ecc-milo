@@ -193,9 +193,9 @@ function getMarketoData(){
   if (urlParams.has('marketoId')) {
     const marketoString = localStorage.getItem(`marketo-event-data-${urlParams.get('externalEventId')}`);
     if(marketoString){
-      localStorage.removeItem(`marketo-event-data-${urlParams.get('marketoId')}`);
+      localStorage.removeItem(`marketo-event-data-${urlParams.get('externalEventId')}`);
       marketoEventData = JSON.parse(marketoString);
-      marketoEventData = {...marketoEventData,marketoId:urlParams.get('marketoId')};
+      marketoEventData = {...marketoEventData,marketoId:urlParams.get('externalEventId')};
     }
   }
 }
