@@ -322,7 +322,7 @@ async function loadEventData(props) {
     const eventObj = await getEventByExternalId(marketoEventId);
     if (!eventObj.error) {
       eventId = eventObj.eventId;
-      props.payload.externalEventId = marketoEventId;
+      props.payload.externalEventId = `mw-${marketoEventId.split('-')[1]}`;
     }
   }
 
