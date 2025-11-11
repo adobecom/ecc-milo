@@ -32,10 +32,12 @@ async function addLanguagePicker(row) {
 }
 
 function addMarketoLinkedBadge(row){
-  const MarketoBadgeWrapper = createTag('div', { class: 'marketo-linked-badge-wrapper' });
-  createTag('sp-label', { for: 'marketo-linked-badge', class:"marketo-linked-badge-label" }, 'Linked to Marketo', { parent: MarketoBadgeWrapper });
-  createTag('span', { id: 'marketo-linked-badge', class: 'marketo-linked-badge' }, `Event Id: ${marketoEventData?.marketoId}`, { parent: MarketoBadgeWrapper });
-  row.append(MarketoBadgeWrapper);
+  if(marketoEventData?.marketoId){
+    const MarketoBadgeWrapper = createTag('div', { class: 'marketo-linked-badge-wrapper' });
+    createTag('sp-label', { for: 'marketo-linked-badge', class:"marketo-linked-badge-label" }, 'Linked to Marketo', { parent: MarketoBadgeWrapper });
+    createTag('span', { id: 'marketo-linked-badge', class: 'marketo-linked-badge' }, `Event Id: ${marketoEventData?.marketoId}`, { parent: MarketoBadgeWrapper });
+    row.append(MarketoBadgeWrapper);
+  }
 }
 
 function buildTimePicker(column, wrapper) {
