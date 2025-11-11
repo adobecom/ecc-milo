@@ -475,7 +475,7 @@ async function saveEvent(props, toPublish = false) {
     }
   };
 
-  if (props.currentStep === 0 && !getAttribute(props.eventDataResp, 'eventId', props.locale)) {
+  if (props.currentStep === 0 && (!getAttribute(props.eventDataResp, 'eventId', props.locale) || !getAttribute(props.eventDataResp, 'externalEventId', props.locale))) {
     resp = await createEvent(getJoinedData(), props.locale);
     if (!resp.error && resp) {
       const newEventData = await getEvent(resp.eventId);
