@@ -171,12 +171,17 @@ function decorateRTETiptap(row) {
   const maxLengthCol = cols[1];
   const isRequired = maxLengthCol?.textContent.trim().endsWith('*');
 
-  const rteProps = {
+  let rteProps = {
     id: 'event-info-details-rte',
     ...(isRequired && { required: true }),
     content:marketoEventData?.description || "",
-    disabled:!!marketoEventData?.description
   };
+  if(marketoEventData?.description){
+    rteProps = {
+      ...rteProps,
+      disabled: true
+    }
+  }
 
   const rteHeading = createTag('sp-label', { for: 'event-info-details-rte' }, 'Event Details', { parent: row });
   const rte = createTag('rte-tiptap', rteProps);
