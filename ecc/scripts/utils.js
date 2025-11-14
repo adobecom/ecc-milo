@@ -49,6 +49,21 @@ export function yieldToMain() {
   });
 }
 
+export function shouldBlockTestTitlePublish(eventData) {
+  if (!eventData || typeof eventData !== 'object') return false;
+
+  const isPrivate = eventData.isPrivate === true;
+  if (isPrivate) return false;
+
+  if (eventData.localizations && typeof eventData.localizations === 'object') {
+    return Object.values(eventData.localizations).some((loc) => (
+      loc?.title && /test/i.test(loc.title)
+    ));
+  }
+
+  return false;
+}
+
 export function handlize(str) {
   return str?.toLowerCase().trim().replaceAll(' ', '-');
 }

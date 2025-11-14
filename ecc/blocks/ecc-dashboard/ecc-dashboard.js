@@ -19,6 +19,7 @@ import {
   getEventPageHost,
   readBlockConfig,
   signIn,
+  shouldBlockTestTitlePublish,
 } from '../../scripts/utils.js';
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
@@ -383,6 +384,45 @@ function initMoreOptions(props, config, eventObj, row) {
       pub.addEventListener('click', async (e) => {
         e.preventDefault();
         toolBox.remove();
+
+        if (shouldBlockTestTitlePublish(eventObj)) {
+          const errorMsg = 'Event title contains "TEST" but event is not marked as private. Please update the title or mark the event as private.';
+          const toastArea = props.el.querySelector('sp-theme.toast-area');
+          const toast = createTag('sp-toast', {
+            open: true,
+            variant: 'negative',
+            timeout: 12000,
+          }, errorMsg, { parent: toastArea });
+
+          const proceedBtn = createTag('sp-button', {
+            slot: 'action',
+            variant: 'overBackground',
+            treatment: 'outline',
+          }, 'Proceed anyway', { parent: toast });
+
+          proceedBtn.addEventListener('click', async () => {
+            toast.remove();
+            row.classList.add('pending');
+            const resp = await publishEvent(eventObj.eventId, eventObjFilter(eventObj));
+
+            if (resp.error) {
+              row.classList.remove('pending');
+              showToast(props, 'Failed to publish event. Please try again later.', { variant: 'negative' });
+              return;
+            }
+
+            updateDashboardData(resp, props);
+            sortData(props, config, { resort: true });
+            showToast(props, buildToastMsgWithEventTitle(eventObj, config['event-published-msg']), { variant: 'positive' });
+          });
+
+          toast.addEventListener('close', () => {
+            toast.remove();
+          });
+
+          return;
+        }
+
         row.classList.add('pending');
         const resp = await publishEvent(eventObj.eventId, eventObjFilter(eventObj));
 
@@ -393,9 +433,7 @@ function initMoreOptions(props, config, eventObj, row) {
         }
 
         updateDashboardData(resp, props);
-
         sortData(props, config, { resort: true });
-
         showToast(props, buildToastMsgWithEventTitle(eventObj, config['event-published-msg']), { variant: 'positive' });
       });
     }
