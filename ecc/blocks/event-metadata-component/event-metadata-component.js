@@ -32,7 +32,7 @@ function buildMetadataPicker(el, key, name, options) {
   picker.appendChild(placeholderLabel);
 
   // Add "No {label}" option first
-  const noOption = createTag('sp-menu-item', {}, `No ${name.toLowerCase()}`);
+  const noOption = createTag('sp-menu-item', {}, `No ${name}`);
   picker.appendChild(noOption);
 
   // Add options to picker
