@@ -193,7 +193,7 @@ export const CONFIG = {
   },
 };
 
-const RELEASE_VERSION = 'T3-25.34';
+const RELEASE_VERSION = 'T3-25.49';
 
 // Decorate the page with site specific needs.
 decorateArea();
