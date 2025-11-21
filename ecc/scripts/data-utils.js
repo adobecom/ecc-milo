@@ -181,6 +181,24 @@ export const VENUE_DATA_FILTER = {
   modificationTime: { type: 'string', localizable: false, submittable: true },
 };
 
+/**
+ * @typedef {Object} PublishingProfileDataFilter
+ * @property {string} type - The type of the attribute.
+ * @property {boolean} submittable - Whether the attribute can be submitted.
+ * @property {boolean} updatable - Whether the attribute can be updated after creation.
+ */
+
+export const PUBLISHING_PROFILE_DATA_FILTER = {
+  name: { type: 'string', submittable: true, updatable: true },
+  description: { type: 'string', submittable: true, updatable: true },
+  cloudType: { type: 'string', submittable: true, updatable: true },
+  metadata: { type: 'object', submittable: true, updatable: true },
+  status: { type: 'string', submittable: true, updatable: true },
+  profileId: { type: 'string', submittable: false, updatable: false },
+  modificationTime: { type: 'string', submittable: true, updatable: true },
+  creationTime: { type: 'string', submittable: false, updatable: false },
+};
+
 export function isValidAttribute(attr) {
   return (attr !== undefined && attr !== null && attr !== '') || attr === false;
 }
@@ -201,6 +219,32 @@ export function filterSeriesData(data, mode = 'submission', options = {}) {
     if (excludeKeys.includes(key)) return acc;
 
     const descriptor = SERIES_DATA_FILTER[key];
+
+    if (!descriptor) return acc;
+    if (!strategy(descriptor)) return acc;
+    if (!isValidAttribute(value)) return acc;
+
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+
+const PUBLISHING_PROFILE_FILTER_STRATEGIES = {
+  submission: (descriptor) => descriptor?.submittable === true,
+  update: (descriptor) => descriptor?.submittable === true && descriptor?.updatable !== false,
+};
+
+export function filterPublishingProfileData(data, mode = 'submission', options = {}) {
+  if (!data || typeof data !== 'object') return {};
+
+  const strategy = PUBLISHING_PROFILE_FILTER_STRATEGIES[mode]
+    || PUBLISHING_PROFILE_FILTER_STRATEGIES.submission;
+  const { excludeKeys = [] } = options;
+
+  return Object.entries(data).reduce((acc, [key, value]) => {
+    if (excludeKeys.includes(key)) return acc;
+
+    const descriptor = PUBLISHING_PROFILE_DATA_FILTER[key];
 
     if (!descriptor) return acc;
     if (!strategy(descriptor)) return acc;

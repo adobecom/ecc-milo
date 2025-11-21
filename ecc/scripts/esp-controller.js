@@ -1674,3 +1674,141 @@ export async function deleteSchedule(scheduleId) {
     throw new Error('Failed to delete schedule', error);
   }
 }
+
+export async function getPublishingProfiles() {
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/publishing-profiles`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to get publishing profiles. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to get publishing profiles:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function getPublishingProfile(profileId) {
+  if (!profileId || typeof profileId !== 'string') throw new Error('Invalid publishing profile ID');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/publishing-profiles/${profileId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to get publishing profile ${profileId}. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to get publishing profile ${profileId}:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function createPublishingProfile(profileData) {
+  if (!profileData || typeof profileData !== 'object') throw new Error('Invalid publishing profile data');
+  if (!profileData.name || typeof profileData.name !== 'string') throw new Error('Publishing profile name is required');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const raw = JSON.stringify(profileData);
+  const options = await constructRequestOptions('POST', raw);
+
+  try {
+    const response = await safeFetch(`${host}/v1/publishing-profiles`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to create publishing profile. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to create publishing profile:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function updatePublishingProfile(profileId, profileData) {
+  if (!profileId || typeof profileId !== 'string') throw new Error('Invalid publishing profile ID');
+  if (!profileData || typeof profileData !== 'object') throw new Error('Invalid publishing profile data');
+  if (!profileData.name || typeof profileData.name !== 'string') throw new Error('Publishing profile name is required');
+  if (!profileData.modificationTime) throw new Error('Modification time is required for optimistic locking');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const raw = JSON.stringify({ ...profileData, profileId });
+  const options = await constructRequestOptions('PUT', raw);
+
+  try {
+    const response = await safeFetch(`${host}/v1/publishing-profiles/${profileId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to update publishing profile ${profileId}. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to update publishing profile ${profileId}:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function getEventPublishingProfile(eventId) {
+  if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/events/${eventId}/publishing-profiles`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to get publishing profile for event ${eventId}. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to get publishing profile for event ${eventId}:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function assignPublishingProfileToEvent(eventId, profileId) {
+  if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
+  if (!profileId || typeof profileId !== 'string') throw new Error('Invalid publishing profile ID');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const raw = JSON.stringify({ profileId });
+  const options = await constructRequestOptions('POST', raw);
+
+  try {
+    const response = await safeFetch(`${host}/v1/events/${eventId}/publishing-profiles`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to assign publishing profile to event ${eventId}. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to assign publishing profile to event ${eventId}:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}

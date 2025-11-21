@@ -53,21 +53,17 @@ async function fetchAndBuildMetadataPickers(el) {
     }
     const catalogue = await response.json();
 
-    if (!catalogue.data || catalogue.data.length === 0) {
-      return;
-    }
+    if (!catalogue?.data?.length) return;
 
-    // Fetch options for all pickers in parallel
-    const optionsPromises = catalogue.data.map((pickerConfig) => (
-      fetchMetadataOptions(pickerConfig.key)
-        .then((options) => ({ config: pickerConfig, options }))
-    ));
+    const pickersData = await Promise.all(
+      catalogue.data.map(async (pickerConfig) => ({
+        config: pickerConfig,
+        options: await fetchMetadataOptions(pickerConfig.key),
+      })),
+    );
 
-    const pickersData = await Promise.all(optionsPromises);
-
-    // Build all pickers
-    pickersData.forEach((pickerData) => {
-      buildMetadataPicker(el, pickerData.config.key, pickerData.config.name, pickerData.options);
+    pickersData.forEach(({ config, options }) => {
+      buildMetadataPicker(el, config.key, config.name, options);
     });
   } catch (error) {
     window.lana?.log(`Failed to fetch metadata catalogue: ${error.message}`);
@@ -78,10 +74,7 @@ export default async function init(el) {
   el.classList.add('form-component');
 
   const rows = el.querySelectorAll(':scope > div');
-
-  if (rows.length > 0) {
-    generateToolTip(rows[0]);
-  }
+  if (rows.length) generateToolTip(rows[0]);
 
   await fetchAndBuildMetadataPickers(el);
 }
