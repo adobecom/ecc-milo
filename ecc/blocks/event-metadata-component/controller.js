@@ -16,6 +16,8 @@ function getMetadataFromComponent(component) {
   pickers.forEach((picker) => {
     const key = picker.id.replace('-picker', '');
     const { value } = picker;
+
+    // Only include fields with actual values (not "No {label}" options)
     if (value && !value.startsWith('No ')) {
       metadata[key] = value;
     }
@@ -91,8 +93,6 @@ export async function onTargetUpdate(component, props) {
   if (!eventDataResp?.eventId) return;
 
   const metadata = getMetadataFromComponent(component);
-  if (Object.keys(metadata).length === 0) return;
-
   const existingProfileId = component.dataset.profileId;
 
   try {
