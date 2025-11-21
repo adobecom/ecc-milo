@@ -191,7 +191,6 @@ export const VENUE_DATA_FILTER = {
 export const PUBLISHING_PROFILE_DATA_FILTER = {
   name: { type: 'string', submittable: true, updatable: true },
   description: { type: 'string', submittable: true, updatable: true },
-  cloudType: { type: 'string', submittable: true, updatable: true },
   metadata: { type: 'object', submittable: true, updatable: true },
   status: { type: 'string', submittable: true, updatable: true },
   profileId: { type: 'string', submittable: false, updatable: false },

@@ -87,13 +87,12 @@ export default async function init(component, props) {
 export async function onTargetUpdate(component, props) {
   if (component.closest('.fragment')?.classList.contains('hidden')) return;
 
-  const { eventDataResp, payload } = props;
+  const { eventDataResp } = props;
   if (!eventDataResp?.eventId) return;
 
   const metadata = getMetadataFromComponent(component);
   if (Object.keys(metadata).length === 0) return;
 
-  const { cloudType } = payload;
   const existingProfileId = component.dataset.profileId;
 
   try {
@@ -101,7 +100,6 @@ export async function onTargetUpdate(component, props) {
       const profileData = filterPublishingProfileData({
         name: `${eventDataResp.title || 'Event'} - Publishing Profile`,
         description: `Publishing profile for event ${eventDataResp.eventId}`,
-        cloudType,
         metadata,
         status: 'active',
       }, 'submission');
@@ -128,7 +126,6 @@ export async function onTargetUpdate(component, props) {
       const profileData = filterPublishingProfileData({
         name: `${eventDataResp.title || 'Event'} - Publishing Profile`,
         description: `Publishing profile for event ${eventDataResp.eventId}`,
-        cloudType,
         metadata,
         status: 'active',
         modificationTime,
