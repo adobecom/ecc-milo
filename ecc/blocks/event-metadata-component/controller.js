@@ -122,7 +122,7 @@ export async function onTargetUpdate(component, props) {
       component.dataset.profileId = createResp.profileId;
       component.dataset.modificationTime = createResp.modificationTime;
     } else {
-      const { modificationTime } = component.dataset;
+      const modificationTime = Number(component.dataset.modificationTime);
       const profileData = filterPublishingProfileData({
         name: `${eventDataResp.title || 'Event'} - Publishing Profile`,
         description: `Publishing profile for event ${eventDataResp.eventId}`,

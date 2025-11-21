@@ -194,8 +194,8 @@ export const PUBLISHING_PROFILE_DATA_FILTER = {
   metadata: { type: 'object', submittable: true, updatable: true },
   status: { type: 'string', submittable: true, updatable: true },
   profileId: { type: 'string', submittable: false, updatable: false },
-  modificationTime: { type: 'string', submittable: true, updatable: true },
-  creationTime: { type: 'string', submittable: false, updatable: false },
+  modificationTime: { type: 'number', submittable: true, updatable: true },
+  creationTime: { type: 'number', submittable: false, updatable: false },
 };
 
 export function isValidAttribute(attr) {

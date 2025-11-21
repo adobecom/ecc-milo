@@ -1745,7 +1745,7 @@ export async function updatePublishingProfile(profileId, profileData) {
   if (!profileId || typeof profileId !== 'string') throw new Error('Invalid publishing profile ID');
   if (!profileData || typeof profileData !== 'object') throw new Error('Invalid publishing profile data');
   if (!profileData.name || typeof profileData.name !== 'string') throw new Error('Publishing profile name is required');
-  if (!profileData.modificationTime) throw new Error('Modification time is required for optimistic locking');
+  if (!profileData.modificationTime || typeof profileData.modificationTime !== 'number') throw new Error('Modification time is required for optimistic locking');
 
   const { host } = API_CONFIG.esp[getCurrentEnvironment()];
   const raw = JSON.stringify({ ...profileData, profileId });
