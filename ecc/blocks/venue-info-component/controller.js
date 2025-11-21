@@ -160,7 +160,7 @@ function initAutocomplete(el) {
     if (place.address_components) {
       let components = place.address_components;
 
-      const addressInfo = { city: '' };
+      const addressInfo = { city: '', postalCode: '' };
 
       const cityCandidates = ['locality', 'postal_town', 'administrative_area_level_2', 'sublocality_level_1'];
 
@@ -168,6 +168,10 @@ function initAutocomplete(el) {
         if (!addressInfo.city
           && cityCandidates.some((type) => component.types.includes(type))) {
           addressInfo.city = component.long_name;
+        }
+
+        if (!addressInfo.postalCode && component.types.includes('postal_code')) {
+          addressInfo.postalCode = component.long_name;
         }
       });
 
@@ -185,7 +189,15 @@ function initAutocomplete(el) {
       changeInputValue(addressComponentsInput, 'value', JSON.stringify(components));
 
       if (Object.values(addressInfo).some((v) => !v)) {
-        el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: 'The selection is not a valid venue.' } }, bubbles: true, composed: true }));
+        const missingFields = [];
+        if (!addressInfo.city) missingFields.push('city');
+        if (!addressInfo.postalCode) missingFields.push('postal code');
+
+        const errorMessage = missingFields.length > 0
+          ? `The selected venue is missing required information: ${missingFields.join(', ')}. Please select a venue with complete address details.`
+          : 'The selection is not a valid venue.';
+
+        el.dispatchEvent(new CustomEvent('show-error-toast', { detail: { error: { message: errorMessage } }, bubbles: true, composed: true }));
         resetAllFields(el);
         togglePrefillableFieldsHiddenState(el);
         return;
