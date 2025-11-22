@@ -31,6 +31,7 @@ import {
   getEventPageHost,
   replaceAnchorWithButton,
   getMetadata,
+  shouldBlockTestTitlePublish,
 } from '../../scripts/utils.js';
 
 import { getCurrentEnvironment } from '../../scripts/environment.js';
@@ -910,6 +911,63 @@ function initFormCtas(props) {
             let resp;
 
             if (props.currentStep === props.maxStep) {
+              if (shouldBlockTestTitlePublish(props.eventDataResp)) {
+                const toastArea = props.el.querySelector('.toast-area');
+                if (toastArea) {
+                  const errorMsg = 'Event title contains "TEST" but event is not marked as private. Please update the title or mark the event as private.';
+                  const toast = createTag('sp-toast', {
+                    open: true,
+                    variant: 'negative',
+                    timeout: 12000,
+                  }, errorMsg, { parent: toastArea });
+
+                  const proceedBtn = createTag('sp-button', {
+                    slot: 'action',
+                    variant: 'overBackground',
+                    treatment: 'outline',
+                  }, 'Proceed anyway', { parent: toast });
+
+                  proceedBtn.addEventListener('click', async () => {
+                    toast.remove();
+                    const publishResp = await saveEvent(
+                      props,
+                      setEventSavePolicies({ liveUpdate: true }),
+                    );
+                    if (publishResp && !publishResp.error) {
+                      const successToastArea = props.el.querySelector('.toast-area');
+                      cta.textContent = cta.dataset.doneStateText;
+                      cta.classList.add('disabled');
+
+                      if (successToastArea) {
+                        const successToast = createTag('sp-toast', {
+                          open: true,
+                          variant: 'positive',
+                        }, 'Success! This event has been published.', { parent: successToastArea });
+                        const dashboardLink = props.el.querySelector('.side-menu > ul > li > a');
+
+                        createTag('sp-button', {
+                          slot: 'action',
+                          variant: 'overBackground',
+                          treatment: 'outline',
+                          href: dashboardLink.href,
+                        }, 'Go to dashboard', { parent: successToast });
+
+                        successToast.addEventListener('close', () => {
+                          successToast.remove();
+                        });
+                      }
+                    }
+                    toggleBtnsSubmittingState(false);
+                  });
+
+                  toast.addEventListener('close', () => {
+                    toast.remove();
+                  });
+                }
+                toggleBtnsSubmittingState(false);
+                return;
+              }
+
               resp = await saveEvent(props, setEventSavePolicies({ liveUpdate: true }));
             } else {
               resp = await saveEvent(props);
