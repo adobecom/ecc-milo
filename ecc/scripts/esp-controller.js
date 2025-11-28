@@ -864,6 +864,34 @@ export async function publishEvent(eventId, payload) {
   }
 }
 
+export async function publishToAdobe(eventId, publishData) {
+  if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
+  if (!publishData || typeof publishData !== 'object') throw new Error('Invalid publish data');
+
+  const { host } = API_CONFIG.esl[getCurrentEnvironment()];
+  const raw = JSON.stringify({
+    eventId,
+    sources: publishData.sources,
+    campaignId: publishData.campaignId,
+  });
+  const options = await constructRequestOptions('POST', raw);
+
+  try {
+    const response = await safeFetch(`${host}/v1/events/${eventId}/publish-to-adobe`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to publish event ${eventId} to Adobe. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to publish event ${eventId} to Adobe:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
 export async function unpublishEvent(eventId, payload) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
   if (!payload || typeof payload !== 'object') throw new Error('Invalid event payload');

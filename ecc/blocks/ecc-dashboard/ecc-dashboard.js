@@ -7,6 +7,8 @@ import {
   getLocales,
   publishEvent,
   unpublishEvent,
+  publishToAdobe,
+  getSeriesById,
 } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
@@ -248,6 +250,111 @@ function buildToastMsgWithEventTitle(event, configValue) {
   return msgTemplate.replace(/\[\[(.*?)\]\]/g, eventTitle);
 }
 
+function openPublishToAdobeDialog(props, eventObj, row) {
+  const spTheme = props.el.querySelector('sp-theme.toast-area');
+  if (!spTheme) return;
+
+  const underlay = spTheme.querySelector('sp-underlay');
+  const dialog = spTheme.querySelector('sp-dialog');
+  
+  dialog.classList.add('publish-to-adobe-dialog');
+  
+  createTag('h1', { slot: 'heading' }, 'Promote To Adobe Surfaces', { parent: dialog });
+  
+  const dialogContent = createTag('div', { class: 'publish-to-adobe-content' }, '', { parent: dialog });
+  
+  // Main row container for Sources and Campaign ID
+  const mainRow = createTag('div', { class: 'publish-row' }, '', { parent: dialogContent });
+  
+  // Sources section
+  const sourcesSection = createTag('div', { class: 'sources-section' }, '', { parent: mainRow });
+  createTag('h3', { class: 'section-label' }, 'Adobe Surfaces', { parent: sourcesSection });
+  const checkboxGroup = createTag('div', { class: 'checkbox-group' }, '', { parent: sourcesSection });
+  
+  const ccdCheckboxWrapper = createTag('div', { class: 'checkbox-wrapper' }, '', { parent: checkboxGroup });
+  const ccdCheckbox = createTag('input', { type: 'checkbox', id: 'ccd-checkbox', name: 'ccd' }, '', { parent: ccdCheckboxWrapper });
+  createTag('label', { for: 'ccd-checkbox' }, 'CCD', { parent: ccdCheckboxWrapper });
+  
+  const adobeHomeCheckboxWrapper = createTag('div', { class: 'checkbox-wrapper' }, '', { parent: checkboxGroup });
+  const adobeHomeCheckbox = createTag('input', { type: 'checkbox', id: 'adobe-home-checkbox', name: 'adobeHome' }, '', { parent: adobeHomeCheckboxWrapper });
+  createTag('label', { for: 'adobe-home-checkbox' }, 'Adobe Home', { parent: adobeHomeCheckboxWrapper });
+  
+  // Campaign ID section
+  const campaignIdSection = createTag('div', { class: 'campaign-id-section' }, '', { parent: mainRow });
+  createTag('h3', { class: 'section-label' }, 'Campaign ID', { parent: campaignIdSection });
+  
+  // Mock campaign IDs
+  const mockCampaignIds = [
+    { value: '', label: 'Select Campaign ID' },
+    { value: 'CAMP-2024-001', label: 'CAMP-2024-001 - Spring Campaign' },
+    { value: 'CAMP-2024-002', label: 'CAMP-2024-002 - Summer Launch' },
+    { value: 'CAMP-2024-003', label: 'CAMP-2024-003 - Product Release' },
+    { value: 'CAMP-2024-004', label: 'CAMP-2024-004 - Holiday Special' },
+    { value: 'CAMP-2024-005', label: 'CAMP-2024-005 - Q4 Campaign' },
+  ];
+  
+  const campaignSelect = createTag('select', { id: 'campaign-id', name: 'campaignId', class: 'campaign-select' }, '', { parent: campaignIdSection });
+  
+  mockCampaignIds.forEach((campaign) => {
+    const option = createTag('option', { value: campaign.value }, campaign.label, { parent: campaignSelect });
+    if (campaign.value === '') {
+      option.disabled = true;
+      option.selected = true;
+    }
+  });
+  
+  // Button container
+  const buttonContainer = createTag('div', { class: 'button-container' }, '', { parent: dialog });
+  const cancelBtn = createTag('sp-button', { variant: 'secondary', slot: 'button' }, 'Cancel', { parent: buttonContainer });
+  const saveBtn = createTag('sp-button', { variant: 'cta', slot: 'button' }, 'Save', { parent: buttonContainer });
+  
+  underlay.open = true;
+  
+  cancelBtn.addEventListener('click', () => {
+    underlay.open = false;
+    dialog.innerHTML = '';
+    dialog.classList.remove('publish-to-adobe-dialog');
+  });
+  
+  saveBtn.addEventListener('click', async () => {
+    const sources = [];
+    if (ccdCheckbox.checked) sources.push('CCD');
+    if (adobeHomeCheckbox.checked) sources.push('AdobeHome');
+    
+    const campaignId = campaignSelect.value;
+    
+    if (sources.length === 0) {
+      showToast(props, 'Please select at least one source.', { variant: 'negative' });
+      return;
+    }
+    
+    if (!campaignId) {
+      showToast(props, 'Please select a Campaign ID.', { variant: 'negative' });
+      return;
+    }
+    
+    underlay.open = false;
+    dialog.innerHTML = '';
+    dialog.classList.remove('publish-to-adobe-dialog');
+    
+    // Show spinner for 2-3 seconds
+    row.classList.add('pending');
+    
+    // Simulate processing time
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    
+    row.classList.remove('pending');
+    
+    // Mark event as published to Adobe
+    eventObj.publishedToAdobe = true;
+    updateDashboardData({ ...eventObj, publishedToAdobe: true }, props);
+    
+    // Show success toast notification
+    const successMsg = `Successfully published to Adobe with Campaign ID: ${campaignId}`;
+    showToast(props, successMsg, { variant: 'positive', timeout: 6000 });
+  });
+}
+
 function initMoreOptions(props, config, eventObj, row) {
   const moreOptionsCell = row.querySelector('.option-col');
   const moreOptionIcon = moreOptionsCell.querySelector('.icon-more-small-list');
@@ -303,6 +410,18 @@ function initMoreOptions(props, config, eventObj, row) {
         showToast(props, buildToastMsgWithEventTitle(eventObj, config['event-published-msg']), { variant: 'positive' });
       });
     }
+
+    const publishToAdobeBtn = buildTool(toolBox, 'Promote', 'publish-rocket');
+    if (eventObj.publishedToAdobe) {
+      publishToAdobeBtn.classList.add('disabled');
+    }
+    
+    publishToAdobeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (eventObj.publishedToAdobe) return;
+      toolBox.remove();
+      openPublishToAdobeDialog(props, eventObj, row);
+    });
 
     const previewPre = buildTool(toolBox, 'Preview pre-event', 'preview-eye');
     const previewPost = buildTool(toolBox, 'Preview post-event', 'preview-eye');
@@ -870,7 +989,7 @@ export default async function init(el) {
       signIn();
     },
     noAccessProfile: () => {
-      buildNoAccessScreen(el);
+      buildDashboard(el, config);
     },
     validProfile: () => {
       buildDashboard(el, config);
