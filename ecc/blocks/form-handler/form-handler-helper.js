@@ -114,6 +114,7 @@ export const VANILLA_COMPONENTS = [
   'terms-conditions',
   'product-promotion',
   'event-topics',
+  'event-metadata',
   'registration-details',
   'registration-fields',
   'secondary-cta',
