@@ -55,10 +55,7 @@ export function onSubmit(component, props) {
 }
 
 export async function onPayloadUpdate(component, props) {
-  const { cloudType } = props.payload;
-  if (cloudType && cloudType !== component.dataset.cloudType) {
-    component.dataset.cloudType = cloudType;
-  }
+  // Handle payload updates if needed
 }
 
 export async function onRespUpdate(component, props) {
