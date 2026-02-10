@@ -19,7 +19,6 @@ import {
   getEventPageHost,
   readBlockConfig,
   signIn,
-  isPublishingLocked,
 } from '../../scripts/utils.js';
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
@@ -355,7 +354,7 @@ function initMoreOptions(props, config, eventObj, row) {
     return tool;
   };
 
-  moreOptionIcon.addEventListener('click', async () => {
+  moreOptionIcon.addEventListener('click', () => {
     const toolBox = createTag('div', { class: 'dashboard-event-tool-box' });
 
     if (eventObj.published) {
@@ -380,23 +379,7 @@ function initMoreOptions(props, config, eventObj, row) {
       });
     } else {
       const pub = buildTool(toolBox, 'Publish', 'publish-rocket');
-      const { isLocked, message } = await isPublishingLocked(eventObj);
-      if (!eventObj.detailPagePath || isLocked) {
-        pub.classList.add('disabled');
-        if (isLocked && message) {
-          pub.title = message;
-          const toastArea = props.el.querySelector('sp-theme.toast-area');
-          if (toastArea) {
-            const existingLockToast = toastArea.querySelector('.publish-lock-toast');
-            if (!existingLockToast) {
-              const toast = createTag('sp-toast', { class: 'publish-lock-toast', open: true }, message, { parent: toastArea });
-              toast.addEventListener('close', () => {
-                toast.remove();
-              });
-            }
-          }
-        }
-      }
+      if (!eventObj.detailPagePath) pub.classList.add('disabled');
       pub.addEventListener('click', async (e) => {
         e.preventDefault();
         toolBox.remove();

@@ -31,7 +31,6 @@ import {
   getEventPageHost,
   replaceAnchorWithButton,
   getMetadata,
-  isPublishingLocked,
 } from '../../scripts/utils.js';
 
 import { getCurrentEnvironment } from '../../scripts/environment.js';
@@ -232,9 +231,9 @@ function onStepValidate(props) {
 
     ctas.forEach((cta) => {
       if (cta.classList.contains('back-btn')) {
-        cta.classList.toggle('form-invalid', props.currentStep === 0);
+        cta.classList.toggle('disabled', props.currentStep === 0);
       } else {
-        cta.classList.toggle('form-invalid', !stepValid);
+        cta.classList.toggle('disabled', !stepValid);
       }
     });
 
@@ -552,7 +551,7 @@ function updateSideNav(props) {
   });
 }
 
-async function renderFormNavigation(props, prevStep, currentStep) {
+function renderFormNavigation(props, prevStep, currentStep) {
   const nextBtn = props.el.querySelector('.form-handler-ctas-panel .next-button');
   const backBtn = props.el.querySelector('.form-handler-ctas-panel .back-btn');
   const frags = props.el.querySelectorAll('.fragment');
@@ -567,22 +566,6 @@ async function renderFormNavigation(props, prevStep, currentStep) {
       nextBtn.textContent = nextBtn.dataset.finalStateText;
     }
     nextBtn.prepend(getIcon('golden-rocket'));
-    const { isLocked, message } = await isPublishingLocked(props.eventDataResp);
-    if (isLocked) {
-      nextBtn.classList.add('disabled');
-      nextBtn.textContent = 'Publish disabled';
-      nextBtn.title = message;
-      const toastArea = props.el.querySelector('.toast-area');
-      if (toastArea) {
-        const existingLockToast = toastArea.querySelector('.publish-lock-toast');
-        if (!existingLockToast) {
-          const toast = createTag('sp-toast', { class: 'publish-lock-toast', open: true }, message, { parent: toastArea });
-          toast.addEventListener('close', () => {
-            toast.remove();
-          });
-        }
-      }
-    }
   } else {
     nextBtn.textContent = nextBtn.dataset.nextStateText;
     nextBtn.append(getIcon('chev-right-white'));
@@ -927,12 +910,6 @@ function initFormCtas(props) {
             let resp;
 
             if (props.currentStep === props.maxStep) {
-              const { isLocked, message } = await isPublishingLocked(props.eventDataResp);
-              if (isLocked) {
-                buildErrorMessage(props, { error: { message } });
-                toggleBtnsSubmittingState(false);
-                return;
-              }
               resp = await saveEvent(props, setEventSavePolicies({ liveUpdate: true }));
             } else {
               resp = await saveEvent(props);
@@ -1001,7 +978,7 @@ function updateCtas(props) {
   const formCtas = props.el.querySelectorAll('.form-handler-ctas-panel a');
   const { eventDataResp } = props;
 
-  formCtas.forEach(async (a) => {
+  formCtas.forEach((a) => {
     if (a.classList.contains('preview-btns')) {
       const testTime = a.classList.contains('pre-event') ? +props.eventDataResp.localEndTimeMillis - 10 : +props.eventDataResp.localEndTimeMillis + 10;
       if (eventDataResp.detailPagePath) {
@@ -1026,22 +1003,6 @@ function updateCtas(props) {
           a.textContent = a.dataset.finalStateText;
         }
         a.prepend(getIcon('golden-rocket'));
-        const { isLocked, message } = await isPublishingLocked(props.eventDataResp);
-        if (isLocked) {
-          a.classList.add('disabled');
-          a.textContent = 'Publish disabled';
-          a.title = message;
-          const toastArea = props.el.querySelector('.toast-area');
-          if (toastArea) {
-            const existingLockToast = toastArea.querySelector('.publish-lock-toast');
-            if (!existingLockToast) {
-              const toast = createTag('sp-toast', { class: 'publish-lock-toast', open: true }, message, { parent: toastArea });
-              toast.addEventListener('close', () => {
-                toast.remove();
-              });
-            }
-          }
-        }
       } else {
         a.textContent = a.dataset.nextStateText;
         a.append(getIcon('chev-right-white'));

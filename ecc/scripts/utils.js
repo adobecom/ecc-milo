@@ -433,38 +433,6 @@ export const fetchThrottledMemoizedText = (() => {
   return (url, options = {}, { ttl = 3000 } = {}) => memoize(url, options, fetch, ttl);
 })();
 
-export const fetchThrottledMemoizedJson = (() => {
-  const cache = new Map();
-  const pending = new Map();
-
-  const memoize = async (url, options, fetcher, ttl) => {
-    const key = `${url}-${JSON.stringify(options)}`;
-
-    if (cache.has(key)) {
-      return cache.get(key);
-    }
-
-    if (pending.has(key)) {
-      return pending.get(key);
-    }
-
-    const fetchPromise = fetcher(url, options);
-    pending.set(key, fetchPromise);
-
-    try {
-      const response = await fetchPromise;
-      const json = response.ok ? await response.json() : null;
-      cache.set(key, json);
-      setTimeout(() => cache.delete(key), ttl);
-      return json;
-    } finally {
-      pending.delete(key);
-    }
-  };
-
-  return (url, options = {}, { ttl = 3000 } = {}) => memoize(url, options, fetch, ttl);
-})();
-
 export function replaceAnchorWithButton(anchor) {
   if (!anchor || anchor.tagName !== 'A') {
     return null;
@@ -486,18 +454,4 @@ export function getMetadata(name, doc = document) {
   const attr = name && name.includes('og:') ? 'property' : 'name';
   const meta = doc.head.querySelector(`meta[${attr}="${name}"]`);
   return meta && meta.content;
-}
-
-export async function isPublishingLocked(event) {
-  const result = await fetchThrottledMemoizedJson('/ecc/system/publish-lock.json');
-  const publishLockList = result?.data ?? [];
-
-  const lockEntry = publishLockList.find(({ resourceType, id }) => (resourceType === 'event' && id === event.eventId)
-      || (resourceType === 'series' && id === event.seriesId));
-
-  if (lockEntry) {
-    return { isLocked: true, message: lockEntry.message || 'Publishing is currently disabled for this event.' };
-  }
-
-  return { isLocked: false, message: null };
 }
