@@ -108,6 +108,23 @@ export function getImsEnvironment(location = window.location) {
   return currentEnv === ENVIRONMENTS.PROD ? IMS_ENVIRONMENTS.PROD : IMS_ENVIRONMENTS.STAGE;
 }
 
+export function getContentTarget() {
+  const currentOrigin = window.location.origin;
+
+  const isDotPage = currentOrigin.endsWith('.page');
+  const isDotLive = currentOrigin.endsWith('.live');
+
+  if (isDotPage) {
+    return 'page';
+  }
+
+  if (isDotLive) {
+    return 'live';
+  }
+
+  return 'live';
+}
+
 /**
  * Gets the event service host based on the current environment
  * @param {string} [relativeDomain] - Optional relative domain to use
@@ -122,7 +139,7 @@ export function getEventServiceHost(relativeDomain, location = window.location) 
   if (href.includes('.hlx.') || href.includes('.aem.')) {
     return origin.replace(
       hostname,
-      `${currentEnv}--events-milo--adobecom.aem.page`,
+      `${currentEnv}--da-events--adobecom.${getContentTarget()}`,
     );
   }
 
@@ -137,6 +154,40 @@ export function getEventServiceHost(relativeDomain, location = window.location) 
 
   if (hostname.includes(DOMAINS.LOCALHOST)) {
     return 'https://dev--events-milo--adobecom.aem.page';
+  }
+
+  return `https://${DOMAINS.ADOBE_COM}`;
+}
+
+/**
+ * Gets the event service host based on the current environment
+ * @param {string} [relativeDomain] - Optional relative domain to use
+ * @param {Location} [location=window.location]
+ * @returns {string} The event service host URL
+ * @throws {Error} If environment detection is not available
+ */
+export function getEventLibsHost(relativeDomain, location = window.location) {
+  const currentEnv = getCurrentEnvironment(location);
+  const { hostname, href, origin } = location;
+
+  if (href.includes('.hlx.') || href.includes('.aem.')) {
+    return origin.replace(
+      hostname,
+      `${currentEnv}--event-libs--adobecom.aem.live`,
+    );
+  }
+
+  if (relativeDomain) return relativeDomain;
+
+  if ([
+    DOMAINS.STAGE_ADOBE_COM,
+    DOMAINS.ADOBE_COM,
+  ].includes(hostname)) {
+    return origin;
+  }
+
+  if (hostname.includes(DOMAINS.LOCALHOST)) {
+    return 'https://dev--event-libs--adobecom.aem.live';
   }
 
   return `https://${DOMAINS.ADOBE_COM}`;

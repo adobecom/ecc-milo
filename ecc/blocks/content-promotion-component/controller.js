@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { getAttribute } from '../../scripts/data-utils.js';
-import { getEventPageHost } from '../../scripts/utils.js';
+import { getEventLibsHost } from '../../scripts/environment.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { LOCALES } from '../../scripts/scripts.js';
 import { getLocales } from '../../scripts/esp-controller.js';
@@ -34,7 +34,8 @@ async function getPromotionalContentSheet(props) {
       return [];
     }
 
-    const sheetLocation = 'events/default/promotional-content.json';
+    // No longer pointing at Events Milo for promotional content.
+    const sheetLocation = 'event-libs/assets/configs/promotional-content.json';
     const locales = await getLocales().then((resp) => resp.localeNames) || {};
     const lName = locales[locale];
 
@@ -42,7 +43,7 @@ async function getPromotionalContentSheet(props) {
       .find(([, v]) => v.longName.toLowerCase() === lName?.toLowerCase()) || {};
     const localePrefix = targetLocaleObject[0];
 
-    const sheetResp = await fetch(`${getEventPageHost()}${localePrefix ? `/${localePrefix}` : ''}/${sheetLocation}`);
+    const sheetResp = await fetch(`${getEventLibsHost()}${localePrefix ? `/${localePrefix}` : ''}/${sheetLocation}`);
 
     if (!sheetResp.ok) {
       console.warn(`Failed to fetch promotional content: ${sheetResp.status} ${sheetResp.statusText}`);

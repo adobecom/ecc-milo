@@ -107,6 +107,10 @@ export function parse24HourFormat(timeStr) {
   };
 }
 
+export function getEventLibsHost(relativeDomain) {
+  return getEventLibsHost(relativeDomain);
+}
+
 export function getEventPageHost(relativeDomain) {
   return getEventServiceHost(relativeDomain);
 }
