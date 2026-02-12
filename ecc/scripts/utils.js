@@ -1,5 +1,5 @@
 import { LIBS, CONFIG } from './scripts.js';
-import { getEventServiceHost } from './environment.js';
+import { getEventServiceHost, getDAHost } from './environment.js';
 
 export function createTag(tag, attributes, html, options = {}) {
   const el = document.createElement(tag);
@@ -108,7 +108,7 @@ export function parse24HourFormat(timeStr) {
 }
 
 export function getEventLibsHost(relativeDomain) {
-  return getEventLibsHost(relativeDomain);
+  return getDAHost(relativeDomain);
 }
 
 export function getEventPageHost(relativeDomain) {

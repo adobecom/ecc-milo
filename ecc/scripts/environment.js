@@ -166,7 +166,7 @@ export function getEventServiceHost(relativeDomain, location = window.location) 
  * @returns {string} The event service host URL
  * @throws {Error} If environment detection is not available
  */
-export function getEventLibsHost(relativeDomain, location = window.location) {
+export function getDAHost(relativeDomain, location = window.location) {
   const currentEnv = getCurrentEnvironment(location);
   const { hostname, href, origin } = location;
 

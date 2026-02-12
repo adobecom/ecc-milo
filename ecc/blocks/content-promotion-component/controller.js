@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { getAttribute } from '../../scripts/data-utils.js';
-import { getEventLibsHost } from '../../scripts/environment.js';
+import { getEventLibsHost } from '../../scripts/utils.js';
 import { setPropsPayload } from '../form-handler/data-handler.js';
 import { LOCALES } from '../../scripts/scripts.js';
 import { getLocales } from '../../scripts/esp-controller.js';
