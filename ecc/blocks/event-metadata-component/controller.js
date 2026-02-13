@@ -37,6 +37,20 @@ function prefillMetadata(component, metadata) {
   });
 }
 
+function selectNoMetadataDefaults(component) {
+  const pickers = component.querySelectorAll('sp-picker[id$="-picker"]');
+
+  pickers.forEach((picker) => {
+    if (!picker.value) {
+      const noOption = [...picker.querySelectorAll('sp-menu-item')]
+        .find((item) => item.textContent.startsWith('No '));
+      if (noOption) {
+        changeInputValue(picker, 'value', noOption.textContent);
+      }
+    }
+  });
+}
+
 function showErrorToast(component, message) {
   component.dispatchEvent(new CustomEvent('show-error-toast', {
     detail: { error: { message } },
@@ -83,6 +97,10 @@ export async function onRespUpdate(component, props) {
   } catch (error) {
     window.lana?.log(`Failed to fetch event publishing profile: ${error.message}`);
   }
+
+  // Auto-select "No {name}" for any pickers that weren't prefilled
+  // so the user doesn't have to manually deselect metadata each time they edit.
+  selectNoMetadataDefaults(component);
 }
 
 export default async function init(component, props) {
