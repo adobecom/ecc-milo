@@ -122,7 +122,7 @@ export function getContentTarget() {
     return 'live';
   }
 
-  return 'live';
+  return 'page';
 }
 
 /**
@@ -139,7 +139,7 @@ export function getEventServiceHost(relativeDomain, location = window.location) 
   if (href.includes('.hlx.') || href.includes('.aem.')) {
     return origin.replace(
       hostname,
-      `${currentEnv}--da-events--adobecom.${getContentTarget()}`,
+      `${currentEnv}--da-events--adobecom.aem.${getContentTarget()}`,
     );
   }
 
