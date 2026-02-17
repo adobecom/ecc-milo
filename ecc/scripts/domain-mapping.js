@@ -36,20 +36,17 @@ function isSuffixEntry(value) {
  * @returns {string|null} The mapped hostname, or null if no match
  */
 function mapHostname(hostname, fromKey, toKey) {
-  for (const entry of DOMAIN_MAP) {
+  return DOMAIN_MAP.reduce((matched, entry) => {
+    if (matched) return matched;
     const from = entry[fromKey];
     const to = entry[toKey];
 
-    if (isSuffixEntry(from)) {
-      if (hostname.endsWith(from)) {
-        return hostname.slice(0, -from.length) + to;
-      }
-    } else if (hostname === from) {
-      return to;
+    if (isSuffixEntry(from) && hostname.endsWith(from)) {
+      return hostname.slice(0, -from.length) + to;
     }
-  }
-
-  return null;
+    if (hostname === from) return to;
+    return null;
+  }, null);
 }
 
 /**
