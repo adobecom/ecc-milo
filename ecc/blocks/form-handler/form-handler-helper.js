@@ -28,6 +28,7 @@ import {
   buildNoAccessScreen,
   generateToolTip,
   camelToSentenceCase,
+  getEventPageHost,
   getEventLibsHost,
   replaceAnchorWithButton,
   getMetadata,
@@ -47,6 +48,7 @@ import {
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
 import { ENVIRONMENTS, EVENT_TYPES, DEFAULT_SAVE_POLICIES } from '../../scripts/constants.js';
+import { toStageOrigin } from '../../scripts/domain-mapping.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -1011,6 +1013,10 @@ function updateCtas(props) {
           previewUrl = new URL(eventDataResp.detailPagePath).href;
         } catch (e) {
           previewUrl = `${getEventPageHost()}${eventDataResp.detailPagePath}`;
+        }
+
+        if (getCurrentEnvironment() !== ENVIRONMENTS.PROD) {
+          previewUrl = toStageOrigin(previewUrl);
         }
 
         a.href = `${previewUrl}?previewMode=true&cachebuster=${Date.now()}&timing=${testTime}`;
