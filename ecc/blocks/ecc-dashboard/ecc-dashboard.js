@@ -25,7 +25,9 @@ import {
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
-import { EVENT_TYPES } from '../../scripts/constants.js';
+import { EVENT_TYPES, ENVIRONMENTS } from '../../scripts/constants.js';
+import { getCurrentEnvironment } from '../../scripts/environment.js';
+import { toStageOrigin } from '../../scripts/domain-mapping.js';
 
 // API Cache and Throttling System (functional approach)
 const apiCache = (() => {
@@ -425,14 +427,23 @@ function initMoreOptions(props, config, eventObj, row) {
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
     if (eventObj.detailPagePath) {
-      previewPre.href = (() => {
+      const resolvePreviewUrl = (detailPagePath) => {
         let url;
-
         try {
-          url = new URL(`${eventObj.detailPagePath}`);
+          url = new URL(detailPagePath);
         } catch (e) {
-          url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+          url = new URL(`${getEventPageHost()}${detailPagePath}`);
         }
+
+        if (getCurrentEnvironment() !== ENVIRONMENTS.PROD) {
+          url = new URL(toStageOrigin(url.href));
+        }
+
+        return url;
+      };
+
+      previewPre.href = (() => {
+        const url = resolvePreviewUrl(eventObj.detailPagePath);
 
         if (url) {
           url.searchParams.set('previewMode', 'true');
@@ -445,12 +456,7 @@ function initMoreOptions(props, config, eventObj, row) {
       previewPre.target = '_blank';
 
       previewPost.href = (() => {
-        let url;
-        try {
-          url = new URL(`${eventObj.detailPagePath}`);
-        } catch (e) {
-          url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
-        }
+        const url = resolvePreviewUrl(eventObj.detailPagePath);
 
         if (url) {
           url.searchParams.set('previewMode', 'true');
