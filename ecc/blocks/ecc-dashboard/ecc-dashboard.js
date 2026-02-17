@@ -21,13 +21,13 @@ import {
   signIn,
   isPublishingLocked,
 } from '../../scripts/utils.js';
+import { toStageOrigin } from '../../scripts/domain-mapping.js';
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES, ENVIRONMENTS } from '../../scripts/constants.js';
 import { getCurrentEnvironment } from '../../scripts/environment.js';
-import { toStageOrigin } from '../../scripts/domain-mapping.js';
 
 // API Cache and Throttling System (functional approach)
 const apiCache = (() => {
@@ -446,8 +446,6 @@ function initMoreOptions(props, config, eventObj, row) {
         const url = resolvePreviewUrl(eventObj.detailPagePath);
 
         if (url) {
-          url.searchParams.set('previewMode', 'true');
-          url.searchParams.set('cachebuster', Date.now());
           url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
           return url.toString();
         }
@@ -459,8 +457,6 @@ function initMoreOptions(props, config, eventObj, row) {
         const url = resolvePreviewUrl(eventObj.detailPagePath);
 
         if (url) {
-          url.searchParams.set('previewMode', 'true');
-          url.searchParams.set('cachebuster', Date.now());
           url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
           return url.toString();
         }

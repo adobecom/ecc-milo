@@ -1019,7 +1019,7 @@ function updateCtas(props) {
           previewUrl = toStageOrigin(previewUrl);
         }
 
-        a.href = `${previewUrl}?previewMode=true&cachebuster=${Date.now()}&timing=${testTime}`;
+        a.href = `${previewUrl}?timing=${testTime}`;
         a.classList.remove('preview-not-ready');
       }
     }
