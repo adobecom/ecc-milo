@@ -1415,10 +1415,18 @@ export async function getEventAttendees(eventId) {
 export async function getAllEventAttendees(eventId) {
   if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
 
-  const recurGetAttendees = async (fullAttendeeArr = [], nextPageToken = null) => {
+  const recurGetAttendees = async (type, fullAttendeeArr = [], nextPageToken = null) => {
     const { host } = API_CONFIG.esp[getCurrentEnvironment()];
     const options = await constructRequestOptions('GET');
-    const fetchUrl = nextPageToken ? `${host}/v1/events/${eventId}/attendees?nextPageToken=${nextPageToken}` : `${host}/v1/events/${eventId}/attendees`;
+    const baseFetchUrl = `${host}/v1/events/${eventId}/attendees`;
+    const potentialUrlParams = new URLSearchParams();
+    if (type) {
+      potentialUrlParams.set('type', type);
+    }
+    if (nextPageToken) {
+      potentialUrlParams.set('nextPageToken', nextPageToken);
+    }
+    const fetchUrl = `${baseFetchUrl}?${potentialUrlParams.toString()}`;
 
     return safeFetch(fetchUrl, options)
       .then((response) => {
@@ -1431,7 +1439,11 @@ export async function getAllEventAttendees(eventId) {
       })
       .then((data) => {
         if (data.nextPageToken) {
-          return recurGetAttendees(fullAttendeeArr.concat(data.attendees), data.nextPageToken);
+          return recurGetAttendees(
+            type,
+            fullAttendeeArr.concat(data.attendees),
+            data.nextPageToken,
+          );
         }
 
         return fullAttendeeArr.concat(data.attendees || []);
@@ -1442,7 +1454,21 @@ export async function getAllEventAttendees(eventId) {
       });
   };
 
-  return recurGetAttendees();
+  const [registeredAttendees, waitlistedAttendees] = await Promise.all([
+    recurGetAttendees('registered'),
+    recurGetAttendees('waitlisted'),
+  ]);
+
+  const allAttendees = [];
+
+  registeredAttendees.forEach((attendee) => {
+    allAttendees.push({ ...attendee, registrationStatus: 'registered' });
+  });
+  waitlistedAttendees.forEach((attendee) => {
+    allAttendees.push({ ...attendee, registrationStatus: 'waitlisted' });
+  });
+
+  return allAttendees;
 }
 
 export async function getAttendee(eventId, attendeeId) {

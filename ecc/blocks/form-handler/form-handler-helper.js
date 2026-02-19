@@ -28,7 +28,7 @@ import {
   buildNoAccessScreen,
   generateToolTip,
   camelToSentenceCase,
-  getEventPageHost,
+  getEventLibsHost,
   replaceAnchorWithButton,
   getMetadata,
   isPublishingLocked,
@@ -734,7 +734,7 @@ async function getNonProdPreviewDataById(props) {
     .find(([, v]) => v.longName.toLowerCase() === lName?.toLowerCase()) || {};
   const localePrefix = targetLocaleObject[0];
 
-  const resp = await fetch(`${getEventPageHost()}${localePrefix ? `/${localePrefix}` : ''}/events/default/${esEnv === ENVIRONMENTS.PROD ? '' : `${esEnv}/`}metadata-preview.json?limit=999999`);
+  const resp = await fetch(`${getEventLibsHost()}${localePrefix ? `/${localePrefix}` : ''}/events/default/${esEnv === ENVIRONMENTS.PROD ? '' : `${esEnv}/`}metadata-preview.json?limit=999999`);
   if (resp.ok) {
     const json = await resp.json();
     const pageData = json.data.reverse().find((d) => d['event-id'] === eventId);

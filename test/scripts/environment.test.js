@@ -91,7 +91,7 @@ describe('Environment Module', () => {
       locationStub.host = 'dev--events-milo--adobecom.aem.page';
       locationStub.hostname = 'dev--events-milo--adobecom.aem.page';
       locationStub.origin = 'https://dev--events-milo--adobecom.aem.page';
-      expect(getEventServiceHost(undefined, locationStub)).to.equal('https://dev--events-milo--adobecom.aem.page');
+      expect(getEventServiceHost(undefined, locationStub)).to.equal('https://dev--da-events--adobecom.aem.page');
     });
 
     it('should return relativeDomain if provided', () => {
