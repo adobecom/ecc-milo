@@ -35,7 +35,7 @@ import {
   isPublishingLocked,
 } from '../../scripts/utils.js';
 
-import { getCurrentEnvironment } from '../../scripts/environment.js';
+import { getCurrentEnvironment, getEspEnvParam } from '../../scripts/environment.js';
 
 import {
   createEvent,
@@ -1010,16 +1010,21 @@ function updateCtas(props) {
         let previewUrl;
 
         try {
-          previewUrl = new URL(eventDataResp.detailPagePath).href;
+          previewUrl = new URL(eventDataResp.detailPagePath);
         } catch (e) {
-          previewUrl = `${getEventPageHost()}${eventDataResp.detailPagePath}`;
+          previewUrl = new URL(`${getEventPageHost()}${eventDataResp.detailPagePath}`);
         }
 
         if (getCurrentEnvironment() !== ENVIRONMENTS.PROD) {
-          previewUrl = toStageOrigin(previewUrl);
+          previewUrl = new URL(toStageOrigin(previewUrl.href));
         }
 
-        a.href = `${previewUrl}?timing=${testTime}`;
+        previewUrl.searchParams.set('timing', testTime);
+
+        const espEnv = getEspEnvParam();
+        if (espEnv) previewUrl.searchParams.set('espenv', espEnv);
+
+        a.href = previewUrl.toString();
         a.classList.remove('preview-not-ready');
       }
     }

@@ -27,7 +27,7 @@ import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
 import { EVENT_TYPES, ENVIRONMENTS } from '../../scripts/constants.js';
-import { getCurrentEnvironment } from '../../scripts/environment.js';
+import { getCurrentEnvironment, getEspEnvParam } from '../../scripts/environment.js';
 
 // API Cache and Throttling System (functional approach)
 const apiCache = (() => {
@@ -438,6 +438,9 @@ function initMoreOptions(props, config, eventObj, row) {
         if (getCurrentEnvironment() !== ENVIRONMENTS.PROD) {
           url = new URL(toStageOrigin(url.href));
         }
+
+        const espEnv = getEspEnvParam();
+        if (espEnv) url.searchParams.set('espenv', espEnv);
 
         return url;
       };
