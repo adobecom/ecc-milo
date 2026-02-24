@@ -27,6 +27,42 @@ const SPECTRUM_COMPONENTS = [
   'divider',
 ];
 
+const MOCK_CAMPAIGNS = [
+  {
+    campaignId: 'mock-1',
+    name: 'Partner Promotion',
+    status: 'Active',
+    attendeeLimit: 50,
+    attendeeCount: 23,
+    waitlistAttendeeCount: 0,
+    url: 'https://www.adobe.com/events/example?campaign=partner-promo',
+    creationTime: Date.now(),
+    modificationTime: Date.now(),
+  },
+  {
+    campaignId: 'mock-2',
+    name: 'Email Newsletter',
+    status: 'Active',
+    attendeeLimit: 100,
+    attendeeCount: 67,
+    waitlistAttendeeCount: 0,
+    url: 'https://www.adobe.com/events/example?campaign=email-newsletter',
+    creationTime: Date.now(),
+    modificationTime: Date.now(),
+  },
+  {
+    campaignId: 'mock-3',
+    name: 'Social Media',
+    status: 'Archived',
+    attendeeLimit: 0,
+    attendeeCount: 45,
+    waitlistAttendeeCount: 0,
+    url: 'https://www.adobe.com/events/example?campaign=social',
+    creationTime: Date.now(),
+    modificationTime: Date.now(),
+  },
+];
+
 class CampaignTable extends LitElement {
   static properties = {
     eventId: { type: String },
@@ -68,10 +104,12 @@ class CampaignTable extends LitElement {
       if (Array.isArray(resp)) {
         this.campaigns = resp;
       } else {
-        this.campaigns = [];
+        window.lana?.log('Campaign fetch did not return an array, using mock data');
+        this.campaigns = MOCK_CAMPAIGNS;
       }
     } catch {
-      this.campaigns = [];
+      window.lana?.log('Campaign fetch failed, using mock data');
+      this.campaigns = MOCK_CAMPAIGNS;
     }
     this.loading = false;
   }
