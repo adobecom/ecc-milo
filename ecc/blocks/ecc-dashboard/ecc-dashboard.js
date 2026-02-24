@@ -491,7 +491,7 @@ function initMoreOptions(props, config, eventObj, row) {
     edit.href = url.toString();
 
     // campaigns
-    const campaignsUrl = new URL(`${window.location.origin}${config['campaign-dashboard-url'] || '/ecc/campaign-management-table'}`);
+    const campaignsUrl = new URL(`${window.location.origin}${config['campaign-dashboard-url'] || '/ecc/dashboard/t3/campaigns'}`);
     campaignsUrl.searchParams.set('eventId', eventObj.eventId);
     campaigns.href = campaignsUrl.toString();
 
