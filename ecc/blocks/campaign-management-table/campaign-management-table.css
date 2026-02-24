@@ -189,7 +189,7 @@
   width: 100%;
 }
 
-.campaign-management-table .capacity-input {
+.campaign-management-table .field-row .capacity-input {
   box-sizing: border-box;
   padding: 8px 12px;
   font-size: var(--type-body-s-size);

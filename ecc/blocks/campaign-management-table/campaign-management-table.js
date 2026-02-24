@@ -5,7 +5,7 @@ import {
   updateCampaign,
   deleteCampaign,
 } from '../../scripts/esp-controller.js';
-import { getIcon, buildNoAccessScreen, signIn } from '../../scripts/utils.js';
+import { buildNoAccessScreen, signIn } from '../../scripts/utils.js';
 import { initProfileLogicTree } from '../../scripts/profile.js';
 
 const { LitElement, html, repeat, nothing } = await import(`${LIBS}/deps/lit-all.min.js`);
@@ -145,7 +145,7 @@ class CampaignTable extends LitElement {
     }
   }
 
-  extractUrlParam(campaign) {
+  static extractUrlParam(campaign) {
     if (!campaign.url) return '';
     try {
       const url = new URL(campaign.url);
@@ -290,7 +290,7 @@ class CampaignTable extends LitElement {
               <tr>
                 <td class="campaign-name-cell">${c.name}</td>
                 <td class="url-param-cell">
-                  <span class="url-param-text">${this.extractUrlParam(c)}</span>
+                  <span class="url-param-text">${CampaignTable.extractUrlParam(c)}</span>
                   <sp-action-button size="xl" quiet label="Copy URL"
                     @click=${() => this.copyToClipboard(c.url || '')}>
                     <img src="/ecc/icons/copy.svg" slot="icon" alt="copy">
