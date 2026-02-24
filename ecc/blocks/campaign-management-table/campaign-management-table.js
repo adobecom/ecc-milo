@@ -24,7 +24,6 @@ const SPECTRUM_COMPONENTS = [
   'overlay',
   'popover',
   'field-label',
-  'number-field',
   'divider',
 ];
 
@@ -298,7 +297,7 @@ class CampaignTable extends LitElement {
           </div>
           <div class="field-row">
             <sp-field-label for="create-limit">Set link capacity limit</sp-field-label>
-            <sp-textfield id="create-limit" name="attendeeLimit" type="number" placeholder="e.g. 50" min="1"></sp-textfield>
+            <input id="create-limit" name="attendeeLimit" type="number" placeholder="e.g. 50" min="1" class="capacity-input">
             <span class="helper-text">Must be lower than the event capacity limit</span>
           </div>
         </div>
@@ -334,7 +333,7 @@ class CampaignTable extends LitElement {
           </div>
           <div class="field-row">
             <sp-field-label>Set link capacity limit</sp-field-label>
-            <sp-textfield name="attendeeLimit" value=${c.attendeeLimit || ''} disabled></sp-textfield>
+            <input name="attendeeLimit" type="number" value=${c.attendeeLimit || ''} disabled class="capacity-input">
           </div>
           <div class="field-row switch-row">
             <sp-switch name="status" ?checked=${c.status === 'Active'}>Active</sp-switch>

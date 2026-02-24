@@ -183,8 +183,29 @@
   gap: 4px;
 }
 
-.campaign-management-table .field-row sp-textfield {
+.campaign-management-table .field-row sp-textfield,
+.campaign-management-table .field-row .capacity-input {
   width: 100%;
+}
+
+.campaign-management-table .capacity-input {
+  box-sizing: border-box;
+  padding: 8px 12px;
+  font-size: var(--type-body-s-size);
+  font-family: var(--body-font-family);
+  border: 1px solid var(--color-gray-400);
+  border-radius: 4px;
+  outline: none;
+}
+
+.campaign-management-table .capacity-input:focus {
+  border-color: var(--color-accent);
+}
+
+.campaign-management-table .capacity-input:disabled {
+  background: var(--color-gray-100);
+  color: var(--color-gray-500);
+  cursor: not-allowed;
 }
 
 .campaign-management-table .field-row .helper-text {
