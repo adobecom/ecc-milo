@@ -291,7 +291,7 @@ class CampaignTable extends LitElement {
                 <td class="campaign-name-cell">${c.name}</td>
                 <td class="url-param-cell">
                   <span class="url-param-text">${this.extractUrlParam(c)}</span>
-                  <sp-action-button size="s" quiet label="Copy URL"
+                  <sp-action-button size="xl" quiet label="Copy URL"
                     @click=${() => this.copyToClipboard(c.url || '')}>
                     <img src="/ecc/icons/copy.svg" slot="icon" alt="copy">
                   </sp-action-button>
@@ -305,11 +305,11 @@ class CampaignTable extends LitElement {
                   </span>
                 </td>
                 <td class="actions-col">
-                  <sp-action-button size="s" quiet label="Edit"
+                  <sp-action-button size="xl" quiet label="Edit"
                     @click=${() => this.openEditDialog(c)}>
                     <img src="/ecc/icons/edit.svg" slot="icon" alt="edit">
                   </sp-action-button>
-                  <sp-action-button size="s" quiet label="Delete"
+                  <sp-action-button size="xl" quiet label="Delete"
                     @click=${() => this.openDeleteDialog(c)}>
                     <img src="/ecc/icons/delete.svg" slot="icon" alt="delete">
                   </sp-action-button>
@@ -363,7 +363,7 @@ class CampaignTable extends LitElement {
             <sp-field-label>Tracking link</sp-field-label>
             <div class="tracking-link-row">
               <span class="tracking-link-text">${c.url || ''}</span>
-              <sp-action-button size="s" quiet label="Copy link"
+              <sp-action-button size="xl" quiet label="Copy link"
                 @click=${() => this.copyToClipboard(c.url || '')}>
                 <img src="/ecc/icons/copy.svg" slot="icon" alt="copy">
               </sp-action-button>
