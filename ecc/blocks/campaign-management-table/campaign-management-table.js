@@ -446,6 +446,12 @@ export default async function init(el) {
 
   el.innerHTML = '';
 
+  const spTheme = document.createElement('sp-theme');
+  spTheme.setAttribute('color', 'light');
+  spTheme.setAttribute('scale', 'medium');
+  el.parentElement.replaceChild(spTheme, el);
+  spTheme.appendChild(el);
+
   const eventId = new URLSearchParams(window.location.search).get('eventId');
   if (!eventId) {
     el.textContent = 'No event ID provided.';
