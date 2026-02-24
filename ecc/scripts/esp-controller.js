@@ -1838,3 +1838,130 @@ export async function assignPublishingProfileToEvent(eventId, profileId) {
     return { status: 'Network Error', error: error.message };
   }
 }
+
+export async function createCampaign(eventId, campaignData) {
+  if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
+  if (!campaignData || typeof campaignData !== 'object') throw new Error('Invalid campaign data');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const raw = JSON.stringify(campaignData);
+  const options = await constructRequestOptions('POST', raw);
+
+  try {
+    const response = await safeFetch(`${host}/v1/events/${eventId}/campaigns`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to create campaign for event ${eventId}. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to create campaign for event ${eventId}:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function getCampaigns(eventId) {
+  if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/events/${eventId}/campaigns`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to get campaigns for event ${eventId}. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data.campaigns;
+  } catch (error) {
+    window.lana?.log(`Failed to get campaigns for event ${eventId}:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function getCampaign(eventId, campaignId) {
+  if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
+  if (!campaignId || typeof campaignId !== 'string') throw new Error('Invalid campaign ID');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('GET');
+
+  try {
+    const response = await safeFetch(`${host}/v1/events/${eventId}/campaigns/${campaignId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to get campaign ${campaignId} for event ${eventId}. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to get campaign ${campaignId} for event ${eventId}:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function updateCampaign(eventId, campaignId, campaignData) {
+  if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
+  if (!campaignId || typeof campaignId !== 'string') throw new Error('Invalid campaign ID');
+  if (!campaignData || typeof campaignData !== 'object') throw new Error('Invalid campaign data');
+
+  const existingCampaign = await getCampaign(eventId, campaignId);
+  if (existingCampaign.error) {
+    window.lana?.log(`Failed to get campaign ${campaignId} for update. Status: ${existingCampaign.status}\nError: ${JSON.stringify(existingCampaign, null, 2)}`);
+    return { status: existingCampaign.status, error: existingCampaign.error };
+  }
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const updatedCampaignData = {
+    ...campaignData,
+    modificationTime: existingCampaign.modificationTime,
+  };
+  const raw = JSON.stringify(updatedCampaignData);
+  const options = await constructRequestOptions('PUT', raw);
+
+  try {
+    const response = await safeFetch(`${host}/v1/events/${eventId}/campaigns/${campaignId}`, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      window.lana?.log(`Failed to update campaign ${campaignId} for event ${eventId}. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+      return { status: response.status, error: data };
+    }
+
+    return data;
+  } catch (error) {
+    window.lana?.log(`Failed to update campaign ${campaignId} for event ${eventId}:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
+
+export async function deleteCampaign(eventId, campaignId) {
+  if (!eventId || typeof eventId !== 'string') throw new Error('Invalid event ID');
+  if (!campaignId || typeof campaignId !== 'string') throw new Error('Invalid campaign ID');
+
+  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+  const options = await constructRequestOptions('DELETE');
+
+  try {
+    const response = await safeFetch(`${host}/v1/events/${eventId}/campaigns/${campaignId}`, options);
+
+    if (response.ok) {
+      return { ok: true };
+    }
+
+    const data = await response.json();
+    window.lana?.log(`Failed to delete campaign ${campaignId} for event ${eventId}. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+    return { status: response.status, error: data };
+  } catch (error) {
+    window.lana?.log(`Failed to delete campaign ${campaignId} for event ${eventId}:\n${JSON.stringify(error, null, 2)}`);
+    return { status: 'Network Error', error: error.message };
+  }
+}
