@@ -423,6 +423,7 @@ function initMoreOptions(props, config, eventObj, row) {
     const previewPost = buildTool(toolBox, 'Preview post-event', 'preview-eye');
     const copyUrl = buildTool(toolBox, 'Copy URL', 'copy');
     const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
+    const campaigns = buildTool(toolBox, 'Campaigns', 'copy');
     const clone = buildTool(toolBox, 'Clone', 'clone');
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
@@ -491,6 +492,11 @@ function initMoreOptions(props, config, eventObj, row) {
     // edit
     const url = getEventEditUrl(config, eventObj);
     edit.href = url.toString();
+
+    // campaigns
+    const campaignsUrl = new URL(`${window.location.origin}${config['campaign-dashboard-url'] || '/ecc/dashboard/t3/campaigns'}`);
+    campaignsUrl.searchParams.set('eventId', eventObj.eventId);
+    campaigns.href = campaignsUrl.toString();
 
     // clone
     clone.addEventListener('click', async (e) => {
