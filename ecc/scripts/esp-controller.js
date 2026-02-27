@@ -975,24 +975,44 @@ export async function deleteEvent(eventId) {
   }
 }
 
-export async function getEvents() {
-  const { host } = API_CONFIG.esp[getCurrentEnvironment()];
-  const options = await constructRequestOptions('GET');
-
-  try {
-    const response = await safeFetch(`${host}/v1/events`, options);
-    const data = await response.json();
-
-    if (!response.ok) {
-      window.lana?.log(`Failed to get list of events. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
-      return { status: response.status, error: data };
+async function getAllEvents() {
+  const recurGetEvents = async (fullEventsArr = [], nextPageToken = null) => {
+    const { host } = API_CONFIG.esp[getCurrentEnvironment()];
+    const options = await constructRequestOptions('GET');
+    const baseFetchUrl = `${host}/v1/events`;
+    const potentialUrlParams = new URLSearchParams();
+    if (nextPageToken) {
+      potentialUrlParams.set('next-page-token', nextPageToken);
     }
+    const fetchUrl = `${baseFetchUrl}?${potentialUrlParams.toString()}`;
 
-    return data;
-  } catch (error) {
-    window.lana?.log(`Failed to get list of events:\n${JSON.stringify(error, null, 2)}`);
-    return { status: 'Network Error', error: error.message };
-  }
+    try {
+      const response = await safeFetch(fetchUrl, options);
+      const data = await response.json();
+
+      if (!response.ok) {
+        window.lana?.log(`Failed to get list of events. Status: ${response.status}\nError: ${JSON.stringify(data, null, 2)}`);
+        return { status: response.status, error: data };
+      }
+
+      const allEvents = fullEventsArr.concat(data.events || []);
+
+      if (data.nextPageToken) {
+        return recurGetEvents(allEvents, data.nextPageToken);
+      }
+
+      return { events: allEvents };
+    } catch (error) {
+      window.lana?.log(`Failed to get list of events:\n${JSON.stringify(error, null, 2)}`);
+      return { status: 'Network Error', error: error.message };
+    }
+  };
+
+  return recurGetEvents();
+}
+
+export async function getEvents() {
+  return getAllEvents();
 }
 
 export async function getEventsForUser() {
@@ -1424,7 +1444,7 @@ export async function getAllEventAttendees(eventId) {
       potentialUrlParams.set('type', type);
     }
     if (nextPageToken) {
-      potentialUrlParams.set('nextPageToken', nextPageToken);
+      potentialUrlParams.set('next-page-token', nextPageToken);
     }
     const fetchUrl = `${baseFetchUrl}?${potentialUrlParams.toString()}`;
 
