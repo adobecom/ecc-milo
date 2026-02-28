@@ -2,6 +2,7 @@ import { LIBS } from '../../scripts/scripts.js';
 import {
   createCampaign,
   getCampaigns,
+  getEvent,
   updateCampaign,
   deleteCampaign,
 } from '../../scripts/esp-controller.js';
@@ -37,7 +38,7 @@ class CampaignTable extends LitElement {
     showCreateDialog: { type: Boolean },
     toastMsg: { type: String },
     toastVariant: { type: String },
-    eventAttendeeLimit: { type: Number },
+    useNoLimitToggle: { type: Boolean },
   };
 
   constructor() {
@@ -49,7 +50,7 @@ class CampaignTable extends LitElement {
     this.showCreateDialog = false;
     this.toastMsg = '';
     this.toastVariant = 'info';
-    this.eventAttendeeLimit = 0;
+    this.useNoLimitToggle = false;
   }
 
   createRenderRoot() {
@@ -86,14 +87,6 @@ class CampaignTable extends LitElement {
     return this.campaigns.reduce((sum, c) => sum + (c.attendeeCount || 0), 0);
   }
 
-  get totalAllocated() {
-    return this.campaigns.reduce((sum, c) => sum + (c.attendeeLimit || 0), 0);
-  }
-
-  get availableCapacity() {
-    return Math.max(0, this.eventAttendeeLimit - this.totalAllocated);
-  }
-
   showToast(msg, variant = 'info') {
     this.toastMsg = msg;
     this.toastVariant = variant;
@@ -119,7 +112,10 @@ class CampaignTable extends LitElement {
     }
   }
 
-  openCreateDialog() { this.showCreateDialog = true; }
+  openCreateDialog() {
+    this.showCreateDialog = true;
+    this.useNoLimitToggle = false;
+  }
 
   closeCreateDialog() { this.showCreateDialog = false; }
 
@@ -135,21 +131,31 @@ class CampaignTable extends LitElement {
     e.preventDefault();
     const form = this.querySelector('.create-dialog');
     const name = form.querySelector('[name="name"]')?.value?.trim();
-    const attendeeLimit = parseInt(form.querySelector('[name="attendeeLimit"]')?.value, 10);
 
     if (!name) return;
 
     const payload = { name };
-    if (!Number.isNaN(attendeeLimit) && attendeeLimit > 0) {
-      payload.attendeeLimit = attendeeLimit;
+
+    if (this.useNoLimitToggle) {
+      const eventResp = await getEvent(this.eventId);
+      if (eventResp?.error) {
+        this.showToast('Failed to load event. Please try again.', 'negative');
+        return;
+      }
+      const eventLimit = eventResp.attendeeLimit;
+      if (eventLimit != null && !Number.isNaN(+eventLimit) && +eventLimit > 0) {
+        payload.attendeeLimit = +eventLimit;
+      }
+    } else {
+      const attendeeLimit = parseInt(form.querySelector('[name="attendeeLimit"]')?.value, 10);
+      if (!Number.isNaN(attendeeLimit) && attendeeLimit > 0) {
+        payload.attendeeLimit = attendeeLimit;
+      }
     }
 
     const resp = await createCampaign(this.eventId, payload);
     if (resp.error) {
-      const msg = resp.status === 409
-        ? 'Campaign capacity exceeds available event capacity.'
-        : 'Failed to create campaign.';
-      this.showToast(msg, 'negative');
+      this.showToast('Failed to create campaign.', 'negative');
       return;
     }
 
@@ -220,12 +226,6 @@ class CampaignTable extends LitElement {
         <div class="stat">
           <span class="stat-label">CAMPAIGN REGISTRATIONS</span>
           <span class="stat-value">${this.totalRegistrations}</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">AVAILABLE CAPACITY</span>
-          <span class="stat-value">${this.availableCapacity}
-            <span class="stat-subtext">of ${this.eventAttendeeLimit} total</span>
-          </span>
         </div>
       </div>`;
   }
@@ -299,8 +299,11 @@ class CampaignTable extends LitElement {
           </div>
           <div class="field-row">
             <sp-field-label for="create-limit">Set link capacity limit</sp-field-label>
-            <input id="create-limit" name="attendeeLimit" type="number" placeholder="e.g. 50" min="1" class="capacity-input">
-            <span class="helper-text">Must be lower than the event capacity limit</span>
+            <input id="create-limit" name="attendeeLimit" type="number" placeholder="e.g. 50" min="1" class="capacity-input" ?disabled=${this.useNoLimitToggle}>
+          </div>
+          <div class="field-row switch-row">
+            <sp-switch name="useNoLimit" ?checked=${this.useNoLimitToggle}
+              @change=${(e) => { this.useNoLimitToggle = e.target.checked; }}>Use full event capacity (no limit)</sp-switch>
           </div>
         </div>
         <div class="dialog-actions">
