@@ -21,11 +21,13 @@ import {
   signIn,
   isPublishingLocked,
 } from '../../scripts/utils.js';
+import { toStageOrigin } from '../../scripts/domain-mapping.js';
 
 import { initProfileLogicTree } from '../../scripts/profile.js';
 import { cloneFilter, eventObjFilter } from './dashboard-utils.js';
 import { getAttribute, setEventAttribute } from '../../scripts/data-utils.js';
-import { EVENT_TYPES } from '../../scripts/constants.js';
+import { EVENT_TYPES, ENVIRONMENTS } from '../../scripts/constants.js';
+import { getCurrentEnvironment, getEspEnvParam } from '../../scripts/environment.js';
 
 // API Cache and Throttling System (functional approach)
 const apiCache = (() => {
@@ -421,22 +423,33 @@ function initMoreOptions(props, config, eventObj, row) {
     const previewPost = buildTool(toolBox, 'Preview post-event', 'preview-eye');
     const copyUrl = buildTool(toolBox, 'Copy URL', 'copy');
     const edit = buildTool(toolBox, 'Edit', 'edit-pencil');
+    const campaigns = buildTool(toolBox, 'Campaigns', 'copy');
     const clone = buildTool(toolBox, 'Clone', 'clone');
     const deleteBtn = buildTool(toolBox, 'Delete', 'delete-wire-round');
 
     if (eventObj.detailPagePath) {
-      previewPre.href = (() => {
+      const resolvePreviewUrl = (detailPagePath) => {
         let url;
-
         try {
-          url = new URL(`${eventObj.detailPagePath}`);
+          url = new URL(detailPagePath);
         } catch (e) {
-          url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
+          url = new URL(`${getEventPageHost()}${detailPagePath}`);
         }
 
+        if (getCurrentEnvironment() !== ENVIRONMENTS.PROD) {
+          url = new URL(toStageOrigin(url.href));
+        }
+
+        const espEnv = getEspEnvParam();
+        if (espEnv) url.searchParams.set('espenv', espEnv);
+
+        return url;
+      };
+
+      previewPre.href = (() => {
+        const url = resolvePreviewUrl(eventObj.detailPagePath);
+
         if (url) {
-          url.searchParams.set('previewMode', 'true');
-          url.searchParams.set('cachebuster', Date.now());
           url.searchParams.set('timing', +eventObj.localEndTimeMillis - 10);
           return url.toString();
         }
@@ -445,16 +458,9 @@ function initMoreOptions(props, config, eventObj, row) {
       previewPre.target = '_blank';
 
       previewPost.href = (() => {
-        let url;
-        try {
-          url = new URL(`${eventObj.detailPagePath}`);
-        } catch (e) {
-          url = new URL(`${getEventPageHost()}${eventObj.detailPagePath}`);
-        }
+        const url = resolvePreviewUrl(eventObj.detailPagePath);
 
         if (url) {
-          url.searchParams.set('previewMode', 'true');
-          url.searchParams.set('cachebuster', Date.now());
           url.searchParams.set('timing', +eventObj.localEndTimeMillis + 10);
           return url.toString();
         }
@@ -486,6 +492,11 @@ function initMoreOptions(props, config, eventObj, row) {
     // edit
     const url = getEventEditUrl(config, eventObj);
     edit.href = url.toString();
+
+    // campaigns
+    const campaignsUrl = new URL(`${window.location.origin}${config['campaign-dashboard-url'] || '/ecc/dashboard/t3/campaigns'}`);
+    campaignsUrl.searchParams.set('eventId', eventObj.eventId);
+    campaigns.href = campaignsUrl.toString();
 
     // clone
     clone.addEventListener('click', async (e) => {

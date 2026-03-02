@@ -28,13 +28,14 @@ import {
   buildNoAccessScreen,
   generateToolTip,
   camelToSentenceCase,
+  getEventPageHost,
   getEventLibsHost,
   replaceAnchorWithButton,
   getMetadata,
   isPublishingLocked,
 } from '../../scripts/utils.js';
 
-import { getCurrentEnvironment } from '../../scripts/environment.js';
+import { getCurrentEnvironment, getEspEnvParam } from '../../scripts/environment.js';
 
 import {
   createEvent,
@@ -47,6 +48,7 @@ import {
 } from '../../scripts/esp-controller.js';
 import { getAttribute } from '../../scripts/data-utils.js';
 import { ENVIRONMENTS, EVENT_TYPES, DEFAULT_SAVE_POLICIES } from '../../scripts/constants.js';
+import { toStageOrigin } from '../../scripts/domain-mapping.js';
 
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 const { decorateButtons } = await import(`${LIBS}/utils/decorate.js`);
@@ -1008,12 +1010,21 @@ function updateCtas(props) {
         let previewUrl;
 
         try {
-          previewUrl = new URL(eventDataResp.detailPagePath).href;
+          previewUrl = new URL(eventDataResp.detailPagePath);
         } catch (e) {
-          previewUrl = `${getEventPageHost()}${eventDataResp.detailPagePath}`;
+          previewUrl = new URL(`${getEventPageHost()}${eventDataResp.detailPagePath}`);
         }
 
-        a.href = `${previewUrl}?previewMode=true&cachebuster=${Date.now()}&timing=${testTime}`;
+        if (getCurrentEnvironment() !== ENVIRONMENTS.PROD) {
+          previewUrl = new URL(toStageOrigin(previewUrl.href));
+        }
+
+        previewUrl.searchParams.set('timing', testTime);
+
+        const espEnv = getEspEnvParam();
+        if (espEnv) previewUrl.searchParams.set('espenv', espEnv);
+
+        a.href = previewUrl.toString();
         a.classList.remove('preview-not-ready');
       }
     }
