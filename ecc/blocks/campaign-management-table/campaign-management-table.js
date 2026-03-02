@@ -35,6 +35,7 @@ class CampaignTable extends LitElement {
     loading: { type: Boolean },
     editingCampaign: { type: Object },
     deletingCampaign: { type: Object },
+    deactivatingCampaign: { type: Object },
     showCreateDialog: { type: Boolean },
     toastMsg: { type: String },
     toastVariant: { type: String },
@@ -47,6 +48,7 @@ class CampaignTable extends LitElement {
     this.loading = true;
     this.editingCampaign = null;
     this.deletingCampaign = null;
+    this.deactivatingCampaign = null;
     this.showCreateDialog = false;
     this.toastMsg = '';
     this.toastVariant = 'info';
@@ -173,25 +175,45 @@ class CampaignTable extends LitElement {
 
     if (!name) return;
 
-    const payload = { name, status };
+    if (status === 'Archived' && this.editingCampaign.status === 'Active') {
+      this.deactivatingCampaign = { ...this.editingCampaign, name, status };
+      return;
+    }
 
-    const resp = await updateCampaign(
-      this.eventId,
-      this.editingCampaign.campaignId,
-      payload,
-    );
+    const ok = await this.performUpdate(this.editingCampaign.campaignId, { name, status });
+    if (ok) {
+      this.closeEditDialog();
+      await this.loadCampaigns();
+      this.showToast('Campaign updated successfully', 'positive');
+    }
+  }
+
+  closeInactiveConfirmDialog() {
+    this.deactivatingCampaign = null;
+  }
+
+  async handleConfirmInactive() {
+    const { campaignId, name, status } = this.deactivatingCampaign;
+    const ok = await this.performUpdate(campaignId, { name, status });
+    if (ok) {
+      this.closeInactiveConfirmDialog();
+      this.closeEditDialog();
+      await this.loadCampaigns();
+      this.showToast('Campaign updated successfully', 'positive');
+    }
+  }
+
+  async performUpdate(campaignId, payload) {
+    const resp = await updateCampaign(this.eventId, campaignId, payload);
 
     if (resp.error) {
       const msg = resp.status === 409
         ? 'Campaign was modified by another user. Please refresh and try again.'
         : 'Failed to update campaign.';
       this.showToast(msg, 'negative');
-      return;
+      return false;
     }
-
-    this.closeEditDialog();
-    await this.loadCampaigns();
-    this.showToast('Campaign updated successfully', 'positive');
+    return true;
   }
 
   async handleDelete() {
@@ -255,10 +277,12 @@ class CampaignTable extends LitElement {
                 <td class="campaign-name-cell">${c.name}</td>
                 <td class="url-param-cell">
                   <span class="url-param-text">${CampaignTable.extractUrlParam(c)}</span>
+                  ${c.url ? html`
                   <sp-action-button size="xl" quiet label="Copy URL"
-                    @click=${() => this.copyToClipboard(c.url || '')}>
+                    @click=${() => this.copyToClipboard(c.url)}>
                     <img src="/ecc/icons/copy.svg" slot="icon" alt="copy">
                   </sp-action-button>
+                  ` : nothing}
                 </td>
                 <td class="registrations-cell">
                   ${c.attendeeCount || 0}${c.attendeeLimit ? html` / ${c.attendeeLimit}` : nothing}
@@ -269,10 +293,12 @@ class CampaignTable extends LitElement {
                   </span>
                 </td>
                 <td class="actions-col">
+                  ${c.status === 'Active' ? html`
                   <sp-action-button size="xl" quiet label="Edit"
                     @click=${() => this.openEditDialog(c)}>
                     <img src="/ecc/icons/edit.svg" slot="icon" alt="edit">
                   </sp-action-button>
+                  ` : nothing}
                   <sp-action-button size="xl" quiet label="Delete"
                     @click=${() => this.openDeleteDialog(c)}>
                     <img src="/ecc/icons/delete.svg" slot="icon" alt="delete">
@@ -330,10 +356,12 @@ class CampaignTable extends LitElement {
             <sp-field-label>Tracking link</sp-field-label>
             <div class="tracking-link-row">
               <span class="tracking-link-text">${c.url || ''}</span>
+              ${c.url ? html`
               <sp-action-button size="xl" quiet label="Copy link"
-                @click=${() => this.copyToClipboard(c.url || '')}>
+                @click=${() => this.copyToClipboard(c.url)}>
                 <img src="/ecc/icons/copy.svg" slot="icon" alt="copy">
               </sp-action-button>
+              ` : nothing}
             </div>
           </div>
           <div class="field-row">
@@ -348,6 +376,24 @@ class CampaignTable extends LitElement {
         <div class="dialog-actions">
           <sp-button variant="secondary" @click=${this.closeEditDialog}>Cancel</sp-button>
           <sp-button variant="accent" @click=${(e) => this.handleUpdate(e)}>Save</sp-button>
+        </div>
+      </div>`;
+  }
+
+  renderInactiveConfirmDialog() {
+    if (!this.deactivatingCampaign) return nothing;
+    return html`
+      <sp-underlay open></sp-underlay>
+      <div class="campaign-dialog inactive-confirm-dialog">
+        <h2>Make Campaign Inactive</h2>
+        <sp-divider size="s"></sp-divider>
+        <div class="dialog-body">
+          <p>Making this campaign inactive is <strong>permanent</strong>. Once inactive, the campaign cannot be reactivated. The tracking link will no longer accept new registrations. Existing registrations are not affected.</p>
+          <p>Are you sure you want to make this campaign inactive?</p>
+        </div>
+        <div class="dialog-actions">
+          <sp-button variant="secondary" @click=${this.closeInactiveConfirmDialog}>Cancel</sp-button>
+          <sp-button variant="negative" @click=${() => this.handleConfirmInactive()}>Make inactive</sp-button>
         </div>
       </div>`;
   }
@@ -393,6 +439,7 @@ class CampaignTable extends LitElement {
       ${this.renderTable()}
       ${this.renderCreateDialog()}
       ${this.renderEditDialog()}
+      ${this.renderInactiveConfirmDialog()}
       ${this.renderDeleteDialog()}
       <div class="toast-area">${this.renderToast()}</div>
     `;
