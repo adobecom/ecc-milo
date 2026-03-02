@@ -180,7 +180,7 @@ class CampaignTable extends LitElement {
       return;
     }
 
-    const ok = await this.performUpdate(this.editingCampaign.campaignId, { name, status });
+    const ok = await this.submitCampaignUpdate(this.editingCampaign.campaignId, { name, status });
     if (ok) {
       this.closeEditDialog();
       await this.loadCampaigns();
@@ -194,7 +194,7 @@ class CampaignTable extends LitElement {
 
   async handleConfirmInactive() {
     const { campaignId, name, status } = this.deactivatingCampaign;
-    const ok = await this.performUpdate(campaignId, { name, status });
+    const ok = await this.submitCampaignUpdate(campaignId, { name, status });
     if (ok) {
       this.closeInactiveConfirmDialog();
       this.closeEditDialog();
@@ -203,7 +203,7 @@ class CampaignTable extends LitElement {
     }
   }
 
-  async performUpdate(campaignId, payload) {
+  async submitCampaignUpdate(campaignId, payload) {
     const resp = await updateCampaign(this.eventId, campaignId, payload);
 
     if (resp.error) {
