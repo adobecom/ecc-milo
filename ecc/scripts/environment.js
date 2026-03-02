@@ -166,6 +166,19 @@ export function getEventServiceHost(relativeDomain, location = window.location) 
  * @returns {string} The event service host URL
  * @throws {Error} If environment detection is not available
  */
+/**
+ * Returns the ESP environment identifier for use as a URL parameter.
+ * Maps LOCAL to DEV (same ESP host). Returns null for PROD (default).
+ * @param {Location} [location=window.location]
+ * @returns {string|null}
+ */
+export function getEspEnvParam(location = window.location) {
+  const env = getCurrentEnvironment(location);
+  if (env === ENVIRONMENTS.PROD) return null;
+  if (env === ENVIRONMENTS.LOCAL) return ENVIRONMENTS.DEV;
+  return env;
+}
+
 export function getDAHost(relativeDomain, location = window.location) {
   const currentEnv = getCurrentEnvironment(location);
   const { hostname, href, origin } = location;
