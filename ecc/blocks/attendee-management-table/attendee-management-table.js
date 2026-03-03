@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { getAllEventAttendees, getEventImages, getEventsForUser, fetchRsvpFormConfigs } from '../../scripts/esp-controller.js';
+import { getAllEventAttendees, getCampaigns, getEventImages, getEventsForUser, fetchRsvpFormConfigs } from '../../scripts/esp-controller.js';
 import { LIBS } from '../../scripts/scripts.js';
 import {
   getIcon,
@@ -17,7 +17,7 @@ import { getAttribute } from '../../scripts/data-utils.js';
 const { createTag } = await import(`${LIBS}/utils/utils.js`);
 
 // Place these at the top so they're defined before use
-const stickyColumns = ['registrationStatus', 'checkedIn'];
+const stickyColumns = ['campaignId', 'registrationStatus', 'checkedIn'];
 const SPECTRUM_COMPONENTS = [
   'theme',
   'toast',
@@ -548,7 +548,13 @@ function buildEventPicker(props) {
     const { detail } = e;
     props.currentEventId = detail.value;
     renderTableLoadingOverlay(props);
-    getAllEventAttendees(props.currentEventId).then((attendees) => {
+    Promise.all([
+      getAllEventAttendees(props.currentEventId),
+      getCampaigns(props.currentEventId),
+    ]).then(([attendees, campaignsResp]) => {
+      const hasCampaigns = Array.isArray(campaignsResp) && campaignsResp.length > 0;
+      props.hasCampaigns = hasCampaigns;
+
       if (!attendees.error) {
         props.data = attendees;
       }
@@ -607,7 +613,7 @@ function initCustomLitComponents() {
   customElements.define('filter-menu', FilterMenu);
 }
 
-async function fetchRSVPConfig(cloudType) {
+async function fetchRSVPConfig(cloudType, { hasCampaigns = false } = {}) {
   try {
     if (!rsvpConfigCache) {
       return [];
@@ -622,7 +628,7 @@ async function fetchRSVPConfig(cloudType) {
     // Only use rows where Type is not 'submit'
     const configColumns = configItem.config.data
       .filter((row) => row.Type !== 'submit')
-      .filter((row) => !['firstName', 'lastName'].includes(row.Field)) // Remove individual name fields
+      .filter((row) => !['firstName', 'lastName'].includes(row.Field))
       .map((row) => ({
         key: row.Field,
         label: row.Label,
@@ -630,7 +636,6 @@ async function fetchRSVPConfig(cloudType) {
         fallback: '',
       }));
 
-    // Add the name column at the beginning
     configColumns.unshift({
       key: 'name',
       label: 'Name',
@@ -638,13 +643,15 @@ async function fetchRSVPConfig(cloudType) {
       fallback: '',
     });
 
-    // Add the required sticky columns if they don't exist
     const requiredColumns = [
       { key: 'registrationStatus', label: 'RSVP Status', type: 'text', fallback: 'registered' },
       { key: 'checkedIn', label: 'Checked In', type: 'text', fallback: '-' },
     ];
 
-    // Only add if they don't already exist in the config
+    if (hasCampaigns) {
+      requiredColumns.unshift({ key: 'campaignId', label: 'Campaign', type: 'text', fallback: '-' });
+    }
+
     requiredColumns.forEach((col) => {
       if (!configColumns.find((c) => c.key === col.key)) {
         configColumns.push(col);
@@ -679,6 +686,7 @@ async function buildDashboard(el, config) {
     columnMap: [],
     currentCloudType: '',
     filterMap: {},
+    hasCampaigns: false,
   };
 
   let data = [];
@@ -697,15 +705,21 @@ async function buildDashboard(el, config) {
     const hasBUAccess = userHasAccessToBU(user, currentEvent.cloudType);
 
     if (hasEventAccess || hasSeriesAccess || hasBUAccess) {
-      const resp = await getAllEventAttendees(props.currentEventId);
+      const [resp, campaignsResp] = await Promise.all([
+        getAllEventAttendees(props.currentEventId),
+        getCampaigns(props.currentEventId),
+      ]);
+
       if (resp && !resp.error) {
         data = resp;
       } else {
         console.error('Failed to load attendee data:', resp?.error);
       }
 
-      // Fetch the RSVP config based on cloudType
-      props.columnMap = await fetchRSVPConfig(currentEvent.cloudType);
+      const hasCampaigns = Array.isArray(campaignsResp) && campaignsResp.length > 0;
+      props.hasCampaigns = hasCampaigns;
+
+      props.columnMap = await fetchRSVPConfig(currentEvent.cloudType, { hasCampaigns });
       props.currentCloudType = currentEvent.cloudType;
 
       console.log('RSVP config load results:', {
@@ -755,12 +769,13 @@ async function buildDashboard(el, config) {
       if (prop === 'currentEventId') {
         clearActionArea(target);
         resetSort(target);
-        // On event change, check if cloudType changed and reload config if needed
-        const newEvent = target.events.find((e) => e.eventId === value);
-        if (newEvent && newEvent.cloudType !== target.currentCloudType) {
-          fetchRSVPConfig(newEvent.cloudType).then((columnMap) => {
+      }
+      if (prop === 'hasCampaigns') {
+        const currentEvent = target.events.find((e) => e.eventId === target.currentEventId);
+        if (currentEvent) {
+          fetchRSVPConfig(currentEvent.cloudType, { hasCampaigns: !!value }).then((columnMap) => {
             target.columnMap = columnMap;
-            target.currentCloudType = newEvent.cloudType;
+            target.currentCloudType = currentEvent.cloudType;
             updateFilterMap(target);
             buildFilters(target);
             buildDashboardTable(target, config);
