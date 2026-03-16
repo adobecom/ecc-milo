@@ -3,12 +3,13 @@
 /* eslint-disable no-undef */
 /* eslint-disable func-names */
 /* eslint-disable object-shorthand */
-import { Editor } from 'https://esm.sh/@tiptap/core';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit';
-import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder';
-import Underline from 'https://esm.sh/@tiptap/extension-underline';
-import Link from 'https://esm.sh/@tiptap/extension-link';
-import CharacterCount from 'https://esm.sh/@tiptap/extension-character-count';
+/* eslint-disable import/extensions */
+import { Editor } from 'https://esm.sh/@tiptap/core@2.27.2';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.27.2';
+import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder@2.27.2';
+import Underline from 'https://esm.sh/@tiptap/extension-underline@2.27.2';
+import Link from 'https://esm.sh/@tiptap/extension-link@2.27.2';
+import CharacterCount from 'https://esm.sh/@tiptap/extension-character-count@2.27.2';
 
 import { LIBS } from '../../scripts/scripts.js';
 import { style } from './rte-tiptap.css.js';
