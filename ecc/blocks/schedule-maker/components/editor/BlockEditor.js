@@ -46,6 +46,21 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
     return new Date(timestamp).toISOString().slice(0, 16);
   };
 
+  const displayInTimezone = (timestamp, timezone) => {
+    if (!timestamp) return '';
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    }).format(new Date(timestamp));
+  };
+
+  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   return html`
     <div \
       class="sm-editor__block ${editingBlockId === block.id ? 'sm-editor__block--editing' : ''} ${!block.isComplete ? 'sm-editor__block--incomplete' : ''}" \
@@ -104,35 +119,51 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
             placeholder="Enter block start date and time" \
           />
         </div>
-        <div class="sm-editor__block-livestream">
-          <sp-checkbox \
-            id="${block.id}-live-stream-checkbox" \
-            name="${block.id}-live-stream-checkbox" \
-            checked=${block.includeLiveStream} \
-            onchange=${(event) => handleLiveStreamChange(block.id, event)} \
-          >
-            Live stream
-          </sp-checkbox>
-          ${block.includeLiveStream && html`
-          <sp-textfield \
-            aria-label="Mobile rider stream id" \
-            type="text" \
-            id="${block.id}-mobile-rider-stream-id-input" \
-            value=${block.liveStream?.streamId || ''} \
-            oninput=${(event) => handleLiveStreamIdChange(block.id, event)} \
-            placeholder="Enter Mobile Rider Stream ID" \
-          />
-          `}
-        </div>
+        ${block.startDateTime && html`
+          <div class="sm-editor__block-datetime-preview">
+            <p class="sm-editor__block-datetime-preview-item">
+              <span class="sm-editor__block-datetime-preview-label">PT:</span>
+              ${displayInTimezone(block.startDateTime, 'America/Los_Angeles')}
+            </p>
+            ${localTimezone !== 'America/Los_Angeles' && html`
+              <p class="sm-editor__block-datetime-preview-item">
+                <span class="sm-editor__block-datetime-preview-label">Local:</span>
+                ${displayInTimezone(block.startDateTime, localTimezone)}
+              </p>
+            `}
+          </div>
+        `}
       </div>
-      <sp-field-label size="l" for="${block.id}-fragment-path-input">Fragment path</sp-field-label>
-      <sp-textfield \
-        type="text" \
-        id="${block.id}-fragment-path-input" \
-        value=${block.fragmentPath} \
-        oninput=${(event) => handleFragmentPathChange(block.id, event)} \
-        placeholder="Enter fragment path" \
-      />
+      <div class="sm-editor__block-livestream">
+        <sp-checkbox \
+          id="${block.id}-live-stream-checkbox" \
+          name="${block.id}-live-stream-checkbox" \
+          checked=${block.includeLiveStream} \
+          onchange=${(event) => handleLiveStreamChange(block.id, event)} \
+        >
+          Live stream
+        </sp-checkbox>
+        ${block.includeLiveStream && html`
+        <sp-textfield \
+          aria-label="Mobile rider stream id" \
+          type="text" \
+          id="${block.id}-mobile-rider-stream-id-input" \
+          value=${block.liveStream?.streamId || ''} \
+          oninput=${(event) => handleLiveStreamIdChange(block.id, event)} \
+          placeholder="Enter Mobile Rider Stream ID" \
+        />
+        `}
+      </div>
+      <div class="sm-editor__block-fragment-path">
+        <sp-field-label size="l" for="${block.id}-fragment-path-input">Fragment path</sp-field-label>
+        <sp-textfield \
+          type="text" \
+          id="${block.id}-fragment-path-input" \
+          value=${block.fragmentPath} \
+          oninput=${(event) => handleFragmentPathChange(block.id, event)} \
+          placeholder="Enter fragment path" \
+        />
+      </div>
     </div>
   `;
 }
