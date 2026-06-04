@@ -1,6 +1,7 @@
 /* ==========================================================================
-   Fragment Path Browser — AEM column-view style
+   Fragment Path Browser — Adobe Spectrum tree-view style
    ========================================================================== */
+
 
 .fpb-wrapper {
   padding: 8px 0 0;
@@ -11,9 +12,9 @@
   display: flex;
   height: 320px;
   overflow-x: auto;
-  border: 1px solid var(--sm-color-border, #e0e0e0);
+  border: 1px solid #e1e1e1;
   border-radius: var(--sm-border-radius, 8px);
-  background: var(--sm-color-surface, white);
+  background: #fff;
 }
 
 /* Individual column */
@@ -22,7 +23,7 @@
   max-width: 280px;
   flex-shrink: 0;
   overflow-y: auto;
-  border-right: 1px solid var(--sm-color-border, #e0e0e0);
+  border-right: 1px solid #e1e1e1;
 }
 
 .fpb-column:last-child {
@@ -30,7 +31,7 @@
 }
 
 .fpb-column--root {
-  background: var(--sm-color-background, #f8f8f8);
+  background: #fafafa;
 }
 
 .fpb-column--loading {
@@ -46,7 +47,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 6px 10px;
   cursor: pointer;
   user-select: none;
   border: none;
@@ -54,43 +55,36 @@
   width: 100%;
   text-align: left;
   font-size: 14px;
-  color: var(--sm-color-text-primary, #333);
+  color: #4b4b4b;
   border-left: 3px solid transparent;
   transition: background 0.1s ease;
+  min-height: 32px;
+  box-sizing: border-box;
 }
 
 .fpb-item:hover {
-  background: var(--sm-color-surface-hover, #f0f0f0);
+  background: #eaeaea;
 }
 
 .fpb-item--active {
-  background: #e8f0fe;
-  border-left-color: #1473e6;
-  font-weight: 600;
-  color: #1473e6;
+  background: #def;
+  border-left-color: #0265dc;
+  color: #4b4b4b;
 }
 
 .fpb-item--active:hover {
-  background: #dde8fd;
+  background: #cce4ff;
 }
 
 .fpb-item-icon {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  color: #6e6e6e;
+  color: #8d8d8d;
 }
 
 .fpb-item--active .fpb-item-icon {
-  color: #1473e6;
-}
-
-.fpb-item--folder .fpb-item-icon {
-  color: #e68619;
-}
-
-.fpb-item--active.fpb-item--folder .fpb-item-icon {
-  color: #1473e6;
+  color: #0265dc;
 }
 
 .fpb-item-name {
@@ -102,14 +96,18 @@
 
 .fpb-item-chevron {
   flex-shrink: 0;
-  color: var(--sm-color-text-muted, #999);
+  color: #8d8d8d;
   font-size: 16px;
   line-height: 1;
 }
 
+.fpb-item--active .fpb-item-chevron {
+  color: #0265dc;
+}
+
 .fpb-item-check {
   flex-shrink: 0;
-  color: #1473e6;
+  color: #0265dc;
   font-weight: 700;
 }
 
@@ -145,7 +143,7 @@
 .fpb-auth-error-msg {
   margin: 0 0 12px;
   font-size: 13px;
-  color: var(--sm-color-text-primary, #333);
+  color: #4b4b4b;
 }
 
 .fpb-auth-error-actions {
@@ -159,7 +157,7 @@
 .fpb-open-da-btn {
   display: inline-block;
   padding: 7px 16px;
-  background: #1473e6;
+  background: #0265dc;
   color: white;
   text-decoration: none;
   border-radius: 4px;
@@ -168,22 +166,22 @@
 }
 
 .fpb-open-da-btn:hover {
-  background: #0d66d0;
+  background: #0054b6;
   color: white;
 }
 
 .fpb-retry-btn {
   padding: 6px 14px;
   background: none;
-  border: 1px solid var(--sm-color-border, #ccc);
+  border: 1px solid #e1e1e1;
   border-radius: 4px;
   font-size: 13px;
   cursor: pointer;
-  color: var(--sm-color-text-primary, #333);
+  color: #4b4b4b;
 }
 
 .fpb-retry-btn:hover {
-  background: var(--sm-color-surface-hover, #f0f0f0);
+  background: #eaeaea;
 }
 
 .fpb-columns--hidden {
@@ -201,7 +199,7 @@
 }
 
 .fpb-breadcrumb-sep {
-  color: var(--sm-color-text-muted, #999);
+  color: #8d8d8d;
   font-size: 14px;
   padding: 0 2px;
 }
@@ -211,20 +209,20 @@
   border: none;
   padding: 2px 4px;
   font-size: 12px;
-  color: #1473e6;
+  color: #0265dc;
   cursor: pointer;
   border-radius: 3px;
   line-height: 1.4;
 }
 
 .fpb-breadcrumb-btn:hover:not(:disabled) {
-  background: #e8f0fe;
+  background: #def;
   text-decoration: underline;
 }
 
 .fpb-breadcrumb-btn--current,
 .fpb-breadcrumb-btn:disabled {
-  color: var(--sm-color-text-secondary, #666);
+  color: #6f6f6f;
   cursor: default;
   font-weight: 600;
 }
@@ -240,16 +238,16 @@
 }
 
 .fpb-selected-label {
-  color: var(--sm-color-text-secondary, #666);
+  color: #6f6f6f;
   flex-shrink: 0;
 }
 
 .fpb-selected-value {
   font-family: monospace;
   font-size: 11px;
-  color: var(--sm-color-text-primary, #333);
-  background: var(--sm-color-background, #f8f8f8);
-  border: 1px solid var(--sm-color-border, #e0e0e0);
+  color: #4b4b4b;
+  background: #f5f5f5;
+  border: 1px solid #e1e1e1;
   border-radius: 3px;
   padding: 2px 6px;
   word-break: break-all;
