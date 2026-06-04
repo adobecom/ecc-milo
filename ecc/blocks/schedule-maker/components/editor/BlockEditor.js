@@ -1,8 +1,20 @@
+import { useState } from '../../../../scripts/deps/preact-hook.js';
 import { html } from '../../htm-wrapper.js';
 import { useSchedulesOperations } from '../../context/SchedulesContext.js';
+import FragmentPathBrowser, { DEFAULT_FRAGMENT_ROOTS } from './FragmentPathBrowser.js';
+
+function getFragmentPreviewUrl(block) {
+  const { repo, org } = DEFAULT_FRAGMENT_ROOTS[0];
+  return `https://main--${repo}--${org}.aem.page${block.fragmentPath}`;
+}
+
+function getFragmentRootHint() {
+  return `Root: ${DEFAULT_FRAGMENT_ROOTS[0].repo} (default)`;
+}
 
 export default function BlockEditor({ block, editingBlockId, setEditingBlockId }) {
   const { updateBlockLocally, deleteBlockLocally } = useSchedulesOperations();
+  const [isBrowserOpen, setIsBrowserOpen] = useState(false);
 
   const handleEditBlockTitle = (blockId) => {
     updateBlockLocally(blockId, { isEditingBlockTitle: true });
@@ -156,14 +168,38 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
       </div>
       <div class="sm-editor__block-fragment-path">
         <sp-field-label size="l" for="${block.id}-fragment-path-input">Fragment path</sp-field-label>
-        <sp-textfield \
-          type="text" \
-          id="${block.id}-fragment-path-input" \
-          value=${block.fragmentPath} \
-          oninput=${(event) => handleFragmentPathChange(block.id, event)} \
-          placeholder="Enter fragment path" \
-        />
+        <div class="sm-editor__block-fragment-path-row">
+          <sp-textfield \
+            type="text" \
+            id="${block.id}-fragment-path-input" \
+            value=${block.fragmentPath} \
+            oninput=${(event) => handleFragmentPathChange(block.id, event)} \
+            placeholder="Enter fragment path" \
+          />
+          <sp-action-button quiet size="l" onClick=${() => setIsBrowserOpen(true)} aria-label="Browse fragment path" title="Browse DA fragments">
+            <sp-icon slot="icon"><svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18"><path fill="currentColor" d="M1,4.5v10A1.5,1.5,0,0,0,2.5,16h13A1.5,1.5,0,0,0,17,14.5V6.5A1.5,1.5,0,0,0,15.5,5H9.664a.5.5,0,0,1-.39-.188L7.546,2.688A1.5,1.5,0,0,0,6.378,2.1H2.5A1.5,1.5,0,0,0,1,3.6Z"/></svg></sp-icon>
+          </sp-action-button>
+          ${block.fragmentPath && html`
+            <a \
+              href=${getFragmentPreviewUrl(block)} \
+              target="_blank" \
+              rel="noopener noreferrer" \
+              class="sm-fragment-preview-btn" \
+              title="Open fragment preview" \
+              aria-label="Open fragment preview" \
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18"><path fill="currentColor" d="M16,1H6A1,1,0,0,0,5,2V5H2A1,1,0,0,0,1,6V16a1,1,0,0,0,1,1H12a1,1,0,0,0,1-1V13h3a1,1,0,0,0,1-1V2A1,1,0,0,0,16,1ZM11,15H3V7h8Zm4-4H13V6a1,1,0,0,0-1-1H7V3h8Z"/></svg>
+            </a>
+          `}
+        </div>
+        ${block.fragmentPath && html`<p class="sm-fragment-root-hint">${getFragmentRootHint()}</p>`}
       </div>
+      <${FragmentPathBrowser} \
+        isOpen=${isBrowserOpen} \
+        onClose=${() => setIsBrowserOpen(false)} \
+        onSelect=${(path) => updateBlockLocally(block.id, { fragmentPath: path })} \
+        roots=${DEFAULT_FRAGMENT_ROOTS} \
+      />
     </div>
   `;
 }
