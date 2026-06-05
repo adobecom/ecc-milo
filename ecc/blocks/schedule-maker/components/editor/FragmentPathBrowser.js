@@ -248,9 +248,10 @@ export default function FragmentPathBrowser({
       ${items.map((item) => {
         const isFolder = !item.ext;
         const root = roots[selectedRootIndex];
-        const contentPath = stripOrgRepo(item.path, root.org, root.repo);
-        const isActiveFolder = activeFolderPaths[colIndex] === contentPath;
-        const isSelectedFile = selectedFilePath === contentPath;
+        const rawPath = stripOrgRepo(item.path, root.org, root.repo);
+        const contentPath = isFolder ? rawPath : (item.ext ? rawPath.slice(0, -(item.ext.length + 1)) : rawPath);
+        const isActiveFolder = isFolder && activeFolderPaths[colIndex] === rawPath;
+        const isSelectedFile = !isFolder && selectedFilePath === contentPath;
 
         return html`
           <div \
