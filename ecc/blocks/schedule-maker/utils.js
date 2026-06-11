@@ -172,10 +172,18 @@ class ScheduleURLUtility {
       // Generate the URL using createScheduleURL
       const scheduleURL = this.createScheduleURL(scheduleObject);
 
-      // Extract title and scheduleId from options
-      const { title, scheduleId } = scheduleObject;
-      // Create link text content
-      const linkText = scheduleId ? `Schedule: ${title} (${scheduleId})` : `Schedule: ${title}`;
+      const { title, modificationTime } = scheduleObject;
+      const formattedDate = modificationTime
+        ? new Date(modificationTime).toLocaleString('en-US', {
+          weekday: 'long',
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        })
+        : '';
+      const linkText = formattedDate ? `Schedule: ${title} – ${formattedDate}` : `Schedule: ${title}`;
 
       // Create a virtual link element
       const linkElement = document.createElement('a');
