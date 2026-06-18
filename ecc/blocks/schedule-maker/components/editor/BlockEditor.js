@@ -1,18 +1,16 @@
 import { useState } from '../../../../scripts/deps/preact-hook.js';
 import { html } from '../../htm-wrapper.js';
 import { useSchedulesOperations } from '../../context/SchedulesContext.js';
-import FragmentPathBrowser, { DEFAULT_FRAGMENT_ROOTS } from './FragmentPathBrowser.js';
+import FragmentPathBrowser from './FragmentPathBrowser.js';
+import { getRepoConfig, DEFAULT_REPO_NAME } from '../../repos.js';
 
-function getFragmentPreviewUrl(block) {
-  const { repo, org } = DEFAULT_FRAGMENT_ROOTS[0];
-  return `https://main--${repo}--${org}.aem.page${block.fragmentPath}`;
+function getFragmentPreviewUrl(block, repoConfig) {
+  const { repo, org } = repoConfig;
+  return `https://da.live/edit#/${org}/${repo}${block.fragmentPath}`;
 }
 
-function getFragmentRootHint() {
-  return `Root: ${DEFAULT_FRAGMENT_ROOTS[0].repo} (default)`;
-}
-
-export default function BlockEditor({ block, editingBlockId, setEditingBlockId }) {
+export default function BlockEditor({ block, editingBlockId, setEditingBlockId, repoConfig }) {
+  const effectiveRepoConfig = repoConfig ?? getRepoConfig(DEFAULT_REPO_NAME);
   const { updateBlockLocally, deleteBlockLocally } = useSchedulesOperations();
   const [isBrowserOpen, setIsBrowserOpen] = useState(false);
 
@@ -72,6 +70,7 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
   };
 
   const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const isRelativePath = block.fragmentPath?.startsWith('/');
 
   return html`
     <div \
@@ -179,26 +178,25 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
           <sp-action-button quiet size="l" onClick=${() => setIsBrowserOpen(true)} aria-label="Browse fragment path" title="Browse DA fragments">
             <sp-icon slot="icon"><svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18"><path fill="currentColor" d="M1,4.5v10A1.5,1.5,0,0,0,2.5,16h13A1.5,1.5,0,0,0,17,14.5V6.5A1.5,1.5,0,0,0,15.5,5H9.664a.5.5,0,0,1-.39-.188L7.546,2.688A1.5,1.5,0,0,0,6.378,2.1H2.5A1.5,1.5,0,0,0,1,3.6Z"/></svg></sp-icon>
           </sp-action-button>
-          ${block.fragmentPath && html`
-            <a \
-              href=${getFragmentPreviewUrl(block)} \
-              target="_blank" \
-              rel="noopener noreferrer" \
-              class="sm-fragment-preview-btn" \
-              title="Open fragment preview" \
-              aria-label="Open fragment preview" \
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18"><path fill="currentColor" d="M16,1H6A1,1,0,0,0,5,2V5H2A1,1,0,0,0,1,6V16a1,1,0,0,0,1,1H12a1,1,0,0,0,1-1V13h3a1,1,0,0,0,1-1V2A1,1,0,0,0,16,1ZM11,15H3V7h8Zm4-4H13V6a1,1,0,0,0-1-1H7V3h8Z"/></svg>
-            </a>
-          `}
+          <a \
+            href=${isRelativePath ? getFragmentPreviewUrl(block, effectiveRepoConfig) : undefined} \
+            target="_blank" \
+            rel="noopener noreferrer" \
+            class="sm-fragment-preview-btn ${!isRelativePath ? 'sm-fragment-preview-btn--disabled' : ''}" \
+            title="Open in DA" \
+            aria-label="Open in DA" \
+            aria-disabled=${!isRelativePath} \
+            onClick=${!isRelativePath ? (e) => e.preventDefault() : undefined} \
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 18 18" width="18"><path fill="currentColor" d="M16,1H6A1,1,0,0,0,5,2V5H2A1,1,0,0,0,1,6V16a1,1,0,0,0,1,1H12a1,1,0,0,0,1-1V13h3a1,1,0,0,0,1-1V2A1,1,0,0,0,16,1ZM11,15H3V7h8Zm4-4H13V6a1,1,0,0,0-1-1H7V3h8Z"/></svg>
+          </a>
         </div>
-        ${block.fragmentPath && html`<p class="sm-fragment-root-hint">${getFragmentRootHint()}</p>`}
       </div>
       <${FragmentPathBrowser} \
         isOpen=${isBrowserOpen} \
         onClose=${() => setIsBrowserOpen(false)} \
         onSelect=${(path) => updateBlockLocally(block.id, { fragmentPath: path })} \
-        roots=${DEFAULT_FRAGMENT_ROOTS} \
+        roots=${[effectiveRepoConfig]} \
       />
     </div>
   `;

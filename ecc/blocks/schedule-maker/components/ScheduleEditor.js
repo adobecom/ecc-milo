@@ -3,12 +3,18 @@ import { useSchedulesData, useSchedulesOperations } from '../context/SchedulesCo
 import { useState } from '../../../scripts/deps/preact-hook.js';
 import ScheduleHeader from './editor/ScheduleHeader.js';
 import BlockEditor from './editor/BlockEditor.js';
+import { getRepoForSchedule } from '../schedule-repo-store.js';
+import { getRepoConfig, DEFAULT_REPO_NAME } from '../repos.js';
 
 export default function ScheduleEditor() {
   const { activeSchedule } = useSchedulesData();
   const { addBlockLocally } = useSchedulesOperations();
 
   const [editingBlockId, setEditingBlockId] = useState(null);
+
+  const repoConfig = getRepoConfig(
+    getRepoForSchedule(activeSchedule?.scheduleId) ?? DEFAULT_REPO_NAME,
+  );
 
   const handleAddBlock = () => {
     if (!activeSchedule) return;
@@ -52,6 +58,7 @@ export default function ScheduleEditor() {
               block=${block} \
               editingBlockId=${editingBlockId} \
               setEditingBlockId=${setEditingBlockId} \
+              repoConfig=${repoConfig} \
             />
           `) || ''}
         </section>

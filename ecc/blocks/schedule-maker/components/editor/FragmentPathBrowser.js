@@ -1,21 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from '../../../../scripts/deps/preact-hook.js';
 import { html } from '../../htm-wrapper.js';
 import Modal from '../Modal.js';
+import { SUPPORTED_REPOS } from '../../repos.js';
 
-export const DEFAULT_FRAGMENT_ROOTS = [
-  {
-    label: 'da-events',
-    org: 'adobecom',
-    repo: 'da-events',
-    initialPath: '/events/events-shared/fragments',
-  },
-  {
-    label: 'da-events-fg-pink',
-    org: 'adobecom',
-    repo: 'da-events-fg-pink',
-    initialPath: '/events/events-shared/fragments',
-  },
-];
+// Re-exported so existing imports of DEFAULT_FRAGMENT_ROOTS from this file keep working.
+export { SUPPORTED_REPOS as DEFAULT_FRAGMENT_ROOTS };
 
 async function waitForImsToken(maxMs = 5000) {
   // da.live is a prod service — stage IMS tokens won't work locally.
@@ -65,7 +54,7 @@ export default function FragmentPathBrowser({
   isOpen,
   onClose,
   onSelect,
-  roots = DEFAULT_FRAGMENT_ROOTS,
+  roots = SUPPORTED_REPOS,
 }) {
   const [selectedRootIndex, setSelectedRootIndex] = useState(0);
   // columnItems[0] is always the roots list (virtual). columnItems[1+] are fetched.
@@ -123,18 +112,21 @@ export default function FragmentPathBrowser({
     setSelectedFilePath(null);
 
     const segments = targetPath.split('/').filter(Boolean);
-    const pathsToLoad = segments.map((_, i) => `/${segments.slice(0, i + 1).join('/')}`);
+    // Always start from '/' so every level of the hierarchy is a visible column.
+    const pathsToLoad = ['/', ...segments.map((_, i) => `/${segments.slice(0, i + 1).join('/')}`)];
+    // Remove duplicate '/' if targetPath itself was '/'.
+    const uniquePathsToLoad = [...new Set(pathsToLoad)];
 
-    for (let i = 0; i < pathsToLoad.length; i++) {
+    for (let i = 0; i < uniquePathsToLoad.length; i += 1) {
       setLoadingColIndex(i);
       try {
         // eslint-disable-next-line no-await-in-loop
-        const items = await fetchDAItems(org, repo, pathsToLoad[i]);
-        const colPath = pathsToLoad[i];
+        const items = await fetchDAItems(org, repo, uniquePathsToLoad[i]);
+        const colPath = uniquePathsToLoad[i];
         setColumnItems((prev) => { const next = [...prev]; next[i] = items; return next; });
         setColumnPaths((prev) => { const next = [...prev]; next[i] = colPath; return next; });
-        if (i < pathsToLoad.length - 1) {
-          const activeChild = pathsToLoad[i + 1];
+        if (i < uniquePathsToLoad.length - 1) {
+          const activeChild = uniquePathsToLoad[i + 1];
           setActiveFolderPaths((prev) => { const next = [...prev]; next[i] = activeChild; return next; });
         }
       } catch (err) {
@@ -194,8 +186,7 @@ export default function FragmentPathBrowser({
     const parts = [];
     parts.push({ label: currentRoot.label, path: null });
     const deepestActive = selectedFilePath
-      || activeFolderPaths[activeFolderPaths.length - 1]
-      || currentRoot.initialPath;
+      || activeFolderPaths[activeFolderPaths.length - 1];
 
     if (deepestActive) {
       const segments = deepestActive.split('/').filter(Boolean);
@@ -208,7 +199,7 @@ export default function FragmentPathBrowser({
 
   const handleBreadcrumbClick = (path) => {
     if (!path) {
-      loadColumn(0, currentRoot.org, currentRoot.repo, '/');
+      expandToPath(currentRoot.org, currentRoot.repo, '/');
       return;
     }
     const colIndex = columnPaths.indexOf(path);

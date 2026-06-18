@@ -2,9 +2,11 @@ import { html } from '../htm-wrapper.js';
 import { useState, useEffect } from '../../../scripts/deps/preact-hook.js';
 import { useSchedulesOperations, useSchedulesData } from '../context/SchedulesContext.js';
 import { useNavigation } from '../context/NavigationContext.js';
+import { setRepoForSchedule } from '../schedule-repo-store.js';
+import { DEFAULT_REPO_NAME } from '../repos.js';
 
 export default function SheetImporter() {
-  const { importSheetScheduleName } = useNavigation();
+  const { importSheetScheduleName, importSheetRepo } = useNavigation();
   const { createAndAddSchedule } = useSchedulesOperations();
   const { setActiveSchedule } = useSchedulesData();
   const { goToEditSchedule, clearImportSheetScheduleName } = useNavigation();
@@ -164,6 +166,8 @@ export default function SheetImporter() {
       // Error is already displayed via toast, just return
       return;
     }
+
+    setRepoForSchedule(newSchedule.scheduleId, importSheetRepo ?? DEFAULT_REPO_NAME);
 
     // Reset the form and go to edit schedule
     setUploadedFile(null);

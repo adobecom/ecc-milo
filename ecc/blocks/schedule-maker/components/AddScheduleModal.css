@@ -6,7 +6,24 @@
 
 .add-schedule-form-container sp-textfield {
   width: 100%;
+  margin-bottom: 1rem;
+}
+
+.add-schedule-form-repo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
   margin-bottom: 2rem;
+}
+
+.add-schedule-form-repo-row sp-field-label {
+  white-space: nowrap;
+  margin: 0;
+}
+
+.add-schedule-form-repo-picker {
+  flex: 1;
 }
 
 .add-schedule-form-buttons {

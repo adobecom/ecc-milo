@@ -7,7 +7,6 @@
 /* Import Component Styles */
 @import url('./components/Modal.css');
 @import url('./components/FragmentPathBrowser.css');
-@import url('./components/CreateManuallyScheduleModal.css');
 @import url('./components/AddScheduleModal.css');
 
 /* ==========================================================================
@@ -454,11 +453,23 @@
   border-bottom: 1px solid var(--sm-color-border);
 }
 
+.sm-editor__header-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
 .sm-editor__header-title {
   display: flex;
   align-items: center;
   gap: var(--sm-spacing-sm);
-  flex: 1;
+}
+
+.sm-editor__header-repo {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--sm-color-text-secondary, #6e6e6e);
 }
 
 .sm-editor__header-actions {
@@ -560,9 +571,15 @@
   text-decoration: none;
 }
 
-.sm-fragment-preview-btn:hover {
+.sm-fragment-preview-btn:hover:not(.sm-fragment-preview-btn--disabled) {
   background: var(--sm-color-surface-hover, #f0f0f0);
   color: var(--sm-color-text-primary, #333);
+}
+
+.sm-fragment-preview-btn--disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .sm-fragment-root-hint {
