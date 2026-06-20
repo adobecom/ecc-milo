@@ -22,10 +22,52 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
     updateBlockLocally(blockId, { fragmentPath: event.target.value });
   };
 
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+
+  const epochToLocalInput = (timestamp, timezone) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(date);
+    const get = (type) => parts.find((p) => p.type === type).value;
+    const h = get('hour') === '24' ? '00' : get('hour');
+    return `${get('year')}-${get('month')}-${get('day')}T${h}:${get('minute')}`;
+  };
+
+  // DST-safe: probes actual UTC offset via Intl for the given local datetime string
+  const localInputToEpoch = (localIsoString, timezone) => {
+    if (!localIsoString) return 0;
+    const naiveUtc = new Date(`${localIsoString}:00Z`);
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).formatToParts(naiveUtc);
+    const get = (type) => parseInt(parts.find((p) => p.type === type).value, 10);
+    const tzMs = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour') % 24, get('minute'));
+    const [y, mo, d, h, mi] = localIsoString.split(/[-T:]/).map(Number);
+    const wantedMs = Date.UTC(y, mo - 1, d, h, mi);
+    return naiveUtc.getTime() - (tzMs - wantedMs);
+  };
+
   const handleStartDateTimeChange = (blockId, event) => {
-    // Add Z to make it a UTC date
-    const date = new Date(`${event.target.value}Z`);
-    const timestamp = date.getTime() || 0;
+    const timestamp = localInputToEpoch(event.target.value, userTimezone);
+    updateBlockLocally(blockId, { startDateTime: timestamp || 0 });
+  };
+
+  const handleEpochChange = (blockId, event) => {
+    const timestamp = parseInt(event.target.value, 10) || 0;
     updateBlockLocally(blockId, { startDateTime: timestamp });
   };
 
@@ -40,26 +82,6 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
   const handleLiveStreamIdChange = (blockId, event) => {
     updateBlockLocally(blockId, { liveStream: { provider: 'MobileRider', streamId: event.target.value } });
   };
-
-  const displayAsIsoString = (timestamp) => {
-    if (!timestamp) return '';
-    return new Date(timestamp).toISOString().slice(0, 16);
-  };
-
-  const displayInTimezone = (timestamp, timezone) => {
-    if (!timestamp) return '';
-    return new Intl.DateTimeFormat('en-US', {
-      timeZone: timezone,
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZoneName: 'short',
-    }).format(new Date(timestamp));
-  };
-
-  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   return html`
     <div \
@@ -109,30 +131,27 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
       </div>
       <div class="sm-editor__block-datetime">
         <div class="sm-editor__block-datetime-wrapper">
-          <sp-field-label size="l" for="${block.id}-start-datetime-input">Start Date and Time UTC</sp-field-label>
+          <sp-field-label size="l" for="${block.id}-start-datetime-input">Start Date and Time (${userTimezone})</sp-field-label>
           <input \
             type="datetime-local" \
             id="${block.id}-start-datetime-input" \
-            value=${displayAsIsoString(block.startDateTime)} \
+            value=${epochToLocalInput(block.startDateTime, userTimezone)} \
             onInput=${(e) => handleStartDateTimeChange(block.id, e)} \
             class="sm-input--datetime" \
             placeholder="Enter block start date and time" \
           />
         </div>
-        ${block.startDateTime && html`
-          <div class="sm-editor__block-datetime-preview">
-            <p class="sm-editor__block-datetime-preview-item">
-              <span class="sm-editor__block-datetime-preview-label">PT:</span>
-              ${displayInTimezone(block.startDateTime, 'America/Los_Angeles')}
-            </p>
-            ${localTimezone !== 'America/Los_Angeles' && html`
-              <p class="sm-editor__block-datetime-preview-item">
-                <span class="sm-editor__block-datetime-preview-label">Local:</span>
-                ${displayInTimezone(block.startDateTime, localTimezone)}
-              </p>
-            `}
-          </div>
-        `}
+        <div class="sm-editor__block-datetime-wrapper">
+          <sp-field-label size="l" for="${block.id}-epoch-input">Epoch (ms)</sp-field-label>
+          <input \
+            type="number" \
+            id="${block.id}-epoch-input" \
+            value=${block.startDateTime || ''} \
+            onInput=${(e) => handleEpochChange(block.id, e)} \
+            class="sm-input--epoch" \
+            placeholder="Enter epoch milliseconds" \
+          />
+        </div>
       </div>
       <div class="sm-editor__block-livestream">
         <sp-checkbox \

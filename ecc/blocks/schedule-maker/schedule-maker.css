@@ -512,20 +512,6 @@
   margin-bottom: var(--sm-spacing-md);
 }
 
-.sm-editor__block-datetime-preview {
-  font-size: 12px;
-  color: var(--sm-color-text-secondary, #6e6e6e);
-}
-
-.sm-editor__block-datetime-preview-item {
-  margin: 2px 0;
-}
-
-.sm-editor__block-datetime-preview-label {
-  font-weight: 600;
-  margin-right: 4px;
-}
-
 .sm-editor__block-livestream {
   display: flex;
   align-items: center;
@@ -612,6 +598,27 @@
 }
 
 .sm-input--datetime:focus {
+  outline: var(--sm-border-width-thick) solid rgb(20 122 243);
+  outline-offset: var(--sm-border-width-thick);
+  border-color: #000;
+}
+
+.sm-input--epoch {
+  border-radius: 4px;
+  border-color: #909090;
+  border-width: 1px;
+  border-style: solid;
+  line-height: 32px;
+  font-family: var(--body-font-family);
+  font-size: 14px;
+  font-weight: 400;
+  padding: 5px 11px 8px;
+  box-sizing: border-box;
+  block-size: 32px;
+  inline-size: 240px;
+}
+
+.sm-input--epoch:focus {
   outline: var(--sm-border-width-thick) solid rgb(20 122 243);
   outline-offset: var(--sm-border-width-thick);
   border-color: #000;
