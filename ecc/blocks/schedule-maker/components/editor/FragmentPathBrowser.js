@@ -55,6 +55,7 @@ export default function FragmentPathBrowser({
   onClose,
   onSelect,
   roots = SUPPORTED_REPOS,
+  selectedPath = null,
 }) {
   const [selectedRootIndex, setSelectedRootIndex] = useState(0);
   // columnItems[0] is always the roots list (virtual). columnItems[1+] are fetched.
@@ -140,10 +141,20 @@ export default function FragmentPathBrowser({
     setLoadingColIndex(null);
   }, []);
 
-  // Reset and expand to initialPath when modal opens or root changes
+  // Reset and expand when modal opens or root changes.
+  // If a selectedPath is provided, expand to its parent dir and pre-select the file.
   useEffect(() => {
     if (!isOpen) return;
-    expandToPath(currentRoot.org, currentRoot.repo, currentRoot.initialPath);
+    (async () => {
+      if (selectedPath?.startsWith('/')) {
+        const lastSlash = selectedPath.lastIndexOf('/');
+        const parentDir = lastSlash > 0 ? selectedPath.slice(0, lastSlash) : '/';
+        await expandToPath(currentRoot.org, currentRoot.repo, parentDir);
+        setSelectedFilePath(selectedPath);
+      } else {
+        expandToPath(currentRoot.org, currentRoot.repo, currentRoot.initialPath);
+      }
+    })();
   }, [isOpen, selectedRootIndex]);
 
   const handleRootClick = (index) => {

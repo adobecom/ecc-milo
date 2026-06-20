@@ -197,6 +197,7 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId, 
         onClose=${() => setIsBrowserOpen(false)} \
         onSelect=${(path) => updateBlockLocally(block.id, { fragmentPath: path })} \
         roots=${[effectiveRepoConfig]} \
+        selectedPath=${isRelativePath ? block.fragmentPath : null} \
       />
     </div>
   `;
