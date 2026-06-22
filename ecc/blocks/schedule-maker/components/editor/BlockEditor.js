@@ -41,6 +41,16 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
     return `${get('year')}-${get('month')}-${get('day')}T${h}:${get('minute')}`;
   };
 
+  const formatPtHint = (timestamp) => new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  }).format(new Date(timestamp));
+
   // DST-safe: probes actual UTC offset via Intl for the given local datetime string
   const localInputToEpoch = (localIsoString, timezone) => {
     if (!localIsoString) return 0;
@@ -140,6 +150,9 @@ export default function BlockEditor({ block, editingBlockId, setEditingBlockId }
             class="sm-input--datetime" \
             placeholder="Enter block start date and time" \
           />
+          ${block.startDateTime && userTimezone !== 'America/Los_Angeles' && html`
+            <small class="sm-datetime-pt-hint">PT: ${formatPtHint(block.startDateTime)}</small>
+          `}
         </div>
         <div class="sm-editor__block-datetime-wrapper">
           <sp-field-label size="l" for="${block.id}-epoch-input">Epoch (ms)</sp-field-label>

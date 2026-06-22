@@ -506,7 +506,7 @@
 
 .sm-editor__block-datetime {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 21px;
   margin-top: var(--sm-spacing-xs);
   margin-bottom: var(--sm-spacing-md);
@@ -601,6 +601,13 @@
   outline: var(--sm-border-width-thick) solid rgb(20 122 243);
   outline-offset: var(--sm-border-width-thick);
   border-color: #000;
+}
+
+.sm-datetime-pt-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--sm-color-text-secondary, #6e6e6e);
 }
 
 .sm-input--epoch {
